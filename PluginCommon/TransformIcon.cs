@@ -6,9 +6,6 @@ using System.Threading.Tasks;
 
 namespace PluginCommon
 {
-    /// <summary>
-    /// Get icon from name for "font.ttf".
-    /// </summary>
     public class TransformIcon
     {
         private static string steam = "";
@@ -24,6 +21,9 @@ namespace PluginCommon
         private static string twitch = "";
 
 
+        /// <summary>
+        /// Get icon from name for "font.ttf".
+        /// </summary>
         public static string Get(string Name)
         {
             string stringReturn;
