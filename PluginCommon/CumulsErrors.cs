@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SuccessStory.Common
+namespace PluginCommon
 {
-    class CumulErrors
+    public class CumulErrors
     {
         private List<string> ListMessage = new List<string>();
 
+        /// <summary>
+        /// Add a new error message.
+        /// </summary>
+        /// <param name="Message"></param>
         public void Add(string Message)
         {
             if (!ListMessage.Exists(x => x == Message))
@@ -15,6 +19,10 @@ namespace SuccessStory.Common
             }
         }
 
+        /// <summary>
+        /// Get list errors messages formatted.
+        /// </summary>
+        /// <returns></returns>
         public string Get()
         {
             string Result = "";
