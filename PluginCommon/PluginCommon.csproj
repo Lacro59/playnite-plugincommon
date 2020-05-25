@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CumulsErrors.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="TransformIcon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
