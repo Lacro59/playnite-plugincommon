@@ -8,17 +8,18 @@ namespace PluginCommon
 {
     public class TransformIcon
     {
-        private static string steam = "";
-        private static string gog = "";
-        private static string battleNET = "";
-        private static string origin = "";
-        private static string xbox = "";
-        private static string uplay = "";
-        private static string epic = "";
-        private static string playnite = "";
-        private static string bethesda = "";
-        private static string humble = "";
-        private static string twitch = "";
+        private static string steam = "";      // e906
+        private static string gog = "";        // e903
+        private static string battleNET = "";  // e900
+        private static string origin = "";     // e904
+        private static string xbox = "";       // e908
+        private static string uplay = "";      // e907
+        private static string epic = "";       // e902
+        private static string playnite = "";   // e905
+        private static string bethesda = "";   // e901
+        private static string humble = "";     // e909
+        private static string twitch = "";     // e90a
+        private static string itchio = "";     // e90b
 
 
         /// <summary>
@@ -61,6 +62,9 @@ namespace PluginCommon
                     break;
                 case "twitch":
                     stringReturn = twitch;
+                    break;
+                case "itch.io":
+                    stringReturn = itchio;
                     break;
                 default:
                     stringReturn = Name;
