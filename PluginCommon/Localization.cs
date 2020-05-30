@@ -19,7 +19,7 @@ namespace PluginCommon
         /// <param name="PlayniteConfigurationPath"></param>
         public static void SetPluginLanguage(string pluginFolder, string PlayniteConfigurationPath)
         {
-            string language = GetPluginLanguageConfiguration(PlayniteConfigurationPath);
+            string language = GetPlayniteLanguageConfiguration(PlayniteConfigurationPath);
 
             var dictionaries = Application.Current.Resources.MergedDictionaries;
 
@@ -72,7 +72,7 @@ namespace PluginCommon
         /// <param name="PlayniteConfigurationPath"></param>
         /// <returns></returns>
         // TODO Wait SDK have a best solution to get Playnite configuration.
-        internal static string GetPluginLanguageConfiguration(string PlayniteConfigurationPath)
+        public static string GetPlayniteLanguageConfiguration(string PlayniteConfigurationPath)
         {
             string path = Path.Combine(PlayniteConfigurationPath, "config.json");
 
