@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace PluginCommon
 {
+    /// <summary>
+    /// Group erros message in order to haven't duplicate.
+    /// </summary>
     public class CumulErrors
     {
         private List<string> ListMessage = new List<string>();

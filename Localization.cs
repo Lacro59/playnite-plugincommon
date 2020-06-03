@@ -13,7 +13,7 @@ namespace PluginCommon
 
 
         /// <summary>
-        /// Set in application ressources the language file.
+        /// Set in application ressources the language ressource.
         /// </summary>
         /// <param name="pluginFolder"></param>
         /// <param name="PlayniteConfigurationPath"></param>
@@ -23,6 +23,7 @@ namespace PluginCommon
 
             var dictionaries = Application.Current.Resources.MergedDictionaries;
 
+            // Default language
             if (language == "english")
             {
                 language = "LocSource";
@@ -30,15 +31,18 @@ namespace PluginCommon
 
             var langFile = Path.Combine(pluginFolder, "localization\\" + language + ".xaml");
 
-            logger.Debug($"PluginCommon - Parse plugin localization file {langFile}");
+            logger.Debug($"PluginCommon - Parse plugin localization file {langFile}.");
 
+            // Set default language if not found
             if (!File.Exists(langFile))
             {
+                logger.Error($"PluginCommon - File {langFile} not found.");
+
                 language = "LocSource";
                 langFile = Path.Combine(pluginFolder, "localization\\" + language + ".xaml");
             }
 
-            logger.Debug($"PluginCommon - Parse plugin localization file {langFile}");
+            logger.Debug($"PluginCommon - Parse plugin localization file {langFile}.");
 
             if (File.Exists(langFile))
             {
@@ -56,13 +60,17 @@ namespace PluginCommon
                         }
                     }
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    logger.Error(e, $"PluginCommon - Failed to parse localization file {langFile}");
+                    logger.Error(ex, $"PluginCommon - Failed to parse localization file {langFile}.");
                     return;
                 }
 
                 dictionaries.Add(res);
+            }
+            else
+            {
+                logger.Error($"PluginCommon - File {langFile} not found.");
             }
         }
 
