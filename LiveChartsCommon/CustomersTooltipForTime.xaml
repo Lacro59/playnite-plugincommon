@@ -8,7 +8,11 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300" 
              d:DataContext="{d:DesignInstance localLVC:CustomersTooltipForTime}">
-    
+
+    <UserControl.Resources>
+        <localLVC:ShowIconConverterTime x:Key="ShowIconConverterTime" />
+    </UserControl.Resources>
+
     <UserControl.Template>
         <ControlTemplate>
             <Grid VerticalAlignment="Center" HorizontalAlignment="Center" >
@@ -20,13 +24,18 @@
                             <DataTemplate DataType="{x:Type wpf:DataPointViewModel}">
                                 <Grid Margin="2">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Title"/>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="Time"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Column="0" Text="{Binding ChartPoint.Instance.(localLVC:CustomerForTime.Name)}"
+                                    <TextBlock Grid.Column="0" Text="{Binding ChartPoint.Instance.(localLVC:CustomerForTime.Name), Converter={StaticResource ShowIconConverterTime}}" 
+                                                   Margin="5 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
+
+                                    <TextBlock Grid.Column="1" Text="{Binding ChartPoint.Instance.(localLVC:CustomerForTime.Name)}"
                                            Margin="5 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding ChartPoint.Instance.(localLVC:CustomerForTime.ValuesFormat)}" 
+                                    
+                                    <TextBlock Grid.Column="2" Text="{Binding ChartPoint.Instance.(localLVC:CustomerForTime.ValuesFormat)}" 
                                            Margin="10 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
                                 </Grid>
                             </DataTemplate>

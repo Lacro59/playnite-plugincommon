@@ -68,6 +68,9 @@
   <ItemGroup>
     <Compile Include="Common.cs" />
     <Compile Include="CumulsErrors.cs" />
+    <Compile Include="LiveChartsCommon\CustomersTooltipForMultipleTime.xaml.cs">
+      <DependentUpon>CustomersTooltipForMultipleTime.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LiveChartsCommon\CustomersTooltipForTime.xaml.cs">
       <DependentUpon>CustomersTooltipForTime.xaml</DependentUpon>
     </Compile>
@@ -87,6 +90,10 @@
     <Page Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LiveChartsCommon\CustomersTooltipForMultipleTime.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="LiveChartsCommon\CustomersTooltipForTime.xaml">
       <SubType>Designer</SubType>
