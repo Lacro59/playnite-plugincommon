@@ -7,7 +7,6 @@ using LiveCharts.Wpf;
 
 namespace PluginCommon.LiveChartsCommon
 {
-
     /// <summary>
     /// Logique d'interaction pour CustomersTooltipForTime.xaml
     /// </summary>
