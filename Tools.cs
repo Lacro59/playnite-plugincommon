@@ -1,14 +1,20 @@
 ﻿using Newtonsoft.Json.Linq;
+using Playnite.Controls;
+using Playnite.SDK;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 
 namespace PluginCommon
 {
     public class Tools
     {
+        private static readonly ILogger logger = LogManager.GetLogger();
+
         // https://stackoverflow.com/a/48735199
         public static JArray RemoveValue(JArray oldArray, dynamic obj)
         {
@@ -50,6 +56,21 @@ namespace PluginCommon
                     {
                         yield return childOfChild;
                     }
+                }
+            }
+        }
+
+        public static void DesactivePlayniteWindowControl(DependencyObject depObj)
+        {
+            foreach (Button sp in FindVisualChildren<Button>(depObj))
+            {
+                if (sp.Name == "PART_ButtonMinimize")
+                {
+                    sp.Visibility = Visibility.Hidden;
+                }
+                if (sp.Name == "PART_ButtonMaximize")
+                {
+                    sp.Visibility = Visibility.Hidden;
                 }
             }
         }
