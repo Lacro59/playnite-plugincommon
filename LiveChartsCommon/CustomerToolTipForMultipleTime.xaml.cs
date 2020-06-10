@@ -5,17 +5,18 @@ using System.Windows.Data;
 using LiveCharts;
 using LiveCharts.Wpf;
 
+
 namespace PluginCommon.LiveChartsCommon
 {
     /// <summary>
     /// Logique d'interaction pour CustomersTooltipForTime.xaml
     /// </summary>
-    public partial class CustomersTooltipForMultipleTime : IChartTooltip
+    public partial class CustomerToolTipForMultipleTime : IChartTooltip
     {
         private TooltipData _data;
 
         public static readonly DependencyProperty ShowIconProperty = DependencyProperty.Register(
-            "ShowIcon", typeof(Boolean), typeof(CustomersTooltipForMultipleTime), new PropertyMetadata(false));
+            "ShowIcon", typeof(Boolean), typeof(CustomerToolTipForMultipleTime), new PropertyMetadata(false));
 
         public static bool _ShowIcon = false;
 
@@ -25,7 +26,7 @@ namespace PluginCommon.LiveChartsCommon
             set { SetValue(ShowIconProperty, value); }
         }
 
-        public CustomersTooltipForMultipleTime()
+        public CustomerToolTipForMultipleTime()
         {
             InitializeComponent();
 
@@ -65,7 +66,7 @@ namespace PluginCommon.LiveChartsCommon
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             string Result = "";
-            if (TransformIcon.Get((string)value).Length == 1 && CustomersTooltipForMultipleTime._ShowIcon)
+            if (TransformIcon.Get((string)value).Length == 1 && CustomerToolTipForMultipleTime._ShowIcon)
             {
                 Result = TransformIcon.Get((string)value);
             }

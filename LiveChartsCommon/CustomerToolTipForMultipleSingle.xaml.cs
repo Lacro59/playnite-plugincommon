@@ -1,17 +1,18 @@
-﻿using LiveCharts.Wpf;
+﻿using LiveCharts;
+using LiveCharts.Wpf;
 using System.ComponentModel;
-using LiveCharts;
+
 
 namespace PluginCommon.LiveChartsCommon
 {
     /// <summary>
-    /// Logique d'interaction pour CustomersTooltipForSingle.xaml
+    /// Logique d'interaction pour CustomerForMultipleSingle.xaml
     /// </summary>
-    public partial class CustomersTooltipForSingle : IChartTooltip
+    public partial class CustomerToolTipForMultipleSingle : IChartTooltip
     {
         private TooltipData _data;
 
-        public CustomersTooltipForSingle()
+        public CustomerToolTipForMultipleSingle()
         {
             InitializeComponent();
 

@@ -74,15 +74,18 @@
     <Compile Include="CodeLang.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="CumulsErrors.cs" />
+    <Compile Include="LiveChartsCommon\CustomerToolTipForMultipleSingle.xaml.cs">
+      <DependentUpon>CustomerToolTipForMultipleSingle.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LiveChartsCommon\CustomerForSingle.cs" />
-    <Compile Include="LiveChartsCommon\CustomersTooltipForMultipleTime.xaml.cs">
-      <DependentUpon>CustomersTooltipForMultipleTime.xaml</DependentUpon>
+    <Compile Include="LiveChartsCommon\CustomerToolTipForMultipleTime.xaml.cs">
+      <DependentUpon>CustomerToolTipForMultipleTime.xaml</DependentUpon>
     </Compile>
-    <Compile Include="LiveChartsCommon\CustomersTooltipForSingle.xaml.cs">
-      <DependentUpon>CustomersTooltipForSingle.xaml</DependentUpon>
+    <Compile Include="LiveChartsCommon\CustomerToolTipForSingle.xaml.cs">
+      <DependentUpon>CustomerToolTipForSingle.xaml</DependentUpon>
     </Compile>
-    <Compile Include="LiveChartsCommon\CustomersTooltipForTime.xaml.cs">
-      <DependentUpon>CustomersTooltipForTime.xaml</DependentUpon>
+    <Compile Include="LiveChartsCommon\CustomerToolTipForTime.xaml.cs">
+      <DependentUpon>CustomerToolTipForTime.xaml</DependentUpon>
     </Compile>
     <Compile Include="LiveChartsCommon\CustomerForTime.cs" />
     <Compile Include="Localization.cs" />
@@ -108,15 +111,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="LiveChartsCommon\CustomersTooltipForMultipleTime.xaml">
+    <Page Include="LiveChartsCommon\CustomerToolTipForMultipleSingle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="LiveChartsCommon\CustomersTooltipForSingle.xaml">
+    <Page Include="LiveChartsCommon\CustomerToolTipForMultipleTime.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="LiveChartsCommon\CustomersTooltipForTime.xaml">
+    <Page Include="LiveChartsCommon\CustomerToolTipForSingle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="LiveChartsCommon\CustomerToolTipForTime.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
