@@ -40,6 +40,11 @@
                             <Label Content="{Binding CpuUsageData.Value}" Foreground="{Binding CpuUsageData.isWarm, Converter={StaticResource SetTextColor}}" />
                             <Label Content=", " />
 
+                            <Label Content="{Binding RamUsageData.Name}" />
+                            <Label Content=" = " />
+                            <Label Content="{Binding RamUsageData.Value}" Foreground="{Binding RamUsageData.isWarm, Converter={StaticResource SetTextColor}}" />
+                            <Label Content=", " />
+
                             <Label Content="{Binding GpuTempData.Name}" />
                             <Label Content=" = " />
                             <Label Content="{Binding GpuTempData.Value}" Foreground="{Binding GpuTempData.isWarm, Converter={StaticResource SetTextColor}}" />

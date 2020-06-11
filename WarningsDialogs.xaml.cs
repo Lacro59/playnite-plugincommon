@@ -28,7 +28,8 @@ namespace PluginCommon
                     CpuTempData = new Data { Name = (string)Messages[i][2]["Name"], Value = (int)Messages[i][2]["Value"], isWarm = (bool)Messages[i][2]["isWarm"] },
                     GpuTempData = new Data { Name = (string)Messages[i][3]["Name"], Value = (int)Messages[i][3]["Value"], isWarm = (bool)Messages[i][3]["isWarm"] },
                     CpuUsageData = new Data { Name = (string)Messages[i][4]["Name"], Value = (int)Messages[i][4]["Value"], isWarm = (bool)Messages[i][4]["isWarm"] },
-                    GpuUsageData = new Data { Name = (string)Messages[i][5]["Name"], Value = (int)Messages[i][5]["Value"], isWarm = (bool)Messages[i][5]["isWarm"] }
+                    GpuUsageData = new Data { Name = (string)Messages[i][5]["Name"], Value = (int)Messages[i][5]["Value"], isWarm = (bool)Messages[i][5]["isWarm"] },
+                    RamUsageData = new Data { Name = (string)Messages[i][6]["Name"], Value = (int)Messages[i][6]["Value"], isWarm = (bool)Messages[i][6]["isWarm"] }
                 });
             }
             icData.ItemsSource = MessagesData;
@@ -65,6 +66,7 @@ namespace PluginCommon
         public Data GpuTempData { get; set; }
         public Data CpuUsageData { get; set; }
         public Data GpuUsageData { get; set; }
+        public Data RamUsageData { get; set; }
     }
     public class Data
     {
