@@ -17,13 +17,12 @@
     
     <UserControl.Template>
         <ControlTemplate>
-            <Grid VerticalAlignment="Center" HorizontalAlignment="Center" >
+            <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Tag="{Binding ChartPoint.Instance.(localLVC:CustomerForTime.Name)}">
                 <Border Background="{DynamicResource CommonToolTipBackgroundBrush}" CornerRadius="{DynamicResource CommonToolTipCornerRadius}"
                         BorderThickness="{DynamicResource CommonToolTipBorderThickness}" Padding="{DynamicResource CommonToolTipPadding}"
                         BorderBrush="{DynamicResource CommonToolTipBorderBrush}">
 
                     <StackPanel>
-                        <!--TextBlock Text="{Binding ShowTitle}" HorizontalAlignment="Center" FontWeight="Bold" /-->
                         <TextBlock Text="{Binding Data, Converter={StaticResource SharedConverter}}" HorizontalAlignment="Center" FontWeight="Bold"
                                     Foreground="{DynamicResource CommonToolTipForeground}" Margin="0, 0, 0, 10">
                             <TextBlock.Visibility>
