@@ -8,18 +8,21 @@ namespace PluginCommon
 {
     public class TransformIcon
     {
-        private static string steam = "";      // e906
-        private static string gog = "";        // e903
-        private static string battleNET = "";  // e900
-        private static string origin = "";     // e904
-        private static string xbox = "";       // e908
-        private static string uplay = "";      // e907
-        private static string epic = "";       // e902
-        private static string playnite = "";   // e905
-        private static string bethesda = "";   // e901
-        private static string humble = "";     // e909
-        private static string twitch = "";     // e90a
-        private static string itchio = "";     // e90b
+        private static string steam = "";          // e906
+        private static string gog = "";            // e903
+        private static string battleNET = "";      // e900
+        private static string origin = "";         // e904
+        private static string xbox = "";           // e908
+        private static string uplay = "";          // e907
+        private static string epic = "";           // e902
+        private static string playnite = "";       // e905
+        private static string bethesda = "";       // e901
+        private static string humble = "";         // e909
+        private static string twitch = "";         // e90a
+        private static string itchio = "";         // e90b
+
+        private static string statistics = "";     // e90c
+        private static string howlongtobeat = "";  // e90d
 
 
         /// <summary>
@@ -30,6 +33,13 @@ namespace PluginCommon
             string stringReturn;
             switch (Name.ToLower())
             {
+                case "howlongtobeat":
+                    stringReturn = howlongtobeat;
+                    break;
+                case "statistics":
+                    stringReturn = statistics;
+                    break;
+
                 case "steam":
                     stringReturn = steam;
                     break;
