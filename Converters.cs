@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
-using Playnite.SDK;
+﻿using Playnite.SDK;
 using System;
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
+
 
 namespace PluginCommon
 {

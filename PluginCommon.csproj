@@ -75,6 +75,7 @@
     <Compile Include="Common.cs" />
     <Compile Include="Converters.cs" />
     <Compile Include="CumulsErrors.cs" />
+    <Compile Include="IntegrationUI.cs" />
     <Compile Include="LiveChartsCommon\CustomerToolTipForMultipleSingle.xaml.cs">
       <DependentUpon>CustomerToolTipForMultipleSingle.xaml</DependentUpon>
     </Compile>

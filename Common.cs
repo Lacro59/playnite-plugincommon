@@ -1,6 +1,7 @@
 ﻿using Playnite.Common;
 using Playnite.SDK;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 
@@ -50,6 +51,29 @@ namespace PluginCommon
                 return;
             }
         }
+
+
+        public static void LogError(Exception ex, string PluginName, string Message)
+        {
+            StackTrace Trace = new StackTrace(ex, true);
+            int LineNumber = 0;
+            string FileName = "";
+            
+            foreach (var frame in Trace.GetFrames())
+            {
+                if (!string.IsNullOrEmpty(frame.GetFileName()) && (string.IsNullOrEmpty(FileName)))
+                {
+                    FileName = frame.GetFileName();
+                }
+                if ((frame.GetFileLineNumber() > 0) && (LineNumber == 0))
+                {
+                    LineNumber = frame.GetFileLineNumber();
+                }
+            }
+
+            logger.Error(ex, $"{PluginName} [{FileName} {LineNumber}] - {Message} ");
+        }
+
 
     }
 }
