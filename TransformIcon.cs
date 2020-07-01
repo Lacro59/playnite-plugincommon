@@ -23,7 +23,8 @@ namespace PluginCommon
 
         private static string statistics = "";     // e90c
         private static string howlongtobeat = "";  // e90d
-        private static string successstory = "";   //e90e
+        private static string successstory = "";   // e90e
+        private static string gameactivity = "";   // e90f
 
 
         /// <summary>
@@ -42,6 +43,9 @@ namespace PluginCommon
                     break;
                 case "successstory":
                     stringReturn = successstory;
+                    break;
+                case "gameactivity":
+                    stringReturn = gameactivity;
                     break;
 
                 case "steam":

@@ -1,6 +1,7 @@
 ﻿using Playnite.SDK;
 using System;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 
@@ -9,9 +10,6 @@ namespace PluginCommon
 {
     public class CompareValueConverter : IMultiValueConverter
     {
-        private static readonly ILogger logger = LogManager.GetLogger();
-        private static IResourceProvider resources = new ResourceProvider();
-
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             int ValueData = int.Parse(((string)values[0]).Replace("%", "").Replace("°", ""));
@@ -50,6 +48,34 @@ namespace PluginCommon
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+    public class VisibilityZeroConverter : IValueConverter
+    {
+        private static ILogger logger = LogManager.GetLogger();
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value.ToString() == "0")
+            {
+                if (parameter.ToString() == "1") {
+                    return Visibility.Collapsed;
+                }
+                else
+                {
+                    return Visibility.Hidden;
+                }
+            }
+            else
+            {
+                return Visibility.Visible;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotSupportedException();
         }

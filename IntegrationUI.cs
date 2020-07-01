@@ -407,7 +407,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error in ClearElementInCustomTheme({ElementParentInCustomThemeName})");
+                //Common.LogError(ex, "PluginCommon", $"Error in ClearElementInCustomTheme({ElementParentInCustomThemeName})");
                 return false;
             }
         }
@@ -452,7 +452,7 @@ namespace PluginCommon
         {
             foreach (FrameworkElement el in SearchList)
             {
-                if (ElSearch == el)
+                if (ElSearch.Name == el.Name)
                 {
                     return true;
                 }
