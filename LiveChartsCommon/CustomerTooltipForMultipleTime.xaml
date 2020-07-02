@@ -4,12 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+             xmlns:pcon="clr-namespace:Playnite.Converters;assembly=Playnite"
              xmlns:localLVC="clr-namespace:PluginCommon.LiveChartsCommon"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300" 
              d:DataContext="{d:DesignInstance localLVC:CustomerToolTipForMultipleTime}">
-    
+
     <UserControl.Resources>
+        <pcon:LongToTimePlayedConverter x:Key="LongToTimePlayedConverter" />
         <wpf:SharedConverter x:Key="SharedConverter"/>
         <wpf:SharedVisibilityConverter x:Key="SharedVisibilityConverter"/>
         <localLVC:ShowIconConverterMultipleTime x:Key="ShowIconConverterMultipleTime" />
@@ -56,7 +58,7 @@
                                         <TextBlock Grid.Column="2" Text="{Binding ChartPoint.Instance.(localLVC:CustomerForTime.Name)}"
                                             Margin="5 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
 
-                                        <TextBlock Grid.Column="3" Text="{Binding ChartPoint.Instance.(localLVC:CustomerForTime.ValuesFormat)}" 
+                                        <TextBlock Grid.Column="3" Text="{Binding ChartPoint.Instance.(localLVC:CustomerForTime.Values), Mode=OneWay, Converter={StaticResource LongToTimePlayedConverter}}" 
                                             Margin="10 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
 
                                     </Grid>
