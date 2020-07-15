@@ -112,10 +112,12 @@ namespace PluginCommon
                 // Add only if not exist
                 if (!SearchElementInsert(btGameSelectedActionBarList, btGameSelectedActionBar))
                 {
-                    // Add search element if not allready find
-                    if (btGameSelectedActionBarChild == null)
+                    btGameSelectedActionBarChild = SearchElementByName("PART_ButtonEditGame");
+
+                    btGameSelectedActionBar.Height = btGameSelectedActionBarChild.ActualHeight;
+                    if (btGameSelectedActionBar.Name == "PART_HltbButton")
                     {
-                        btGameSelectedActionBarChild = SearchElementByName("PART_ButtonEditGame");
+                        btGameSelectedActionBar.Width = btGameSelectedActionBarChild.ActualWidth;
                     }
 
                     // Not find element
@@ -127,16 +129,40 @@ namespace PluginCommon
                     // Add in parent if good type
                     if (btGameSelectedActionBarChild.Parent is StackPanel)
                     {
-                        btGameSelectedActionBar.Height = btGameSelectedActionBarChild.ActualHeight;
-
                         // Add button 
                         ((StackPanel)(btGameSelectedActionBarChild.Parent)).Children.Add(btGameSelectedActionBar);
                         ((StackPanel)(btGameSelectedActionBarChild.Parent)).UpdateLayout();
-                        logger.Info($"PluginCommon - btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
+
+                        logger.Info($"PluginCommon - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
                     }
-                    else
+
+                    if (btGameSelectedActionBarChild.Parent is Grid)
                     {
-                        throw new Exception("btGameSelectedActionBarChild.Parent is not a StackPanel element");
+                        StackPanel spContener = (StackPanel)SearchElementByName("PART_spContener");
+
+                        // Add StackPanel contener
+                        if (((Grid)btGameSelectedActionBarChild.Parent).ColumnDefinitions.Count == 3)
+                        {
+                            var columnDefinitions = new ColumnDefinition();
+                            columnDefinitions.Width = GridLength.Auto;
+                            ((Grid)(btGameSelectedActionBarChild.Parent)).ColumnDefinitions.Add(columnDefinitions);
+
+                            spContener = new StackPanel();
+                            spContener.Name = "PART_spContener";
+                            spContener.Orientation = Orientation.Horizontal;
+                            spContener.SetValue(Grid.ColumnProperty, 3);
+
+                            btGameSelectedActionBarChild.Margin = new Thickness(10, 0, 0, 0);
+
+                            ((Grid)(btGameSelectedActionBarChild.Parent)).Children.Add(spContener);
+                            ((Grid)(btGameSelectedActionBarChild.Parent)).UpdateLayout();
+                        }
+
+                        // Add button 
+                        spContener.Children.Add(btGameSelectedActionBar);
+                        spContener.UpdateLayout();
+
+                        logger.Info($"PluginCommon - (Grid)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
                     }
                 }
                 else
@@ -144,7 +170,6 @@ namespace PluginCommon
                     logger.Info($"PluginCommon - btGameSelectedActionBar [{btGameSelectedActionBar.Name}] allready insert");
                 }
 
-                btGameSelectedActionBarList.Add(btGameSelectedActionBar);
                 return true;
             }
             catch (Exception ex)
@@ -158,52 +183,53 @@ namespace PluginCommon
         {
             try
             {
-                // Remove only if not exist
-                if (SearchElementInsert(btGameSelectedActionBarList, btGameSelectedActionBarName))
+                foreach (var tt in btGameSelectedActionBarList)
                 {
-                    // Add search element if not allready find
-                    if (btGameSelectedActionBarChild == null)
-                    {
-                        btGameSelectedActionBarChild = SearchElementByName("PART_ButtonEditGame");
-                    }
+                    logger.Debug(btGameSelectedActionBarName + " " + tt.Name);
+                }
 
-                    // Not find element
-                    if (btGameSelectedActionBarChild == null)
-                    {
-                        throw new Exception("btGameSelectedActionBarChild [PART_ButtonEditGame] not find");
-                    }
+                btGameSelectedActionBarChild = SearchElementByName("PART_ButtonEditGame");
+                FrameworkElement spContener = SearchElementByName("PART_spContener");
 
-                    // Remove in parent if good type
-                    if (btGameSelectedActionBarChild.Parent is StackPanel)
+                // Not find element
+                if (btGameSelectedActionBarChild == null)
+                {
+                    throw new Exception("btGameSelectedActionBarChild [PART_ButtonEditGame] not find");
+                }
+
+                // Remove in parent if good type
+                if (btGameSelectedActionBarChild.Parent is StackPanel && btGameSelectedActionBarChild != null)
+                {
+                    StackPanel btGameSelectedParent = ((StackPanel)(btGameSelectedActionBarChild.Parent));
+                    for (int i = 0; i < btGameSelectedParent.Children.Count; i++)
                     {
-                        StackPanel btGameSelectedParent = ((StackPanel)(btGameSelectedActionBarChild.Parent));
-                        for (int i = 0; i < btGameSelectedParent.Children.Count; i++)
+                        if (((FrameworkElement)btGameSelectedParent.Children[i]).Name == btGameSelectedActionBarName)
                         {
-                            if (((FrameworkElement)btGameSelectedParent.Children[i]).Name == btGameSelectedActionBarName)
-                            {
-                                btGameSelectedParent.Children.Remove(btGameSelectedParent.Children[i]);
-                                btGameSelectedParent.UpdateLayout();
-                                logger.Info($"PluginCommon - btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
+                            btGameSelectedParent.Children.Remove(btGameSelectedParent.Children[i]);
+                            btGameSelectedParent.UpdateLayout();
 
-                                foreach (FrameworkElement el in btGameSelectedActionBarList)
-                                {
-                                    if (btGameSelectedActionBarName == el.Name)
-                                    {
-                                        btGameSelectedActionBarList.Remove(el);
-                                        break;
-                                    }
-                                }
-                            }
+                            logger.Info($"PluginCommon - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
                         }
                     }
-                    else
-                    {
-                        throw new Exception("btGameSelectedActionBarChild.Parent is not a StackPanel element");
-                    }
                 }
-                else
+
+                if (btGameSelectedActionBarChild.Parent is Grid && spContener != null)
                 {
-                    logger.Info($"PluginCommon - btGameSelectedActionBarName [{btGameSelectedActionBarName}] allready remove");
+                    //Grid btGameSelectedParent = ((Grid)(btGameSelectedActionBarChild.Parent));
+                    for (int i = 0; i < ((StackPanel)spContener).Children.Count; i++)
+                    {
+                        logger.Debug(((FrameworkElement)((StackPanel)spContener).Children[i]).Name);
+
+                        if (((FrameworkElement)((StackPanel)spContener).Children[i]).Name == btGameSelectedActionBarName)
+                        {
+                            logger.Debug(btGameSelectedActionBarName + " " + ((Grid)(btGameSelectedActionBarChild.Parent)).ColumnDefinitions.Count);
+
+                            ((StackPanel)spContener).Children.Remove(((StackPanel)spContener).Children[i]);
+                            spContener.UpdateLayout();
+
+                            logger.Info($"PluginCommon - (Grid)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
+                        }
+                    }
                 }
 
                 return true;
@@ -228,11 +254,8 @@ namespace PluginCommon
                 // Add only if not exist
                 if (!SearchElementInsert(elGameSelectedDescriptionList, elGameSelectedDescription))
                 {
-                    // Add search element if not allready find
-                    if (elGameSelectedDescriptionContener == null)
-                    {
-                        elGameSelectedDescriptionContener = SearchElementByName("PART_ElemDescription");
-                    }
+                    elGameSelectedDescriptionContener = SearchElementByName("PART_HtmlDescription");
+                    elGameSelectedDescriptionContener = (FrameworkElement)elGameSelectedDescriptionContener.Parent;
 
                     // Not find element
                     if (elGameSelectedDescriptionContener == null)
@@ -255,9 +278,22 @@ namespace PluginCommon
                         ((StackPanel)elGameSelectedDescriptionContener).UpdateLayout();
                         logger.Info($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
                     }
-                    else
+
+                    if (elGameSelectedDescriptionContener is DockPanel)
                     {
-                        throw new Exception("elGameSelectedDescriptionContener is not a StackPanel element");
+                        elGameSelectedDescription.SetValue(DockPanel.DockProperty, Dock.Top);
+
+                        // Add FrameworkElement 
+                        if (isTop)
+                        {
+                            ((DockPanel)elGameSelectedDescriptionContener).Children.Insert(1, elGameSelectedDescription);
+                        }
+                        else
+                        {
+                            ((DockPanel)elGameSelectedDescriptionContener).Children.Add(elGameSelectedDescription);
+                        }
+                        ((DockPanel)elGameSelectedDescriptionContener).UpdateLayout();
+                        logger.Info($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
                     }
                 }
                 else
@@ -283,15 +319,16 @@ namespace PluginCommon
                 if (SearchElementInsert(elGameSelectedDescriptionList, elGameSelectedDescriptionName))
                 {
                     // Add search element if not allready find
-                    if (elGameSelectedDescriptionContener == null)
-                    {
-                        elGameSelectedDescriptionContener = SearchElementByName("PART_ButtonEditGame");
-                    }
+                    //if (elGameSelectedDescriptionContener == null)
+                    //{
+                    elGameSelectedDescriptionContener = SearchElementByName("PART_HtmlDescription");
+                    elGameSelectedDescriptionContener = (FrameworkElement)elGameSelectedDescriptionContener.Parent;
+                    //}
 
                     // Not find element
                     if (elGameSelectedDescriptionContener == null)
                     {
-                        throw new Exception("elGameSelectedDescriptionContener [PART_ButtonEditGame] not find");
+                        throw new Exception("elGameSelectedDescriptionContener [PART_ElemDescription] not find");
                     }
 
                     // Remove in parent if good type
@@ -317,9 +354,28 @@ namespace PluginCommon
                             }
                         }
                     }
-                    else
+
+                    if (elGameSelectedDescriptionContener is DockPanel)
                     {
-                        throw new Exception("elGameSelectedDescriptionContener is not a StackPanel element");
+                        DockPanel elGameSelectedParent = ((DockPanel)(elGameSelectedDescriptionContener));
+                        for (int i = 0; i < elGameSelectedParent.Children.Count; i++)
+                        {
+                            if (((FrameworkElement)elGameSelectedParent.Children[i]).Name == elGameSelectedDescriptionName)
+                            {
+                                elGameSelectedParent.Children.Remove(elGameSelectedParent.Children[i]);
+                                elGameSelectedParent.UpdateLayout();
+                                logger.Info($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
+
+                                foreach (FrameworkElement el in elGameSelectedDescriptionList)
+                                {
+                                    if (elGameSelectedDescriptionName == el.Name)
+                                    {
+                                        elGameSelectedDescriptionList.Remove(el);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 else
@@ -431,8 +487,6 @@ namespace PluginCommon
                     }
                 }
             }
-
-            logger.Debug(JsonConvert.SerializeObject(ElementFind.ToString()));
 
             return ElementFind;
         }
