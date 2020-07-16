@@ -23,7 +23,7 @@ namespace PluginCommon
             {
                 MessagesData.Add(new WarningData
                 {
-                    At = (string)Messages[i][0]["At"],
+                    At = Convert.ToDateTime((string)Messages[i][0]["At"]).ToString(Playnite.Common.Constants.TimeUiFormat),
                     FpsData = new Data { Name = (string)Messages[i][1]["Name"], Value = (int)Messages[i][1]["Value"], isWarm = (bool)Messages[i][1]["isWarm"] },
                     CpuTempData = new Data { Name = (string)Messages[i][2]["Name"], Value = (int)Messages[i][2]["Value"], isWarm = (bool)Messages[i][2]["isWarm"] },
                     GpuTempData = new Data { Name = (string)Messages[i][3]["Name"], Value = (int)Messages[i][3]["Value"], isWarm = (bool)Messages[i][3]["isWarm"] },

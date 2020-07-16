@@ -53,6 +53,7 @@ namespace PluginCommon
         }
     }
 
+
     public class VisibilityZeroConverter : IValueConverter
     {
         private static ILogger logger = LogManager.GetLogger();
@@ -81,6 +82,7 @@ namespace PluginCommon
         }
     }
 
+
     public class StringToBooleanConverter : IValueConverter
     {
         enum Parameters
@@ -88,7 +90,7 @@ namespace PluginCommon
             Normal, Inverted
         }
 
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var direction = parameter == null ? Parameters.Normal : (Parameters)Enum.Parse(typeof(Parameters), (string)parameter);
             if (direction == Parameters.Inverted)
@@ -99,6 +101,45 @@ namespace PluginCommon
             {
                 return string.IsNullOrEmpty(value as string) ? false : true;
             }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    
+
+    public class LocalDateConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class LocalTimeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class LocalDateTimeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern) 
+                + " " + ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
