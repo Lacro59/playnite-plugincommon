@@ -71,6 +71,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CheckVersion.cs" />
     <Compile Include="CodeLang.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Converters.cs" />
