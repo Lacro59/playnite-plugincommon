@@ -22,11 +22,18 @@ namespace PluginCommon
 
         internal async Task<string> DownloadStringData(string url)
         {
-            using (var client = new HttpClient())
+            try
             {
-                client.DefaultRequestHeaders.UserAgent.TryParseAdd("request");
-                string responseData = await client.GetStringAsync(url).ConfigureAwait(false);
-                return responseData;
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.UserAgent.TryParseAdd("request");
+                    string responseData = await client.GetStringAsync(url).ConfigureAwait(false);
+                    return responseData;
+                }
+            }
+            catch
+            {
+                return null;
             }
         }
 
@@ -51,7 +58,7 @@ namespace PluginCommon
             LastReleaseUrl = "";
             LastReleaseTagName = "";
             LastReleaseBody = "";
-            if (ResultWeb != "")
+            if (!ResultWeb.IsNullOrEmpty())
             {
                 try
                 {
