@@ -4,6 +4,7 @@ using Playnite.SDK;
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace PluginCommon
@@ -25,11 +26,10 @@ namespace PluginCommon
 
             try
             {
-                using (var client = new HttpClient())
-                {
-                    string responseData = await client.GetStringAsync(url).ConfigureAwait(false);
-                    return responseData;
-                }
+                var client = new HttpClient();
+                client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
+                string responseData = await client.GetStringAsync(url).ConfigureAwait(false);
+                return responseData;
             }
             catch (Exception ex)
             {
@@ -95,7 +95,7 @@ namespace PluginCommon
             return JObject.Parse(responseData);
         }
 
-        public int GetSteamId(string Name, bool IsLoop1 = false, bool IsLoop2 = false)
+        public int GetSteamId(string Name, bool IsLoop1 = false, bool IsLoop2 = false, bool IsLoop3 = false)
         {
             int SteamId = 0;
 
@@ -116,11 +116,17 @@ namespace PluginCommon
 
             if (!IsLoop1)
             {
-                SteamId = GetSteamId(Name.Replace(":", ""), true);
+                SteamId = GetSteamId(Name.Replace("  ", " "), true);
                 if ((SteamId == 0) && (!IsLoop2))
                 {
-                    SteamId = GetSteamId(Name + "™", true, true);
+                    SteamId = GetSteamId(Name.Replace(":", ""), true, true);
                 }
+
+                if ((SteamId == 0) && (!IsLoop3))
+                {
+                    SteamId = GetSteamId(Name + "™", true, true, true);
+                }
+
                 return SteamId;
             }
 
