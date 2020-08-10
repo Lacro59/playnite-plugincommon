@@ -53,7 +53,7 @@ namespace PluginCommon
                     if (File.Exists(PluginCacheFile))
                     {
                         // If not expired
-                        if (File.GetLastWriteTime(PluginCacheFile).AddDays(3) > DateTime.Now)
+                        if (File.GetLastWriteTime(PluginCacheFile).AddDays(3) < DateTime.Now)
                         {
                             logger.Debug("PluginCommon - GetSteamAppListFromCache");
                             SteamListApp = JObject.Parse(File.ReadAllText(PluginCacheFile));
