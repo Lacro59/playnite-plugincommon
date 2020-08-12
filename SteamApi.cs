@@ -53,9 +53,9 @@ namespace PluginCommon
                     if (File.Exists(PluginCacheFile))
                     {
                         // If not expired
-                        if (File.GetLastWriteTime(PluginCacheFile).AddDays(3) < DateTime.Now)
+                        if (File.GetLastWriteTime(PluginCacheFile).AddDays(3) > DateTime.Now)
                         {
-                            logger.Debug("PluginCommon - GetSteamAppListFromCache");
+                            logger.Info("PluginCommon - GetSteamAppListFromCache");
                             SteamListApp = JObject.Parse(File.ReadAllText(PluginCacheFile));
                         }
                         else
@@ -82,7 +82,7 @@ namespace PluginCommon
 
         private JObject GetSteamAppListFromWeb(string PluginCacheFile)
         {
-            logger.Debug("PluginCommon - GetSteamAppListFromWeb");
+            logger.Info("PluginCommon - GetSteamAppListFromWeb");
             string responseData = DownloadStringData(urlSteamListApp).GetAwaiter().GetResult();
             if (responseData.IsNullOrEmpty() && responseData!= "{\"applist\":{\"apps\":[]}}")
             {
@@ -95,6 +95,36 @@ namespace PluginCommon
             return JObject.Parse(responseData);
         }
 
+        private string NormalizeGameName(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return string.Empty;
+            }
+
+            var newName = name.ToLower();
+            newName = newName.RemoveTrademarks();
+            newName = newName.Replace("_", "");
+            newName = newName.Replace(".", "");
+            newName = StringExtensions.RemoveTrademarks(newName);
+            newName = newName.Replace('’', '\'');
+
+            newName = newName.Replace(":", "");
+            newName = newName.Replace("-", "");
+            newName = newName.Replace("-", "");
+            newName = newName.Replace("goty", "");
+            newName = newName.Replace("game of the year edition", "");
+            newName = newName.Replace("  ", " ");
+            newName = newName.Replace("  ", " ");
+            newName = newName.Replace("  ", " ");
+            newName = newName.Replace("  ", " ");
+            newName = newName.Replace("  ", " ");
+            newName = newName.Replace("  ", " ");
+            newName = newName.Replace("  ", " ");
+
+            return newName.Trim();
+        }
+
         public int GetSteamId(string Name, bool IsLoop1 = false, bool IsLoop2 = false, bool IsLoop3 = false)
         {
             int SteamId = 0;
@@ -103,7 +133,10 @@ namespace PluginCommon
             {
                 foreach (JObject Game in SteamListApp["applist"]["apps"])
                 {
-                    if (((string)Game["name"]).Trim().ToLower() == Name.ToLower())
+                    string NameSteam = NormalizeGameName((string)Game["name"]);
+                    string NameSearch = NormalizeGameName(Name);
+
+                    if (NameSteam == NameSearch)
                     {
                         return (int)Game["appid"];
                     }
@@ -114,20 +147,25 @@ namespace PluginCommon
                 Common.LogError(ex, "PluginCommon", "Error on GetSteamId for {Name}");
             }
 
-            if (!IsLoop1)
+            //if (!IsLoop1)
+            //{
+            //    SteamId = GetSteamId(Name.Replace("  ", " "), true);
+            //    if ((SteamId == 0) && (!IsLoop2))
+            //    {
+            //        SteamId = GetSteamId(Name.Replace(":", ""), true, true);
+            //    }
+            //
+            //    if ((SteamId == 0) && (!IsLoop3))
+            //    {
+            //        SteamId = GetSteamId(Name + "™", true, true, true);
+            //    }
+            //
+            //    return SteamId;
+            //}
+
+            if (SteamId == 0)
             {
-                SteamId = GetSteamId(Name.Replace("  ", " "), true);
-                if ((SteamId == 0) && (!IsLoop2))
-                {
-                    SteamId = GetSteamId(Name.Replace(":", ""), true, true);
-                }
-
-                if ((SteamId == 0) && (!IsLoop3))
-                {
-                    SteamId = GetSteamId(Name + "™", true, true, true);
-                }
-
-                return SteamId;
+                logger.Info($"PluginCommon - SteamId not find for {Name}");
             }
 
             return SteamId;
