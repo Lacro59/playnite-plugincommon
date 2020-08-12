@@ -12,7 +12,7 @@ namespace PluginCommon
     /// </summary>
     public partial class WarningsDialogs : Window
     {
-        public WarningsDialogs(string Caption, List<JArray> Messages)
+        public WarningsDialogs(string Caption, List<WarningData> Messages)
         {
             InitializeComponent();
 
@@ -21,16 +21,7 @@ namespace PluginCommon
             List<WarningData> MessagesData = new List<WarningData>();
             for (int i = 0; i < Messages.Count; i++)
             {
-                MessagesData.Add(new WarningData
-                {
-                    At = Convert.ToDateTime((string)Messages[i][0]["At"]).ToString(Playnite.Common.Constants.TimeUiFormat),
-                    FpsData = new Data { Name = (string)Messages[i][1]["Name"], Value = (int)Messages[i][1]["Value"], isWarm = (bool)Messages[i][1]["isWarm"] },
-                    CpuTempData = new Data { Name = (string)Messages[i][2]["Name"], Value = (int)Messages[i][2]["Value"], isWarm = (bool)Messages[i][2]["isWarm"] },
-                    GpuTempData = new Data { Name = (string)Messages[i][3]["Name"], Value = (int)Messages[i][3]["Value"], isWarm = (bool)Messages[i][3]["isWarm"] },
-                    CpuUsageData = new Data { Name = (string)Messages[i][4]["Name"], Value = (int)Messages[i][4]["Value"], isWarm = (bool)Messages[i][4]["isWarm"] },
-                    GpuUsageData = new Data { Name = (string)Messages[i][5]["Name"], Value = (int)Messages[i][5]["Value"], isWarm = (bool)Messages[i][5]["isWarm"] },
-                    RamUsageData = new Data { Name = (string)Messages[i][6]["Name"], Value = (int)Messages[i][6]["Value"], isWarm = (bool)Messages[i][6]["isWarm"] }
-                });
+                MessagesData.Add(Messages[i]);
             }
             icData.ItemsSource = MessagesData;
         }
