@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PluginCommon
@@ -95,6 +96,16 @@ namespace PluginCommon
             return JObject.Parse(responseData);
         }
 
+        private string RemoveTrademarks(string str, string remplacement = "")
+        {
+            if (str.IsNullOrEmpty())
+            {
+                return str;
+            }
+
+            return Regex.Replace(str, @"[™©®]", remplacement);
+        }
+
         private string NormalizeGameName(string name)
         {
             if (string.IsNullOrEmpty(name))
@@ -106,7 +117,7 @@ namespace PluginCommon
             newName = newName.RemoveTrademarks();
             newName = newName.Replace("_", "");
             newName = newName.Replace(".", "");
-            newName = StringExtensions.RemoveTrademarks(newName);
+            newName = RemoveTrademarks(newName);
             newName = newName.Replace('’', '\'');
 
             newName = newName.Replace(":", "");
