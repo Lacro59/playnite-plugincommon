@@ -45,6 +45,8 @@ namespace PluginCommon
             // Get Github info
             string url = string.Format(@"https://api.github.com/repos/Lacro59/playnite-{0}-plugin/releases", PluginName.ToLower());
 
+            logger.Info($"PluginCommon - Download {url}");
+
             string ResultWeb = "";
             try
             {
@@ -69,12 +71,18 @@ namespace PluginCommon
                         LastReleaseTagName = (string)resultObj[0]["tag_name"];
                         LastReleaseBody = (string)resultObj[0]["body"];
                     }
+
+                    logger.Info($"PluginCommon - Find {LastReleaseTagName}");
                 }
                 catch (Exception ex)
                 {
                     Common.LogError(ex, "PluginCommon", $"Failed to parse Github response {ResultWeb}");
                     return false;
                 }
+            }
+            else
+            {
+                logger.Warn($"PluginCommon - No Data from {url}");
             }
 
             // Check actual vs Github
