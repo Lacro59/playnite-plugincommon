@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Newtonsoft.Json;
 using Playnite.SDK;
-
 
 namespace PluginCommon
 {
@@ -395,13 +389,11 @@ namespace PluginCommon
 
 
         #region Custom theme
-        private ConcurrentDictionary<string, FrameworkElement> elCustomTheme = new ConcurrentDictionary<string, FrameworkElement>();
         public bool AddElementInCustomTheme(FrameworkElement ElementInCustomTheme, string ElementParentInCustomThemeName)
         {
             try
             {
-                // Get or set element
-                FrameworkElement ElementCustomTheme = elCustomTheme.GetOrAdd(ElementParentInCustomThemeName, SearchElementByName(ElementParentInCustomThemeName));
+                FrameworkElement ElementCustomTheme = SearchElementByName(ElementParentInCustomThemeName);
 
                 // Not find element
                 if (ElementCustomTheme == null)
@@ -436,8 +428,7 @@ namespace PluginCommon
         {
             try
             {
-                // Get or set element
-                FrameworkElement ElementCustomTheme = elCustomTheme.GetOrAdd(ElementParentInCustomThemeName, SearchElementByName(ElementParentInCustomThemeName));
+                FrameworkElement ElementCustomTheme = SearchElementByName(ElementParentInCustomThemeName);
 
                 // Not find element
                 if (ElementCustomTheme == null)
