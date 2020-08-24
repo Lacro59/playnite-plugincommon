@@ -509,6 +509,6 @@ namespace PluginCommon
     public class ResourcesList
     {
         public string Key { get; set; }
-        public string Value { get; set; }
+        public object Value { get; set; }
     }
 }
