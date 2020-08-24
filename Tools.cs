@@ -1,12 +1,11 @@
 ﻿using Newtonsoft.Json.Linq;
-using Playnite.Controls;
 using Playnite.SDK;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 
 namespace PluginCommon
@@ -14,6 +13,7 @@ namespace PluginCommon
     public class Tools
     {
         private static readonly ILogger logger = LogManager.GetLogger();
+
 
         // https://stackoverflow.com/a/48735199
         public static JArray RemoveValue(JArray oldArray, dynamic obj)
@@ -100,6 +100,35 @@ namespace PluginCommon
                     sp.Visibility = Visibility.Hidden;
                 }
             }
+        }
+
+        public static bool IsDisabledPlaynitePlugins(string PluginName, string PluginUserDataPath)
+        {
+            JArray DisabledPlugins = new JArray();
+            JObject PlayniteConfig = new JObject();
+            try
+            {
+                PlayniteConfig = JObject.Parse(File.ReadAllText(PluginUserDataPath + "\\..\\..\\config.json"));
+                DisabledPlugins = (JArray)PlayniteConfig["DisabledPlugins"];
+
+                if (DisabledPlugins != null)
+                {
+                    foreach (string name in DisabledPlugins)
+                    {
+                        if (name.ToLower() == PluginName.ToLower())
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon", "Error on IsDisabledPlaynitePlugins()");
+                return false;
+            }
+
+            return false;
         }
     }
 }
