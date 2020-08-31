@@ -2,23 +2,24 @@
 {
     public class TransformIcon
     {
-        private static string steam = "";          // e906
-        private static string gog = "";            // e903
-        private static string battleNET = "";      // e900
-        private static string origin = "";         // e904
-        private static string xbox = "";           // e908
-        private static string uplay = "";          // e907
-        private static string epic = "";           // e902
-        private static string playnite = "";       // e905
-        private static string bethesda = "";       // e901
-        private static string humble = "";         // e909
-        private static string twitch = "";         // e90a
-        private static string itchio = "";         // e90b
+        private static string steam = "";              // e906
+        private static string gog = "";                // e903
+        private static string battleNET = "";          // e900
+        private static string origin = "";             // e904
+        private static string xbox = "";               // e908
+        private static string uplay = "";              // e907
+        private static string epic = "";               // e902
+        private static string playnite = "";           // e905
+        private static string bethesda = "";           // e901
+        private static string humble = "";             // e909
+        private static string twitch = "";             // e90a
+        private static string itchio = "";             // e90b
 
-        private static string statistics = "";     // e90c
-        private static string howlongtobeat = "";  // e90d
-        private static string successstory = "";   // e90e
-        private static string gameactivity = "";   // e90f
+        private static string statistics = "";         // e90c
+        private static string howlongtobeat = "";      // e90d
+        private static string successstory = "";       // e90e
+        private static string gameactivity = "";       // e90f
+        private static string retroachievements = "";  // e910
 
 
         /// <summary>
@@ -42,6 +43,9 @@
                     stringReturn = gameactivity;
                     break;
 
+                case "retroachievements":
+                    stringReturn = retroachievements;
+                    break;
                 case "steam":
                     stringReturn = steam;
                     break;
