@@ -14,12 +14,13 @@
         private static string humble = "";             // e909
         private static string twitch = "";             // e90a
         private static string itchio = "";             // e90b
+        private static string indiegala = "";          // e911
+        private static string retroachievements = "";  // e910
 
         private static string statistics = "";         // e90c
         private static string howlongtobeat = "";      // e90d
         private static string successstory = "";       // e90e
         private static string gameactivity = "";       // e90f
-        private static string retroachievements = "";  // e910
 
 
         /// <summary>
@@ -45,6 +46,9 @@
 
                 case "retroachievements":
                     stringReturn = retroachievements;
+                    break;
+                case "indiegala":
+                    stringReturn = indiegala;
                     break;
                 case "steam":
                     stringReturn = steam;
