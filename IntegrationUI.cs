@@ -177,11 +177,6 @@ namespace PluginCommon
         {
             try
             {
-                foreach (var tt in btGameSelectedActionBarList)
-                {
-                    logger.Debug(btGameSelectedActionBarName + " " + tt.Name);
-                }
-
                 btGameSelectedActionBarChild = SearchElementByName("PART_ButtonEditGame");
                 FrameworkElement spContener = SearchElementByName("PART_spContener");
 
@@ -225,6 +220,8 @@ namespace PluginCommon
                         }
                     }
                 }
+
+                //RemoveButtonInGameSelectedActionBarButtonOrToggleButton(btGameSelectedActionBarName);
 
                 return true;
             }
@@ -377,6 +374,8 @@ namespace PluginCommon
                     logger.Info($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] allready remove");
                 }
 
+                //RemoveElementInGameSelectedDescription(elGameSelectedDescriptionName);
+
                 return true;
             }
             catch (Exception ex)
@@ -404,6 +403,16 @@ namespace PluginCommon
                 // Add in parent if good type
                 if (ElementCustomTheme is StackPanel)
                 {
+                    if (!double.IsNaN(ElementCustomTheme.Height))
+                    {
+                        ElementInCustomTheme.Height = ElementCustomTheme.Height;
+                    }
+
+                    if (!double.IsNaN(ElementCustomTheme.Width))
+                    {
+                        ElementInCustomTheme.Width = ElementCustomTheme.Width;
+                    }
+
                     // Add FrameworkElement 
                     ((StackPanel)ElementCustomTheme).Children.Add(ElementInCustomTheme);
                     ((StackPanel)ElementCustomTheme).Visibility = Visibility.Visible;
@@ -449,6 +458,8 @@ namespace PluginCommon
                 {
                     throw new Exception("ElementCustomTheme is not a StackPanel element");
                 }
+
+                //ClearElementInCustomTheme(ElementParentInCustomThemeName);
 
                 return true;
             }
