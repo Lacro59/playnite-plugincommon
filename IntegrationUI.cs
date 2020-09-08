@@ -69,7 +69,7 @@ namespace PluginCommon
                                 btHeaderParent.Children.Insert((i - 1), btHeader);
                                 btHeaderParent.UpdateLayout();
                                 i = btHeaderParent.Children.Count;
-                                logger.Info($"PluginCommon - btHeader [{btHeader.Name}] insert");
+                                // logger.Info($"PluginCommon - btHeader [{btHeader.Name}] insert");
                             }
                         }
                     }
@@ -80,7 +80,7 @@ namespace PluginCommon
                 }
                 else
                 {
-                    logger.Info($"PluginCommon - btHeader [{btHeader.Name}] allready insert");
+                    // logger.Info($"PluginCommon - btHeader [{btHeader.Name}] allready insert");
                 }
 
                 btHeaderList.Add(btHeader);
@@ -127,7 +127,7 @@ namespace PluginCommon
                         ((StackPanel)(btGameSelectedActionBarChild.Parent)).Children.Add(btGameSelectedActionBar);
                         ((StackPanel)(btGameSelectedActionBarChild.Parent)).UpdateLayout();
 
-                        logger.Info($"PluginCommon - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
+                        // logger.Info($"PluginCommon - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
                     }
 
                     if (btGameSelectedActionBarChild.Parent is Grid)
@@ -156,12 +156,12 @@ namespace PluginCommon
                         spContener.Children.Add(btGameSelectedActionBar);
                         spContener.UpdateLayout();
 
-                        logger.Info($"PluginCommon - (Grid)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
+                        // logger.Info($"PluginCommon - (Grid)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
                     }
                 }
                 else
                 {
-                    logger.Info($"PluginCommon - btGameSelectedActionBar [{btGameSelectedActionBar.Name}] allready insert");
+                    // logger.Info($"PluginCommon - btGameSelectedActionBar [{btGameSelectedActionBar.Name}] allready insert");
                 }
 
                 return true;
@@ -197,7 +197,7 @@ namespace PluginCommon
                             btGameSelectedParent.Children.Remove(btGameSelectedParent.Children[i]);
                             btGameSelectedParent.UpdateLayout();
 
-                            logger.Info($"PluginCommon - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
+                            // logger.Info($"PluginCommon - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
                         }
                     }
                 }
@@ -207,16 +207,16 @@ namespace PluginCommon
                     //Grid btGameSelectedParent = ((Grid)(btGameSelectedActionBarChild.Parent));
                     for (int i = 0; i < ((StackPanel)spContener).Children.Count; i++)
                     {
-                        logger.Debug(((FrameworkElement)((StackPanel)spContener).Children[i]).Name);
+                        // logger.Debug(((FrameworkElement)((StackPanel)spContener).Children[i]).Name);
 
                         if (((FrameworkElement)((StackPanel)spContener).Children[i]).Name == btGameSelectedActionBarName)
                         {
-                            logger.Debug(btGameSelectedActionBarName + " " + ((Grid)(btGameSelectedActionBarChild.Parent)).ColumnDefinitions.Count);
+                            // logger.Debug(btGameSelectedActionBarName + " " + ((Grid)(btGameSelectedActionBarChild.Parent)).ColumnDefinitions.Count);
 
                             ((StackPanel)spContener).Children.Remove(((StackPanel)spContener).Children[i]);
                             spContener.UpdateLayout();
 
-                            logger.Info($"PluginCommon - (Grid)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
+                            // logger.Info($"PluginCommon - (Grid)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
                         }
                     }
                 }
@@ -267,7 +267,7 @@ namespace PluginCommon
                             ((StackPanel)elGameSelectedDescriptionContener).Children.Add(elGameSelectedDescription);
                         }
                         ((StackPanel)elGameSelectedDescriptionContener).UpdateLayout();
-                        logger.Info($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
+                        // logger.Info($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
                     }
 
                     if (elGameSelectedDescriptionContener is DockPanel)
@@ -284,12 +284,12 @@ namespace PluginCommon
                             ((DockPanel)elGameSelectedDescriptionContener).Children.Add(elGameSelectedDescription);
                         }
                         ((DockPanel)elGameSelectedDescriptionContener).UpdateLayout();
-                        logger.Info($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
+                        // logger.Info($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
                     }
                 }
                 else
                 {
-                    logger.Info($"PluginCommon - elGameSelectedDescription [{elGameSelectedDescription.Name}] allready insert");
+                    // logger.Info($"PluginCommon - elGameSelectedDescription [{elGameSelectedDescription.Name}] allready insert");
                 }
 
                 elGameSelectedDescriptionList.Add(elGameSelectedDescription);
@@ -332,7 +332,7 @@ namespace PluginCommon
                             {
                                 elGameSelectedParent.Children.Remove(elGameSelectedParent.Children[i]);
                                 elGameSelectedParent.UpdateLayout();
-                                logger.Info($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
+                                // logger.Info($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
 
                                 foreach (FrameworkElement el in elGameSelectedDescriptionList)
                                 {
@@ -355,7 +355,7 @@ namespace PluginCommon
                             {
                                 elGameSelectedParent.Children.Remove(elGameSelectedParent.Children[i]);
                                 elGameSelectedParent.UpdateLayout();
-                                logger.Info($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
+                                // logger.Info($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
 
                                 foreach (FrameworkElement el in elGameSelectedDescriptionList)
                                 {
@@ -371,7 +371,7 @@ namespace PluginCommon
                 }
                 else
                 {
-                    logger.Info($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] allready remove");
+                    // logger.Info($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] allready remove");
                 }
 
                 //RemoveElementInGameSelectedDescription(elGameSelectedDescriptionName);
@@ -417,7 +417,7 @@ namespace PluginCommon
                     ((StackPanel)ElementCustomTheme).Children.Add(ElementInCustomTheme);
                     ((StackPanel)ElementCustomTheme).Visibility = Visibility.Visible;
                     ((StackPanel)ElementCustomTheme).UpdateLayout();
-                    logger.Info($"PluginCommon - ElementCustomTheme [{ElementCustomTheme.Name}] insert");
+                    // logger.Info($"PluginCommon - ElementCustomTheme [{ElementCustomTheme.Name}] insert");
                 }
                 else
                 {
@@ -452,7 +452,7 @@ namespace PluginCommon
                     ((StackPanel)ElementCustomTheme).Children.Clear();
                     ((StackPanel)ElementCustomTheme).Visibility = Visibility.Collapsed;
                     ((StackPanel)ElementCustomTheme).UpdateLayout();
-                    logger.Info($"PluginCommon - ElementCustomTheme [{ElementCustomTheme.Name}] clear");
+                    // logger.Info($"PluginCommon - ElementCustomTheme [{ElementCustomTheme.Name}] clear");
                 }
                 else
                 {
