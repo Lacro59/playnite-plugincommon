@@ -13,12 +13,13 @@ namespace PluginCommon
     {
         private static ILogger logger = LogManager.GetLogger();
 
-        private string PluginName = "";
+        private string PluginName = string.Empty;
         private ExtensionDescription PluginInfo;
 
-        private string LastReleaseUrl = "";
-        private string LastReleaseTagName = "";
-        private string LastReleaseBody = "";
+        private string LastReleaseUrl = string.Empty;
+        private string LastReleaseTagName = string.Empty;
+        private string LastReleaseBody = string.Empty;
+
 
         internal async Task<string> DownloadStringData(string url)
         {
@@ -45,21 +46,24 @@ namespace PluginCommon
             // Get Github info
             string url = string.Format(@"https://api.github.com/repos/Lacro59/playnite-{0}-plugin/releases", PluginName.ToLower());
 
-            logger.Info($"PluginCommon - Download {url}");
+#if !DEBUG
+            logger.Debug($"PluginCommon - Download {url} for {PluginName}");
+#endif
 
-            string ResultWeb = "";
+            string ResultWeb = string.Empty;
             try
             {
                 ResultWeb = DownloadStringData(url).GetAwaiter().GetResult();
             }
             catch (WebException ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Failed to load from {url}");
+                Common.LogError(ex, "PluginCommon", $"Failed to load from {url} for {PluginName}");
             }
 
-            LastReleaseUrl = "";
-            LastReleaseTagName = "";
-            LastReleaseBody = "";
+            LastReleaseUrl = string.Empty;
+            LastReleaseTagName = string.Empty;
+            LastReleaseBody = string.Empty;
+
             if (!ResultWeb.IsNullOrEmpty())
             {
                 try
@@ -72,17 +76,17 @@ namespace PluginCommon
                         LastReleaseBody = (string)resultObj[0]["body"];
                     }
 
-                    logger.Info($"PluginCommon - Find {LastReleaseTagName}");
+                    logger.Info($"PluginCommon - {PluginName} - Find {LastReleaseTagName} - Actual {PluginInfo.Version}");
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "PluginCommon", $"Failed to parse Github response {ResultWeb}");
+                    Common.LogError(ex, "PluginCommon", $"Failed to parse Github response for {PluginName} - {ResultWeb}");
                     return false;
                 }
             }
             else
             {
-                logger.Warn($"PluginCommon - No Data from {url}");
+                logger.Warn($"PluginCommon - No Data from {url} for {PluginName}");
             }
 
             // Check actual vs Github

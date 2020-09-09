@@ -50,7 +50,8 @@ namespace PluginCommon
                     // Not find element
                     if (btHeaderChild == null)
                     {
-                        throw new Exception("btHeaderChild [PART_ButtonSteamFriends] not find");
+                        logger.Error("PluginCommon - btHeaderChild [PART_ButtonSteamFriends] not find");
+                        return false;
                     }
 
                     // Add in parent if good type
@@ -69,18 +70,24 @@ namespace PluginCommon
                                 btHeaderParent.Children.Insert((i - 1), btHeader);
                                 btHeaderParent.UpdateLayout();
                                 i = btHeaderParent.Children.Count;
-                                // logger.Info($"PluginCommon - btHeader [{btHeader.Name}] insert");
+
+#if !DEBUG
+                                logger.Debug($"PluginCommon - btHeader [{btHeader.Name}] insert");
+#endif
                             }
                         }
                     }
                     else
                     {
-                        throw new Exception("btHeaderChild.Parent is not a DockPanel element");
+                        logger.Error("PluginCommon - btHeaderChild.Parent is not a DockPanel element");
+                        return false;
                     }
                 }
                 else
                 {
-                    // logger.Info($"PluginCommon - btHeader [{btHeader.Name}] allready insert");
+#if !DEBUG
+                    logger.Debug($"PluginCommon - btHeader [{btHeader.Name}] allready insert");
+#endif
                 }
 
                 btHeaderList.Add(btHeader);
@@ -117,7 +124,8 @@ namespace PluginCommon
                     // Not find element
                     if (btGameSelectedActionBarChild == null)
                     {
-                        throw new Exception("btGameSelectedActionBarChild [PART_ButtonEditGame] not find");
+                        logger.Error("PluginCommon - btGameSelectedActionBarChild [PART_ButtonEditGame] not find");
+                        return false;
                     }
 
                     // Add in parent if good type
@@ -127,7 +135,9 @@ namespace PluginCommon
                         ((StackPanel)(btGameSelectedActionBarChild.Parent)).Children.Add(btGameSelectedActionBar);
                         ((StackPanel)(btGameSelectedActionBarChild.Parent)).UpdateLayout();
 
-                        // logger.Info($"PluginCommon - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
+#if !DEBUG
+                        logger.Debug($"PluginCommon - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
+#endif
                     }
 
                     if (btGameSelectedActionBarChild.Parent is Grid)
@@ -156,12 +166,17 @@ namespace PluginCommon
                         spContener.Children.Add(btGameSelectedActionBar);
                         spContener.UpdateLayout();
 
-                        // logger.Info($"PluginCommon - (Grid)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
+#if !DEBUG
+                        logger.Debug($"PluginCommon - (Grid)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
+#endif
+
                     }
                 }
                 else
                 {
-                    // logger.Info($"PluginCommon - btGameSelectedActionBar [{btGameSelectedActionBar.Name}] allready insert");
+#if !DEBUG
+                    logger.Debug($"PluginCommon - btGameSelectedActionBar [{btGameSelectedActionBar.Name}] allready insert");
+#endif
                 }
 
                 return true;
@@ -183,7 +198,8 @@ namespace PluginCommon
                 // Not find element
                 if (btGameSelectedActionBarChild == null)
                 {
-                    throw new Exception("btGameSelectedActionBarChild [PART_ButtonEditGame] not find");
+                    logger.Error("PluginCommon - btGameSelectedActionBarChild [PART_ButtonEditGame] not find");
+                    return false;
                 }
 
                 // Remove in parent if good type
@@ -197,31 +213,28 @@ namespace PluginCommon
                             btGameSelectedParent.Children.Remove(btGameSelectedParent.Children[i]);
                             btGameSelectedParent.UpdateLayout();
 
-                            // logger.Info($"PluginCommon - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
+#if !DEBUG
+                            logger.Debug($"PluginCommon - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
+#endif
                         }
                     }
                 }
 
                 if (btGameSelectedActionBarChild.Parent is Grid && spContener != null)
                 {
-                    //Grid btGameSelectedParent = ((Grid)(btGameSelectedActionBarChild.Parent));
                     for (int i = 0; i < ((StackPanel)spContener).Children.Count; i++)
                     {
-                        // logger.Debug(((FrameworkElement)((StackPanel)spContener).Children[i]).Name);
-
                         if (((FrameworkElement)((StackPanel)spContener).Children[i]).Name == btGameSelectedActionBarName)
                         {
-                            // logger.Debug(btGameSelectedActionBarName + " " + ((Grid)(btGameSelectedActionBarChild.Parent)).ColumnDefinitions.Count);
-
                             ((StackPanel)spContener).Children.Remove(((StackPanel)spContener).Children[i]);
                             spContener.UpdateLayout();
 
-                            // logger.Info($"PluginCommon - (Grid)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
+#if !DEBUG
+                            logger.Debug($"PluginCommon - (Grid)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
+#endif
                         }
                     }
                 }
-
-                //RemoveButtonInGameSelectedActionBarButtonOrToggleButton(btGameSelectedActionBarName);
 
                 return true;
             }
@@ -251,7 +264,8 @@ namespace PluginCommon
                     // Not find element
                     if (elGameSelectedDescriptionContener == null)
                     {
-                        throw new Exception("elGameSelectedDescriptionContener [PART_ElemDescription] not find");
+                        logger.Error("PluginCommon - elGameSelectedDescriptionContener [PART_ElemDescription] not find");
+                        return false;
                     }
 
                     // Add in parent if good type
@@ -267,7 +281,10 @@ namespace PluginCommon
                             ((StackPanel)elGameSelectedDescriptionContener).Children.Add(elGameSelectedDescription);
                         }
                         ((StackPanel)elGameSelectedDescriptionContener).UpdateLayout();
-                        // logger.Info($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
+
+#if !DEBUG
+                        logger.Debug($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
+#endif
                     }
 
                     if (elGameSelectedDescriptionContener is DockPanel)
@@ -284,12 +301,17 @@ namespace PluginCommon
                             ((DockPanel)elGameSelectedDescriptionContener).Children.Add(elGameSelectedDescription);
                         }
                         ((DockPanel)elGameSelectedDescriptionContener).UpdateLayout();
-                        // logger.Info($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
+
+#if !DEBUG
+                        logger.Debug($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
+#endif
                     }
                 }
                 else
                 {
-                    // logger.Info($"PluginCommon - elGameSelectedDescription [{elGameSelectedDescription.Name}] allready insert");
+#if !DEBUG
+                    logger.Debug($"PluginCommon - elGameSelectedDescription [{elGameSelectedDescription.Name}] allready insert");
+#endif
                 }
 
                 elGameSelectedDescriptionList.Add(elGameSelectedDescription);
@@ -309,17 +331,14 @@ namespace PluginCommon
                 // Remove only if not exist
                 if (SearchElementInsert(elGameSelectedDescriptionList, elGameSelectedDescriptionName))
                 {
-                    // Add search element if not allready find
-                    //if (elGameSelectedDescriptionContener == null)
-                    //{
                     elGameSelectedDescriptionContener = SearchElementByName("PART_HtmlDescription");
                     elGameSelectedDescriptionContener = (FrameworkElement)elGameSelectedDescriptionContener.Parent;
-                    //}
 
                     // Not find element
                     if (elGameSelectedDescriptionContener == null)
                     {
-                        throw new Exception("elGameSelectedDescriptionContener [PART_ElemDescription] not find");
+                        logger.Error("PluginCommon - elGameSelectedDescriptionContener [PART_ElemDescription] not find");
+                        return false;
                     }
 
                     // Remove in parent if good type
@@ -332,7 +351,10 @@ namespace PluginCommon
                             {
                                 elGameSelectedParent.Children.Remove(elGameSelectedParent.Children[i]);
                                 elGameSelectedParent.UpdateLayout();
-                                // logger.Info($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
+
+#if !DEBUG
+                                logger.Debug($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
+#endif
 
                                 foreach (FrameworkElement el in elGameSelectedDescriptionList)
                                 {
@@ -355,7 +377,10 @@ namespace PluginCommon
                             {
                                 elGameSelectedParent.Children.Remove(elGameSelectedParent.Children[i]);
                                 elGameSelectedParent.UpdateLayout();
-                                // logger.Info($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
+
+#if !DEBUG
+                                logger.Debug($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
+#endif
 
                                 foreach (FrameworkElement el in elGameSelectedDescriptionList)
                                 {
@@ -371,10 +396,10 @@ namespace PluginCommon
                 }
                 else
                 {
-                    // logger.Info($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] allready remove");
+#if !DEBUG
+                    logger.Debug($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] allready remove");
+#endif
                 }
-
-                //RemoveElementInGameSelectedDescription(elGameSelectedDescriptionName);
 
                 return true;
             }
@@ -397,7 +422,8 @@ namespace PluginCommon
                 // Not find element
                 if (ElementCustomTheme == null)
                 {
-                    throw new Exception($"ElementCustomTheme [{ElementParentInCustomThemeName}] not find");
+                    logger.Error($"PluginCommon - ElementCustomTheme [{ElementParentInCustomThemeName}] not find");
+                    return false;
                 }
 
                 // Add in parent if good type
@@ -417,11 +443,15 @@ namespace PluginCommon
                     ((StackPanel)ElementCustomTheme).Children.Add(ElementInCustomTheme);
                     ((StackPanel)ElementCustomTheme).Visibility = Visibility.Visible;
                     ((StackPanel)ElementCustomTheme).UpdateLayout();
-                    // logger.Info($"PluginCommon - ElementCustomTheme [{ElementCustomTheme.Name}] insert");
+
+#if !DEBUG
+                    logger.Debug($"PluginCommon - ElementCustomTheme [{ElementCustomTheme.Name}] insert");
+#endif
                 }
                 else
                 {
-                    throw new Exception("ElementCustomTheme is not a StackPanel element");
+                    logger.Error($"PluginCommon - ElementCustomTheme is not a StackPanel element");
+                    return false;
                 }
 
                 return true;
@@ -442,7 +472,8 @@ namespace PluginCommon
                 // Not find element
                 if (ElementCustomTheme == null)
                 {
-                    throw new Exception($"ElementCustomTheme [{ElementParentInCustomThemeName}] not find");
+                    logger.Error($"PluginCommon - ElementCustomTheme [{ElementParentInCustomThemeName}] not find");
+                    return false;
                 }
 
                 // Add in parent if good type
@@ -452,20 +483,22 @@ namespace PluginCommon
                     ((StackPanel)ElementCustomTheme).Children.Clear();
                     ((StackPanel)ElementCustomTheme).Visibility = Visibility.Collapsed;
                     ((StackPanel)ElementCustomTheme).UpdateLayout();
-                    // logger.Info($"PluginCommon - ElementCustomTheme [{ElementCustomTheme.Name}] clear");
+
+#if !DEBUG
+                    logger.Debug($"PluginCommon - ElementCustomTheme [{ElementCustomTheme.Name}] clear");
+#endif
                 }
                 else
                 {
-                    throw new Exception("ElementCustomTheme is not a StackPanel element");
+                    logger.Error($"PluginCommon - ElementCustomTheme is not a StackPanel element");
+                    return false;
                 }
-
-                //ClearElementInCustomTheme(ElementParentInCustomThemeName);
-
+                
                 return true;
             }
             catch (Exception ex)
             {
-                //Common.LogError(ex, "PluginCommon", $"Error in ClearElementInCustomTheme({ElementParentInCustomThemeName})");
+                Common.LogError(ex, "PluginCommon", $"Error in ClearElementInCustomTheme({ElementParentInCustomThemeName})");
                 return false;
             }
         }
@@ -516,6 +549,7 @@ namespace PluginCommon
             return false;
         }
     }
+
 
     public class ResourcesList
     {
