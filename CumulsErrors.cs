@@ -10,6 +10,7 @@ namespace PluginCommon
     {
         private List<string> ListMessage = new List<string>();
 
+
         /// <summary>
         /// Add a new error message.
         /// </summary>
@@ -28,7 +29,7 @@ namespace PluginCommon
         /// <returns></returns>
         public string Get()
         {
-            string Result = "";
+            string Result = string.Empty;
             for (int i = 0; i < ListMessage.Count; i++)
             {
                 Result += ((i != 0) ? Environment.NewLine : "") + ListMessage[i];

@@ -13,7 +13,7 @@ namespace PluginCommon
 
 
         /// <summary>
-        /// Set in application ressources the common ressource.
+        /// Set in application ressources the common ressources.
         /// </summary>
         /// <param name="pluginFolder"></param>
         public static void Load(string pluginFolder)
@@ -47,17 +47,23 @@ namespace PluginCommon
             }
             else
             {
-                logger.Error($"PluginCommon - File {LiveChartsCommonFile} not found.");
+                logger.Warn($"PluginCommon - File {LiveChartsCommonFile} not found.");
                 return;
             }
         }
 
 
+        /// <summary>
+        /// Normalize log error in Playnite.
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <param name="PluginName"></param>
+        /// <param name="Message"></param>
         public static void LogError(Exception ex, string PluginName, string Message)
         {
             StackTrace Trace = new StackTrace(ex, true);
             int LineNumber = 0;
-            string FileName = "";
+            string FileName = string.Empty;
             
             foreach (var frame in Trace.GetFrames())
             {
@@ -73,7 +79,5 @@ namespace PluginCommon
 
             logger.Error(ex, $"{PluginName} [{FileName} {LineNumber}] - {Message} ");
         }
-
-
     }
 }

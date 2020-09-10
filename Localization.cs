@@ -34,16 +34,20 @@ namespace PluginCommon
             // Set default language if not found
             if (!File.Exists(langFile))
             {
-                logger.Error($"PluginCommon - File {langFile} not found.");
+                logger.Warn($"PluginCommon - File {langFile} not found.");
 
                 language = "LocSource";
                 langFile = Path.Combine(pluginFolder, "localization\\" + language + ".xaml");
             }
 
-            logger.Info($"PluginCommon - Parse plugin localization file {langFile}.");
-
+            
+            // Load localization
             if (File.Exists(langFile))
             {
+#if DEBUG
+                logger.Debug($"PluginCommon - Parse plugin localization file {langFile}.");
+#endif
+
                 ResourceDictionary res = null;
                 try
                 {

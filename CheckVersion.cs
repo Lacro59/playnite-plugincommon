@@ -21,7 +21,7 @@ namespace PluginCommon
         private string LastReleaseBody = string.Empty;
 
 
-        internal async Task<string> DownloadStringData(string url)
+        private async Task<string> DownloadStringData(string url)
         {
             try
             {
@@ -32,8 +32,9 @@ namespace PluginCommon
                     return responseData;
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                Common.LogError(ex, "PluginCommon", $"Failed to load from {url}");
                 return null;
             }
         }
@@ -46,7 +47,7 @@ namespace PluginCommon
             // Get Github info
             string url = string.Format(@"https://api.github.com/repos/Lacro59/playnite-{0}-plugin/releases", PluginName.ToLower());
 
-#if !DEBUG
+#if DEBUG
             logger.Debug($"PluginCommon - Download {url} for {PluginName}");
 #endif
 
@@ -76,7 +77,7 @@ namespace PluginCommon
                         LastReleaseBody = (string)resultObj[0]["body"];
                     }
 
-                    logger.Info($"PluginCommon - {PluginName} - Find {LastReleaseTagName} - Actual {PluginInfo.Version}");
+                    logger.Info($"PluginCommon - {PluginName} - Find {LastReleaseTagName} - Actual v{PluginInfo.Version}");
                 }
                 catch (Exception ex)
                 {

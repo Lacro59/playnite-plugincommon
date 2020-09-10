@@ -17,7 +17,6 @@
         </StackPanel>
 
         <StackPanel Margin="10,10" MinHeight="20">
-
             <ItemsControl Name="icData">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
@@ -57,12 +56,10 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-
         </StackPanel>
-        
+
         <StackPanel DockPanel.Dock="Bottom" Margin="10">
             <Button Width="150" Click="Button_Click">OK</Button>
         </StackPanel>
-
     </StackPanel>
 </Window>

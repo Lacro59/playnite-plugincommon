@@ -87,6 +87,7 @@ namespace PluginCommon
             }
         }
 
+
         public static void DesactivePlayniteWindowControl(DependencyObject depObj)
         {
             foreach (Button sp in FindVisualChildren<Button>(depObj))

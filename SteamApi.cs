@@ -15,15 +15,14 @@ namespace PluginCommon
         private static readonly ILogger logger = LogManager.GetLogger();
 
         private readonly string urlSteamListApp = "https://api.steampowered.com/ISteamApps/GetAppList/v2/";
-
-        private string PluginCachePath;
-
         private JObject SteamListApp = new JObject();
 
 
-        internal async Task<string> DownloadStringData(string url)
+        private async Task<string> DownloadStringData(string url)
         {
+#if DEBUG
             logger.Debug($"PluginCommon - Download {url}");
+#endif
 
             try
             {
@@ -34,7 +33,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", "");
+                Common.LogError(ex, "PluginCommon", $"Failed to load from {url}");
                 return null;
             }
         }
@@ -42,7 +41,7 @@ namespace PluginCommon
         public SteamApi(string PluginUserDataPath)
         {
             // Class variable
-            PluginCachePath = PluginUserDataPath + "\\cache\\";
+            string PluginCachePath = PluginUserDataPath + "\\cache\\";
             string PluginCacheFile = PluginCachePath + "\\SteamListApp.json";
 
             // Load Steam list app
@@ -84,6 +83,7 @@ namespace PluginCommon
         private JObject GetSteamAppListFromWeb(string PluginCacheFile)
         {
             logger.Info("PluginCommon - GetSteamAppListFromWeb");
+
             string responseData = DownloadStringData(urlSteamListApp).GetAwaiter().GetResult();
             if (responseData.IsNullOrEmpty() && responseData!= "{\"applist\":{\"apps\":[]}}")
             {
@@ -136,6 +136,7 @@ namespace PluginCommon
             return newName.Trim();
         }
 
+        [Obsolete("Method is deprecated, please use GetSteamId(string Name) instead.")]
         public int GetSteamId(string Name, bool IsLoop1 = false, bool IsLoop2 = false, bool IsLoop3 = false)
         {
             int SteamId = 0;
@@ -155,31 +156,46 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", "Error on GetSteamId for {Name}");
+                Common.LogError(ex, "PluginCommon", $"Error on GetSteamId for {Name}");
             }
-
-            //if (!IsLoop1)
-            //{
-            //    SteamId = GetSteamId(Name.Replace("  ", " "), true);
-            //    if ((SteamId == 0) && (!IsLoop2))
-            //    {
-            //        SteamId = GetSteamId(Name.Replace(":", ""), true, true);
-            //    }
-            //
-            //    if ((SteamId == 0) && (!IsLoop3))
-            //    {
-            //        SteamId = GetSteamId(Name + "™", true, true, true);
-            //    }
-            //
-            //    return SteamId;
-            //}
 
             if (SteamId == 0)
             {
-                logger.Info($"PluginCommon - SteamId not find for {Name}");
+                logger.Warn($"PluginCommon - SteamId not find for {Name}");
             }
 
             return SteamId;
         }
+
+        // TODO Check usage
+        //public int GetSteamId(string Name)
+        //{
+        //    int SteamId = 0;
+        //
+        //    try
+        //    {
+        //        foreach (JObject Game in SteamListApp["applist"]["apps"])
+        //        {
+        //            string NameSteam = NormalizeGameName((string)Game["name"]);
+        //            string NameSearch = NormalizeGameName(Name);
+        //
+        //            if (NameSteam == NameSearch)
+        //            {
+        //                return (int)Game["appid"];
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Common.LogError(ex, "PluginCommon", $"Error on GetSteamId for {Name}");
+        //    }
+        //
+        //    if (SteamId == 0)
+        //    {
+        //        logger.Warn($"PluginCommon - SteamId not find for {Name}");
+        //    }
+        //
+        //    return SteamId;
+        //}
     }
 }

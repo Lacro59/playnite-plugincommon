@@ -13,10 +13,12 @@ namespace PluginCommon
 
         public bool AddResources(List<ResourcesList> ResourcesList)
         {
+            string ItemKey = string.Empty;
             try
             {
                 foreach (ResourcesList item in ResourcesList)
                 {
+                    ItemKey = item.Key;
                     Application.Current.Resources.Remove(item.Key);
                     Application.Current.Resources.Add(item.Key, item.Value);
                 }
@@ -24,7 +26,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", "Error in AddResources()");
+                Common.LogError(ex, "PluginCommon", $"Error in AddResources({ItemKey})");
                 return false;
             }
         }
@@ -71,7 +73,7 @@ namespace PluginCommon
                                 btHeaderParent.UpdateLayout();
                                 i = btHeaderParent.Children.Count;
 
-#if !DEBUG
+#if DEBUG
                                 logger.Debug($"PluginCommon - btHeader [{btHeader.Name}] insert");
 #endif
                             }
@@ -85,7 +87,7 @@ namespace PluginCommon
                 }
                 else
                 {
-#if !DEBUG
+#if DEBUG
                     logger.Debug($"PluginCommon - btHeader [{btHeader.Name}] allready insert");
 #endif
                 }
@@ -135,7 +137,7 @@ namespace PluginCommon
                         ((StackPanel)(btGameSelectedActionBarChild.Parent)).Children.Add(btGameSelectedActionBar);
                         ((StackPanel)(btGameSelectedActionBarChild.Parent)).UpdateLayout();
 
-#if !DEBUG
+#if DEBUG
                         logger.Debug($"PluginCommon - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
 #endif
                     }
@@ -166,7 +168,7 @@ namespace PluginCommon
                         spContener.Children.Add(btGameSelectedActionBar);
                         spContener.UpdateLayout();
 
-#if !DEBUG
+#if DEBUG
                         logger.Debug($"PluginCommon - (Grid)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
 #endif
 
@@ -174,7 +176,7 @@ namespace PluginCommon
                 }
                 else
                 {
-#if !DEBUG
+#if DEBUG
                     logger.Debug($"PluginCommon - btGameSelectedActionBar [{btGameSelectedActionBar.Name}] allready insert");
 #endif
                 }
@@ -213,7 +215,7 @@ namespace PluginCommon
                             btGameSelectedParent.Children.Remove(btGameSelectedParent.Children[i]);
                             btGameSelectedParent.UpdateLayout();
 
-#if !DEBUG
+#if DEBUG
                             logger.Debug($"PluginCommon - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
 #endif
                         }
@@ -229,7 +231,7 @@ namespace PluginCommon
                             ((StackPanel)spContener).Children.Remove(((StackPanel)spContener).Children[i]);
                             spContener.UpdateLayout();
 
-#if !DEBUG
+#if DEBUG
                             logger.Debug($"PluginCommon - (Grid)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
 #endif
                         }
@@ -282,7 +284,7 @@ namespace PluginCommon
                         }
                         ((StackPanel)elGameSelectedDescriptionContener).UpdateLayout();
 
-#if !DEBUG
+#if DEBUG
                         logger.Debug($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
 #endif
                     }
@@ -302,14 +304,14 @@ namespace PluginCommon
                         }
                         ((DockPanel)elGameSelectedDescriptionContener).UpdateLayout();
 
-#if !DEBUG
+#if DEBUG
                         logger.Debug($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
 #endif
                     }
                 }
                 else
                 {
-#if !DEBUG
+#if DEBUG
                     logger.Debug($"PluginCommon - elGameSelectedDescription [{elGameSelectedDescription.Name}] allready insert");
 #endif
                 }
@@ -352,7 +354,7 @@ namespace PluginCommon
                                 elGameSelectedParent.Children.Remove(elGameSelectedParent.Children[i]);
                                 elGameSelectedParent.UpdateLayout();
 
-#if !DEBUG
+#if DEBUG
                                 logger.Debug($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
 #endif
 
@@ -378,7 +380,7 @@ namespace PluginCommon
                                 elGameSelectedParent.Children.Remove(elGameSelectedParent.Children[i]);
                                 elGameSelectedParent.UpdateLayout();
 
-#if !DEBUG
+#if DEBUG
                                 logger.Debug($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
 #endif
 
@@ -396,7 +398,7 @@ namespace PluginCommon
                 }
                 else
                 {
-#if !DEBUG
+#if DEBUG
                     logger.Debug($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] allready remove");
 #endif
                 }
@@ -444,7 +446,7 @@ namespace PluginCommon
                     ((StackPanel)ElementCustomTheme).Visibility = Visibility.Visible;
                     ((StackPanel)ElementCustomTheme).UpdateLayout();
 
-#if !DEBUG
+#if DEBUG
                     logger.Debug($"PluginCommon - ElementCustomTheme [{ElementCustomTheme.Name}] insert");
 #endif
                 }
@@ -484,7 +486,7 @@ namespace PluginCommon
                     ((StackPanel)ElementCustomTheme).Visibility = Visibility.Collapsed;
                     ((StackPanel)ElementCustomTheme).UpdateLayout();
 
-#if !DEBUG
+#if DEBUG
                     logger.Debug($"PluginCommon - ElementCustomTheme [{ElementCustomTheme.Name}] clear");
 #endif
                 }

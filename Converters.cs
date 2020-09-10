@@ -5,14 +5,13 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 
-
 namespace PluginCommon
 {
     public class CompareValueConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            int ValueData = int.Parse(((string)values[0]).Replace("%", "").Replace("°", ""));
+            int ValueData = int.Parse(((string)values[0]).Replace("%", string.Empty).Replace("°", string.Empty));
             int ValueControl = int.Parse((string)values[1]);
             bool Enable = (bool)values[2];
 
@@ -120,7 +119,7 @@ namespace PluginCommon
             }
             else
             {
-                return "";
+                return string.Empty;
             }
         }
 
@@ -139,7 +138,7 @@ namespace PluginCommon
             }
             else
             {
-                return "";
+                return string.Empty;
             }
         }
 
@@ -157,7 +156,7 @@ namespace PluginCommon
                     + " " + ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern);
             }
             else {
-                return "";
+                return string.Empty;
             }
         }
 
