@@ -1,9 +1,10 @@
-﻿using Playnite.Common;
-using Playnite.SDK;
+﻿using Playnite.SDK;
 using System;
 using System.IO;
 using Newtonsoft.Json;
 using System.Windows;
+using PluginCommon.PlayniteResources.Common;
+using PluginCommon.PlayniteResources.Common.Extensions;
 
 namespace PluginCommon
 {

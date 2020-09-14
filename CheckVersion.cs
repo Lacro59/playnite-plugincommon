@@ -1,11 +1,14 @@
 ﻿using Newtonsoft.Json.Linq;
-using Playnite.API;
 using Playnite.SDK;
+using PluginCommon.PlayniteResources.Common.Extensions;
+using PluginCommon.PlayniteResources.Models;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using YamlDotNet.Serialization;
 
 namespace PluginCommon
 {
@@ -42,7 +45,8 @@ namespace PluginCommon
         public bool Check(string PluginName, string PluginFolder)
         {
             this.PluginName = PluginName;
-            PluginInfo = ExtensionDescription.FromFile(PluginFolder + "\\extension.yaml");
+            var deserializer = new DeserializerBuilder().IgnoreUnmatchedProperties().Build();
+            PluginInfo = deserializer.Deserialize<ExtensionDescription>(File.ReadAllText(PluginFolder + "\\extension.yaml"));
 
             // Get Github info
             string url = string.Format(@"https://api.github.com/repos/Lacro59/playnite-{0}-plugin/releases", PluginName.ToLower());
@@ -90,12 +94,11 @@ namespace PluginCommon
                 logger.Warn($"PluginCommon - No Data from {url} for {PluginName}");
             }
 
-            // Check actual vs Github
+            //Check actual vs Github
             if (!LastReleaseTagName.IsNullOrEmpty() && LastReleaseTagName.IndexOf(PluginInfo.Version) == -1)
             {
                 return true;
             }
-
             return false;
         }
 
