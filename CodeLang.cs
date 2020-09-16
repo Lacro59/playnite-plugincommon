@@ -142,5 +142,16 @@ namespace PluginCommon
             }
             return PlayniteLanguage.Substring(0, 2);
         }
+
+
+        // If not exist, Xbox return english data.
+        public static string GetXboxLang(string PlayniteLanguage)
+        {
+            if (PlayniteLanguage == "english")
+            {
+                PlayniteLanguage = "en_US";
+            }
+            return PlayniteLanguage.Replace("_", "-");
+        }
     }
 }
