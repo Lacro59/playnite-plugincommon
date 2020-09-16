@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PluginCommon.LiveChartsCommon
+﻿namespace PluginCommon.LiveChartsCommon
 {
     public class CustomerForSingle
     {

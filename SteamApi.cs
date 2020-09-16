@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using PluginCommon.PlayniteResources.Common.Extensions;
 
@@ -16,7 +15,7 @@ namespace PluginCommon
         private static readonly ILogger logger = LogManager.GetLogger();
 
         private readonly string urlSteamListApp = "https://api.steampowered.com/ISteamApps/GetAppList/v2/";
-        private JObject SteamListApp = new JObject();
+        private readonly JObject SteamListApp = new JObject();
 
 
         private async Task<string> DownloadStringData(string url)
@@ -85,26 +84,27 @@ namespace PluginCommon
         {
             logger.Info("PluginCommon - GetSteamAppListFromWeb");
 
-            string responseData = DownloadStringData(urlSteamListApp).GetAwaiter().GetResult();
-            if (responseData.IsNullOrEmpty() && responseData!= "{\"applist\":{\"apps\":[]}}")
+            string responseData = string.Empty;
+            try
             {
-                responseData = JsonConvert.SerializeObject(new JObject());
+                responseData = DownloadStringData(urlSteamListApp).GetAwaiter().GetResult();
+                if (responseData.IsNullOrEmpty() || responseData == "{\"applist\":{\"apps\":[]}}")
+                {
+                    responseData = JsonConvert.SerializeObject(new JObject());
+                }
+                else
+                {
+                    // Write file for cache usage
+                    File.WriteAllText(PluginCacheFile, responseData);
+                }
             }
-            else
+            catch(Exception ex)
             {
-                File.WriteAllText(PluginCacheFile, responseData);
+                Common.LogError(ex, "PluginCommon", $"Failed to load from {urlSteamListApp}");
+                responseData = "{\"applist\":{\"apps\":[]}}";
             }
+
             return JObject.Parse(responseData);
-        }
-
-        private string RemoveTrademarks(string str, string remplacement = "")
-        {
-            if (str.IsNullOrEmpty())
-            {
-                return str;
-            }
-
-            return Regex.Replace(str, @"[™©®]", remplacement);
         }
 
         private string NormalizeGameName(string name)
@@ -118,36 +118,30 @@ namespace PluginCommon
             newName = newName.RemoveTrademarks();
             newName = newName.Replace("_", "");
             newName = newName.Replace(".", "");
-            newName = RemoveTrademarks(newName);
             newName = newName.Replace('’', '\'');
-
             newName = newName.Replace(":", "");
-            newName = newName.Replace("-", "");
             newName = newName.Replace("-", "");
             newName = newName.Replace("goty", "");
             newName = newName.Replace("game of the year edition", "");
-            newName = newName.Replace("  ", " ");
-            newName = newName.Replace("  ", " ");
-            newName = newName.Replace("  ", " ");
-            newName = newName.Replace("  ", " ");
-            newName = newName.Replace("  ", " ");
-            newName = newName.Replace("  ", " ");
             newName = newName.Replace("  ", " ");
 
             return newName.Trim();
         }
 
-        [Obsolete("Method is deprecated, please use GetSteamId(string Name) instead.")]
-        public int GetSteamId(string Name, bool IsLoop1 = false, bool IsLoop2 = false, bool IsLoop3 = false)
+        public int GetSteamId(string Name)
         {
             int SteamId = 0;
-
+        
             try
             {
                 foreach (JObject Game in SteamListApp["applist"]["apps"])
                 {
                     string NameSteam = NormalizeGameName((string)Game["name"]);
                     string NameSearch = NormalizeGameName(Name);
+
+#if DEBUG
+            logger.Debug($"PluginCommon - GetSteamId() - Search: {Name} => {NameSearch} - Steam: {Game["name"]} => {NameSteam}");
+#endif
 
                     if (NameSteam == NameSearch)
                     {
@@ -157,46 +151,15 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on GetSteamId for {Name}");
+                Common.LogError(ex, "PluginCommon", $"Error with {Name}");
             }
-
+        
             if (SteamId == 0)
             {
                 logger.Warn($"PluginCommon - SteamId not find for {Name}");
             }
-
+        
             return SteamId;
         }
-
-        // TODO Check usage
-        //public int GetSteamId(string Name)
-        //{
-        //    int SteamId = 0;
-        //
-        //    try
-        //    {
-        //        foreach (JObject Game in SteamListApp["applist"]["apps"])
-        //        {
-        //            string NameSteam = NormalizeGameName((string)Game["name"]);
-        //            string NameSearch = NormalizeGameName(Name);
-        //
-        //            if (NameSteam == NameSearch)
-        //            {
-        //                return (int)Game["appid"];
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Common.LogError(ex, "PluginCommon", $"Error on GetSteamId for {Name}");
-        //    }
-        //
-        //    if (SteamId == 0)
-        //    {
-        //        logger.Warn($"PluginCommon - SteamId not find for {Name}");
-        //    }
-        //
-        //    return SteamId;
-        //}
     }
 }

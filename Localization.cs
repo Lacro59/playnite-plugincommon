@@ -93,10 +93,14 @@ namespace PluginCommon
                 {
                     return ((dynamic)JsonConvert.DeserializeObject(File.ReadAllText(path))).Language;
                 }
+                else
+                {
+                    logger.Warn($"PluginCommon - Not find config file {path}");
+                }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.Error(e, $"PluginCommon - Failed to load {path} setting file.");
+                logger.Error(ex, $"PluginCommon - Failed to load config file {path}");
             }
 
             return "english";

@@ -1,7 +1,4 @@
-﻿<Application x:Class="PluginCommon.App"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:PluginCommon">
+﻿<Application xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 
     <Application.Resources>
         <ResourceDictionary>
@@ -11,7 +8,7 @@
                 <ResourceDictionary Source="Resources/PlayniteResources/Common.xaml" />
                 <!--Playnite Default localization-->
                 <ResourceDictionary Source="Resources/PlayniteResources/LocSource.xaml" />
-                <!--DerivedStyles-->
+                <!--Playnite DerivedStyles-->
                 <ResourceDictionary Source="Resources/PlayniteResources/DerivedStyles/MainWindowStyle.xaml" />
                 <ResourceDictionary Source="Resources/PlayniteResources/DerivedStyles/StandardWindowStyle.xaml" />
                 <ResourceDictionary Source="Resources/PlayniteResources/DerivedStyles/WindowBarButton.xaml" />
@@ -45,10 +42,10 @@
                 <ResourceDictionary Source="Resources/PlayniteResources/DefaultControls/ToggleButton.xaml" />
                 <ResourceDictionary Source="Resources/PlayniteResources/DefaultControls/ToolTip.xaml" />
                 <ResourceDictionary Source="Resources/PlayniteResources/DefaultControls/TreeView.xaml" />
+
                 <!--PluginCommon-->
                 <ResourceDictionary Source="Resources/LiveChartsCommon/Common.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
-
 </Application>

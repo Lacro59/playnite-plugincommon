@@ -19,6 +19,8 @@ namespace PluginCommon
         private string PluginName = string.Empty;
         private ExtensionDescription PluginInfo;
 
+        private readonly string urlGithub = @"https://api.github.com/repos/Lacro59/playnite-{0}-plugin/releases";
+
         private string LastReleaseUrl = string.Empty;
         private string LastReleaseTagName = string.Empty;
         private string LastReleaseBody = string.Empty;
@@ -49,7 +51,7 @@ namespace PluginCommon
             PluginInfo = deserializer.Deserialize<ExtensionDescription>(File.ReadAllText(PluginFolder + "\\extension.yaml"));
 
             // Get Github info
-            string url = string.Format(@"https://api.github.com/repos/Lacro59/playnite-{0}-plugin/releases", PluginName.ToLower());
+            string url = string.Format(urlGithub, PluginName.ToLower());
 
 #if DEBUG
             logger.Debug($"PluginCommon - Download {url} for {PluginName}");
@@ -99,6 +101,7 @@ namespace PluginCommon
             {
                 return true;
             }
+
             return false;
         }
 
