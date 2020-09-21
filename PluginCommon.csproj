@@ -86,6 +86,7 @@
     </Compile>
     <Compile Include="LiveChartsCommon\CustomerForTime.cs" />
     <Compile Include="Localization.cs" />
+    <Compile Include="OriginApi.cs" />
     <Compile Include="PlayniteResources\Common\Serialization.cs" />
     <Compile Include="PlayniteResources\Common\Extensions\StringExtensions.cs" />
     <Compile Include="PlayniteResources\Common\Xaml.cs" />
