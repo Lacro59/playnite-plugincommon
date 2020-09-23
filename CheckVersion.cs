@@ -1,14 +1,13 @@
 ﻿using Newtonsoft.Json.Linq;
 using Playnite.SDK;
 using PluginCommon.PlayniteResources.Common.Extensions;
-using PluginCommon.PlayniteResources.Models;
+using PluginCommon.PlayniteResources.API;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using YamlDotNet.Serialization;
+using PluginCommon.PlayniteResources;
 
 namespace PluginCommon
 {
@@ -17,7 +16,7 @@ namespace PluginCommon
         private static ILogger logger = LogManager.GetLogger();
 
         private string PluginName = string.Empty;
-        private ExtensionDescription PluginInfo;
+        private ExtensionManifest PluginInfo;
 
         private readonly string urlGithub = @"https://api.github.com/repos/Lacro59/playnite-{0}-plugin/releases";
 
@@ -26,29 +25,13 @@ namespace PluginCommon
         private string LastReleaseBody = string.Empty;
 
 
-        private async Task<string> DownloadStringData(string url)
-        {
-            try
-            {
-                using (var client = new HttpClient())
-                {
-                    client.DefaultRequestHeaders.UserAgent.TryParseAdd("request");
-                    string responseData = await client.GetStringAsync(url).ConfigureAwait(false);
-                    return responseData;
-                }
-            }
-            catch(Exception ex)
-            {
-                Common.LogError(ex, "PluginCommon", $"Failed to load from {url}");
-                return null;
-            }
-        }
-
         public bool Check(string PluginName, string PluginFolder)
         {
             this.PluginName = PluginName;
             var deserializer = new DeserializerBuilder().IgnoreUnmatchedProperties().Build();
-            PluginInfo = deserializer.Deserialize<ExtensionDescription>(File.ReadAllText(PluginFolder + "\\extension.yaml"));
+
+            var path = Path.Combine(PluginFolder, PlaynitePaths.ExtensionManifestFileName);
+            PluginInfo = ExtensionManifest.FromFile(path);
 
             // Get Github info
             string url = string.Format(urlGithub, PluginName.ToLower());
@@ -60,7 +43,7 @@ namespace PluginCommon
             string ResultWeb = string.Empty;
             try
             {
-                ResultWeb = DownloadStringData(url).GetAwaiter().GetResult();
+                ResultWeb = Web.DownloadStringData(url, WebUserAgentType.Request).GetAwaiter().GetResult();
             }
             catch (WebException ex)
             {
@@ -97,12 +80,7 @@ namespace PluginCommon
             }
 
             //Check actual vs Github
-            if (!LastReleaseTagName.IsNullOrEmpty() && LastReleaseTagName.IndexOf(PluginInfo.Version) == -1)
-            {
-                return true;
-            }
-
-            return false;
+            return (!LastReleaseTagName.IsNullOrEmpty() && LastReleaseTagName.IndexOf(PluginInfo.Version) == -1);
         }
 
         public void ShowNotification(IPlayniteAPI PlayniteApi, string Message)
@@ -113,6 +91,12 @@ namespace PluginCommon
                 NotificationType.Info,
                 () => Process.Start(LastReleaseUrl)
             ));
+        }
+
+        // TODO DownloadSystem
+        public void GetRelease()
+        {
+
         }
     }
 }

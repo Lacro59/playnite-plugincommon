@@ -18,19 +18,6 @@ namespace PluginCommon
         private readonly List<GameStoreDataResponseAppsList> OriginListApp = new List<GameStoreDataResponseAppsList>();
 
 
-        public async Task<string> DownloadStringData(string url)
-        {
-            HttpClientHandler handler = new HttpClientHandler()
-            {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-            };
-
-            using (HttpClient client = new HttpClient(handler))
-            {
-                return client.GetStringAsync(url).GetAwaiter().GetResult();
-            }
-        }
-
         public OriginApi(string PluginUserDataPath)
         {
             // Class variable
@@ -80,8 +67,7 @@ namespace PluginCommon
             string responseData = string.Empty;
             try
             {
-                string result = DownloadStringData(string.Format(urlOriginListApp)).GetAwaiter().GetResult();
-
+                string result = Web.DownloadStringDataWithGz(urlOriginListApp).GetAwaiter().GetResult();
                 JObject resultObject = JObject.Parse(result);
                 responseData = JsonConvert.SerializeObject(resultObject["offers"]);
 

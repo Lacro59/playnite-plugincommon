@@ -64,7 +64,7 @@ namespace PluginCommon
         {
             StackTrace Trace = new StackTrace(ex, true);
             int LineNumber = 0;
-            string FileName = string.Empty;
+            string FileName = "???";
             
             foreach (var frame in Trace.GetFrames())
             {
@@ -78,7 +78,7 @@ namespace PluginCommon
                 }
             }
 
-            logger.Error(ex, $"{PluginName} [{FileName} {LineNumber}] - {Message} ");
+            logger.Error(ex, $"{PluginName} [{FileName} {LineNumber}] - {Message}");
         }
     }
 }

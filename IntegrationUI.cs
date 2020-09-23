@@ -507,7 +507,7 @@ namespace PluginCommon
         #endregion
 
 
-        private FrameworkElement SearchElementByName(string ElementName)
+        public FrameworkElement SearchElementByName(string ElementName)
         {
             FrameworkElement ElementFind = null;
 

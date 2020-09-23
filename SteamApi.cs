@@ -3,9 +3,6 @@ using Newtonsoft.Json.Linq;
 using Playnite.SDK;
 using System;
 using System.IO;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using PluginCommon.PlayniteResources.Common.Extensions;
 
 namespace PluginCommon
@@ -17,26 +14,6 @@ namespace PluginCommon
         private readonly string urlSteamListApp = "https://api.steampowered.com/ISteamApps/GetAppList/v2/";
         private readonly JObject SteamListApp = new JObject();
 
-
-        private async Task<string> DownloadStringData(string url)
-        {
-#if DEBUG
-            logger.Debug($"PluginCommon - Download {url}");
-#endif
-
-            try
-            {
-                var client = new HttpClient();
-                client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
-                string responseData = await client.GetStringAsync(url).ConfigureAwait(false);
-                return responseData;
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, "PluginCommon", $"Failed to load from {url}");
-                return null;
-            }
-        }
 
         public SteamApi(string PluginUserDataPath)
         {
@@ -87,7 +64,7 @@ namespace PluginCommon
             string responseData = string.Empty;
             try
             {
-                responseData = DownloadStringData(urlSteamListApp).GetAwaiter().GetResult();
+                responseData = Web.DownloadStringData(urlSteamListApp).GetAwaiter().GetResult();
                 if (responseData.IsNullOrEmpty() || responseData == "{\"applist\":{\"apps\":[]}}")
                 {
                     responseData = JsonConvert.SerializeObject(new JObject());

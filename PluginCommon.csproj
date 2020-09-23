@@ -87,11 +87,16 @@
     <Compile Include="LiveChartsCommon\CustomerForTime.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="OriginApi.cs" />
+    <Compile Include="PlayniteResources\API\ScriptFunctionDescription.cs" />
+    <Compile Include="PlayniteResources\Common\Interop.cs" />
+    <Compile Include="PlayniteResources\Common\Paths.cs" />
     <Compile Include="PlayniteResources\Common\Serialization.cs" />
     <Compile Include="PlayniteResources\Common\Extensions\StringExtensions.cs" />
     <Compile Include="PlayniteResources\Common\Xaml.cs" />
     <Compile Include="PlayniteResources\Converters\LongToTimePlayedConverter.cs" />
-    <Compile Include="PlayniteResources\Models\ExtensionDescription.cs" />
+    <Compile Include="PlayniteResources\API\ExtensionDescription.cs" />
+    <Compile Include="PlayniteResources\PlaynitePaths.cs" />
+    <Compile Include="PlayniteResources\PlayniteSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SteamApi.cs" />
     <Compile Include="Tools.cs" />
@@ -99,6 +104,7 @@
     <Compile Include="WarningsDialogs.xaml.cs">
       <DependentUpon>WarningsDialogs.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Web.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\font.ttf" />
