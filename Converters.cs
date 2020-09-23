@@ -3,6 +3,7 @@ using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Markup;
 using System.Windows.Media;
 
 namespace PluginCommon
@@ -52,7 +53,6 @@ namespace PluginCommon
         }
     }
 
-
     public class VisibilityZeroConverter : IValueConverter
     {
         private static ILogger logger = LogManager.GetLogger();
@@ -81,7 +81,6 @@ namespace PluginCommon
         }
     }
 
-
     public class StringToBooleanConverter : IValueConverter
     {
         enum Parameters
@@ -107,7 +106,6 @@ namespace PluginCommon
             throw new NotImplementedException();
         }
     }
-    
 
     public class LocalDateConverter : IValueConverter
     {
@@ -163,6 +161,24 @@ namespace PluginCommon
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
+        }
+    }
+
+    public class InvertedBoolenConverter : MarkupExtension, IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return !(bool)value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return !(bool)value;
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            return this;
         }
     }
 }
