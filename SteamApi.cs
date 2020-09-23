@@ -116,10 +116,6 @@ namespace PluginCommon
                     string NameSteam = NormalizeGameName((string)Game["name"]);
                     string NameSearch = NormalizeGameName(Name);
 
-#if DEBUG
-            logger.Debug($"PluginCommon - GetSteamId() - Search: {Name} => {NameSearch} - Steam: {Game["name"]} => {NameSteam}");
-#endif
-
                     if (NameSteam == NameSearch)
                     {
                         return (int)Game["appid"];
