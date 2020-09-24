@@ -3,7 +3,6 @@ using Newtonsoft.Json.Linq;
 using Playnite.SDK;
 using System;
 using System.IO;
-using PluginCommon.PlayniteResources.Common.Extensions;
 
 namespace PluginCommon
 {

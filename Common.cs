@@ -1,6 +1,9 @@
 ﻿using Playnite.SDK;
+using PluginCommon;
+using PluginCommon.PlayniteResources;
+using PluginCommon.PlayniteResources.API;
 using PluginCommon.PlayniteResources.Common;
-using PluginCommon.PlayniteResources.Common.Extensions;
+using PluginCommon.PlayniteResources.Converters;
 using System;
 using System.Diagnostics;
 using System.IO;

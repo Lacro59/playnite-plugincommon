@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace PluginCommon.PlayniteResources.Common.Extensions
+namespace System
 {
     public static class StringExtensions
     {
