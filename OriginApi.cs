@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace PluginCommon
 {
-    class OriginApi
+    public class OriginApi
     {
         private static readonly ILogger logger = LogManager.GetLogger();
 
