@@ -103,6 +103,7 @@
     <Compile Include="PlayniteResources\PlayniteSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SteamApi.cs" />
+    <Compile Include="TaskHelper.cs" />
     <Compile Include="Tools.cs" />
     <Compile Include="TransformIcon.cs" />
     <Compile Include="WarningsDialogs.xaml.cs">
