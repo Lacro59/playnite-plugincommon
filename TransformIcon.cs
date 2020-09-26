@@ -26,9 +26,9 @@
         /// <summary>
         /// Get icon from name for "font.ttf".
         /// </summary>
-        public static string Get(string Name)
+        public static string Get(string Name, bool ReturnEmpy = false)
         {
-            string stringReturn;
+            string stringReturn = string.Empty;
             switch (Name.ToLower())
             {
                 case "howlongtobeat":
@@ -87,7 +87,10 @@
                     stringReturn = itchio;
                     break;
                 default:
-                    stringReturn = Name;
+                    if (!ReturnEmpy)
+                    {
+                        stringReturn = Name;
+                    }
                     break;
             }
             return stringReturn;
