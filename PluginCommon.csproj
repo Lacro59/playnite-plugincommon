@@ -112,6 +112,7 @@
     <Compile Include="Web.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="LICENSE" />
     <None Include="Resources\font.ttf" />
     <None Include="packages.config" />
     <None Include="README.md" />
