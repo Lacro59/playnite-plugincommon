@@ -528,6 +528,27 @@ namespace PluginCommon
             return ElementFind;
         }
 
+        public FrameworkElement SearchElementByName(string ElementName, DependencyObject dpObj)
+        {
+            FrameworkElement ElementFind = null;
+
+            ElementFind = (FrameworkElement)LogicalTreeHelper.FindLogicalNode(dpObj, ElementName);
+
+            if (ElementFind == null)
+            {
+                foreach (FrameworkElement el in Tools.FindVisualChildren<FrameworkElement>(dpObj))
+                {
+                    if (el.Name == ElementName)
+                    {
+                        ElementFind = el;
+                        break;
+                    }
+                }
+            }
+
+            return ElementFind;
+        }
+
         private bool SearchElementInsert(List<FrameworkElement> SearchList, string ElSearchName)
         {
             foreach (FrameworkElement el in SearchList)
