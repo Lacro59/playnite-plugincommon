@@ -10,7 +10,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using YamlDotNet.Serialization;
-using PluginCommon.PlayniteResources;
 
 namespace PluginCommon
 {
