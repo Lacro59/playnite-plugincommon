@@ -1,10 +1,12 @@
-﻿using Playnite.SDK;
+﻿using Newtonsoft.Json;
+using Playnite.SDK;
 using PluginCommon;
 using PluginCommon.PlayniteResources;
 using PluginCommon.PlayniteResources.API;
 using PluginCommon.PlayniteResources.Common;
 using PluginCommon.PlayniteResources.Converters;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -22,37 +24,51 @@ namespace PluginCommon
         /// <param name="pluginFolder"></param>
         public static void Load(string pluginFolder)
         {
-            var dictionaries = Application.Current.Resources.MergedDictionaries;
-
-            var LiveChartsCommonFile = Path.Combine(pluginFolder, "Resources\\LiveChartsCommon\\Common.xaml");
-            if (File.Exists(LiveChartsCommonFile))
+            List<string> ListCommonFiles = new List<string>
             {
-                ResourceDictionary res = null;
-                try
-                {
-                    res = Xaml.FromFile<ResourceDictionary>(LiveChartsCommonFile);
-                    res.Source = new Uri(LiveChartsCommonFile, UriKind.Absolute);
+                Path.Combine(pluginFolder, "Resources\\Common.xaml"),
+                Path.Combine(pluginFolder, "Resources\\LiveChartsCommon\\Common.xaml")
+            };
 
-                    foreach (var key in res.Keys)
+            foreach (string CommonFile in ListCommonFiles)
+            {
+                if (File.Exists(CommonFile))
+                {
+#if DEBUG
+                    logger.Debug($"PluginCommon - Load {CommonFile}");
+#endif
+
+                    ResourceDictionary res = null;
+                    try
                     {
-                        if (res[key] is string locString && locString.IsNullOrEmpty())
+                        res = Xaml.FromFile<ResourceDictionary>(CommonFile);
+                        res.Source = new Uri(CommonFile, UriKind.Absolute);
+
+                        foreach (var key in res.Keys)
                         {
-                            res.Remove(key);
+                            if (res[key] is string locString && locString.IsNullOrEmpty())
+                            {
+                                res.Remove(key);
+                            }
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        logger.Error(ex, $"PluginCommon - Failed to parse file {CommonFile}.");
+                        return;
+                    }
+
+#if DEBUG
+                    logger.Debug($"PluginCommon - res: {JsonConvert.SerializeObject(res)}");
+#endif
+
+                    Application.Current.Resources.MergedDictionaries.Add(res);
                 }
-                catch (Exception ex)
+                else
                 {
-                    logger.Error(ex, $"PluginCommon - Failed to parse file {LiveChartsCommonFile}.");
+                    logger.Warn($"PluginCommon - File {CommonFile} not found.");
                     return;
                 }
-
-                dictionaries.Add(res);
-            }
-            else
-            {
-                logger.Warn($"PluginCommon - File {LiveChartsCommonFile} not found.");
-                return;
             }
         }
 
