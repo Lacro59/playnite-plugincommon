@@ -48,7 +48,7 @@ namespace PluginCommon
                     {
                         redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
                     }
-                    logger.Debug(string.Format("CheckLocalizations - Redirecting to {0}", redirectUri));
+                    logger.Info(string.Format("DownloadStringData - Redirecting to {0}", redirectUri));
 
                     return await DownloadStringData(redirectUri.ToString());
                 }
