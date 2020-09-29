@@ -103,24 +103,32 @@ namespace PluginCommon
             }
         }
 
-        public static bool IsDisabledPlaynitePlugins(string PluginName, string PluginUserDataPath)
+        public static bool IsDisabledPlaynitePlugins(string PluginName, string ConfigurationPath)
         {
             JArray DisabledPlugins = new JArray();
             JObject PlayniteConfig = new JObject();
             try
             {
-                PlayniteConfig = JObject.Parse(File.ReadAllText(PluginUserDataPath + "\\..\\..\\config.json"));
-                DisabledPlugins = (JArray)PlayniteConfig["DisabledPlugins"];
-
-                if (DisabledPlugins != null)
+                string FileConfig = ConfigurationPath + "\\config.json";
+                if (File.Exists(FileConfig))
                 {
-                    foreach (string name in DisabledPlugins)
+                    PlayniteConfig = JObject.Parse(File.ReadAllText(FileConfig));
+                    DisabledPlugins = (JArray)PlayniteConfig["DisabledPlugins"];
+
+                    if (DisabledPlugins != null)
                     {
-                        if (name.ToLower() == PluginName.ToLower())
+                        foreach (string name in DisabledPlugins)
                         {
-                            return true;
+                            if (name.ToLower() == PluginName.ToLower())
+                            {
+                                return true;
+                            }
                         }
                     }
+                }
+                else
+                {
+                    logger.Warn($"PluginCommon - File not found {FileConfig}");
                 }
             }
             catch (Exception ex)
