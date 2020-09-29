@@ -117,6 +117,13 @@ namespace PluginCommon
                 {
                     btGameSelectedActionBarChild = SearchElementByName("PART_ButtonEditGame");
 
+                    // Not find element
+                    if (btGameSelectedActionBarChild == null)
+                    {
+                        logger.Error("PluginCommon - btGameSelectedActionBarChild [PART_ButtonEditGame] not find");
+                        return false;
+                    }
+
                     btGameSelectedActionBar.Height = btGameSelectedActionBarChild.ActualHeight;
                     if (btGameSelectedActionBar.Name == "PART_HltbButton")
                     {
