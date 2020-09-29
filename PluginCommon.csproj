@@ -92,11 +92,14 @@
     <Compile Include="PlayniteResources\Common\Constants.cs" />
     <Compile Include="PlayniteResources\Common\Extensions\CloneObject.cs" />
     <Compile Include="PlayniteResources\Common\Extensions\EnumExtensions.cs" />
+    <Compile Include="PlayniteResources\Common\FileSystem.cs" />
     <Compile Include="PlayniteResources\Common\GlobalRandom.cs" />
     <Compile Include="PlayniteResources\Common\Interop.cs" />
     <Compile Include="PlayniteResources\Common\Paths.cs" />
     <Compile Include="PlayniteResources\Common\Serialization.cs" />
     <Compile Include="PlayniteResources\Common\Extensions\StringExtensions.cs" />
+    <Compile Include="PlayniteResources\Common\Web\Downloader.cs" />
+    <Compile Include="PlayniteResources\Common\Web\HttpDownloader.cs" />
     <Compile Include="PlayniteResources\Common\Xaml.cs" />
     <Compile Include="PlayniteResources\Converters\LongToTimePlayedConverter.cs" />
     <Compile Include="PlayniteResources\API\ExtensionDescription.cs" />
