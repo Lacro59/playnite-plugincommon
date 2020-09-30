@@ -31,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="akr.WPF.Controls.ColorPicker, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Resources\akr.WPF.Controls.ColorPicker.dll</HintPath>
+    </Reference>
     <Reference Include="LiveCharts, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
       <HintPath>packages\LiveCharts.0.9.7\lib\net45\LiveCharts.dll</HintPath>
       <Private>False</Private>
@@ -68,6 +72,9 @@
     <Compile Include="CheckVersion.cs" />
     <Compile Include="CodeLang.cs" />
     <Compile Include="Common.cs" />
+    <Compile Include="Controls\ControlPickerGradient.xaml.cs">
+      <DependentUpon>ControlPickerGradient.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Converters.cs" />
     <Compile Include="CumulsErrors.cs" />
     <Compile Include="IntegrationUI.cs" />
@@ -122,6 +129,10 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Controls\ControlPickerGradient.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="LiveChartsCommon\CustomerToolTipForMultipleSingle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -297,6 +308,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\PlayniteResources\Playnite.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\akr.WPF.Controls.ColorPicker.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
