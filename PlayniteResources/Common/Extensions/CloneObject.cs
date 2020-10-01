@@ -132,7 +132,6 @@ namespace System
                     continue;
                 }
 
-                // TODO Add support for lists
                 if (sourceValue is IComparable && diffOnly)
                 {
                     var equal = ((IComparable)sourceValue).CompareTo(targetValue) == 0;

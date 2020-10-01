@@ -1,4 +1,5 @@
-﻿using Playnite.SDK;
+﻿using Newtonsoft.Json;
+using Playnite.SDK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -82,6 +83,11 @@ namespace PluginCommon.Controls
 
             Offset1 = linearGradient.GradientStops[0].Offset;
             Offset2 = linearGradient.GradientStops[1].Offset;
+
+#if DEBUG
+            logger.Debug($"ThemeModifier - Offset1: {Offset1} - Offset2: {Offset2}");
+            logger.Debug($"ThemeModifier - StartPoint: {JsonConvert.SerializeObject(StartPoint)} - EndPoint: {JsonConvert.SerializeObject(EndPoint)}");
+#endif
 
             StartPoint = linearGradient.StartPoint;
             EndPoint = linearGradient.EndPoint;

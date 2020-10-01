@@ -2,6 +2,7 @@
 using Playnite.SDK.Models;
 using PluginCommon.PlayniteResources.Common;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using YamlDotNet.Serialization;
@@ -95,8 +96,7 @@ namespace PluginCommon.PlayniteResources.API
             description.DescriptionPath = descriptorPath;
             description.DirectoryPath = Path.GetDirectoryName(descriptorPath);
             description.DirectoryName = Path.GetFileNameWithoutExtension(description.DirectoryPath);
-            // TODO With new SDK
-            //description.IsBuiltInExtension = BuiltinExtensions.BuiltinExtensionFolders.Contains(description.DirectoryName);
+            description.IsBuiltInExtension = BuiltinExtensions.BuiltinExtensionFolders.Contains(description.DirectoryName);
             return description;
         }
     }

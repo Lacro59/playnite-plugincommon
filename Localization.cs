@@ -12,15 +12,8 @@ namespace PluginCommon
         private static ILogger logger = LogManager.GetLogger();
 
 
-        /// <summary>
-        /// Set in application ressources the language ressource.
-        /// </summary>
-        /// <param name="pluginFolder"></param>
-        /// <param name="PlayniteConfigurationPath"></param>
-        public static void SetPluginLanguage(string pluginFolder, string PlayniteConfigurationPath)
+        public static void SetPluginLanguage(string pluginFolder, string language)
         {
-            string language = GetPlayniteLanguageConfiguration(PlayniteConfigurationPath);
-
             var dictionaries = Application.Current.Resources.MergedDictionaries;
 
             // Default language
@@ -81,7 +74,7 @@ namespace PluginCommon
         /// </summary>
         /// <param name="PlayniteConfigurationPath"></param>
         /// <returns></returns>
-        // TODO Wait SDK have a best solution to get Playnite configuration.
+        [Obsolete("Use PlayniteApi.ApplicationSettings.Language")]
         public static string GetPlayniteLanguageConfiguration(string PlayniteConfigurationPath)
         {
             string path = Path.Combine(PlayniteConfigurationPath, "config.json");
