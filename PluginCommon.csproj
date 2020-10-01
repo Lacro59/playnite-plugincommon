@@ -277,18 +277,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </None>
-    <None Include="Resources\PlayniteResources\DerivedStyles\StandardWindowStyle.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\PlayniteResources\DerivedStyles\MainWindowStyle.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Resources\PlayniteResources\DerivedStyles\WindowBarButton.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </None>
     <None Include="Resources\Common.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -305,9 +293,6 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\PlayniteResources\Playnite.dll" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\akr.WPF.Controls.ColorPicker.dll" />
