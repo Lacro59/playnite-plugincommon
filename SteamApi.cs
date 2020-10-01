@@ -110,14 +110,17 @@ namespace PluginCommon
         
             try
             {
-                foreach (JObject Game in SteamListApp["applist"]["apps"])
+                if (SteamListApp != null && SteamListApp["applist"] != null && SteamListApp["applist"]["apps"] != null)
                 {
-                    string NameSteam = NormalizeGameName((string)Game["name"]);
-                    string NameSearch = NormalizeGameName(Name);
-
-                    if (NameSteam == NameSearch)
+                    foreach (JObject Game in SteamListApp["applist"]["apps"])
                     {
-                        return (int)Game["appid"];
+                        string NameSteam = NormalizeGameName((string)Game["name"]);
+                        string NameSearch = NormalizeGameName(Name);
+
+                        if (NameSteam == NameSearch)
+                        {
+                            return (int)Game["appid"];
+                        }
                     }
                 }
             }
