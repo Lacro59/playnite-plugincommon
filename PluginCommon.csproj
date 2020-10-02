@@ -99,6 +99,7 @@
     <Compile Include="PlayniteResources\Common\Constants.cs" />
     <Compile Include="PlayniteResources\Common\Extensions\CloneObject.cs" />
     <Compile Include="PlayniteResources\Common\Extensions\EnumExtensions.cs" />
+    <Compile Include="PlayniteResources\Common\Extensions\ItemsControlExtensions.cs" />
     <Compile Include="PlayniteResources\Common\FileSystem.cs" />
     <Compile Include="PlayniteResources\Common\GlobalRandom.cs" />
     <Compile Include="PlayniteResources\Common\Interop.cs" />
