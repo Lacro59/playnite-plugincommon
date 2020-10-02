@@ -112,6 +112,7 @@
     <Compile Include="PlayniteResources\Converters\InvertedBoolenConverter.cs" />
     <Compile Include="PlayniteResources\Converters\LongToTimePlayedConverter.cs" />
     <Compile Include="PlayniteResources\API\ExtensionDescription.cs" />
+    <Compile Include="PlayniteResources\Converters\NegateConverter.cs" />
     <Compile Include="PlayniteResources\Converters\StringNullOrEmptyToVisibilityConverter.cs" />
     <Compile Include="PlayniteResources\PlaynitePaths.cs" />
     <Compile Include="PlayniteResources\PlayniteSettings.cs" />
