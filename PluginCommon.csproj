@@ -108,8 +108,11 @@
     <Compile Include="PlayniteResources\Common\Web\Downloader.cs" />
     <Compile Include="PlayniteResources\Common\Web\HttpDownloader.cs" />
     <Compile Include="PlayniteResources\Common\Xaml.cs" />
+    <Compile Include="PlayniteResources\Converters\InvertableBooleanToVisibilityConverter.cs" />
+    <Compile Include="PlayniteResources\Converters\InvertedBoolenConverter.cs" />
     <Compile Include="PlayniteResources\Converters\LongToTimePlayedConverter.cs" />
     <Compile Include="PlayniteResources\API\ExtensionDescription.cs" />
+    <Compile Include="PlayniteResources\Converters\StringNullOrEmptyToVisibilityConverter.cs" />
     <Compile Include="PlayniteResources\PlaynitePaths.cs" />
     <Compile Include="PlayniteResources\PlayniteSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
