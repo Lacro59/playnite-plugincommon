@@ -12,20 +12,16 @@ namespace PluginCommon
         private static ILogger logger = LogManager.GetLogger();
 
 
-        public static void SetPluginLanguage(string pluginFolder, string language)
+        public static void SetPluginLanguage(string pluginFolder, string language, bool DefaultLoad = false)
         {
             // Load default for missing
-            SetPluginLanguage(pluginFolder, "english");
+            if (!DefaultLoad)
+            {
+                SetPluginLanguage(pluginFolder, "LocSource", true);
+            }
 
 
             var dictionaries = Application.Current.Resources.MergedDictionaries;
-
-            // Default language
-            if (language == "english")
-            {
-                language = "LocSource";
-            }
-
             var langFile = Path.Combine(pluginFolder, "localization\\" + language + ".xaml");
 
             // Load localization
