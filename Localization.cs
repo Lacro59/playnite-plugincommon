@@ -14,6 +14,10 @@ namespace PluginCommon
 
         public static void SetPluginLanguage(string pluginFolder, string language)
         {
+            // Load default for missing
+            SetPluginLanguage(pluginFolder, "english");
+
+
             var dictionaries = Application.Current.Resources.MergedDictionaries;
 
             // Default language
@@ -24,16 +28,6 @@ namespace PluginCommon
 
             var langFile = Path.Combine(pluginFolder, "localization\\" + language + ".xaml");
 
-            // Set default language if not found
-            if (!File.Exists(langFile))
-            {
-                logger.Warn($"PluginCommon - File {langFile} not found.");
-
-                language = "LocSource";
-                langFile = Path.Combine(pluginFolder, "localization\\" + language + ".xaml");
-            }
-
-            
             // Load localization
             if (File.Exists(langFile))
             {
@@ -65,7 +59,7 @@ namespace PluginCommon
             }
             else
             {
-                logger.Error($"PluginCommon - File {langFile} not found.");
+                logger.Warn($"PluginCommon - File {langFile} not found.");
             }
         }
 
