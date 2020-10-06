@@ -94,6 +94,7 @@
     <Compile Include="LiveChartsCommon\CustomerForTime.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="OriginApi.cs" />
+    <Compile Include="PlayniteTools.cs" />
     <Compile Include="PlayniteResources\API\ScriptFunctionDescription.cs" />
     <Compile Include="PlayniteResources\Behaviors\LeftClickContextMenuBehavior.cs" />
     <Compile Include="PlayniteResources\Common\Constants.cs" />
