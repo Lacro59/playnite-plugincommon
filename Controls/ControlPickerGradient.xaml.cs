@@ -346,13 +346,13 @@ namespace PluginCommon.Controls
 
         private void PART_SlidderOffset0_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            Offset1 = PART_SlidderOffset0.Value;
+            Offset1 = (double)Math.Round(PART_SlidderOffset0.Value, 1);
             SetLinearGradientBrush();
         }
 
         private void PART_SlidderOffset1_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            Offset2 = PART_SlidderOffset1.Value;
+            Offset2 = (double)Math.Round(PART_SlidderOffset1.Value, 1);
             SetLinearGradientBrush();
         }
 
