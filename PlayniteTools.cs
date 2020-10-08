@@ -1,6 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Playnite.SDK;
 using Playnite.SDK.Models;
+using PluginCommon.PlayniteResources;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,6 +35,28 @@ namespace PluginCommon
         }
         #endregion
 
+
+        public static string GetCacheFile(string ImageFileName)
+        {
+            try
+            {
+                string PathImageFileName = Path.Combine(PlaynitePaths.ImagesCachePath, ImageFileName);
+
+                if (File.Exists(PathImageFileName + ".png"))
+                {
+                    return PathImageFileName + ".png";
+                }
+#if DEBUG
+                logger.Debug($"PluginCommon - GetCacheFile() not find - {PathImageFileName}");
+#endif
+            }
+            catch(Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon", "Error on GetCacheFile()");
+            }
+
+            return string.Empty;
+        }
 
 
         public static bool IsDisabledPlaynitePlugins(string PluginName, string ConfigurationPath)
