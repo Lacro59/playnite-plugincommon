@@ -36,11 +36,16 @@ namespace PluginCommon
         #endregion
 
 
-        public static string GetCacheFile(string ImageFileName)
+        public static string GetCacheFile(string ImageFileName, string PluginName)
         {
             try
             {
-                string PathImageFileName = Path.Combine(PlaynitePaths.ImagesCachePath, ImageFileName);
+                if (!Directory.Exists(Path.Combine(PlaynitePaths.ImagesCachePath, PluginName.ToLower())))
+                {
+                    Directory.CreateDirectory(Path.Combine(PlaynitePaths.ImagesCachePath, PluginName.ToLower()));
+                }
+                
+                string PathImageFileName = Path.Combine(PlaynitePaths.ImagesCachePath, PluginName.ToLower(), ImageFileName);
 
                 if (File.Exists(PathImageFileName + ".png"))
                 {
@@ -94,6 +99,27 @@ namespace PluginCommon
             }
 
             return false;
+        }
+
+
+        public static string GetSourceName(Game game, IPlayniteAPI PlayniteApi)
+        {
+            string SourceName = string.Empty;
+
+            if (IsGameEmulated(PlayniteApi, game))
+            {
+                SourceName = "RetroAchievements";
+            }
+            else if (game.SourceId != Guid.Parse("00000000-0000-0000-0000-000000000000"))
+            {
+                SourceName = PlayniteApi.Database.Sources.Get(game.SourceId).Name;    
+            }
+            else
+            {
+                SourceName = "Playnite";
+            }
+
+            return SourceName;
         }
     }
 }

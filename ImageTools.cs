@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Playnite.SDK;
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -17,6 +18,9 @@ namespace PluginCommon
 
     public class ImageTools
     {
+        private static ILogger logger = LogManager.GetLogger();
+
+
         #region Resize
         public static void Resize(string srcPath, int width, int height)
         {
@@ -29,6 +33,9 @@ namespace PluginCommon
         {
             try
             {
+#if DEBUG
+                logger.Debug("PluginCommon - Resize: " + path + ".png");
+#endif
                 Image image = Image.FromStream(imgStream);
                 Bitmap resultImage = Resize(image, width, height);
                 resultImage.Save(path + ".png");

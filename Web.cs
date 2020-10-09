@@ -31,12 +31,9 @@ namespace PluginCommon
         }
 
 
-        public static async Task<bool> DownloadFileImage(string ImageFileName, string url, string ImagesCachePath)
+        public static async Task<bool> DownloadFileImage(string ImageFileName, string url, string ImagesCachePath, string PluginName)
         {
-            List<string> urlSplited = url.Split('/').ToList();
-            ImageFileName = urlSplited[2] + "_" + ImageFileName.Replace(" ", "");
-            ImageFileName = string.Concat(ImageFileName.Split(Path.GetInvalidFileNameChars()));
-            string PathImageFileName = Path.Combine(ImagesCachePath, ImageFileName);
+            string PathImageFileName = Path.Combine(ImagesCachePath, PluginName.ToLower(), ImageFileName);
 
             using (var client = new HttpClient())
             {
