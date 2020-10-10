@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 
@@ -14,6 +15,7 @@ namespace PluginCommon
         List = 2,
         Unknown = 9
     }
+
 
     public abstract class PlayniteUiHelper
     {
@@ -37,8 +39,49 @@ namespace PluginCommon
         public abstract void AddBtActionBar();
         public abstract void RefreshBtActionBar(Game GameSelected);
         public abstract void RemoveBtActionBar();
-    }
 
+        public static void HandleEsc(object sender, KeyEventArgs e)
+        {
+#if DEBUG
+            logger.Debug($"PluginCommon - {sender.ToString()}");
+#endif
+
+            if (e.Key == Key.Escape)
+            {
+                if (sender is Window)
+                {
+                    ((Window)sender).Close();
+                }
+            }
+            else
+            {
+#if DEBUG
+                logger.Debug("PluginCommon - sender is not a Window");
+#endif
+            }
+        }
+
+        public static Window CreateExtensionWindow(IPlayniteAPI PlayniteApi, string Title, UserControl ViewExtension)
+        {
+            Window windowExtension = PlayniteApi.Dialogs.CreateWindow(new WindowCreationOptions
+            {
+                ShowMinimizeButton = false,
+                ShowMaximizeButton = false,
+                ShowCloseButton = true
+            });
+            windowExtension.Title = Title;
+            windowExtension.ShowInTaskbar = false;
+            windowExtension.ResizeMode = ResizeMode.NoResize;
+            windowExtension.Owner = PlayniteApi.Dialogs.GetCurrentAppWindow();
+            windowExtension.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            windowExtension.Content = ViewExtension;
+            windowExtension.Width = ViewExtension.Width;
+            windowExtension.Height = ViewExtension.Height + 20;
+            windowExtension.PreviewKeyDown += new KeyEventHandler(HandleEsc);
+
+            return windowExtension;
+        }
+    }
 
 
     public class IntegrationUI
