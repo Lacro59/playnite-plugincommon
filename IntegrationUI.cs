@@ -3,9 +3,44 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using Playnite.SDK;
+using Playnite.SDK.Models;
 
 namespace PluginCommon
 {
+    public enum ParentTypeView : int
+    {
+        Details = 0,
+        Grid = 1,
+        List = 2,
+        Unknown = 9
+    }
+
+    public abstract class PlayniteUiHelper
+    {
+        public static readonly ILogger logger = LogManager.GetLogger();
+
+        public readonly IPlayniteAPI _PlayniteApi;
+        public readonly string _PluginUserDataPath;
+
+        public IntegrationUI ui = new IntegrationUI();
+        public readonly TaskHelper taskHelper = new TaskHelper();
+
+        public ParentTypeView BtActionBarParentType = ParentTypeView.Unknown;
+
+
+        public PlayniteUiHelper(IPlayniteAPI PlayniteApi, string PluginUserDataPath)
+        {
+            _PlayniteApi = PlayniteApi;
+            _PluginUserDataPath = PluginUserDataPath;
+        }
+
+        public abstract void AddBtActionBar();
+        public abstract void RefreshBtActionBar(Game GameSelected);
+        public abstract void RemoveBtActionBar();
+    }
+
+
+
     public class IntegrationUI
     {
         private static ILogger logger = LogManager.GetLogger();
