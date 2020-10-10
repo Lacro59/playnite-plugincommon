@@ -55,6 +55,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -75,6 +76,7 @@
     <Compile Include="Controls\ControlPickerGradient.xaml.cs">
       <DependentUpon>ControlPickerGradient.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ImageTools.cs" />
     <Compile Include="Converters.cs" />
     <Compile Include="CumulsErrors.cs" />
     <Compile Include="IntegrationUI.cs" />
@@ -94,11 +96,13 @@
     <Compile Include="LiveChartsCommon\CustomerForTime.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="OriginApi.cs" />
+    <Compile Include="PlayniteTools.cs" />
     <Compile Include="PlayniteResources\API\ScriptFunctionDescription.cs" />
     <Compile Include="PlayniteResources\Behaviors\LeftClickContextMenuBehavior.cs" />
     <Compile Include="PlayniteResources\Common\Constants.cs" />
     <Compile Include="PlayniteResources\Common\Extensions\CloneObject.cs" />
     <Compile Include="PlayniteResources\Common\Extensions\EnumExtensions.cs" />
+    <Compile Include="PlayniteResources\Common\Extensions\ItemsControlExtensions.cs" />
     <Compile Include="PlayniteResources\Common\FileSystem.cs" />
     <Compile Include="PlayniteResources\Common\GlobalRandom.cs" />
     <Compile Include="PlayniteResources\Common\Interop.cs" />
@@ -108,8 +112,12 @@
     <Compile Include="PlayniteResources\Common\Web\Downloader.cs" />
     <Compile Include="PlayniteResources\Common\Web\HttpDownloader.cs" />
     <Compile Include="PlayniteResources\Common\Xaml.cs" />
+    <Compile Include="PlayniteResources\Converters\InvertableBooleanToVisibilityConverter.cs" />
+    <Compile Include="PlayniteResources\Converters\InvertedBoolenConverter.cs" />
     <Compile Include="PlayniteResources\Converters\LongToTimePlayedConverter.cs" />
     <Compile Include="PlayniteResources\API\ExtensionDescription.cs" />
+    <Compile Include="PlayniteResources\Converters\NegateConverter.cs" />
+    <Compile Include="PlayniteResources\Converters\StringNullOrEmptyToVisibilityConverter.cs" />
     <Compile Include="PlayniteResources\PlaynitePaths.cs" />
     <Compile Include="PlayniteResources\PlayniteSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -281,6 +289,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\PlayniteResources\DerivedStyles\BottomButton.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </None>
     <Page Include="WarningsDialogs.xaml">
       <SubType>Designer</SubType>

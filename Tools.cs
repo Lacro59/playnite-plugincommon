@@ -87,7 +87,7 @@ namespace PluginCommon
             }
         }
 
-
+        [Obsolete("Remove after new SDK with window")]
         public static void DesactivePlayniteWindowControl(DependencyObject depObj)
         {
             foreach (Button sp in FindVisualChildren<Button>(depObj))
@@ -103,6 +103,8 @@ namespace PluginCommon
             }
         }
 
+
+        [Obsolete("Use PlayniteTools.IsDisabledPlaynitePlugins")]
         public static bool IsDisabledPlaynitePlugins(string PluginName, string ConfigurationPath)
         {
             JArray DisabledPlugins = new JArray();

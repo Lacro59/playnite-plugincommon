@@ -3,7 +3,8 @@
     public class TransformIcon
     {
         private static string steam = "";                  // e906
-        private static string gog = "";                    // e903
+        private static string gogGalaxy = "";              // e903
+        private static string gog = "";                    // ea35
         private static string battleNET = "";              // e900
         private static string origin = "";                 // e904
         private static string xbox = "";                   // e908
@@ -19,7 +20,8 @@
 
         private static string statistics = "";             // e90c
         private static string howlongtobeat = "";          // e90d
-        private static string successstory = "";           // e90e
+        private static string successstoryOld = "";        // e90e
+        private static string successstory = "";           // ea33
         private static string gameactivity = "";           // e90f
         private static string checklocalizations = "";     // ea2c
 
