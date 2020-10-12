@@ -16,10 +16,16 @@ namespace PluginCommon
         Unknown = 9
     }
 
+    public class CustomElement
+    {
+        public string ParentElementName { get; set; }
+        public FrameworkElement Element { get; set; }
+    }
 
     public abstract class PlayniteUiHelper
     {
         public static readonly ILogger logger = LogManager.GetLogger();
+        public static IResourceProvider resources = new ResourceProvider();
 
         public readonly IPlayniteAPI _PlayniteApi;
         public readonly string _PluginUserDataPath;
@@ -27,7 +33,15 @@ namespace PluginCommon
         public IntegrationUI ui = new IntegrationUI();
         public readonly TaskHelper taskHelper = new TaskHelper();
 
+        public bool IsFirstLoad { get; set; } = true;
+
+        // BtActionBar
+        public static string BtActionBarName = string.Empty;
+        public FrameworkElement PART_BtActionBar;
         public ParentTypeView BtActionBarParentType = ParentTypeView.Unknown;
+
+        // CustomElement
+        public List<CustomElement> ListCustomElements = new List<CustomElement>();
 
 
         public PlayniteUiHelper(IPlayniteAPI PlayniteApi, string PluginUserDataPath)
@@ -36,9 +50,73 @@ namespace PluginCommon
             _PluginUserDataPath = PluginUserDataPath;
         }
 
+
+        public abstract void Initial();
+        public abstract void AddElements();
+        public abstract void RefreshElements(Game GameSelected);
+        public void RemoveElements()
+        {
+            RemoveBtActionBar();
+            RemoveCustomElements();
+        }
+
+
+        public abstract void InitialBtActionBar();
         public abstract void AddBtActionBar();
-        public abstract void RefreshBtActionBar(Game GameSelected);
-        public abstract void RemoveBtActionBar();
+        public abstract void RefreshBtActionBar();
+        public void RemoveBtActionBar()
+        {
+            if (!BtActionBarName.IsNullOrEmpty())
+            {
+                ui.RemoveButtonInGameSelectedActionBarButtonOrToggleButton(BtActionBarName);
+                PART_BtActionBar = null;
+                BtActionBarParentType = ParentTypeView.Unknown;
+            }
+            else
+            {
+                logger.Warn($"PluginCommon - RemoveBtActionBar() without BtActionBarName");
+            }
+        }
+
+
+        public abstract void InitialCustomElements();
+        public abstract void AddCustomElements();
+        public abstract void RefreshCustomElements();
+        public void RemoveCustomElements()
+        {
+            foreach (CustomElement customElement in ListCustomElements)
+            {
+                ui.ClearElementInCustomTheme(customElement.ParentElementName);
+            }
+            ListCustomElements = new List<CustomElement>();
+        }
+
+
+        public void CheckTypeView()
+        {
+            // TODO Don't work when you change view
+            if (PART_BtActionBar != null)
+            {
+                FrameworkElement BtActionBarParent = (FrameworkElement)PART_BtActionBar.Parent;
+                if (BtActionBarParent is StackPanel && BtActionBarParentType != ParentTypeView.Details)
+                {
+#if DEBUG
+                    logger.Debug($"PluginCommon - PART_BtActionBar removed from DetailsView");
+#endif
+                    RemoveBtActionBar();
+                    BtActionBarParentType = ParentTypeView.Details;
+                }
+                if (BtActionBarParent is Grid && BtActionBarParentType != ParentTypeView.Grid)
+                {
+#if DEBUG
+                    logger.Debug($"PluginCommon - PART_BtActionBar removed from GridView");
+#endif
+                    RemoveBtActionBar();
+                    BtActionBarParentType = ParentTypeView.Grid;
+                }
+            }
+        }
+
 
         public static void HandleEsc(object sender, KeyEventArgs e)
         {
@@ -592,7 +670,7 @@ namespace PluginCommon
         #endregion
 
 
-        public FrameworkElement SearchElementByName(string ElementName)
+        public static FrameworkElement SearchElementByName(string ElementName)
         {
             FrameworkElement ElementFind = null;
 
@@ -613,7 +691,7 @@ namespace PluginCommon
             return ElementFind;
         }
 
-        public FrameworkElement SearchElementByName(string ElementName, DependencyObject dpObj)
+        public static FrameworkElement SearchElementByName(string ElementName, DependencyObject dpObj)
         {
             FrameworkElement ElementFind = null;
 
@@ -634,7 +712,7 @@ namespace PluginCommon
             return ElementFind;
         }
 
-        private bool SearchElementInsert(List<FrameworkElement> SearchList, string ElSearchName)
+        private static bool SearchElementInsert(List<FrameworkElement> SearchList, string ElSearchName)
         {
             foreach (FrameworkElement el in SearchList)
             {
@@ -645,7 +723,7 @@ namespace PluginCommon
             }
             return false;
         }
-        private bool SearchElementInsert(List<FrameworkElement> SearchList, FrameworkElement ElSearch)
+        private static bool SearchElementInsert(List<FrameworkElement> SearchList, FrameworkElement ElSearch)
         {
             foreach (FrameworkElement el in SearchList)
             {
