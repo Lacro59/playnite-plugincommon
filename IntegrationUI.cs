@@ -154,7 +154,7 @@ namespace PluginCommon
             windowExtension.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             windowExtension.Content = ViewExtension;
             windowExtension.Width = ViewExtension.Width;
-            windowExtension.Height = ViewExtension.Height + 20;
+            windowExtension.Height = ViewExtension.Height + 25;
             windowExtension.PreviewKeyDown += new KeyEventHandler(HandleEsc);
 
             return windowExtension;
