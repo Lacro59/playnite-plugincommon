@@ -48,12 +48,14 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Playnite.SDK">
-      <HintPath>..\..\..\JosefNemec\Playnite\source\PlayniteSDK\bin\Debug\Playnite.SDK.dll</HintPath>
+      <HintPath>Resources\PlayniteResources\Playnite.SDK.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -74,6 +76,7 @@
     <Compile Include="Controls\ControlPickerGradient.xaml.cs">
       <DependentUpon>ControlPickerGradient.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ImageTools.cs" />
     <Compile Include="Converters.cs" />
     <Compile Include="CumulsErrors.cs" />
     <Compile Include="IntegrationUI.cs" />
@@ -93,6 +96,7 @@
     <Compile Include="LiveChartsCommon\CustomerForTime.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="OriginApi.cs" />
+    <Compile Include="PlayniteTools.cs" />
     <Compile Include="PlayniteResources\API\ScriptFunctionDescription.cs" />
     <Compile Include="PlayniteResources\Behaviors\LeftClickContextMenuBehavior.cs" />
     <Compile Include="PlayniteResources\Common\Constants.cs" />

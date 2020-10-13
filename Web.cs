@@ -1,5 +1,9 @@
 ﻿using Playnite.SDK;
 using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -25,6 +29,43 @@ namespace PluginCommon
             }
             return string.Empty;
         }
+
+
+        public static async Task<bool> DownloadFileImage(string ImageFileName, string url, string ImagesCachePath, string PluginName)
+        {
+            string PathImageFileName = Path.Combine(ImagesCachePath, PluginName.ToLower(), ImageFileName);
+
+            using (var client = new HttpClient())
+            {
+                var response = client.GetAsync(url).Result;
+                var filetype = response.Content.Headers.ContentType.MediaType;
+
+                var imageStream = response.Content.ReadAsStreamAsync().Result;
+                ImageTools.Resize(imageStream, 64, 64, PathImageFileName);
+
+                client.Dispose();
+            }
+            
+            // Delete id file is empty
+            try
+            {
+                if (File.Exists(PathImageFileName + ".png"))
+                {
+                    FileInfo fi = new FileInfo(PathImageFileName + ".png");
+                    if (fi.Length == 0)
+                    {
+                        File.Delete(PathImageFileName + ".png");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon", $"Error on Delete file image");
+            }
+
+            return true;
+        }
+
 
 
         public static async Task<string> DownloadStringData(string url)

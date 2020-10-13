@@ -83,7 +83,7 @@
                     </Grid.ColumnDefinitions>
 
                     <Label Grid.Column="0" Content="Offset" Margin="0,0,10,0" VerticalAlignment="Center" />
-                    <Slider Grid.Column="1" Name="PART_SlidderOffset0" VerticalAlignment="Center" Margin="0,0,10,0" 
+                    <Slider Grid.Column="1" Name="PART_SlidderOffset0" VerticalAlignment="Center" Margin="0,0,10,0"
                             Minimum="0" Maximum="1" Value="0.1" SmallChange="0.1" ValueChanged="PART_SlidderOffset0_ValueChanged" />
                     <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{Binding ElementName=PART_SlidderOffset0, Path=Value}" TextAlignment="Center" />
                 </Grid>
