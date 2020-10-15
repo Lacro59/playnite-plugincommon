@@ -107,7 +107,6 @@
     <Compile Include="PlayniteResources\Common\GlobalRandom.cs" />
     <Compile Include="PlayniteResources\Common\Interop.cs" />
     <Compile Include="PlayniteResources\Common\Paths.cs" />
-    <Compile Include="PlayniteResources\Common\Serialization.cs" />
     <Compile Include="PlayniteResources\Common\Extensions\StringExtensions.cs" />
     <Compile Include="PlayniteResources\Common\Web\Downloader.cs" />
     <Compile Include="PlayniteResources\Common\Web\HttpDownloader.cs" />
