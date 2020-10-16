@@ -8,14 +8,6 @@ using Playnite.SDK.Models;
 
 namespace PluginCommon
 {
-    public enum ParentTypeView : int
-    {
-        Details = 0,
-        Grid = 1,
-        List = 2,
-        Unknown = 9
-    }
-
     public class CustomElement
     {
         public string ParentElementName { get; set; }
@@ -38,7 +30,10 @@ namespace PluginCommon
         // BtActionBar
         public static string BtActionBarName = string.Empty;
         public FrameworkElement PART_BtActionBar;
-        public ParentTypeView BtActionBarParentType = ParentTypeView.Unknown;
+
+        // SpDescription
+        public static string SpDescriptionName = string.Empty;
+        public FrameworkElement PART_SpDescription;
 
         // CustomElement
         public List<CustomElement> ListCustomElements = new List<CustomElement>();
@@ -57,6 +52,7 @@ namespace PluginCommon
         public void RemoveElements()
         {
             RemoveBtActionBar();
+            RemoveSpDescription();
             RemoveCustomElements();
         }
 
@@ -70,11 +66,27 @@ namespace PluginCommon
             {
                 ui.RemoveButtonInGameSelectedActionBarButtonOrToggleButton(BtActionBarName);
                 PART_BtActionBar = null;
-                BtActionBarParentType = ParentTypeView.Unknown;
             }
             else
             {
                 logger.Warn($"PluginCommon - RemoveBtActionBar() without BtActionBarName");
+            }
+        }
+
+
+        public abstract void InitialSpDescription();
+        public abstract void AddSpDescription();
+        public abstract void RefreshSpDescription();
+        public void RemoveSpDescription()
+        {
+            if (!SpDescriptionName.IsNullOrEmpty())
+            {
+                ui.RemoveElementInGameSelectedDescription(SpDescriptionName);
+                PART_SpDescription = null;
+            }
+            else
+            {
+                logger.Warn($"PluginCommon - RemoveSpDescriptionr() without SpDescriptionrName");
             }
         }
 
@@ -94,25 +106,40 @@ namespace PluginCommon
 
         public void CheckTypeView()
         {
-            // TODO Don't work when you change view
             if (PART_BtActionBar != null)
             {
                 FrameworkElement BtActionBarParent = (FrameworkElement)PART_BtActionBar.Parent;
-                if (BtActionBarParent is StackPanel && BtActionBarParentType != ParentTypeView.Details)
-                {
 #if DEBUG
-                    logger.Debug($"PluginCommon - PART_BtActionBar removed from DetailsView");
+                logger.Debug($"PluginCommon - BtActionBarParent: {BtActionBarParent.ToString()} - {BtActionBarParent.IsVisible}");
 #endif
+                if (!BtActionBarParent.IsVisible)
+                {
                     RemoveBtActionBar();
-                    BtActionBarParentType = ParentTypeView.Details;
                 }
-                if (BtActionBarParent is Grid && BtActionBarParentType != ParentTypeView.Grid)
-                {
+            }
+
+            if (PART_SpDescription != null)
+            {
+                FrameworkElement SpDescriptionParent = (FrameworkElement)PART_SpDescription.Parent;
 #if DEBUG
-                    logger.Debug($"PluginCommon - PART_BtActionBar removed from GridView");
+                logger.Debug($"PluginCommon - SpDescriptionParent: {SpDescriptionParent.ToString()} - {SpDescriptionParent.IsVisible}");
 #endif
-                    RemoveBtActionBar();
-                    BtActionBarParentType = ParentTypeView.Grid;
+                if (!SpDescriptionParent.IsVisible)
+                {
+                    RemoveSpDescription();
+                }
+            }
+
+            foreach (CustomElement customElement in ListCustomElements)
+            {
+                FrameworkElement customElementParent = (FrameworkElement)customElement.Element.Parent;
+#if DEBUG
+                logger.Debug($"PluginCommon - SpDescriptionParent: {customElementParent.ToString()} - {customElementParent.IsVisible}");
+#endif
+                if (!customElementParent.IsVisible)
+                {
+                    RemoveCustomElements();
+                    break;
                 }
             }
         }
@@ -190,71 +217,57 @@ namespace PluginCommon
 
         #region Header button
         private FrameworkElement btHeaderChild = null;
-        private List<FrameworkElement> btHeaderList = new List<FrameworkElement>();
 
-        public bool AddButtonInWindowsHeader(Button btHeader)
+        public void AddButtonInWindowsHeader(Button btHeader)
         {
             try
             {
-                // Add only if not exist
-                if (!SearchElementInsert(btHeaderList, btHeader))
+                // Add search element if not allready find
+                if (btHeaderChild == null)
                 {
-                    // Add search element if not allready find
-                    if (btHeaderChild == null)
-                    {
-                        btHeaderChild = SearchElementByName("PART_ButtonSteamFriends");
-                    }
+                    btHeaderChild = SearchElementByName("PART_ButtonSteamFriends");
+                }
 
-                    // Not find element
-                    if (btHeaderChild == null)
-                    {
-                        logger.Error("PluginCommon - btHeaderChild [PART_ButtonSteamFriends] not find");
-                        return false;
-                    }
+                // Not find element
+                if (btHeaderChild == null)
+                {
+                    logger.Error("PluginCommon - btHeaderChild [PART_ButtonSteamFriends] not find");
+                    return;
+                }
 
-                    // Add in parent if good type
-                    if (btHeaderChild.Parent is DockPanel)
-                    {
-                        btHeader.Width = btHeaderChild.ActualWidth;
-                        btHeader.Height = btHeaderChild.ActualHeight;
-                        DockPanel.SetDock(btHeader, Dock.Right);
+                // Add in parent if good type
+                if (btHeaderChild.Parent is DockPanel)
+                {
+                    btHeader.Width = btHeaderChild.ActualWidth;
+                    btHeader.Height = btHeaderChild.ActualHeight;
+                    DockPanel.SetDock(btHeader, Dock.Right);
 
-                        // Add button 
-                        DockPanel btHeaderParent = (DockPanel)btHeaderChild.Parent;
-                        for (int i = 0; i < btHeaderParent.Children.Count; i++)
+                    // Add button 
+                    DockPanel btHeaderParent = (DockPanel)btHeaderChild.Parent;
+                    for (int i = 0; i < btHeaderParent.Children.Count; i++)
+                    {
+                        if (((FrameworkElement)btHeaderParent.Children[i]).Name == "PART_ButtonSteamFriends")
                         {
-                            if (((FrameworkElement)btHeaderParent.Children[i]).Name == "PART_ButtonSteamFriends")
-                            {
-                                btHeaderParent.Children.Insert((i - 1), btHeader);
-                                btHeaderParent.UpdateLayout();
-                                i = btHeaderParent.Children.Count;
+                            btHeaderParent.Children.Insert((i - 1), btHeader);
+                            btHeaderParent.UpdateLayout();
+                            i = btHeaderParent.Children.Count;
 
 #if DEBUG
-                                logger.Debug($"PluginCommon - btHeader [{btHeader.Name}] insert");
+                            logger.Debug($"PluginCommon - btHeader [{btHeader.Name}] insert");
 #endif
-                            }
                         }
-                    }
-                    else
-                    {
-                        logger.Error("PluginCommon - btHeaderChild.Parent is not a DockPanel element");
-                        return false;
                     }
                 }
                 else
                 {
-#if DEBUG
-                    logger.Debug($"PluginCommon - btHeader [{btHeader.Name}] allready insert");
-#endif
+                    logger.Error("PluginCommon - btHeaderChild.Parent is not a DockPanel element");
+                    return;
                 }
-
-                btHeaderList.Add(btHeader);
-                return true;
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, "PluginCommon", $"Error in AddButtonInWindowsHeader({btHeader.Name})");
-                return false;
+                return;
             }
         }
         #endregion
@@ -262,110 +275,98 @@ namespace PluginCommon
 
         #region GameSelectedActionBar button
         private FrameworkElement btGameSelectedActionBarChild = null;
-        private List<FrameworkElement> btGameSelectedActionBarList = new List<FrameworkElement>();
 
-        public bool AddButtonInGameSelectedActionBarButtonOrToggleButton(FrameworkElement btGameSelectedActionBar)
+        public void AddButtonInGameSelectedActionBarButtonOrToggleButton(FrameworkElement btGameSelectedActionBar)
         {
             try
             {
-                // Add only if not exist
-                if (!SearchElementInsert(btGameSelectedActionBarList, btGameSelectedActionBar))
-                {
-                    btGameSelectedActionBarChild = SearchElementByName("PART_ButtonEditGame");
 
-                    // Not find element
-                    if (btGameSelectedActionBarChild == null)
-                    {
-                        logger.Error("PluginCommon - btGameSelectedActionBarChild [PART_ButtonEditGame] not find");
-                        return false;
-                    }
-
-                    btGameSelectedActionBar.Height = btGameSelectedActionBarChild.ActualHeight;
-                    if (btGameSelectedActionBar.Name == "PART_HltbButton")
-                    {
-                        btGameSelectedActionBar.Width = btGameSelectedActionBarChild.ActualWidth;
-                    }
-
-                    // Not find element
-                    if (btGameSelectedActionBarChild == null)
-                    {
-                        logger.Error("PluginCommon - btGameSelectedActionBarChild [PART_ButtonEditGame] not find");
-                        return false;
-                    }
-
-                    // Add in parent if good type
-                    if (btGameSelectedActionBarChild.Parent is StackPanel)
-                    {
-                        // Add button 
-                        ((StackPanel)(btGameSelectedActionBarChild.Parent)).Children.Add(btGameSelectedActionBar);
-                        ((StackPanel)(btGameSelectedActionBarChild.Parent)).UpdateLayout();
-
-#if DEBUG
-                        logger.Debug($"PluginCommon - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
-#endif
-                    }
-
-                    if (btGameSelectedActionBarChild.Parent is Grid)
-                    {
-                        StackPanel spContener = (StackPanel)SearchElementByName("PART_spContener");
-
-                        // Add StackPanel contener
-                        if (((Grid)btGameSelectedActionBarChild.Parent).ColumnDefinitions.Count == 3)
-                        {
-                            var columnDefinitions = new ColumnDefinition();
-                            columnDefinitions.Width = GridLength.Auto;
-                            ((Grid)(btGameSelectedActionBarChild.Parent)).ColumnDefinitions.Add(columnDefinitions);
-
-                            spContener = new StackPanel();
-                            spContener.Name = "PART_spContener";
-                            spContener.Orientation = Orientation.Horizontal;
-                            spContener.SetValue(Grid.ColumnProperty, 3);
-
-                            btGameSelectedActionBarChild.Margin = new Thickness(10, 0, 0, 0);
-
-                            ((Grid)(btGameSelectedActionBarChild.Parent)).Children.Add(spContener);
-                            ((Grid)(btGameSelectedActionBarChild.Parent)).UpdateLayout();
-                        }
-
-                        // Add button 
-                        spContener.Children.Add(btGameSelectedActionBar);
-                        spContener.UpdateLayout();
-
-#if DEBUG
-                        logger.Debug($"PluginCommon - (Grid)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
-#endif
-
-                    }
-                }
-                else
-                {
-#if DEBUG
-                    logger.Debug($"PluginCommon - btGameSelectedActionBar [{btGameSelectedActionBar.Name}] allready insert");
-#endif
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, "PluginCommon", $"Error in AddButtonInGameSelectedActionBarButtonOrToggleButton({btGameSelectedActionBar.Name})");
-                return false;
-            }
-        }
-
-        public bool RemoveButtonInGameSelectedActionBarButtonOrToggleButton(string btGameSelectedActionBarName)
-        {
-            try
-            {
-                btGameSelectedActionBarChild = SearchElementByName("PART_ButtonEditGame");
-                FrameworkElement spContener = SearchElementByName("PART_spContener");
+                btGameSelectedActionBarChild = SearchElementByName("PART_ButtonMoreActions", true);
 
                 // Not find element
                 if (btGameSelectedActionBarChild == null)
                 {
-                    logger.Error("PluginCommon - btGameSelectedActionBarChild [PART_ButtonEditGame] not find");
-                    return false;
+                    logger.Error("PluginCommon - btGameSelectedActionBarChild [PART_ButtonMoreActions] not find");
+                    return;
                 }
+
+                btGameSelectedActionBar.Height = btGameSelectedActionBarChild.ActualHeight;
+                if (btGameSelectedActionBar.Name == "PART_ButtonMoreActions")
+                {
+                    btGameSelectedActionBar.Width = btGameSelectedActionBarChild.ActualWidth;
+                }
+
+                // Not find element
+                if (btGameSelectedActionBarChild == null)
+                {
+                    logger.Error("PluginCommon - btGameSelectedActionBarChild [PART_ButtonMoreActions] not find");
+                    return;
+                }
+
+                // Add in parent if good type
+                if (btGameSelectedActionBarChild.Parent is StackPanel)
+                {
+                    // Add button 
+                    ((StackPanel)(btGameSelectedActionBarChild.Parent)).Children.Add(btGameSelectedActionBar);
+                    ((StackPanel)(btGameSelectedActionBarChild.Parent)).UpdateLayout();
+
+#if DEBUG
+                    logger.Debug($"PluginCommon - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
+#endif
+                }
+
+                if (btGameSelectedActionBarChild.Parent is Grid)
+                {
+                    StackPanel spContener = (StackPanel)SearchElementByName("PART_spContener", true);
+
+                    // Add StackPanel contener
+                    if (((Grid)btGameSelectedActionBarChild.Parent).ColumnDefinitions.Count == 3)
+                    {
+                        var columnDefinitions = new ColumnDefinition();
+                        columnDefinitions.Width = GridLength.Auto;
+                        ((Grid)(btGameSelectedActionBarChild.Parent)).ColumnDefinitions.Add(columnDefinitions);
+
+                        spContener = new StackPanel();
+                        spContener.Name = "PART_spContener";
+                        spContener.Orientation = Orientation.Horizontal;
+                        spContener.SetValue(Grid.ColumnProperty, 3);
+
+                        btGameSelectedActionBarChild.Margin = new Thickness(10, 0, 0, 0);
+
+                        ((Grid)(btGameSelectedActionBarChild.Parent)).Children.Add(spContener);
+                        ((Grid)(btGameSelectedActionBarChild.Parent)).UpdateLayout();
+                    }
+
+                    // Add button 
+                    spContener.Children.Add(btGameSelectedActionBar);
+                    spContener.UpdateLayout();
+
+#if DEBUG
+                    logger.Debug($"PluginCommon - (Grid)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
+#endif
+                }
+
+                return;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon", $"Error in AddButtonInGameSelectedActionBarButtonOrToggleButton({btGameSelectedActionBar.Name})");
+                return;
+            }
+        }
+
+        public void RemoveButtonInGameSelectedActionBarButtonOrToggleButton(string btGameSelectedActionBarName)
+        {
+            try
+            {
+                // Not find element
+                if (btGameSelectedActionBarChild == null)
+                {
+                    logger.Error("PluginCommon - btGameSelectedActionBarChild [PART_ButtonMoreActions] not find");
+                    return;
+                }
+
+                FrameworkElement spContener = SearchElementByName("PART_spContener", btGameSelectedActionBarChild.Parent, true);
 
                 // Remove in parent if good type
                 if (btGameSelectedActionBarChild.Parent is StackPanel && btGameSelectedActionBarChild != null)
@@ -401,12 +402,12 @@ namespace PluginCommon
                     }
                 }
 
-                return true;
+                return;
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, "PluginCommon", $"Error in RemoveButtonInGameSelectedActionBarButtonOrToggleButton({btGameSelectedActionBarName})");
-                return false;
+                return;
             }
         }
         #endregion
@@ -414,181 +415,147 @@ namespace PluginCommon
 
         #region GameSelectedDescription
         private FrameworkElement elGameSelectedDescriptionContener = null;
-        private List<FrameworkElement> elGameSelectedDescriptionList = new List<FrameworkElement>();
 
-        public bool AddElementInGameSelectedDescription(FrameworkElement elGameSelectedDescription, bool isTop = false)
+        public void AddElementInGameSelectedDescription(FrameworkElement elGameSelectedDescription, bool isTop = false)
         {
             try
             {
-                // Add only if not exist
-                if (!SearchElementInsert(elGameSelectedDescriptionList, elGameSelectedDescription))
+                elGameSelectedDescriptionContener = SearchElementByName("PART_HtmlDescription", true);
+
+                // Not find element
+                if (elGameSelectedDescriptionContener == null)
                 {
-                    elGameSelectedDescriptionContener = SearchElementByName("PART_HtmlDescription");
-                    elGameSelectedDescriptionContener = (FrameworkElement)elGameSelectedDescriptionContener.Parent;
-
-                    // Not find element
-                    if (elGameSelectedDescriptionContener == null)
-                    {
-                        logger.Error("PluginCommon - elGameSelectedDescriptionContener [PART_ElemDescription] not find");
-                        return false;
-                    }
-
-                    // Add in parent if good type
-                    if (elGameSelectedDescriptionContener is StackPanel)
-                    {
-                        // Add FrameworkElement 
-                        if (isTop)
-                        {
-                            ((StackPanel)elGameSelectedDescriptionContener).Children.Insert(0, elGameSelectedDescription);
-                        }
-                        else
-                        {
-                            ((StackPanel)elGameSelectedDescriptionContener).Children.Add(elGameSelectedDescription);
-                        }
-                        ((StackPanel)elGameSelectedDescriptionContener).UpdateLayout();
-
-#if DEBUG
-                        logger.Debug($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
-#endif
-                    }
-
-                    if (elGameSelectedDescriptionContener is DockPanel)
-                    {
-                        elGameSelectedDescription.SetValue(DockPanel.DockProperty, Dock.Top);
-
-                        // Add FrameworkElement 
-                        if (isTop)
-                        {
-                            ((DockPanel)elGameSelectedDescriptionContener).Children.Insert(1, elGameSelectedDescription);
-                        }
-                        else
-                        {
-                            ((DockPanel)elGameSelectedDescriptionContener).Children.Add(elGameSelectedDescription);
-                        }
-                        ((DockPanel)elGameSelectedDescriptionContener).UpdateLayout();
-
-#if DEBUG
-                        logger.Debug($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
-#endif
-                    }
+                    logger.Error("PluginCommon - elGameSelectedDescriptionContener [PART_ElemDescription] not find");
+                    return;
                 }
-                else
+
+                elGameSelectedDescriptionContener = (FrameworkElement)elGameSelectedDescriptionContener.Parent;
+
+                // Not find element
+                if (elGameSelectedDescriptionContener == null)
                 {
+                    logger.Error("PluginCommon - elGameSelectedDescriptionContener.Parent [PART_ElemDescription] not find");
+                    return;
+                }
+
+                // Add in parent if good type
+                if (elGameSelectedDescriptionContener is StackPanel)
+                {
+                    // Add FrameworkElement 
+                    if (isTop)
+                    {
+                        ((StackPanel)elGameSelectedDescriptionContener).Children.Insert(0, elGameSelectedDescription);
+                    }
+                    else
+                    {
+                        ((StackPanel)elGameSelectedDescriptionContener).Children.Add(elGameSelectedDescription);
+                    }
+                    ((StackPanel)elGameSelectedDescriptionContener).UpdateLayout();
+
 #if DEBUG
-                    logger.Debug($"PluginCommon - elGameSelectedDescription [{elGameSelectedDescription.Name}] allready insert");
+                    logger.Debug($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
 #endif
                 }
 
-                elGameSelectedDescriptionList.Add(elGameSelectedDescription);
-                return true;
+                if (elGameSelectedDescriptionContener is DockPanel)
+                {
+                    elGameSelectedDescription.SetValue(DockPanel.DockProperty, Dock.Top);
+
+                    // Add FrameworkElement 
+                    if (isTop)
+                    {
+                        ((DockPanel)elGameSelectedDescriptionContener).Children.Insert(1, elGameSelectedDescription);
+                    }
+                    else
+                    {
+                        ((DockPanel)elGameSelectedDescriptionContener).Children.Add(elGameSelectedDescription);
+                    }
+                    ((DockPanel)elGameSelectedDescriptionContener).UpdateLayout();
+
+#if DEBUG
+                    logger.Debug($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
+#endif
+                }
+                return;
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, "PluginCommon", $"Error in AddElementInGameSelectedDescription({elGameSelectedDescription.Name})");
-                return false;
+                return;
             }
         }
 
-        public bool RemoveElementInGameSelectedDescription(string elGameSelectedDescriptionName)
+        public void RemoveElementInGameSelectedDescription(string elGameSelectedDescriptionName)
         {
             try
             {
-                // Remove only if not exist
-                if (SearchElementInsert(elGameSelectedDescriptionList, elGameSelectedDescriptionName))
+                // Not find element
+                if (elGameSelectedDescriptionContener == null)
                 {
-                    elGameSelectedDescriptionContener = SearchElementByName("PART_HtmlDescription");
-                    elGameSelectedDescriptionContener = (FrameworkElement)elGameSelectedDescriptionContener.Parent;
+                    logger.Error("PluginCommon - elGameSelectedDescriptionContener [PART_ElemDescription] not find");
+                    return;
+                }
 
-                    // Not find element
-                    if (elGameSelectedDescriptionContener == null)
+                // Remove in parent if good type
+                if (elGameSelectedDescriptionContener is StackPanel)
+                {
+                    StackPanel elGameSelectedParent = ((StackPanel)(elGameSelectedDescriptionContener));
+                    for (int i = 0; i < elGameSelectedParent.Children.Count; i++)
                     {
-                        logger.Error("PluginCommon - elGameSelectedDescriptionContener [PART_ElemDescription] not find");
-                        return false;
-                    }
-
-                    // Remove in parent if good type
-                    if (elGameSelectedDescriptionContener is StackPanel)
-                    {
-                        StackPanel elGameSelectedParent = ((StackPanel)(elGameSelectedDescriptionContener));
-                        for (int i = 0; i < elGameSelectedParent.Children.Count; i++)
+                        if (((FrameworkElement)elGameSelectedParent.Children[i]).Name == elGameSelectedDescriptionName)
                         {
-                            if (((FrameworkElement)elGameSelectedParent.Children[i]).Name == elGameSelectedDescriptionName)
-                            {
-                                elGameSelectedParent.Children.Remove(elGameSelectedParent.Children[i]);
-                                elGameSelectedParent.UpdateLayout();
+                            elGameSelectedParent.Children.Remove(elGameSelectedParent.Children[i]);
+                            elGameSelectedParent.UpdateLayout();
 
 #if DEBUG
-                                logger.Debug($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
+                            logger.Debug($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
 #endif
-
-                                foreach (FrameworkElement el in elGameSelectedDescriptionList)
-                                {
-                                    if (elGameSelectedDescriptionName == el.Name)
-                                    {
-                                        elGameSelectedDescriptionList.Remove(el);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (elGameSelectedDescriptionContener is DockPanel)
-                    {
-                        DockPanel elGameSelectedParent = ((DockPanel)(elGameSelectedDescriptionContener));
-                        for (int i = 0; i < elGameSelectedParent.Children.Count; i++)
-                        {
-                            if (((FrameworkElement)elGameSelectedParent.Children[i]).Name == elGameSelectedDescriptionName)
-                            {
-                                elGameSelectedParent.Children.Remove(elGameSelectedParent.Children[i]);
-                                elGameSelectedParent.UpdateLayout();
-
-#if DEBUG
-                                logger.Debug($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
-#endif
-
-                                foreach (FrameworkElement el in elGameSelectedDescriptionList)
-                                {
-                                    if (elGameSelectedDescriptionName == el.Name)
-                                    {
-                                        elGameSelectedDescriptionList.Remove(el);
-                                        break;
-                                    }
-                                }
-                            }
                         }
                     }
                 }
-                else
+
+                if (elGameSelectedDescriptionContener is DockPanel)
                 {
+                    DockPanel elGameSelectedParent = ((DockPanel)(elGameSelectedDescriptionContener));
+                    for (int i = 0; i < elGameSelectedParent.Children.Count; i++)
+                    {
+                        if (((FrameworkElement)elGameSelectedParent.Children[i]).Name == elGameSelectedDescriptionName)
+                        {
+                            elGameSelectedParent.Children.Remove(elGameSelectedParent.Children[i]);
+                            elGameSelectedParent.UpdateLayout();
+
 #if DEBUG
-                    logger.Debug($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] allready remove");
+                            logger.Debug($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
 #endif
+                        }
+                    }
                 }
 
-                return true;
+                return;
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, "PluginCommon", $"Error in RemoveElementInGameSelectedDescription({elGameSelectedDescriptionName})");
-                return false;
+                return;
             }
         }
         #endregion
 
 
         #region Custom theme
-        public bool AddElementInCustomTheme(FrameworkElement ElementInCustomTheme, string ElementParentInCustomThemeName)
+        private List<FrameworkElement> ListCustomElement = new List<FrameworkElement>();
+
+        public void AddElementInCustomTheme(FrameworkElement ElementInCustomTheme, string ElementParentInCustomThemeName)
         {
             try
             {
-                FrameworkElement ElementCustomTheme = SearchElementByName(ElementParentInCustomThemeName);
+                FrameworkElement ElementCustomTheme = SearchElementByName(ElementParentInCustomThemeName, true);
 
                 // Not find element
                 if (ElementCustomTheme == null)
                 {
                     logger.Error($"PluginCommon - ElementCustomTheme [{ElementParentInCustomThemeName}] not find");
-                    return false;
+                    return;
                 }
 
                 // Add in parent if good type
@@ -606,9 +573,9 @@ namespace PluginCommon
 
                     // Add FrameworkElement 
                     ((StackPanel)ElementCustomTheme).Children.Add(ElementInCustomTheme);
-                    ((StackPanel)ElementCustomTheme).Visibility = Visibility.Visible;
                     ((StackPanel)ElementCustomTheme).UpdateLayout();
 
+                    ListCustomElement.Add(ElementCustomTheme);
 #if DEBUG
                     logger.Debug($"PluginCommon - ElementCustomTheme [{ElementCustomTheme.Name}] insert");
 #endif
@@ -616,65 +583,68 @@ namespace PluginCommon
                 else
                 {
                     logger.Error($"PluginCommon - ElementCustomTheme is not a StackPanel element");
-                    return false;
+                    return;
                 }
 
-                return true;
+                return;
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, "PluginCommon", $"Error in AddElementInCustomTheme({ElementParentInCustomThemeName})");
-                return false;
+                return;
             }
         }
 
-        public bool ClearElementInCustomTheme(string ElementParentInCustomThemeName)
+        public void ClearElementInCustomTheme(string ElementParentInCustomThemeName)
         {
             try
             {
-                FrameworkElement ElementCustomTheme = SearchElementByName(ElementParentInCustomThemeName);
-
-                // Not find element
-                if (ElementCustomTheme == null)
+                foreach (FrameworkElement ElementCustomTheme in ListCustomElement)
                 {
-                    logger.Error($"PluginCommon - ElementCustomTheme [{ElementParentInCustomThemeName}] not find");
-                    return false;
-                }
+                    // Not find element
+                    if (ElementCustomTheme == null)
+                    {
+                        logger.Error($"PluginCommon - ElementCustomTheme [{ElementParentInCustomThemeName}] not find");
+                    }
 
-                // Add in parent if good type
-                if (ElementCustomTheme is StackPanel)
-                {
-                    // Clear FrameworkElement 
-                    ((StackPanel)ElementCustomTheme).Children.Clear();
-                    ((StackPanel)ElementCustomTheme).Visibility = Visibility.Collapsed;
-                    ((StackPanel)ElementCustomTheme).UpdateLayout();
+                    // Add in parent if good type
+                    if (ElementCustomTheme is StackPanel)
+                    {
+                        // Clear FrameworkElement 
+                        ((StackPanel)ElementCustomTheme).Children.Clear();
+                        ((StackPanel)ElementCustomTheme).UpdateLayout();
 
 #if DEBUG
-                    logger.Debug($"PluginCommon - ElementCustomTheme [{ElementCustomTheme.Name}] clear");
+                        logger.Debug($"PluginCommon - ElementCustomTheme [{ElementCustomTheme.Name}] clear");
 #endif
+                    }
+                    else
+                    {
+                        logger.Error($"PluginCommon - ElementCustomTheme is not a StackPanel element");
+                    }
                 }
-                else
-                {
-                    logger.Error($"PluginCommon - ElementCustomTheme is not a StackPanel element");
-                    return false;
-                }
-                
-                return true;
+
+                ListCustomElement = new List<FrameworkElement>();
+                return;
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, "PluginCommon", $"Error in ClearElementInCustomTheme({ElementParentInCustomThemeName})");
-                return false;
+                ListCustomElement = new List<FrameworkElement>();
+                return;
             }
         }
         #endregion
 
 
-        public static FrameworkElement SearchElementByName(string ElementName)
+        public static FrameworkElement SearchElementByName(string ElementName, bool MustVisible = false)
         {
             FrameworkElement ElementFind = null;
 
-            ElementFind = (FrameworkElement)LogicalTreeHelper.FindLogicalNode(Application.Current.MainWindow, ElementName);
+            if (!MustVisible)
+            {
+                ElementFind = (FrameworkElement)LogicalTreeHelper.FindLogicalNode(Application.Current.MainWindow, ElementName);
+            }
 
             if (ElementFind == null)
             {
@@ -682,8 +652,16 @@ namespace PluginCommon
                 {
                     if (el.Name == ElementName)
                     {
-                        ElementFind = el;
-                        break;
+                        if (!MustVisible)
+                        {
+                            ElementFind = el;
+                            break;
+                        }
+                        else if (el.IsVisible)
+                        {
+                            ElementFind = el;
+                            break;
+                        }
                     }
                 }
             }
@@ -691,11 +669,14 @@ namespace PluginCommon
             return ElementFind;
         }
 
-        public static FrameworkElement SearchElementByName(string ElementName, DependencyObject dpObj)
+        public static FrameworkElement SearchElementByName(string ElementName, DependencyObject dpObj, bool MustVisible = false)
         {
             FrameworkElement ElementFind = null;
 
-            ElementFind = (FrameworkElement)LogicalTreeHelper.FindLogicalNode(dpObj, ElementName);
+            if (!MustVisible)
+            {
+                ElementFind = (FrameworkElement)LogicalTreeHelper.FindLogicalNode(dpObj, ElementName);
+            }
 
             if (ElementFind == null)
             {
@@ -703,8 +684,16 @@ namespace PluginCommon
                 {
                     if (el.Name == ElementName)
                     {
-                        ElementFind = el;
-                        break;
+                        if (!MustVisible)
+                        {
+                            ElementFind = el;
+                            break;
+                        }
+                        else if (el.IsVisible)
+                        {
+                            ElementFind = el;
+                            break;
+                        }
                     }
                 }
             }
