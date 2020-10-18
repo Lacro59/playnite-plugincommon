@@ -48,7 +48,7 @@ namespace PluginCommon
 
         public abstract void Initial();
         public abstract void AddElements();
-        public abstract void RefreshElements(Game GameSelected);
+        public abstract void RefreshElements(Game GameSelected, bool force = false);
         public void RemoveElements()
         {
             RemoveBtActionBar();
