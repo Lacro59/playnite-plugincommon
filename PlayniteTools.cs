@@ -121,5 +121,33 @@ namespace PluginCommon
 
             return SourceName;
         }
+
+
+        public static void SetThemeInformation(IPlayniteAPI PlayniteApi)
+        {
+            string defaultThemeName = "Default";
+            ThemeManifest defaultTheme = new ThemeManifest()
+            {
+                DirectoryName = defaultThemeName,
+                DirectoryPath = Path.Combine(PlaynitePaths.ThemesProgramPath, ThemeManager.GetThemeRootDir(ApplicationMode.Desktop), defaultThemeName),
+                Name = defaultThemeName
+            };
+            ThemeManager.SetDefaultTheme(defaultTheme);
+
+            ThemeManifest customTheme = null;
+            var theme = PlayniteApi.ApplicationSettings.DesktopTheme;
+            if (theme != ThemeManager.DefaultTheme.Name)
+            {
+                customTheme = ThemeManager.GetAvailableThemes(ApplicationMode.Desktop).SingleOrDefault(a => a.DirectoryName == theme);
+                if (customTheme == null)
+                {
+                    ThemeManager.SetCurrentTheme(defaultTheme);
+                }
+                else
+                {
+                    ThemeManager.SetCurrentTheme(customTheme);
+                }
+            }
+        }
     }
 }
