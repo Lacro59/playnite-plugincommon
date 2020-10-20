@@ -55,6 +55,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -95,6 +96,10 @@
     <Compile Include="LiveChartsCommon\CustomerForTime.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="OriginApi.cs" />
+    <Compile Include="PlayniteResources\Common\Extensions\ProcessExtensions.cs" />
+    <Compile Include="PlayniteResources\Extensions\IProvideValueTarget.cs" />
+    <Compile Include="PlayniteResources\Extensions\Markup\ThemeFile.cs" />
+    <Compile Include="PlayniteResources\Themes.cs" />
     <Compile Include="PlayniteTools.cs" />
     <Compile Include="PlayniteResources\API\ScriptFunctionDescription.cs" />
     <Compile Include="PlayniteResources\Behaviors\LeftClickContextMenuBehavior.cs" />
