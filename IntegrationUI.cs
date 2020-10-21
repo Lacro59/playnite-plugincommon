@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using Playnite.SDK;
@@ -109,38 +110,83 @@ namespace PluginCommon
         {
             if (PART_BtActionBar != null)
             {
-                FrameworkElement BtActionBarParent = (FrameworkElement)PART_BtActionBar.Parent;
-#if DEBUG
-                logger.Debug($"PluginCommon - BtActionBarParent: {BtActionBarParent.ToString()} - {BtActionBarParent.IsVisible}");
-#endif
-                if (!BtActionBarParent.IsVisible)
+                try
                 {
-                    RemoveBtActionBar();
+                    FrameworkElement BtActionBarParent = (FrameworkElement)PART_BtActionBar.Parent;
+
+                    if (BtActionBarParent != null)
+                    {
+#if DEBUG
+                        logger.Debug($"PluginCommon - BtActionBarParent: {BtActionBarParent.ToString()} - {BtActionBarParent.IsVisible}");
+#endif
+                        if (!BtActionBarParent.IsVisible)
+                        {
+                            RemoveBtActionBar();
+                        }
+                    }
+                    else
+                    {
+                        logger.Warn("PluginCommon - BtActionBarParent is null");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, "PluginCommon", $"Error in BtActionBar.CheckTypeView({PART_BtActionBar.Name})");
                 }
             }
 
             if (PART_SpDescription != null)
             {
-                FrameworkElement SpDescriptionParent = (FrameworkElement)PART_SpDescription.Parent;
-#if DEBUG
-                logger.Debug($"PluginCommon - SpDescriptionParent: {SpDescriptionParent.ToString()} - {SpDescriptionParent.IsVisible}");
-#endif
-                if (!SpDescriptionParent.IsVisible)
+                try
                 {
-                    RemoveSpDescription();
+                    FrameworkElement SpDescriptionParent = (FrameworkElement)PART_SpDescription.Parent;
+
+                    if (SpDescriptionParent != null)
+                    {
+#if DEBUG
+                        logger.Debug($"PluginCommon - SpDescriptionParent: {SpDescriptionParent.ToString()} - {SpDescriptionParent.IsVisible}");
+#endif
+                        if (!SpDescriptionParent.IsVisible)
+                        {
+                            RemoveSpDescription();
+                        }
+                    }
+                    else
+                    {
+                        logger.Warn("PluginCommon - SpDescriptionParent is null");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, "PluginCommon", $"Error in SpDescription.CheckTypeView({PART_SpDescription.Name})");
                 }
             }
 
             foreach (CustomElement customElement in ListCustomElements)
             {
-                FrameworkElement customElementParent = (FrameworkElement)customElement.Element.Parent;
-#if DEBUG
-                logger.Debug($"PluginCommon - SpDescriptionParent: {customElementParent.ToString()} - {customElementParent.IsVisible}");
-#endif
-                if (!customElementParent.IsVisible)
+                try
                 {
-                    RemoveCustomElements();
-                    break;
+                    FrameworkElement customElementParent = (FrameworkElement)customElement.Element.Parent;
+
+                    if (customElementParent != null)
+                    {
+#if DEBUG
+                        logger.Debug($"PluginCommon - SpDescriptionParent: {customElementParent.ToString()} - {customElementParent.IsVisible}");
+#endif
+                        if (!customElementParent.IsVisible)
+                        {
+                            RemoveCustomElements();
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        logger.Warn($"PluginCommon - customElementParent is null for {customElement.Element.Name}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, "PluginCommon", $"Error in customElement.CheckTypeView({customElement.Element.Name})");
                 }
             }
         }
@@ -186,6 +232,87 @@ namespace PluginCommon
             windowExtension.PreviewKeyDown += new KeyEventHandler(HandleEsc);
 
             return windowExtension;
+        }
+
+
+        private StackPanel PART_ElemDescription = null;
+        public void OnBtActionBarToggleButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (PART_ElemDescription == null)
+            {
+                foreach (StackPanel sp in Tools.FindVisualChildren<StackPanel>(Application.Current.MainWindow))
+                {
+                    if (sp.Name == "PART_ElemDescription")
+                    {
+                        PART_ElemDescription = sp;
+                        break;
+                    }
+                }
+            }
+
+            if (PART_ElemDescription != null)
+            {
+                if ((bool)((ToggleButton)sender).IsChecked)
+                {
+                    for (int i = 0; i < PART_ElemDescription.Children.Count; i++)
+                    {
+                        if (((FrameworkElement)PART_ElemDescription.Children[i]).Name == "PART_GaDescriptionIntegration" && ((ToggleButton)sender).Name == "PART_GaButton")
+                        {
+                            ((FrameworkElement)PART_ElemDescription.Children[i]).Visibility = Visibility.Visible;
+
+                            // Uncheck other integratio ToggleButton
+                            foreach (ToggleButton sp in Tools.FindVisualChildren<ToggleButton>(Application.Current.MainWindow))
+                            {
+                                if (sp.Name == "PART_ScButton")
+                                {
+                                    sp.IsChecked = false;
+                                    break;
+                                }
+                            }
+                        }
+                        else if (((FrameworkElement)PART_ElemDescription.Children[i]).Name == "PART_ScDescriptionIntegration" && ((ToggleButton)sender).Name == "PART_ScButton")
+                        {
+                            ((FrameworkElement)PART_ElemDescription.Children[i]).Visibility = Visibility.Visible;
+
+                            // Uncheck other integration ToggleButton
+                            foreach (ToggleButton sp in Tools.FindVisualChildren<ToggleButton>(Application.Current.MainWindow))
+                            {
+                                if (sp.Name == "PART_GaButton")
+                                {
+                                    sp.IsChecked = false;
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            ((FrameworkElement)PART_ElemDescription.Children[i]).Visibility = Visibility.Collapsed;
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < PART_ElemDescription.Children.Count; i++)
+                    {
+                        if (((FrameworkElement)PART_ElemDescription.Children[i]).Name == "PART_GaDescriptionIntegration" && ((ToggleButton)sender).Name == "PART_GaButton")
+                        {
+                            ((FrameworkElement)PART_ElemDescription.Children[i]).Visibility = Visibility.Collapsed;
+                        }
+                        else if (((FrameworkElement)PART_ElemDescription.Children[i]).Name == "PART_ScDescriptionIntegration" && ((ToggleButton)sender).Name == "PART_ScButton")
+                        {
+                            ((FrameworkElement)PART_ElemDescription.Children[i]).Visibility = Visibility.Collapsed;
+                        }
+                        else
+                        {
+                            ((FrameworkElement)PART_ElemDescription.Children[i]).Visibility = Visibility.Visible;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                logger.Error("PluginCommon - PART_ElemDescription not found");
+            }
         }
     }
 
@@ -456,6 +583,7 @@ namespace PluginCommon
 #if DEBUG
                     logger.Debug($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
 #endif
+                    return;
                 }
 
                 if (elGameSelectedDescriptionContener is DockPanel)
@@ -476,8 +604,10 @@ namespace PluginCommon
 #if DEBUG
                     logger.Debug($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
 #endif
+                    return;
                 }
-                return;
+
+                logger.Warn($"PluginCommon - elGameSelectedDescriptionContener is {elGameSelectedDescriptionContener.ToString()}");
             }
             catch (Exception ex)
             {
@@ -550,7 +680,7 @@ namespace PluginCommon
         {
             try
             {
-                FrameworkElement ElementCustomTheme = SearchElementByName(ElementParentInCustomThemeName, true);
+                FrameworkElement ElementCustomTheme = SearchElementByName(ElementParentInCustomThemeName, false, true);
 
                 // Not find element
                 if (ElementCustomTheme == null)
@@ -625,7 +755,7 @@ namespace PluginCommon
                     }
                 }
 
-                ListCustomElement = new List<FrameworkElement>();
+                 ListCustomElement = new List<FrameworkElement>();
                 return;
             }
             catch (Exception ex)
@@ -638,7 +768,7 @@ namespace PluginCommon
         #endregion
 
 
-        public static FrameworkElement SearchElementByName(string ElementName, bool MustVisible = false)
+        public static FrameworkElement SearchElementByName(string ElementName, bool MustVisible = false, bool ParentMustVisible = false)
         {
             FrameworkElement ElementFind = null;
 
@@ -655,8 +785,16 @@ namespace PluginCommon
                     {
                         if (!MustVisible)
                         {
-                            ElementFind = el;
-                            break;
+                            if (!ParentMustVisible)
+                            {
+                                ElementFind = el;
+                                break;
+                            }
+                            else if (((FrameworkElement)((FrameworkElement)((FrameworkElement)el.Parent).Parent).Parent).IsVisible)
+                            {
+                                ElementFind = el;
+                                break;
+                            }
                         }
                         else if (el.IsVisible)
                         {
@@ -670,7 +808,7 @@ namespace PluginCommon
             return ElementFind;
         }
 
-        public static FrameworkElement SearchElementByName(string ElementName, DependencyObject dpObj, bool MustVisible = false)
+        public static FrameworkElement SearchElementByName(string ElementName, DependencyObject dpObj, bool MustVisible = false, bool ParentMustVisible = false)
         {
             FrameworkElement ElementFind = null;
 
@@ -687,8 +825,16 @@ namespace PluginCommon
                     {
                         if (!MustVisible)
                         {
-                            ElementFind = el;
-                            break;
+                            if (!ParentMustVisible)
+                            {
+                                ElementFind = el;
+                                break;
+                            }
+                            else if (((FrameworkElement)((FrameworkElement)((FrameworkElement)el.Parent).Parent).Parent).IsVisible)
+                            {
+                                ElementFind = el;
+                                break;
+                            }
                         }
                         else if (el.IsVisible)
                         {
