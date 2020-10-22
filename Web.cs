@@ -105,7 +105,24 @@ namespace PluginCommon
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.UserAgent.TryParseAdd(StrWebUserAgentType(UserAgentType));
-                return await client.GetStringAsync(url).ConfigureAwait(false);
+
+                var request = new HttpRequestMessage()
+                {
+                    RequestUri = new Uri(url),
+                    Method = HttpMethod.Get
+                };
+
+                HttpResponseMessage response = client.SendAsync(request).Result;
+                int statusCode = (int)response.StatusCode;
+
+                if (statusCode == 403)
+                {
+                    return string.Empty;
+                }
+                else
+                {
+                    return await response.Content.ReadAsStringAsync();
+                }
             }
         }
 
