@@ -18,11 +18,49 @@ namespace PluginCommon
             if (!DefaultLoad)
             {
                 SetPluginLanguage(pluginFolder, "LocSource", true);
+                SetPluginLanguage(pluginFolder + "\\Common", "LocSource", true);
             }
 
 
             var dictionaries = Application.Current.Resources.MergedDictionaries;
             var langFile = Path.Combine(pluginFolder, "localization\\" + language + ".xaml");
+            var langFileCommon = Path.Combine(pluginFolder, "localization\\Common\\" + language + ".xaml");
+
+
+            // Load localization common
+            if (File.Exists(langFileCommon))
+            {
+#if DEBUG
+                logger.Debug($"PluginCommon - Parse plugin localization file {langFileCommon}.");
+#endif
+
+                ResourceDictionary res = null;
+                try
+                {
+                    res = Xaml.FromFile<ResourceDictionary>(langFileCommon);
+                    res.Source = new Uri(langFileCommon, UriKind.Absolute);
+
+                    foreach (var key in res.Keys)
+                    {
+                        if (res[key] is string locString && locString.IsNullOrEmpty())
+                        {
+                            res.Remove(key);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, $"PluginCommon - Failed to parse localization file {langFileCommon}.");
+                    return;
+                }
+
+                dictionaries.Add(res);
+            }
+            else
+            {
+                logger.Warn($"PluginCommon - File {langFileCommon} not found.");
+            }
+
 
             // Load localization
             if (File.Exists(langFile))
