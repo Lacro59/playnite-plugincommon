@@ -25,6 +25,7 @@
 
     <!-- CommonMenus -->
 
+    <sys:String x:Key="LOCCommonRefreshGameData">Refresh data</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">Delete data</sys:String>
     
     <sys:String x:Key="LOCCommonAddAllTags">Add tag for all games in database</sys:String>
@@ -34,7 +35,7 @@
 
     <!-- CommonGlobalProgress -->
 
-    <sys:String x:Key="LOCCommonGettingAllDatas">Getting data for all games in database</sys:String>
+    <sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games in database</sys:String>
     <sys:String x:Key="LOCCommonAddingAllTag">Adding tag for all games in database</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Removing tag for all games in database</sys:String>
 
