@@ -18,7 +18,6 @@ namespace PluginCommon
             if (!DefaultLoad)
             {
                 SetPluginLanguage(pluginFolder, "LocSource", true);
-                SetPluginLanguage(pluginFolder + "\\Common", "LocSource", true);
             }
 
 
