@@ -29,8 +29,8 @@
     <sys:String x:Key="LOCCommonDeleteGameData">Delete data</sys:String>
     
     <sys:String x:Key="LOCCommonAddAllTags">Add tag for all games in database</sys:String>
-    <sys:String x:Key="LOCCommonGetAllDatas">Get data for all games in database</sys:String>
-    <sys:String x:Key="LOCCommonClearAllDatas">Clear data for all games in database</sys:String>
+    <sys:String x:Key="LOCCommonGetAllDatas">Download data for all games in database</sys:String>
+    <sys:String x:Key="LOCCommonClearAllDatas">Delete data for all games in database</sys:String>
     <sys:String x:Key="LOCCommonRemoveAllTags">Remove tag for all games in database</sys:String>
 
     <!-- CommonGlobalProgress -->
