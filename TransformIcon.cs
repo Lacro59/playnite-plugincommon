@@ -68,6 +68,9 @@
                 case "origin":
                     stringReturn = origin;
                     break;
+                case "microsoft store":
+                    stringReturn = xbox;
+                    break;
                 case "xbox":
                     stringReturn = xbox;
                     break;
