@@ -128,9 +128,6 @@
     <Compile Include="TaskHelper.cs" />
     <Compile Include="Tools.cs" />
     <Compile Include="TransformIcon.cs" />
-    <Compile Include="WarningsDialogs.xaml.cs">
-      <DependentUpon>WarningsDialogs.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Web.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -302,10 +299,6 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <Page Include="WarningsDialogs.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\LiveChartsCommon\Common.xaml">
