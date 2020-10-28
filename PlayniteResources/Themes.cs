@@ -36,7 +36,7 @@ namespace PluginCommon.PlayniteResources
 
         public ThemeManifest(string manifestPath)
         {
-            var thm = Serialization.FromYaml<ThemeManifest>(File.ReadAllText(manifestPath));
+            var thm = Playnite.SDK.Data.Serialization.FromYaml<ThemeManifest>(File.ReadAllText(manifestPath));
             thm.CopyProperties(this, false);
             DescriptionPath = manifestPath;
             DirectoryPath = Path.GetDirectoryName(manifestPath);
