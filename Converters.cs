@@ -1,6 +1,7 @@
 ﻿using Playnite.SDK;
 using System;
 using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -115,6 +116,40 @@ namespace PluginCommon
             if (value != null && (DateTime)value != default(DateTime))
             {
                 return ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern);
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    public class LocalDateYMConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value != null && (DateTime)value != default(DateTime))
+            {
+                string tmpDate = ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern);
+                string tmpDay = string.Empty;
+                string tmpDateShort = string.Empty;
+
+                tmpDay = ((DateTime)value).ToString("d");
+                Regex rgx = new Regex(@"[/\.\- ]" + tmpDay  + "|" + tmpDay + @"[/\.\- ]");
+                tmpDateShort = rgx.Replace(tmpDate, string.Empty, 1);
+
+                if (tmpDateShort.Length == tmpDate.Length)
+                {
+                    tmpDay = ((DateTime)value).ToString("dd");
+                    rgx = new Regex(@"[/\.\- ]" + tmpDay + "|" + tmpDay + @"[/\.\- ]");
+                    tmpDateShort = rgx.Replace(tmpDate, string.Empty, 1);
+                }
+
+                return tmpDateShort;
             }
             else
             {
