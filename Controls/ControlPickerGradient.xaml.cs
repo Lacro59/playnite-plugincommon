@@ -32,6 +32,7 @@ namespace PluginCommon.Controls
         private double Offset2 = 1;
 
         public bool IsSimpleColor = false;
+        public bool OnlySimpleColor = false;
 
         public Color SimpleColor;
         public LinearGradientBrush linearGradientBrush = new LinearGradientBrush();
@@ -85,8 +86,8 @@ namespace PluginCommon.Controls
             Offset2 = linearGradient.GradientStops[1].Offset;
 
 #if DEBUG
-            logger.Debug($"ThemeModifier - Offset1: {Offset1} - Offset2: {Offset2}");
-            logger.Debug($"ThemeModifier - StartPoint: {JsonConvert.SerializeObject(StartPoint)} - EndPoint: {JsonConvert.SerializeObject(EndPoint)}");
+            logger.Debug($"ControlPicker - Offset1: {Offset1} - Offset2: {Offset2}");
+            logger.Debug($"ControlPicker - StartPoint: {JsonConvert.SerializeObject(StartPoint)} - EndPoint: {JsonConvert.SerializeObject(EndPoint)}");
 #endif
 
             StartPoint = linearGradient.StartPoint;
@@ -163,7 +164,6 @@ namespace PluginCommon.Controls
                 Canvas.SetLeft(PART_GradientDetailsLinearBottomThumb, PART_GradientDetailsLinearGrid.RenderSize.Width - PART_GradientDetailsLinearBottomThumb.Width / 2);
             if (Canvas.GetTop(PART_GradientDetailsLinearBottomThumb) > PART_GradientDetailsLinearGrid.RenderSize.Height - PART_GradientDetailsLinearBottomThumb.Height / 2)
                 Canvas.SetTop(PART_GradientDetailsLinearBottomThumb, PART_GradientDetailsLinearGrid.RenderSize.Height - PART_GradientDetailsLinearBottomThumb.Height / 2);
-
         }
 
 
@@ -359,6 +359,15 @@ namespace PluginCommon.Controls
         private void PART_ColorPickerGradient_Loaded(object sender, RoutedEventArgs e)
         {
             SetCursor();
+        }
+
+        private void PART_AkrColorPicker_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            PART_GradientSelector.Visibility = Visibility.Visible;
+            if (OnlySimpleColor)
+            {
+                PART_GradientSelector.Visibility = Visibility.Hidden;
+            }
         }
     }
 }

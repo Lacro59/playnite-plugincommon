@@ -9,9 +9,9 @@
 
     <DockPanel>
         <controls:ColorPicker Name="PART_AkrColorPicker" DockPanel.Dock="Left" Background="Transparent" Margin="0,0,20,0"
-                              SelectedColorChanged="PART_AkrColorPicker_SelectedColorChanged" />
+                              SelectedColorChanged="PART_AkrColorPicker_SelectedColorChanged" IsVisibleChanged="PART_AkrColorPicker_IsVisibleChanged" />
 
-        <Grid DockPanel.Dock="Right">
+        <Grid DockPanel.Dock="Right" Name="PART_GradientSelector">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="auto" />
