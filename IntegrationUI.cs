@@ -552,7 +552,7 @@ namespace PluginCommon
                 // Not find element
                 if (elGameSelectedDescriptionContener == null)
                 {
-                    logger.Error("PluginCommon - elGameSelectedDescriptionContener [PART_ElemDescription] not find");
+                    logger.Warn("PluginCommon - elGameSelectedDescriptionContener [PART_ElemDescription] not find");
                     return;
                 }
 
@@ -561,7 +561,7 @@ namespace PluginCommon
                 // Not find element
                 if (elGameSelectedDescriptionContener == null)
                 {
-                    logger.Error("PluginCommon - elGameSelectedDescriptionContener.Parent [PART_ElemDescription] not find");
+                    logger.Warn("PluginCommon - elGameSelectedDescriptionContener.Parent [PART_ElemDescription] not find");
                     return;
                 }
 
@@ -769,52 +769,12 @@ namespace PluginCommon
 
         public static FrameworkElement SearchElementByName(string ElementName, bool MustVisible = false, bool ParentMustVisible = false)
         {
-            FrameworkElement ElementFind = null;
-
-            if (!MustVisible)
-            {
-                ElementFind = (FrameworkElement)LogicalTreeHelper.FindLogicalNode(Application.Current.MainWindow, ElementName);
-            }
-
-            if (ElementFind == null)
-            {
-                foreach (FrameworkElement el in Tools.FindVisualChildren<FrameworkElement>(Application.Current.MainWindow))
-                {
-                    if (el.Name == ElementName)
-                    {
-                        if (!MustVisible)
-                        {
-                            if (!ParentMustVisible)
-                            {
-                                ElementFind = el;
-                                break;
-                            }
-                            else if (((FrameworkElement)((FrameworkElement)((FrameworkElement)el.Parent).Parent).Parent).IsVisible)
-                            {
-                                ElementFind = el;
-                                break;
-                            }
-                        }
-                        else if (el.IsVisible)
-                        {
-                            ElementFind = el;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            return ElementFind;
+            return SearchElementByName(ElementName, Application.Current.MainWindow, MustVisible, ParentMustVisible);
         }
 
         public static FrameworkElement SearchElementByName(string ElementName, DependencyObject dpObj, bool MustVisible = false, bool ParentMustVisible = false)
         {
             FrameworkElement ElementFind = null;
-
-            if (!MustVisible)
-            {
-                ElementFind = (FrameworkElement)LogicalTreeHelper.FindLogicalNode(dpObj, ElementName);
-            }
 
             if (ElementFind == null)
             {
@@ -829,7 +789,7 @@ namespace PluginCommon
                                 ElementFind = el;
                                 break;
                             }
-                            else if (((FrameworkElement)((FrameworkElement)((FrameworkElement)el.Parent).Parent).Parent).IsVisible)
+                            else if (((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)el.Parent).Parent).Parent).Parent).Parent).IsVisible)
                             {
                                 ElementFind = el;
                                 break;
@@ -837,8 +797,16 @@ namespace PluginCommon
                         }
                         else if (el.IsVisible)
                         {
-                            ElementFind = el;
-                            break;
+                            if (!ParentMustVisible)
+                            {
+                                ElementFind = el;
+                                break;
+                            }
+                            else if (((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)el.Parent).Parent).Parent).Parent).Parent).IsVisible)
+                            {
+                                ElementFind = el;
+                                break;
+                            }
                         }
                     }
                 }
