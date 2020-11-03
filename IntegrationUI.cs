@@ -234,9 +234,51 @@ namespace PluginCommon
         }
 
 
+        public static void ResetToggle()
+        {
+#if DEBUG
+            logger.Debug("PluginCommon - ResetToggle()");
+#endif
+            try
+            {
+                FrameworkElement PART_GaButton = IntegrationUI.SearchElementByName("PART_GaButton", true);
+                if (PART_GaButton != null)
+                {
+#if DEBUG
+                    logger.Debug("PluginCommon - Reset PART_GaButton");
+#endif
+                    ((ToggleButton)PART_GaButton).IsChecked = false;
+                    ((ToggleButton)PART_GaButton).RaiseEvent(new RoutedEventArgs(ToggleButton.ClickEvent));
+                    return;
+                }
+
+                FrameworkElement PART_ScButton = IntegrationUI.SearchElementByName("PART_ScButton");
+                if (PART_ScButton != null && PART_ScButton is ToggleButton && (bool)((ToggleButton)PART_ScButton).IsChecked)
+                {
+#if DEBUG
+                    logger.Debug("PluginCommon - Reset PART_ScButton");
+#endif
+                    ((ToggleButton)PART_ScButton).IsChecked = false;
+                    ((ToggleButton)PART_ScButton).RaiseEvent(new RoutedEventArgs(ToggleButton.ClickEvent));
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon", "Error on ResetToggle()");
+            }
+#if DEBUG
+            logger.Debug("PluginCommon - No ResetToggle()");
+#endif
+        }
+
+
         private StackPanel PART_ElemDescription = null;
         public void OnBtActionBarToggleButtonClick(object sender, RoutedEventArgs e)
         {
+#if DEBUG
+            logger.Debug($"PluginCommon - OnBtActionBarToggleButtonClick()");
+#endif
             if (PART_ElemDescription == null)
             {
                 foreach (StackPanel sp in Tools.FindVisualChildren<StackPanel>(Application.Current.MainWindow))

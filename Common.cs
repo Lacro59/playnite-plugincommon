@@ -97,7 +97,7 @@ namespace PluginCommon
                 }
             }
 
-            logger.Error(ex, $"{PluginName} [{FileName} {LineNumber}] - {Message}");
+            logger.Error(ex, $"{PluginName} [{FileName} {LineNumber}] - {Message}\r\n");
         }
     }
 }
