@@ -229,7 +229,17 @@ namespace PluginCommon
             windowExtension.Owner = PlayniteApi.Dialogs.GetCurrentAppWindow();
             windowExtension.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             windowExtension.Content = ViewExtension;
-            windowExtension.SizeToContent = SizeToContent.WidthAndHeight;
+
+            if (!double.IsNaN(ViewExtension.Height) && !double.IsNaN(ViewExtension.Width))
+            {
+                windowExtension.Height = ViewExtension.Height + 25;
+                windowExtension.Width = ViewExtension.Width;
+            }
+            else
+            {
+                windowExtension.SizeToContent = SizeToContent.WidthAndHeight;
+            }
+
             windowExtension.PreviewKeyDown += new KeyEventHandler(HandleEsc);
 
             return windowExtension;

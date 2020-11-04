@@ -64,7 +64,9 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
+#if DEBUG
                 Common.LogError(ex, "PluginCommon", "Error on Check()");
+#endif
             }
         }
     }
