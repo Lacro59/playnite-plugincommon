@@ -165,9 +165,9 @@ namespace PluginCommon
                 }
             }
 
-            settings.HttpWebRequest.UseUnsafeHeaderParsing = defaultValue;
-            config.Save(ConfigurationSaveMode.Modified);
-            ConfigurationManager.RefreshSection("system.net/settings");
+            //settings.HttpWebRequest.UseUnsafeHeaderParsing = defaultValue;
+            //config.Save(ConfigurationSaveMode.Modified);
+            //ConfigurationManager.RefreshSection("system.net/settings");
 
             return response;
         }
