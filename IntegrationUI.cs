@@ -198,7 +198,7 @@ namespace PluginCommon
 #if DEBUG
             logger.Debug($"PluginCommon - {sender.ToString()}");
 #endif
-            e.Handled = true;
+            //e.Handled = true;
             if (e.Key == Key.Escape)
             {
                 if (sender is Window)
@@ -222,6 +222,7 @@ namespace PluginCommon
                 ShowMaximizeButton = false,
                 ShowCloseButton = true
             });
+
             windowExtension.Title = Title;
             windowExtension.ShowInTaskbar = false;
             windowExtension.ResizeMode = ResizeMode.NoResize;

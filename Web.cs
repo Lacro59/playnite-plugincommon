@@ -1,11 +1,14 @@
 ﻿using Playnite.SDK;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Configuration;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace PluginCommon
@@ -45,7 +48,7 @@ namespace PluginCommon
 
                 client.Dispose();
             }
-            
+
             // Delete id file is empty
             try
             {
@@ -65,7 +68,6 @@ namespace PluginCommon
 
             return true;
         }
-
 
 
         public static async Task<string> DownloadStringData(string url)
@@ -138,6 +140,36 @@ namespace PluginCommon
             {
                 return await client.GetStringAsync(url).ConfigureAwait(false);
             }
+        }
+
+
+        public static async Task<string> PostStringDataPayload(string url, string payload)
+        {
+            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            var settings = (SettingsSection)config.GetSection("system.net/settings");
+            var defaultValue = settings.HttpWebRequest.UseUnsafeHeaderParsing;
+            settings.HttpWebRequest.UseUnsafeHeaderParsing = true;
+            config.Save(ConfigurationSaveMode.Modified);
+            ConfigurationManager.RefreshSection("system.net/settings");
+
+            var response = string.Empty;
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("accept", "application/json, text/javascript, */*; q=0.01");
+                client.DefaultRequestHeaders.Add("Vary", "Accept-Encoding");
+                HttpContent c = new StringContent(payload, Encoding.UTF8, "application/json");
+                HttpResponseMessage result = await client.PostAsync(url, c);
+                if (result.IsSuccessStatusCode)
+                {
+                    response = await result.Content.ReadAsStringAsync();
+                }
+            }
+
+            settings.HttpWebRequest.UseUnsafeHeaderParsing = defaultValue;
+            config.Save(ConfigurationSaveMode.Modified);
+            ConfigurationManager.RefreshSection("system.net/settings");
+
+            return response;
         }
     }
 }
