@@ -102,6 +102,7 @@
     <Compile Include="PlayniteResources\Common\Serialization.cs" />
     <Compile Include="PlayniteResources\Extensions\IProvideValueTarget.cs" />
     <Compile Include="PlayniteResources\Extensions\Markup\ThemeFile.cs" />
+    <Compile Include="PlayniteResources\PluginLibrary\EpicLibrary\Models\WebStoreModels.cs" />
     <Compile Include="PlayniteResources\PluginLibrary\GogLibrary\Gog.cs" />
     <Compile Include="PlayniteResources\PluginLibrary\GogLibrary\Services\GogAccountClient.cs" />
     <Compile Include="PlayniteResources\PluginLibrary\GogLibrary\Models\AccountBasicRespose.cs" />
@@ -118,6 +119,8 @@
     <Compile Include="PlayniteResources\PluginLibrary\OriginLibrary\Models\UsageReponse.cs" />
     <Compile Include="PlayniteResources\PluginLibrary\OriginLibrary\Services\OriginAccountClient.cs" />
     <Compile Include="PlayniteResources\PluginLibrary\OriginLibrary\Services\OriginApiClient.cs" />
+    <Compile Include="PlayniteResources\PluginLibrary\SteamLibrary\SteamShared\StoreAppDetailsResult.cs" />
+    <Compile Include="PlayniteResources\PluginLibrary\XboxLibrary\Models\AuthenticationData.cs" />
     <Compile Include="PlayniteResources\Themes.cs" />
     <Compile Include="PlayniteTools.cs" />
     <Compile Include="PlayniteResources\API\ScriptFunctionDescription.cs" />

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace PlayniteResources.PluginLibrary.OriginLibrary.Models
+namespace PluginCommon.PlayniteResources.PluginLibrary.OriginLibrary.Models
 {
     public class GameStoreDataResponse
     {

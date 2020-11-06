@@ -1,13 +1,15 @@
 ﻿using Newtonsoft.Json;
-using PluginCommon.PlayniteResources.Common.Web;
 using Playnite.SDK;
-using PlayniteResources.PluginLibrary.OriginLibrary.Models;
+using PluginCommon.PlayniteResources.Common.Web;
+using PluginCommon.PlayniteResources.PluginLibrary.OriginLibrary.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
-namespace PlayniteResources.PluginLibrary.OriginLibrary.Services
+namespace PluginCommon.PlayniteResources.PluginLibrary.OriginLibrary.Services
 {
     public class OriginApiClient
     {
