@@ -12,7 +12,7 @@
     <sys:String x:Key="LOCCommonIntegrationButton">Show plugin button in game details</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInDescription">Show plugin information in game details</sys:String>
 
-    <sys:String x:Key="LOCCommonIntegrationSelectElements">Details view components</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationSelectElements">Selection elements</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationButtonOptions">Button options</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">Only show a icon</sys:String>
