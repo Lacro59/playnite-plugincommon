@@ -14,13 +14,19 @@ namespace PluginCommon
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            int ValueData = int.Parse(((string)values[0]).Replace("%", string.Empty).Replace("°", string.Empty));
-            int ValueControl = int.Parse((string)values[1]);
+            int ValueData = 0;
+            int.TryParse(((string)values[0]).Replace("%", string.Empty).Replace("°", string.Empty), out ValueData);
+
+            int ValueControl = 0;
+            int.TryParse((string)values[1], out ValueControl);
+
             bool Enable = (bool)values[2];
 
             if (Enable)
             {
-                if (int.Parse((string)parameter) == 0)
+                int parameterValue = 0;
+                int.TryParse((string)parameter, out parameterValue);
+                if (parameterValue == 0)
                 {
                     if (ValueData > ValueControl)
                     {
