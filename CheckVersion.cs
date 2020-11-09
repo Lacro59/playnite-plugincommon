@@ -85,7 +85,7 @@ namespace PluginCommon
             }
 
             //Check actual vs Github
-            return (!LastReleaseTagName.IsNullOrEmpty() && LastReleaseTagName != PluginInfo.Version);
+            return (!LastReleaseTagName.IsNullOrEmpty() && LastReleaseTagName != "v" + PluginInfo.Version);
         }
 
         public void ShowNotification(IPlayniteAPI PlayniteApi, string Message)
