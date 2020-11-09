@@ -70,6 +70,18 @@ namespace PluginCommon
         }
 
 
+        public static async Task<Stream> DownloadFileStream(string url)
+        {
+            using (var client = new HttpClient())
+            {
+                var response = client.GetAsync(url).Result;
+                var filetype = response.Content.Headers.ContentType.MediaType;
+
+                return response.Content.ReadAsStreamAsync().Result;
+            }
+        }
+
+
         public static async Task<string> DownloadStringData(string url)
         {
             using (var client = new HttpClient())

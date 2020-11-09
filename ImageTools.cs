@@ -16,17 +16,72 @@ namespace PluginCommon
         Black = 2
     }
 
+    public class ImageProperty
+    {
+        public int Width { get; set; } 
+        public int Height { get; set; } 
+    }
+
     public class ImageTools
     {
         private static ILogger logger = LogManager.GetLogger();
 
 
-        #region Resize
-        public static void Resize(string srcPath, int width, int height)
+        public static ImageProperty GetImapeProperty(string srcPath)
         {
-            Image image = Image.FromFile(srcPath);
-            Bitmap resultImage = Resize(image, width, height);
-            resultImage.Save(srcPath.Replace(".png", "_" + width + "x" + height + ".png"));
+            try
+            {
+                Image image = Image.FromFile(srcPath);
+
+                return new ImageProperty
+                {
+                    Width = image.Width,
+                    Height = image.Height,
+                };
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon", $"Error on GetImapeProperty()");
+                return null;
+            }
+        }
+
+        public static ImageProperty GetImapeProperty(Stream imgStream)
+        {
+            try
+            {
+                Image image = Image.FromStream(imgStream);
+
+                return new ImageProperty
+                {
+                    Width = image.Width,
+                    Height = image.Height,
+                };
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon", $"Error on GetImapeProperty()");
+                return null;
+            }
+        }
+
+
+        #region Resize
+        public static string Resize(string srcPath, int width, int height)
+        {
+            try
+            {
+                Image image = Image.FromFile(srcPath);
+                Bitmap resultImage = Resize(image, width, height);
+                string newPath = srcPath.Replace(".png", "_" + width + "x" + height + ".png");
+                resultImage.Save(newPath);
+                return newPath;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon", $"Error on create image");
+                return string.Empty;
+            }
         }
 
         public static void Resize(Stream imgStream, int width, int height, string path)
