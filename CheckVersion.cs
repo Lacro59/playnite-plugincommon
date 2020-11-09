@@ -49,7 +49,10 @@ namespace PluginCommon
             }
             catch (WebException ex)
             {
+                logger.Error($"Failed to load from {url} for {PluginName}");
+#if DEBUG
                 Common.LogError(ex, "PluginCommon", $"Failed to load from {url} for {PluginName}");
+#endif
             }
 
             LastReleaseUrl = string.Empty;
@@ -82,7 +85,7 @@ namespace PluginCommon
             }
 
             //Check actual vs Github
-            return (!LastReleaseTagName.IsNullOrEmpty() && LastReleaseTagName.IndexOf(PluginInfo.Version) == -1);
+            return (!LastReleaseTagName.IsNullOrEmpty() && LastReleaseTagName != PluginInfo.Version);
         }
 
         public void ShowNotification(IPlayniteAPI PlayniteApi, string Message)
@@ -95,10 +98,8 @@ namespace PluginCommon
             ));
         }
 
-        // TODO DownloadSystem
         public void GetRelease()
         {
-
         }
     }
 }
