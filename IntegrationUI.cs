@@ -900,7 +900,9 @@ namespace PluginCommon
         {
             var parent = VisualTreeHelper.GetParent(child);
             if (parent != null && !(parent is T))
+            {
                 return (T)GetAncestorOfType<T>((FrameworkElement)parent);
+            }
             return (T)parent;
         }
     }
