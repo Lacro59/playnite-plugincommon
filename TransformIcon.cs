@@ -20,10 +20,11 @@
 
         private static string statistics = "";             // e90c
         private static string howlongtobeat = "";          // e90d
-        private static string successstoryOld = "";        // e90e
         private static string successstory = "";           // ea33
         private static string gameactivity = "";           // e90f
         private static string checklocalizations = "";     // ea2c
+
+        private static string gameHacked = "";             // ea36
 
 
         /// <summary>
@@ -50,6 +51,10 @@
                     stringReturn = checklocalizations;
                     break;
 
+                case "gamehacked":
+                    stringReturn = gameHacked;
+                    break;
+
                 case "retroachievements":
                     stringReturn = retroachievements;
                     break;
@@ -61,6 +66,9 @@
                     break;
                 case "gog":
                     stringReturn = gog;
+                    break;
+                case "goggalaxy":
+                    stringReturn = gogGalaxy;
                     break;
                 case "battle.net":
                     stringReturn = battleNET;
@@ -95,6 +103,7 @@
                 case "itch.io":
                     stringReturn = itchio;
                     break;
+
                 default:
                     if (!ReturnEmpy)
                     {

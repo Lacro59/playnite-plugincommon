@@ -58,7 +58,9 @@ namespace PluginCommon
 
         private JObject GetSteamAppListFromWeb(string PluginCacheFile)
         {
-            logger.Info("PluginCommon - GetSteamAppListFromWeb");
+#if DEBUG
+            logger.Debug("PluginCommon - GetSteamAppListFromWeb");
+#endif
 
             string responseData = string.Empty;
             try

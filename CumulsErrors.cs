@@ -32,7 +32,7 @@ namespace PluginCommon
             string Result = string.Empty;
             for (int i = 0; i < ListMessage.Count; i++)
             {
-                Result += ((i != 0) ? Environment.NewLine : "") + ListMessage[i];
+                Result += ((i != 0) ? Environment.NewLine : string.Empty) + ListMessage[i];
             }
             return Result;
         }

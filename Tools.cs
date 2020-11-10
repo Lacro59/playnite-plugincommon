@@ -3,9 +3,7 @@ using Playnite.SDK;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace PluginCommon
@@ -85,61 +83,6 @@ namespace PluginCommon
             {
                 return FindParent<T>(parentObject);
             }
-        }
-
-        [Obsolete("Remove after new SDK with window")]
-        public static void DesactivePlayniteWindowControl(DependencyObject depObj)
-        {
-            foreach (Button sp in FindVisualChildren<Button>(depObj))
-            {
-                if (sp.Name == "PART_ButtonMinimize")
-                {
-                    sp.Visibility = Visibility.Hidden;
-                }
-                if (sp.Name == "PART_ButtonMaximize")
-                {
-                    sp.Visibility = Visibility.Hidden;
-                }
-            }
-        }
-
-
-        [Obsolete("Use PlayniteTools.IsDisabledPlaynitePlugins")]
-        public static bool IsDisabledPlaynitePlugins(string PluginName, string ConfigurationPath)
-        {
-            JArray DisabledPlugins = new JArray();
-            JObject PlayniteConfig = new JObject();
-            try
-            {
-                string FileConfig = ConfigurationPath + "\\config.json";
-                if (File.Exists(FileConfig))
-                {
-                    PlayniteConfig = JObject.Parse(File.ReadAllText(FileConfig));
-                    DisabledPlugins = (JArray)PlayniteConfig["DisabledPlugins"];
-
-                    if (DisabledPlugins != null)
-                    {
-                        foreach (string name in DisabledPlugins)
-                        {
-                            if (name.ToLower() == PluginName.ToLower())
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    logger.Warn($"PluginCommon - File not found {FileConfig}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, "PluginCommon", "Error on IsDisabledPlaynitePlugins()");
-                return false;
-            }
-
-            return false;
         }
     }
 }

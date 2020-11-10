@@ -16,15 +16,22 @@ namespace PluginCommon
     {
         private static readonly ILogger logger = LogManager.GetLogger();
 
+        private static List<Emulator> ListEmulators = null;
+        private static JArray DisabledPlugins = null;
+
 
         #region Emulators
         public static List<Emulator> GetListEmulators(IPlayniteAPI PlayniteApi)
         {
-            List<Emulator> ListEmulators = new List<Emulator>();
-            foreach (Emulator item in PlayniteApi.Database.Emulators)
+            if (ListEmulators == null)
             {
-                ListEmulators.Add(item);
+                ListEmulators = new List<Emulator>();
+                foreach (Emulator item in PlayniteApi.Database.Emulators)
+                {
+                    ListEmulators.Add(item);
+                }
             }
+
             return ListEmulators;
         }
 
@@ -65,31 +72,39 @@ namespace PluginCommon
 
 
         public static bool IsDisabledPlaynitePlugins(string PluginName, string ConfigurationPath)
-        {
-            JArray DisabledPlugins = new JArray();
+        {            
             JObject PlayniteConfig = new JObject();
             try
             {
-                string FileConfig = ConfigurationPath + "\\config.json";
-                if (File.Exists(FileConfig))
+                if (DisabledPlugins == null)
                 {
-                    PlayniteConfig = JObject.Parse(File.ReadAllText(FileConfig));
-                    DisabledPlugins = (JArray)PlayniteConfig["DisabledPlugins"];
-
-                    if (DisabledPlugins != null)
+                    string FileConfig = ConfigurationPath + "\\config.json";
+                    if (File.Exists(FileConfig))
                     {
-                        foreach (string name in DisabledPlugins)
+                        PlayniteConfig = JObject.Parse(File.ReadAllText(FileConfig));
+                        DisabledPlugins = (JArray)PlayniteConfig["DisabledPlugins"];
+                    }
+                    else
+                    {
+                        logger.Warn($"PluginCommon - File not found {FileConfig}");
+                        return false;
+                    }
+                }
+
+                if (DisabledPlugins != null)
+                {
+                    foreach (string name in DisabledPlugins)
+                    {
+                        if (name.ToLower() == PluginName.ToLower())
                         {
-                            if (name.ToLower() == PluginName.ToLower())
-                            {
-                                return true;
-                            }
+                            return true;
                         }
                     }
                 }
                 else
                 {
-                    logger.Warn($"PluginCommon - File not found {FileConfig}");
+                    logger.Warn($"PluginCommon - DisabledPlugins is null");
+                    return false;
                 }
             }
             catch (Exception ex)

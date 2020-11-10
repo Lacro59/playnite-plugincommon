@@ -27,6 +27,7 @@ namespace PluginCommon
         private static ILogger logger = LogManager.GetLogger();
 
 
+        #region ImageProperty
         public static ImageProperty GetImapeProperty(string srcPath)
         {
             try
@@ -64,6 +65,7 @@ namespace PluginCommon
                 return null;
             }
         }
+        #endregion
 
 
         #region Resize
@@ -75,16 +77,17 @@ namespace PluginCommon
                 Bitmap resultImage = Resize(image, width, height);
                 string newPath = srcPath.Replace(".png", "_" + width + "x" + height + ".png");
                 resultImage.Save(newPath);
+
                 return newPath;
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on create image");
+                Common.LogError(ex, "PluginCommon", $"Error on Resize()");
                 return string.Empty;
             }
         }
 
-        public static void Resize(Stream imgStream, int width, int height, string path)
+        public static bool Resize(Stream imgStream, int width, int height, string path)
         {
             try
             {
@@ -94,22 +97,25 @@ namespace PluginCommon
                 Image image = Image.FromStream(imgStream);
                 Bitmap resultImage = Resize(image, width, height);
                 resultImage.Save(path + ".png");
+
+                return true;
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on create image");
+                Common.LogError(ex, "PluginCommon", $"Error on Resize()");
+                return false;
             }
         }
 
         public static Bitmap Resize(Image image, int width, int height)
         {
 
-            var destRect = new Rectangle(0, 0, width, height);
-            var destImage = new Bitmap(width, height);
+            Rectangle destRect = new Rectangle(0, 0, width, height);
+            Bitmap destImage = new Bitmap(width, height);
 
             destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-            using (var graphics = Graphics.FromImage(destImage))
+            using (Graphics graphics = Graphics.FromImage(destImage))
             {
                 graphics.CompositingMode = CompositingMode.SourceCopy;
                 graphics.CompositingQuality = CompositingQuality.HighQuality;
@@ -117,7 +123,7 @@ namespace PluginCommon
                 graphics.SmoothingMode = SmoothingMode.HighQuality;
                 graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-                using (var wrapMode = new ImageAttributes())
+                using (ImageAttributes wrapMode = new ImageAttributes())
                 {
                     wrapMode.SetWrapMode(WrapMode.TileFlipXY);
                     graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
@@ -133,21 +139,28 @@ namespace PluginCommon
         {
             FormatConvertedBitmap ConvertBitmapSource = new FormatConvertedBitmap();
 
-            ConvertBitmapSource.BeginInit();
-            ConvertBitmapSource.Source = IconImage;
-
-            switch (imageColor)
+            try
             {
-                case ImageColor.Gray:
-                    ConvertBitmapSource.DestinationFormat = PixelFormats.Gray32Float;
-                    break;
+                ConvertBitmapSource.BeginInit();
+                ConvertBitmapSource.Source = IconImage;
 
-                case ImageColor.Black:
-                    ConvertBitmapSource.Source = IconImage;
-                    break;
+                switch (imageColor)
+                {
+                    case ImageColor.Gray:
+                        ConvertBitmapSource.DestinationFormat = PixelFormats.Gray32Float;
+                        break;
+
+                    case ImageColor.Black:
+                        ConvertBitmapSource.Source = IconImage;
+                        break;
+                }
+
+                ConvertBitmapSource.EndInit();
             }
-
-            ConvertBitmapSource.EndInit();
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon", $"Error on ConvertBitmapImage()");
+            }
 
             return ConvertBitmapSource;
         }

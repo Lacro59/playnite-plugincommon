@@ -34,19 +34,36 @@ namespace PluginCommon
         }
 
 
+        /// <summary>
+        /// Download file image and resize in icon format (64x64).
+        /// </summary>
+        /// <param name="ImageFileName"></param>
+        /// <param name="url"></param>
+        /// <param name="ImagesCachePath"></param>
+        /// <param name="PluginName"></param>
+        /// <returns></returns>
         public static async Task<bool> DownloadFileImage(string ImageFileName, string url, string ImagesCachePath, string PluginName)
         {
             string PathImageFileName = Path.Combine(ImagesCachePath, PluginName.ToLower(), ImageFileName);
 
             using (var client = new HttpClient())
             {
-                var response = client.GetAsync(url).Result;
-                var filetype = response.Content.Headers.ContentType.MediaType;
+                Stream imageStream;
+                try
+                {
+                    var response = client.GetAsync(url).Result;
+                    imageStream = await response.Content.ReadAsStreamAsync();
+                }
+                catch(Exception ex)
+                {
+                    Common.LogError(ex, "PluginCommon", $"Error on Download {url}");
+                    return false;
+                }
 
-                var imageStream = response.Content.ReadAsStreamAsync().Result;
-                ImageTools.Resize(imageStream, 64, 64, PathImageFileName);
-
-                client.Dispose();
+                if (imageStream != null)
+                {
+                    ImageTools.Resize(imageStream, 64, 64, PathImageFileName);
+                }
             }
 
             // Delete id file is empty
@@ -64,24 +81,40 @@ namespace PluginCommon
             catch (Exception ex)
             {
                 Common.LogError(ex, "PluginCommon", $"Error on Delete file image");
+                return false;
             }
 
             return true;
         }
 
-
+        /// <summary>
+        /// Download file stream.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public static async Task<Stream> DownloadFileStream(string url)
         {
             using (var client = new HttpClient())
             {
-                var response = client.GetAsync(url).Result;
-                var filetype = response.Content.Headers.ContentType.MediaType;
-
-                return response.Content.ReadAsStreamAsync().Result;
+                try
+                {
+                    var response = client.GetAsync(url).Result;
+                    return await response.Content.ReadAsStreamAsync();
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, "PluginCommon", $"Error on Download {url}");
+                    return null;
+                }
             }
         }
 
 
+        /// <summary>
+        /// Download string data with manage redirect url.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public static async Task<string> DownloadStringData(string url)
         {
             using (var client = new HttpClient())
@@ -92,7 +125,17 @@ namespace PluginCommon
                     Method = HttpMethod.Get
                 };
 
-                HttpResponseMessage response = client.SendAsync(request).Result;
+                HttpResponseMessage response;
+                try
+                {
+                    response = client.SendAsync(request).Result;
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, "PluginCommon", $"Error on Download {url}");
+                    return string.Empty;
+                }
+
                 int statusCode = (int)response.StatusCode;
 
                 // We want to handle redirects ourselves so that we can determine the final redirect Location (via header)
@@ -103,8 +146,9 @@ namespace PluginCommon
                     {
                         redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
                     }
-                    logger.Info(string.Format("DownloadStringData - Redirecting to {0}", redirectUri));
-
+#if DEBUG
+                    logger.Info(string.Format("PluginCommon - DownloadStringData() redirecting to {0}", redirectUri));
+#endif
                     return await DownloadStringData(redirectUri.ToString());
                 }
                 else
@@ -114,6 +158,12 @@ namespace PluginCommon
             }
         }
 
+        /// <summary>
+        /// Download string data with a specific UserAgent.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="UserAgentType"></param>
+        /// <returns></returns>
         public static async Task<string> DownloadStringData(string url, WebUserAgentType UserAgentType)
         {
             using (var client = new HttpClient())
@@ -126,21 +176,35 @@ namespace PluginCommon
                     Method = HttpMethod.Get
                 };
 
-                HttpResponseMessage response = client.SendAsync(request).Result;
-                int statusCode = (int)response.StatusCode;
-
-                if (statusCode == 403)
+                HttpResponseMessage response;
+                try
                 {
+                    response = client.SendAsync(request).Result;
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, "PluginCommon", $"Error on Download {url}");
                     return string.Empty;
+                }
+
+                int statusCode = (int)response.StatusCode;
+                if (statusCode == 200)
+                {
+                    return await response.Content.ReadAsStringAsync();
                 }
                 else
                 {
-                    return await response.Content.ReadAsStringAsync();
+                    logger.Warn($"PluginCommon - DownloadStringData() with statuscode {statusCode} for {url}");
+                    return string.Empty;
                 }
             }
         }
 
-
+        /// <summary>
+        /// Download compressed string data.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public static async Task<string> DownloadStringDataWithGz(string url)
         {
             HttpClientHandler handler = new HttpClientHandler()
@@ -155,6 +219,12 @@ namespace PluginCommon
         }
 
 
+        /// <summary>
+        /// Post data with a payload.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="payload"></param>
+        /// <returns></returns>
         public static async Task<string> PostStringDataPayload(string url, string payload)
         {
             var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
@@ -170,10 +240,19 @@ namespace PluginCommon
                 client.DefaultRequestHeaders.Add("accept", "application/json, text/javascript, */*; q=0.01");
                 client.DefaultRequestHeaders.Add("Vary", "Accept-Encoding");
                 HttpContent c = new StringContent(payload, Encoding.UTF8, "application/json");
-                HttpResponseMessage result = await client.PostAsync(url, c);
-                if (result.IsSuccessStatusCode)
+
+                HttpResponseMessage result;
+                try
                 {
-                    response = await result.Content.ReadAsStringAsync();
+                    result = await client.PostAsync(url, c);
+                    if (result.IsSuccessStatusCode)
+                    {
+                        response = await result.Content.ReadAsStringAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, "PluginCommon", $"Error on Post {url}");
                 }
             }
 

@@ -95,34 +95,5 @@ namespace PluginCommon
                 logger.Warn($"PluginCommon - File {langFile} not found.");
             }
         }
-
-        /// <summary>
-        /// Get language defined in Playnite settings; default "english".
-        /// </summary>
-        /// <param name="PlayniteConfigurationPath"></param>
-        /// <returns></returns>
-        [Obsolete("Use PlayniteApi.ApplicationSettings.Language")]
-        public static string GetPlayniteLanguageConfiguration(string PlayniteConfigurationPath)
-        {
-            string path = Path.Combine(PlayniteConfigurationPath, "config.json");
-
-            try
-            {
-                if (File.Exists(path))
-                {
-                    return ((dynamic)JsonConvert.DeserializeObject(File.ReadAllText(path))).Language;
-                }
-                else
-                {
-                    logger.Warn($"PluginCommon - Not find config file {path}");
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, $"PluginCommon - Failed to load config file {path}");
-            }
-
-            return "english";
-        }
     }
 }

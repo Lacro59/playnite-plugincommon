@@ -12,46 +12,53 @@ namespace PluginCommon
 {
     public class CompareValueConverter : IMultiValueConverter
     {
+        public static IResourceProvider resources = new ResourceProvider();
+
+
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            int ValueData = 0;
-            int.TryParse(((string)values[0]).Replace("%", string.Empty).Replace("°", string.Empty), out ValueData);
-
-            int ValueControl = 0;
-            int.TryParse((string)values[1], out ValueControl);
-
-            bool Enable = (bool)values[2];
-
-            if (Enable)
+            try
             {
-                int parameterValue = 0;
-                int.TryParse((string)parameter, out parameterValue);
-                if (parameterValue == 0)
+                int.TryParse(((string)values[0]).Replace("%", string.Empty).Replace("°", string.Empty), out int ValueData);
+                int.TryParse((string)values[1], out int ValueControl);
+
+                bool Enable = (bool)values[2];
+
+                if (Enable)
                 {
-                    if (ValueData > ValueControl)
+                    int.TryParse((string)parameter, out int parameterValue);
+                    if (parameterValue == 0)
                     {
-                        return Brushes.White;
+                        if (ValueData > ValueControl)
+                        {
+                            return resources.GetResource("TextBrush");
+                        }
+                        else
+                        {
+                            return Brushes.Orange;
+                        }
                     }
                     else
                     {
-                        return Brushes.Orange;
+                        if (ValueData < ValueControl)
+                        {
+                            return resources.GetResource("TextBrush");
+                        }
+                        else
+                        {
+                            return Brushes.Orange;
+                        }
                     }
                 }
                 else
                 {
-                    if (ValueData < ValueControl)
-                    {
-                        return Brushes.White;
-                    }
-                    else
-                    {
-                        return Brushes.Orange;
-                    }
+                    return resources.GetResource("TextBrush");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                return Brushes.White;
+                Common.LogError(ex, "PluginCommon", $"Error on CompareValueConverter");
+                return (Brushes)resources.GetResource("TextBrush");
             }
         }
 
@@ -67,18 +74,27 @@ namespace PluginCommon
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value.ToString() == "0")
+            try
             {
-                if (parameter.ToString() == "1") {
-                    return Visibility.Collapsed;
+                if (value.ToString() == "0")
+                {
+                    if (parameter.ToString() == "1")
+                    {
+                        return Visibility.Collapsed;
+                    }
+                    else
+                    {
+                        return Visibility.Hidden;
+                    }
                 }
                 else
                 {
-                    return Visibility.Hidden;
+                    return Visibility.Visible;
                 }
             }
-            else
+            catch (Exception ex)
             {
+                Common.LogError(ex, "PluginCommon", $"Error on VisibilityZeroConverter");
                 return Visibility.Visible;
             }
         }
@@ -101,11 +117,11 @@ namespace PluginCommon
             var direction = parameter == null ? Parameters.Normal : (Parameters)Enum.Parse(typeof(Parameters), (string)parameter);
             if (direction == Parameters.Inverted)
             {
-                return string.IsNullOrEmpty(value as string) ? true : false;
+                return string.IsNullOrEmpty(value.ToString()) ? true : false;
             }
             else
             {
-                return string.IsNullOrEmpty(value as string) ? false : true;
+                return string.IsNullOrEmpty(value.ToString()) ? false : true;
             }
         }
 
@@ -119,12 +135,20 @@ namespace PluginCommon
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value != null && (DateTime)value != default(DateTime))
+            try
             {
-                return ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern);
+                if (value != null && (DateTime)value != default(DateTime))
+                {
+                    return ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern);
+                }
+                else
+                {
+                    return string.Empty;
+                }
             }
-            else
+            catch (Exception ex)
             {
+                Common.LogError(ex, "PluginCommon", $"Error on LocalDateConverter");
                 return string.Empty;
             }
         }
@@ -138,27 +162,35 @@ namespace PluginCommon
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value != null && (DateTime)value != default(DateTime))
+            try
             {
-                string tmpDate = ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern);
-                string tmpDay = string.Empty;
-                string tmpDateShort = string.Empty;
-
-                tmpDay = ((DateTime)value).ToString("d");
-                Regex rgx = new Regex(@"[/\.\- ]" + tmpDay  + "|" + tmpDay + @"[/\.\- ]");
-                tmpDateShort = rgx.Replace(tmpDate, string.Empty, 1);
-
-                if (tmpDateShort.Length == tmpDate.Length)
+                if (value != null && (DateTime)value != default(DateTime))
                 {
-                    tmpDay = ((DateTime)value).ToString("dd");
-                    rgx = new Regex(@"[/\.\- ]" + tmpDay + "|" + tmpDay + @"[/\.\- ]");
-                    tmpDateShort = rgx.Replace(tmpDate, string.Empty, 1);
-                }
+                    string tmpDate = ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern);
+                    string tmpDay = string.Empty;
+                    string tmpDateShort = string.Empty;
 
-                return tmpDateShort;
+                    tmpDay = ((DateTime)value).ToString("d");
+                    Regex rgx = new Regex(@"[/\.\- ]" + tmpDay + "|" + tmpDay + @"[/\.\- ]");
+                    tmpDateShort = rgx.Replace(tmpDate, string.Empty, 1);
+
+                    if (tmpDateShort.Length == tmpDate.Length)
+                    {
+                        tmpDay = ((DateTime)value).ToString("dd");
+                        rgx = new Regex(@"[/\.\- ]" + tmpDay + "|" + tmpDay + @"[/\.\- ]");
+                        tmpDateShort = rgx.Replace(tmpDate, string.Empty, 1);
+                    }
+
+                    return tmpDateShort;
+                }
+                else
+                {
+                    return string.Empty;
+                }
             }
-            else
+            catch (Exception ex)
             {
+                Common.LogError(ex, "PluginCommon", $"Error on LocalDateYMConverter");
                 return string.Empty;
             }
         }
@@ -172,12 +204,20 @@ namespace PluginCommon
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value != null && (DateTime)value != default(DateTime))
+            try
             {
-                return ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern);
+                if (value != null && (DateTime)value != default(DateTime))
+                {
+                    return ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern);
+                }
+                else
+                {
+                    return string.Empty;
+                }
             }
-            else
+            catch (Exception ex)
             {
+                Common.LogError(ex, "PluginCommon", $"Error on LocalTimeConverter");
                 return string.Empty;
             }
         }
@@ -191,11 +231,21 @@ namespace PluginCommon
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value != null && (DateTime)value != default(DateTime)) {
-                return ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern)
-                    + " " + ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern);
+            try
+            {
+                if (value != null && (DateTime)value != default(DateTime))
+                {
+                    return ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern)
+                        + " " + ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern);
+                }
+                else
+                {
+                    return string.Empty;
+                }
             }
-            else {
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon", $"Error on LocalDateTimeConverter");
                 return string.Empty;
             }
         }
@@ -215,7 +265,7 @@ namespace PluginCommon
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return !(bool)value;
+            throw new NotImplementedException();
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)
@@ -228,10 +278,18 @@ namespace PluginCommon
     {
         public object Convert(object value, Type TargetType, object parameter, CultureInfo culture)
         {
-            ListBoxItem item = (ListBoxItem)value;
-            ListBox listView = ItemsControl.ItemsControlFromItemContainer(item) as ListBox;
-            int index = listView.ItemContainerGenerator.IndexFromContainer(item);
-            return index.ToString();
+            try
+            {
+                ListBoxItem item = (ListBoxItem)value;
+                ListBox listView = ItemsControl.ItemsControlFromItemContainer(item) as ListBox;
+                int index = listView.ItemContainerGenerator.IndexFromContainer(item);
+                return index.ToString();
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon", $"Error on IndexConverter");
+                return string.Empty;
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
