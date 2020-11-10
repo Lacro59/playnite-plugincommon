@@ -121,16 +121,24 @@ namespace PluginCommon
         {
             string SourceName = string.Empty;
 
-            if (IsGameEmulated(PlayniteApi, game))
+            try
             {
-                SourceName = "RetroAchievements";
+                if (IsGameEmulated(PlayniteApi, game))
+                {
+                    SourceName = "RetroAchievements";
+                }
+                else if (game.SourceId != Guid.Parse("00000000-0000-0000-0000-000000000000"))
+                {
+                    SourceName = PlayniteApi.Database.Sources.Get(game.SourceId).Name;
+                }
+                else
+                {
+                    SourceName = "Playnite";
+                }
             }
-            else if (game.SourceId != Guid.Parse("00000000-0000-0000-0000-000000000000"))
+            catch (Exception ex)
             {
-                SourceName = PlayniteApi.Database.Sources.Get(game.SourceId).Name;    
-            }
-            else
-            {
+                Common.LogError(ex, "PluginCommon", $"Error on GetSourceName({game.Name})");
                 SourceName = "Playnite";
             }
 
