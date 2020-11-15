@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 
@@ -50,7 +51,7 @@ namespace PluginCommon
 
 
         public abstract void Initial();
-        public abstract void AddElements();
+        public abstract DispatcherOperation AddElements();
         public abstract void RefreshElements(Game GameSelected, bool force = false);
         public void RemoveElements()
         {
