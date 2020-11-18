@@ -1,15 +1,13 @@
 ﻿using Newtonsoft.Json;
 using Playnite.SDK;
-using PluginCommon;
-using PluginCommon.PlayniteResources;
-using PluginCommon.PlayniteResources.API;
 using PluginCommon.PlayniteResources.Common;
-using PluginCommon.PlayniteResources.Converters;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using PluginCommon.Models;
 
 namespace PluginCommon
 {
@@ -54,14 +52,13 @@ namespace PluginCommon
                     }
                     catch (Exception ex)
                     {
-                        logger.Error(ex, $"PluginCommon - Failed to parse file {CommonFile}.");
+                        LogError(ex, "PluginCommon", $"Failed to parse file {CommonFile}");
                         return;
                     }
 
 #if DEBUG
                     logger.Debug($"PluginCommon - res: {JsonConvert.SerializeObject(res)}");
 #endif
-
                     Application.Current.Resources.MergedDictionaries.Add(res);
                 }
                 else
@@ -73,6 +70,25 @@ namespace PluginCommon
         }
 
 
+
+        /// <summary>
+        /// Normalize log error in Playnite.
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <param name="PluginName"></param>
+        public static void LogError(Exception ex, string PluginName)
+        {
+            TraceInfos traceInfos = new TraceInfos(ex);
+            string Message = $"{PluginName} [{traceInfos.FileName} {traceInfos.LineNumber}]";
+
+            if (!traceInfos.InitialCaller.IsNullOrEmpty())
+            {
+                Message += $" - Error on {Message}()";
+            }
+
+            logger.Error(ex, $"{Message}\r\n");
+        }
+
         /// <summary>
         /// Normalize log error in Playnite.
         /// </summary>
@@ -81,23 +97,10 @@ namespace PluginCommon
         /// <param name="Message"></param>
         public static void LogError(Exception ex, string PluginName, string Message)
         {
-            StackTrace Trace = new StackTrace(ex, true);
-            int LineNumber = 0;
-            string FileName = "???";
-            
-            foreach (var frame in Trace.GetFrames())
-            {
-                if (!string.IsNullOrEmpty(frame.GetFileName()) && (string.IsNullOrEmpty(FileName)))
-                {
-                    FileName = frame.GetFileName();
-                }
-                if ((frame.GetFileLineNumber() > 0) && (LineNumber == 0))
-                {
-                    LineNumber = frame.GetFileLineNumber();
-                }
-            }
+            TraceInfos traceInfos = new TraceInfos(ex);
+            Message = $"{PluginName} [{traceInfos.FileName} {traceInfos.LineNumber}] - {Message}";
 
-            logger.Error(ex, $"{PluginName} [{FileName} {LineNumber}] - {Message}\r\n");
+            logger.Error(ex, $"{Message}\r\n");
         }
     }
 }

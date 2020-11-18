@@ -7,7 +7,7 @@ using PluginCommon.PlayniteResources.Common;
 
 namespace PluginCommon
 {
-    public class Localization
+    public class PluginLocalization
     {
         private static ILogger logger = LogManager.GetLogger();
 

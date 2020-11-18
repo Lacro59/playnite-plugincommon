@@ -2,6 +2,7 @@
 using Playnite.SDK;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,23 @@ namespace PluginCommon.PlayniteResources.Common
                 logger.Error(e, $"Failed to deserialize {typeof(T).FullName} from json:");
                 logger.Debug(json);
                 throw;
+            }
+        }
+
+        public static T FromJsonStream<T>(Stream stream) where T : class
+        {
+            using (var sr = new StreamReader(stream))
+            using (var reader = new JsonTextReader(sr))
+            {
+                return new JsonSerializer().Deserialize<T>(reader);
+            }
+        }
+
+        public static T FromJsonFile<T>(string filePath) where T : class
+        {
+            using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                return FromJsonStream<T>(fs);
             }
         }
 
