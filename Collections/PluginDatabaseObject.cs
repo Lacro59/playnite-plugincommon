@@ -99,6 +99,21 @@ namespace PluginCommon.Collections
             }
         }
 
+        private bool _GameIsLoaded = false;
+        public bool GameIsLoaded
+        {
+            get
+            {
+                return _GameIsLoaded;
+            }
+
+            set
+            {
+                _GameIsLoaded = value;
+                OnPropertyChanged();
+            }
+        }
+
 
         protected PluginDatabaseObject(IPlayniteAPI PlayniteApi, ISettings PluginSettings, string PluginUserDataPath)
         {
@@ -148,7 +163,7 @@ namespace PluginCommon.Collections
 
         protected abstract bool LoadDatabase();
 
-        public bool ClearDatabase()
+        public virtual bool ClearDatabase()
         {
             if (Directory.Exists(PluginDatabaseDirectory))
             {

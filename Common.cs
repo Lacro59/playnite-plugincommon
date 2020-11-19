@@ -86,7 +86,7 @@ namespace PluginCommon
                 Message += $" - Error on {Message}()";
             }
 
-            logger.Error(ex, $"{Message}\r\n");
+            logger.Error(ex, $"{Message}");
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace PluginCommon
             TraceInfos traceInfos = new TraceInfos(ex);
             Message = $"{PluginName} [{traceInfos.FileName} {traceInfos.LineNumber}] - {Message}";
 
-            logger.Error(ex, $"{Message}\r\n");
+            logger.Error(ex, $"{Message}");
         }
     }
 }
