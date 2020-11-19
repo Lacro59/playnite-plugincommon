@@ -557,24 +557,5 @@ namespace PluginCommon.PlayniteResources.Database
         {
             return this.Select(a => a.GetClone());
         }
-
-
-        public void SetGameInfo<T>(IPlayniteAPI PlayniteApi)
-        {
-            foreach (var item in Items)
-            {
-                Game game = PlayniteApi.Database.Games.Get(item.Key);
-
-                if (game != null && item.Value is PluginDataBaseGame<T>)
-                {
-                    var temp = item.Value as PluginDataBaseGame<T>;
-
-                    temp.Name = game.Name;
-                    temp.Hidden = game.Hidden;
-                    temp.Icon = game.Icon;
-                    temp.CoverImage = game.CoverImage;
-                }
-            }
-        }
     }
 }

@@ -8,8 +8,10 @@ using System.Threading.Tasks;
 
 namespace PluginCommon.Collections
 {
-    public abstract class PluginDataBaseGame<T> : PluginDataBaseGameBase
+    public abstract class PluginDataBaseGameDetails<T, Y> : PluginDataBaseGameBase
     {
         public abstract List<T> Items { get; set; }
+
+        public abstract Y ItemsDetails { get; set; }
     }
 }
