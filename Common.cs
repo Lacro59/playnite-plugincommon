@@ -83,7 +83,7 @@ namespace PluginCommon
 
             if (!traceInfos.InitialCaller.IsNullOrEmpty())
             {
-                Message += $" - Error on {Message}()";
+                Message += $" - Error on {traceInfos.InitialCaller}()";
             }
 
             logger.Error(ex, $"{Message}");

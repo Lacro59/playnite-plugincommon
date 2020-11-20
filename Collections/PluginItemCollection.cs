@@ -31,17 +31,20 @@ namespace PluginCommon.Collections
                 try
                 {
                     Game game = PlayniteApi.Database.Games.Get(item.Key);
+                    var temp = item.Value as PluginDataBaseGame<T>;
 
                     if (game != null && item.Value is PluginDataBaseGame<T>)
                     {
-                        var temp = item.Value as PluginDataBaseGame<T>;
-
                         temp.Name = game.Name;
                         temp.Hidden = game.Hidden;
                         temp.Icon = game.Icon;
                         temp.CoverImage = game.CoverImage;
                         temp.GenreIds = game.GenreIds;
                         temp.Genres = game.Genres;
+                    }
+                    else
+                    {
+                        temp.IsDeleted = true;
                     }
                 }
                 catch (Exception ex)
@@ -63,18 +66,20 @@ namespace PluginCommon.Collections
                 try
                 {
                     Game game = PlayniteApi.Database.Games.Get(item.Key);
+                    var temp = item.Value as PluginDataBaseGameDetails<T, Y>;
 
                     if (game != null && item.Value is PluginDataBaseGameDetails<T, Y>)
                     {
-
-                        var temp = item.Value as PluginDataBaseGameDetails<T, Y>;
-
                         temp.Name = game.Name;
                         temp.Hidden = game.Hidden;
                         temp.Icon = game.Icon;
                         temp.CoverImage = game.CoverImage;
                         temp.GenreIds = game.GenreIds;
                         temp.Genres = game.Genres;
+                    }
+                    else
+                    {
+                        temp.IsDeleted = true;
                     }
                 }
                 catch (Exception ex)

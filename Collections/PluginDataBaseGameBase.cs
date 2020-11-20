@@ -112,5 +112,24 @@ namespace PluginCommon.Collections
                 OnPropertyChanged();
             }
         }
+
+        private bool _IsDeleted;
+        /// <summary>
+        /// 
+        /// </summary>
+        [JsonIgnore]
+        public bool IsDeleted
+        {
+            get
+            {
+                return _IsDeleted;
+            }
+
+            set
+            {
+                _IsDeleted = value;
+                OnPropertyChanged();
+            }
+        }
     }
 }
