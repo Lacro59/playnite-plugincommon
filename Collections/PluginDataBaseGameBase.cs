@@ -76,6 +76,10 @@ namespace PluginCommon.Collections
         {
             get
             {
+                if (_Genres == null)
+                {
+                    return new List<Genre>();
+                }
                 return _Genres;
             }
 
@@ -86,7 +90,7 @@ namespace PluginCommon.Collections
             }
         }
 
-        private List<Guid> genreIds;
+        private List<Guid> _GenreIds;
         /// <summary>
         /// Gets or sets list of genres.
         /// </summary>
@@ -95,12 +99,16 @@ namespace PluginCommon.Collections
         {
             get
             {
-                return genreIds;
+                if (_GenreIds == null)
+                {
+                    return new List<Guid>();
+                }
+                return _GenreIds;
             }
 
             set
             {
-                genreIds = value;
+                _GenreIds = value;
                 OnPropertyChanged();
             }
         }

@@ -10,48 +10,76 @@ using System.Windows.Controls;
 
 namespace PluginCommon.Collections
 {
-    public class PluginItemCollection<TItem> : ItemCollection<TItem> where TItem : DatabaseObject
+    public class PluginItemCollection<TItem> : ItemCollection<TItem> where TItem : PluginDataBaseGameBase
     {
+        private ILogger logger = LogManager.GetLogger();
+
+
         public PluginItemCollection(string path, GameDatabaseCollection type = GameDatabaseCollection.Uknown) : base(path, type)
         {
         }
 
         public void SetGameInfo<T>(IPlayniteAPI PlayniteApi)
         {
+            while (!PlayniteApi.Database.IsOpen)
+            {
+
+            }
+
             foreach (var item in Items)
             {
-                Game game = PlayniteApi.Database.Games.Get(item.Key);
-
-                if (game != null && item.Value is PluginDataBaseGame<T>)
+                try
                 {
-                    var temp = item.Value as PluginDataBaseGame<T>;
+                    Game game = PlayniteApi.Database.Games.Get(item.Key);
 
-                    temp.Name = game.Name;
-                    temp.Hidden = game.Hidden;
-                    temp.Icon = game.Icon;
-                    temp.CoverImage = game.CoverImage;
-                    temp.GenreIds = game.GenreIds;
-                    temp.Genres = game.Genres;
+                    if (game != null && item.Value is PluginDataBaseGame<T>)
+                    {
+                        var temp = item.Value as PluginDataBaseGame<T>;
+
+                        temp.Name = game.Name;
+                        temp.Hidden = game.Hidden;
+                        temp.Icon = game.Icon;
+                        temp.CoverImage = game.CoverImage;
+                        temp.GenreIds = game.GenreIds;
+                        temp.Genres = game.Genres;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, "PluginCommon");
                 }
             }
         }
 
         public void SetGameInfoDetails<T, Y>(IPlayniteAPI PlayniteApi)
         {
+            while (!PlayniteApi.Database.IsOpen)
+            {
+
+            }
+
             foreach (var item in Items)
             {
-                Game game = PlayniteApi.Database.Games.Get(item.Key);
-
-                if (game != null && item.Value is PluginDataBaseGameDetails<T, Y>)
+                try
                 {
-                    var temp = item.Value as PluginDataBaseGameDetails<T, Y>;
+                    Game game = PlayniteApi.Database.Games.Get(item.Key);
 
-                    temp.Name = game.Name;
-                    temp.Hidden = game.Hidden;
-                    temp.Icon = game.Icon;
-                    temp.CoverImage = game.CoverImage;
-                    temp.GenreIds = game.GenreIds;
-                    temp.Genres = game.Genres;
+                    if (game != null && item.Value is PluginDataBaseGameDetails<T, Y>)
+                    {
+
+                        var temp = item.Value as PluginDataBaseGameDetails<T, Y>;
+
+                        temp.Name = game.Name;
+                        temp.Hidden = game.Hidden;
+                        temp.Icon = game.Icon;
+                        temp.CoverImage = game.CoverImage;
+                        temp.GenreIds = game.GenreIds;
+                        temp.Genres = game.Genres;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, "PluginCommon");
                 }
             }
         }
