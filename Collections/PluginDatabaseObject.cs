@@ -237,6 +237,11 @@ namespace PluginCommon.Collections
         }
 
 
+        public virtual TItem Get(Guid Id)
+        {
+            return Database.Get(Id);
+        }
+
         public abstract TItem Get(Guid Id, bool OnlyCache = false);
 
         public virtual TItem Get(Game game, bool OnlyCache = false)
