@@ -15,7 +15,10 @@ using System.Threading.Tasks;
 
 namespace PluginCommon.Collections
 {
-    public abstract class PluginDatabaseObject : ObservableObject
+    public abstract class PluginDatabaseObject<TypeSettings, TypeDatabase, TItem> : ObservableObject 
+        where TypeSettings : ISettings
+        where TypeDatabase : PluginItemCollection<TItem>
+        where TItem : PluginDataBaseGameBase
     {
         protected static readonly ILogger logger = LogManager.GetLogger();
         protected static IResourceProvider resources = new ResourceProvider();
@@ -35,7 +38,6 @@ namespace PluginCommon.Collections
             set
             {
                 _PluginName = value;
-                OnPropertyChanged();
             }
         }
 
@@ -50,12 +52,12 @@ namespace PluginCommon.Collections
             set
             {
                 _PluginUserDataPath = value;
-                OnPropertyChanged();
             }
         }
 
-        private ISettings _PluginSettings;
-        public ISettings PluginSettings
+
+        private TypeSettings _PluginSettings;
+        public TypeSettings PluginSettings
         {
             get
             {
@@ -68,6 +70,36 @@ namespace PluginCommon.Collections
                 OnPropertyChanged();
             }
         }
+
+        private TypeDatabase _Database;
+        public TypeDatabase Database
+        {
+            get
+            {
+                return _Database;
+            }
+
+            set
+            {
+                _Database = value;
+            }
+        }
+
+        private TItem _GameSelectedData;
+        public TItem GameSelectedData
+        {
+            get
+            {
+                return _GameSelectedData;
+            }
+
+            set
+            {
+                _GameSelectedData = value;
+                OnPropertyChanged();
+            }
+        }
+
 
         private bool _hasErrorCritical = false;
         public bool HasErrorCritical
@@ -115,7 +147,7 @@ namespace PluginCommon.Collections
         }
 
 
-        protected PluginDatabaseObject(IPlayniteAPI PlayniteApi, ISettings PluginSettings, string PluginUserDataPath)
+        protected PluginDatabaseObject(IPlayniteAPI PlayniteApi, TypeSettings PluginSettings, string PluginUserDataPath)
         {
             _PlayniteApi = PlayniteApi;
             this.PluginUserDataPath = PluginUserDataPath;
@@ -173,7 +205,9 @@ namespace PluginCommon.Collections
                     Directory.CreateDirectory(PluginDatabaseDirectory);
 
                     IsLoaded = false;
-                    return true;
+                    logger.Info($"{PluginName} - Database is cleared");
+
+                    return LoadDatabase();
                 }
                 catch (Exception ex)
                 {
@@ -184,6 +218,46 @@ namespace PluginCommon.Collections
             }
 
             return false;
+        }
+
+
+        public virtual void Add(TItem itemToAdd)
+        {
+            Database.Add(itemToAdd);
+        }
+
+        public virtual void Update(TItem itemToUpdate)
+        {
+            Database.Update(itemToUpdate);
+        }
+
+        public virtual bool Remove(Guid Id)
+        {
+            return Database.Remove(Id);
+        }
+
+
+        public abstract TItem Get(Guid Id, bool OnlyCache = false);
+
+        public virtual TItem Get(Game game, bool OnlyCache = false)
+        {
+            return Get(game.Id, OnlyCache);
+        }
+
+
+        public virtual void SetCurrent(Guid Id)
+        {
+            GameSelectedData = Get(Id);
+        }
+
+        public virtual void SetCurrent(Game game)
+        {
+            GameSelectedData = Get(game.Id);
+        }
+
+        public virtual void SetCurrent(TItem gameSelectedData)
+        {
+            GameSelectedData = gameSelectedData;
         }
     }
 }

@@ -11,5 +11,15 @@ namespace PluginCommon.Collections
     public abstract class PluginDataBaseGame<T> : PluginDataBaseGameBase
     {
         public abstract List<T> Items { get; set; }
+
+
+        [JsonIgnore]
+        public virtual bool HasData
+        {
+            get
+            {
+                return Items.Count > 0;
+            }
+        }
     }
 }

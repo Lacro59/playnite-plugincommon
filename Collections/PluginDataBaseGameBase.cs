@@ -25,7 +25,6 @@ namespace PluginCommon.Collections
             set
             {
                 _Hidden = value;
-                OnPropertyChanged();
             }
         }
 
@@ -44,7 +43,6 @@ namespace PluginCommon.Collections
             set
             {
                 _Icon = value;
-                OnPropertyChanged();
             }
         }
 
@@ -63,7 +61,6 @@ namespace PluginCommon.Collections
             set
             {
                 _CoverImage = value;
-                OnPropertyChanged();
             }
         }
 
@@ -86,7 +83,6 @@ namespace PluginCommon.Collections
             set
             {
                 _Genres = value;
-                OnPropertyChanged();
             }
         }
 
@@ -109,13 +105,30 @@ namespace PluginCommon.Collections
             set
             {
                 _GenreIds = value;
-                OnPropertyChanged();
+            }
+        }
+
+        private long _Playtime;
+        /// <summary>
+        /// Gets or sets played time in seconds.
+        /// </summary>
+        [JsonIgnore]
+        public long Playtime
+        {
+            get
+            {
+                return _Playtime;
+            }
+
+            set
+            {
+                _Playtime = value;
             }
         }
 
         private bool _IsDeleted;
         /// <summary>
-        /// 
+        /// Gets or sets value indicating if the game is deleted in library.
         /// </summary>
         [JsonIgnore]
         public bool IsDeleted
@@ -128,7 +141,24 @@ namespace PluginCommon.Collections
             set
             {
                 _IsDeleted = value;
-                OnPropertyChanged();
+            }
+        }
+
+        private bool _IsSaved;
+        /// <summary>
+        /// Gets or sets value indicating if the game is saved in disk.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsSaved
+        {
+            get
+            {
+                return _IsSaved;
+            }
+
+            set
+            {
+                _IsSaved = value;
             }
         }
     }

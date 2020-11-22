@@ -41,6 +41,8 @@ namespace PluginCommon.Collections
                         temp.CoverImage = game.CoverImage;
                         temp.GenreIds = game.GenreIds;
                         temp.Genres = game.Genres;
+                        temp.Playtime = game.Playtime;
+                        temp.IsSaved = true;
                     }
                     else
                     {
@@ -76,6 +78,8 @@ namespace PluginCommon.Collections
                         temp.CoverImage = game.CoverImage;
                         temp.GenreIds = game.GenreIds;
                         temp.Genres = game.Genres;
+                        temp.Playtime = game.Playtime;
+                        temp.IsSaved = true;
                     }
                     else
                     {

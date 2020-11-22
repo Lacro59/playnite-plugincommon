@@ -13,5 +13,15 @@ namespace PluginCommon.Collections
         public abstract List<T> Items { get; set; }
 
         public abstract Y ItemsDetails { get; set; }
+
+
+        [JsonIgnore]
+        public virtual bool HasData
+        {
+            get
+            {
+                return Items.Count > 0;
+            }
+        }
     }
 }
