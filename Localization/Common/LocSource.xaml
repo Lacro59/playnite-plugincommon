@@ -42,6 +42,7 @@
     <sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games</sys:String>
     <sys:String x:Key="LOCCommonAddingAllTag">Adding tag for all games</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Removing tag for all games</sys:String>
+    <sys:String x:Key="LOCCommonClearingAllTag">Clearing database</sys:String>
 
     <!-- CommonNotifications -->
 
