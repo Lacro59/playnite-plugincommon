@@ -21,10 +21,7 @@ namespace PluginCommon.Collections
 
         public void SetGameInfo<T>(IPlayniteAPI PlayniteApi)
         {
-            while (!PlayniteApi.Database.IsOpen)
-            {
-
-            }
+            System.Threading.SpinWait.SpinUntil(() => PlayniteApi.Database.IsOpen, -1);
 
             foreach (var item in Items)
             {
@@ -58,10 +55,7 @@ namespace PluginCommon.Collections
 
         public void SetGameInfoDetails<T, Y>(IPlayniteAPI PlayniteApi)
         {
-            while (!PlayniteApi.Database.IsOpen)
-            {
-
-            }
+            System.Threading.SpinWait.SpinUntil(() => PlayniteApi.Database.IsOpen, -1);
 
             foreach (var item in Items)
             {
