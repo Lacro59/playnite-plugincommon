@@ -17,6 +17,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace PluginCommon.Collections
 {
@@ -248,7 +249,7 @@ namespace PluginCommon.Collections
 
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
-                    logger.Info($"{PluginName} - Task GetAllDatas(){CancelText} - {String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)}");
+                    logger.Info($"{PluginName} - Task GetAllDatas(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
                 }
                 catch (Exception ex)
                 {
@@ -287,6 +288,7 @@ namespace PluginCommon.Collections
 
         public virtual void Add(TItem itemToAdd)
         {
+            itemToAdd.IsSaved = true;
             Database.Add(itemToAdd);
 
             PropertyInfo propertyInfo = PluginSettings.GetType().GetProperty("EnableTag");
@@ -347,6 +349,9 @@ namespace PluginCommon.Collections
 
         public virtual void SetCurrent(TItem gameSelectedData)
         {
+#if DEBUG
+            logger.Debug($"{PluginName} - SetCurrent() - {gameSelectedData.Name}");
+#endif
             GameSelectedData = gameSelectedData;
         }
 
@@ -417,12 +422,12 @@ namespace PluginCommon.Collections
                     Stopwatch stopWatch = new Stopwatch();
                     stopWatch.Start();
 
-                    var db = _PlayniteApi.Database.Games.Where(x => x.Hidden == false);
-                    activateGlobalProgress.ProgressMaxValue = (double)db.Count();
+                    var PlayniteDb = _PlayniteApi.Database.Games.Where(x => x.Hidden == false);
+                    activateGlobalProgress.ProgressMaxValue = (double)PlayniteDb.Count();
 
                     string CancelText = string.Empty;
 
-                    foreach (Game game in db)
+                    foreach (Game game in PlayniteDb)
                     {
                         if (activateGlobalProgress.CancelToken.IsCancellationRequested)
                         {
@@ -439,7 +444,7 @@ namespace PluginCommon.Collections
 
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
-                    logger.Info($"{PluginName} - AddTagAllGame(){CancelText} - {String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)}");
+                    logger.Info($"{PluginName} - AddTagAllGame(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
                 }
                 catch (Exception ex)
                 {
@@ -474,12 +479,12 @@ namespace PluginCommon.Collections
                     Stopwatch stopWatch = new Stopwatch();
                     stopWatch.Start();
 
-                    var db = _PlayniteApi.Database.Games.Where(x => x.Hidden == false);
-                    activateGlobalProgress.ProgressMaxValue = (double)db.Count();
+                    var PlayniteDb = _PlayniteApi.Database.Games.Where(x => x.Hidden == false);
+                    activateGlobalProgress.ProgressMaxValue = (double)PlayniteDb.Count();
 
                     string CancelText = string.Empty;
 
-                    foreach (Game game in db)
+                    foreach (Game game in PlayniteDb)
                     {
                         if (activateGlobalProgress.CancelToken.IsCancellationRequested)
                         {
@@ -493,7 +498,7 @@ namespace PluginCommon.Collections
 
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
-                    logger.Info($"{PluginName} - RemoveTagAllGame(){CancelText} - {String.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)}");
+                    logger.Info($"{PluginName} - RemoveTagAllGame(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
                 }
                 catch (Exception ex)
                 {
