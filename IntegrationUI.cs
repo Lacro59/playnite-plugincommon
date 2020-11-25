@@ -917,7 +917,7 @@ namespace PluginCommon
 
         public static void SetControlSize(FrameworkElement ControlElement)
         {
-
+            SetControlSize(ControlElement, 0, 0);
         }
 
 
