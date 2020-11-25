@@ -6,6 +6,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Newtonsoft.Json;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 
@@ -382,6 +383,9 @@ namespace PluginCommon
 
         public bool AddResources(List<ResourcesList> ResourcesList)
         {
+#if DEBUG
+            logger.Debug($"PluginCommon - AddResources() - {JsonConvert.SerializeObject(ResourcesList)}");
+#endif
             string ItemKey = string.Empty;
             try
             {
@@ -874,6 +878,7 @@ namespace PluginCommon
             return ElementFind;
         }
 
+
         private static bool SearchElementInsert(List<FrameworkElement> SearchList, string ElSearchName)
         {
             foreach (FrameworkElement el in SearchList)
@@ -885,6 +890,7 @@ namespace PluginCommon
             }
             return false;
         }
+
         private static bool SearchElementInsert(List<FrameworkElement> SearchList, FrameworkElement ElSearch)
         {
             foreach (FrameworkElement el in SearchList)
@@ -897,6 +903,7 @@ namespace PluginCommon
             return false;
         }
 
+
         public static T GetAncestorOfType<T>(FrameworkElement child) where T : FrameworkElement
         {
             var parent = VisualTreeHelper.GetParent(child);
@@ -905,6 +912,67 @@ namespace PluginCommon
                 return (T)GetAncestorOfType<T>((FrameworkElement)parent);
             }
             return (T)parent;
+        }
+
+
+        public static void SetControlSize(FrameworkElement ControlElement)
+        {
+
+        }
+
+
+        public static void SetControlSize(FrameworkElement ControlElement, double DefaultHeight, double DefaultWidth)
+        {
+            try
+            {
+                UserControl ControlParent = IntegrationUI.GetAncestorOfType<UserControl>(ControlElement);
+                FrameworkElement ControlContener = (FrameworkElement)ControlParent.Parent;
+
+#if DEBUG
+                logger.Debug($"PluginCommon - SetControlSize({ControlElement.Name}) - parent.name: {ControlContener.Name} - parent.Height: {ControlContener.Height} - parent.Width: {ControlContener.Width} - parent.MaxHeight: {ControlContener.MaxHeight} - parent.MaxWidth: {ControlContener.MaxWidth}");
+#endif
+
+                // Set Height
+                if (!double.IsNaN(ControlContener.Height))
+                {
+                    ControlElement.Height = ControlContener.Height;
+                }
+                else if (DefaultHeight != 0)
+                {
+                    ControlElement.Height = DefaultHeight;
+                }
+                // Control with MaxHeight
+                if (!double.IsNaN(ControlContener.MaxHeight))
+                {
+                    if (ControlElement.Height > ControlContener.MaxHeight)
+                    {
+                        ControlElement.Height = ControlContener.MaxHeight;
+                    }
+                }
+
+
+                // Set Width
+                if (!double.IsNaN(ControlContener.Width))
+                {
+                    ControlElement.Width = ControlContener.Width;
+                }
+                else if (DefaultWidth != 0)
+                {
+                    ControlElement.Width = DefaultWidth;
+                }
+                // Control with MaxWidth
+                if (!double.IsNaN(ControlContener.MaxWidth))
+                {
+                    if (ControlElement.Width > ControlContener.MaxWidth)
+                    {
+                        ControlElement.Width = ControlContener.MaxWidth;
+                    }
+                }
+            }
+            catch
+            {
+
+            }
         }
     }
 
