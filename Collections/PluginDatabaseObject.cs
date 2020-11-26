@@ -317,6 +317,11 @@ namespace PluginCommon.Collections
             return Database.Remove(Id);
         }
 
+        public virtual bool Remove(Game game)
+        {
+            return Database.Remove(game.Id);
+        }
+
 
         public virtual TItem GetOnlyCache(Guid Id)
         {

@@ -10,6 +10,42 @@ namespace PluginCommon.Collections
 {
     public class PluginDataBaseGameBase : DatabaseObject
     {
+        private Guid _SourceId;
+        /// <summary>
+        /// Gets or sets source of the game.
+        /// </summary>
+        [JsonIgnore]
+        public Guid SourceId
+        {
+            get
+            {
+                return _SourceId;
+            }
+
+            set
+            {
+                _SourceId = value;
+            }
+        }
+
+        private DateTime? _LastActivity;
+        /// <summary>
+        /// Gets or sets last played date.
+        /// </summary>
+        [JsonIgnore]
+        public DateTime? LastActivity
+        {
+            get
+            {
+                return _LastActivity;
+            }
+
+            set
+            {
+                _LastActivity = value;
+            }
+        }
+
         private bool _Hidden;
         /// <summary>
         /// Gets or sets value indicating if the game is hidden in library.

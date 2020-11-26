@@ -33,12 +33,14 @@ namespace PluginCommon.Collections
                     if (game != null && item.Value is PluginDataBaseGame<T>)
                     {
                         temp.Name = game.Name;
+                        temp.SourceId = game.SourceId;
                         temp.Hidden = game.Hidden;
                         temp.Icon = game.Icon;
                         temp.CoverImage = game.CoverImage;
                         temp.GenreIds = game.GenreIds;
                         temp.Genres = game.Genres;
                         temp.Playtime = game.Playtime;
+                        temp.LastActivity = game.LastActivity;
                         temp.IsSaved = true;
                     }
                     else
@@ -67,12 +69,14 @@ namespace PluginCommon.Collections
                     if (game != null && item.Value is PluginDataBaseGameDetails<T, Y>)
                     {
                         temp.Name = game.Name;
+                        temp.SourceId = game.SourceId;
                         temp.Hidden = game.Hidden;
                         temp.Icon = game.Icon;
                         temp.CoverImage = game.CoverImage;
                         temp.GenreIds = game.GenreIds;
                         temp.Genres = game.Genres;
                         temp.Playtime = game.Playtime;
+                        temp.LastActivity = game.LastActivity;
                         temp.IsSaved = true;
                     }
                     else
