@@ -129,9 +129,6 @@ namespace PluginCommon
             Game game = PlayniteApi.Database.Games.Get(Id);
             if (game == null)
             {
-#if DEBUG
-                logger.Debug($"PluginCommon - GetSourceName() - Game is null for {Id.ToString()}");
-#endif
                 return "Playnite";
             }
             return GetSourceName(PlayniteApi, game);
@@ -145,23 +142,14 @@ namespace PluginCommon
             {
                 if (IsGameEmulated(PlayniteApi, game))
                 {
-#if DEBUG
-                    logger.Debug($"PluginCommon - GetSourceName() - Game is emulated for {game.Name} / {game.Id}");
-#endif
                     SourceName = "RetroAchievements";
                 }
                 else if (game.SourceId != null && game.SourceId != Guid.Parse("00000000-0000-0000-0000-000000000000"))
                 {
-#if DEBUG
-                    logger.Debug($"PluginCommon - GetSourceName() - {PlayniteApi.Database.Sources.Get(game.SourceId).Name} find for {game.Name} / {game.Id}");
-#endif
                     SourceName = PlayniteApi.Database.Sources.Get(game.SourceId).Name;
                 }
                 else
                 {
-#if DEBUG
-                    logger.Debug($"PluginCommon - GetSourceName() - Source is null or empty for {game.Name} / {game.Id}");
-#endif
                     SourceName = "Playnite";
                 }
             }
