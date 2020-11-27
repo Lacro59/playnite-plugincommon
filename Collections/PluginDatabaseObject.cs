@@ -165,6 +165,8 @@ namespace PluginCommon.Collections
             }
         }
 
+        public bool IsViewOpen = false;
+
 
         protected PluginDatabaseObject(IPlayniteAPI PlayniteApi, TypeSettings PluginSettings, string PluginUserDataPath)
         {
