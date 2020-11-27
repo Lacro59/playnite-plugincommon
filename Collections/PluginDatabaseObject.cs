@@ -346,24 +346,37 @@ namespace PluginCommon.Collections
 
         public virtual void SetCurrent(Guid Id)
         {
-            SetCurrent(GetOnlyCache(Id));
+            SetCurrent(Get(Id, true));
         }
 
         public virtual void SetCurrent(Game game)
         {
-            SetCurrent(GetOnlyCache(game.Id));
+            SetCurrent(Get(game.Id, true));
         }
 
         public virtual void SetCurrent(TItem gameSelectedData)
         {
-#if DEBUG
-            logger.Debug($"{PluginName} - SetCurrent() - {gameSelectedData.Name}");
-#endif
             GameSelectedData = gameSelectedData;
         }
 
 
-        public abstract TItem GetDefault(Game game);
+        public virtual TItem GetDefault(Game game)
+        {
+            var newItem = typeof(TItem).CrateInstance<TItem>();
+
+            newItem.Id = game.Id;
+            newItem.Name = game.Name;
+            newItem.SourceId = game.SourceId;
+            newItem.Hidden = game.Hidden;
+            newItem.Icon = game.Icon;
+            newItem.CoverImage = game.CoverImage;
+            newItem.GenreIds = game.GenreIds;
+            newItem.Genres = game.Genres;
+            newItem.Playtime = game.Playtime;
+            newItem.LastActivity = game.LastActivity;
+
+            return newItem;
+        }
 
 
         protected virtual void GetPluginTags()
