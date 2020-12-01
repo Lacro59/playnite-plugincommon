@@ -262,5 +262,39 @@ namespace PluginCommon
 
             return response;
         }
+
+        //var formContent = new FormUrlEncodedContent(new[]
+        //{
+        //    new KeyValuePair<string, string>("comment", comment),
+        //    new KeyValuePair<string, string>("questionId", questionId)
+        //});
+        public static async Task<string> PostStringDataCookies(string url, FormUrlEncodedContent formContent, List<HttpCookie> Cookies = null)
+        {
+            var response = string.Empty;
+            using (var client = new HttpClient())
+            {
+                if (Cookies != null)
+                {
+                    var cookieString = string.Join(";", Cookies.Select(a => $"{a.Name}={a.Value}"));
+                    client.DefaultRequestHeaders.Add("Cookie", cookieString);
+                }
+                
+                HttpResponseMessage result;
+                try
+                {
+                    result = client.PostAsync(url, formContent).Result;
+                    if (result.IsSuccessStatusCode)
+                    {
+                        response = await result.Content.ReadAsStringAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, "PluginCommon", $"Error on Post {url}");
+                }
+            }
+
+            return response;
+        }
     }
 }
