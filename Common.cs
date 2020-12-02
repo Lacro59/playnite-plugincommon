@@ -102,5 +102,27 @@ namespace PluginCommon
 
             logger.Error(ex, $"{Message}");
         }
+
+
+        public static string NormalizeGameName(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return string.Empty;
+            }
+
+            var newName = name.ToLower();
+            newName = newName.RemoveTrademarks();
+            newName = newName.Replace("_", "");
+            newName = newName.Replace(".", "");
+            newName = newName.Replace('’', '\'');
+            newName = newName.Replace(":", "");
+            newName = newName.Replace("-", "");
+            newName = newName.Replace("goty", "");
+            newName = newName.Replace("game of the year edition", "");
+            newName = newName.Replace("  ", " ");
+
+            return newName.Trim();
+        }
     }
 }

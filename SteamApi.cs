@@ -85,27 +85,6 @@ namespace PluginCommon
             return JObject.Parse(responseData);
         }
 
-        private string NormalizeGameName(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                return string.Empty;
-            }
-
-            var newName = name.ToLower();
-            newName = newName.RemoveTrademarks();
-            newName = newName.Replace("_", "");
-            newName = newName.Replace(".", "");
-            newName = newName.Replace('’', '\'');
-            newName = newName.Replace(":", "");
-            newName = newName.Replace("-", "");
-            newName = newName.Replace("goty", "");
-            newName = newName.Replace("game of the year edition", "");
-            newName = newName.Replace("  ", " ");
-
-            return newName.Trim();
-        }
-
         public int GetSteamId(string Name)
         {
             int SteamId = 0;
@@ -116,8 +95,8 @@ namespace PluginCommon
                 {
                     foreach (JObject Game in SteamListApp["applist"]["apps"])
                     {
-                        string NameSteam = NormalizeGameName((string)Game["name"]);
-                        string NameSearch = NormalizeGameName(Name);
+                        string NameSteam = Common.NormalizeGameName((string)Game["name"]);
+                        string NameSearch = Common.NormalizeGameName(Name);
 
                         if (NameSteam == NameSearch)
                         {
