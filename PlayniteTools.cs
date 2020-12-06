@@ -47,6 +47,12 @@ namespace PluginCommon
             List<Emulator> ListEmulators = GetListEmulators(PlayniteApi);
             return game.PlayAction != null && game.PlayAction.EmulatorId != null && ListEmulators.FindAll(x => x.Id == game.PlayAction.EmulatorId).Count > 0;
         }
+
+        public static bool GameUseRpcs3(IPlayniteAPI PlayniteApi, Game game)
+        {
+            List<Emulator> ListEmulators = GetListEmulators(PlayniteApi);
+            return ListEmulators.Find(x => x.Id == game.PlayAction.EmulatorId).Profiles[0].Executable.ToLower().Contains("rpcs3.exe");
+        }
         #endregion
 
 
@@ -143,6 +149,12 @@ namespace PluginCommon
                 if (IsGameEmulated(PlayniteApi, game))
                 {
                     SourceName = "RetroAchievements";
+                    
+                    if (GameUseRpcs3(PlayniteApi, game))
+                    {
+                        SourceName = "Rpcs3";
+                    }
+
                 }
                 else if (game.SourceId != null && game.SourceId != Guid.Parse("00000000-0000-0000-0000-000000000000"))
                 {
