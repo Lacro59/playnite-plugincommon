@@ -17,6 +17,7 @@
         private static string itchio = "";                 // e90b
         private static string indiegala = "";              // e911
         private static string retroachievements = "";      // e910
+        private static string rpcs3 = "";                  // ea37
 
         private static string statistics = "";             // e90c
         private static string howlongtobeat = "";          // e90d
@@ -102,6 +103,9 @@
                     break;
                 case "itch.io":
                     stringReturn = itchio;
+                    break;
+                case "rpcs3":
+                    stringReturn = rpcs3;
                     break;
 
                 default:
