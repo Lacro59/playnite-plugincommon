@@ -46,6 +46,11 @@ namespace PluginCommon
         {
             string PathImageFileName = Path.Combine(ImagesCachePath, PluginName.ToLower(), ImageFileName);
 
+            if (!url.ToLower().Contains("http"))
+            {
+                return false;
+            }
+
             using (var client = new HttpClient())
             {
                 Stream imageStream;

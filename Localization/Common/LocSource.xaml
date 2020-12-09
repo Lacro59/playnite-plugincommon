@@ -10,6 +10,9 @@
     <sys:String x:Key="LOCCommonMenuInExtensions">Plugin main menus in extensions menu *</sys:String>
     <sys:String x:Key="LOCCommonIconStore">Show icon store</sys:String>
 
+    <sys:String x:Key="LOCCommonIntegrationFullScreen">Full screen</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Enable full screen integration</sys:String>
+    
     <sys:String x:Key="LOCCommonIntegration">Appearance</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInCustomTheme">Enable custom theme integration (Only if integrated in custom theme)</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonHeader">Add plugin button to Playnite window</sys:String>

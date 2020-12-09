@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -33,6 +34,7 @@ namespace PluginCommon
 
         private StackPanel PART_ElemDescription = null;
 
+
         // BtActionBar
         public abstract string BtActionBarName { get; set; }
         public abstract FrameworkElement PART_BtActionBar { get; set; }
@@ -45,6 +47,16 @@ namespace PluginCommon
         public abstract List<CustomElement> ListCustomElements { get; set; }
 
 
+        // SpInfoBarFS
+        public abstract string SpInfoBarFSName { get; set; }
+        public abstract FrameworkElement PART_SpInfoBarFS { get; set; }
+
+        // BtActionBarFS
+        public abstract string BtActionBarFSName { get; set; }
+        public abstract FrameworkElement PART_BtActionBarFS { get; set; }
+
+
+
         public PlayniteUiHelper(IPlayniteAPI PlayniteApi, string PluginUserDataPath)
         {
             _PlayniteApi = PlayniteApi;
@@ -52,15 +64,20 @@ namespace PluginCommon
 
 
         public abstract void Initial();
-        public abstract DispatcherOperation AddElements();
         public abstract void RefreshElements(Game GameSelected, bool force = false);
         public void RemoveElements()
         {
             RemoveBtActionBar();
             RemoveSpDescription();
             RemoveCustomElements();
+
+            RemoveSpInfoBarFS();
+            RemoveBtActionBarFS();
         }
 
+
+        #region DesktopMode
+        public abstract DispatcherOperation AddElements();
 
         public abstract void InitialBtActionBar();
         public abstract void AddBtActionBar();
@@ -193,6 +210,45 @@ namespace PluginCommon
                 }
             }
         }
+        #endregion
+
+
+        #region FullScreenMode
+        public abstract DispatcherOperation AddElementsFS();
+
+        public abstract void InitialSpInfoBarFS();
+        public abstract void AddSpInfoBarFS();
+        public abstract void RefreshSpInfoBarFS();
+        public void RemoveSpInfoBarFS()
+        {
+            if (!SpInfoBarFSName.IsNullOrEmpty())
+            {
+                ui.RemoveStackPanelInGameSelectedInfoBarFS(SpInfoBarFSName);
+                PART_SpInfoBarFS = null;
+            }
+            else
+            {
+                logger.Warn($"PluginCommon - RemoveSpInfoBarFS() without SpInfoBarFSName");
+            }
+        }
+
+
+        public abstract void InitialBtActionBarFS();
+        public abstract void AddBtActionBarFS();
+        public abstract void RefreshBtActionBarFS();
+        public void RemoveBtActionBarFS()
+        {
+            if (!BtActionBarName.IsNullOrEmpty())
+            {
+                ui.RemoveButtonInGameSelectedActionBarButtonOrToggleButtonFS(BtActionBarFSName);
+                PART_BtActionBarFS = null;
+            }
+            else
+            {
+                logger.Warn($"PluginCommon - RemoveBtActionBarFS() without BtActionBarFSName");
+            }
+        }
+        #endregion
 
 
         public static void HandleEsc(object sender, KeyEventArgs e)
@@ -828,6 +884,212 @@ namespace PluginCommon
             }
         }
         #endregion
+
+        
+
+
+        #region GameSelectedInfoBarFS
+        private FrameworkElement spInfoBarFS = null;
+
+        public void AddStackPanelInGameSelectedInfoBarFS(FrameworkElement spGameSelectedInfoBarFS)
+        {
+            try
+            {
+                FrameworkElement tempElement = SearchElementByName("PART_ButtonContext");
+                if (tempElement != null)
+                {
+                    tempElement = (FrameworkElement)tempElement.Parent;
+                    tempElement = (FrameworkElement)tempElement.Parent;
+
+                    spInfoBarFS = Tools.FindVisualChildren<StackPanel>(tempElement).FirstOrDefault();
+
+                    // Not find element
+                    if (spInfoBarFS == null)
+                    {
+                        logger.Error("PluginCommon - btGameSelectedInfoBarFS Parent [PART_ButtonContext] not find");
+                        return;
+                    }
+
+                    // Add element 
+                    if (spInfoBarFS is StackPanel)
+                    {
+                        ((StackPanel)(spInfoBarFS)).Children.Add(spGameSelectedInfoBarFS);
+                        ((StackPanel)(spInfoBarFS)).UpdateLayout();
+
+#if DEBUG
+                        logger.Debug($"PluginCommon - (StackPanel)btGameSelectedActionBarFS [{spGameSelectedInfoBarFS.Name}] insert");
+#endif
+                    }
+                }
+                else
+                {
+                    logger.Error("PluginCommon - btGameSelectedInfoBarFS [PART_ButtonContext] not find");
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon");
+            }
+        }
+
+        public void RemoveStackPanelInGameSelectedInfoBarFS(string spGameSelectedInfoBarNameFS)
+        {
+            try
+            {
+                // Not find element
+                if (spInfoBarFS == null)
+                {
+                    logger.Error("PluginCommon - btGameSelectedInfoBarFS [PART_ButtonContext] not find");
+                    return;
+                }
+
+                // Remove in parent if good type
+                if (spInfoBarFS is StackPanel)
+                {
+                    for (int i = 0; i < ((StackPanel)spInfoBarFS).Children.Count; i++)
+                    {
+                        if (((FrameworkElement)((StackPanel)spInfoBarFS).Children[i]).Name == spGameSelectedInfoBarNameFS)
+                        {
+                            ((StackPanel)spInfoBarFS).Children.Remove(((StackPanel)spInfoBarFS).Children[i]);
+                            ((StackPanel)spInfoBarFS).UpdateLayout();
+
+#if DEBUG
+                            logger.Debug($"PluginCommon - (StackPanel)btGameSelectedInfoBarFS [{spGameSelectedInfoBarNameFS}] remove");
+#endif
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon");
+            }
+        }
+        #endregion
+
+
+        #region GameSelectedActionBarFS
+        private FrameworkElement btGameSelectedActionBarChildFS = null;
+
+        public void AddButtonInGameSelectedActionBarButtonOrToggleButtonFS(FrameworkElement btGameSelectedActionBarFS)
+        {
+            try
+            {
+                btGameSelectedActionBarChildFS = SearchElementByName("PART_ButtonContext", true);
+
+                // Not find element
+                if (btGameSelectedActionBarChildFS == null)
+                {
+                    logger.Error("PluginCommon - btGameSelectedActionBarChildFS [PART_ButtonContext] not find");
+                    return;
+                }
+
+                btGameSelectedActionBarFS.Height = btGameSelectedActionBarChildFS.ActualHeight;
+                if (btGameSelectedActionBarFS.Name == "PART_ButtonContext")
+                {
+                    btGameSelectedActionBarFS.Width = btGameSelectedActionBarChildFS.ActualWidth;
+                }
+
+                // Not find element
+                if (btGameSelectedActionBarChildFS == null)
+                {
+                    logger.Error("PluginCommon - btGameSelectedActionBarChildFS [PART_ButtonContext] not find");
+                    return;
+                }
+
+                // Add in parent if good type
+                if (btGameSelectedActionBarChildFS.Parent is StackPanel)
+                {
+                    // Add button 
+                    ((StackPanel)(btGameSelectedActionBarChildFS.Parent)).Children.Add(btGameSelectedActionBarFS);
+                    ((StackPanel)(btGameSelectedActionBarChildFS.Parent)).UpdateLayout();
+
+#if DEBUG
+                    logger.Debug($"PluginCommon - (StackPanel)btGameSelectedActionBarFS [{btGameSelectedActionBarFS.Name}] insert");
+#endif
+                }
+
+                return;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon", $"Error in AddButtonInGameSelectedActionBarButtonOrToggleButtonFS({btGameSelectedActionBarFS.Name})");
+                return;
+            }
+        }
+
+        public void RemoveButtonInGameSelectedActionBarButtonOrToggleButtonFS(string btGameSelectedActionBarNameFS)
+        {
+            try
+            {
+                // Not find element
+                if (btGameSelectedActionBarChildFS == null)
+                {
+                    logger.Error("PluginCommon - btGameSelectedActionBarChildFS [PART_ButtonContext] not find");
+                    return;
+                }
+
+                // Remove in parent if good type
+                if (btGameSelectedActionBarChildFS.Parent is StackPanel && btGameSelectedActionBarChildFS != null)
+                {
+                    StackPanel btGameSelectedParent = ((StackPanel)(btGameSelectedActionBarChildFS.Parent));
+                    for (int i = 0; i < btGameSelectedParent.Children.Count; i++)
+                    {
+                        if (((FrameworkElement)btGameSelectedParent.Children[i]).Name == btGameSelectedActionBarNameFS)
+                        {
+                            btGameSelectedParent.Children.Remove(btGameSelectedParent.Children[i]);
+                            btGameSelectedParent.UpdateLayout();
+
+#if DEBUG
+                            logger.Debug($"PluginCommon - (StackPanel)btGameSelectedActionBarChildFS [{btGameSelectedActionBarNameFS}] remove");
+#endif
+                        }
+                    }
+                }
+
+                return;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon", $"Error in RemoveButtonInGameSelectedActionBarButtonOrToggleButton({btGameSelectedActionBarNameFS})");
+                return;
+            }
+        }
+        #endregion
+
+
+        #region GameSelectedDescription
+        private FrameworkElement elGameSelectedDescriptionContenerFS = null;
+
+        public void AddElementInGameSelectedDescriptionFS(FrameworkElement elGameSelectedDescriptionFS)
+        {
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon", $"Error in AddElementInGameSelectedDescriptionFS({elGameSelectedDescriptionFS.Name})");
+                return;
+            }
+        }
+
+        public void RemoveElementInGameSelectedDescriptionFS(string elGameSelectedDescriptionFSName)
+        {
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon", $"Error in RemoveElementInGameSelectedDescriptionFS({elGameSelectedDescriptionFSName})");
+                return;
+            }
+        }
+        #endregion
+
+
 
 
         public static FrameworkElement SearchElementByName(string ElementName, bool MustVisible = false, bool ParentMustVisible = false)
