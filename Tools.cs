@@ -1,9 +1,12 @@
 ﻿using Newtonsoft.Json.Linq;
 using Playnite.SDK;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace PluginCommon
@@ -122,6 +125,32 @@ namespace PluginCommon
             }
 
             return buffer;
+        }
+
+
+        //https://stackoverflow.com/questions/1585462/bubbling-scroll-events-from-a-listview-to-its-parent
+        public static void HandlePreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (!e.Handled)
+            {
+                var scrollViewer = Tools.FindVisualChildren<ScrollViewer>((FrameworkElement)sender).FirstOrDefault();
+
+                if (scrollViewer == null)
+                {
+                    return;
+                }
+
+                var scrollPos = scrollViewer.ContentVerticalOffset;
+                if ((scrollPos == scrollViewer.ScrollableHeight && e.Delta < 0) || (scrollPos == 0 && e.Delta > 0))
+                {
+                    e.Handled = true;
+                    var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta);
+                    eventArg.RoutedEvent = UIElement.MouseWheelEvent;
+                    eventArg.Source = sender;
+                    var parent = ((Control)sender).Parent as UIElement;
+                    parent.RaiseEvent(eventArg);
+                }
+            }
         }
     }
 }
