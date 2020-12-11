@@ -612,7 +612,7 @@ namespace PluginCommon
                     return;
                 }
 
-                FrameworkElement spContener = SearchElementByName("PART_spContener", btGameSelectedActionBarChild.Parent, true);
+                FrameworkElement spContener = SearchElementByName("PART_spContener", btGameSelectedActionBarChild.Parent);
 
                 // Remove in parent if good type
                 if (btGameSelectedActionBarChild.Parent is StackPanel && btGameSelectedActionBarChild != null)
