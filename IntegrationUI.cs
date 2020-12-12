@@ -537,7 +537,7 @@ namespace PluginCommon
                 }
 
                 btGameSelectedActionBar.Height = btGameSelectedActionBarChild.ActualHeight;
-                if (btGameSelectedActionBar.Name == "PART_ButtonMoreActions")
+                if (btGameSelectedActionBarChild.Name == "PART_ButtonMoreActions")
                 {
                     btGameSelectedActionBar.Width = btGameSelectedActionBarChild.ActualWidth;
                 }
