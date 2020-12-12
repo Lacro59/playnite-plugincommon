@@ -186,8 +186,8 @@ namespace PluginCommon
             {
                 try
                 {
-                    FrameworkElement customElementParent = (FrameworkElement)customElement.Element.Parent;
-
+                    FrameworkElement customElementParent = (FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)customElement.Element.Parent).Parent).Parent).Parent;
+                    
                     if (customElementParent != null)
                     {
 #if DEBUG
