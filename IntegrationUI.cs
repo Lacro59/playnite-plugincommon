@@ -34,6 +34,8 @@ namespace PluginCommon
 
         private StackPanel PART_ElemDescription = null;
 
+        private Visibility? NotesVisibility;
+
 
         // BtActionBar
         public abstract string BtActionBarName { get; set; }
@@ -105,6 +107,7 @@ namespace PluginCommon
             {
                 ui.RemoveElementInGameSelectedDescription(SpDescriptionName);
                 PART_SpDescription = null;
+                PART_ElemDescription = null;
             }
             else
             {
@@ -312,7 +315,7 @@ namespace PluginCommon
             try
             {
                 FrameworkElement PART_GaButton = IntegrationUI.SearchElementByName("PART_GaButton", true);
-                if (PART_GaButton != null)
+                if (PART_GaButton != null && PART_GaButton is ToggleButton && (bool)((ToggleButton)PART_GaButton).IsChecked)
                 {
 #if DEBUG
                     logger.Debug("PluginCommon - Reset PART_GaButton");
@@ -350,15 +353,21 @@ namespace PluginCommon
 #endif
             if (PART_ElemDescription == null)
             {
-                foreach (StackPanel sp in Tools.FindVisualChildren<StackPanel>(Application.Current.MainWindow))
+                PART_ElemDescription = (StackPanel)IntegrationUI.SearchElementByName("PART_ElemDescription", false, true);
+            }
+
+            dynamic PART_ElemDescriptionParent = (FrameworkElement)PART_ElemDescription.Parent;
+
+
+            if (NotesVisibility == null)
+            {
+                FrameworkElement PART_ElemNotes = IntegrationUI.SearchElementByName("PART_ElemNotes");
+                if (PART_ElemNotes != null)
                 {
-                    if (sp.Name == "PART_ElemDescription")
-                    {
-                        PART_ElemDescription = sp;
-                        break;
-                    }
+                    NotesVisibility = PART_ElemNotes.Visibility;
                 }
             }
+
 
             if (PART_ElemDescription != null)
             {
@@ -369,11 +378,11 @@ namespace PluginCommon
 
                 if ((bool)(tgButton.IsChecked))
                 {
-                    for (int i = 0; i < PART_ElemDescription.Children.Count; i++)
+                    for (int i = 0; i < PART_ElemDescriptionParent.Children.Count; i++)
                     {
-                        if (((FrameworkElement)PART_ElemDescription.Children[i]).Name == "PART_GaDescriptionIntegration" && tgButton.Name == "PART_GaButton")
+                        if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_GaDescriptionIntegration" && tgButton.Name == "PART_GaButton")
                         {
-                            ((FrameworkElement)PART_ElemDescription.Children[i]).Visibility = Visibility.Visible;
+                            ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
 
                             // Uncheck other integration ToggleButton
                             if (PART_ScButton is ToggleButton)
@@ -381,9 +390,9 @@ namespace PluginCommon
                                 ((ToggleButton)PART_ScButton).IsChecked = false;
                             }
                         }
-                        else if (((FrameworkElement)PART_ElemDescription.Children[i]).Name == "PART_ScDescriptionIntegration" && tgButton.Name == "PART_ScButton")
+                        else if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ScDescriptionIntegration" && tgButton.Name == "PART_ScButton")
                         {
-                            ((FrameworkElement)PART_ElemDescription.Children[i]).Visibility = Visibility.Visible;
+                            ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
 
                             // Uncheck other integration ToggleButton
                             if (PART_GaButton is ToggleButton)
@@ -393,33 +402,43 @@ namespace PluginCommon
                         }
                         else
                         {
-                            ((FrameworkElement)PART_ElemDescription.Children[i]).Visibility = Visibility.Collapsed;
+                            if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ElemNotes" || ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ElemDescription")
+                            {
+                                ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Collapsed;
+                            }
                         }
                     }
                 }
                 else
                 {
-                    for (int i = 0; i < PART_ElemDescription.Children.Count; i++)
+                    for (int i = 0; i < PART_ElemDescriptionParent.Children.Count; i++)
                     {
-                        if (((FrameworkElement)PART_ElemDescription.Children[i]).Name == "PART_GaDescriptionIntegration")
+                        if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_GaDescriptionIntegration")
                         {
-                            ((FrameworkElement)PART_ElemDescription.Children[i]).Visibility = Visibility.Collapsed;
+                            ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Collapsed;
                             if (tgButton.Name == "PART_GaButton" && (bool)tgButton.IsChecked)
                             {
-                                ((FrameworkElement)PART_ElemDescription.Children[i]).Visibility = Visibility.Visible;
+                                ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
                             }
                         }
-                        else if (((FrameworkElement)PART_ElemDescription.Children[i]).Name == "PART_ScDescriptionIntegration")
+                        else if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ScDescriptionIntegration")
                         {
-                            ((FrameworkElement)PART_ElemDescription.Children[i]).Visibility = Visibility.Collapsed;
+                            ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Collapsed;
                             if (tgButton.Name == "PART_ScButton" && (bool)tgButton.IsChecked)
                             {
-                                ((FrameworkElement)PART_ElemDescription.Children[i]).Visibility = Visibility.Visible;
+                                ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
                             }
                         }
                         else
                         {
-                            ((FrameworkElement)PART_ElemDescription.Children[i]).Visibility = Visibility.Visible;
+                            if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ElemNotes")
+                            {
+                                ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = (Visibility)NotesVisibility;
+                            }
+                            else if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ElemDescription")
+                            {
+                                ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
+                            }
                         }
                     }
                 }
@@ -526,7 +545,6 @@ namespace PluginCommon
         {
             try
             {
-
                 btGameSelectedActionBarChild = SearchElementByName("PART_ButtonMoreActions", true);
                 var PART_ButtonEditGame = SearchElementByName("PART_ButtonEditGame", btGameSelectedActionBarChild.Parent);
 
@@ -668,7 +686,7 @@ namespace PluginCommon
         #region GameSelectedDescription
         private FrameworkElement elGameSelectedDescriptionContener = null;
 
-        public void AddElementInGameSelectedDescription(FrameworkElement elGameSelectedDescription, bool isTop = false)
+        public void AddElementInGameSelectedDescription(FrameworkElement elGameSelectedDescription, bool isTop = false, bool ShowTitle = true)
         {
             try
             {
@@ -698,7 +716,7 @@ namespace PluginCommon
                 else
                 {
                     PART_ElemDescription.Margin = PART_ElemNotes.Margin;
-                    elGameSelectedDescription.Margin = elGameSelectedDescriptionContener.Margin;
+                    elGameSelectedDescription.Margin = PART_ElemDescription.Margin;
                 }
 
                 // Add in parent if good type
@@ -707,7 +725,15 @@ namespace PluginCommon
                     var tempTextBlock = Tools.FindVisualChildren<TextBlock>(PART_ElemDescription).FirstOrDefault();
                     if (tempTextBlock != null)
                     {
-                        elGameSelectedDescription.Margin = tempTextBlock.Margin;
+                        FrameworkElement PART_Title = (FrameworkElement)elGameSelectedDescription.FindName("PART_Title");
+                        if (PART_Title != null && ShowTitle)
+                        {
+                            PART_Title.Margin = tempTextBlock.Margin;
+                        }
+                        else
+                        {
+                            elGameSelectedDescription.Margin = tempTextBlock.Margin;
+                        }
                     }
 
                     // Add FrameworkElement 
@@ -731,16 +757,22 @@ namespace PluginCommon
                 {
                     elGameSelectedDescription.SetValue(DockPanel.DockProperty, Dock.Top);
 
+                    var tempSeparator = Tools.FindVisualChildren<Separator>(PART_ElemDescription).FirstOrDefault();
+                    if (tempSeparator != null)
+                    {
+                        FrameworkElement PART_Separator = (FrameworkElement)elGameSelectedDescription.FindName("PART_Separator");
+                        if (PART_Separator != null && ShowTitle)
+                        {
+                            PART_Separator.Margin = tempSeparator.Margin;
+                        }
+                        else
+                        {
+                        }
+                    }
+
                     // Add FrameworkElement 
                     if (isTop)
                     {
-                        //elGameSelectedDescription.Margin = new Thickness
-                        //    (
-                        //        elGameSelectedDescription.Margin.Left,
-                        //        elGameSelectedDescription.Margin.Top,
-                        //        elGameSelectedDescription.Margin.Right,
-                        //        15
-                        //    );
                         ((DockPanel)elGameSelectedDescriptionContener).Children.Insert(1, elGameSelectedDescription);
                     }
                     else
