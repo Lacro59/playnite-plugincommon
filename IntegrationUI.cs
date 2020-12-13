@@ -713,7 +713,7 @@ namespace PluginCommon
                 {
                     elGameSelectedDescription.Margin = PART_ElemNotes.Margin;
                 }
-                else
+                else if (PART_ElemNotes != null)
                 {
                     PART_ElemDescription.Margin = PART_ElemNotes.Margin;
                     elGameSelectedDescription.Margin = PART_ElemDescription.Margin;
