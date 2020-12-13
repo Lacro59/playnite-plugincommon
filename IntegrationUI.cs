@@ -528,6 +528,7 @@ namespace PluginCommon
             {
 
                 btGameSelectedActionBarChild = SearchElementByName("PART_ButtonMoreActions", true);
+                var PART_ButtonEditGame = SearchElementByName("PART_ButtonEditGame", btGameSelectedActionBarChild.Parent);
 
                 // Not find element
                 if (btGameSelectedActionBarChild == null)
@@ -536,10 +537,17 @@ namespace PluginCommon
                     return;
                 }
 
+                // Button size
                 btGameSelectedActionBar.Height = btGameSelectedActionBarChild.ActualHeight;
-                if (btGameSelectedActionBarChild.Name == "PART_ButtonMoreActions")
+                btGameSelectedActionBar.Margin = btGameSelectedActionBarChild.Margin;
+
+                if (double.IsNaN(btGameSelectedActionBar.Width))
                 {
                     btGameSelectedActionBar.Width = btGameSelectedActionBarChild.ActualWidth;
+                    if (PART_ButtonEditGame != null)
+                    {
+                        btGameSelectedActionBar.Width = PART_ButtonEditGame.ActualWidth;
+                    }
                 }
 
                 // Not find element
@@ -576,9 +584,7 @@ namespace PluginCommon
                         spContener.Name = "PART_spContener";
                         spContener.Orientation = Orientation.Horizontal;
                         spContener.SetValue(Grid.ColumnProperty, 3);
-
-                        btGameSelectedActionBarChild.Margin = new Thickness(10, 0, 0, 0);
-
+        
                         ((Grid)(btGameSelectedActionBarChild.Parent)).Children.Add(spContener);
                         ((Grid)(btGameSelectedActionBarChild.Parent)).UpdateLayout();
                     }
@@ -666,16 +672,17 @@ namespace PluginCommon
         {
             try
             {
-                elGameSelectedDescriptionContener = SearchElementByName("PART_HtmlDescription", true);
+                var PART_ElemDescription = SearchElementByName("PART_ElemDescription", true);
 
                 // Not find element
-                if (elGameSelectedDescriptionContener == null)
+                if (PART_ElemDescription == null)
                 {
                     logger.Warn("PluginCommon - elGameSelectedDescriptionContener [PART_ElemDescription] not find");
                     return;
                 }
 
-                elGameSelectedDescriptionContener = (FrameworkElement)elGameSelectedDescriptionContener.Parent;
+                elGameSelectedDescriptionContener = (FrameworkElement)PART_ElemDescription.Parent;
+                var PART_ElemNotes = SearchElementByName("PART_ElemNotes", elGameSelectedDescriptionContener);
 
                 // Not find element
                 if (elGameSelectedDescriptionContener == null)
@@ -684,9 +691,25 @@ namespace PluginCommon
                     return;
                 }
 
+                if (PART_ElemNotes != null && isTop)
+                {
+                    elGameSelectedDescription.Margin = PART_ElemNotes.Margin;
+                }
+                else
+                {
+                    PART_ElemDescription.Margin = PART_ElemNotes.Margin;
+                    elGameSelectedDescription.Margin = elGameSelectedDescriptionContener.Margin;
+                }
+
                 // Add in parent if good type
                 if (elGameSelectedDescriptionContener is StackPanel)
                 {
+                    var tempTextBlock = Tools.FindVisualChildren<TextBlock>(PART_ElemDescription).FirstOrDefault();
+                    if (tempTextBlock != null)
+                    {
+                        elGameSelectedDescription.Margin = tempTextBlock.Margin;
+                    }
+
                     // Add FrameworkElement 
                     if (isTop)
                     {
@@ -711,6 +734,13 @@ namespace PluginCommon
                     // Add FrameworkElement 
                     if (isTop)
                     {
+                        //elGameSelectedDescription.Margin = new Thickness
+                        //    (
+                        //        elGameSelectedDescription.Margin.Left,
+                        //        elGameSelectedDescription.Margin.Top,
+                        //        elGameSelectedDescription.Margin.Right,
+                        //        15
+                        //    );
                         ((DockPanel)elGameSelectedDescriptionContener).Children.Insert(1, elGameSelectedDescription);
                     }
                     else
