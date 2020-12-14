@@ -1159,6 +1159,46 @@ namespace PluginCommon
             return SearchElementByName(ElementName, Application.Current.MainWindow, MustVisible, ParentMustVisible);
         }
 
+        private static FrameworkElement SearchElementByNameInExtander(object control, string ElementName)
+        {
+            if (control is FrameworkElement)
+            {
+                var children = LogicalTreeHelper.GetChildren((FrameworkElement)control);
+                foreach (object child in children)
+                {
+                    if (child is FrameworkElement)
+                    {
+                        if (((FrameworkElement)child).Name == ElementName)
+                        {
+                            return (FrameworkElement)child;
+                        }
+                        
+                        var subItems = LogicalTreeHelper.GetChildren((FrameworkElement)child);
+                        foreach (object subItem in subItems)
+                        {
+                            if (subItem.ToString().ToLower().Contains("expander"))
+                            {
+                                var tmp = SearchElementByNameInExtander(((Expander)subItem).Content, ElementName);
+                                if (tmp != null)
+                                {
+                                    return tmp;
+                                }           
+                            }
+                            else
+                            {
+                                var tmp = SearchElementByNameInExtander(child, ElementName);
+                                if (tmp != null)
+                                {
+                                    return tmp;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+        
         public static FrameworkElement SearchElementByName(string ElementName, DependencyObject dpObj, bool MustVisible = false, bool ParentMustVisible = false)
         {
             FrameworkElement ElementFind = null;
@@ -1167,7 +1207,43 @@ namespace PluginCommon
             {
                 foreach (FrameworkElement el in Tools.FindVisualChildren<FrameworkElement>(dpObj))
                 {
-                    if (el.Name == ElementName)
+                    if (el.ToString().ToLower().Contains("expander"))
+                    {
+                        var tmpEl = SearchElementByNameInExtander(((Expander)el).Content, ElementName);
+                        if (tmpEl != null)
+                        {
+                            if (tmpEl.Name == ElementName)
+                            {
+                                if (!MustVisible)
+                                {
+                                    if (!ParentMustVisible)
+                                    {
+                                        ElementFind = tmpEl;
+                                        break;
+                                    }
+                                    else if (((FrameworkElement)el.Parent).IsVisible)
+                                    {
+                                        ElementFind = tmpEl;
+                                        break;
+                                    }
+                                }
+                                else if (tmpEl.IsVisible)
+                                {
+                                    if (!ParentMustVisible)
+                                    {
+                                        ElementFind = tmpEl;
+                                        break;
+                                    }
+                                    else if (((FrameworkElement)el.Parent).IsVisible)
+                                    {
+                                        ElementFind = tmpEl;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (el.Name == ElementName)
                     {
                         if (!MustVisible)
                         {
