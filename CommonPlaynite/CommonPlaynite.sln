@@ -1,0 +1,18 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1300
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CommonPlaynite", "CommonPlaynite.shproj", "{B0C19ED2-A426-458F-9476-30739ECBCEF5}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		CommonPlaynite.projitems*{b0c19ed2-a426-458f-9476-30739ecbcef5}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F363FFCA-A4B7-4789-BDBB-CED422D5CC2B}
+	EndGlobalSection
+EndGlobal

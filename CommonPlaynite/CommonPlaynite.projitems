@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>b0c19ed2-a426-458f-9476-30739ecbcef5</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>CommonPlaynite</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)API\ExtensionDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)API\ScriptFunctionDescription.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Behaviors\LeftClickContextMenuBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Constants.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\CloneObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\EnumExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\ItemsControlExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\ProcessExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\StringExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\FileSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\GlobalRandom.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\IniParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Interop.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Paths.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Serialization.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Web\Downloader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Web\HttpDownloader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Xaml.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\InvertableBooleanToVisibilityConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\InvertedBoolenConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\LongToTimePlayedConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\NegateConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\StringNullOrEmptyToVisibilityConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Database\ItemCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\IProvideValueTarget.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\Markup\ThemeFile.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\ObjectExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PlaynitePaths.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PlayniteSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Models\WebStoreModels.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Gog.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Models\AccountBasicRespose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Models\GetOwnedGamesResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Models\LibraryGameResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Models\PagedResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Services\GogAccountClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Services\HumbleAccountClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\OriginLibrary\Models\AccountEntitlementsResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\OriginLibrary\Models\AccountInfoResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\OriginLibrary\Models\AuthTokenResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\OriginLibrary\Models\GameLocalDataResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\OriginLibrary\Models\GameStoreDataResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\OriginLibrary\Models\StorePageMetadata.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\OriginLibrary\Models\UsageReponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\OriginLibrary\Services\OriginAccountClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\OriginLibrary\Services\OriginApiClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\SteamLibrary\SteamShared\StoreAppDetailsResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\XboxLibrary\Models\AuthenticationData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Themes.cs" />
+  </ItemGroup>
+</Project>
