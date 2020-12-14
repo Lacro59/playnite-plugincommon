@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A4C600FB-92F5-4FD6-AD6B-0C0E0CF2EC81}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CommonPlaynite</RootNamespace>
+    <AssemblyName>CommonPlaynite</AssemblyName>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Playnite.SDK, Version=5.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PlayniteSDK.5.5.0\lib\net462\Playnite.SDK.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="YamlDotNet, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\YamlDotNet.5.4.0\lib\net45\YamlDotNet.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="API\ExtensionDescription.cs" />
+    <Compile Include="API\ScriptFunctionDescription.cs" />
+    <Compile Include="Behaviors\LeftClickContextMenuBehavior.cs" />
+    <Compile Include="Common\Constants.cs" />
+    <Compile Include="Common\Extensions\CloneObject.cs" />
+    <Compile Include="Common\Extensions\EnumExtensions.cs" />
+    <Compile Include="Common\Extensions\ItemsControlExtensions.cs" />
+    <Compile Include="Common\Extensions\ProcessExtensions.cs" />
+    <Compile Include="Common\Extensions\StringExtensions.cs" />
+    <Compile Include="Common\FileSystem.cs" />
+    <Compile Include="Common\GlobalRandom.cs" />
+    <Compile Include="Common\IniParser.cs" />
+    <Compile Include="Common\Interop.cs" />
+    <Compile Include="Common\Paths.cs" />
+    <Compile Include="Common\Serialization.cs" />
+    <Compile Include="Common\Web\Downloader.cs" />
+    <Compile Include="Common\Web\HttpDownloader.cs" />
+    <Compile Include="Common\Xaml.cs" />
+    <Compile Include="Converters\InvertableBooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\InvertedBoolenConverter.cs" />
+    <Compile Include="Converters\LongToTimePlayedConverter.cs" />
+    <Compile Include="Converters\NegateConverter.cs" />
+    <Compile Include="Converters\StringNullOrEmptyToVisibilityConverter.cs" />
+    <Compile Include="Database\ItemCollection.cs" />
+    <Compile Include="Extensions\IProvideValueTarget.cs" />
+    <Compile Include="Extensions\Markup\ThemeFile.cs" />
+    <Compile Include="Extensions\ObjectExtensions.cs" />
+    <Compile Include="PlaynitePaths.cs" />
+    <Compile Include="PlayniteSettings.cs" />
+    <Compile Include="PluginLibrary\EpicLibrary\Models\WebStoreModels.cs" />
+    <Compile Include="PluginLibrary\GogLibrary\Gog.cs" />
+    <Compile Include="PluginLibrary\GogLibrary\Models\AccountBasicRespose.cs" />
+    <Compile Include="PluginLibrary\GogLibrary\Models\GetOwnedGamesResult.cs" />
+    <Compile Include="PluginLibrary\GogLibrary\Models\LibraryGameResponse.cs" />
+    <Compile Include="PluginLibrary\GogLibrary\Models\PagedResponse.cs" />
+    <Compile Include="PluginLibrary\GogLibrary\Services\GogAccountClient.cs" />
+    <Compile Include="PluginLibrary\HumbleLibrary\Services\HumbleAccountClient.cs" />
+    <Compile Include="PluginLibrary\OriginLibrary\Models\AccountEntitlementsResponse.cs" />
+    <Compile Include="PluginLibrary\OriginLibrary\Models\AccountInfoResponse.cs" />
+    <Compile Include="PluginLibrary\OriginLibrary\Models\AuthTokenResponse.cs" />
+    <Compile Include="PluginLibrary\OriginLibrary\Models\GameLocalDataResponse.cs" />
+    <Compile Include="PluginLibrary\OriginLibrary\Models\GameStoreDataResponse.cs" />
+    <Compile Include="PluginLibrary\OriginLibrary\Models\StorePageMetadata.cs" />
+    <Compile Include="PluginLibrary\OriginLibrary\Models\UsageReponse.cs" />
+    <Compile Include="PluginLibrary\OriginLibrary\Services\OriginAccountClient.cs" />
+    <Compile Include="PluginLibrary\OriginLibrary\Services\OriginApiClient.cs" />
+    <Compile Include="PluginLibrary\SteamLibrary\SteamShared\StoreAppDetailsResult.cs" />
+    <Compile Include="PluginLibrary\XboxLibrary\Models\AuthenticationData.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Themes.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="CommonPlaynite.sln" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
