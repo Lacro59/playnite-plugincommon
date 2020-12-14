@@ -5,7 +5,6 @@ using System.Windows.Data;
 using LiveCharts;
 using LiveCharts.Wpf;
 
-
 namespace PluginCommon.LiveChartsCommon
 {
     /// <summary>
@@ -65,7 +64,7 @@ namespace PluginCommon.LiveChartsCommon
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            string Result = "";
+            string Result = string.Empty;
             if (TransformIcon.Get((string)value).Length == 1 && CustomerToolTipForMultipleTime._ShowIcon)
             {
                 Result = TransformIcon.Get((string)value);
@@ -76,7 +75,7 @@ namespace PluginCommon.LiveChartsCommon
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            return "";
+            return string.Empty;
         }
     }
 }

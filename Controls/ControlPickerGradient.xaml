@@ -9,7 +9,8 @@
 
     <DockPanel>
         <controls:ColorPicker Name="PART_AkrColorPicker" DockPanel.Dock="Left" Background="Transparent" Margin="0,0,20,0"
-                              SelectedColorChanged="PART_AkrColorPicker_SelectedColorChanged" IsVisibleChanged="PART_AkrColorPicker_IsVisibleChanged" />
+                              SelectedColorChanged="PART_AkrColorPicker_SelectedColorChanged" 
+                              IsVisibleChanged="PART_AkrColorPicker_IsVisibleChanged" />
 
         <Grid DockPanel.Dock="Right" Name="PART_GradientSelector">
             <Grid.RowDefinitions>
@@ -112,7 +113,7 @@
                 <Label Name="test0" />
                 <Label Name="test1" />
             </StackPanel>
-            
+
             <StackPanel Grid.Row="6">
                 <ToggleButton Name="PART_tbGradient" Content="Use gradient color" Margin="10,0" Checked="PART_tbGradient_Checked" Unchecked="PART_tbGradient_Unchecked" />
             </StackPanel>

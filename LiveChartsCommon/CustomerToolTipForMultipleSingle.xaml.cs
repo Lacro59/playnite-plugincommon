@@ -2,7 +2,6 @@
 using LiveCharts.Wpf;
 using System.ComponentModel;
 
-
 namespace PluginCommon.LiveChartsCommon
 {
     /// <summary>

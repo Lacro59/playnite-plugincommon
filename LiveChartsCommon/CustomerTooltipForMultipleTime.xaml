@@ -6,8 +6,7 @@
              xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
              xmlns:localLVC="clr-namespace:PluginCommon.LiveChartsCommon"
              xmlns:converters="clr-namespace:PluginCommon.PlayniteResources.Converters"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300" 
+             mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300" 
              d:DataContext="{d:DesignInstance localLVC:CustomerToolTipForMultipleTime}">
 
     <UserControl.Resources>
@@ -16,7 +15,7 @@
         <wpf:SharedVisibilityConverter x:Key="SharedVisibilityConverter"/>
         <localLVC:ShowIconConverterMultipleTime x:Key="ShowIconConverterMultipleTime" />
     </UserControl.Resources>
-    
+
     <UserControl.Template>
         <ControlTemplate>
             <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Tag="{Binding ChartPoint.Instance.(localLVC:CustomerForTime.Name)}">
@@ -60,7 +59,6 @@
 
                                         <TextBlock Grid.Column="3" Text="{Binding ChartPoint.Instance.(localLVC:CustomerForTime.Values), Mode=OneWay, Converter={StaticResource LongToTimePlayedConverter}}" 
                                             Margin="10 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
-
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -70,6 +68,5 @@
             </Grid>
         </ControlTemplate>
     </UserControl.Template>
-
 </UserControl>
     

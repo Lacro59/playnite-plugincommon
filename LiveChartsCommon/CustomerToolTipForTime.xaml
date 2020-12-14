@@ -6,8 +6,7 @@
              xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
              xmlns:localLVC="clr-namespace:PluginCommon.LiveChartsCommon"
              xmlns:converters="clr-namespace:PluginCommon.PlayniteResources.Converters"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300" 
+             mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300" 
              d:DataContext="{d:DesignInstance localLVC:CustomerToolTipForTime}">
 
     <UserControl.Resources>
@@ -47,6 +46,5 @@
             </Grid>
         </ControlTemplate>
     </UserControl.Template>
-
 </UserControl>
     
