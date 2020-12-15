@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Markup;
 
-namespace PluginCommon.PlayniteResources.Converters
+namespace CommonPlaynite.Converters
 {
     public class InvertedBoolenConverter : MarkupExtension, IValueConverter
     {

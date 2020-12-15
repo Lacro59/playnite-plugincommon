@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Playnite.SDK;
-using PluginCommon.PlayniteResources.Common.Web;
-using PluginCommon.PlayniteResources.PluginLibrary.GogLibrary;
-using PluginCommon.PlayniteResources.PluginLibrary.GogLibrary.Models;
+using CommonPlaynite.Common.Web;
+using CommonPlaynite.PluginLibrary.GogLibrary;
+using CommonPlaynite.PluginLibrary.GogLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace PluginCommon.PlayniteResources.PluginLibrary.Services.GogLibrary
+namespace CommonPlaynite.PluginLibrary.Services.GogLibrary
 {
     public class GogAccountClient
     {

@@ -3,7 +3,7 @@ using System;
 using System.Windows.Data;
 using System.Windows.Markup;
 
-namespace PluginCommon.PlayniteResources.Converters
+namespace CommonPlaynite.Converters
 {
     public class LongToTimePlayedConverter : MarkupExtension, IValueConverter
     {

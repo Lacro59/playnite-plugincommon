@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace PluginCommon.PlayniteResources.Common
+namespace CommonPlaynite.Common
 {
     public class IniSection
     {

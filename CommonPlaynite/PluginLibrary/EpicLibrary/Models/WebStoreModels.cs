@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PluginCommon.PlayniteResources.PluginLibrary.EpicLibrary.Models
+namespace CommonPlaynite.PluginLibrary.EpicLibrary.Models
 {
     public class WebStoreModels
     {

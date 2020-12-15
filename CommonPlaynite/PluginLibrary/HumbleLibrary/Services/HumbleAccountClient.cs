@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PluginCommon.PlayniteResources.PluginLibrary.HumbleLibrary.Services
+namespace CommonPlaynite.PluginLibrary.HumbleLibrary.Services
 {
     public class HumbleAccountClient
     {

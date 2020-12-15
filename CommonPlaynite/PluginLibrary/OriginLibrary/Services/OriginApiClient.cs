@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Playnite.SDK;
-using PluginCommon.PlayniteResources.Common.Web;
-using PluginCommon.PlayniteResources.PluginLibrary.OriginLibrary.Models;
+using CommonPlaynite.Common.Web;
+using CommonPlaynite.PluginLibrary.OriginLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace PluginCommon.PlayniteResources.PluginLibrary.OriginLibrary.Services
+namespace CommonPlaynite.PluginLibrary.OriginLibrary.Services
 {
     public class OriginApiClient
     {

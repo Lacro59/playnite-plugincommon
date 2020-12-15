@@ -9,7 +9,7 @@ using System.Net.Http;
 using Playnite.SDK;
 using System.Threading;
 
-namespace PluginCommon.PlayniteResources.Common.Web
+namespace CommonPlaynite.Common.Web
 {
     public class HttpDownloader
     {

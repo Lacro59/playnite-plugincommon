@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Playnite.SDK;
 using Playnite.SDK.Models;
-using PluginCommon.PlayniteResources.Common;
+using CommonPlaynite.Common;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PluginCommon.PlayniteResources.Database
+namespace CommonPlaynite.Database
 {
     public class ItemCollection<TItem> : IItemCollection<TItem> where TItem : DatabaseObject
     {

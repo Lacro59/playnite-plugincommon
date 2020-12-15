@@ -1,10 +1,9 @@
 ﻿using Playnite.SDK;
 using Playnite.SDK.Models;
-using PluginCommon;
-using PluginCommon.PlayniteResources;
-using PluginCommon.PlayniteResources.API;
-using PluginCommon.PlayniteResources.Common;
-using PluginCommon.PlayniteResources.Converters;
+using CommonPlaynite;
+using CommonPlaynite.API;
+using CommonPlaynite.Common;
+using CommonPlaynite.Converters;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +12,7 @@ using System.Linq;
 using System.Windows;
 using Playnite.SDK.Data;
 
-namespace PluginCommon.PlayniteResources
+namespace CommonPlaynite
 {
     public class ThemeManifest : BaseExtensionManifest
     {

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PluginCommon.PlayniteResources.Common
+namespace CommonPlaynite.Common
 {
     public class Serialization
     {

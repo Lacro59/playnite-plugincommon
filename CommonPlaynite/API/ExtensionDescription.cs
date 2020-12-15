@@ -1,13 +1,13 @@
 ﻿using Playnite.SDK;
 using Playnite.SDK.Models;
-using PluginCommon.PlayniteResources.Common;
+using CommonPlaynite.Common;
 using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using YamlDotNet.Serialization;
 
-namespace PluginCommon.PlayniteResources.API
+namespace CommonPlaynite.API
 {
     public enum ExtensionType
     {

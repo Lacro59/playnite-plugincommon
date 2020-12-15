@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Windows.Markup;
 
-namespace PluginCommon.PlayniteResources.Common
+namespace CommonPlaynite.Common
 {
     public class Xaml
     {

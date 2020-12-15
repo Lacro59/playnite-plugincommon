@@ -11,7 +11,7 @@ using System.IO.Compression;
 using Playnite.SDK;
 using System.Diagnostics;
 
-namespace PluginCommon.PlayniteResources.Common
+namespace CommonPlaynite.Common
 {
     public static class FileSystem
     {

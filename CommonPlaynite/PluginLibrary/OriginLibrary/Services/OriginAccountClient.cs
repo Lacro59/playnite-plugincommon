@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Playnite.SDK;
-using PluginCommon.PlayniteResources.PluginLibrary.OriginLibrary.Models;
+using CommonPlaynite.PluginLibrary.OriginLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PluginCommon.PlayniteResources.PluginLibrary.OriginLibrary.Services
+namespace CommonPlaynite.PluginLibrary.OriginLibrary.Services
 {
     public class OriginAccountClient
     {

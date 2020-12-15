@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Playnite.SDK;
-using PluginCommon.PlayniteResources.Common;
+using CommonPlaynite.Common;
 using System;
 using System.Linq;
 using System.Collections.Generic;

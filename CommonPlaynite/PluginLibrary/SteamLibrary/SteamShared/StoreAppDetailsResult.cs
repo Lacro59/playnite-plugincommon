@@ -3,7 +3,7 @@ using Playnite.SDK;
 using System;
 using System.Collections.Generic;
 
-namespace PluginCommon.PlayniteResources.PluginLibrary.SteamLibrary.SteamShared
+namespace CommonPlaynite.PluginLibrary.SteamLibrary.SteamShared
 {
     public class AppReviewsResult
     {

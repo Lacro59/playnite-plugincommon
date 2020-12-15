@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace PluginCommon.PlayniteResources
+namespace CommonPlaynite
 {
     public class PlaynitePaths
     {

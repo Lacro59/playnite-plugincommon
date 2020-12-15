@@ -1,9 +1,9 @@
-﻿using PluginCommon.PlayniteResources.API;
+﻿using CommonPlaynite.API;
 using System.Collections.Generic;
 using System.IO;
 using YamlDotNet.Serialization;
 
-namespace PluginCommon.PlayniteResources.API
+namespace CommonPlaynite.API
 {
     public class ScriptFunctionDescription
     {

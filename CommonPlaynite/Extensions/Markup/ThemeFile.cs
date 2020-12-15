@@ -14,9 +14,9 @@ using System.Windows.Media;
 using System.Xaml;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using PluginCommon.PlayniteResources.Common;
+using CommonPlaynite.Common;
 
-namespace PluginCommon.PlayniteResources.Extensions.Markup
+namespace CommonPlaynite.Extensions.Markup
 {
     public class ThemeFile : MarkupExtension
     {

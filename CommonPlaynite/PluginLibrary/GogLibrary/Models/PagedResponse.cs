@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PluginCommon.PlayniteResources.PluginLibrary.GogLibrary.Models
+namespace CommonPlaynite.PluginLibrary.GogLibrary.Models
 {
     public class PagedResponse<T>
     {

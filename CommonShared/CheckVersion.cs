@@ -1,10 +1,10 @@
 ﻿using Newtonsoft.Json.Linq;
 using Playnite.SDK;
 using PluginCommon;
-using PluginCommon.PlayniteResources;
-using PluginCommon.PlayniteResources.API;
-using PluginCommon.PlayniteResources.Common;
-using PluginCommon.PlayniteResources.Converters;
+using CommonPlaynite;
+using CommonPlaynite.API;
+using CommonPlaynite.Common;
+using CommonPlaynite.Converters;
 using System;
 using System.Diagnostics;
 using System.IO;

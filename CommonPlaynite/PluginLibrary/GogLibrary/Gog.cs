@@ -1,5 +1,5 @@
 ﻿using Microsoft.Win32;
-using PluginCommon.PlayniteResources.Common.Web;
+using CommonPlaynite.Common.Web;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace PluginCommon.PlayniteResources.PluginLibrary.GogLibrary
+namespace CommonPlaynite.PluginLibrary.GogLibrary
 {
     public class Gog
     {

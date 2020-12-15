@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PluginCommon.PlayniteResources.Common
+namespace CommonPlaynite.Common
 {
     public class GlobalRandom
     {

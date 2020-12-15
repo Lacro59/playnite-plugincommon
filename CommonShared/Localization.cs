@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using Newtonsoft.Json;
 using System.Windows;
-using PluginCommon.PlayniteResources.Common;
+using CommonPlaynite.Common;
 
 namespace PluginCommon
 {
