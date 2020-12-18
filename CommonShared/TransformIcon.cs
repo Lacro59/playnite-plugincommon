@@ -24,6 +24,7 @@
         private static string successstory = "";           // ea33
         private static string gameactivity = "";           // e90f
         private static string checklocalizations = "";     // ea2c
+        private static string screenshotsvisualizer = "";  // ea38
 
         private static string gameHacked = "";             // ea36
 
@@ -50,6 +51,9 @@
                     break;
                 case "checklocalizations":
                     stringReturn = checklocalizations;
+                    break;
+                case "screenshotsvisualizer":
+                    stringReturn = screenshotsvisualizer;
                     break;
 
                 case "gamehacked":

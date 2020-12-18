@@ -275,14 +275,20 @@ namespace PluginCommon
             }
         }
 
-        public static Window CreateExtensionWindow(IPlayniteAPI PlayniteApi, string Title, UserControl ViewExtension)
+        public static Window CreateExtensionWindow(IPlayniteAPI PlayniteApi, string Title, UserControl ViewExtension, 
+            WindowCreationOptions windowCreationOptions = null)
         {
-            Window windowExtension = PlayniteApi.Dialogs.CreateWindow(new WindowCreationOptions
+            if (windowCreationOptions == null)
             {
-                ShowMinimizeButton = false,
-                ShowMaximizeButton = false,
-                ShowCloseButton = true
-            });
+                windowCreationOptions = new WindowCreationOptions
+                {
+                    ShowMinimizeButton = false,
+                    ShowMaximizeButton = false,
+                    ShowCloseButton = true
+                };
+            }
+
+            Window windowExtension = PlayniteApi.Dialogs.CreateWindow(windowCreationOptions);
 
             windowExtension.Title = Title;
             windowExtension.ShowInTaskbar = false;
