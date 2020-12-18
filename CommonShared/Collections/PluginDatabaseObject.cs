@@ -279,7 +279,7 @@ namespace PluginCommon.Collections
                 catch (Exception ex)
                 {
 #if DEBUG
-                    Common.LogError(ex, PluginName);
+                    Common.LogError(ex, PluginName + " [Ignored]");
 #endif
                 }
             }

@@ -103,7 +103,7 @@ namespace PluginCommon
             catch (Exception ex)
             {
 #if DEBUG
-                Common.LogError(ex, "PluginCommon", $"Error on Resize()");
+                Common.LogError(ex, "PluginCommon [Ignored]");
 #endif
                 return false;
             }
