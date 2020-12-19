@@ -77,6 +77,9 @@
     <Compile Include="Common\Web\Downloader.cs" />
     <Compile Include="Common\Web\HttpDownloader.cs" />
     <Compile Include="Common\Xaml.cs" />
+    <Compile Include="Controls\VirtualizingGridPanel.cs" />
+    <Compile Include="Controls\VirtualizingTilePanel.cs" />
+    <Compile Include="Controls\VirtualizingUniformPanel.cs" />
     <Compile Include="Converters\InvertableBooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\InvertedBoolenConverter.cs" />
     <Compile Include="Converters\LongToTimePlayedConverter.cs" />
