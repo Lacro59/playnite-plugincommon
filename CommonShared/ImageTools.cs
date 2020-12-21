@@ -166,5 +166,40 @@ namespace PluginCommon
 
             return ConvertBitmapSource;
         }
+
+        public static BitmapSource ConvertBitmapToBitmapSource(Bitmap bitmap)
+        {
+            var bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadOnly, bitmap.PixelFormat);
+
+            var bitmapSource = BitmapSource.Create(
+                bitmapData.Width, bitmapData.Height,
+                bitmap.HorizontalResolution, bitmap.VerticalResolution,
+                PixelFormats.Bgr24, null,
+                bitmapData.Scan0, bitmapData.Stride * bitmapData.Height, bitmapData.Stride);
+
+            bitmap.UnlockBits(bitmapData);
+
+            return bitmapSource;
+        }
+
+        public static BitmapImage ConvertBitmapToBitmapImage(Bitmap bitmap)
+        {
+            using (var memory = new MemoryStream())
+            {
+                bitmap.Save(memory, ImageFormat.Png);
+                memory.Position = 0;
+
+                var bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = memory;
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
+                bitmapImage.Freeze();
+
+                return bitmapImage;
+            }
+        }
     }
 }
