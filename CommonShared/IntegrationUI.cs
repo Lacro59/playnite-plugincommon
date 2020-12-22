@@ -302,6 +302,11 @@ namespace PluginCommon
                 windowExtension.Height = ViewExtension.Height + 25;
                 windowExtension.Width = ViewExtension.Width;
             }
+            else if(!double.IsNaN(ViewExtension.MinHeight) && !double.IsNaN(ViewExtension.MinWidth))
+            {
+                windowExtension.Height = ViewExtension.MinHeight + 25;
+                windowExtension.Width = ViewExtension.MinWidth;
+            }
             else
             {
                 windowExtension.SizeToContent = SizeToContent.WidthAndHeight;
