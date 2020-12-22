@@ -43,6 +43,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
     <Reference Include="System.Windows" />
     <Reference Include="System.Xaml" />
@@ -70,10 +71,13 @@
     <Compile Include="Common\Extensions\StringExtensions.cs" />
     <Compile Include="Common\FileSystem.cs" />
     <Compile Include="Common\GlobalRandom.cs" />
+    <Compile Include="Common\Images.cs" />
     <Compile Include="Common\IniParser.cs" />
     <Compile Include="Common\Interop.cs" />
     <Compile Include="Common\Paths.cs" />
     <Compile Include="Common\Serialization.cs" />
+    <Compile Include="Common\Sizes.cs" />
+    <Compile Include="Common\TGASharpLib.cs" />
     <Compile Include="Common\Web\Downloader.cs" />
     <Compile Include="Common\Web\HttpDownloader.cs" />
     <Compile Include="Common\Xaml.cs" />
@@ -86,6 +90,7 @@
     <Compile Include="Converters\NegateConverter.cs" />
     <Compile Include="Converters\StringNullOrEmptyToVisibilityConverter.cs" />
     <Compile Include="Database\ItemCollection.cs" />
+    <Compile Include="Extensions\BitpmapExtensions.cs" />
     <Compile Include="Extensions\IProvideValueTarget.cs" />
     <Compile Include="Extensions\Markup\ThemeFile.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
