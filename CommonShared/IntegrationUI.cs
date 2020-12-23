@@ -185,31 +185,47 @@ namespace PluginCommon
                 }
             }
 
-            foreach (CustomElement customElement in ListCustomElements)
+            if (ListCustomElements.Count > 0)
             {
-                try
+                bool isVisible = false;
+
+                foreach (CustomElement customElement in ListCustomElements)
                 {
-                    FrameworkElement customElementParent = (FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)customElement.Element.Parent).Parent).Parent).Parent;
-                    
-                    if (customElementParent != null)
+                    try
                     {
-#if DEBUG
-                        logger.Debug($"PluginCommon - SpDescriptionParent: {customElementParent.ToString()} - {customElementParent.IsVisible}");
-#endif
-                        if (!customElementParent.IsVisible)
+                        FrameworkElement customElementParent = (FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)customElement.Element.Parent).Parent).Parent).Parent;
+
+                        if (customElementParent != null)
                         {
-                            RemoveCustomElements();
-                            break;
+#if DEBUG
+                            logger.Debug($"PluginCommon - SpDescriptionParent: {customElementParent.ToString()} - {customElementParent.IsVisible}");
+#endif
+                            // TODO Perfectible
+                            if (!customElementParent.IsVisible)
+                            {
+                                //RemoveCustomElements();
+                                //break;
+                            }
+                            else
+                            {
+                                isVisible = true;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            logger.Warn($"PluginCommon - customElementParent is null for {customElement.Element.Name}");
                         }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        logger.Warn($"PluginCommon - customElementParent is null for {customElement.Element.Name}");
+                        Common.LogError(ex, "PluginCommon", $"Error in customElement.CheckTypeView({customElement.Element.Name})");
                     }
                 }
-                catch (Exception ex)
+
+                if (!isVisible)
                 {
-                    Common.LogError(ex, "PluginCommon", $"Error in customElement.CheckTypeView({customElement.Element.Name})");
+                    RemoveCustomElements();
                 }
             }
         }
@@ -1185,12 +1201,12 @@ namespace PluginCommon
                             {
                                 FrameworkElement tmp = null;
 
-                                if (tmp.ToString().ToLower().Contains("expander"))
+                                if (subItem.ToString().ToLower().Contains("expander"))
                                 {
                                     tmp = SearchElementByNameInExtander(((Expander)subItem).Content, ElementName);
                                 }
 
-                                if (tmp.ToString().ToLower().Contains("tabitem"))
+                                if (subItem.ToString().ToLower().Contains("tabitem"))
                                 {
                                     tmp = SearchElementByNameInExtander(((TabItem)subItem).Content, ElementName);
                                 }
