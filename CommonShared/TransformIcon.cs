@@ -56,7 +56,7 @@
                     stringReturn = screenshotsvisualizer;
                     break;
 
-                case "gamehacked":
+                case "hacked":
                     stringReturn = gameHacked;
                     break;
 

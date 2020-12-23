@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using PluginCommon.Models;
+using System.Windows.Automation;
 
 namespace PluginCommon
 {
@@ -66,6 +67,34 @@ namespace PluginCommon
                     logger.Warn($"PluginCommon - File {CommonFile} not found.");
                     return;
                 }
+            }
+        }
+
+
+        public static void SetEvent(IPlayniteAPI PlayniteAPI)
+        {
+            if (PlayniteAPI.ApplicationInfo.Mode == ApplicationMode.Desktop)
+            {
+                EventManager.RegisterClassHandler(typeof(Window), Window.LoadedEvent, new RoutedEventHandler(WindowBase_LoadedEvent));
+            }
+        }
+
+        private static void WindowBase_LoadedEvent(object sender, System.EventArgs e)
+        {
+            string WinIdProperty = String.Empty;
+
+            try
+            {
+                WinIdProperty = ((Window)sender).GetValue(AutomationProperties.AutomationIdProperty).ToString();
+
+                if (WinIdProperty == "WindowSettings")
+                {
+                    ((Window)sender).Width = 850;
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "PluginCommon", $"Error on WindowBase_LoadedEvent for {WinIdProperty}");
             }
         }
 
