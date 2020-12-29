@@ -184,7 +184,7 @@ namespace CommonShared.Collections
         }
 
 
-        private void WindowBase_UnloadedEvent(object sender, System.EventArgs e)
+        private void WindowBase_UnloadedEvent(object sender, EventArgs e)
         {
             string WinIdProperty = string.Empty;
 
@@ -202,7 +202,6 @@ namespace CommonShared.Collections
                 Common.LogError(ex, "CommonShared", $"Error on WindowBase_LoadedEvent for {WinIdProperty}");
             }
         }
-
 
 
         protected bool ControlAndCreateDirectory(string PluginUserDataPath, string DirectoryName)
