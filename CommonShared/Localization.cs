@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using System.Windows;
 using CommonPlaynite.Common;
 
-namespace PluginCommon
+namespace CommonShared
 {
     public class PluginLocalization
     {
@@ -30,7 +30,7 @@ namespace PluginCommon
             if (File.Exists(langFileCommon))
             {
 #if DEBUG
-                logger.Debug($"PluginCommon - Parse plugin localization file {langFileCommon}.");
+                logger.Debug($"CommonShared - Parse plugin localization file {langFileCommon}.");
 #endif
 
                 ResourceDictionary res = null;
@@ -49,7 +49,7 @@ namespace PluginCommon
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex, $"PluginCommon - Failed to parse localization file {langFileCommon}.");
+                    logger.Error(ex, $"CommonShared - Failed to parse localization file {langFileCommon}.");
                     return;
                 }
 
@@ -57,7 +57,7 @@ namespace PluginCommon
             }
             else
             {
-                logger.Warn($"PluginCommon - File {langFileCommon} not found.");
+                logger.Warn($"CommonShared - File {langFileCommon} not found.");
             }
 
 
@@ -65,7 +65,7 @@ namespace PluginCommon
             if (File.Exists(langFile))
             {
 #if DEBUG
-                logger.Debug($"PluginCommon - Parse plugin localization file {langFile}.");
+                logger.Debug($"CommonShared - Parse plugin localization file {langFile}.");
 #endif
 
                 ResourceDictionary res = null;
@@ -84,7 +84,7 @@ namespace PluginCommon
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex, $"PluginCommon - Failed to parse localization file {langFile}.");
+                    logger.Error(ex, $"CommonShared - Failed to parse localization file {langFile}.");
                     return;
                 }
 
@@ -92,7 +92,7 @@ namespace PluginCommon
             }
             else
             {
-                logger.Warn($"PluginCommon - File {langFile} not found.");
+                logger.Warn($"CommonShared - File {langFile} not found.");
             }
         }
     }

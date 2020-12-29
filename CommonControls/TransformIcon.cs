@@ -1,4 +1,4 @@
-﻿namespace CommonShared
+﻿namespace CommonControls
 {
     public class TransformIcon
     {

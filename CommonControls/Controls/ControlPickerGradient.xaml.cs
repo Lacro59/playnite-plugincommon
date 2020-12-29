@@ -16,7 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace PluginCommon.Controls
+namespace CommonControls.Controls
 {
     /// <summary>
     /// Logique d'interaction pour ControlPickerGradient.xaml

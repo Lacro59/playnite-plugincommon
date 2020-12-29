@@ -4,7 +4,7 @@ using Playnite.SDK;
 using System;
 using System.IO;
 
-namespace PluginCommon
+namespace CommonShared
 {
     public class SteamApi
     {
@@ -31,7 +31,7 @@ namespace PluginCommon
                         // If not expired
                         if (File.GetLastWriteTime(PluginCacheFile).AddDays(3) > DateTime.Now)
                         {
-                            logger.Info("PluginCommon - GetSteamAppListFromCache");
+                            logger.Info("CommonShared - GetSteamAppListFromCache");
                             SteamListApp = JObject.Parse(File.ReadAllText(PluginCacheFile));
                         }
                         else
@@ -52,14 +52,14 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", "Error on load SteamListApp");
+                Common.LogError(ex, "CommonShared", "Error on load SteamListApp");
             }
         }
 
         private JObject GetSteamAppListFromWeb(string PluginCacheFile)
         {
 #if DEBUG
-            logger.Debug("PluginCommon - GetSteamAppListFromWeb");
+            logger.Debug("CommonShared - GetSteamAppListFromWeb");
 #endif
 
             string responseData = string.Empty;
@@ -78,7 +78,7 @@ namespace PluginCommon
             }
             catch(Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Failed to load from {urlSteamListApp}");
+                Common.LogError(ex, "CommonShared", $"Failed to load from {urlSteamListApp}");
                 responseData = "{\"applist\":{\"apps\":[]}}";
             }
 
@@ -107,12 +107,12 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error with {Name}");
+                Common.LogError(ex, "CommonShared", $"Error with {Name}");
             }
         
             if (SteamId == 0)
             {
-                logger.Warn($"PluginCommon - SteamId not find for {Name}");
+                logger.Warn($"CommonShared - SteamId not find for {Name}");
             }
         
             return SteamId;

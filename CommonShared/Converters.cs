@@ -8,7 +8,7 @@ using System.Windows.Data;
 using System.Windows.Markup;
 using System.Windows.Media;
 
-namespace PluginCommon
+namespace CommonShared
 {
     public class CompareValueConverter : IMultiValueConverter
     {
@@ -57,7 +57,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on CompareValueConverter");
+                Common.LogError(ex, "CommonShared", $"Error on CompareValueConverter");
                 return (Brushes)resources.GetResource("TextBrush");
             }
         }
@@ -94,7 +94,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on VisibilityZeroConverter");
+                Common.LogError(ex, "CommonShared", $"Error on VisibilityZeroConverter");
                 return Visibility.Visible;
             }
         }
@@ -148,7 +148,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on LocalDateConverter");
+                Common.LogError(ex, "CommonShared", $"Error on LocalDateConverter");
                 return string.Empty;
             }
         }
@@ -190,7 +190,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on LocalDateYMConverter");
+                Common.LogError(ex, "CommonShared", $"Error on LocalDateYMConverter");
                 return string.Empty;
             }
         }
@@ -217,7 +217,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on LocalTimeConverter");
+                Common.LogError(ex, "CommonShared", $"Error on LocalTimeConverter");
                 return string.Empty;
             }
         }
@@ -245,7 +245,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on LocalDateTimeConverter");
+                Common.LogError(ex, "CommonShared", $"Error on LocalDateTimeConverter");
                 return string.Empty;
             }
         }
@@ -287,7 +287,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on IndexConverter");
+                Common.LogError(ex, "CommonShared", $"Error on IndexConverter");
                 return string.Empty;
             }
         }

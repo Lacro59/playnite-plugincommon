@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using LiveCharts;
 
-namespace PluginCommon.LiveChartsCommon
+namespace CommonControls.LiveChartsCommon
 {
     /// <summary>
     /// Logique d'interaction pour CustomersTooltipForSingle.xaml

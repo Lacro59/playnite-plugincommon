@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
-namespace PluginCommon.Collections
+namespace CommonShared.Collections
 {
     public class PluginItemCollection<TItem> : ItemCollection<TItem> where TItem : PluginDataBaseGameBase
     {
@@ -50,7 +50,7 @@ namespace PluginCommon.Collections
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "PluginCommon");
+                    Common.LogError(ex, "CommonShared");
                 }
             }
         }
@@ -86,7 +86,7 @@ namespace PluginCommon.Collections
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "PluginCommon");
+                    Common.LogError(ex, "CommonShared");
                 }
             }
         }

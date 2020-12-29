@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PluginCommon.Models
+namespace CommonShared.Models
 {
     public class TraceInfos
     {

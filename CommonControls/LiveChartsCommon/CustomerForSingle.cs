@@ -1,4 +1,4 @@
-﻿namespace PluginCommon.LiveChartsCommon
+﻿namespace CommonControls.LiveChartsCommon
 {
     public class CustomerForSingle
     {

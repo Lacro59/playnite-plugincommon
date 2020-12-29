@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+  <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!--Playnite Resources-->
+                <ResourceDictionary Source="../CommonPlaynite/Resources/Constants.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/Common.xaml" />
+                <!--Playnite Default localization-->
+                <ResourceDictionary Source="../CommonPlaynite/Resources/LocSource.xaml" />
+                <!--Default Controls-->
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/Border.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/TextBlock.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/TextBox.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/Button.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/ComboBox.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/ContextMenu.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/DatePicker.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/Expander.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/GridSplitter.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/GroupBox.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/Hyperlink.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/CheckBox.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/Label.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/ListBox.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/ListView.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/Menu.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/PasswordBox.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/Popup.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/ProgressBar.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/RadioButton.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/RepeatButton.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/RichTextBox.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/ScrollViewer.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/Slider.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/TabControl.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/Thumb.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/ToggleButton.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/ToolTip.xaml" />
+                <ResourceDictionary Source="../CommonPlaynite/Resources/DefaultControls/TreeView.xaml" />
+
+                <!--PluginResources-->
+                <ResourceDictionary Source="Resources/Common.xaml" />
+                <!--PluginCommon-->
+                <ResourceDictionary Source="../CommonControls/Resources/Common.xaml" />
+                <ResourceDictionary Source="../CommonControls/Resources/LiveChartsCommon/Common.xaml" />
+                <!--Plugin default localization-->
+                <ResourceDictionary Source="../CommonControls/Localization/Common/LocSource.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
+    

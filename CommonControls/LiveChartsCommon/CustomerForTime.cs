@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PluginCommon.LiveChartsCommon
+namespace CommonControls.LiveChartsCommon
 {
     public class CustomerForTime
     {

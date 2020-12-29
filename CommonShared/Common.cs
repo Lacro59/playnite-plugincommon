@@ -7,10 +7,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
-using PluginCommon.Models;
+using CommonShared.Models;
 using System.Windows.Automation;
 
-namespace PluginCommon
+namespace CommonShared
 {
     public class Common
     {
@@ -34,7 +34,7 @@ namespace PluginCommon
                 if (File.Exists(CommonFile))
                 {
 #if DEBUG
-                    logger.Debug($"PluginCommon - Load {CommonFile}");
+                    logger.Debug($"CommonShared - Load {CommonFile}");
 #endif
 
                     ResourceDictionary res = null;
@@ -53,18 +53,18 @@ namespace PluginCommon
                     }
                     catch (Exception ex)
                     {
-                        LogError(ex, "PluginCommon", $"Failed to parse file {CommonFile}");
+                        LogError(ex, "CommonShared", $"Failed to parse file {CommonFile}");
                         return;
                     }
 
 #if DEBUG
-                    logger.Debug($"PluginCommon - res: {JsonConvert.SerializeObject(res)}");
+                    logger.Debug($"CommonShared - res: {JsonConvert.SerializeObject(res)}");
 #endif
                     Application.Current.Resources.MergedDictionaries.Add(res);
                 }
                 else
                 {
-                    logger.Warn($"PluginCommon - File {CommonFile} not found.");
+                    logger.Warn($"CommonShared - File {CommonFile} not found.");
                     return;
                 }
             }
@@ -94,7 +94,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on WindowBase_LoadedEvent for {WinIdProperty}");
+                Common.LogError(ex, "CommonShared", $"Error on WindowBase_LoadedEvent for {WinIdProperty}");
             }
         }
 

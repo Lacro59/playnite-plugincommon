@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using Playnite.SDK;
-using PluginCommon;
+using CommonShared;
 using CommonPlaynite;
 using CommonPlaynite.API;
 using CommonPlaynite.Common;
@@ -11,7 +11,7 @@ using System.IO;
 using System.Net;
 using YamlDotNet.Serialization;
 
-namespace PluginCommon
+namespace CommonShared
 {
     public class CheckVersion
     {
@@ -39,7 +39,7 @@ namespace PluginCommon
             string url = string.Format(urlGithub, PluginName.ToLower());
 
 #if DEBUG
-            logger.Debug($"PluginCommon - Download {url} for {PluginName}");
+            logger.Debug($"CommonShared - Download {url} for {PluginName}");
 #endif
 
             string ResultWeb = string.Empty;
@@ -51,7 +51,7 @@ namespace PluginCommon
             {
                 logger.Error($"Failed to load from {url} for {PluginName}");
 #if DEBUG
-                Common.LogError(ex, "PluginCommon", $"Failed to load from {url} for {PluginName}");
+                Common.LogError(ex, "CommonShared", $"Failed to load from {url} for {PluginName}");
 #endif
             }
 
@@ -71,17 +71,17 @@ namespace PluginCommon
                         LastReleaseBody = (string)resultObj[0]["body"];
                     }
 
-                    logger.Info($"PluginCommon - {PluginName} - Find {LastReleaseTagName} - Actual v{PluginInfo.Version}");
+                    logger.Info($"CommonShared - {PluginName} - Find {LastReleaseTagName} - Actual v{PluginInfo.Version}");
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "PluginCommon", $"Failed to parse Github response for {PluginName} - {ResultWeb}");
+                    Common.LogError(ex, "CommonShared", $"Failed to parse Github response for {PluginName} - {ResultWeb}");
                     return false;
                 }
             }
             else
             {
-                logger.Warn($"PluginCommon - No Data from {url} for {PluginName}");
+                logger.Warn($"CommonShared - No Data from {url} for {PluginName}");
             }
 
             //Check actual vs Github

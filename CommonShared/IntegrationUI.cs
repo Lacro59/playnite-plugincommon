@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 
-namespace PluginCommon
+namespace CommonShared
 {
     public class CustomElement
     {
@@ -93,7 +93,7 @@ namespace PluginCommon
             }
             else
             {
-                logger.Warn($"PluginCommon - RemoveBtActionBar() without BtActionBarName");
+                logger.Warn($"CommonShared - RemoveBtActionBar() without BtActionBarName");
             }
         }
 
@@ -111,7 +111,7 @@ namespace PluginCommon
             }
             else
             {
-                logger.Warn($"PluginCommon - RemoveSpDescription() without SpDescriptionrName");
+                logger.Warn($"CommonShared - RemoveSpDescription() without SpDescriptionrName");
             }
         }
 
@@ -140,7 +140,7 @@ namespace PluginCommon
                     if (BtActionBarParent != null)
                     {
 #if DEBUG
-                        logger.Debug($"PluginCommon - BtActionBarParent: {BtActionBarParent.ToString()} - {BtActionBarParent.IsVisible}");
+                        logger.Debug($"CommonShared - BtActionBarParent: {BtActionBarParent.ToString()} - {BtActionBarParent.IsVisible}");
 #endif
                         if (!BtActionBarParent.IsVisible)
                         {
@@ -149,12 +149,12 @@ namespace PluginCommon
                     }
                     else
                     {
-                        logger.Warn("PluginCommon - BtActionBarParent is null");
+                        logger.Warn("CommonShared - BtActionBarParent is null");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "PluginCommon", $"Error in BtActionBar.CheckTypeView({PART_BtActionBar.Name})");
+                    Common.LogError(ex, "CommonShared", $"Error in BtActionBar.CheckTypeView({PART_BtActionBar.Name})");
                 }
             }
 
@@ -167,7 +167,7 @@ namespace PluginCommon
                     if (SpDescriptionParent != null)
                     {
 #if DEBUG
-                        logger.Debug($"PluginCommon - SpDescriptionParent: {SpDescriptionParent.ToString()} - {SpDescriptionParent.IsVisible}");
+                        logger.Debug($"CommonShared - SpDescriptionParent: {SpDescriptionParent.ToString()} - {SpDescriptionParent.IsVisible}");
 #endif
                         if (!SpDescriptionParent.IsVisible)
                         {
@@ -176,12 +176,12 @@ namespace PluginCommon
                     }
                     else
                     {
-                        logger.Warn("PluginCommon - SpDescriptionParent is null");
+                        logger.Warn("CommonShared - SpDescriptionParent is null");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "PluginCommon", $"Error in SpDescription.CheckTypeView({PART_SpDescription.Name})");
+                    Common.LogError(ex, "CommonShared", $"Error in SpDescription.CheckTypeView({PART_SpDescription.Name})");
                 }
             }
 
@@ -198,7 +198,7 @@ namespace PluginCommon
                         if (customElementParent != null)
                         {
 #if DEBUG
-                            logger.Debug($"PluginCommon - SpDescriptionParent: {customElementParent.ToString()} - {customElementParent.IsVisible}");
+                            logger.Debug($"CommonShared - SpDescriptionParent: {customElementParent.ToString()} - {customElementParent.IsVisible}");
 #endif
                             // TODO Perfectible
                             if (!customElementParent.IsVisible)
@@ -214,12 +214,12 @@ namespace PluginCommon
                         }
                         else
                         {
-                            logger.Warn($"PluginCommon - customElementParent is null for {customElement.Element.Name}");
+                            logger.Warn($"CommonShared - customElementParent is null for {customElement.Element.Name}");
                         }
                     }
                     catch (Exception ex)
                     {
-                        Common.LogError(ex, "PluginCommon", $"Error in customElement.CheckTypeView({customElement.Element.Name})");
+                        Common.LogError(ex, "CommonShared", $"Error in customElement.CheckTypeView({customElement.Element.Name})");
                     }
                 }
 
@@ -247,7 +247,7 @@ namespace PluginCommon
             }
             else
             {
-                logger.Warn($"PluginCommon - RemoveSpInfoBarFS() without SpInfoBarFSName");
+                logger.Warn($"CommonShared - RemoveSpInfoBarFS() without SpInfoBarFSName");
             }
         }
 
@@ -264,7 +264,7 @@ namespace PluginCommon
             }
             else
             {
-                logger.Warn($"PluginCommon - RemoveBtActionBarFS() without BtActionBarFSName");
+                logger.Warn($"CommonShared - RemoveBtActionBarFS() without BtActionBarFSName");
             }
         }
         #endregion
@@ -273,7 +273,7 @@ namespace PluginCommon
         public static void HandleEsc(object sender, KeyEventArgs e)
         {
 #if DEBUG
-            logger.Debug($"PluginCommon - {sender.ToString()}");
+            logger.Debug($"CommonShared - {sender.ToString()}");
 #endif
             if (e.Key == Key.Escape)
             {
@@ -286,7 +286,7 @@ namespace PluginCommon
             else
             {
 #if DEBUG
-                logger.Debug("PluginCommon - sender is not a Window");
+                logger.Debug("CommonShared - sender is not a Window");
 #endif
             }
         }
@@ -337,7 +337,7 @@ namespace PluginCommon
         public static void ResetToggle()
         {
 #if DEBUG
-            logger.Debug("PluginCommon - ResetToggle()");
+            logger.Debug("CommonShared - ResetToggle()");
 #endif
             try
             {
@@ -345,7 +345,7 @@ namespace PluginCommon
                 if (PART_GaButton != null && PART_GaButton is ToggleButton && (bool)((ToggleButton)PART_GaButton).IsChecked)
                 {
 #if DEBUG
-                    logger.Debug("PluginCommon - Reset PART_GaButton");
+                    logger.Debug("CommonShared - Reset PART_GaButton");
 #endif
                     ((ToggleButton)PART_GaButton).IsChecked = false;
                     ((ToggleButton)PART_GaButton).RaiseEvent(new RoutedEventArgs(ToggleButton.ClickEvent));
@@ -356,7 +356,7 @@ namespace PluginCommon
                 if (PART_ScButton != null && PART_ScButton is ToggleButton && (bool)((ToggleButton)PART_ScButton).IsChecked)
                 {
 #if DEBUG
-                    logger.Debug("PluginCommon - Reset PART_ScButton");
+                    logger.Debug("CommonShared - Reset PART_ScButton");
 #endif
                     ((ToggleButton)PART_ScButton).IsChecked = false;
                     ((ToggleButton)PART_ScButton).RaiseEvent(new RoutedEventArgs(ToggleButton.ClickEvent));
@@ -365,10 +365,10 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", "Error on ResetToggle()");
+                Common.LogError(ex, "CommonShared", "Error on ResetToggle()");
             }
 #if DEBUG
-            logger.Debug("PluginCommon - No ResetToggle()");
+            logger.Debug("CommonShared - No ResetToggle()");
 #endif
         }
 
@@ -376,7 +376,7 @@ namespace PluginCommon
         public void OnBtActionBarToggleButtonClick(object sender, RoutedEventArgs e)
         {
 #if DEBUG
-            logger.Debug($"PluginCommon - OnBtActionBarToggleButtonClick()");
+            logger.Debug($"CommonShared - OnBtActionBarToggleButtonClick()");
 #endif
             if (PART_ElemDescription == null)
             {
@@ -385,7 +385,7 @@ namespace PluginCommon
 
             if (PART_ElemDescription == null)
             {
-                logger.Warn("PluginCommon - PART_ElemDescription not find on OnBtActionBarToggleButtonClick()");
+                logger.Warn("CommonShared - PART_ElemDescription not find on OnBtActionBarToggleButtonClick()");
                 return;
             }
 
@@ -485,7 +485,7 @@ namespace PluginCommon
         public bool AddResources(List<ResourcesList> ResourcesList)
         {
 #if DEBUG
-            logger.Debug($"PluginCommon - AddResources() - {JsonConvert.SerializeObject(ResourcesList)}");
+            logger.Debug($"CommonShared - AddResources() - {JsonConvert.SerializeObject(ResourcesList)}");
 #endif
             string ItemKey = string.Empty;
             try
@@ -500,7 +500,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error in AddResources({ItemKey})");
+                Common.LogError(ex, "CommonShared", $"Error in AddResources({ItemKey})");
                 return false;
             }
         }
@@ -522,7 +522,7 @@ namespace PluginCommon
                 // Not find element
                 if (btHeaderChild == null)
                 {
-                    logger.Error("PluginCommon - btHeaderChild [PART_ButtonSteamFriends] not find");
+                    logger.Error("CommonShared - btHeaderChild [PART_ButtonSteamFriends] not find");
                     return;
                 }
 
@@ -544,20 +544,20 @@ namespace PluginCommon
                             i = btHeaderParent.Children.Count;
 
 #if DEBUG
-                            logger.Debug($"PluginCommon - btHeader [{btHeader.Name}] insert");
+                            logger.Debug($"CommonShared - btHeader [{btHeader.Name}] insert");
 #endif
                         }
                     }
                 }
                 else
                 {
-                    logger.Error("PluginCommon - btHeaderChild.Parent is not a DockPanel element");
+                    logger.Error("CommonShared - btHeaderChild.Parent is not a DockPanel element");
                     return;
                 }
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error in AddButtonInWindowsHeader({btHeader.Name})");
+                Common.LogError(ex, "CommonShared", $"Error in AddButtonInWindowsHeader({btHeader.Name})");
                 return;
             }
         }
@@ -576,7 +576,7 @@ namespace PluginCommon
                 // Not find element
                 if (btGameSelectedActionBarChild == null)
                 {
-                    logger.Error("PluginCommon - btGameSelectedActionBarChild [PART_ButtonMoreActions] not find");
+                    logger.Error("CommonShared - btGameSelectedActionBarChild [PART_ButtonMoreActions] not find");
                     return;
                 }
 
@@ -603,7 +603,7 @@ namespace PluginCommon
                     ((StackPanel)(btGameSelectedActionBarChild.Parent)).UpdateLayout();
 
 #if DEBUG
-                    logger.Debug($"PluginCommon - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
+                    logger.Debug($"CommonShared - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
 #endif
                 }
 
@@ -632,7 +632,7 @@ namespace PluginCommon
                     spContener.UpdateLayout();
 
 #if DEBUG
-                    logger.Debug($"PluginCommon - (Grid)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
+                    logger.Debug($"CommonShared - (Grid)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
 #endif
                 }
 
@@ -640,7 +640,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error in AddButtonInGameSelectedActionBarButtonOrToggleButton({btGameSelectedActionBar.Name})");
+                Common.LogError(ex, "CommonShared", $"Error in AddButtonInGameSelectedActionBarButtonOrToggleButton({btGameSelectedActionBar.Name})");
                 return;
             }
         }
@@ -652,7 +652,7 @@ namespace PluginCommon
                 // Not find element
                 if (btGameSelectedActionBarChild == null)
                 {
-                    logger.Error("PluginCommon - btGameSelectedActionBarChild [PART_ButtonMoreActions] not find");
+                    logger.Error("CommonShared - btGameSelectedActionBarChild [PART_ButtonMoreActions] not find");
                     return;
                 }
 
@@ -670,7 +670,7 @@ namespace PluginCommon
                             btGameSelectedParent.UpdateLayout();
 
 #if DEBUG
-                            logger.Debug($"PluginCommon - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
+                            logger.Debug($"CommonShared - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
 #endif
                         }
                     }
@@ -686,7 +686,7 @@ namespace PluginCommon
                             spContener.UpdateLayout();
 
 #if DEBUG
-                            logger.Debug($"PluginCommon - (Grid)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
+                            logger.Debug($"CommonShared - (Grid)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
 #endif
                         }
                     }
@@ -696,7 +696,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error in RemoveButtonInGameSelectedActionBarButtonOrToggleButton({btGameSelectedActionBarName})");
+                Common.LogError(ex, "CommonShared", $"Error in RemoveButtonInGameSelectedActionBarButtonOrToggleButton({btGameSelectedActionBarName})");
                 return;
             }
         }
@@ -715,7 +715,7 @@ namespace PluginCommon
                 // Not find element
                 if (PART_ElemDescription == null)
                 {
-                    logger.Warn("PluginCommon - elGameSelectedDescriptionContener [PART_ElemDescription] not find");
+                    logger.Warn("CommonShared - elGameSelectedDescriptionContener [PART_ElemDescription] not find");
                     return;
                 }
 
@@ -725,7 +725,7 @@ namespace PluginCommon
                 // Not find element
                 if (elGameSelectedDescriptionContener == null)
                 {
-                    logger.Warn("PluginCommon - elGameSelectedDescriptionContener.Parent [PART_ElemDescription] not find");
+                    logger.Warn("CommonShared - elGameSelectedDescriptionContener.Parent [PART_ElemDescription] not find");
                     return;
                 }
 
@@ -768,7 +768,7 @@ namespace PluginCommon
                     ((StackPanel)elGameSelectedDescriptionContener).UpdateLayout();
 
 #if DEBUG
-                    logger.Debug($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
+                    logger.Debug($"CommonShared - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
 #endif
                     return;
                 }
@@ -802,16 +802,16 @@ namespace PluginCommon
                     ((DockPanel)elGameSelectedDescriptionContener).UpdateLayout();
 
 #if DEBUG
-                    logger.Debug($"PluginCommon - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
+                    logger.Debug($"CommonShared - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
 #endif
                     return;
                 }
 
-                logger.Warn($"PluginCommon - elGameSelectedDescriptionContener is {elGameSelectedDescriptionContener.ToString()}");
+                logger.Warn($"CommonShared - elGameSelectedDescriptionContener is {elGameSelectedDescriptionContener.ToString()}");
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error in AddElementInGameSelectedDescription({elGameSelectedDescription.Name})");
+                Common.LogError(ex, "CommonShared", $"Error in AddElementInGameSelectedDescription({elGameSelectedDescription.Name})");
                 return;
             }
         }
@@ -823,7 +823,7 @@ namespace PluginCommon
                 // Not find element
                 if (elGameSelectedDescriptionContener == null)
                 {
-                    logger.Error("PluginCommon - elGameSelectedDescriptionContener [PART_ElemDescription] not find");
+                    logger.Error("CommonShared - elGameSelectedDescriptionContener [PART_ElemDescription] not find");
                     return;
                 }
 
@@ -839,7 +839,7 @@ namespace PluginCommon
                             elGameSelectedParent.UpdateLayout();
 
 #if DEBUG
-                            logger.Debug($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
+                            logger.Debug($"CommonShared - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
 #endif
                         }
                     }
@@ -856,7 +856,7 @@ namespace PluginCommon
                             elGameSelectedParent.UpdateLayout();
 
 #if DEBUG
-                            logger.Debug($"PluginCommon - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
+                            logger.Debug($"CommonShared - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
 #endif
                         }
                     }
@@ -866,7 +866,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error in RemoveElementInGameSelectedDescription({elGameSelectedDescriptionName})");
+                Common.LogError(ex, "CommonShared", $"Error in RemoveElementInGameSelectedDescription({elGameSelectedDescriptionName})");
                 return;
             }
         }
@@ -885,7 +885,7 @@ namespace PluginCommon
                 // Not find element
                 if (ElementCustomTheme == null)
                 {
-                    logger.Error($"PluginCommon - ElementCustomTheme [{ElementParentInCustomThemeName}] not find");
+                    logger.Error($"CommonShared - ElementCustomTheme [{ElementParentInCustomThemeName}] not find");
                     return;
                 }
 
@@ -908,12 +908,12 @@ namespace PluginCommon
 
                     ListCustomElement.Add(ElementCustomTheme);
 #if DEBUG
-                    logger.Debug($"PluginCommon - ElementCustomTheme [{ElementCustomTheme.Name}] insert");
+                    logger.Debug($"CommonShared - ElementCustomTheme [{ElementCustomTheme.Name}] insert");
 #endif
                 }
                 else
                 {
-                    logger.Error($"PluginCommon - ElementCustomTheme is not a StackPanel element");
+                    logger.Error($"CommonShared - ElementCustomTheme is not a StackPanel element");
                     return;
                 }
 
@@ -921,7 +921,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error in AddElementInCustomTheme({ElementParentInCustomThemeName})");
+                Common.LogError(ex, "CommonShared", $"Error in AddElementInCustomTheme({ElementParentInCustomThemeName})");
                 return;
             }
         }
@@ -935,7 +935,7 @@ namespace PluginCommon
                     // Not find element
                     if (ElementCustomTheme == null)
                     {
-                        logger.Error($"PluginCommon - ElementCustomTheme [{ElementParentInCustomThemeName}] not find");
+                        logger.Error($"CommonShared - ElementCustomTheme [{ElementParentInCustomThemeName}] not find");
                     }
 
                     // Add in parent if good type
@@ -946,12 +946,12 @@ namespace PluginCommon
                         ((StackPanel)ElementCustomTheme).UpdateLayout();
 
 #if DEBUG
-                        logger.Debug($"PluginCommon - ElementCustomTheme [{ElementCustomTheme.Name}] clear");
+                        logger.Debug($"CommonShared - ElementCustomTheme [{ElementCustomTheme.Name}] clear");
 #endif
                     }
                     else
                     {
-                        logger.Error($"PluginCommon - ElementCustomTheme is not a StackPanel element");
+                        logger.Error($"CommonShared - ElementCustomTheme is not a StackPanel element");
                     }
                 }
 
@@ -960,7 +960,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error in ClearElementInCustomTheme({ElementParentInCustomThemeName})");
+                Common.LogError(ex, "CommonShared", $"Error in ClearElementInCustomTheme({ElementParentInCustomThemeName})");
                 ListCustomElement = new List<FrameworkElement>();
                 return;
             }
@@ -988,7 +988,7 @@ namespace PluginCommon
                     // Not find element
                     if (spInfoBarFS == null)
                     {
-                        logger.Error("PluginCommon - btGameSelectedInfoBarFS Parent [PART_ButtonContext] not find");
+                        logger.Error("CommonShared - btGameSelectedInfoBarFS Parent [PART_ButtonContext] not find");
                         return;
                     }
 
@@ -999,19 +999,19 @@ namespace PluginCommon
                         ((StackPanel)(spInfoBarFS)).UpdateLayout();
 
 #if DEBUG
-                        logger.Debug($"PluginCommon - (StackPanel)btGameSelectedActionBarFS [{spGameSelectedInfoBarFS.Name}] insert");
+                        logger.Debug($"CommonShared - (StackPanel)btGameSelectedActionBarFS [{spGameSelectedInfoBarFS.Name}] insert");
 #endif
                     }
                 }
                 else
                 {
-                    logger.Error("PluginCommon - btGameSelectedInfoBarFS [PART_ButtonContext] not find");
+                    logger.Error("CommonShared - btGameSelectedInfoBarFS [PART_ButtonContext] not find");
                     return;
                 }
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon");
+                Common.LogError(ex, "CommonShared");
             }
         }
 
@@ -1022,7 +1022,7 @@ namespace PluginCommon
                 // Not find element
                 if (spInfoBarFS == null)
                 {
-                    logger.Error("PluginCommon - btGameSelectedInfoBarFS [PART_ButtonContext] not find");
+                    logger.Error("CommonShared - btGameSelectedInfoBarFS [PART_ButtonContext] not find");
                     return;
                 }
 
@@ -1037,7 +1037,7 @@ namespace PluginCommon
                             ((StackPanel)spInfoBarFS).UpdateLayout();
 
 #if DEBUG
-                            logger.Debug($"PluginCommon - (StackPanel)btGameSelectedInfoBarFS [{spGameSelectedInfoBarNameFS}] remove");
+                            logger.Debug($"CommonShared - (StackPanel)btGameSelectedInfoBarFS [{spGameSelectedInfoBarNameFS}] remove");
 #endif
                         }
                     }
@@ -1045,7 +1045,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon");
+                Common.LogError(ex, "CommonShared");
             }
         }
         #endregion
@@ -1063,7 +1063,7 @@ namespace PluginCommon
                 // Not find element
                 if (btGameSelectedActionBarChildFS == null)
                 {
-                    logger.Error("PluginCommon - btGameSelectedActionBarChildFS [PART_ButtonContext] not find");
+                    logger.Error("CommonShared - btGameSelectedActionBarChildFS [PART_ButtonContext] not find");
                     return;
                 }
 
@@ -1076,7 +1076,7 @@ namespace PluginCommon
                 // Not find element
                 if (btGameSelectedActionBarChildFS == null)
                 {
-                    logger.Error("PluginCommon - btGameSelectedActionBarChildFS [PART_ButtonContext] not find");
+                    logger.Error("CommonShared - btGameSelectedActionBarChildFS [PART_ButtonContext] not find");
                     return;
                 }
 
@@ -1088,7 +1088,7 @@ namespace PluginCommon
                     ((StackPanel)(btGameSelectedActionBarChildFS.Parent)).UpdateLayout();
 
 #if DEBUG
-                    logger.Debug($"PluginCommon - (StackPanel)btGameSelectedActionBarFS [{btGameSelectedActionBarFS.Name}] insert");
+                    logger.Debug($"CommonShared - (StackPanel)btGameSelectedActionBarFS [{btGameSelectedActionBarFS.Name}] insert");
 #endif
                 }
 
@@ -1096,7 +1096,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error in AddButtonInGameSelectedActionBarButtonOrToggleButtonFS({btGameSelectedActionBarFS.Name})");
+                Common.LogError(ex, "CommonShared", $"Error in AddButtonInGameSelectedActionBarButtonOrToggleButtonFS({btGameSelectedActionBarFS.Name})");
                 return;
             }
         }
@@ -1108,7 +1108,7 @@ namespace PluginCommon
                 // Not find element
                 if (btGameSelectedActionBarChildFS == null)
                 {
-                    logger.Error("PluginCommon - btGameSelectedActionBarChildFS [PART_ButtonContext] not find");
+                    logger.Error("CommonShared - btGameSelectedActionBarChildFS [PART_ButtonContext] not find");
                     return;
                 }
 
@@ -1124,7 +1124,7 @@ namespace PluginCommon
                             btGameSelectedParent.UpdateLayout();
 
 #if DEBUG
-                            logger.Debug($"PluginCommon - (StackPanel)btGameSelectedActionBarChildFS [{btGameSelectedActionBarNameFS}] remove");
+                            logger.Debug($"CommonShared - (StackPanel)btGameSelectedActionBarChildFS [{btGameSelectedActionBarNameFS}] remove");
 #endif
                         }
                     }
@@ -1134,7 +1134,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error in RemoveButtonInGameSelectedActionBarButtonOrToggleButton({btGameSelectedActionBarNameFS})");
+                Common.LogError(ex, "CommonShared", $"Error in RemoveButtonInGameSelectedActionBarButtonOrToggleButton({btGameSelectedActionBarNameFS})");
                 return;
             }
         }
@@ -1152,7 +1152,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error in AddElementInGameSelectedDescriptionFS({elGameSelectedDescriptionFS.Name})");
+                Common.LogError(ex, "CommonShared", $"Error in AddElementInGameSelectedDescriptionFS({elGameSelectedDescriptionFS.Name})");
                 return;
             }
         }
@@ -1165,7 +1165,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error in RemoveElementInGameSelectedDescriptionFS({elGameSelectedDescriptionFSName})");
+                Common.LogError(ex, "CommonShared", $"Error in RemoveElementInGameSelectedDescriptionFS({elGameSelectedDescriptionFSName})");
                 return;
             }
         }
@@ -1377,7 +1377,7 @@ namespace PluginCommon
                 FrameworkElement ControlContener = (FrameworkElement)ControlParent.Parent;
 
 #if DEBUG
-                logger.Debug($"PluginCommon - SetControlSize({ControlElement.Name}) - parent.name: {ControlContener.Name} - parent.Height: {ControlContener.Height} - parent.Width: {ControlContener.Width} - parent.MaxHeight: {ControlContener.MaxHeight} - parent.MaxWidth: {ControlContener.MaxWidth}");
+                logger.Debug($"CommonShared - SetControlSize({ControlElement.Name}) - parent.name: {ControlContener.Name} - parent.Height: {ControlContener.Height} - parent.Width: {ControlContener.Width} - parent.MaxHeight: {ControlContener.MaxHeight} - parent.MaxWidth: {ControlContener.MaxWidth}");
 #endif
 
                 // Set Height

@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PluginCommon
+namespace CommonShared
 {
     public class PlayniteTools
     {
@@ -72,12 +72,12 @@ namespace PluginCommon
                     return PathImageFileName + ".png";
                 }
 #if DEBUG
-                logger.Debug($"PluginCommon - GetCacheFile() not find - {PathImageFileName}");
+                logger.Debug($"CommonShared - GetCacheFile() not find - {PathImageFileName}");
 #endif
             }
             catch(Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", "Error on GetCacheFile()");
+                Common.LogError(ex, "CommonShared", "Error on GetCacheFile()");
             }
 
             return string.Empty;
@@ -99,7 +99,7 @@ namespace PluginCommon
                     }
                     else
                     {
-                        logger.Warn($"PluginCommon - File not found {FileConfig}");
+                        logger.Warn($"CommonShared - File not found {FileConfig}");
                         return false;
                     }
                 }
@@ -116,13 +116,13 @@ namespace PluginCommon
                 }
                 else
                 {
-                    logger.Warn($"PluginCommon - DisabledPlugins is null");
+                    logger.Warn($"CommonShared - DisabledPlugins is null");
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", "Error on IsDisabledPlaynitePlugins()");
+                Common.LogError(ex, "CommonShared", "Error on IsDisabledPlaynitePlugins()");
                 return false;
             }
 
@@ -167,7 +167,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on GetSourceName({game.Name})");
+                Common.LogError(ex, "CommonShared", $"Error on GetSourceName({game.Name})");
                 SourceName = "Playnite";
             }
 

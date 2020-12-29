@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PluginCommon
+namespace CommonShared
 {
     public class SystemTask
     {
@@ -32,7 +32,7 @@ namespace PluginCommon
                 List<SystemTask> TaskDelete = new List<SystemTask>();
 
 #if DEBUG
-                logger.Debug($"PluginCommon - SystemTask {SystemTask.Count}");
+                logger.Debug($"CommonShared - SystemTask {SystemTask.Count}");
 #endif
 
                 // Check task status
@@ -41,7 +41,7 @@ namespace PluginCommon
                     if (taskRunning.task.Status != TaskStatus.RanToCompletion)
                     {
 #if DEBUG
-                        logger.Debug($"PluginCommon - Task {taskRunning.task.Id} ({taskRunning.task.Status}) is canceled");
+                        logger.Debug($"CommonShared - Task {taskRunning.task.Id} ({taskRunning.task.Status}) is canceled");
 #endif
                         // Cancel task if not terminated
                         taskRunning.tokenSource.Cancel();
@@ -65,7 +65,7 @@ namespace PluginCommon
             catch (Exception ex)
             {
 #if DEBUG
-                Common.LogError(ex, "PluginCommon", "Error on Check()");
+                Common.LogError(ex, "CommonShared", "Error on Check()");
 #endif
             }
         }

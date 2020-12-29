@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PluginCommon.Collections
+namespace CommonShared.Collections
 {
     public class PluginDataBaseGameBase : DatabaseObject
     {

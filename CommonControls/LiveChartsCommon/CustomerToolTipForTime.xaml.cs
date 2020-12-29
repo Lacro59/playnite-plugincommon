@@ -5,7 +5,7 @@ using System.Windows.Data;
 using LiveCharts;
 using LiveCharts.Wpf;
 
-namespace PluginCommon.LiveChartsCommon
+namespace CommonControls.LiveChartsCommon
 {
     /// <summary>
     /// Logique d'interaction pour CustomersTooltipForTime.xaml

@@ -3,7 +3,7 @@ using LiveCharts.Wpf;
 using System.ComponentModel;
 
 
-namespace PluginCommon.LiveChartsCommon
+namespace CommonControls.LiveChartsCommon
 {
     /// <summary>
     /// Logique d'interaction pour CustomerForMultipleSingle.xaml

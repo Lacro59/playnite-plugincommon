@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PluginCommon
+namespace CommonShared
 {
     public class CodeLang
     {

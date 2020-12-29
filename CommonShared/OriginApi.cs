@@ -8,7 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace PluginCommon
+namespace CommonShared
 {
     public class OriginApi
     {
@@ -35,7 +35,7 @@ namespace PluginCommon
                         // If not expired
                         if (File.GetLastWriteTime(PluginCacheFile).AddDays(3) > DateTime.Now)
                         {
-                            logger.Info("PluginCommon - GetOriginAppListFromCache");
+                            logger.Info("CommonShared - GetOriginAppListFromCache");
                             OriginListApp = JsonConvert.DeserializeObject<List<GameStoreDataResponseAppsList>>(File.ReadAllText(PluginCacheFile));
                         }
                         else
@@ -56,13 +56,13 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", "Error on load SteamListApp");
+                Common.LogError(ex, "CommonShared", "Error on load SteamListApp");
             }
         }
 
         private List<GameStoreDataResponseAppsList> GetOriginAppListFromWeb(string PluginCacheFile)
         {
-            logger.Info("PluginCommon - GetOriginAppListFromWeb");
+            logger.Info("CommonShared - GetOriginAppListFromWeb");
 
             string responseData = string.Empty;
             try
@@ -76,7 +76,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Failed to load from {urlOriginListApp}");
+                Common.LogError(ex, "CommonShared", $"Failed to load from {urlOriginListApp}");
             }
 
             return JsonConvert.DeserializeObject<List<GameStoreDataResponseAppsList>>(responseData);
@@ -87,7 +87,7 @@ namespace PluginCommon
             GameStoreDataResponseAppsList findGame = OriginListApp.Find(x => x.masterTitle.ToLower() == Name.ToLower());
 
 #if DEBUG
-            logger.Debug($"PluginCommon - Find Origin data for {Name} - {JsonConvert.SerializeObject(findGame)}");
+            logger.Debug($"CommonShared - Find Origin data for {Name} - {JsonConvert.SerializeObject(findGame)}");
 #endif
 
             if (findGame != null)

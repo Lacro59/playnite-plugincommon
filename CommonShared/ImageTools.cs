@@ -7,7 +7,7 @@ using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace PluginCommon
+namespace CommonShared
 {
     public enum ImageColor
     {
@@ -42,7 +42,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on GetImapeProperty()");
+                Common.LogError(ex, "CommonShared", $"Error on GetImapeProperty()");
                 return null;
             }
         }
@@ -61,7 +61,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on GetImapeProperty()");
+                Common.LogError(ex, "CommonShared", $"Error on GetImapeProperty()");
                 return null;
             }
         }
@@ -82,7 +82,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on Resize()");
+                Common.LogError(ex, "CommonShared", $"Error on Resize()");
                 return string.Empty;
             }
         }
@@ -92,7 +92,7 @@ namespace PluginCommon
             try
             {
 #if DEBUG
-                logger.Debug("PluginCommon - Resize: " + path + ".png");
+                logger.Debug("CommonShared - Resize: " + path + ".png");
 #endif
                 Image image = Image.FromStream(imgStream);
                 Bitmap resultImage = Resize(image, width, height);
@@ -103,7 +103,7 @@ namespace PluginCommon
             catch (Exception ex)
             {
 #if DEBUG
-                Common.LogError(ex, "PluginCommon [Ignored]");
+                Common.LogError(ex, "CommonShared [Ignored]");
 #endif
                 return false;
             }
@@ -161,7 +161,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on ConvertBitmapImage()");
+                Common.LogError(ex, "CommonShared", $"Error on ConvertBitmapImage()");
             }
 
             return ConvertBitmapSource;

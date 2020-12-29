@@ -11,7 +11,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PluginCommon
+namespace CommonShared
 {
     public enum WebUserAgentType
     {
@@ -61,7 +61,7 @@ namespace PluginCommon
                 }
                 catch(Exception ex)
                 {
-                    Common.LogError(ex, "PluginCommon", $"Error on Download {url}");
+                    Common.LogError(ex, "CommonShared", $"Error on Download {url}");
                     return false;
                 }
 
@@ -85,7 +85,7 @@ namespace PluginCommon
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "PluginCommon", $"Error on Delete file image");
+                Common.LogError(ex, "CommonShared", $"Error on Delete file image");
                 return false;
             }
 
@@ -108,7 +108,7 @@ namespace PluginCommon
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "PluginCommon", $"Error on Download {url}");
+                    Common.LogError(ex, "CommonShared", $"Error on Download {url}");
                     return null;
                 }
             }
@@ -137,7 +137,7 @@ namespace PluginCommon
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "PluginCommon", $"Error on Download {url}");
+                    Common.LogError(ex, "CommonShared", $"Error on Download {url}");
                     return string.Empty;
                 }
 
@@ -152,7 +152,7 @@ namespace PluginCommon
                         redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
                     }
 #if DEBUG
-                    logger.Info(string.Format("PluginCommon - DownloadStringData() redirecting to {0}", redirectUri));
+                    logger.Info(string.Format("CommonShared - DownloadStringData() redirecting to {0}", redirectUri));
 #endif
                     return await DownloadStringData(redirectUri.ToString());
                 }
@@ -188,7 +188,7 @@ namespace PluginCommon
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "PluginCommon", $"Error on Download {url}");
+                    Common.LogError(ex, "CommonShared", $"Error on Download {url}");
                     return string.Empty;
                 }
 
@@ -199,7 +199,7 @@ namespace PluginCommon
                 }
                 else
                 {
-                    logger.Warn($"PluginCommon - DownloadStringData() with statuscode {statusCode} for {url}");
+                    logger.Warn($"CommonShared - DownloadStringData() with statuscode {statusCode} for {url}");
                     return string.Empty;
                 }
             }
@@ -257,7 +257,7 @@ namespace PluginCommon
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "PluginCommon", $"Error on Post {url}");
+                    Common.LogError(ex, "CommonShared", $"Error on Post {url}");
                 }
             }
 
@@ -295,7 +295,7 @@ namespace PluginCommon
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "PluginCommon", $"Error on Post {url}");
+                    Common.LogError(ex, "CommonShared", $"Error on Post {url}");
                 }
             }
 

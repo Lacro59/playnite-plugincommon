@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Playnite.SDK;
 using Playnite.SDK.Models;
-using PluginCommon.Models;
+using CommonShared.Models;
 using CommonPlaynite.Database;
 using System;
 using System.Collections.Concurrent;
@@ -19,7 +19,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 
-namespace PluginCommon.Collections
+namespace CommonShared.Collections
 {
     public abstract class PluginDatabaseObject<TypeSettings, TypeDatabase, TItem> : ObservableObject 
         where TypeSettings : ISettings

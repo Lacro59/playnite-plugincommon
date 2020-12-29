@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PluginCommon
+namespace CommonShared
 {
     /// <summary>
     /// Group erros message in order to haven't duplicate.
