@@ -87,7 +87,7 @@ namespace CommonShared
             GameStoreDataResponseAppsList findGame = OriginListApp.Find(x => x.masterTitle.ToLower() == Name.ToLower());
 
 #if DEBUG
-            logger.Debug($"CommonShared - Find Origin data for {Name} - {JsonConvert.SerializeObject(findGame)}");
+            logger.Debug($"CommonShared [Ignored] - Find Origin data for {Name} - {JsonConvert.SerializeObject(findGame)}");
 #endif
 
             if (findGame != null)

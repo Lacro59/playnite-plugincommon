@@ -39,7 +39,7 @@ namespace CommonShared
             string url = string.Format(urlGithub, PluginName.ToLower());
 
 #if DEBUG
-            logger.Debug($"CommonShared - Download {url} for {PluginName}");
+            logger.Debug($"CommonShared [Ignored] - Download {url} for {PluginName}");
 #endif
 
             string ResultWeb = string.Empty;
@@ -51,7 +51,7 @@ namespace CommonShared
             {
                 logger.Error($"Failed to load from {url} for {PluginName}");
 #if DEBUG
-                Common.LogError(ex, "CommonShared", $"Failed to load from {url} for {PluginName}");
+                Common.LogError(ex, "CommonShared [Ignored]", $"Failed to load from {url} for {PluginName}");
 #endif
             }
 

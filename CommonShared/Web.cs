@@ -152,7 +152,7 @@ namespace CommonShared
                         redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
                     }
 #if DEBUG
-                    logger.Info(string.Format("CommonShared - DownloadStringData() redirecting to {0}", redirectUri));
+                    logger.Info(string.Format("CommonShared [Ignored] - DownloadStringData() redirecting to {0}", redirectUri));
 #endif
                     return await DownloadStringData(redirectUri.ToString());
                 }

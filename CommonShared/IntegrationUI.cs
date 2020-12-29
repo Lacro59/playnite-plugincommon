@@ -139,9 +139,6 @@ namespace CommonShared
 
                     if (BtActionBarParent != null)
                     {
-#if DEBUG
-                        logger.Debug($"CommonShared - BtActionBarParent: {BtActionBarParent.ToString()} - {BtActionBarParent.IsVisible}");
-#endif
                         if (!BtActionBarParent.IsVisible)
                         {
                             RemoveBtActionBar();
@@ -166,9 +163,6 @@ namespace CommonShared
 
                     if (SpDescriptionParent != null)
                     {
-#if DEBUG
-                        logger.Debug($"CommonShared - SpDescriptionParent: {SpDescriptionParent.ToString()} - {SpDescriptionParent.IsVisible}");
-#endif
                         if (!SpDescriptionParent.IsVisible)
                         {
                             RemoveSpDescription();
@@ -197,9 +191,6 @@ namespace CommonShared
 
                         if (customElementParent != null)
                         {
-#if DEBUG
-                            logger.Debug($"CommonShared - SpDescriptionParent: {customElementParent.ToString()} - {customElementParent.IsVisible}");
-#endif
                             // TODO Perfectible
                             if (!customElementParent.IsVisible)
                             {
@@ -272,9 +263,6 @@ namespace CommonShared
 
         public static void HandleEsc(object sender, KeyEventArgs e)
         {
-#if DEBUG
-            logger.Debug($"CommonShared - {sender.ToString()}");
-#endif
             if (e.Key == Key.Escape)
             {
                 if (sender is Window)
@@ -285,9 +273,6 @@ namespace CommonShared
             }
             else
             {
-#if DEBUG
-                logger.Debug("CommonShared - sender is not a Window");
-#endif
             }
         }
 
@@ -337,7 +322,7 @@ namespace CommonShared
         public static void ResetToggle()
         {
 #if DEBUG
-            logger.Debug("CommonShared - ResetToggle()");
+            logger.Debug("CommonShared [Ignored] - ResetToggle()");
 #endif
             try
             {
@@ -345,7 +330,7 @@ namespace CommonShared
                 if (PART_GaButton != null && PART_GaButton is ToggleButton && (bool)((ToggleButton)PART_GaButton).IsChecked)
                 {
 #if DEBUG
-                    logger.Debug("CommonShared - Reset PART_GaButton");
+                    logger.Debug("CommonShared [Ignored] - Reset PART_GaButton");
 #endif
                     ((ToggleButton)PART_GaButton).IsChecked = false;
                     ((ToggleButton)PART_GaButton).RaiseEvent(new RoutedEventArgs(ToggleButton.ClickEvent));
@@ -356,7 +341,7 @@ namespace CommonShared
                 if (PART_ScButton != null && PART_ScButton is ToggleButton && (bool)((ToggleButton)PART_ScButton).IsChecked)
                 {
 #if DEBUG
-                    logger.Debug("CommonShared - Reset PART_ScButton");
+                    logger.Debug("CommonShared [Ignored] - Reset PART_ScButton");
 #endif
                     ((ToggleButton)PART_ScButton).IsChecked = false;
                     ((ToggleButton)PART_ScButton).RaiseEvent(new RoutedEventArgs(ToggleButton.ClickEvent));
@@ -368,7 +353,7 @@ namespace CommonShared
                 Common.LogError(ex, "CommonShared", "Error on ResetToggle()");
             }
 #if DEBUG
-            logger.Debug("CommonShared - No ResetToggle()");
+            logger.Debug("CommonShared [Ignored] - No ResetToggle()");
 #endif
         }
 
@@ -376,7 +361,7 @@ namespace CommonShared
         public void OnBtActionBarToggleButtonClick(object sender, RoutedEventArgs e)
         {
 #if DEBUG
-            logger.Debug($"CommonShared - OnBtActionBarToggleButtonClick()");
+            logger.Debug($"CommonShared [Ignored] - OnBtActionBarToggleButtonClick()");
 #endif
             if (PART_ElemDescription == null)
             {
@@ -485,7 +470,7 @@ namespace CommonShared
         public bool AddResources(List<ResourcesList> ResourcesList)
         {
 #if DEBUG
-            logger.Debug($"CommonShared - AddResources() - {JsonConvert.SerializeObject(ResourcesList)}");
+            logger.Debug($"CommonShared [Ignored] - AddResources() - {JsonConvert.SerializeObject(ResourcesList)}");
 #endif
             string ItemKey = string.Empty;
             try
@@ -544,7 +529,7 @@ namespace CommonShared
                             i = btHeaderParent.Children.Count;
 
 #if DEBUG
-                            logger.Debug($"CommonShared - btHeader [{btHeader.Name}] insert");
+                            logger.Debug($"CommonShared [Ignored] - btHeader [{btHeader.Name}] insert");
 #endif
                         }
                     }
@@ -603,7 +588,7 @@ namespace CommonShared
                     ((StackPanel)(btGameSelectedActionBarChild.Parent)).UpdateLayout();
 
 #if DEBUG
-                    logger.Debug($"CommonShared - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
+                    logger.Debug($"CommonShared [Ignored] - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
 #endif
                 }
 
@@ -632,7 +617,7 @@ namespace CommonShared
                     spContener.UpdateLayout();
 
 #if DEBUG
-                    logger.Debug($"CommonShared - (Grid)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
+                    logger.Debug($"CommonShared [Ignored] - (Grid)btGameSelectedActionBar [{btGameSelectedActionBar.Name}] insert");
 #endif
                 }
 
@@ -670,7 +655,7 @@ namespace CommonShared
                             btGameSelectedParent.UpdateLayout();
 
 #if DEBUG
-                            logger.Debug($"CommonShared - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
+                            logger.Debug($"CommonShared [Ignored] - (StackPanel)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
 #endif
                         }
                     }
@@ -686,7 +671,7 @@ namespace CommonShared
                             spContener.UpdateLayout();
 
 #if DEBUG
-                            logger.Debug($"CommonShared - (Grid)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
+                            logger.Debug($"CommonShared [Ignored] - (Grid)btGameSelectedActionBar [{btGameSelectedActionBarName}] remove");
 #endif
                         }
                     }
@@ -768,7 +753,7 @@ namespace CommonShared
                     ((StackPanel)elGameSelectedDescriptionContener).UpdateLayout();
 
 #if DEBUG
-                    logger.Debug($"CommonShared - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
+                    logger.Debug($"CommonShared [Ignored] - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
 #endif
                     return;
                 }
@@ -802,7 +787,7 @@ namespace CommonShared
                     ((DockPanel)elGameSelectedDescriptionContener).UpdateLayout();
 
 #if DEBUG
-                    logger.Debug($"CommonShared - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
+                    logger.Debug($"CommonShared [Ignored] - elGameSelectedDescriptionContener [{elGameSelectedDescription.Name}] insert");
 #endif
                     return;
                 }
@@ -839,7 +824,7 @@ namespace CommonShared
                             elGameSelectedParent.UpdateLayout();
 
 #if DEBUG
-                            logger.Debug($"CommonShared - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
+                            logger.Debug($"CommonShared [Ignored] - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
 #endif
                         }
                     }
@@ -856,7 +841,7 @@ namespace CommonShared
                             elGameSelectedParent.UpdateLayout();
 
 #if DEBUG
-                            logger.Debug($"CommonShared - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
+                            logger.Debug($"CommonShared [Ignored] - elGameSelectedDescriptionName [{elGameSelectedDescriptionName}] remove");
 #endif
                         }
                     }
@@ -908,7 +893,7 @@ namespace CommonShared
 
                     ListCustomElement.Add(ElementCustomTheme);
 #if DEBUG
-                    logger.Debug($"CommonShared - ElementCustomTheme [{ElementCustomTheme.Name}] insert");
+                    logger.Debug($"CommonShared [Ignored] - ElementCustomTheme [{ElementCustomTheme.Name}] insert");
 #endif
                 }
                 else
@@ -946,7 +931,7 @@ namespace CommonShared
                         ((StackPanel)ElementCustomTheme).UpdateLayout();
 
 #if DEBUG
-                        logger.Debug($"CommonShared - ElementCustomTheme [{ElementCustomTheme.Name}] clear");
+                        logger.Debug($"CommonShared [Ignored] - ElementCustomTheme [{ElementCustomTheme.Name}] clear");
 #endif
                     }
                     else
@@ -999,7 +984,7 @@ namespace CommonShared
                         ((StackPanel)(spInfoBarFS)).UpdateLayout();
 
 #if DEBUG
-                        logger.Debug($"CommonShared - (StackPanel)btGameSelectedActionBarFS [{spGameSelectedInfoBarFS.Name}] insert");
+                        logger.Debug($"CommonShared [Ignored] - (StackPanel)btGameSelectedActionBarFS [{spGameSelectedInfoBarFS.Name}] insert");
 #endif
                     }
                 }
@@ -1037,7 +1022,7 @@ namespace CommonShared
                             ((StackPanel)spInfoBarFS).UpdateLayout();
 
 #if DEBUG
-                            logger.Debug($"CommonShared - (StackPanel)btGameSelectedInfoBarFS [{spGameSelectedInfoBarNameFS}] remove");
+                            logger.Debug($"CommonShared [Ignored] - (StackPanel)btGameSelectedInfoBarFS [{spGameSelectedInfoBarNameFS}] remove");
 #endif
                         }
                     }
@@ -1088,7 +1073,7 @@ namespace CommonShared
                     ((StackPanel)(btGameSelectedActionBarChildFS.Parent)).UpdateLayout();
 
 #if DEBUG
-                    logger.Debug($"CommonShared - (StackPanel)btGameSelectedActionBarFS [{btGameSelectedActionBarFS.Name}] insert");
+                    logger.Debug($"CommonShared [Ignored] - (StackPanel)btGameSelectedActionBarFS [{btGameSelectedActionBarFS.Name}] insert");
 #endif
                 }
 
@@ -1124,7 +1109,7 @@ namespace CommonShared
                             btGameSelectedParent.UpdateLayout();
 
 #if DEBUG
-                            logger.Debug($"CommonShared - (StackPanel)btGameSelectedActionBarChildFS [{btGameSelectedActionBarNameFS}] remove");
+                            logger.Debug($"CommonShared [Ignored] - (StackPanel)btGameSelectedActionBarChildFS [{btGameSelectedActionBarNameFS}] remove");
 #endif
                         }
                     }
@@ -1377,7 +1362,7 @@ namespace CommonShared
                 FrameworkElement ControlContener = (FrameworkElement)ControlParent.Parent;
 
 #if DEBUG
-                logger.Debug($"CommonShared - SetControlSize({ControlElement.Name}) - parent.name: {ControlContener.Name} - parent.Height: {ControlContener.Height} - parent.Width: {ControlContener.Width} - parent.MaxHeight: {ControlContener.MaxHeight} - parent.MaxWidth: {ControlContener.MaxWidth}");
+                logger.Debug($"CommonShared [Ignored] - SetControlSize({ControlElement.Name}) - parent.name: {ControlContener.Name} - parent.Height: {ControlContener.Height} - parent.Width: {ControlContener.Width} - parent.MaxHeight: {ControlContener.MaxHeight} - parent.MaxWidth: {ControlContener.MaxWidth}");
 #endif
 
                 // Set Height

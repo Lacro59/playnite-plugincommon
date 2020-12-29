@@ -35,7 +35,7 @@ namespace CommonShared
                 if (File.Exists(CommonFile))
                 {
 #if DEBUG
-                    logger.Debug($"CommonShared - Load {CommonFile}");
+                    logger.Debug($"CommonShared [Ignored] - Load {CommonFile}");
 #endif
 
                     ResourceDictionary res = null;
@@ -59,7 +59,7 @@ namespace CommonShared
                     }
 
 #if DEBUG
-                    logger.Debug($"CommonShared - res: {JsonConvert.SerializeObject(res)}");
+                    logger.Debug($"CommonShared [Ignored] - res: {JsonConvert.SerializeObject(res)}");
 #endif
                     Application.Current.Resources.MergedDictionaries.Add(res);
                 }

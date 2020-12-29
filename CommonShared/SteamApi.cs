@@ -59,7 +59,7 @@ namespace CommonShared
         private JObject GetSteamAppListFromWeb(string PluginCacheFile)
         {
 #if DEBUG
-            logger.Debug("CommonShared - GetSteamAppListFromWeb");
+            logger.Debug("CommonShared [Ignored] - GetSteamAppListFromWeb");
 #endif
 
             string responseData = string.Empty;

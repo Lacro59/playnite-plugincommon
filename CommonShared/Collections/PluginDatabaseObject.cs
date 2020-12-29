@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using System.Windows.Automation;
 
 namespace CommonShared.Collections
 {
@@ -106,6 +107,8 @@ namespace CommonShared.Collections
             }
         }
 
+        public static Game GameSelected;
+
         private List<Tag> _PluginTags;
         public List<Tag> PluginTags
         {
@@ -173,7 +176,33 @@ namespace CommonShared.Collections
             _PlayniteApi = PlayniteApi;
             this.PluginUserDataPath = PluginUserDataPath;
             this.PluginSettings = PluginSettings;
+
+            if (PlayniteApi.ApplicationInfo.Mode == ApplicationMode.Desktop)
+            {
+                EventManager.RegisterClassHandler(typeof(Window), Window.UnloadedEvent, new RoutedEventHandler(WindowBase_UnloadedEvent));
+            }
         }
+
+
+        private void WindowBase_UnloadedEvent(object sender, System.EventArgs e)
+        {
+            string WinIdProperty = string.Empty;
+
+            try
+            {
+                WinIdProperty = ((Window)sender).GetValue(AutomationProperties.AutomationIdProperty).ToString();
+
+                if (WinIdProperty == "WindowGameEdit")
+                {
+                    SetCurrent(GameSelectedData);
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "CommonShared", $"Error on WindowBase_LoadedEvent for {WinIdProperty}");
+            }
+        }
+
 
 
         protected bool ControlAndCreateDirectory(string PluginUserDataPath, string DirectoryName)
@@ -300,7 +329,7 @@ namespace CommonShared.Collections
                 if (EnableTag)
                 {
 #if DEBUG
-                    logger.Debug($"{PluginName} - RemoveTag & AddTag for {itemToAdd.Name} with {itemToAdd.Id}");
+                    logger.Debug($"{PluginName} [Ignored] - RemoveTag & AddTag for {itemToAdd.Name} with {itemToAdd.Id}");
 #endif
                     RemoveTag(itemToAdd.Id);
                     AddTag(itemToAdd.Id);
@@ -357,6 +386,19 @@ namespace CommonShared.Collections
         public virtual void SetCurrent(TItem gameSelectedData)
         {
             GameSelectedData = gameSelectedData;
+
+            if (GameSelected != null && GameSelectedData.Id == GameSelected.Id)
+            {
+                GameSelectedData.Name = GameSelected.Name;
+                GameSelectedData.SourceId = GameSelected.SourceId;
+                GameSelectedData.Hidden = GameSelected.Hidden;
+                GameSelectedData.Icon = GameSelected.Icon;
+                GameSelectedData.CoverImage = GameSelected.CoverImage;
+                GameSelectedData.GenreIds = GameSelected.GenreIds;
+                GameSelectedData.Genres = GameSelected.Genres;
+                GameSelectedData.Playtime = GameSelected.Playtime;
+                GameSelectedData.LastActivity = GameSelected.LastActivity;
+            }
         }
 
 
@@ -406,8 +448,8 @@ namespace CommonShared.Collections
                 {
                     game.TagIds = game.TagIds.Where(x => !PluginTags.Any(y => x == y.Id)).ToList();
 #if DEBUG
-                    logger.Debug($"{PluginName} - PluginTags: {JsonConvert.SerializeObject(PluginTags)}");
-                    logger.Debug($"{PluginName} - game.TagIds: {JsonConvert.SerializeObject(game.TagIds)}");
+                    logger.Debug($"{PluginName} [Ignored] - PluginTags: {JsonConvert.SerializeObject(PluginTags)}");
+                    logger.Debug($"{PluginName} [Ignored] - game.TagIds: {JsonConvert.SerializeObject(game.TagIds)}");
 #endif
                     _PlayniteApi.Database.Games.Update(game);
                 }
@@ -426,7 +468,7 @@ namespace CommonShared.Collections
         public void AddTagAllGame()
         {
 #if DEBUG
-            logger.Debug($"{PluginName} - AddTagAllGame");
+            logger.Debug($"{PluginName} [Ignored] - AddTagAllGame");
 #endif
 
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
@@ -476,7 +518,7 @@ namespace CommonShared.Collections
         public void RemoveTagAllGame(bool FromClearDatabase = false)
         {
 #if DEBUG
-            logger.Debug($"{PluginName} - RemoveTagAllGame");
+            logger.Debug($"{PluginName} [Ignored] - RemoveTagAllGame");
 #endif
 
             string Message = string.Empty;

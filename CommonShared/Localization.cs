@@ -30,7 +30,7 @@ namespace CommonShared
             if (File.Exists(langFileCommon))
             {
 #if DEBUG
-                logger.Debug($"CommonShared - Parse plugin localization file {langFileCommon}.");
+                logger.Debug($"CommonShared [Ignored] - Parse plugin localization file {langFileCommon}.");
 #endif
 
                 ResourceDictionary res = null;
@@ -65,7 +65,7 @@ namespace CommonShared
             if (File.Exists(langFile))
             {
 #if DEBUG
-                logger.Debug($"CommonShared - Parse plugin localization file {langFile}.");
+                logger.Debug($"CommonShared [Ignored] - Parse plugin localization file {langFile}.");
 #endif
 
                 ResourceDictionary res = null;

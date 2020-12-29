@@ -32,7 +32,7 @@ namespace CommonShared
                 List<SystemTask> TaskDelete = new List<SystemTask>();
 
 #if DEBUG
-                logger.Debug($"CommonShared - SystemTask {SystemTask.Count}");
+                logger.Debug($"CommonShared [Ignored] - SystemTask {SystemTask.Count}");
 #endif
 
                 // Check task status
@@ -41,7 +41,7 @@ namespace CommonShared
                     if (taskRunning.task.Status != TaskStatus.RanToCompletion)
                     {
 #if DEBUG
-                        logger.Debug($"CommonShared - Task {taskRunning.task.Id} ({taskRunning.task.Status}) is canceled");
+                        logger.Debug($"CommonShared [Ignored] - Task {taskRunning.task.Id} ({taskRunning.task.Status}) is canceled");
 #endif
                         // Cancel task if not terminated
                         taskRunning.tokenSource.Cancel();
@@ -58,14 +58,14 @@ namespace CommonShared
                 {
                     SystemTask.Remove(taskRunning);
 #if DEBUG
-                    logger.Debug($"SystemChecker - Task {taskRunning.task.Id} ({taskRunning.task.Status}) is removed");
+                    logger.Debug($"SystemChecker [Ignored] - Task {taskRunning.task.Id} ({taskRunning.task.Status}) is removed");
 #endif
                 }
             }
             catch (Exception ex)
             {
 #if DEBUG
-                Common.LogError(ex, "CommonShared", "Error on Check()");
+                Common.LogError(ex, "CommonShared [Ignored]");
 #endif
             }
         }

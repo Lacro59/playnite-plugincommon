@@ -72,7 +72,7 @@ namespace CommonShared
                     return PathImageFileName + ".png";
                 }
 #if DEBUG
-                logger.Debug($"CommonShared - GetCacheFile() not find - {PathImageFileName}");
+                logger.Debug($"CommonShared [Ignored] - GetCacheFile() not find - {PathImageFileName}");
 #endif
             }
             catch(Exception ex)

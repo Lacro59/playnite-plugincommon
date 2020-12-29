@@ -92,7 +92,7 @@ namespace CommonShared
             try
             {
 #if DEBUG
-                logger.Debug("CommonShared - Resize: " + path + ".png");
+                logger.Debug("CommonShared [Ignored]- Resize: " + path + ".png");
 #endif
                 Image image = Image.FromStream(imgStream);
                 Bitmap resultImage = Resize(image, width, height);
