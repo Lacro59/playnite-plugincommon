@@ -16,7 +16,7 @@
         <wpf:SharedVisibilityConverter x:Key="SharedVisibilityConverter"/>
         <local:ShowIconConverterMultipleTime x:Key="ShowIconConverterMultipleTime" />
     </UserControl.Resources>
-    
+
     <UserControl.Template>
         <ControlTemplate>
             <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Tag="{Binding ChartPoint.Instance.(local:CustomerForTime.Name)}">
@@ -56,11 +56,10 @@
                                                    Margin="5 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
 
                                         <TextBlock Grid.Column="2" Text="{Binding ChartPoint.Instance.(local:CustomerForTime.Name)}"
-                                            Margin="5 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
+                                                   Margin="5 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
 
                                         <TextBlock Grid.Column="3" Text="{Binding ChartPoint.Instance.(local:CustomerForTime.Values), Mode=OneWay, Converter={StaticResource LongToTimePlayedConverter}}" 
-                                            Margin="10 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
-
+                                                   Margin="10 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -70,6 +69,5 @@
             </Grid>
         </ControlTemplate>
     </UserControl.Template>
-
 </UserControl>
     

@@ -5,8 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
              xmlns:localLVC="clr-namespace:CommonControls.LiveChartsCommon"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300"
+             mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300"
              d:DataContext="{d:DesignInstance localLVC:CustomerToolTipForMultipleSingle}">
 
     <UserControl.Template>
@@ -30,16 +29,15 @@
                                             </Grid.ColumnDefinitions>
 
                                             <Path Width="10" Height="10" 
-                                                StrokeThickness="{Binding Series.StrokeThickness}" 
-                                                Stroke="{Binding Series.Stroke}" Fill="{Binding Series.Fill}" 
-                                                Stretch="Fill" Data="{Binding Series.PointGeometry}"/>
+                                                  StrokeThickness="{Binding Series.StrokeThickness}" 
+                                                  Stroke="{Binding Series.Stroke}" Fill="{Binding Series.Fill}" 
+                                                  Stretch="Fill" Data="{Binding Series.PointGeometry}"/>
 
                                             <TextBlock Grid.Column="1" Text="{Binding ChartPoint.Instance.(localLVC:CustomerForSingle.Name)}"
-                                            Margin="5 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
+                                                       Margin="5 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
 
                                             <TextBlock Grid.Column="2" Text="{Binding ChartPoint.Instance.(localLVC:CustomerForSingle.Values)}" 
-                                            Margin="10 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
-
+                                                       Margin="10 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -50,6 +48,5 @@
             </Grid>
         </ControlTemplate>
     </UserControl.Template>
-
 </UserControl>
     

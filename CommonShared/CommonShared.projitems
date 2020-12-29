@@ -31,4 +31,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)TransformIcon.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Resources\font.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

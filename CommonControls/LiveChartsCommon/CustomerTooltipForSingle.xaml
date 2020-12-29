@@ -5,8 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
              xmlns:localLVC="clr-namespace:CommonControls.LiveChartsCommon"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300">
 
     <UserControl.Template>
         <ControlTemplate>
@@ -24,10 +23,10 @@
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0" Text="{Binding ChartPoint.Instance.(localLVC:CustomerForSingle.Name)}"
-                                           Margin="5 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
+                                               Margin="5 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
 
                                     <TextBlock Grid.Column="1" Text="{Binding ChartPoint.Instance.(localLVC:CustomerForSingle.Values)}" 
-                                           Margin="10 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
+                                               Margin="10 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}"/>
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -36,5 +35,4 @@
             </Grid>
         </ControlTemplate>
     </UserControl.Template>
-
 </UserControl>

@@ -9,6 +9,7 @@ using System.IO;
 using System.Windows;
 using CommonShared.Models;
 using System.Windows.Automation;
+using System.Windows.Media;
 
 namespace CommonShared
 {
@@ -64,9 +65,23 @@ namespace CommonShared
                 }
                 else
                 {
-                    logger.Warn($"CommonShared - File {CommonFile} not found.");
+                    logger.Warn($"CommonShared - File {CommonFile} not find");
                     return;
                 }
+            }
+
+
+            // Add font
+            string FontFile = Path.Combine(pluginFolder, "Resources\\font.ttf");
+            if (File.Exists(FontFile))
+            {
+                FontFamily fontFamily = new FontFamily(new Uri(FontFile), "./#font");
+                Application.Current.Resources.Remove("CommonFont");
+                Application.Current.Resources.Add("CommonFont", fontFamily);
+            }
+            else
+            {
+                logger.Warn($"CommonShared - -File not find {FontFile}");
             }
         }
 
