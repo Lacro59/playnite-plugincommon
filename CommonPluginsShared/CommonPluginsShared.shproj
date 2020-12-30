@@ -8,6 +8,32 @@
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\CodeSharing\Microsoft.CodeSharing.Common.Default.props" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\CodeSharing\Microsoft.CodeSharing.Common.props" />
   <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="CheckVersion.cs" />
+    <Compile Include="CodeLang.cs" />
+    <Compile Include="Collections\PluginDataBaseGame.cs" />
+    <Compile Include="Collections\PluginDataBaseGameBase.cs" />
+    <Compile Include="Collections\PluginDataBaseGameDetails.cs" />
+    <Compile Include="Collections\PluginDatabaseObject.cs" />
+    <Compile Include="Collections\PluginItemCollection.cs" />
+    <Compile Include="Common.cs" />
+    <Compile Include="Converters.cs" />
+    <Compile Include="CumulsErrors.cs" />
+    <Compile Include="ImageTools.cs" />
+    <Compile Include="IntegrationUI.cs" />
+    <Compile Include="Localization.cs" />
+    <Compile Include="Models\TraceInfos.cs" />
+    <Compile Include="OriginApi.cs" />
+    <Compile Include="PlayniteTools.cs" />
+    <Compile Include="SteamApi.cs" />
+    <Compile Include="TaskHelper.cs" />
+    <Compile Include="Tools.cs" />
+    <Compile Include="TransformIcon.cs" />
+    <Compile Include="Web.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\font.ttf" />
+  </ItemGroup>
   <Import Project="CommonShared.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\CodeSharing\Microsoft.CodeSharing.CSharp.targets" />
 </Project>
