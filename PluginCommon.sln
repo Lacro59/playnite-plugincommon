@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.1300
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonControls", "CommonControls\CommonControls.csproj", "{9ACFA07B-718C-4546-AC27-A9FCE42F61F7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonPluginsControls", "CommonPluginsControls\CommonPluginsControls.csproj", "{9ACFA07B-718C-4546-AC27-A9FCE42F61F7}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CommonShared", "CommonShared\CommonShared.shproj", "{27E5D35B-F3CE-4A3F-9705-4564674615A5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonPluginsPlaynite", "CommonPluginsPlaynite\CommonPluginsPlaynite.csproj", "{A4C600FB-92F5-4FD6-AD6B-0C0E0CF2EC81}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonPlaynite", "CommonPlaynite\CommonPlaynite.csproj", "{A4C600FB-92F5-4FD6-AD6B-0C0E0CF2EC81}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CommonPluginsShared", "CommonPluginsShared\CommonPluginsShared.shproj", "{27E5D35B-F3CE-4A3F-9705-4564674615A5}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		CommonShared\CommonShared.projitems*{27e5d35b-f3ce-4a3f-9705-4564674615a5}*SharedItemsImports = 13
+		CommonPluginsShared\CommonShared.projitems*{27e5d35b-f3ce-4a3f-9705-4564674615a5}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

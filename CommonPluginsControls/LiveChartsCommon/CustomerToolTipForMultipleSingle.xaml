@@ -1,0 +1,51 @@
+﻿<UserControl x:Class="CommonPluginsControls.LiveChartsCommon.CustomerToolTipForMultipleSingle"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+             xmlns:local="clr-namespace:CommonPluginsControls.LiveChartsCommon"
+             mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300"
+             d:DataContext="{d:DesignInstance local:CustomerToolTipForMultipleSingle}">
+
+    <UserControl.Template>
+        <ControlTemplate>
+            <Grid VerticalAlignment="Center" HorizontalAlignment="Center" >
+                <Border Background="{DynamicResource CommonToolTipBackgroundBrush}" CornerRadius="{DynamicResource CommonToolTipCornerRadius}"
+                        BorderThickness="{DynamicResource CommonToolTipBorderThickness}" Padding="{DynamicResource CommonToolTipPadding}"
+                        BorderBrush="{DynamicResource CommonToolTipBorderBrush}">
+                    <ScrollViewer x:Name="ScrollViewer" MaxHeight="400" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <ItemsControl ItemsSource="{Binding Data.Points}" Grid.IsSharedSizeScope="True">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type wpf:DataPointViewModel}">
+                                        <Grid Margin="2" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="{Binding ChartPoint.Instance.(local:CustomerForSingle.Name)}">
+
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
+                                                <ColumnDefinition Width="Auto" SharedSizeGroup="Time" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Path Width="10" Height="10" 
+                                                  StrokeThickness="{Binding Series.StrokeThickness}" 
+                                                  Stroke="{Binding Series.Stroke}" Fill="{Binding Series.Fill}" 
+                                                  Stretch="Fill" Data="{Binding Series.PointGeometry}" />
+
+                                            <TextBlock Grid.Column="1" Text="{Binding ChartPoint.Instance.(local:CustomerForSingle.Name)}"
+                                                       Margin="5 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
+
+                                            <TextBlock Grid.Column="2" Text="{Binding ChartPoint.Instance.(local:CustomerForSingle.Values)}" 
+                                                       Margin="10 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </ControlTemplate>
+    </UserControl.Template>
+</UserControl>
+    
