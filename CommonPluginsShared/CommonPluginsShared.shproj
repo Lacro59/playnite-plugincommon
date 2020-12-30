@@ -34,6 +34,6 @@
   <ItemGroup>
     <Content Include="Resources\font.ttf" />
   </ItemGroup>
-  <Import Project="CommonShared.projitems" Label="Shared" />
+  <Import Project="CommonPluginsShared.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\CodeSharing\Microsoft.CodeSharing.CSharp.targets" />
 </Project>
