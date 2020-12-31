@@ -420,10 +420,7 @@ namespace CommonPluginsShared
                         }
                         else
                         {
-                            if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ElemNotes" || ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ElemDescription")
-                            {
-                                ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Collapsed;
-                            }
+                            ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Collapsed;
                         }
                     }
                 }
