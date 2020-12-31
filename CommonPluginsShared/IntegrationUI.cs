@@ -350,7 +350,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", "Error on ResetToggle()");
+                Common.LogError(ex, "CommonPluginsShared");
             }
 #if DEBUG
             logger.Debug("CommonPluginsShared [Ignored] - No ResetToggle()");
@@ -363,100 +363,107 @@ namespace CommonPluginsShared
 #if DEBUG
             logger.Debug($"CommonPluginsShared [Ignored] - OnBtActionBarToggleButtonClick()");
 #endif
-            if (PART_ElemDescription == null)
+            try
             {
-                PART_ElemDescription = (StackPanel)IntegrationUI.SearchElementByName("PART_ElemDescription", false, true);
-            }
-
-            if (PART_ElemDescription == null)
-            {
-                logger.Warn("CommonPluginsShared - PART_ElemDescription not find on OnBtActionBarToggleButtonClick()");
-                return;
-            }
-
-            dynamic PART_ElemDescriptionParent = (FrameworkElement)PART_ElemDescription.Parent;
-
-
-            if (NotesVisibility == null)
-            {
-                FrameworkElement PART_ElemNotes = IntegrationUI.SearchElementByName("PART_ElemNotes");
-                if (PART_ElemNotes != null)
+                if (PART_ElemDescription == null)
                 {
-                    NotesVisibility = PART_ElemNotes.Visibility;
+                    PART_ElemDescription = (StackPanel)IntegrationUI.SearchElementByName("PART_ElemDescription", false, true);
                 }
-            }
 
-
-            FrameworkElement PART_GaButton = IntegrationUI.SearchElementByName("PART_GaButton", true);
-            FrameworkElement PART_ScButton = IntegrationUI.SearchElementByName("PART_ScButton", true);
-
-            ToggleButton tgButton = sender as ToggleButton;
-
-            if ((bool)(tgButton.IsChecked))
-            {
-                for (int i = 0; i < PART_ElemDescriptionParent.Children.Count; i++)
+                if (PART_ElemDescription == null)
                 {
-                    if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_GaDescriptionIntegration" && tgButton.Name == "PART_GaButton")
-                    {
-                        ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
+                    logger.Warn("CommonPluginsShared - PART_ElemDescription not find on OnBtActionBarToggleButtonClick()");
+                    return;
+                }
 
-                        // Uncheck other integration ToggleButton
-                        if (PART_ScButton is ToggleButton)
+                dynamic PART_ElemDescriptionParent = (FrameworkElement)PART_ElemDescription.Parent;
+
+
+                if (NotesVisibility == null)
+                {
+                    FrameworkElement PART_ElemNotes = IntegrationUI.SearchElementByName("PART_ElemNotes");
+                    if (PART_ElemNotes != null)
+                    {
+                        NotesVisibility = PART_ElemNotes.Visibility;
+                    }
+                }
+
+
+                FrameworkElement PART_GaButton = IntegrationUI.SearchElementByName("PART_GaButton", true);
+                FrameworkElement PART_ScButton = IntegrationUI.SearchElementByName("PART_ScButton", true);
+
+                ToggleButton tgButton = sender as ToggleButton;
+
+                if ((bool)(tgButton.IsChecked))
+                {
+                    for (int i = 0; i < PART_ElemDescriptionParent.Children.Count; i++)
+                    {
+                        if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_GaDescriptionIntegration" && tgButton.Name == "PART_GaButton")
                         {
-                            ((ToggleButton)PART_ScButton).IsChecked = false;
+                            ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
+
+                            // Uncheck other integration ToggleButton
+                            if (PART_ScButton is ToggleButton)
+                            {
+                                ((ToggleButton)PART_ScButton).IsChecked = false;
+                            }
+                        }
+                        else if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ScDescriptionIntegration" && tgButton.Name == "PART_ScButton")
+                        {
+                            ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
+
+                            // Uncheck other integration ToggleButton
+                            if (PART_GaButton is ToggleButton)
+                            {
+                                ((ToggleButton)PART_GaButton).IsChecked = false;
+                            }
+                        }
+                        else
+                        {
+                            if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ElemNotes" || ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ElemDescription")
+                            {
+                                ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Collapsed;
+                            }
                         }
                     }
-                    else if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ScDescriptionIntegration" && tgButton.Name == "PART_ScButton")
+                }
+                else
+                {
+                    for (int i = 0; i < PART_ElemDescriptionParent.Children.Count; i++)
                     {
-                        ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
-
-                        // Uncheck other integration ToggleButton
-                        if (PART_GaButton is ToggleButton)
-                        {
-                            ((ToggleButton)PART_GaButton).IsChecked = false;
-                        }
-                    }
-                    else
-                    {
-                        if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ElemNotes" || ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ElemDescription")
+                        if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_GaDescriptionIntegration")
                         {
                             ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Collapsed;
+                            if (tgButton.Name == "PART_GaButton" && (bool)tgButton.IsChecked)
+                            {
+                                ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
+                            }
+                        }
+                        else if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ScDescriptionIntegration")
+                        {
+                            ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Collapsed;
+                            if (tgButton.Name == "PART_ScButton" && (bool)tgButton.IsChecked)
+                            {
+                                ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
+                            }
+                        }
+                        else
+                        {
+                            if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ElemNotes")
+                            {
+                                ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = (Visibility)NotesVisibility;
+                            }
+                            else if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ElemDescription")
+                            {
+                                ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
+                            }
                         }
                     }
                 }
             }
-            else
+            catch (Exception ex)
             {
-                for (int i = 0; i < PART_ElemDescriptionParent.Children.Count; i++)
-                {
-                    if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_GaDescriptionIntegration")
-                    {
-                        ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Collapsed;
-                        if (tgButton.Name == "PART_GaButton" && (bool)tgButton.IsChecked)
-                        {
-                            ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
-                        }
-                    }
-                    else if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ScDescriptionIntegration")
-                    {
-                        ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Collapsed;
-                        if (tgButton.Name == "PART_ScButton" && (bool)tgButton.IsChecked)
-                        {
-                            ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
-                        }
-                    }
-                    else
-                    {
-                        if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ElemNotes")
-                        {
-                            ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = (Visibility)NotesVisibility;
-                        }
-                        else if (((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Name == "PART_ElemDescription")
-                        {
-                            ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
-                        }
-                    }
-                }
+                Common.LogError(ex, "CommonPluginsShared");
             }
         }
     }

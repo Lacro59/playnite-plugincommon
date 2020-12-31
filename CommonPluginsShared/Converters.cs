@@ -57,7 +57,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on CompareValueConverter");
+                Common.LogError(ex, "CommonPluginsShared");
                 return (Brushes)resources.GetResource("TextBrush");
             }
         }
@@ -94,7 +94,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on VisibilityZeroConverter");
+                Common.LogError(ex, "CommonPluginsShared");
                 return Visibility.Visible;
             }
         }
@@ -148,7 +148,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on LocalDateConverter");
+                Common.LogError(ex, "CommonPluginsShared");
                 return string.Empty;
             }
         }
@@ -190,7 +190,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on LocalDateYMConverter");
+                Common.LogError(ex, "CommonPluginsShared");
                 return string.Empty;
             }
         }
@@ -217,7 +217,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on LocalTimeConverter");
+                Common.LogError(ex, "CommonPluginsShared");
                 return string.Empty;
             }
         }
@@ -245,7 +245,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on LocalDateTimeConverter");
+                Common.LogError(ex, "CommonPluginsShared");
                 return string.Empty;
             }
         }
@@ -287,7 +287,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on IndexConverter");
+                Common.LogError(ex, "CommonPluginsShared");
                 return string.Empty;
             }
         }

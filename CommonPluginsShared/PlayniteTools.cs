@@ -77,7 +77,7 @@ namespace CommonPluginsShared
             }
             catch(Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", "Error on GetCacheFile()");
+                Common.LogError(ex, "CommonPluginsShared");
             }
 
             return string.Empty;
@@ -122,7 +122,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", "Error on IsDisabledPlaynitePlugins()");
+                Common.LogError(ex, "CommonPluginsShared");
                 return false;
             }
 

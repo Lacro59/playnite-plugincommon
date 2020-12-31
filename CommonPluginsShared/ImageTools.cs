@@ -82,7 +82,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on Resize()");
+                Common.LogError(ex, "CommonPluginsShared");
                 return string.Empty;
             }
         }
@@ -161,7 +161,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on ConvertBitmapImage()");
+                Common.LogError(ex, "CommonPluginsShared");
             }
 
             return ConvertBitmapSource;

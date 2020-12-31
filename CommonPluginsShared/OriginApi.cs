@@ -56,7 +56,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", "Error on load SteamListApp");
+                Common.LogError(ex, "CommonPluginsShared");
             }
         }
 
