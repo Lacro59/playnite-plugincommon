@@ -4,14 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
-             xmlns:local="clr-namespace:CommonPluginsControls.LiveChartsCommon"
-             xmlns:converters="clr-namespace:CommonPluginsPlaynite.Converters;assembly=CommonPluginsPlaynite"
+             xmlns:livechartscommon="clr-namespace:CommonPluginsControls.LiveChartsCommon"
+             xmlns:converters="clr-namespace:CommonPluginsPlaynite.Converters"
              mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300" 
-             d:DataContext="{d:DesignInstance local:CustomerToolTipForTime}">
+             d:DataContext="{d:DesignInstance livechartscommon:CustomerToolTipForTime}">
 
     <UserControl.Resources>
         <converters:LongToTimePlayedConverter x:Key="LongToTimePlayedConverter" />
-        <local:ShowIconConverterTime x:Key="ShowIconConverterTime" />
+        <livechartscommon:ShowIconConverterTime x:Key="ShowIconConverterTime" />
     </UserControl.Resources>
 
     <UserControl.Template>
@@ -30,13 +30,16 @@
                                         <ColumnDefinition Width="Auto" SharedSizeGroup="Time" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Column="0" Text="{Binding ChartPoint.Instance.(local:CustomerForTime.Name), Converter={StaticResource ShowIconConverterTime}}" 
+                                    <TextBlock Grid.Column="0" Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Name), Converter={StaticResource ShowIconConverterTime}}" 
+                                               FontSize="16"
                                                Margin="5 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
 
-                                    <TextBlock Grid.Column="1" Text="{Binding ChartPoint.Instance.(local:CustomerForTime.Name)}"
+                                    <TextBlock Grid.Column="1" Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Name)}"
+                                               FontSize="16"
                                                Margin="5 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
 
-                                    <TextBlock Grid.Column="2" Text="{Binding ChartPoint.Instance.(local:CustomerForTime.Values), Mode=OneWay, Converter={StaticResource LongToTimePlayedConverter}}" 
+                                    <TextBlock Grid.Column="2" Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Values), Mode=OneWay, Converter={StaticResource LongToTimePlayedConverter}}" 
+                                               FontSize="16"
                                                Margin="10 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
                                 </Grid>
                             </DataTemplate>

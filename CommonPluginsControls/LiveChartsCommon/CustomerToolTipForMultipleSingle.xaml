@@ -4,9 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
-             xmlns:local="clr-namespace:CommonPluginsControls.LiveChartsCommon"
+             xmlns:livechartscommon="clr-namespace:CommonPluginsControls.LiveChartsCommon"
              mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300"
-             d:DataContext="{d:DesignInstance local:CustomerToolTipForMultipleSingle}">
+             d:DataContext="{d:DesignInstance livechartscommon:CustomerToolTipForMultipleSingle}">
 
     <UserControl.Template>
         <ControlTemplate>
@@ -19,7 +19,7 @@
                             <ItemsControl ItemsSource="{Binding Data.Points}" Grid.IsSharedSizeScope="True">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate DataType="{x:Type wpf:DataPointViewModel}">
-                                        <Grid Margin="2" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="{Binding ChartPoint.Instance.(local:CustomerForSingle.Name)}">
+                                        <Grid Margin="2" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Name)}">
 
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto" />
@@ -32,10 +32,12 @@
                                                   Stroke="{Binding Series.Stroke}" Fill="{Binding Series.Fill}" 
                                                   Stretch="Fill" Data="{Binding Series.PointGeometry}" />
 
-                                            <TextBlock Grid.Column="1" Text="{Binding ChartPoint.Instance.(local:CustomerForSingle.Name)}"
+                                            <TextBlock Grid.Column="1" Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Name)}"
+                                                       FontSize="16"
                                                        Margin="5 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
 
-                                            <TextBlock Grid.Column="2" Text="{Binding ChartPoint.Instance.(local:CustomerForSingle.Values)}" 
+                                            <TextBlock Grid.Column="2" Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Values)}" 
+                                                       FontSize="16"
                                                        Margin="10 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
                                         </Grid>
                                     </DataTemplate>
