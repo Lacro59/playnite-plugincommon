@@ -34,8 +34,6 @@ namespace CommonPluginsShared
 
         private StackPanel PART_ElemDescription = null;
 
-        private Visibility? NotesVisibility;
-
 
         // BtActionBar
         public abstract string BtActionBarName { get; set; }
