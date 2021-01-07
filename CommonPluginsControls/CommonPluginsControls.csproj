@@ -73,6 +73,9 @@
     <Compile Include="Controls\ControlPickerGradient.xaml.cs">
       <DependentUpon>ControlPickerGradient.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\TextBlockTrimmed.xaml.cs">
+      <DependentUpon>TextBlockTrimmed.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LiveChartsCommon\CustomerForSingle.cs" />
     <Compile Include="LiveChartsCommon\CustomerForTime.cs" />
     <Compile Include="LiveChartsCommon\CustomerToolTipForMultipleSingle.xaml.cs">
@@ -94,6 +97,10 @@
     <Page Include="Controls\ControlPickerGradient.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\TextBlockTrimmed.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="LiveChartsCommon\CustomerToolTipForMultipleSingle.xaml">
       <Generator>MSBuild:Compile</Generator>
