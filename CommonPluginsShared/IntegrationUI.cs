@@ -301,7 +301,7 @@ namespace CommonPluginsShared
                 windowExtension.Height = ViewExtension.Height + 25;
                 windowExtension.Width = ViewExtension.Width;
             }
-            else if(!double.IsNaN(ViewExtension.MinHeight) && !double.IsNaN(ViewExtension.MinWidth))
+            else if(!double.IsNaN(ViewExtension.MinHeight) && !double.IsNaN(ViewExtension.MinWidth) && ViewExtension.MinHeight > 0 && ViewExtension.MinWidth > 0)
             {
                 windowExtension.Height = ViewExtension.MinHeight + 25;
                 windowExtension.Width = ViewExtension.MinWidth;
