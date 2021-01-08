@@ -443,7 +443,10 @@ namespace CommonPluginsShared
                             {
                                 if (tgButton.Name == "PART_ScButton" && !(bool)tgButton.IsChecked)
                                 {
-                                    ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
+                                    if ((string)((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Tag == "data")
+                                    {
+                                        ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
+                                    }
                                 }
                             }
                         }
@@ -464,7 +467,10 @@ namespace CommonPluginsShared
                             {
                                 if (tgButton.Name == "PART_GaButton" && !(bool)tgButton.IsChecked)
                                 {
-                                    ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
+                                    if ((string)((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Tag == "data")
+                                    {
+                                        ((FrameworkElement)PART_ElemDescriptionParent.Children[i]).Visibility = Visibility.Visible;
+                                    }
                                 }
                             }
                         }
