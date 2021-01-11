@@ -75,16 +75,16 @@ namespace CommonPluginsShared
             string FontFile = Path.Combine(pluginFolder, "Resources\\font.ttf");
             if (File.Exists(FontFile))
             {
-                DateTime DateTimeFont = default(DateTime);
-                if (Application.Current.Resources.FindName("CommonFontDateTime") != null)
+                long fileSize = 0;
+                if (Application.Current.Resources.FindName("CommonFontSize") != null)
                 {
-                    DateTimeFont = (DateTime)Application.Current.Resources.FindName("CommonFontDateTime");
+                    fileSize = (DateTime)Application.Current.Resources.FindName("CommonFontSize");
                 }
 
-                if (DateTimeFont <= File.GetLastWriteTime(FontFile))
+                if (fileSize <= new FileInfo(FontFile).Length)
                 {
-                    Application.Current.Resources.Remove("CommonFontDateTime");
-                    Application.Current.Resources.Add("CommonFontDateTime", DateTimeFont);
+                    Application.Current.Resources.Remove("CommonFontSize");
+                    Application.Current.Resources.Add("CommonFontSize", new FileInfo(FontFile).Length);
 
                     FontFamily fontFamily = new FontFamily(new Uri(FontFile), "./#font");
                     Application.Current.Resources.Remove("CommonFont");
