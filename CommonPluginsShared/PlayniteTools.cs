@@ -149,7 +149,7 @@ namespace CommonPluginsShared
                 if (IsGameEmulated(PlayniteApi, game))
                 {
                     SourceName = "RetroAchievements";
-                    
+
                     if (GameUseRpcs3(PlayniteApi, game))
                     {
                         SourceName = "Rpcs3";
