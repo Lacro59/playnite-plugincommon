@@ -78,7 +78,7 @@ namespace CommonPluginsShared
                 long fileSize = 0;
                 if (Application.Current.Resources.FindName("CommonFontSize") != null)
                 {
-                    fileSize = (DateTime)Application.Current.Resources.FindName("CommonFontSize");
+                    fileSize = (long)Application.Current.Resources.FindName("CommonFontSize");
                 }
 
                 if (fileSize <= new FileInfo(FontFile).Length)
