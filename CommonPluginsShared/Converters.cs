@@ -313,4 +313,34 @@ namespace CommonPluginsShared
             throw new NotImplementedException();
         }
     }
+
+
+
+    public class DefaultIconConverter : IValueConverter
+    {
+        public object Convert(object value, Type TargetType, object parameter, CultureInfo culture)
+        {
+            try
+            {
+                if (value == null)
+                {
+                    if (ResourceProvider.GetResource("DefaultGameIcon") != null)
+                    {
+                        return ResourceProvider.GetResource("DefaultGameIcon");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "CommonPluginsShared");
+            }
+
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
