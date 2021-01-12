@@ -38,6 +38,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\InvertedBoolenConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\LongToTimePlayedConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\NegateConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\StringNullOrEmptyToBoolConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\StringNullOrEmptyToVisibilityConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Database\ItemCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\BitpmapExtensions.cs" />

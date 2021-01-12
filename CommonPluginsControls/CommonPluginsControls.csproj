@@ -70,6 +70,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\ComboBoxRemovable.xaml.cs">
+      <DependentUpon>ComboBoxRemovable.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ControlPickerGradient.xaml.cs">
       <DependentUpon>ControlPickerGradient.xaml</DependentUpon>
     </Compile>
@@ -90,10 +93,17 @@
     <Compile Include="LiveChartsCommon\CustomerToolTipForTime.xaml.cs">
       <DependentUpon>CustomerToolTipForTime.xaml</DependentUpon>
     </Compile>
+    <Compile Include="PlayniteControls\SearchBox.xaml.cs">
+      <DependentUpon>SearchBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <Page Include="Controls\ComboBoxRemovable.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Controls\ControlPickerGradient.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -115,6 +125,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="LiveChartsCommon\CustomerToolTipForTime.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="PlayniteControls\SearchBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
