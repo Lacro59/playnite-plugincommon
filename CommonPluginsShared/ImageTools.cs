@@ -65,6 +65,23 @@ namespace CommonPluginsShared
                 return null;
             }
         }
+
+        public static ImageProperty GetImapeProperty(Image image)
+        {
+            try
+            {
+                return new ImageProperty
+                {
+                    Width = image.Width,
+                    Height = image.Height,
+                };
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "CommonPluginsShared", $"Error on GetImapeProperty()");
+                return null;
+            }
+        }
         #endregion
 
 
@@ -111,7 +128,6 @@ namespace CommonPluginsShared
 
         public static Bitmap Resize(Image image, int width, int height)
         {
-
             Rectangle destRect = new Rectangle(0, 0, width, height);
             Bitmap destImage = new Bitmap(width, height);
 
@@ -197,6 +213,23 @@ namespace CommonPluginsShared
                 bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
                 bitmapImage.EndInit();
                 bitmapImage.Freeze();
+
+                return bitmapImage;
+            }
+        }
+
+        public static BitmapImage ConvertImageToBitmapImage(Image image)
+        {
+            using (var memory = new MemoryStream())
+            {
+                image.Save(memory, ImageFormat.Png);
+                memory.Position = 0;
+
+                var bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = memory;
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
 
                 return bitmapImage;
             }
