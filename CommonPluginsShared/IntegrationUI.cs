@@ -1259,14 +1259,16 @@ namespace CommonPluginsShared
             return null;
         }
 
-        public static FrameworkElement SearchElementByName(string ElementName, bool MustVisible = false, bool ParentMustVisible = false)
+        public static FrameworkElement SearchElementByName(string ElementName, bool MustVisible = false, bool ParentMustVisible = false, int counter = 1)
         {
-            return SearchElementByName(ElementName, Application.Current.MainWindow, MustVisible, ParentMustVisible);
+            return SearchElementByName(ElementName, Application.Current.MainWindow, MustVisible, ParentMustVisible, counter);
         }
 
-        public static FrameworkElement SearchElementByName(string ElementName, DependencyObject dpObj, bool MustVisible = false, bool ParentMustVisible = false)
+        public static FrameworkElement SearchElementByName(string ElementName, DependencyObject dpObj, bool MustVisible = false, bool ParentMustVisible = false, int counter = 1)
         {
             FrameworkElement ElementFind = null;
+
+            int count = 0;
 
             if (ElementFind == null)
             {
@@ -1321,30 +1323,44 @@ namespace CommonPluginsShared
                     }
                     else if(el.Name == ElementName)
                     {
+                        count++;
+
                         if (!MustVisible)
                         {
                             if (!ParentMustVisible)
                             {
-                                ElementFind = el;
-                                break;
+                                if (count == counter)
+                                {
+                                    ElementFind = el;
+                                    break;
+                                }
                             }
                             else if (((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)el.Parent).Parent).Parent).Parent).Parent).IsVisible)
                             {
-                                ElementFind = el;
-                                break;
+                                if (count == counter)
+                                {
+                                    ElementFind = el;
+                                    break;
+                                }
                             }
                         }
                         else if (el.IsVisible)
                         {
                             if (!ParentMustVisible)
                             {
-                                ElementFind = el;
-                                break;
+                                if (count == counter)
+                                {
+                                    ElementFind = el;
+                                    break;
+                                }
                             }
                             else if (((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)el.Parent).Parent).Parent).Parent).Parent).IsVisible)
                             {
-                                ElementFind = el;
-                                break;
+                                if (count == counter)
+                                {
+                                    ElementFind = el;
+                                    break;
+                                }
                             }
                         }
                     }
