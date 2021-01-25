@@ -322,7 +322,7 @@ namespace CommonPluginsShared
         {
             try
             {
-                if (value == null)
+                if (value == null || (value is string && ((string)value).IsNullOrEmpty()))
                 {
                     if (ResourceProvider.GetResource("DefaultGameIcon") != null)
                     {
