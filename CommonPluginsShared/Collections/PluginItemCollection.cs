@@ -37,6 +37,7 @@ namespace CommonPluginsShared.Collections
                         temp.Hidden = game.Hidden;
                         temp.Icon = game.Icon;
                         temp.CoverImage = game.CoverImage;
+                        temp.BackgroundImage = game.BackgroundImage;
                         temp.GenreIds = game.GenreIds;
                         temp.Genres = game.Genres;
                         temp.Playtime = game.Playtime;
@@ -73,6 +74,7 @@ namespace CommonPluginsShared.Collections
                         temp.Hidden = game.Hidden;
                         temp.Icon = game.Icon;
                         temp.CoverImage = game.CoverImage;
+                        temp.BackgroundImage = game.BackgroundImage;
                         temp.GenreIds = game.GenreIds;
                         temp.Genres = game.Genres;
                         temp.Playtime = game.Playtime;

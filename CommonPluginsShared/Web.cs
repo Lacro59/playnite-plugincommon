@@ -56,12 +56,12 @@ namespace CommonPluginsShared
                 Stream imageStream;
                 try
                 {
-                    var response = client.GetAsync(url).Result;
+                    HttpResponseMessage response = await client.GetAsync(url);
                     imageStream = await response.Content.ReadAsStreamAsync();
                 }
                 catch(Exception ex)
                 {
-                    Common.LogError(ex, "CommonPluginsShared", $"Error on Download {url}");
+                    Common.LogError(ex, "CommonPluginsShared", $"Error on download {url}");
                     return false;
                 }
 
@@ -71,7 +71,7 @@ namespace CommonPluginsShared
                 }
             }
 
-            // Delete id file is empty
+            // Delete file is empty
             try
             {
                 if (File.Exists(PathImageFileName + ".png"))
@@ -85,7 +85,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on Delete file image");
+                Common.LogError(ex, "CommonPluginsShared", $"Error on delete file image");
                 return false;
             }
 
@@ -103,12 +103,12 @@ namespace CommonPluginsShared
             {
                 try
                 {
-                    var response = client.GetAsync(url).Result;
+                    HttpResponseMessage response = await client.GetAsync(url);
                     return await response.Content.ReadAsStreamAsync();
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "CommonPluginsShared", $"Error on Download {url}");
+                    Common.LogError(ex, "CommonPluginsShared", $"Error on download {url}");
                     return null;
                 }
             }
@@ -133,11 +133,16 @@ namespace CommonPluginsShared
                 HttpResponseMessage response;
                 try
                 {
-                    response = client.SendAsync(request).Result;
+                    response = await client.SendAsync(request);
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "CommonPluginsShared", $"Error on Download {url}");
+                    Common.LogError(ex, "CommonPluginsShared", $"Error on download {url}");
+                    return string.Empty;
+                }
+
+                if (response == null)
+                {
                     return string.Empty;
                 }
 
@@ -184,11 +189,16 @@ namespace CommonPluginsShared
                 HttpResponseMessage response;
                 try
                 {
-                    response = client.SendAsync(request).Result;
+                    response = await client.SendAsync(request);
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "CommonPluginsShared", $"Error on Download {url}");
+                    Common.LogError(ex, "CommonPluginsShared", $"Error on download {url}");
+                    return string.Empty;
+                }
+
+                if (response == null)
+                {
                     return string.Empty;
                 }
 
@@ -283,11 +293,11 @@ namespace CommonPluginsShared
                     var cookieString = string.Join(";", Cookies.Select(a => $"{a.Name}={a.Value}"));
                     client.DefaultRequestHeaders.Add("Cookie", cookieString);
                 }
-                
+
                 HttpResponseMessage result;
                 try
                 {
-                    result = client.PostAsync(url, formContent).Result;
+                    result = await client.PostAsync(url, formContent);
                     if (result.IsSuccessStatusCode)
                     {
                         response = await result.Content.ReadAsStringAsync();

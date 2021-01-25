@@ -108,7 +108,7 @@ namespace CommonPluginsShared
 
         private static void WindowBase_LoadedEvent(object sender, System.EventArgs e)
         {
-            string WinIdProperty = String.Empty;
+            string WinIdProperty = string.Empty;
 
             try
             {

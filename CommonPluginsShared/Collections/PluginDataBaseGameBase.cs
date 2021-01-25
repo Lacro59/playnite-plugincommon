@@ -100,6 +100,25 @@ namespace CommonPluginsShared.Collections
             }
         }
 
+        private string backgroundImage;
+        /// <summary>
+        /// Gets or sets background image. Local file path, HTTP URL or database file ids are supported.
+        /// </summary>
+        [JsonIgnore]
+        public string BackgroundImage
+        {
+            get
+            {
+                return backgroundImage;
+            }
+
+            set
+            {
+                backgroundImage = value;
+                OnPropertyChanged();
+            }
+        }
+
         private List<Genre> _Genres;
         /// <summary>
         /// Gets game's genres.
