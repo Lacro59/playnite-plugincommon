@@ -35,6 +35,7 @@ namespace CommonPluginsControls.Controls
         public bool OnlySimpleColor = false;
 
         public Color SimpleColor;
+        public SolidColorBrush SimpleSolidColorBrush;
         public LinearGradientBrush linearGradientBrush = new LinearGradientBrush();
 
 
@@ -49,10 +50,12 @@ namespace CommonPluginsControls.Controls
             IsSimpleColor = true;
             PART_tbGradient.IsChecked = !IsSimpleColor;
 
+            PART_ColorSimple.Visibility = Visibility.Visible;
             PART_ColorPickerGradient.Visibility = Visibility.Hidden;
             PART_GradientDetailsLinearGrid.Visibility = Visibility.Hidden;
             PART_ButtonSetColorGradient.Visibility = Visibility.Hidden;
 
+            SimpleSolidColorBrush = new SolidColorBrush(color);
             SimpleColor = color;
             PART_Border_Color0.Background = new SolidColorBrush(SimpleColor);
             PART_Border_Color1.Background = new SolidColorBrush(SimpleColor);
@@ -68,12 +71,41 @@ namespace CommonPluginsControls.Controls
             SetCursor();
             SetLinearGradientBrush();
         }
-        
+
+        public void SetColors(SolidColorBrush color)
+        {
+            IsSimpleColor = true;
+            PART_tbGradient.IsChecked = !IsSimpleColor;
+
+            PART_ColorSimple.Visibility = Visibility.Visible;
+            PART_ColorPickerGradient.Visibility = Visibility.Hidden;
+            PART_GradientDetailsLinearGrid.Visibility = Visibility.Hidden;
+            PART_ButtonSetColorGradient.Visibility = Visibility.Hidden;
+            
+            SimpleSolidColorBrush = color;
+            PART_SliderOpacity.Value = SimpleSolidColorBrush.Opacity;
+            SimpleColor = color.Color;
+            PART_Border_Color0.Background = new SolidColorBrush(SimpleColor);
+            PART_Border_Color1.Background = new SolidColorBrush(SimpleColor);
+
+            Offset1 = 0;
+            Offset2 = 1;
+
+            StartPoint = new Point(0, 1);
+            EndPoint = new Point(0, 0);
+
+            PART_AkrColorPicker.SelectedColor = SimpleColor;
+
+            SetCursor();
+            SetLinearGradientBrush();
+        }
+
         public void SetColors(LinearGradientBrush linearGradient)
         { 
             IsSimpleColor = false;
             PART_tbGradient.IsChecked = !IsSimpleColor;
 
+            PART_ColorSimple.Visibility = Visibility.Hidden;
             PART_ColorPickerGradient.Visibility = Visibility.Visible;
             PART_GradientDetailsLinearGrid.Visibility = Visibility.Visible;
             PART_ButtonSetColorGradient.Visibility = Visibility.Visible;
@@ -319,6 +351,7 @@ namespace CommonPluginsControls.Controls
         {
             IsSimpleColor = false;
 
+            PART_ColorSimple.Visibility = Visibility.Hidden;
             PART_ColorPickerGradient.Visibility = Visibility.Visible;
             PART_GradientDetailsLinearGrid.Visibility = Visibility.Visible;
             PART_ButtonSetColorGradient.Visibility = Visibility.Visible;
@@ -328,6 +361,7 @@ namespace CommonPluginsControls.Controls
         {
             IsSimpleColor = true;
 
+            PART_ColorSimple.Visibility = Visibility.Visible;
             PART_ColorPickerGradient.Visibility = Visibility.Hidden;
             PART_GradientDetailsLinearGrid.Visibility = Visibility.Hidden;
             PART_ButtonSetColorGradient.Visibility = Visibility.Hidden;
@@ -362,6 +396,36 @@ namespace CommonPluginsControls.Controls
             if (OnlySimpleColor)
             {
                 PART_GradientSelector.Visibility = Visibility.Hidden;
+            }
+        }
+
+        private void PART_SliderOpacity_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            try
+            {
+                if (SimpleSolidColorBrush != null)
+                {
+                    SimpleSolidColorBrush = PART_SolidColorBrush;
+                }
+            }
+            catch
+            {
+
+            }
+        }
+
+        private void PART_SolidColorBrush_Changed(object sender, EventArgs e)
+        {
+            try
+            {
+                if (SimpleSolidColorBrush != null)
+                {
+                    SimpleSolidColorBrush = PART_SolidColorBrush;
+                }
+            }
+            catch
+            {
+
             }
         }
     }
