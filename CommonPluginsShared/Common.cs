@@ -116,7 +116,7 @@ namespace CommonPluginsShared
 
                 if (WinIdProperty == "WindowSettings")
                 {
-                    ((Window)sender).Width = 850;
+                    ((Window)sender).Width = 860;
                 }
             }
             catch (Exception ex)
