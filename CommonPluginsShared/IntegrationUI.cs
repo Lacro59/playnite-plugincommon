@@ -516,21 +516,30 @@ namespace CommonPluginsShared
             logger.Debug($"CommonPluginsShared [Ignored] - AddResources() - {JsonConvert.SerializeObject(ResourcesList)}");
 #endif
             string ItemKey = string.Empty;
-            try
+
+            foreach (ResourcesList item in ResourcesList)
             {
-                foreach (ResourcesList item in ResourcesList)
+                try
                 {
                     ItemKey = item.Key;
-                    Application.Current.Resources.Remove(item.Key);
-                    Application.Current.Resources.Add(item.Key, item.Value);
+                    if (Application.Current.Resources[ItemKey] != null)
+                    {
+                        Application.Current.Resources[ItemKey] = item.Value;
+                    }
+                    else
+                    {
+                        Application.Current.Resources.Add(item.Key, item.Value);
+                    }
                 }
-                return true;
+                catch (Exception ex)
+                {
+                    logger.Warn($"CommonPluginsShared - Error in AddResources({ItemKey})");
+#if DEBUG
+                    Common.LogError(ex, "CommonPluginsShared [Ignored]", $"Error in AddResources({ItemKey})");
+#endif
+                }
             }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, "CommonPluginsShared", $"Error in AddResources({ItemKey})");
-                return false;
-            }
+            return true;
         }
 
 
@@ -1411,7 +1420,6 @@ namespace CommonPluginsShared
         {
             SetControlSize(ControlElement, 0, 0);
         }
-
 
         public static void SetControlSize(FrameworkElement ControlElement, double DefaultHeight, double DefaultWidth)
         {
