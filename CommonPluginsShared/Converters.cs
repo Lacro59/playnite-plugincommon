@@ -283,10 +283,15 @@ namespace CommonPluginsShared
         {
             try
             {
-                ListBoxItem item = (ListBoxItem)value;
-                ListBox listView = ItemsControl.ItemsControlFromItemContainer(item) as ListBox;
-                int index = listView.ItemContainerGenerator.IndexFromContainer(item);
-                return index.ToString();
+                if (value is ListBoxItem)
+                {
+                    ListBoxItem item = (ListBoxItem)value;
+                    ListBox listView = ItemsControl.ItemsControlFromItemContainer(item) as ListBox;
+                    int index = listView.ItemContainerGenerator.IndexFromContainer(item);
+                    return index.ToString();
+                }
+
+                return string.Empty;
             }
             catch (Exception ex)
             {
