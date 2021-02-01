@@ -91,7 +91,7 @@ namespace CommonPluginsShared
                 //Check actual vs Github
                 if (!LastReleaseTagName.IsNullOrEmpty() && LastReleaseTagName != "v" + PluginInfo.Version)
                 {
-                    ShowNotification(PlayniteApi, "HowLongToBeat - " + resources.GetString("LOCUpdaterWindowTitle"));
+                    ShowNotification(PlayniteApi, $"{PluginName} - " + resources.GetString("LOCUpdaterWindowTitle"));
                 }
             });
         }
