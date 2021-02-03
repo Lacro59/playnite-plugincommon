@@ -19,6 +19,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Windows.Automation;
+using CommonPluginsControls.Controls;
 
 namespace CommonPluginsShared.Collections
 {
@@ -244,6 +245,61 @@ namespace CommonPluginsShared.Collections
 
         protected abstract bool LoadDatabase();
 
+
+        public virtual void GetSelectDatas()
+        {
+            var View = new OptionsDownloadData(_PlayniteApi);
+            Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(_PlayniteApi, PluginName + " - " + resources.GetString("LOCCommonSelectData"), View);
+            windowExtension.ShowDialog();
+
+            var PlayniteDb = View.GetFilteredGames();
+
+            if (PlayniteDb == null)
+            {
+                return;
+            }
+
+            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
+                $"{PluginName} - {resources.GetString("LOCCommonGettingData")}",
+                true
+            );
+            globalProgressOptions.IsIndeterminate = false;
+
+            _PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            {
+                try
+                {
+                    Stopwatch stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    
+                    activateGlobalProgress.ProgressMaxValue = (double)PlayniteDb.Count();
+
+                    string CancelText = string.Empty;
+
+                    foreach (Game game in PlayniteDb)
+                    {
+                        if (activateGlobalProgress.CancelToken.IsCancellationRequested)
+                        {
+                            CancelText = " canceled";
+                            break;
+                        }
+
+                        Thread.Sleep(10);
+                        Get(game);
+                        activateGlobalProgress.CurrentProgressValue++;
+                    }
+
+                    stopWatch.Stop();
+                    TimeSpan ts = stopWatch.Elapsed;
+                    logger.Info($"{PluginName} - Task GetDatas(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, PluginName);
+                }
+            }, globalProgressOptions);
+        }
+
         public virtual void GetAllDatas()
         {
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
@@ -287,6 +343,7 @@ namespace CommonPluginsShared.Collections
                 }
             }, globalProgressOptions);
         }
+
 
         public virtual bool ClearDatabase()
         {

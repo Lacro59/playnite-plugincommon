@@ -27,7 +27,7 @@ namespace CommonPluginsControls.Controls
 
         public OptionsDownloadData(IPlayniteAPI PlayniteApi)
         {
-            _FilteredGames = PlayniteApi.Database.Games.ToList();
+            _FilteredGames = PlayniteApi.Database.Games.Where(x => x.Hidden == false).ToList();
 
             InitializeComponent();
         }
@@ -35,6 +35,8 @@ namespace CommonPluginsControls.Controls
 
         private void PART_BtClose_Click(object sender, RoutedEventArgs e)
         {
+            _FilteredGames = null;
+
             ((Window)this.Parent).Close();
         }
 
@@ -47,12 +49,12 @@ namespace CommonPluginsControls.Controls
 
             if ((bool)PART_GamesRecentlyPlayed.IsChecked)
             {
-                _FilteredGames = _FilteredGames.Where(x => (DateTime)x.LastActivity >= DateTime.Now.AddMonths(-1)).ToList();
+                _FilteredGames = _FilteredGames.Where(x => x.LastActivity != null && (DateTime)x.LastActivity >= DateTime.Now.AddMonths(-1)).ToList();
             }
 
             if ((bool)PART_GamesRecentlyAdded.IsChecked)
             {
-                _FilteredGames = _FilteredGames.Where(x => (DateTime)x.Added >= DateTime.Now.AddMonths(-1)).ToList();
+                _FilteredGames = _FilteredGames.Where(x => x.Added != null && (DateTime)x.Added >= DateTime.Now.AddMonths(-1)).ToList();
             }
 
             if ((bool)PART_GamesInstalled.IsChecked)
