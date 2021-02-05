@@ -114,6 +114,42 @@ namespace CommonPluginsShared
             }
         }
 
+        public static async Task<Stream> DownloadFileStream(string url, List<HttpCookie> Cookies)
+        {
+            HttpClientHandler handler = new HttpClientHandler();
+            if (Cookies != null)
+            {
+                CookieContainer cookieContainer = new CookieContainer();
+
+                foreach (var cookie in Cookies)
+                {
+                    Cookie c = new Cookie();
+                    c.Name = cookie.Name;
+                    c.Value = cookie.Value;
+                    c.Domain = cookie.Domain;
+                    c.Path = cookie.Path;
+
+                    cookieContainer.Add(c);
+                }
+
+                handler.CookieContainer = cookieContainer;
+            }
+
+            using (var client = new HttpClient(handler))
+            {
+                try
+                {
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    return await response.Content.ReadAsStreamAsync();
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, "CommonPluginsShared", $"Error on download {url}");
+                    return null;
+                }
+            }
+        }
+
 
         /// <summary>
         /// Download string data with manage redirect url.
@@ -286,18 +322,76 @@ namespace CommonPluginsShared
         public static async Task<string> PostStringDataCookies(string url, FormUrlEncodedContent formContent, List<HttpCookie> Cookies = null)
         {
             var response = string.Empty;
-            using (var client = new HttpClient())
+
+            HttpClientHandler handler = new HttpClientHandler();
+            if (Cookies != null)
             {
-                if (Cookies != null)
+                CookieContainer cookieContainer = new CookieContainer();
+
+                foreach (var cookie in Cookies)
                 {
-                    var cookieString = string.Join(";", Cookies.Select(a => $"{a.Name}={a.Value}"));
-                    client.DefaultRequestHeaders.Add("Cookie", cookieString);
+                    Cookie c = new Cookie();
+                    c.Name = cookie.Name;
+                    c.Value = cookie.Value;
+                    c.Domain = cookie.Domain;
+                    c.Path = cookie.Path;
+
+                    cookieContainer.Add(c);
                 }
 
+                handler.CookieContainer = cookieContainer;
+            }
+
+            using (var client = new HttpClient(handler))
+            {
                 HttpResponseMessage result;
                 try
                 {
                     result = await client.PostAsync(url, formContent);
+                    if (result.IsSuccessStatusCode)
+                    {
+                        response = await result.Content.ReadAsStringAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, "CommonPluginsShared", $"Error on Post {url}");
+                }
+            }
+
+            return response;
+        }
+
+
+        public static async Task<string> DownloadStringData(string url, List<HttpCookie> Cookies = null)
+        {
+            var response = string.Empty;
+
+            HttpClientHandler handler = new HttpClientHandler();
+            if (Cookies != null)
+            {
+                CookieContainer cookieContainer = new CookieContainer();
+
+                foreach (var cookie in Cookies)
+                {
+                    Cookie c = new Cookie();
+                    c.Name = cookie.Name;
+                    c.Value = cookie.Value;
+                    c.Domain = cookie.Domain;
+                    c.Path = cookie.Path;
+
+                    cookieContainer.Add(c);
+                }
+
+                handler.CookieContainer = cookieContainer;
+            }
+
+            using (var client = new HttpClient(handler))
+            {
+                HttpResponseMessage result;
+                try
+                {
+                    result = await client.GetAsync(url);
                     if (result.IsSuccessStatusCode)
                     {
                         response = await result.Content.ReadAsStringAsync();
