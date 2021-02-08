@@ -20,73 +20,32 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Windows.Automation;
 using CommonPluginsControls.Controls;
+using CommonPluginsPlaynite.Common;
+using CommonPluginsShared.Interfaces;
 
 namespace CommonPluginsShared.Collections
 {
-    public abstract class PluginDatabaseObject<TypeSettings, TypeDatabase, TItem> : ObservableObject 
-        where TypeSettings : ISettings
-        where TypeDatabase : PluginItemCollection<TItem>
+    public abstract class PluginDatabaseObject<TSettings, TDatabase, TItem> : ObservableObject, IPluginDatabase
+        where TSettings : ISettings
+        where TDatabase : PluginItemCollection<TItem>
         where TItem : PluginDataBaseGameBase
     {
         protected static readonly ILogger logger = LogManager.GetLogger();
         protected static IResourceProvider resources = new ResourceProvider();
 
-        protected readonly IPlayniteAPI _PlayniteApi;
+        protected readonly IPlayniteAPI PlayniteApi;
+        public TSettings PluginSettings;
 
-        protected string PluginDatabaseDirectory;
+        public string PluginName;
+        protected PluginPaths Paths;
 
-        private string _PluginName;
-        public string PluginName
-        {
-            get
-            {
-                return _PluginName;
-            }
-
-            set
-            {
-                _PluginName = value;
-            }
-        }
-
-        private string _PluginUserDataPath;
-        public string PluginUserDataPath
-        {
-            get
-            {
-                return _PluginUserDataPath;
-            }
-
-            set
-            {
-                _PluginUserDataPath = value;
-            }
-        }
-
-
-        private TypeSettings _PluginSettings;
-        public TypeSettings PluginSettings
-        {
-            get
-            {
-                return _PluginSettings;
-            }
-
-            set
-            {
-                _PluginSettings = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private TypeDatabase _Database;
-        public TypeDatabase Database
+        private TDatabase _Database;
+        public TDatabase Database
         {
             get
             {
                 return _Database;
             }
-
             set
             {
                 _Database = value;
@@ -110,19 +69,9 @@ namespace CommonPluginsShared.Collections
 
         public static Game GameSelected;
 
-        private List<Tag> _PluginTags;
-        public List<Tag> PluginTags
-        {
-            get
-            {
-                return _PluginTags;
-            }
+        public List<Tag> PluginTags { get; set; } = new List<Tag>();
 
-            set
-            {
-                _PluginTags = value;
-            }
-        }
+
 
         private bool _hasErrorCritical = false;
         public bool HasErrorCritical
@@ -172,63 +121,27 @@ namespace CommonPluginsShared.Collections
         public bool IsViewOpen = false;
 
 
-        protected PluginDatabaseObject(IPlayniteAPI PlayniteApi, TypeSettings PluginSettings, string PluginUserDataPath)
+        protected PluginDatabaseObject(IPlayniteAPI PlayniteApi, TSettings PluginSettings, string PluginName, string PluginUserDataPath)
         {
-            _PlayniteApi = PlayniteApi;
-            this.PluginUserDataPath = PluginUserDataPath;
+            this.PlayniteApi = PlayniteApi;
             this.PluginSettings = PluginSettings;
 
-            if (PlayniteApi.ApplicationInfo.Mode == ApplicationMode.Desktop)
+            this.PluginName = PluginName;
+
+            Paths = new PluginPaths
             {
-                EventManager.RegisterClassHandler(typeof(Window), Window.UnloadedEvent, new RoutedEventHandler(WindowBase_UnloadedEvent));
-            }
+                PluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                PluginUserDataPath = PluginUserDataPath,
+                PluginDatabasePath = Path.Combine(PluginUserDataPath, PluginName),
+                PluginCachePath = Path.Combine(PluginUserDataPath, "Cache"),
+            };
+
+            FileSystem.CreateDirectory(Paths.PluginDatabasePath);
+            FileSystem.CreateDirectory(Paths.PluginCachePath);
         }
 
 
-        private void WindowBase_UnloadedEvent(object sender, EventArgs e)
-        {
-            string WinIdProperty = string.Empty;
-
-            try
-            {
-                WinIdProperty = ((Window)sender).GetValue(AutomationProperties.AutomationIdProperty).ToString();
-
-                if (WinIdProperty == "WindowGameEdit")
-                {
-                    SetCurrent(GameSelectedData);
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on WindowBase_LoadedEvent for {WinIdProperty}");
-            }
-        }
-
-
-        protected bool ControlAndCreateDirectory(string PluginUserDataPath, string DirectoryName)
-        {
-            string PluginDatabasePath = Path.Combine(PluginUserDataPath, DirectoryName);
-
-            try
-            {
-                if (!Directory.Exists(PluginDatabasePath))
-                {
-                    Directory.CreateDirectory(PluginDatabasePath);
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, PluginName);
-
-                HasErrorCritical = true;
-                return false;
-            }
-
-            PluginDatabaseDirectory = PluginDatabasePath;
-            return true;
-        }
-
-
+        #region Database
         public Task<bool> InitializeDatabase()
         {
             return Task.Run(() =>
@@ -239,17 +152,57 @@ namespace CommonPluginsShared.Collections
                     return true;
                 }
 
-                return LoadDatabase();
+                IsLoaded = LoadDatabase();
+                return IsLoaded;
             });
         }
 
         protected abstract bool LoadDatabase();
 
+        public virtual bool ClearDatabase()
+        {
+            if (Directory.Exists(Paths.PluginDatabasePath))
+            {
+                try
+                {
+                    Directory.Delete(Paths.PluginDatabasePath, true);
+                    Directory.CreateDirectory(Paths.PluginDatabasePath);
+
+                    IsLoaded = false;
+                    logger.Info($"{PluginName} - Database is cleared");
+
+                    // If tag system
+                    PropertyInfo propertyInfo = PluginSettings.GetType().GetProperty("EnableTag");
+                    if (propertyInfo != null)
+                    {
+                        bool EnableTag = (bool)propertyInfo.GetValue(PluginSettings);
+                        if (EnableTag)
+                        {
+#if DEBUG
+                            logger.Debug($"{PluginName} [Ignored] - RemoveTagAllGame()");
+#endif
+                            RemoveTagAllGame();
+                        }
+                    }
+
+                    return LoadDatabase();
+                }
+                catch (Exception ex)
+                {
+#if DEBUG
+                    Common.LogError(ex, PluginName + " [Ignored]");
+#endif
+                }
+            }
+
+            return false;
+        }
+
 
         public virtual void GetSelectDatas()
         {
-            var View = new OptionsDownloadData(_PlayniteApi);
-            Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(_PlayniteApi, PluginName + " - " + resources.GetString("LOCCommonSelectData"), View);
+            var View = new OptionsDownloadData(PlayniteApi);
+            Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(PlayniteApi, PluginName + " - " + resources.GetString("LOCCommonSelectData"), View);
             windowExtension.ShowDialog();
 
             var PlayniteDb = View.GetFilteredGames();
@@ -265,7 +218,7 @@ namespace CommonPluginsShared.Collections
             );
             globalProgressOptions.IsIndeterminate = false;
 
-            _PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
                 try
                 {
@@ -308,14 +261,14 @@ namespace CommonPluginsShared.Collections
             );
             globalProgressOptions.IsIndeterminate = false;
 
-            _PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
                 try
                 {
                     Stopwatch stopWatch = new Stopwatch();
                     stopWatch.Start();
 
-                    var PlayniteDb = _PlayniteApi.Database.Games.Where(x => x.Hidden == false);
+                    var PlayniteDb = PlayniteApi.Database.Games.Where(x => x.Hidden == false);
                     activateGlobalProgress.ProgressMaxValue = (double)PlayniteDb.Count();
 
                     string CancelText = string.Empty;
@@ -343,33 +296,38 @@ namespace CommonPluginsShared.Collections
                 }
             }, globalProgressOptions);
         }
+        #endregion
 
 
-        public virtual bool ClearDatabase()
+        #region Database item methods
+        public virtual TItem GetDefault(Guid Id)
         {
-            if (Directory.Exists(PluginDatabaseDirectory))
+            Game game = PlayniteApi.Database.Games.Get(Id);
+
+            if (game == null)
             {
-                try
-                {
-                    Directory.Delete(PluginDatabaseDirectory, true);
-                    Directory.CreateDirectory(PluginDatabaseDirectory);
-
-                    IsLoaded = false;
-                    logger.Info($"{PluginName} - Database is cleared");
-
-                    RemoveTagAllGame();
-
-                    return LoadDatabase();
-                }
-                catch (Exception ex)
-                {
-#if DEBUG
-                    Common.LogError(ex, PluginName + " [Ignored]");
-#endif
-                }
+                return null;
             }
 
-            return false;
+            return GetDefault(game);
+        }
+
+        public virtual TItem GetDefault(Game game)
+        {
+            var newItem = typeof(TItem).CrateInstance<TItem>();
+
+            newItem.Id = game.Id;
+            newItem.Name = game.Name;
+            newItem.SourceId = game.SourceId;
+            newItem.Hidden = game.Hidden;
+            newItem.Icon = game.Icon;
+            newItem.CoverImage = game.CoverImage;
+            newItem.GenreIds = game.GenreIds;
+            newItem.Genres = game.Genres;
+            newItem.Playtime = game.Playtime;
+            newItem.LastActivity = game.LastActivity;
+
+            return newItem;
         }
 
 
@@ -378,6 +336,7 @@ namespace CommonPluginsShared.Collections
             itemToAdd.IsSaved = true;
             Database.Add(itemToAdd);
 
+            // If tag system
             PropertyInfo propertyInfo = PluginSettings.GetType().GetProperty("EnableTag");
             if (propertyInfo != null)
             {
@@ -385,7 +344,7 @@ namespace CommonPluginsShared.Collections
                 if (EnableTag)
                 {
 #if DEBUG
-                    logger.Debug($"{PluginName} [Ignored] - RemoveTag & AddTag for {itemToAdd.Name} with {itemToAdd.Id}");
+                    logger.Debug($"{PluginName} [Ignored] - RemoveTag & AddTag for {itemToAdd.Name} with {itemToAdd.Id.ToString()}");
 #endif
                     RemoveTag(itemToAdd.Id);
                     AddTag(itemToAdd.Id);
@@ -395,12 +354,26 @@ namespace CommonPluginsShared.Collections
 
         public virtual void Update(TItem itemToUpdate)
         {
+            itemToUpdate.IsSaved = true;
             Database.Update(itemToUpdate);
         }
 
         public virtual bool Remove(Guid Id)
         {
-            RemoveTag(Id);
+            // If tag system
+            PropertyInfo propertyInfo = PluginSettings.GetType().GetProperty("EnableTag");
+            if (propertyInfo != null)
+            {
+                bool EnableTag = (bool)propertyInfo.GetValue(PluginSettings);
+                if (EnableTag)
+                {
+#if DEBUG
+                    logger.Debug($"{PluginName} [Ignored] - RemoveTag for {Id.ToString()}");
+#endif
+                    RemoveTag(Id);
+                }
+            }
+
             return Database.Remove(Id);
         }
 
@@ -427,56 +400,10 @@ namespace CommonPluginsShared.Collections
         {
             return Get(game.Id, OnlyCache);
         }
+        #endregion
 
 
-        public virtual void SetCurrent(Guid Id)
-        {
-            SetCurrent(Get(Id, true));
-        }
-
-        public virtual void SetCurrent(Game game)
-        {
-            SetCurrent(Get(game.Id, true));
-        }
-
-        public virtual void SetCurrent(TItem gameSelectedData)
-        {
-            GameSelectedData = gameSelectedData;
-
-            if (GameSelected != null && GameSelectedData.Id == GameSelected.Id)
-            {
-                GameSelectedData.Name = GameSelected.Name;
-                GameSelectedData.SourceId = GameSelected.SourceId;
-                GameSelectedData.Hidden = GameSelected.Hidden;
-                GameSelectedData.Icon = GameSelected.Icon;
-                GameSelectedData.CoverImage = GameSelected.CoverImage;
-                GameSelectedData.GenreIds = GameSelected.GenreIds;
-                GameSelectedData.Genres = GameSelected.Genres;
-                GameSelectedData.Playtime = GameSelected.Playtime;
-                GameSelectedData.LastActivity = GameSelected.LastActivity;
-            }
-        }
-
-
-        public virtual TItem GetDefault(Game game)
-        {
-            var newItem = typeof(TItem).CrateInstance<TItem>();
-
-            newItem.Id = game.Id;
-            newItem.Name = game.Name;
-            newItem.SourceId = game.SourceId;
-            newItem.Hidden = game.Hidden;
-            newItem.Icon = game.Icon;
-            newItem.CoverImage = game.CoverImage;
-            newItem.GenreIds = game.GenreIds;
-            newItem.Genres = game.Genres;
-            newItem.Playtime = game.Playtime;
-            newItem.LastActivity = game.LastActivity;
-
-            return newItem;
-        }
-
-
+        #region Tag system
         protected virtual void GetPluginTags()
         {
 
@@ -484,12 +411,12 @@ namespace CommonPluginsShared.Collections
 
         public virtual void AddTag(Game game)
         {
-            
+
         }
 
         public void AddTag(Guid Id)
         {
-            Game game = _PlayniteApi.Database.Games.Get(Id);
+            Game game = PlayniteApi.Database.Games.Get(Id);
             if (game != null)
             {
                 AddTag(game);
@@ -499,7 +426,7 @@ namespace CommonPluginsShared.Collections
         public void RemoveTag(Game game)
         {
             if (game != null && game.TagIds != null)
-            { 
+            {
                 if (game.TagIds.Where(x => PluginTags.Any(y => x == y.Id)).Count() > 0)
                 {
                     game.TagIds = game.TagIds.Where(x => !PluginTags.Any(y => x == y.Id)).ToList();
@@ -507,14 +434,14 @@ namespace CommonPluginsShared.Collections
                     logger.Debug($"{PluginName} [Ignored] - PluginTags: {JsonConvert.SerializeObject(PluginTags)}");
                     logger.Debug($"{PluginName} [Ignored] - game.TagIds: {JsonConvert.SerializeObject(game.TagIds)}");
 #endif
-                    _PlayniteApi.Database.Games.Update(game);
+                    PlayniteApi.Database.Games.Update(game);
                 }
             }
         }
 
         public void RemoveTag(Guid Id)
         {
-            Game game = _PlayniteApi.Database.Games.Get(Id);
+            Game game = PlayniteApi.Database.Games.Get(Id);
             if (game != null)
             {
                 RemoveTag(game);
@@ -533,14 +460,14 @@ namespace CommonPluginsShared.Collections
             );
             globalProgressOptions.IsIndeterminate = false;
 
-            _PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
                 try
                 {
                     Stopwatch stopWatch = new Stopwatch();
                     stopWatch.Start();
 
-                    var PlayniteDb = _PlayniteApi.Database.Games.Where(x => x.Hidden == false);
+                    var PlayniteDb = PlayniteApi.Database.Games.Where(x => x.Hidden == false);
                     activateGlobalProgress.ProgressMaxValue = (double)PlayniteDb.Count();
 
                     string CancelText = string.Empty;
@@ -570,7 +497,7 @@ namespace CommonPluginsShared.Collections
                 }
             }, globalProgressOptions);
         }
-        
+
         public void RemoveTagAllGame(bool FromClearDatabase = false)
         {
 #if DEBUG
@@ -590,14 +517,14 @@ namespace CommonPluginsShared.Collections
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(Message, true);
             globalProgressOptions.IsIndeterminate = false;
 
-            _PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
                 try
                 {
                     Stopwatch stopWatch = new Stopwatch();
                     stopWatch.Start();
 
-                    var PlayniteDb = _PlayniteApi.Database.Games.Where(x => x.Hidden == false);
+                    var PlayniteDb = PlayniteApi.Database.Games.Where(x => x.Hidden == false);
                     activateGlobalProgress.ProgressMaxValue = (double)PlayniteDb.Count();
 
                     string CancelText = string.Empty;
@@ -628,6 +555,36 @@ namespace CommonPluginsShared.Collections
         public virtual Guid? FindGoodPluginTags(string TagName)
         {
             return PluginTags.Find(x => x.Name.ToLower() == TagName.ToLower()).Id;
+        }
+        #endregion
+
+
+        public virtual void SetCurrent(Guid Id)
+        {
+            SetCurrent(Get(Id, true));
+        }
+
+        public virtual void SetCurrent(Game game)
+        {
+            SetCurrent(Get(game.Id, true));
+        }
+
+        public virtual void SetCurrent(TItem gameSelectedData)
+        {
+            GameSelectedData = gameSelectedData;
+
+            if (GameSelected != null && GameSelectedData.Id == GameSelected.Id)
+            {
+                GameSelectedData.Name = GameSelected.Name;
+                GameSelectedData.SourceId = GameSelected.SourceId;
+                GameSelectedData.Hidden = GameSelected.Hidden;
+                GameSelectedData.Icon = GameSelected.Icon;
+                GameSelectedData.CoverImage = GameSelected.CoverImage;
+                GameSelectedData.GenreIds = GameSelected.GenreIds;
+                GameSelectedData.Genres = GameSelected.Genres;
+                GameSelectedData.Playtime = GameSelected.Playtime;
+                GameSelectedData.LastActivity = GameSelected.LastActivity;
+            }
         }
     }
 }

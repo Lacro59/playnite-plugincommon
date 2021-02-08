@@ -19,18 +19,51 @@ namespace CommonPluginsShared
         /// <param name="DefaultLoad"></param>
         internal static void SetPluginLanguage(string pluginFolder, string language, bool DefaultLoad = false)
         {
+            var dictionaries = Application.Current.Resources.MergedDictionaries;
+
             // Load default for missing
             if (!DefaultLoad)
             {
                 SetPluginLanguage(pluginFolder, "LocSource", true);
             }
-
-
-            var dictionaries = Application.Current.Resources.MergedDictionaries;
+            
+#if DEBUG
+            // Load default localization 
             var langFile = Path.Combine(pluginFolder, "localization\\" + language + ".xaml");
-            var langFileCommon = Path.Combine(pluginFolder, "localization\\Common\\" + language + ".xaml");
+
+            if (File.Exists(langFile))
+            {
+                ResourceDictionary res = null;
+                try
+                {
+                    res = Xaml.FromFile<ResourceDictionary>(langFile);
+                    res.Source = new Uri(langFile, UriKind.Absolute);
+
+                    foreach (var key in res.Keys)
+                    {
+                        if (res[key] is string locString && locString.IsNullOrEmpty())
+                        {
+                            res.Remove(key);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, $"CommonPluginsShared - Failed to integrate localization file {langFile}.");
+                    return;
+                }
+
+                dictionaries.Add(res);
+            }
+            else
+            {
+                logger.Warn($"CommonPluginsShared - File {langFile} not found.");
+            }
+#endif
 
             // Load common localization 
+            var langFileCommon = Path.Combine(pluginFolder, "localization\\Common\\" + language + ".xaml");
+
             if (File.Exists(langFileCommon))
             {
                 ResourceDictionary res = null;
