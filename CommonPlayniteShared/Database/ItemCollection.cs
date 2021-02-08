@@ -556,5 +556,10 @@ namespace CommonPluginsPlaynite.Database
         {
             return this.Select(a => a.GetClone());
         }
+
+        public void Dispose()
+        {
+            this.Dispose();
+        }
     }
 }

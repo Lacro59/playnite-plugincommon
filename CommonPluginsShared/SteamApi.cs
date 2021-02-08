@@ -56,6 +56,7 @@ namespace CommonPluginsShared
             }
         }
 
+        // TODO transform to task and identified object and saved in playnite temp
         private JObject GetSteamAppListFromWeb(string PluginCacheFile)
         {
 #if DEBUG
