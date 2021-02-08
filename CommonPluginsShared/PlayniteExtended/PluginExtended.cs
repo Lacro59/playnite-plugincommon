@@ -12,7 +12,7 @@ namespace CommonPluginsShared.PlayniteExtended
     public abstract class PluginExtended<ISettings, TPluginDatabase> : Plugin
         where TPluginDatabase : IPluginDatabase
     {
-        protected ISettings PluginSettings { get; set; }
+        public ISettings PluginSettings { get; set; }
 
         public string PluginFolder { get; set; }
         public static TPluginDatabase PluginDatabase { get; set; }
