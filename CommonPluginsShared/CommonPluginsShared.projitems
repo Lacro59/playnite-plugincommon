@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Localization.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\TraceInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OriginApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PlayniteExtended\PluginExtended.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SteamApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TaskHelper.cs" />

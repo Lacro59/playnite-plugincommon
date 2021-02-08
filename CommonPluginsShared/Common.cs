@@ -19,11 +19,16 @@ namespace CommonPluginsShared
 
 
         /// <summary>
-        /// Set in application ressources the common ressources.
+        /// Load the common ressources.
         /// </summary>
         /// <param name="pluginFolder"></param>
-        public static void Load(string pluginFolder)
+        public static void Load(string pluginFolder, string language)
         {
+            #region Common localization
+            PluginLocalization.SetPluginLanguage(pluginFolder, language);
+            #endregion
+
+            #region Common xaml
             List<string> ListCommonFiles = new List<string>
             {
                 Path.Combine(pluginFolder, "Resources\\Common.xaml"),
@@ -54,13 +59,14 @@ namespace CommonPluginsShared
                     }
                     catch (Exception ex)
                     {
-                        LogError(ex, "CommonPluginsShared", $"Failed to parse file {CommonFile}");
+                        LogError(ex, "CommonPluginsShared", $"Failed to integrate file {CommonFile}");
                         return;
                     }
 
 #if DEBUG
                     logger.Debug($"CommonPluginsShared [Ignored] - res: {JsonConvert.SerializeObject(res)}");
 #endif
+
                     Application.Current.Resources.MergedDictionaries.Add(res);
                 }
                 else
@@ -69,9 +75,9 @@ namespace CommonPluginsShared
                     return;
                 }
             }
+            #endregion
 
-
-            // Add font
+            #region Common font
             string FontFile = Path.Combine(pluginFolder, "Resources\\font.ttf");
             if (File.Exists(FontFile))
             {
@@ -81,6 +87,7 @@ namespace CommonPluginsShared
                     fileSize = (long)Application.Current.Resources.FindName("CommonFontSize");
                 }
 
+                // Load only the newest
                 if (fileSize <= new FileInfo(FontFile).Length)
                 {
                     Application.Current.Resources.Remove("CommonFontSize");
@@ -93,8 +100,9 @@ namespace CommonPluginsShared
             }
             else
             {
-                logger.Warn($"CommonPluginsShared - -File not find {FontFile}");
+                logger.Warn($"CommonPluginsShared - File {FontFile} not find");
             }
+            #endregion
         }
 
 
