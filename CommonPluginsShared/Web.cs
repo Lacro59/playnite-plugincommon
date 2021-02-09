@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 
 namespace CommonPluginsShared
 {
+    // TODO https://stackoverflow.com/questions/62802238/very-slow-httpclient-sendasync-call
+
     public enum WebUserAgentType
     {
         Request
@@ -56,10 +58,10 @@ namespace CommonPluginsShared
                 Stream imageStream;
                 try
                 {
-                    HttpResponseMessage response = await client.GetAsync(url);
-                    imageStream = await response.Content.ReadAsStreamAsync();
+                    HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
+                    imageStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Common.LogError(ex, "CommonPluginsShared", $"Error on download {url}");
                     return false;
@@ -103,8 +105,44 @@ namespace CommonPluginsShared
             {
                 try
                 {
-                    HttpResponseMessage response = await client.GetAsync(url);
-                    return await response.Content.ReadAsStreamAsync();
+                    HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
+                    return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, "CommonPluginsShared", $"Error on download {url}");
+                    return null;
+                }
+            }
+        }
+
+        public static async Task<Stream> DownloadFileStream(string url, List<HttpCookie> Cookies)
+        {
+            HttpClientHandler handler = new HttpClientHandler();
+            if (Cookies != null)
+            {
+                CookieContainer cookieContainer = new CookieContainer();
+
+                foreach (var cookie in Cookies)
+                {
+                    Cookie c = new Cookie();
+                    c.Name = cookie.Name;
+                    c.Value = cookie.Value;
+                    c.Domain = cookie.Domain;
+                    c.Path = cookie.Path;
+
+                    cookieContainer.Add(c);
+                }
+
+                handler.CookieContainer = cookieContainer;
+            }
+
+            using (var client = new HttpClient(handler))
+            {
+                try
+                {
+                    HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
+                    return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -133,7 +171,7 @@ namespace CommonPluginsShared
                 HttpResponseMessage response;
                 try
                 {
-                    response = await client.SendAsync(request);
+                    response = await client.SendAsync(request).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -163,7 +201,7 @@ namespace CommonPluginsShared
                 }
                 else
                 {
-                    return await response.Content.ReadAsStringAsync();
+                    return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 }
             }
         }
@@ -189,7 +227,7 @@ namespace CommonPluginsShared
                 HttpResponseMessage response;
                 try
                 {
-                    response = await client.SendAsync(request);
+                    response = await client.SendAsync(request).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -205,7 +243,7 @@ namespace CommonPluginsShared
                 int statusCode = (int)response.StatusCode;
                 if (statusCode == 200)
                 {
-                    return await response.Content.ReadAsStringAsync();
+                    return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 }
                 else
                 {
@@ -259,10 +297,10 @@ namespace CommonPluginsShared
                 HttpResponseMessage result;
                 try
                 {
-                    result = await client.PostAsync(url, c);
+                    result = await client.PostAsync(url, c).ConfigureAwait(false);
                     if (result.IsSuccessStatusCode)
                     {
-                        response = await result.Content.ReadAsStringAsync();
+                        response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
@@ -286,21 +324,79 @@ namespace CommonPluginsShared
         public static async Task<string> PostStringDataCookies(string url, FormUrlEncodedContent formContent, List<HttpCookie> Cookies = null)
         {
             var response = string.Empty;
-            using (var client = new HttpClient())
+
+            HttpClientHandler handler = new HttpClientHandler();
+            if (Cookies != null)
             {
-                if (Cookies != null)
+                CookieContainer cookieContainer = new CookieContainer();
+
+                foreach (var cookie in Cookies)
                 {
-                    var cookieString = string.Join(";", Cookies.Select(a => $"{a.Name}={a.Value}"));
-                    client.DefaultRequestHeaders.Add("Cookie", cookieString);
+                    Cookie c = new Cookie();
+                    c.Name = cookie.Name;
+                    c.Value = cookie.Value;
+                    c.Domain = cookie.Domain;
+                    c.Path = cookie.Path;
+
+                    cookieContainer.Add(c);
                 }
 
+                handler.CookieContainer = cookieContainer;
+            }
+
+            using (var client = new HttpClient(handler))
+            {
                 HttpResponseMessage result;
                 try
                 {
-                    result = await client.PostAsync(url, formContent);
+                    result = await client.PostAsync(url, formContent).ConfigureAwait(false);
                     if (result.IsSuccessStatusCode)
                     {
-                        response = await result.Content.ReadAsStringAsync();
+                        response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, "CommonPluginsShared", $"Error on Post {url}");
+                }
+            }
+
+            return response;
+        }
+
+
+        public static async Task<string> DownloadStringData(string url, List<HttpCookie> Cookies = null)
+        {
+            var response = string.Empty;
+
+            HttpClientHandler handler = new HttpClientHandler();
+            if (Cookies != null)
+            {
+                CookieContainer cookieContainer = new CookieContainer();
+
+                foreach (var cookie in Cookies)
+                {
+                    Cookie c = new Cookie();
+                    c.Name = cookie.Name;
+                    c.Value = cookie.Value;
+                    c.Domain = cookie.Domain;
+                    c.Path = cookie.Path;
+
+                    cookieContainer.Add(c);
+                }
+
+                handler.CookieContainer = cookieContainer;
+            }
+
+            using (var client = new HttpClient(handler))
+            {
+                HttpResponseMessage result;
+                try
+                {
+                    result = await client.GetAsync(url).ConfigureAwait(false);
+                    if (result.IsSuccessStatusCode)
+                    {
+                        response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
