@@ -363,8 +363,16 @@ namespace CommonPluginsShared
 #endif
             try
             {
-                if (PART_ElemDescription == null)
+                try
                 {
+                    if (PART_ElemDescription == null)
+                    {
+                        PART_ElemDescription = (StackPanel)IntegrationUI.SearchElementByName("PART_ElemDescription", false, true);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, "CommonPluginsShared");
                     PART_ElemDescription = (StackPanel)IntegrationUI.SearchElementByName("PART_ElemDescription", false, true);
                 }
 
