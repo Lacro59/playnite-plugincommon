@@ -90,21 +90,6 @@ namespace CommonPluginsShared.Collections
             }
         }
 
-        private bool _GameIsLoaded = false;
-        public bool GameIsLoaded
-        {
-            get
-            {
-                return _GameIsLoaded;
-            }
-
-            set
-            {
-                _GameIsLoaded = value;
-                OnPropertyChanged();
-            }
-        }
-
         public bool IsViewOpen = false;
 
 
@@ -348,13 +333,22 @@ namespace CommonPluginsShared.Collections
 
         public virtual void Refresh(Guid Id)
         {
-            var loadedItem = Get(Id, true);
-            var webItem = GetWeb(Id);
+            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
+                $"{PluginName} - {resources.GetString("LOCCommonProcessing")}",
+                false
+            );
+            globalProgressOptions.IsIndeterminate = true;
 
-            if (!ReferenceEquals(loadedItem, webItem))
+            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
-                Update(webItem);
-            }
+                var loadedItem = Get(Id, true);
+                var webItem = GetWeb(Id);
+
+                if (!ReferenceEquals(loadedItem, webItem))
+                {
+                    Update(webItem);
+                }
+            }, globalProgressOptions);
         }
 
         public virtual bool Remove(Guid Id)
