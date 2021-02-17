@@ -1,15 +1,20 @@
-﻿using CommonPluginsShared.Interfaces;
+﻿using CommonPluginsShared.Collections;
+using CommonPluginsShared.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Controls;
+using Playnite.SDK.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace CommonPluginsShared.Controls
 {
-    public class PluginUserControlExtend : PluginUserControl
+    public abstract class PluginUserControlExtend : PluginUserControl
     {
         internal static readonly ILogger logger = LogManager.GetLogger();
         internal static IResourceProvider resources = new ResourceProvider();
@@ -46,6 +51,52 @@ namespace CommonPluginsShared.Controls
         }
 
 
+        #region OnPropertyChange
+        // When plugin settings is updated
+        public abstract void PluginSettings_PropertyChanged(object sender, PropertyChangedEventArgs e);
 
+        // When plugin datbase is udpated
+        public virtual void Database_ItemUpdated<TItem>(object sender, ItemUpdatedEventArgs<TItem> e) where TItem : DatabaseObject
+        {
+            this.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new ThreadStart(delegate
+            {
+                if (GameContext == null)
+                {
+                    return;
+                }
+
+                // Publish changes for the currently displayed game if updated
+                var ActualItem = e.UpdatedItems.Find(x => x.NewData.Id == GameContext.Id);
+                if (ActualItem != null)
+                {
+                    Guid Id = ActualItem.NewData.Id;
+                    if (Id != null)
+                    {
+                        GameContextChanged(null, GameContext);
+                    }
+                }
+            }));
+        }
+
+        // When game is updated
+        public virtual void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e)
+        {
+            // Publish changes for the currently displayed game if updated
+            if (GameContext == null)
+            {
+                return;
+            }
+
+            var ActualItem = e.UpdatedItems.Find(x => x.NewData.Id == GameContext.Id);
+            if (ActualItem != null)
+            {
+                Game newContext = ActualItem.NewData;
+                if (newContext != null)
+                {
+                    GameContextChanged(null, newContext);
+                }
+            }
+        }
+        #endregion
     }
 }
