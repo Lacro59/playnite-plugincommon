@@ -37,8 +37,6 @@ namespace CommonPluginsShared.Controls
             var obj = sender as PluginUserControlExtend;            
             if (obj != null && e.NewValue != e.OldValue)
             {
-                var objParent = Tools.FindParent<ContentControl>(obj);
-
                 if ((bool)e.NewValue)
                 {
                     obj.Visibility = Visibility.Visible;
