@@ -33,8 +33,10 @@ namespace CommonPluginsShared.Collections
         protected static readonly ILogger logger = LogManager.GetLogger();
         protected static IResourceProvider resources = new ResourceProvider();
 
-        protected readonly IPlayniteAPI PlayniteApi;
+        public IPlayniteAPI PlayniteApi;
         public TSettings PluginSettings;
+
+        public IntegrationUI ui = new IntegrationUI();
 
         public string PluginName;
         protected PluginPaths Paths;
@@ -52,22 +54,7 @@ namespace CommonPluginsShared.Collections
             }
         }
 
-        private TItem _GameSelectedData;
-        public TItem GameSelectedData
-        {
-            get
-            {
-                return _GameSelectedData;
-            }
-
-            set
-            {
-                _GameSelectedData = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public static Game GameSelected;
+        public Game GameContext;
 
         public List<Tag> PluginTags { get; set; } = new List<Tag>();
 
@@ -355,7 +342,19 @@ namespace CommonPluginsShared.Collections
         public virtual void Update(TItem itemToUpdate)
         {
             itemToUpdate.IsSaved = true;
-            Database.Update(itemToUpdate);
+            Database.Items.TryUpdate(itemToUpdate.Id, itemToUpdate, Get(itemToUpdate.Id, true));
+            Database.Update(itemToUpdate);            
+        }
+
+        public virtual void Refresh(Guid Id)
+        {
+            var loadedItem = Get(Id, true);
+            var webItem = GetWeb(Id);
+
+            if (!ReferenceEquals(loadedItem, webItem))
+            {
+                Update(webItem);
+            }
         }
 
         public virtual bool Remove(Guid Id)
@@ -400,7 +399,17 @@ namespace CommonPluginsShared.Collections
         {
             return Get(game.Id, OnlyCache);
         }
+
+        public abstract TItem GetWeb(Guid Id);
+
+        public virtual TItem GetWeb(Game game)
+        {
+            return GetWeb(game.Id);
+        }
         #endregion
+
+
+        public abstract void SetThemesResources(Game game);
 
 
         #region Tag system
@@ -557,34 +566,5 @@ namespace CommonPluginsShared.Collections
             return PluginTags.Find(x => x.Name.ToLower() == TagName.ToLower()).Id;
         }
         #endregion
-
-
-        public virtual void SetCurrent(Guid Id)
-        {
-            SetCurrent(Get(Id, true));
-        }
-
-        public virtual void SetCurrent(Game game)
-        {
-            SetCurrent(Get(game.Id, true));
-        }
-
-        public virtual void SetCurrent(TItem gameSelectedData)
-        {
-            GameSelectedData = gameSelectedData;
-
-            if (GameSelected != null && GameSelectedData.Id == GameSelected.Id)
-            {
-                GameSelectedData.Name = GameSelected.Name;
-                GameSelectedData.SourceId = GameSelected.SourceId;
-                GameSelectedData.Hidden = GameSelected.Hidden;
-                GameSelectedData.Icon = GameSelected.Icon;
-                GameSelectedData.CoverImage = GameSelected.CoverImage;
-                GameSelectedData.GenreIds = GameSelected.GenreIds;
-                GameSelectedData.Genres = GameSelected.Genres;
-                GameSelectedData.Playtime = GameSelected.Playtime;
-                GameSelectedData.LastActivity = GameSelected.LastActivity;
-            }
-        }
     }
 }

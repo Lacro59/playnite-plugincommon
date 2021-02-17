@@ -79,6 +79,9 @@
     <Compile Include="Controls\OptionsDownloadData.xaml.cs">
       <DependentUpon>OptionsDownloadData.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\PluginUserControlExtended.xaml.cs">
+      <DependentUpon>PluginUserControlExtended.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\TextBlockTrimmed.xaml.cs">
       <DependentUpon>TextBlockTrimmed.xaml</DependentUpon>
     </Compile>
@@ -118,6 +121,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\OptionsDownloadData.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\PluginUserControlExtended.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

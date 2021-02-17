@@ -30,11 +30,19 @@
     <sys:String x:Key="LOCCommonIntegrationButtonDetails">Button with details</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonIsToggle">With a toggle button</sys:String>
 
+    <sys:String x:Key="LOCCommonIntegrationListOptions">List options</sys:String>
+
     <sys:String x:Key="LOCGameActivityIntegrationDescriptionOptions">Description integration options</sys:String>
     <sys:String x:Key="LOCCommonIntegrationShowTitle">Show title</sys:String>
     <sys:String x:Key="LOCCommonIntegrationTopGameDetails">Show above game description</sys:String>
 
     <sys:String x:Key="LOCCommonDatabase">Database</sys:String>
+
+    <sys:String x:Key="LOCCommonControlsAvailable">Available elements for theme integration</sys:String>
+    <sys:String x:Key="LOCCommonControlsPluginButtonShow">Display the plugin button</sys:String>
+    <sys:String x:Key="LOCCommonControlsPluginButtonShowInContextMenu">Display the data in context menu</sys:String>
+
+    <sys:String x:Key="LOCCommonControlsVisibleNoData">Display when there is no data</sys:String>
 
     <!-- CommonMenus -->
 

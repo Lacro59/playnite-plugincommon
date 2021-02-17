@@ -17,6 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDatabaseObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginItemCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\PluginUserControlExtend.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CumulsErrors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageTools.cs" />
