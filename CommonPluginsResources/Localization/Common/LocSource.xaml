@@ -50,7 +50,7 @@
     <sys:String x:Key="LOCCommonDeleteGameData">Delete data</sys:String>
 
     <sys:String x:Key="LOCCommonAddAllTags">Add tag to all games</sys:String>
-    <sys:String x:Key="LOCCommonSelectData">Select the data to download</sys:String>
+    <sys:String x:Key="LOCCommonSelectData">Download data for selected games</sys:String>
     <sys:String x:Key="LOCCommonGetAllDatas">Download data for all games</sys:String>
     <sys:String x:Key="LOCCommonClearAllDatas">Delete data from all games</sys:String>
     <sys:String x:Key="LOCCommonRemoveAllTags">Remove tag from all games</sys:String>
