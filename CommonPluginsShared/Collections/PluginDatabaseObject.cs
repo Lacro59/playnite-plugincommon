@@ -38,42 +38,12 @@ namespace CommonPluginsShared.Collections
 
         public IntegrationUI ui = new IntegrationUI();
 
-        public string PluginName;
-        protected PluginPaths Paths;
-
-        private TDatabase _Database;
-        public TDatabase Database
-        {
-            get
-            {
-                return _Database;
-            }
-            set
-            {
-                _Database = value;
-            }
-        }
-
-        public Game GameContext;
-
+        public string PluginName { get; set; }
+        public PluginPaths Paths { get; set; }
+        public TDatabase Database { get; set; }
+        public Game GameContext { get; set; }
         public List<Tag> PluginTags { get; set; } = new List<Tag>();
 
-
-
-        private bool _hasErrorCritical = false;
-        public bool HasErrorCritical
-        {
-            get
-            {
-                return _hasErrorCritical;
-            }
-
-            set
-            {
-                _hasErrorCritical = value;
-                OnPropertyChanged();
-            }
-        }
 
         private bool _isLoaded = false;
         public bool IsLoaded
@@ -290,14 +260,7 @@ namespace CommonPluginsShared.Collections
 
             newItem.Id = game.Id;
             newItem.Name = game.Name;
-            newItem.SourceId = game.SourceId;
-            newItem.Hidden = game.Hidden;
-            newItem.Icon = game.Icon;
-            newItem.CoverImage = game.CoverImage;
-            newItem.GenreIds = game.GenreIds;
-            newItem.Genres = game.Genres;
-            newItem.Playtime = game.Playtime;
-            newItem.LastActivity = game.LastActivity;
+            newItem.IsSaved = false;
 
             return newItem;
         }
@@ -324,12 +287,14 @@ namespace CommonPluginsShared.Collections
             }
         }
 
+
         public virtual void Update(TItem itemToUpdate)
         {
             itemToUpdate.IsSaved = true;
             Database.Items.TryUpdate(itemToUpdate.Id, itemToUpdate, Get(itemToUpdate.Id, true));
             Database.Update(itemToUpdate);            
         }
+
 
         public virtual void Refresh(Guid Id)
         {
@@ -350,6 +315,7 @@ namespace CommonPluginsShared.Collections
                 }
             }, globalProgressOptions);
         }
+
 
         public virtual bool Remove(Guid Id)
         {
@@ -394,6 +360,7 @@ namespace CommonPluginsShared.Collections
             return Get(game.Id, OnlyCache);
         }
 
+
         public abstract TItem GetWeb(Guid Id);
 
         public virtual TItem GetWeb(Game game)
@@ -401,9 +368,6 @@ namespace CommonPluginsShared.Collections
             return GetWeb(game.Id);
         }
         #endregion
-
-
-        public abstract void SetThemesResources(Game game);
 
 
         #region Tag system
@@ -560,5 +524,8 @@ namespace CommonPluginsShared.Collections
             return PluginTags.Find(x => x.Name.ToLower() == TagName.ToLower()).Id;
         }
         #endregion
+
+
+        public abstract void SetThemesResources(Game game);
     }
 }

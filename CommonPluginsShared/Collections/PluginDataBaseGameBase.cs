@@ -10,114 +10,41 @@ namespace CommonPluginsShared.Collections
 {
     public class PluginDataBaseGameBase : DatabaseObject
     {
-        private Guid _SourceId;
         /// <summary>
         /// Gets or sets source of the game.
         /// </summary>
         [JsonIgnore]
-        public Guid SourceId
-        {
-            get
-            {
-                return _SourceId;
-            }
+        public Guid SourceId { get; set; }
 
-            set
-            {
-                _SourceId = value;
-            }
-        }
-
-        private DateTime? _LastActivity;
         /// <summary>
         /// Gets or sets last played date.
         /// </summary>
         [JsonIgnore]
-        public DateTime? LastActivity
-        {
-            get
-            {
-                return _LastActivity;
-            }
+        public DateTime? LastActivity { get; set; }
 
-            set
-            {
-                _LastActivity = value;
-            }
-        }
-
-        private bool _Hidden;
         /// <summary>
         /// Gets or sets value indicating if the game is hidden in library.
         /// </summary>
         [JsonIgnore]
-        public bool Hidden
-        {
-            get
-            {
-                return _Hidden;
-            }
+        public bool Hidden { get; set; }
 
-            set
-            {
-                _Hidden = value;
-            }
-        }
-
-        private string _Icon;
         /// <summary>
         /// Gets or sets game icon. Local file path, HTTP URL or database file ids are supported.
         /// </summary>
         [JsonIgnore]
-        public string Icon
-        {
-            get
-            {
-                return _Icon;
-            }
+        public string Icon { get; set; }
 
-            set
-            {
-                _Icon = value;
-            }
-        }
-
-        private string _CoverImage;
         /// <summary>
         /// Gets or sets game cover image. Local file path, HTTP URL or database file ids are supported.
         /// </summary>
         [JsonIgnore]
-        public string CoverImage
-        {
-            get
-            {
-                return _CoverImage;
-            }
+        public string CoverImage { get; set; }
 
-            set
-            {
-                _CoverImage = value;
-            }
-        }
-
-        private string backgroundImage;
         /// <summary>
         /// Gets or sets background image. Local file path, HTTP URL or database file ids are supported.
         /// </summary>
         [JsonIgnore]
-        public string BackgroundImage
-        {
-            get
-            {
-                return backgroundImage;
-            }
-
-            set
-            {
-                backgroundImage = value;
-                OnPropertyChanged();
-            }
-        }
+        public string BackgroundImage { get; set; }
 
         private List<Genre> _Genres;
         /// <summary>
@@ -163,58 +90,22 @@ namespace CommonPluginsShared.Collections
             }
         }
 
-        private long _Playtime;
         /// <summary>
         /// Gets or sets played time in seconds.
         /// </summary>
         [JsonIgnore]
-        public long Playtime
-        {
-            get
-            {
-                return _Playtime;
-            }
+        public long Playtime { get; set; }
 
-            set
-            {
-                _Playtime = value;
-            }
-        }
-
-        private bool _IsDeleted;
         /// <summary>
         /// Gets or sets value indicating if the game is deleted in library.
         /// </summary>
         [JsonIgnore]
-        public bool IsDeleted
-        {
-            get
-            {
-                return _IsDeleted;
-            }
+        public bool IsDeleted { get; set; }
 
-            set
-            {
-                _IsDeleted = value;
-            }
-        }
-
-        private bool _IsSaved;
         /// <summary>
         /// Gets or sets value indicating if the game is saved in disk.
         /// </summary>
         [JsonIgnore]
-        public bool IsSaved
-        {
-            get
-            {
-                return _IsSaved;
-            }
-
-            set
-            {
-                _IsSaved = value;
-            }
-        }
+        public bool IsSaved { get; set; }
     }
 }

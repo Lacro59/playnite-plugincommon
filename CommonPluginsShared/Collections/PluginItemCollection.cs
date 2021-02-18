@@ -66,6 +66,7 @@ namespace CommonPluginsShared.Collections
                 {
                     Game game = PlayniteApi.Database.Games.Get(item.Key);
                     var temp = item.Value as PluginDataBaseGameDetails<T, Y>;
+                    temp.IsSaved = true;
 
                     if (game != null && item.Value is PluginDataBaseGameDetails<T, Y>)
                     {
