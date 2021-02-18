@@ -36,6 +36,8 @@
     <sys:String x:Key="LOCCommonIntegrationShowTitle">Show title</sys:String>
     <sys:String x:Key="LOCCommonIntegrationTopGameDetails">Show above game description</sys:String>
 
+    <sys:String x:Key="LOCCommonAddTagAuto">Automatic tag addition with data addition</sys:String>
+    
     <sys:String x:Key="LOCCommonDatabase">Database</sys:String>
 
     <sys:String x:Key="LOCCommonControlsAvailable">Available elements for theme integration</sys:String>

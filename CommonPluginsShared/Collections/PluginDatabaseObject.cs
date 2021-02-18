@@ -376,51 +376,46 @@ namespace CommonPluginsShared.Collections
 
         }
 
-        public virtual void AddTag(Game game)
+        public virtual void AddTag(Game game, bool noUpdate = false)
         {
 
         }
 
-        public void AddTag(Guid Id)
+        public void AddTag(Guid Id, bool noUpdate = false)
         {
             Game game = PlayniteApi.Database.Games.Get(Id);
             if (game != null)
             {
-                AddTag(game);
+                AddTag(game, noUpdate);
             }
         }
 
-        public void RemoveTag(Game game)
+        public void RemoveTag(Game game, bool noUpdate = false)
         {
             if (game != null && game.TagIds != null)
             {
                 if (game.TagIds.Where(x => PluginTags.Any(y => x == y.Id)).Count() > 0)
                 {
                     game.TagIds = game.TagIds.Where(x => !PluginTags.Any(y => x == y.Id)).ToList();
-#if DEBUG
-                    logger.Debug($"{PluginName} [Ignored] - PluginTags: {JsonConvert.SerializeObject(PluginTags)}");
-                    logger.Debug($"{PluginName} [Ignored] - game.TagIds: {JsonConvert.SerializeObject(game.TagIds)}");
-#endif
-                    PlayniteApi.Database.Games.Update(game);
+                    if (noUpdate)
+                    {
+                        PlayniteApi.Database.Games.Update(game);
+                    }
                 }
             }
         }
 
-        public void RemoveTag(Guid Id)
+        public void RemoveTag(Guid Id, bool noUpdate = false)
         {
             Game game = PlayniteApi.Database.Games.Get(Id);
             if (game != null)
             {
-                RemoveTag(game);
+                RemoveTag(game, noUpdate);
             }
         }
 
         public void AddTagAllGame()
         {
-#if DEBUG
-            logger.Debug($"{PluginName} [Ignored] - AddTagAllGame");
-#endif
-
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
                 $"{PluginName} - {resources.GetString("LOCCommonAddingAllTag")}",
                 true
@@ -448,8 +443,13 @@ namespace CommonPluginsShared.Collections
                         }
 
                         Thread.Sleep(10);
-                        RemoveTag(game);
-                        AddTag(game);
+                        Application.Current.Dispatcher.BeginInvoke((Action)delegate
+                        {
+                            RemoveTag(game, true);
+                            AddTag(game, true);
+                            PlayniteApi.Database.Games.Update(game);
+                        });
+
 
                         activateGlobalProgress.CurrentProgressValue++;
                     }
