@@ -7,13 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace CommonPluginsControls.Controls
 {
@@ -22,12 +15,13 @@ namespace CommonPluginsControls.Controls
     /// </summary>
     public partial class OptionsDownloadData : UserControl
     {
+        private IPlayniteAPI _PlayniteApi { get; set; }
         private List<Game> _FilteredGames { get; set; }
 
 
         public OptionsDownloadData(IPlayniteAPI PlayniteApi)
         {
-            _FilteredGames = PlayniteApi.Database.Games.Where(x => x.Hidden == false).ToList();
+            _PlayniteApi = PlayniteApi;
 
             InitializeComponent();
         }
@@ -35,16 +29,16 @@ namespace CommonPluginsControls.Controls
 
         private void PART_BtClose_Click(object sender, RoutedEventArgs e)
         {
-            _FilteredGames = null;
-
             ((Window)this.Parent).Close();
         }
 
         private void PART_BtDownload_Click(object sender, RoutedEventArgs e)
         {
+            _FilteredGames = _PlayniteApi.Database.Games.Where(x => x.Hidden == false).ToList();
+
             if ((bool)PART_AllGames.IsChecked)
             {
-                
+
             }
 
             if ((bool)PART_GamesRecentlyPlayed.IsChecked)
@@ -80,8 +74,5 @@ namespace CommonPluginsControls.Controls
         {
             return _FilteredGames;
         }
-
-
-
     }
 }

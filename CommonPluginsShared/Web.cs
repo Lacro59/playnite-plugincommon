@@ -290,6 +290,7 @@ namespace CommonPluginsShared
             var response = string.Empty;
             using (var client = new HttpClient())
             {
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36");
                 client.DefaultRequestHeaders.Add("accept", "application/json, text/javascript, */*; q=0.01");
                 client.DefaultRequestHeaders.Add("Vary", "Accept-Encoding");
                 HttpContent c = new StringContent(payload, Encoding.UTF8, "application/json");
@@ -324,6 +325,8 @@ namespace CommonPluginsShared
         public static async Task<string> PostStringDataCookies(string url, FormUrlEncodedContent formContent, List<HttpCookie> Cookies = null)
         {
             var response = string.Empty;
+
+            client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36");
 
             HttpClientHandler handler = new HttpClientHandler();
             if (Cookies != null)
