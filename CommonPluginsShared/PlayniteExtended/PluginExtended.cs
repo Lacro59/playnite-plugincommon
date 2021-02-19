@@ -12,6 +12,9 @@ namespace CommonPluginsShared.PlayniteExtended
     public abstract class PluginExtended<ISettings, TPluginDatabase> : Plugin
         where TPluginDatabase : IPluginDatabase
     {
+        internal static readonly ILogger logger = LogManager.GetLogger();
+        internal static IResourceProvider resources = new ResourceProvider();
+
         public ISettings PluginSettings { get; set; }
 
         public string PluginFolder { get; set; }
