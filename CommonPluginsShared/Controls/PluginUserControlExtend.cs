@@ -19,6 +19,8 @@ namespace CommonPluginsShared.Controls
         internal static readonly ILogger logger = LogManager.GetLogger();
         internal static IResourceProvider resources = new ResourceProvider();
 
+        protected static ContentControl contentControl;
+
 
         public bool MustDisplay
         {
@@ -40,10 +42,18 @@ namespace CommonPluginsShared.Controls
                 if ((bool)e.NewValue)
                 {
                     obj.Visibility = Visibility.Visible;
+                    if (contentControl != null)
+                    {
+                        contentControl.Visibility = Visibility.Visible;
+                    }
                 }
                 else
                 {
                     obj.Visibility = Visibility.Collapsed;
+                    if (contentControl != null)
+                    {
+                        contentControl.Visibility = Visibility.Collapsed;
+                    }
                 }
             }
         }
@@ -96,5 +106,24 @@ namespace CommonPluginsShared.Controls
             }
         }
         #endregion
+
+
+        public PluginUserControlExtend()
+        {
+            this.Loaded += PluginUserControlExtend_Loaded;
+        }
+
+        private void PluginUserControlExtend_Loaded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                PluginUserControlExtend pluginUserControlExtend = sender as PluginUserControlExtend;
+                contentControl = pluginUserControlExtend.Parent as ContentControl;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, "CommonPluginsShared");
+            }
+        }
     }
 }
