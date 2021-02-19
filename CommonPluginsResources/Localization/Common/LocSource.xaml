@@ -40,7 +40,7 @@
     
     <sys:String x:Key="LOCCommonDatabase">Database</sys:String>
 
-    <sys:String x:Key="LOCCommonControlsAvailable">Available elements for theme integration</sys:String>
+    <sys:String x:Key="LOCCommonControlsAvailable">Items available for the supported themes</sys:String>
     <sys:String x:Key="LOCCommonControlsPluginButtonShow">Display the plugin button</sys:String>
     <sys:String x:Key="LOCCommonControlsPluginButtonShowInContextMenu">Display the data in context menu</sys:String>
 
