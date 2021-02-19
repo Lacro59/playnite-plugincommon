@@ -326,8 +326,6 @@ namespace CommonPluginsShared
         {
             var response = string.Empty;
 
-            client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36");
-
             HttpClientHandler handler = new HttpClientHandler();
             if (Cookies != null)
             {
@@ -349,6 +347,8 @@ namespace CommonPluginsShared
 
             using (var client = new HttpClient(handler))
             {
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36");
+
                 HttpResponseMessage result;
                 try
                 {
