@@ -61,7 +61,7 @@ namespace CommonPluginsShared
                     HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
                     imageStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Common.LogError(ex, "CommonPluginsShared", $"Error on download {url}");
                     return false;
@@ -303,6 +303,10 @@ namespace CommonPluginsShared
                     {
                         response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
                     }
+                    else
+                    {
+                        logger.Error($"CommonPluginsShared - Web error with status code {result.StatusCode.ToString()}");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -357,6 +361,10 @@ namespace CommonPluginsShared
                     {
                         response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
                     }
+                    else
+                    {
+                        logger.Error($"CommonPluginsShared - Web error with status code {result.StatusCode.ToString()}");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -393,6 +401,8 @@ namespace CommonPluginsShared
 
             using (var client = new HttpClient(handler))
             {
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36");
+
                 HttpResponseMessage result;
                 try
                 {
@@ -400,6 +410,10 @@ namespace CommonPluginsShared
                     if (result.IsSuccessStatusCode)
                     {
                         response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        logger.Error($"CommonPluginsShared - Web error with status code {result.StatusCode.ToString()}");
                     }
                 }
                 catch (Exception ex)
