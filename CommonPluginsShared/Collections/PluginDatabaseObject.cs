@@ -309,7 +309,7 @@ namespace CommonPluginsShared.Collections
                 var loadedItem = Get(Id, true);
                 var webItem = GetWeb(Id);
 
-                if (!ReferenceEquals(loadedItem, webItem))
+                if (webItem != null && !ReferenceEquals(loadedItem, webItem))
                 {
                     Update(webItem);
                 }
@@ -361,7 +361,10 @@ namespace CommonPluginsShared.Collections
         }
 
 
-        public abstract TItem GetWeb(Guid Id);
+        public virtual TItem GetWeb(Guid Id)
+        {
+            return null;
+        }
 
         public virtual TItem GetWeb(Game game)
         {
@@ -526,6 +529,8 @@ namespace CommonPluginsShared.Collections
         #endregion
 
 
-        public abstract void SetThemesResources(Game game);
+        public virtual void SetThemesResources(Game game)
+        {
+        }
     }
 }
