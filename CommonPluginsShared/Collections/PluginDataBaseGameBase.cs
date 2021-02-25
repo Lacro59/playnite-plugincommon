@@ -107,5 +107,14 @@ namespace CommonPluginsShared.Collections
         /// </summary>
         [JsonIgnore]
         public bool IsSaved { get; set; }
+
+        [JsonIgnore]
+        public virtual bool HasData
+        {
+            get
+            {
+                return false;
+            }
+        }
     }
 }

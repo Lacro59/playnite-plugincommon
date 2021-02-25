@@ -2,8 +2,8 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <sys:String x:Key="LOCCommonSelectFilters">Select filters</sys:String>
-    
     <sys:String x:Key="LOCCommonRecentlyAdded">Recently Added</sys:String>
+    <sys:String x:Key="LOCCommonOnlyMissing">Only download missing</sys:String>
     
     <!-- CommonMenus -->
 
@@ -51,11 +51,15 @@
     <sys:String x:Key="LOCCommonRefreshGameData">Refresh data</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">Delete data</sys:String>
 
-    <sys:String x:Key="LOCCommonAddAllTags">Add tag to all games</sys:String>
+    <sys:String x:Key="LOCCommonSelectGames">Select games</sys:String>
+    <sys:String x:Key="LOCCommonAddAllTags">Add tag for all games</sys:String>
+    <sys:String x:Key="LOCCommonAddTPlugin">Add plugin tag...</sys:String>
     <sys:String x:Key="LOCCommonSelectData">Download data for selected games</sys:String>
+    <sys:String x:Key="LOCCommonDownloadPluginData">Download plugin data...</sys:String>
     <sys:String x:Key="LOCCommonGetAllDatas">Download data for all games</sys:String>
+    <sys:String x:Key="LOCCommonDeletePluginData">Delete plugin data</sys:String>
     <sys:String x:Key="LOCCommonClearAllDatas">Delete data from all games</sys:String>
-    <sys:String x:Key="LOCCommonRemoveAllTags">Remove tag from all games</sys:String>
+    <sys:String x:Key="LOCCommonRemoveAllTags">Remove plugin tag</sys:String>
 
     <!-- CommonGlobalProgress -->
 

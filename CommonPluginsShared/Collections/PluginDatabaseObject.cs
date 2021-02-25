@@ -141,13 +141,19 @@ namespace CommonPluginsShared.Collections
         }
 
 
-        public virtual void GetSelectDatas()
+        public virtual void GetSelectData()
         {
             var View = new OptionsDownloadData(PlayniteApi);
             Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(PlayniteApi, PluginName + " - " + resources.GetString("LOCCommonSelectData"), View);
             windowExtension.ShowDialog();
 
             var PlayniteDb = View.GetFilteredGames();
+            bool OnlyMissing = View.GetOnlyMissing();
+
+            if (OnlyMissing)
+            {
+                PlayniteDb = PlayniteDb.FindAll(x => !Get(x.Id, true).HasData);
+            }
 
             if (PlayniteDb == null)
             {
@@ -180,7 +186,9 @@ namespace CommonPluginsShared.Collections
                         }
 
                         Thread.Sleep(10);
+                        Remove(game);
                         Get(game);
+
                         activateGlobalProgress.CurrentProgressValue++;
                     }
 
@@ -333,12 +341,16 @@ namespace CommonPluginsShared.Collections
                 }
             }
 
-            return Database.Remove(Id);
+            if (Database.Items.ContainsKey(Id))
+            {
+                return Database.Remove(Id);
+            }
+            return false;
         }
 
         public virtual bool Remove(Game game)
         {
-            return Database.Remove(game.Id);
+            return Remove(game.Id);
         }
 
 
@@ -467,6 +479,69 @@ namespace CommonPluginsShared.Collections
                 }
             }, globalProgressOptions);
         }
+
+        public void AddTagSelectData()
+        {
+            var View = new OptionsDownloadData(PlayniteApi, true);
+            Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(PlayniteApi, PluginName + " - " + resources.GetString("LOCCommonSelectGames"), View);
+            windowExtension.ShowDialog();
+
+            var PlayniteDb = View.GetFilteredGames();
+            PlayniteDb = PlayniteDb.FindAll(x => Get(x.Id, true).HasData);
+
+            if (PlayniteDb == null)
+            {
+                return;
+            }
+
+            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
+                $"{PluginName} - {resources.GetString("LOCCommonAddingAllTag")}",
+                true
+            );
+            globalProgressOptions.IsIndeterminate = false;
+
+            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            {
+                try
+                {
+                    Stopwatch stopWatch = new Stopwatch();
+                    stopWatch.Start();
+
+                    activateGlobalProgress.ProgressMaxValue = (double)PlayniteDb.Count();
+
+                    string CancelText = string.Empty;
+
+                    foreach (Game game in PlayniteDb)
+                    {
+                        if (activateGlobalProgress.CancelToken.IsCancellationRequested)
+                        {
+                            CancelText = " canceled";
+                            break;
+                        }
+
+                        Thread.Sleep(10);
+                        Application.Current.Dispatcher.BeginInvoke((Action)delegate
+                        {
+                            RemoveTag(game, true);
+                            AddTag(game, true);
+                            PlayniteApi.Database.Games.Update(game);
+                        });
+
+
+                        activateGlobalProgress.CurrentProgressValue++;
+                    }
+
+                    stopWatch.Stop();
+                    TimeSpan ts = stopWatch.Elapsed;
+                    logger.Info($"{PluginName} - AddTagAllGame(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, PluginName);
+                }
+            }, globalProgressOptions);
+        }
+
 
         public void RemoveTagAllGame(bool FromClearDatabase = false)
         {

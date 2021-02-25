@@ -19,11 +19,16 @@ namespace CommonPluginsControls.Controls
         private List<Game> _FilteredGames { get; set; }
 
 
-        public OptionsDownloadData(IPlayniteAPI PlayniteApi)
+        public OptionsDownloadData(IPlayniteAPI PlayniteApi, bool WithoutMissing = false)
         {
             _PlayniteApi = PlayniteApi;
 
             InitializeComponent();
+
+            if (WithoutMissing)
+            {
+                PART_OnlyMissing.Visibility = Visibility.Collapsed;
+            }
         }
 
 
@@ -73,6 +78,11 @@ namespace CommonPluginsControls.Controls
         public List<Game> GetFilteredGames()
         {
             return _FilteredGames;
+        }
+
+        public bool GetOnlyMissing()
+        {
+            return (bool)PART_OnlyMissing.IsChecked;
         }
     }
 }

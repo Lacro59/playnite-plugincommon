@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CommonPluginsControls.Controls"
-             mc:Ignorable="d" Height="200" Width="600">
+             mc:Ignorable="d" Height="220" Width="600">
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -28,6 +28,8 @@
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="10" />
                 <RowDefinition Height="auto" />
+                <RowDefinition Height="10" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
             <RadioButton Name="PART_AllGames" Grid.Column="0" Grid.Row="0" IsChecked="True" GroupName="RadioFilters">
@@ -49,6 +51,11 @@
             <RadioButton Name="PART_GamesFavorite" Grid.Column="2" Grid.Row="2" GroupName="RadioFilters">
                 <Label Content="{DynamicResource LOCQuickFilterFavorites}" />
             </RadioButton>
+
+            <CheckBox Grid.Row="4" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                      IsChecked="True" VerticalAlignment="Bottom"
+                      Name="PART_OnlyMissing"
+                      Content="{DynamicResource LOCCommonOnlyMissing}" />
         </Grid>
 
         <Border BorderThickness="0,1,0,0" BorderBrush="{StaticResource NormalBorderBrush}"

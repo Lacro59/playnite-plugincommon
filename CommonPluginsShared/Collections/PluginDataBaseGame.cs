@@ -14,7 +14,7 @@ namespace CommonPluginsShared.Collections
 
 
         [JsonIgnore]
-        public virtual bool HasData
+        public override bool HasData
         {
             get
             {
