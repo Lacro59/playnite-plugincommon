@@ -29,43 +29,46 @@ namespace CommonPluginsShared
 #if DEBUG
                 Task.Run(() =>
                 {
-                    Thread.Sleep(3000);
+                    Thread.Sleep(2000);
                     SetPluginLanguage(pluginFolder, "LocSource", true);
                 });
 #endif
             }
-            
+
 #if DEBUG
-            // Load default localization 
-            var langFile = Path.Combine(pluginFolder, "localization\\" + language + ".xaml");
-
-            if (File.Exists(langFile))
+            if (DefaultLoad)
             {
-                ResourceDictionary res = null;
-                try
-                {
-                    res = Xaml.FromFile<ResourceDictionary>(langFile);
-                    res.Source = new Uri(langFile, UriKind.Absolute);
+                // Load default localization 
+                var langFile = Path.Combine(pluginFolder, "localization\\" + language + ".xaml");
 
-                    foreach (var key in res.Keys)
+                if (File.Exists(langFile))
+                {
+                    ResourceDictionary res = null;
+                    try
                     {
-                        if (res[key] is string locString && locString.IsNullOrEmpty())
+                        res = Xaml.FromFile<ResourceDictionary>(langFile);
+                        res.Source = new Uri(langFile, UriKind.Absolute);
+
+                        foreach (var key in res.Keys)
                         {
-                            res.Remove(key);
+                            if (res[key] is string locString && locString.IsNullOrEmpty())
+                            {
+                                res.Remove(key);
+                            }
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, $"Failed to integrate localization file {langFile}");
-                    return;
-                }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, $"Failed to integrate localization file {langFile}");
+                        return;
+                    }
 
-                dictionaries.Add(res);
-            }
-            else
-            {
-                logger.Warn($"File {langFile} not found");
+                    dictionaries.Add(res);
+                }
+                else
+                {
+                    logger.Warn($"File {langFile} not found");
+                }
             }
 #endif
 
