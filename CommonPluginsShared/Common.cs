@@ -135,7 +135,7 @@ namespace CommonPluginsShared
         #region Logs
         public static void LogDebug(bool IsIgnored, string Message)
         {
-            if (!IsIgnored)
+            if (IsIgnored)
             {
                 Message = $"[Ignored] {Message}";
             }
@@ -155,7 +155,7 @@ namespace CommonPluginsShared
             TraceInfos traceInfos = new TraceInfos(ex);
             string Message = string.Empty;
 
-            if (!IsIgnored)
+            if (IsIgnored)
             {
                 Message = $"[Ignored] ";
             }
@@ -182,7 +182,7 @@ namespace CommonPluginsShared
             TraceInfos traceInfos = new TraceInfos(ex);
             Message = $"[{traceInfos.FileName} {traceInfos.LineNumber}] - {Message}";
 
-            if (!IsIgnored)
+            if (IsIgnored)
             {
                 Message = $"[Ignored] {Message}";
             }
