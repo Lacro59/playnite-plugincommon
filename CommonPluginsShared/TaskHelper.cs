@@ -31,18 +31,15 @@ namespace CommonPluginsShared
             {
                 List<SystemTask> TaskDelete = new List<SystemTask>();
 
-#if DEBUG
-                logger.Debug($"CommonPluginsShared [Ignored] - SystemTask {SystemTask.Count}");
-#endif
+                Common.LogDebug(true, $"SystemTask {SystemTask.Count}");
 
                 // Check task status
                 foreach (var taskRunning in SystemTask)
                 {
                     if (taskRunning.task.Status != TaskStatus.RanToCompletion)
                     {
-#if DEBUG
-                        logger.Debug($"CommonPluginsShared [Ignored] - Task {taskRunning.task.Id} ({taskRunning.task.Status}) is canceled");
-#endif
+                        Common.LogDebug(true, $"Task {taskRunning.task.Id} ({taskRunning.task.Status}) is canceled");
+                        
                         // Cancel task if not terminated
                         taskRunning.tokenSource.Cancel();
                     }
@@ -57,16 +54,13 @@ namespace CommonPluginsShared
                 foreach (var taskRunning in TaskDelete)
                 {
                     SystemTask.Remove(taskRunning);
-#if DEBUG
-                    logger.Debug($"SystemChecker [Ignored] - Task {taskRunning.task.Id} ({taskRunning.task.Status}) is removed");
-#endif
+
+                    Common.LogDebug(true, $"Task {taskRunning.task.Id} ({taskRunning.task.Status}) is removed");
                 }
             }
             catch (Exception ex)
             {
-#if DEBUG
-                Common.LogError(ex, "CommonPluginsShared [Ignored]");
-#endif
+                Common.LogError(ex, true);
             }
         }
     }

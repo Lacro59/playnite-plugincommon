@@ -60,7 +60,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared");
+                Common.LogError(ex, false);
                 return (Brushes)resources.GetResource("TextBrush");
             }
         }
@@ -97,7 +97,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared");
+                Common.LogError(ex, false);
                 return Visibility.Visible;
             }
         }
@@ -151,7 +151,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared");
+                Common.LogError(ex, false);
                 return string.Empty;
             }
         }
@@ -193,7 +193,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared");
+                Common.LogError(ex, false);
                 return string.Empty;
             }
         }
@@ -220,7 +220,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared");
+                Common.LogError(ex, false);
                 return string.Empty;
             }
         }
@@ -248,7 +248,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared");
+                Common.LogError(ex, false);
                 return string.Empty;
             }
         }
@@ -295,7 +295,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared");
+                Common.LogError(ex, false);
                 return string.Empty;
             }
         }
@@ -340,7 +340,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared");
+                Common.LogError(ex, false);
             }
 
             return value;

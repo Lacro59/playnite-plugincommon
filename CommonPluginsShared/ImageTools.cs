@@ -42,7 +42,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on GetImapeProperty()");
+                Common.LogError(ex, false);
                 return null;
             }
         }
@@ -61,7 +61,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on GetImapeProperty()");
+                Common.LogError(ex, false);
                 return null;
             }
         }
@@ -78,7 +78,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on GetImapeProperty()");
+                Common.LogError(ex, false);
                 return null;
             }
         }
@@ -99,7 +99,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared");
+                Common.LogError(ex, false);
                 return string.Empty;
             }
         }
@@ -108,9 +108,8 @@ namespace CommonPluginsShared
         {
             try
             {
-#if DEBUG
-                logger.Debug("CommonPluginsShared [Ignored]- Resize: " + path + ".png");
-#endif
+                Common.LogDebug(true, $"Resize: {path}.png");
+
                 Image image = Image.FromStream(imgStream);
                 Bitmap resultImage = Resize(image, width, height);
                 resultImage.Save(path + ".png");
@@ -119,9 +118,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-#if DEBUG
-                Common.LogError(ex, "CommonPluginsShared [Ignored]");
-#endif
+                Common.LogError(ex, true);
                 return false;
             }
         }
@@ -177,7 +174,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared");
+                Common.LogError(ex, false);
             }
 
             return ConvertBitmapSource;

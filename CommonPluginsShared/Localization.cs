@@ -49,7 +49,7 @@ namespace CommonPluginsShared
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex, $"CommonPluginsShared - Failed to integrate localization file {langFile}.");
+                    Common.LogError(ex, false, $"Failed to integrate localization file {langFile}");
                     return;
                 }
 
@@ -57,7 +57,7 @@ namespace CommonPluginsShared
             }
             else
             {
-                logger.Warn($"CommonPluginsShared - File {langFile} not found.");
+                logger.Warn($"File {langFile} not found");
             }
 #endif
 
@@ -82,7 +82,7 @@ namespace CommonPluginsShared
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex, $"CommonPluginsShared - Failed to integrate localization file {langFileCommon}.");
+                    Common.LogError(ex, false, $"Failed to integrate localization file {langFileCommon}");
                     return;
                 }
 
@@ -90,7 +90,7 @@ namespace CommonPluginsShared
             }
             else
             {
-                logger.Warn($"CommonPluginsShared - File {langFileCommon} not found.");
+                logger.Warn($"File {langFileCommon} not found");
             }
         }
     }

@@ -63,7 +63,7 @@ namespace CommonPluginsShared
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "CommonPluginsShared", $"Error on download {url}");
+                    Common.LogError(ex, false, $"Error on download {url}");
                     return false;
                 }
 
@@ -87,7 +87,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on delete file image");
+                Common.LogError(ex, false, $"Error on delete file image");
                 return false;
             }
 
@@ -110,7 +110,7 @@ namespace CommonPluginsShared
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "CommonPluginsShared", $"Error on download {url}");
+                    Common.LogError(ex, false, $"Error on download {url}");
                     return null;
                 }
             }
@@ -146,7 +146,7 @@ namespace CommonPluginsShared
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "CommonPluginsShared", $"Error on download {url}");
+                    Common.LogError(ex, false, $"Error on download {url}");
                     return null;
                 }
             }
@@ -175,7 +175,7 @@ namespace CommonPluginsShared
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "CommonPluginsShared", $"Error on download {url}");
+                    Common.LogError(ex, false, $"Error on download {url}");
                     return string.Empty;
                 }
 
@@ -194,9 +194,9 @@ namespace CommonPluginsShared
                     {
                         redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
                     }
-#if DEBUG
-                    logger.Info(string.Format("CommonPluginsShared [Ignored] - DownloadStringData() redirecting to {0}", redirectUri));
-#endif
+
+                    Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
+
                     return await DownloadStringData(redirectUri.ToString());
                 }
                 else
@@ -231,7 +231,7 @@ namespace CommonPluginsShared
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "CommonPluginsShared", $"Error on download {url}");
+                    Common.LogError(ex, false, $"Error on download {url}");
                     return string.Empty;
                 }
 
@@ -247,7 +247,7 @@ namespace CommonPluginsShared
                 }
                 else
                 {
-                    logger.Warn($"CommonPluginsShared - DownloadStringData() with statuscode {statusCode} for {url}");
+                    logger.Warn($"DownloadStringData() with statuscode {statusCode} for {url}");
                     return string.Empty;
                 }
             }
@@ -305,12 +305,12 @@ namespace CommonPluginsShared
                     }
                     else
                     {
-                        logger.Error($"CommonPluginsShared - Web error with status code {result.StatusCode.ToString()}");
+                        logger.Error($"Web error with status code {result.StatusCode.ToString()}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "CommonPluginsShared", $"Error on Post {url}");
+                    Common.LogError(ex, false, $"Error on Post {url}");
                 }
             }
 
@@ -363,12 +363,12 @@ namespace CommonPluginsShared
                     }
                     else
                     {
-                        logger.Error($"CommonPluginsShared - Web error with status code {result.StatusCode.ToString()}");
+                        logger.Error($"Web error with status code {result.StatusCode.ToString()}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "CommonPluginsShared", $"Error on Post {url}");
+                    Common.LogError(ex, false, $"Error on Post {url}");
                 }
             }
 
@@ -413,12 +413,12 @@ namespace CommonPluginsShared
                     }
                     else
                     {
-                        logger.Error($"CommonPluginsShared - Web error with status code {result.StatusCode.ToString()}");
+                        logger.Error($"Web error with status code {result.StatusCode.ToString()}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "CommonPluginsShared", $"Error on Post {url}");
+                    Common.LogError(ex, false, $"Error on Post {url}");
                 }
             }
 

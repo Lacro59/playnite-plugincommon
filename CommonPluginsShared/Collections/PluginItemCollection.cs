@@ -51,7 +51,7 @@ namespace CommonPluginsShared.Collections
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "CommonPluginsShared");
+                    Common.LogError(ex, false);
                 }
             }
         }
@@ -89,7 +89,7 @@ namespace CommonPluginsShared.Collections
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, "CommonPluginsShared");
+                    Common.LogError(ex, false);
                 }
             }
         }

@@ -42,9 +42,7 @@ namespace CommonPluginsShared
                 // Get Github info
                 string url = string.Format(urlGithub, PluginName.ToLower());
 
-#if DEBUG
-                logger.Debug($"CommonPluginsShared [Ignored] - Download {url} for {PluginName}");
-#endif
+                Common.LogDebug(true, $"Download {url} for {PluginName}");
 
                 string ResultWeb = string.Empty;
                 try
@@ -54,9 +52,7 @@ namespace CommonPluginsShared
                 catch (WebException ex)
                 {
                     logger.Error($"Failed to load from {url} for {PluginName}");
-#if DEBUG
-                    Common.LogError(ex, "CommonPluginsShared [Ignored]", $"Failed to load from {url} for {PluginName}");
-#endif
+                    Common.LogError(ex, true, $"Failed to load from {url} for {PluginName}");
                 }
 
                 LastReleaseUrl = string.Empty;
@@ -75,17 +71,17 @@ namespace CommonPluginsShared
                             LastReleaseBody = (string)resultObj[0]["body"];
                         }
 
-                        logger.Info($"CommonPluginsShared - {PluginName} - Find {LastReleaseTagName} - Actual v{PluginInfo.Version}");
+                        logger.Info($"Find {LastReleaseTagName} - Actual v{PluginInfo.Version}");
                     }
                     catch (Exception ex)
                     {
-                        Common.LogError(ex, "CommonPluginsShared", $"Failed to parse Github response for {PluginName} - {ResultWeb}");
+                        Common.LogError(ex, false, $"Failed to parse Github response for {PluginName} - {ResultWeb}");
                         return;
                     }
                 }
                 else
                 {
-                    logger.Warn($"CommonPluginsShared - No Data from {url} for {PluginName}");
+                    logger.Warn($"No Data from {url} for {PluginName}");
                 }
 
                 //Check actual vs Github

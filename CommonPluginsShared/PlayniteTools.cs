@@ -71,13 +71,12 @@ namespace CommonPluginsShared
                 {
                     return PathImageFileName + ".png";
                 }
-#if DEBUG
-                logger.Debug($"CommonPluginsShared [Ignored] - GetCacheFile() not find - {PathImageFileName}");
-#endif
+
+                Common.LogDebug(true, $"GetCacheFile() not find - {PathImageFileName}");
             }
             catch(Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared");
+                Common.LogError(ex, false);
             }
 
             return string.Empty;
@@ -99,7 +98,7 @@ namespace CommonPluginsShared
                     }
                     else
                     {
-                        logger.Warn($"CommonPluginsShared - File not found {FileConfig}");
+                        logger.Warn($"File not found {FileConfig}");
                         return false;
                     }
                 }
@@ -116,13 +115,13 @@ namespace CommonPluginsShared
                 }
                 else
                 {
-                    logger.Warn($"CommonPluginsShared - DisabledPlugins is null");
+                    logger.Warn($"DisabledPlugins is null");
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared");
+                Common.LogError(ex, false);
                 return false;
             }
 
@@ -167,7 +166,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on GetSourceName({game.Name})");
+                Common.LogError(ex, false, $"Error on GetSourceName({game.Name})");
                 SourceName = "Playnite";
             }
 

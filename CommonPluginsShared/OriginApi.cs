@@ -35,7 +35,7 @@ namespace CommonPluginsShared
                         // If not expired
                         if (File.GetLastWriteTime(PluginCacheFile).AddDays(3) > DateTime.Now)
                         {
-                            logger.Info("CommonPluginsShared - GetOriginAppListFromCache");
+                            logger.Info("GetOriginAppListFromCache");
                             OriginListApp = JsonConvert.DeserializeObject<List<GameStoreDataResponseAppsList>>(File.ReadAllText(PluginCacheFile));
                         }
                         else
@@ -56,13 +56,13 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared");
+                Common.LogError(ex, false);
             }
         }
 
         private List<GameStoreDataResponseAppsList> GetOriginAppListFromWeb(string PluginCacheFile)
         {
-            logger.Info("CommonPluginsShared - GetOriginAppListFromWeb");
+            logger.Info("GetOriginAppListFromWeb");
 
             string responseData = string.Empty;
             try
@@ -76,7 +76,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Failed to load from {urlOriginListApp}");
+                Common.LogError(ex, false, $"Failed to load from {urlOriginListApp}");
             }
 
             return JsonConvert.DeserializeObject<List<GameStoreDataResponseAppsList>>(responseData);
@@ -86,9 +86,7 @@ namespace CommonPluginsShared
         {
             GameStoreDataResponseAppsList findGame = OriginListApp.Find(x => x.masterTitle.ToLower() == Name.ToLower());
 
-#if DEBUG
-            logger.Debug($"CommonPluginsShared [Ignored] - Find Origin data for {Name} - {JsonConvert.SerializeObject(findGame)}");
-#endif
+            Common.LogDebug(true, $"Find Origin data for {Name} - {JsonConvert.SerializeObject(findGame)}");
 
             if (findGame != null)
             {

@@ -90,7 +90,7 @@ namespace CommonPluginsShared.Collections
             {
                 if (IsLoaded)
                 {
-                    logger.Info($"{PluginName} - Database is already initialized");
+                    logger.Info($"Database is already initialized");
                     return true;
                 }
 
@@ -111,7 +111,7 @@ namespace CommonPluginsShared.Collections
                     Directory.CreateDirectory(Paths.PluginDatabasePath);
 
                     IsLoaded = false;
-                    logger.Info($"{PluginName} - Database is cleared");
+                    logger.Info($"Database is cleared");
 
                     // If tag system
                     PropertyInfo propertyInfo = PluginSettings.GetType().GetProperty("EnableTag");
@@ -120,9 +120,9 @@ namespace CommonPluginsShared.Collections
                         bool EnableTag = (bool)propertyInfo.GetValue(PluginSettings);
                         if (EnableTag)
                         {
-#if DEBUG
-                            logger.Debug($"{PluginName} [Ignored] - RemoveTagAllGame()");
-#endif
+
+                            Common.LogDebug(true, $"RemoveTagAllGame()");
+
                             RemoveTagAllGame();
                         }
                     }
@@ -131,9 +131,7 @@ namespace CommonPluginsShared.Collections
                 }
                 catch (Exception ex)
                 {
-#if DEBUG
-                    Common.LogError(ex, PluginName + " [Ignored]");
-#endif
+                    Common.LogError(ex, true);
                 }
             }
 
@@ -194,11 +192,11 @@ namespace CommonPluginsShared.Collections
 
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
-                    logger.Info($"{PluginName} - Task GetDatas(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
+                    logger.Info($"Task GetSelectData(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, PluginName);
+                    Common.LogError(ex, false);
                 }
             }, globalProgressOptions);
         }
@@ -238,11 +236,11 @@ namespace CommonPluginsShared.Collections
 
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
-                    logger.Info($"{PluginName} - Task GetAllDatas(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
+                    logger.Info($"Task GetAllDatas(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, PluginName);
+                    Common.LogError(ex, false);
                 }
             }, globalProgressOptions);
         }
@@ -286,9 +284,8 @@ namespace CommonPluginsShared.Collections
                 bool EnableTag = (bool)propertyInfo.GetValue(PluginSettings);
                 if (EnableTag)
                 {
-#if DEBUG
-                    logger.Debug($"{PluginName} [Ignored] - RemoveTag & AddTag for {itemToAdd.Name} with {itemToAdd.Id.ToString()}");
-#endif
+                    Common.LogDebug(true, $"RemoveTag & AddTag for {itemToAdd.Name} with {itemToAdd.Id.ToString()}");
+
                     RemoveTag(itemToAdd.Id);
                     AddTag(itemToAdd.Id);
                 }
@@ -334,9 +331,8 @@ namespace CommonPluginsShared.Collections
                 bool EnableTag = (bool)propertyInfo.GetValue(PluginSettings);
                 if (EnableTag)
                 {
-#if DEBUG
-                    logger.Debug($"{PluginName} [Ignored] - RemoveTag for {Id.ToString()}");
-#endif
+                    Common.LogDebug(true, $"RemoveTag for {Id.ToString()}");
+
                     RemoveTag(Id);
                 }
             }
@@ -471,11 +467,11 @@ namespace CommonPluginsShared.Collections
 
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
-                    logger.Info($"{PluginName} - AddTagAllGame(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
+                    logger.Info($"AddTagAllGame(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, PluginName);
+                    Common.LogError(ex, false);
                 }
             }, globalProgressOptions);
         }
@@ -533,11 +529,11 @@ namespace CommonPluginsShared.Collections
 
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
-                    logger.Info($"{PluginName} - AddTagAllGame(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
+                    logger.Info($"AddTagSelectData(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, PluginName);
+                    Common.LogError(ex, false);
                 }
             }, globalProgressOptions);
         }
@@ -545,9 +541,7 @@ namespace CommonPluginsShared.Collections
 
         public void RemoveTagAllGame(bool FromClearDatabase = false)
         {
-#if DEBUG
-            logger.Debug($"{PluginName} [Ignored] - RemoveTagAllGame");
-#endif
+            Common.LogDebug(true, $"RemoveTagAllGame");
 
             string Message = string.Empty;
             if (FromClearDatabase)
@@ -588,11 +582,11 @@ namespace CommonPluginsShared.Collections
 
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
-                    logger.Info($"{PluginName} - RemoveTagAllGame(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
+                    logger.Info($"RemoveTagAllGame(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, PluginName);
+                    Common.LogError(ex, false);
                 }
             }, globalProgressOptions);
         }

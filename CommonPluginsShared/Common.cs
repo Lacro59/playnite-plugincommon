@@ -39,9 +39,7 @@ namespace CommonPluginsShared
             {
                 if (File.Exists(CommonFile))
                 {
-#if DEBUG
-                    logger.Debug($"CommonPluginsShared [Ignored] - Load {CommonFile}");
-#endif
+                    Common.LogDebug(true, $"Load {CommonFile}");
 
                     ResourceDictionary res = null;
                     try
@@ -59,19 +57,17 @@ namespace CommonPluginsShared
                     }
                     catch (Exception ex)
                     {
-                        LogError(ex, "CommonPluginsShared", $"Failed to integrate file {CommonFile}");
+                        LogError(ex, false, $"Failed to integrate file {CommonFile}");
                         return;
                     }
 
-#if DEBUG
-                    logger.Debug($"CommonPluginsShared [Ignored] - res: {JsonConvert.SerializeObject(res)}");
-#endif
+                    Common.LogDebug(true, $"res: {JsonConvert.SerializeObject(res)}");
 
                     Application.Current.Resources.MergedDictionaries.Add(res);
                 }
                 else
                 {
-                    logger.Warn($"CommonPluginsShared - File {CommonFile} not find");
+                    logger.Warn($"File {CommonFile} not find");
                     return;
                 }
             }
@@ -100,7 +96,7 @@ namespace CommonPluginsShared
             }
             else
             {
-                logger.Warn($"CommonPluginsShared - File {FontFile} not find");
+                logger.Warn($"File {FontFile} not find");
             }
             #endregion
         }
@@ -129,43 +125,78 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, "CommonPluginsShared", $"Error on WindowBase_LoadedEvent for {WinIdProperty}");
+                Common.LogError(ex, false, $"Error on WindowBase_LoadedEvent for {WinIdProperty}");
             }
         }
 
 
 
-        /// <summary>
-        /// Normalize log error in Playnite.
-        /// </summary>
-        /// <param name="ex"></param>
-        /// <param name="PluginName"></param>
-        public static void LogError(Exception ex, string PluginName)
+
+        #region Logs
+        public static void LogDebug(bool IsIgnored, string Message)
+        {
+            if (!IsIgnored)
+            {
+                Message = $"[Ignored] {Message}";
+            }
+
+#if DEBUG
+            logger.Debug(Message);
+#else
+            if (!IsIgnored) 
+            {            
+                logger.Debug(Message); 
+            }
+#endif
+        }
+
+        public static void LogError(Exception ex, bool IsIgnored)
         {
             TraceInfos traceInfos = new TraceInfos(ex);
-            string Message = $"{PluginName} [{traceInfos.FileName} {traceInfos.LineNumber}]";
+            string Message = string.Empty;
+
+            if (!IsIgnored)
+            {
+                Message = $"[Ignored] ";
+            }
+
+            Message += $"[{traceInfos.FileName} {traceInfos.LineNumber}]";
 
             if (!traceInfos.InitialCaller.IsNullOrEmpty())
             {
                 Message += $" - Error on {traceInfos.InitialCaller}()";
             }
 
+#if DEBUG
             logger.Error(ex, $"{Message}");
+#else
+            if (!IsIgnored) 
+            {
+                logger.Error(ex, $"{Message}");
+            }
+#endif
         }
 
-        /// <summary>
-        /// Normalize log error in Playnite.
-        /// </summary>
-        /// <param name="ex"></param>
-        /// <param name="PluginName"></param>
-        /// <param name="Message"></param>
-        public static void LogError(Exception ex, string PluginName, string Message)
+        public static void LogError(Exception ex, bool IsIgnored, string Message)
         {
             TraceInfos traceInfos = new TraceInfos(ex);
-            Message = $"{PluginName} [{traceInfos.FileName} {traceInfos.LineNumber}] - {Message}";
+            Message = $"[{traceInfos.FileName} {traceInfos.LineNumber}] - {Message}";
 
+            if (!IsIgnored)
+            {
+                Message = $"[Ignored] {Message}";
+            }
+
+#if DEBUG
             logger.Error(ex, $"{Message}");
+#else
+            if (!IsIgnored) 
+            {
+                logger.Error(ex, $"{Message}");
+            }
+#endif
         }
+        #endregion
 
 
         public static string NormalizeGameName(string name)
