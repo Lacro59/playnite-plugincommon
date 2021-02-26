@@ -3,6 +3,8 @@ using System;
 using System.IO;
 using System.Windows;
 using CommonPluginsPlaynite.Common;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace CommonPluginsShared
 {
@@ -24,7 +26,13 @@ namespace CommonPluginsShared
             // Load default for missing
             if (!DefaultLoad)
             {
-                SetPluginLanguage(pluginFolder, "LocSource", true);
+#if DEBUG
+                Task.Run(() =>
+                {
+                    Thread.Sleep(3000);
+                    SetPluginLanguage(pluginFolder, "LocSource", true);
+                });
+#endif
             }
             
 #if DEBUG
