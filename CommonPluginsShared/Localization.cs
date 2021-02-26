@@ -27,6 +27,7 @@ namespace CommonPluginsShared
             if (!DefaultLoad)
             {
 #if DEBUG
+                // Force development localization
                 Task.Run(() =>
                 {
                     Thread.Sleep(3000);
