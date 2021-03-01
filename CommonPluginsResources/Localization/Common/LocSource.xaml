@@ -19,7 +19,7 @@
 
     <sys:String x:Key="LOCCommonIntegration">Appearance</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInCustomTheme">Enable custom theme integration (Only if integrated in custom theme)</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Add plugin button to window title bar</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Display the plugin button in window title bar *</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButton">Show plugin button in game details</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInDescription">Show plugin information in game details</sys:String>
 
@@ -32,6 +32,8 @@
 
     <sys:String x:Key="LOCCommonIntegrationListOptions">List options</sys:String>
 
+    <sys:String x:Key="LOCCommonIntegrationChartOptions">Chart options</sys:String>
+    
     <sys:String x:Key="LOCGameActivityIntegrationDescriptionOptions">Description integration options</sys:String>
     <sys:String x:Key="LOCCommonIntegrationShowTitle">Show title</sys:String>
     <sys:String x:Key="LOCCommonIntegrationTopGameDetails">Show above game description</sys:String>

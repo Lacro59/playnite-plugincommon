@@ -323,7 +323,6 @@ namespace CommonPluginsShared
     }
 
 
-
     public class DefaultIconConverter : IValueConverter
     {
         public object Convert(object value, Type TargetType, object parameter, CultureInfo culture)
@@ -351,7 +350,6 @@ namespace CommonPluginsShared
             throw new NotImplementedException();
         }
     }
-
 
 
     public class ImageConverter : IMultiValueConverter
@@ -427,6 +425,21 @@ namespace CommonPluginsShared
         public object[] ConvertBack(object value, Type[] targetType, object parameter, CultureInfo culture)
         {
             throw new NotSupportedException();
+        }
+    }
+
+
+    public class HeightToFontSizeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var height = (double)value;
+            return .45 * height;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }
