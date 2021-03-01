@@ -8,6 +8,17 @@ namespace CommonPluginsShared.Controls
 {
     public class ListViewExtend : ListView
     {
+        #region HeightStretch
+        public static readonly DependencyProperty HeightStretchProperty;
+        public bool HeightStretch { get; set; }
+        #endregion
+
+        #region WidthStretch
+        public static readonly DependencyProperty WidthStretchProperty;
+        public bool WidthStretch { get; set; }
+        #endregion  
+
+
         #region BubblingScrollEvents
         public bool BubblingScrollEvents
         {
@@ -37,5 +48,38 @@ namespace CommonPluginsShared.Controls
             }
         }
         #endregion
+
+
+        public ListViewExtend()
+        {
+            this.Loaded += ListViewExtend_Loaded;
+        }
+
+
+        private void ListViewExtend_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (HeightStretch)
+            {
+                this.Height = ((FrameworkElement)sender).ActualHeight;
+            }
+            if (WidthStretch)
+            {
+                this.Width = ((FrameworkElement)sender).ActualWidth;
+            }
+
+            ((FrameworkElement)this.Parent).SizeChanged += Parent_SizeChanged;
+        }
+
+        private void Parent_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (HeightStretch)
+            {
+                this.Height = ((FrameworkElement)sender).ActualHeight;
+            }
+            if (WidthStretch)
+            {
+                this.Width = ((FrameworkElement)sender).ActualWidth;
+            }
+        }
     }
 }
