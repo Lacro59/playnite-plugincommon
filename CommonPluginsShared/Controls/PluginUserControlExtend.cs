@@ -59,6 +59,28 @@ namespace CommonPluginsShared.Controls
         }
 
 
+        public bool IgnoreSettings
+        {
+            get { return (bool)GetValue(IgnoreSettingsProperty); }
+            set { SetValue(IgnoreSettingsProperty, value); }
+        }
+
+        public static readonly DependencyProperty IgnoreSettingsProperty = DependencyProperty.Register(
+            nameof(IgnoreSettings),
+            typeof(bool),
+            typeof(PluginUserControlExtend),
+            new FrameworkPropertyMetadata(false, SettingsPropertyChangedCallback));
+
+        private static void SettingsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            PluginUserControlExtend obj = sender as PluginUserControlExtend;
+            if (obj != null && e.NewValue != e.OldValue)
+            {
+                obj.PluginSettings_PropertyChanged(null, null);
+            }
+        }
+
+
         #region OnPropertyChange
         // When plugin settings is updated
         public abstract void PluginSettings_PropertyChanged(object sender, PropertyChangedEventArgs e);
