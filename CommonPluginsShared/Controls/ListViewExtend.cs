@@ -257,6 +257,11 @@ namespace CommonPluginsShared.Controls
                                 direction = ListSortDirection.Ascending;
                             }
 
+                            if (_lastHeaderClicked != null && headerClicked != _lastHeaderClicked)
+                            {
+                                direction = ListSortDirection.Ascending;
+                            }
+
                             if (headerClicked.Column != null)
                             {
                                 Binding columnBinding;
@@ -333,12 +338,37 @@ namespace CommonPluginsShared.Controls
             }
         }
         
-        private void Sorting()
+        public void Sorting()
         {
-            var columnBinding = _lastHeaderClicked.Column.DisplayMemberBinding as Binding;
-            var sortBy = columnBinding?.Path.Path ?? _lastHeaderClicked.Column.Header as string;
+            if (_lastHeaderClicked != null)
+            {
+                var headerClicked = _lastHeaderClicked;
+                if (headerClicked.Column != null)
+                {
+                    Binding columnBinding;
+                    string sortBy;
 
-            Sort(sortBy, (ListSortDirection)_lastDirection);
+                    // Specific sort with another column
+                    if (headerClicked.Tag != null && !((string)headerClicked.Tag).IsNullOrEmpty())
+                    {
+                        GridViewColumnHeader gridViewColumnHeader = FindGridViewColumn((string)headerClicked.Tag);
+                        if (gridViewColumnHeader == null)
+                        {
+                            return;
+                        }
+
+                        columnBinding = gridViewColumnHeader.Column.DisplayMemberBinding as Binding;
+                        sortBy = columnBinding?.Path.Path ?? headerClicked.Column.Header as string;
+                    }
+                    else
+                    {
+                        columnBinding = headerClicked.Column.DisplayMemberBinding as Binding;
+                        sortBy = columnBinding?.Path.Path ?? headerClicked.Column.Header as string;
+                    }
+
+                    Sort(sortBy, (ListSortDirection)_lastDirection);
+                }
+            }
         }
 
         private void Sort(string sortBy, ListSortDirection direction)
