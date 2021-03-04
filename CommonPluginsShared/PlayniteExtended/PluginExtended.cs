@@ -26,9 +26,50 @@ namespace CommonPluginsShared.PlayniteExtended
 
         public PluginExtended(IPlayniteAPI api) : base(api)
         {
+            TransfertOldDatabase();
+            CleanOldDatabase();
+
             // Get plugin's database if used
             PluginDatabase = typeof(TPluginDatabase).CrateInstance<TPluginDatabase>(PlayniteApi, PluginSettings, this.GetPluginUserDataPath());
             PluginDatabase.InitializeDatabase();
+        }
+
+
+        // TEMP Transfert database directory
+        private void TransfertOldDatabase()
+        {
+            string OldDirectory = string.Empty;
+            string NewDirectory = string.Empty;
+
+            OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "Activity");
+            NewDirectory = Path.Combine(this.GetPluginUserDataPath(), "GameActivity");
+            if (Directory.Exists(OldDirectory))
+            {
+                Directory.Move(OldDirectory, NewDirectory);
+            }
+        }
+        private void CleanOldDatabase()
+        {
+            string OldDirectory = string.Empty;
+
+            try
+            {
+                // Clean old database
+                OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "activity_old");
+                if (Directory.Exists(OldDirectory))
+                {
+                    Directory.Delete(OldDirectory);
+                }
+                OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "activityDetails_old");
+                if (Directory.Exists(OldDirectory))
+                {
+                    Directory.Delete(OldDirectory);
+                }
+            }
+            catch
+            {
+
+            }
         }
     }
 
