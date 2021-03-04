@@ -173,8 +173,13 @@
                 case "nintendo 64":
                     stringReturn = nintendo64;
                     break;
-                case "sony playStation":
+                case "sony playstation":
+                case "sony playstation 2":
+                case "sony playstation 3":
                     stringReturn = playstation;
+                    break;
+                case "sony playstation 4":
+                    stringReturn = playstation4;
                     break;
                 case "super nintendo entertainment system":
                     stringReturn = supernintendo;
