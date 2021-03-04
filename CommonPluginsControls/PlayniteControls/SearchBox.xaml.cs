@@ -159,5 +159,12 @@ namespace CommonPluginsControls.PlayniteControls
             Text = TextFilter.Text;
             ignoreTextCallback = false;
         }
+
+
+        public event TextChangedEventHandler TextChanged
+        {
+            add { TextFilter.TextChanged += value; }
+            remove { TextFilter.TextChanged -= value; }
+        }
     }
 }

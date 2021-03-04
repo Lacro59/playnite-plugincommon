@@ -20,6 +20,9 @@ namespace CommonPluginsControls.Controls
     /// </summary>
     public partial class ComboBoxRemovable : ComboBox
     {
+        public event RoutedEventHandler ClearEvent;
+
+
         public ComboBoxRemovable()
         {
             InitializeComponent();
@@ -30,6 +33,8 @@ namespace CommonPluginsControls.Controls
         {
             this.Text = string.Empty;
             this.SelectedIndex = -1;
+
+            this.ClearEvent?.Invoke(sender, e);
         }
     }
 }
