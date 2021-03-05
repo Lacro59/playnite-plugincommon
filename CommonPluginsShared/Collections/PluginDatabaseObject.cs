@@ -320,7 +320,7 @@ namespace CommonPluginsShared.Collections
 
             if (propertyInfo != null)
             {
-                bool EnableTag = (bool)propertyInfo.GetValue(PluginSettings);
+                bool EnableTag = (bool)propertyInfo.GetValue(Settings);
                 if (EnableTag)
                 {
                     Common.LogDebug(true, $"RemoveTag & AddTag for {itemToUpdate.Name} with {itemToUpdate.Id.ToString()}");
