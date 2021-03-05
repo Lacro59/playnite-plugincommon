@@ -53,9 +53,13 @@
                                                         </Rectangle.RenderTransform>
                                                     </Rectangle>
                                                 </Grid>
-                                                <TextBlock Text="{Binding TextValue, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue='empty text'}"                                                           
-                                                           Foreground="{DynamicResource TextBrush}"
-                                                           VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Width="{Binding MarginWidth, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                    <TextBlock Text="{Binding TextValue, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue='empty text'}"                                                           
+                                                               Width="{Binding TextWidth, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                               Foreground="{DynamicResource TextBrush}"
+                                                               TextAlignment="Center" VerticalAlignment="Center" />
+                                                </StackPanel>
                                             </Grid>
                                         </Decorator>
                                     </Grid>
@@ -115,10 +119,14 @@
                                                         </Rectangle.RenderTransform>
                                                     </Rectangle>
                                                 </Grid>
-                                                <TextBlock Text="{Binding TextValue, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue='empty text'}"
-                                                           Visibility="{Binding TextInsideVisibility, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                           Foreground="{DynamicResource TextBrush}"
-                                                           VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Width="{Binding MarginWidth, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                    <TextBlock Text="{Binding TextValue, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue='empty text'}"                                                           
+                                                               Width="{Binding TextWidth, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                               Foreground="{DynamicResource TextBrush}"
+                                                               Visibility="{Binding TextInsideVisibility, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                               TextAlignment="Center" VerticalAlignment="Center" />
+                                                </StackPanel>
                                             </Grid>
                                         </Decorator>
                                     </Grid>
@@ -179,9 +187,13 @@
                                                         </Rectangle.RenderTransform>
                                                     </Rectangle>
                                                 </Grid>
-                                                <TextBlock Text="{Binding TextValue, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue='empty text'}"                                                           
-                                                           Foreground="{DynamicResource TextBrush}"
-                                                           VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Width="{Binding MarginWidth, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                    <TextBlock Text="{Binding TextValue, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue='empty text'}"                                                           
+                                                               Width="{Binding TextWidth, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                               Foreground="{DynamicResource TextBrush}"
+                                                               TextAlignment="Center" VerticalAlignment="Center" />
+                                                </StackPanel>
                                             </Grid>
                                         </Decorator>
                                     </Grid>

@@ -183,6 +183,44 @@ namespace CommonPluginsControls.Controls
             typeof(ProgressBarExtend),
             new PropertyMetadata(double.NaN, ProgressBarChangedCallback));
 
+        public double MarginWidth
+        {
+            get
+            {
+                return (double)GetValue(MarginWidthProperty);
+            }
+
+            set
+            {
+                SetValue(MarginWidthProperty, value);
+            }
+        }
+
+        public static readonly DependencyProperty MarginWidthProperty = DependencyProperty.Register(
+            nameof(MarginWidth),
+            typeof(double),
+            typeof(ProgressBarExtend),
+            new PropertyMetadata(double.NaN, ProgressBarChangedCallback));
+
+        public double TextWidth
+        {
+            get
+            {
+                return (double)GetValue(TextWidthProperty);
+            }
+
+            set
+            {
+                SetValue(TextWidthProperty, value);
+            }
+        }
+
+        public static readonly DependencyProperty TextWidthProperty = DependencyProperty.Register(
+            nameof(TextWidth),
+            typeof(double),
+            typeof(ProgressBarExtend),
+            new PropertyMetadata(double.NaN));
+
         private static void ProgressBarChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             var obj = sender as ProgressBarExtend;
@@ -199,6 +237,12 @@ namespace CommonPluginsControls.Controls
                     case "Value":
                         obj.Value = (double)e.NewValue;
                         break;
+                    case "MarginWidth":
+                        obj.MarginWidth = (double)e.NewValue;
+                        break;
+                    case "TextWidth":
+                        obj.TextWidth = (double)e.NewValue;
+                        break;
                 }
             }
         }
@@ -213,7 +257,15 @@ namespace CommonPluginsControls.Controls
         public double GetIndicatorWidth()
         {
             Decorator indicator = (Decorator)PART_ProgressBar.Template.FindName("PART_Indicator", PART_ProgressBar);
-            return indicator.ActualWidth;
+
+            if (indicator != null)
+            {
+                return indicator.ActualWidth;
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         public double GetIndicatorHeight()

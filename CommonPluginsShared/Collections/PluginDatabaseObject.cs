@@ -271,6 +271,15 @@ namespace CommonPluginsShared.Collections
 
             newItem.Id = game.Id;
             newItem.Name = game.Name;
+            newItem.SourceId = game.SourceId;
+            newItem.Hidden = game.Hidden;
+            newItem.Icon = game.Icon;
+            newItem.CoverImage = game.CoverImage;
+            newItem.BackgroundImage = game.BackgroundImage;
+            newItem.GenreIds = game.GenreIds;
+            newItem.Genres = game.Genres;
+            newItem.Playtime = game.Playtime;
+            newItem.LastActivity = game.LastActivity;
             newItem.IsSaved = false;
 
             return newItem;
@@ -283,15 +292,16 @@ namespace CommonPluginsShared.Collections
             Database.Add(itemToAdd);
 
             // If tag system
-            PropertyInfo propertyInfo = PluginSettings.GetType().GetProperty("EnableTag");
+            var Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
+            PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
+
             if (propertyInfo != null)
             {
-                bool EnableTag = (bool)propertyInfo.GetValue(PluginSettings);
+                bool EnableTag = (bool)propertyInfo.GetValue(Settings);
                 if (EnableTag)
                 {
                     Common.LogDebug(true, $"RemoveTag & AddTag for {itemToAdd.Name} with {itemToAdd.Id.ToString()}");
-
-                    RemoveTag(itemToAdd.Id);
+                    RemoveTag(itemToAdd.Id, true);
                     AddTag(itemToAdd.Id);
                 }
             }
@@ -302,7 +312,22 @@ namespace CommonPluginsShared.Collections
         {
             itemToUpdate.IsSaved = true;
             Database.Items.TryUpdate(itemToUpdate.Id, itemToUpdate, Get(itemToUpdate.Id, true));
-            Database.Update(itemToUpdate);            
+            Database.Update(itemToUpdate);
+
+            // If tag system
+            var Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
+            PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
+
+            if (propertyInfo != null)
+            {
+                bool EnableTag = (bool)propertyInfo.GetValue(PluginSettings);
+                if (EnableTag)
+                {
+                    Common.LogDebug(true, $"RemoveTag & AddTag for {itemToUpdate.Name} with {itemToUpdate.Id.ToString()}");
+                    RemoveTag(itemToUpdate.Id);
+                    AddTag(itemToUpdate.Id);
+                }
+            }
         }
 
 
@@ -330,16 +355,13 @@ namespace CommonPluginsShared.Collections
         public virtual bool Remove(Guid Id)
         {
             // If tag system
-            PropertyInfo propertyInfo = PluginSettings.GetType().GetProperty("EnableTag");
+            var Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
+            PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
+
             if (propertyInfo != null)
             {
-                bool EnableTag = (bool)propertyInfo.GetValue(PluginSettings);
-                if (EnableTag)
-                {
-                    Common.LogDebug(true, $"RemoveTag for {Id.ToString()}");
-
-                    RemoveTag(Id);
-                }
+                Common.LogDebug(true, $"RemoveTag for {Id.ToString()}");
+                RemoveTag(Id);
             }
 
             if (Database.Items.ContainsKey(Id))
