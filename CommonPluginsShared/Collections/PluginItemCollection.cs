@@ -19,40 +19,77 @@ namespace CommonPluginsShared.Collections
         {
         }
 
+        public void SetGameInfo<T>(IPlayniteAPI PlayniteApi, Guid Id)
+        {
+            try
+            {
+                Items.TryGetValue(Id, out var item);
+                Game game = PlayniteApi.Database.Games.Get(Id);
+
+                if (game != null && item is PluginDataBaseGame<T>)
+                {
+                    item.Name = game.Name;
+                    item.SourceId = game.SourceId;
+                    item.Hidden = game.Hidden;
+                    item.Icon = game.Icon;
+                    item.CoverImage = game.CoverImage;
+                    item.BackgroundImage = game.BackgroundImage;
+                    item.GenreIds = game.GenreIds;
+                    item.Genres = game.Genres;
+                    item.Playtime = game.Playtime;
+                    item.LastActivity = game.LastActivity;
+                    item.IsSaved = true;
+                }
+                else
+                {
+                    item.IsDeleted = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+            }
+        }
+
         public void SetGameInfo<T>(IPlayniteAPI PlayniteApi)
         {
             System.Threading.SpinWait.SpinUntil(() => PlayniteApi.Database.IsOpen, -1);
 
             foreach (var item in Items)
             {
-                try
-                {
-                    Game game = PlayniteApi.Database.Games.Get(item.Key);
-                    var temp = item.Value as PluginDataBaseGame<T>;
+                SetGameInfo<T>(PlayniteApi, item.Key);
+            }
+        }
 
-                    if (game != null && item.Value is PluginDataBaseGame<T>)
-                    {
-                        temp.Name = game.Name;
-                        temp.SourceId = game.SourceId;
-                        temp.Hidden = game.Hidden;
-                        temp.Icon = game.Icon;
-                        temp.CoverImage = game.CoverImage;
-                        temp.BackgroundImage = game.BackgroundImage;
-                        temp.GenreIds = game.GenreIds;
-                        temp.Genres = game.Genres;
-                        temp.Playtime = game.Playtime;
-                        temp.LastActivity = game.LastActivity;
-                        temp.IsSaved = true;
-                    }
-                    else
-                    {
-                        temp.IsDeleted = true;
-                    }
-                }
-                catch (Exception ex)
+        public void SetGameInfoDetails<T, Y>(IPlayniteAPI PlayniteApi, Guid Id)
+        {
+            try
+            {
+                Items.TryGetValue(Id, out var item);
+                Game game = PlayniteApi.Database.Games.Get(Id);
+
+                if (game != null && item is PluginDataBaseGameDetails<T, Y>)
                 {
-                    Common.LogError(ex, false);
+                    item.Name = game.Name;
+                    item.SourceId = game.SourceId;
+                    item.Hidden = game.Hidden;
+                    item.Icon = game.Icon;
+                    item.CoverImage = game.CoverImage;
+                    item.BackgroundImage = game.BackgroundImage;
+                    item.GenreIds = game.GenreIds;
+                    item.Genres = game.Genres;
+                    item.Playtime = game.Playtime;
+                    item.LastActivity = game.LastActivity;
+                    item.IsSaved = true;
                 }
+                else
+                {
+                    item.IsDeleted = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
             }
         }
 
@@ -62,35 +99,7 @@ namespace CommonPluginsShared.Collections
 
             foreach (var item in Items)
             {
-                try
-                {
-                    Game game = PlayniteApi.Database.Games.Get(item.Key);
-                    var temp = item.Value as PluginDataBaseGameDetails<T, Y>;
-                    temp.IsSaved = true;
-
-                    if (game != null && item.Value is PluginDataBaseGameDetails<T, Y>)
-                    {
-                        temp.Name = game.Name;
-                        temp.SourceId = game.SourceId;
-                        temp.Hidden = game.Hidden;
-                        temp.Icon = game.Icon;
-                        temp.CoverImage = game.CoverImage;
-                        temp.BackgroundImage = game.BackgroundImage;
-                        temp.GenreIds = game.GenreIds;
-                        temp.Genres = game.Genres;
-                        temp.Playtime = game.Playtime;
-                        temp.LastActivity = game.LastActivity;
-                        temp.IsSaved = true;
-                    }
-                    else
-                    {
-                        temp.IsDeleted = true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false);
-                }
+                SetGameInfoDetails<T, Y>(PlayniteApi, item.Key);
             }
         }
     }

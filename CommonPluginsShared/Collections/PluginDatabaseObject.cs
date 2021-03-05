@@ -80,7 +80,12 @@ namespace CommonPluginsShared.Collections
 
             FileSystem.CreateDirectory(Paths.PluginDatabasePath);
             FileSystem.CreateDirectory(Paths.PluginCachePath);
+
+            PlayniteApi.Database.Games.ItemUpdated += Games_ItemUpdated;
         }
+
+
+        public abstract void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e);
 
 
         #region Database

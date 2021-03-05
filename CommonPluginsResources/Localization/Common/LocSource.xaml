@@ -5,6 +5,14 @@
     <sys:String x:Key="LOCCommonRecentlyAdded">Recently Added</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Only download missing</sys:String>
     
+    <!-- login -->
+
+    <sys:String x:Key="LOCCommonAuthenticateLabel">Authenticate</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedIn">Requires authentication</sys:String>
+    <sys:String x:Key="LOCCommonLoggedIn">User is authenticated</sys:String>
+    <sys:String x:Key="LOCCommonAccountName">Account Name</sys:String>
+    <sys:String x:Key="LOCCommonLoginChecking">Checking authentication status…</sys:String>
+
     <!-- CommonMenus -->
 
     <sys:String x:Key="LOCCommonTotalFound">Total found</sys:String>

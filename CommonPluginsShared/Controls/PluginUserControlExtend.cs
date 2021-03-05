@@ -86,7 +86,7 @@ namespace CommonPluginsShared.Controls
         public abstract void PluginSettings_PropertyChanged(object sender, PropertyChangedEventArgs e);
 
         // When plugin datbase is udpated
-        public virtual void Database_ItemUpdated<TItem>(object sender, ItemUpdatedEventArgs<TItem> e) where TItem : DatabaseObject
+        internal virtual void Database_ItemUpdated<TItem>(object sender, ItemUpdatedEventArgs<TItem> e) where TItem : DatabaseObject
         {
             this.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new ThreadStart(delegate
             {
@@ -107,9 +107,21 @@ namespace CommonPluginsShared.Controls
                 }
             }));
         }
+        internal virtual void Database_ItemCollectionChanged<TItem>(object sender, ItemCollectionChangedEventArgs<TItem> e) where TItem : DatabaseObject
+        {
+            this.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new ThreadStart(delegate
+            {
+                if (GameContext == null)
+                {
+                    return;
+                }
+
+                GameContextChanged(null, GameContext);
+            }));
+        }
 
         // When game is updated
-        public virtual void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e)
+        internal virtual void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e)
         {
             // Publish changes for the currently displayed game if updated
             if (GameContext == null)
