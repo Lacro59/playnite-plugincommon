@@ -324,7 +324,7 @@ namespace CommonPluginsShared.Collections
                 if (EnableTag)
                 {
                     Common.LogDebug(true, $"RemoveTag & AddTag for {itemToUpdate.Name} with {itemToUpdate.Id.ToString()}");
-                    RemoveTag(itemToUpdate.Id);
+                    RemoveTag(itemToUpdate.Id, true);
                     AddTag(itemToUpdate.Id);
                 }
             }
@@ -435,7 +435,7 @@ namespace CommonPluginsShared.Collections
                 if (game.TagIds.Where(x => PluginTags.Any(y => x == y.Id)).Count() > 0)
                 {
                     game.TagIds = game.TagIds.Where(x => !PluginTags.Any(y => x == y.Id)).ToList();
-                    if (noUpdate)
+                    if (!noUpdate)
                     {
                         PlayniteApi.Database.Games.Update(game);
                     }
