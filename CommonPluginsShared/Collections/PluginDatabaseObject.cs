@@ -438,6 +438,7 @@ namespace CommonPluginsShared.Collections
                     if (!noUpdate)
                     {
                         PlayniteApi.Database.Games.Update(game);
+                        game.OnPropertyChanged();
                     }
                 }
             }
