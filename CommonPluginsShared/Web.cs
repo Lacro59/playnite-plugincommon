@@ -1,4 +1,5 @@
-﻿using Playnite.SDK;
+﻿using Newtonsoft.Json;
+using Playnite.SDK;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -131,7 +132,14 @@ namespace CommonPluginsShared
                     c.Domain = cookie.Domain;
                     c.Path = cookie.Path;
 
-                    cookieContainer.Add(c);
+                    try
+                    {
+                        cookieContainer.Add(c);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Warn($"Cookies ignored for {url}");
+                    }
                 }
 
                 handler.CookieContainer = cookieContainer;
@@ -343,7 +351,14 @@ namespace CommonPluginsShared
                     c.Domain = cookie.Domain;
                     c.Path = cookie.Path;
 
-                    cookieContainer.Add(c);
+                    try
+                    {
+                        cookieContainer.Add(c);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Warn($"Cookies ignored for {url}");
+                    }
                 }
 
                 handler.CookieContainer = cookieContainer;
@@ -393,7 +408,14 @@ namespace CommonPluginsShared
                     c.Domain = cookie.Domain;
                     c.Path = cookie.Path;
 
-                    cookieContainer.Add(c);
+                    try
+                    {
+                        cookieContainer.Add(c);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Warn($"Cookies ignored for {url}");
+                    }
                 }
 
                 handler.CookieContainer = cookieContainer;
