@@ -3,52 +3,52 @@
     public class TransformIcon
     {
         #region font
-        private static string steam = "";                  // e906
-        private static string gogGalaxy = "";              // e903
-        private static string gog = "";                    // ea35
-        private static string battleNET = "";              // e900
-        private static string origin = "";                 // e904
-        private static string xbox = "";                   // e908
-        private static string uplay = "";                  // e907
-        private static string epic = "";                   // e902
-        private static string playnite = "";               // e905
-        private static string bethesda = "";               // e901
-        private static string humble = "";                 // e909
-        private static string twitch = "";                 // e90a
-        private static string itchio = "";                 // e90b
-        private static string indiegala = "";              // e911
+        private static string steam = "\ue906";                  // e906
+        private static string gogGalaxy = "\ue903";              // e903
+        private static string gog = "\uea35";                    // ea35
+        private static string battleNET = "\ue900";              // e900
+        private static string origin = "\ue904";                 // e904
+        private static string xbox = "\ue908";                   // e908
+        private static string uplay = "\ue907";                  // e907
+        private static string epic = "\ue902";                   // e902
+        private static string playnite = "\ue905";               // e905
+        private static string bethesda = "\ue901";               // e901
+        private static string humble = "\ue909";                 // e909
+        private static string twitch = "\ue90a";                 // e90a
+        private static string itchio = "\ue90b";                 // e90b
+        private static string indiegala = "\ue911";              // e911
 
-        private static string retroachievements = "";      // e910
-        private static string rpcs3 = "";                  // ea37
+        private static string retroachievements = "\ue910";      // e910
+        private static string rpcs3 = "\uea37";                  // ea37
 
-        private static string statistics = "";             // e90c
-        private static string howlongtobeat = "";          // e90d
-        private static string successstory = "";           // ea33
-        private static string gameactivity = "";           // e90f
-        private static string checklocalizations = "";     // ea2c
-        private static string screenshotsvisualizer = "";  // ea38
+        private static string statistics = "\ue90c";             // e90c
+        private static string howlongtobeat = "\ue90d";          // e90d
+        private static string successstory = "\uea33";           // ea33
+        private static string gameactivity = "\ue90f";           // e90f
+        private static string checklocalizations = "\uea2c";     // ea2c
+        private static string screenshotsvisualizer = "\uea38";  // ea38
 
-        private static string gameHacked = "";             // ea36
+        private static string gameHacked = "\uea36";             // ea36
         #endregion
 
         #region retrogaming
-        private static string psp = "";                    // ea46
-        private static string dreamcast = "";              // ea3c
-        private static string dos = "";                    // ea3b
-        private static string commodore64 = "";            // ea3a
-        private static string ds = "";                     // e904
-        private static string gameboy = "";                // ea3d
-        private static string gameboyadvance = "";         // ea3f
-        private static string gamecube = "";               // ea40
-        private static string megadrive = "";              // ea41
-        private static string nintendo = "";               // ea42
-        private static string nintendo64 = "";             // ea43
-        private static string playstation = "";            // ea44
-        private static string playstation4 = "";           // ea45
-        private static string supernintendo = "";          // ea47
-        private static string nintendoswitch = "";         // ea48
-        private static string wii = "";                    // ea49
-        private static string mame = "";                   // ea4a
+        private static string psp = "\uea46";                    // ea46
+        private static string dreamcast = "\uea3c";              // ea3c
+        private static string dos = "\uea3b";                    // ea3b
+        private static string commodore64 = "\uea3a";            // ea3a
+        private static string ds = "\ue904";                     // e904
+        private static string gameboy = "\uea3d";                // ea3d
+        private static string gameboyadvance = "\uea3f";         // ea3f
+        private static string gamecube = "\uea40";               // ea40
+        private static string megadrive = "\uea41";              // ea41
+        private static string nintendo = "\uea42";               // ea42
+        private static string nintendo64 = "\uea43";             // ea43
+        private static string playstation = "\uea44";            // ea44
+        private static string playstation4 = "\uea45";           // ea45
+        private static string supernintendo = "\uea47";          // ea47
+        private static string nintendoswitch = "\uea48";         // ea48
+        private static string wii = "\uea49";                    // ea49
+        private static string mame = "\uea4a";                   // ea4a
         #endregion
 
 
@@ -60,7 +60,7 @@
             string stringReturn = string.Empty;
             switch (Name.ToLower())
             {
-                #region font
+                #region plugin
                 case "howlongtobeat":
                     stringReturn = howlongtobeat;
                     break;
@@ -79,7 +79,9 @@
                 case "screenshotsvisualizer":
                     stringReturn = screenshotsvisualizer;
                     break;
+                #endregion
 
+                #region sources
                 case "hacked":
                     stringReturn = gameHacked;
                     break;
@@ -112,6 +114,7 @@
                     stringReturn = xbox;
                     break;
                 case "uplay":
+                case "ubisoft connect":
                     stringReturn = uplay;
                     break;
                 case "epic":
