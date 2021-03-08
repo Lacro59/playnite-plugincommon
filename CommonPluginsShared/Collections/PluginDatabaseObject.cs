@@ -62,6 +62,8 @@ namespace CommonPluginsShared.Collections
 
         public bool IsViewOpen = false;
 
+        public RelayCommand<Guid> GoToGame { get; }
+
 
         protected PluginDatabaseObject(IPlayniteAPI PlayniteApi, TSettings PluginSettings, string PluginName, string PluginUserDataPath)
         {
@@ -82,6 +84,13 @@ namespace CommonPluginsShared.Collections
             FileSystem.CreateDirectory(Paths.PluginCachePath);
 
             PlayniteApi.Database.Games.ItemUpdated += Games_ItemUpdated;
+
+
+            GoToGame = new RelayCommand<Guid>((Id) =>
+            {
+                PlayniteApi.MainView.SelectGame(Id);
+                PlayniteApi.MainView.SwitchToLibraryView();
+            });
         }
 
 

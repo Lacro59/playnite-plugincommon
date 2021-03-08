@@ -32,7 +32,8 @@ namespace CommonPluginsShared
             List<string> ListCommonFiles = new List<string>
             {
                 Path.Combine(pluginFolder, "Resources\\Common.xaml"),
-                Path.Combine(pluginFolder, "Resources\\LiveChartsCommon\\Common.xaml")
+                Path.Combine(pluginFolder, "Resources\\LiveChartsCommon\\Common.xaml"),
+                Path.Combine(pluginFolder, "Resources\\Controls\\ListExtendStyle.xaml")
             };
 
             foreach (string CommonFile in ListCommonFiles)
