@@ -518,6 +518,22 @@ namespace CommonPluginsShared
                     ItemKey = item.Key;
                     if (Application.Current.Resources[ItemKey] != null)
                     {
+                        Type TypeActual = Application.Current.Resources[ItemKey].GetType();
+                        Type TypeNew = item.Value.GetType();
+
+                        if (TypeActual != TypeNew)
+                        {
+                            if ((TypeActual.Name == "SolidColorBrush" || TypeActual.Name == "LinearGradientBrush")
+                                && (TypeNew.Name == "SolidColorBrush" || TypeNew.Name == "LinearGradientBrush"))
+                            {
+                            }
+                            else
+                            {
+                                logger.Warn($"Different type for {ItemKey}");
+                                continue;
+                            }
+                        }
+
                         Application.Current.Resources[ItemKey] = item.Value;
                     }
                     else

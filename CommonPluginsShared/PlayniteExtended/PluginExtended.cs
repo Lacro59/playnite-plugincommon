@@ -1,4 +1,5 @@
-﻿using CommonPluginsShared.Interfaces;
+﻿using CommonPluginsPlaynite.Common;
+using CommonPluginsShared.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Plugins;
 using System;
@@ -56,15 +57,10 @@ namespace CommonPluginsShared.PlayniteExtended
             {
                 // Clean old database
                 OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "activity_old");
-                if (Directory.Exists(OldDirectory))
-                {
-                    Directory.Delete(OldDirectory);
-                }
+                FileSystem.DeleteDirectory(OldDirectory);
+
                 OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "activityDetails_old");
-                if (Directory.Exists(OldDirectory))
-                {
-                    Directory.Delete(OldDirectory);
-                }
+                FileSystem.DeleteDirectory(OldDirectory);
             }
             catch
             {
