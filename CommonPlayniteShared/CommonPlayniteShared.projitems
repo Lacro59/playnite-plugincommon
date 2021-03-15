@@ -9,12 +9,11 @@
     <Import_RootNamespace>CommonPlayniteShared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)API\ExtensionDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)API\ScriptFunctionDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Behaviors\LeftClickContextMenuBehavior.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\CloneObject.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\EnumExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\Enums.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\ItemsControlExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\ProcessExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\StringExtensions.cs" />
@@ -22,10 +21,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\GlobalRandom.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Images.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\IniParser.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Common\Interop.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\InteropMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Paths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\SafeFileEnumerator.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Common\Serialization.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Sizes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\TGASharpLib.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Web\Downloader.cs" />
@@ -41,12 +39,16 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\StringNullOrEmptyToBoolConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\StringNullOrEmptyToVisibilityConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Database\ItemCollection.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\BitpmapExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\BitpmapExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\IProvideValueTarget.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\Markup\ThemeFile.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\ObjectExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PlaynitePaths.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PlayniteSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\ObjectExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Manifests\ExtensionManifest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Manifests\ThemeManifest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Models\Order.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Models\UserHome.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Settings\PlaynitePaths.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Settings\PlayniteSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Models\WebStoreModels.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Gog.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Models\AccountBasicRespose.cs" />
@@ -67,5 +69,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\SteamLibrary\SteamShared\StoreAppDetailsResult.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\XboxLibrary\Models\AuthenticationData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Themes.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Settings\" />
   </ItemGroup>
 </Project>

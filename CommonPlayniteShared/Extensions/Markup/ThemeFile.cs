@@ -1,4 +1,7 @@
-﻿using Playnite.SDK;
+﻿using CommonPluginsPlaynite.Common;
+//using Playnite.Extensions;
+using Playnite.SDK;
+//using Playnite.Settings;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,7 +17,7 @@ using System.Windows.Media;
 using System.Xaml;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using CommonPluginsPlaynite.Common;
+using CommonPlayniteShared.Manifests;
 
 namespace CommonPluginsPlaynite.Extensions.Markup
 {
@@ -23,8 +26,8 @@ namespace CommonPluginsPlaynite.Extensions.Markup
         private static FileInfo lastUserTheme = null;
         private static bool? lastUserThemeFound = null;
 
-        public ThemeManifest CurrentTheme { get; set; }
-        public ThemeManifest DefaultTheme { get; set; }
+        internal ThemeManifest CurrentTheme { get; set; }
+        internal ThemeManifest DefaultTheme { get; set; }
 
         public string RelativePath { get; set; }
 
@@ -90,24 +93,28 @@ namespace CommonPluginsPlaynite.Extensions.Markup
             };
         }
 
-        public static string GetFilePath(string relPath)
+        public static string GetFilePath(string relPath, bool checkExistance = true)
         {
-            return GetFilePath(relPath, ThemeManager.DefaultTheme, ThemeManager.CurrentTheme);
+            return GetFilePath(relPath, ThemeManager.DefaultTheme, ThemeManager.CurrentTheme, checkExistance);
         }
 
-        public static string GetFilePath(string relPath, ThemeManifest defaultTheme)
+        public static string GetFilePath(string relPath, ThemeManifest defaultTheme, bool checkExistance = true)
         {
-            return GetFilePath(relPath, defaultTheme, ThemeManager.CurrentTheme);
+            return GetFilePath(relPath, defaultTheme, ThemeManager.CurrentTheme, checkExistance);
         }
 
-        public static string GetFilePath(string relPath, ThemeManifest defaultTheme, ThemeManifest currentTheme)
+        public static string GetFilePath(string relPath, ThemeManifest defaultTheme, ThemeManifest currentTheme, bool checkExistance = true)
         {
             var relativePath = Paths.FixSeparators(relPath).TrimStart(new char[] { Path.DirectorySeparatorChar });
 
             if (currentTheme != null)
             {
                 var themePath = Path.Combine(currentTheme.DirectoryPath, relativePath);
-                if (File.Exists(themePath))
+                if (File.Exists(themePath) && checkExistance)
+                {
+                    return themePath;
+                }
+                else if (!checkExistance)
                 {
                     return themePath;
                 }
@@ -116,7 +123,11 @@ namespace CommonPluginsPlaynite.Extensions.Markup
             if (defaultTheme != null)
             {
                 var defaultPath = Path.Combine(defaultTheme.DirectoryPath, relativePath);
-                if (File.Exists(defaultPath))
+                if (File.Exists(defaultPath) && checkExistance)
+                {
+                    return defaultPath;
+                }
+                else if (!checkExistance)
                 {
                     return defaultPath;
                 }

@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
-using System.IO.Compression;
 using Playnite.SDK;
 using System.Diagnostics;
 
@@ -126,31 +124,29 @@ namespace CommonPluginsPlaynite.Common
             }
         }
 
-        /*
-        public static void AddFolderToZip(ZipArchive archive, string zipRoot, string path, string filter, SearchOption searchOption)
-        {
-            IEnumerable<string> files;
-
-            if (filter.Contains('|'))
-            {
-                var filters = filter.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-                files = Directory.EnumerateFiles(path, "*.*", searchOption).Where(a =>
-                {
-                    return filters.Contains(Path.GetExtension(a));
-                });
-            }
-            else
-            {
-                files = Directory.EnumerateFiles(path, filter, searchOption);
-            }
-
-            foreach (var file in files)
-            {
-                var archiveName = zipRoot + file.Replace(path, "").Replace(@"\", @"/");
-                archive.CreateEntryFromFile(file, archiveName);
-            }
-        }
-        */
+        //public static void AddFolderToZip(ZipArchive archive, string zipRoot, string path, string filter, SearchOption searchOption)
+        //{
+        //    IEnumerable<string> files;
+        //
+        //    if (filter.Contains('|'))
+        //    {
+        //        var filters = filter.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+        //        files = Directory.EnumerateFiles(path, "*.*", searchOption).Where(a =>
+        //        {
+        //            return filters.Contains(Path.GetExtension(a));
+        //        });
+        //    }
+        //    else
+        //    {
+        //        files = Directory.EnumerateFiles(path, filter, searchOption);
+        //    }
+        //
+        //    foreach (var file in files)
+        //    {
+        //        var archiveName = zipRoot + file.Replace(path, "").Replace(@"\", @"/");
+        //        archive.CreateEntryFromFile(file, archiveName);
+        //    }
+        //}
 
         public static bool CanWriteToFolder(string folder)
         {

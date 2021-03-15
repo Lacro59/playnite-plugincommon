@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace CommonPluginsPlaynite
 {
@@ -11,17 +15,23 @@ namespace CommonPluginsPlaynite
         public const string PackedExtensionFileExtention = ".pext";
         public const string EngLocSourceFileName = "LocSource.xaml";
 
+        public const string ThemeSlnFileName = "Theme.sln";
+        public const string ThemeProjFileName = "Theme.csproj";
+        public const string AppXamlFileName = "App.xaml";
+
         public static string ProgramPath => Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
         public static string DesktopExecutablePath => Path.Combine(ProgramPath, "Playnite.DesktopApp.exe");
         public static string FullscreenExecutablePath => Path.Combine(ProgramPath, "Playnite.FullscreenApp.exe");
         public static string PlayniteAssemblyPath => Path.Combine(ProgramPath, "Playnite.dll");
-        public static string PlayniteCommonAssemblyPath => Path.Combine(ProgramPath, "Playnite.Common.dll");
         public static string PlayniteSDKAssemblyPath => Path.Combine(ProgramPath, "Playnite.SDK.dll");
         public static string ExtensionsUserDataPath => Path.Combine(ConfigRootPath, "Extensions");
         public static string ExtensionsProgramPath => Path.Combine(ProgramPath, "Extensions");
         public static string ExtensionsDataPath => Path.Combine(ConfigRootPath, "ExtensionsData");
         public static string ExtensionQueueFilePath => Path.Combine(ConfigRootPath, "extinstalls.json");
-        public static string LocalizationsPath => Path.Combine(ProgramPath, "Localization");
+        public static string AddonLicenseAgreementsFilePath => Path.Combine(ConfigRootPath, "licenseagreements.json");
+        public const string LocalizationsDirName = "Localization";
+        public static string LocalizationsPath => Path.Combine(ProgramPath, LocalizationsDirName);
+        public static string LocalizationsStatusPath => Path.Combine(LocalizationsPath, "locstatus.json");
         public static string ThemesProgramPath => Path.Combine(ProgramPath, "Themes");
         public static string ThemesUserDataPath => Path.Combine(ConfigRootPath, "Themes");
         public static string UninstallerPath => Path.Combine(ProgramPath, "unins000.exe");
@@ -32,10 +42,12 @@ namespace CommonPluginsPlaynite
         public static string FullscreenConfigFilePath => Path.Combine(ConfigRootPath, "fullscreenConfig.json");
         public static string WindowPositionsPath => Path.Combine(ConfigRootPath, "windowPositions.json");
         public static string ExclusionListConfigFilePath => Path.Combine(ConfigRootPath, "exclusionList.json");
+        public static string FilterPresetsFilePath => Path.Combine(ConfigRootPath, "filters.json");
         public static string BackupConfigFilePath => Path.Combine(ConfigRootPath, "Backup", "config.json");
         public static string BackupFullscreenConfigFilePath => Path.Combine(ConfigRootPath, "Backup", "fullscreenConfig.json");
         public static string BackupWindowPositionsPath => Path.Combine(ConfigRootPath, "Backup", "windowPositions.json");
         public static string BackupExclusionListConfigFilePath => Path.Combine(ConfigRootPath, "Backup", "exclusionList.json");
+        public static string BackupFilterPresetsFilePath => Path.Combine(ConfigRootPath, "Backup", "filters.json");
         public static string DataCachePath => Path.Combine(ConfigRootPath, "cache");
         public static string ImagesCachePath => Path.Combine(DataCachePath, "images");
         public static string IconsCachePath => Path.Combine(DataCachePath, "icons");

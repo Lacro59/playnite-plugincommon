@@ -1,13 +1,15 @@
-﻿using Playnite.SDK;
+﻿//using Playnite.Common;
+using Playnite.SDK;
 using Playnite.SDK.Models;
-using CommonPluginsPlaynite.Common;
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 
-namespace CommonPluginsPlaynite.API
+namespace CommonPlayniteShared.Manifests
 {
     public enum ExtensionType
     {
@@ -38,22 +40,6 @@ namespace CommonPluginsPlaynite.API
         [YamlIgnore]
         public string DescriptionPath { get; set; }
 
-        [YamlIgnore]
-        public string LegacyDirId
-        {
-            get
-            {
-                if (Name.IsNullOrEmpty())
-                {
-                    return string.Empty;
-                }
-                else
-                {
-                    return Paths.GetSafeFilename(Name).Replace(" ", string.Empty) + "_" + (Name + Author).MD5();
-                }
-            }
-        }
-
         public void VerifyManifest()
         {
             if (!System.Version.TryParse(Version, out var extver))
@@ -66,10 +52,7 @@ namespace CommonPluginsPlaynite.API
     public class ExtensionManifest : BaseExtensionManifest
     {
         [YamlIgnore]
-        public bool IsBuiltInExtension { get; set; }
-
-        [YamlIgnore]
-        public bool IsCustomExtension => !IsBuiltInExtension;
+        public bool IsExternalDev { get; set; }
 
         //[YamlIgnore]
         //public bool IsCompatible { get; } = false;
@@ -88,15 +71,9 @@ namespace CommonPluginsPlaynite.API
         {
             var deserializer = new DeserializerBuilder().IgnoreUnmatchedProperties().Build();
             var description = deserializer.Deserialize<ExtensionManifest>(File.ReadAllText(descriptorPath));
-            if (description.Type == ExtensionType.Script)
-            {
-                description = deserializer.Deserialize<ScriptExtensionDescription>(File.ReadAllText(descriptorPath));
-            }
-
             description.DescriptionPath = descriptorPath;
             description.DirectoryPath = Path.GetDirectoryName(descriptorPath);
             description.DirectoryName = Path.GetFileNameWithoutExtension(description.DirectoryPath);
-            description.IsBuiltInExtension = BuiltinExtensions.BuiltinExtensionFolders.Contains(description.DirectoryName);
             return description;
         }
     }

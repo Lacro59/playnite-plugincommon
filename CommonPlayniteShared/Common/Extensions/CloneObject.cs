@@ -6,11 +6,46 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Reflection;
+using Playnite.SDK.Data;
+using Newtonsoft.Json.Serialization;
 
 namespace System
 {
     public static class CloneObject
     {
+        public class JsonResolver : DefaultContractResolver
+        {
+            public static JsonResolver Global { get; } = new JsonResolver();
+
+            protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+            {
+                var prop = base.CreateProperty(member, memberSerialization);
+                if (Attribute.IsDefined(member, typeof(SerializationPropertyNameAttribute)))
+                {
+                    var att = (SerializationPropertyNameAttribute)Attribute.GetCustomAttribute(member, typeof(SerializationPropertyNameAttribute));
+                    prop.PropertyName = att.PropertyName;
+                }
+
+                return prop;
+            }
+
+            protected override List<MemberInfo> GetSerializableMembers(Type objectType)
+            {
+                return objectType.
+                    GetMembers(BindingFlags.Public | BindingFlags.Instance).
+                    Where(a => a is PropertyInfo || a is FieldInfo).
+                    Where(a => !Attribute.IsDefined(a, typeof(DontSerializeAttribute)) && !Attribute.IsDefined(a, typeof(JsonIgnoreAttribute))).
+                    ToList();
+            }
+        }
+
+
+        private static readonly JsonSerializerSettings jsonSerializerSettings = new JsonSerializerSettings()
+        {
+            Formatting = Formatting.None,
+            ContractResolver = JsonResolver.Global
+        };
+
         /// <summary>
         /// Perform a deep copy of the object, using Json as a serialisation method.
         /// </summary>
@@ -24,17 +59,7 @@ namespace System
                 return default(T);
             }
 
-            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source));
-        }
-
-        public static T GetClone<T>(this T source, JsonSerializerSettings settings)
-        {
-            if (Object.ReferenceEquals(source, null))
-            {
-                return default(T);
-            }
-
-            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source, settings), settings);
+            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source, jsonSerializerSettings));
         }
 
         public static U GetClone<T, U>(this T source)
@@ -44,23 +69,13 @@ namespace System
                 return default(U);
             }
 
-            return JsonConvert.DeserializeObject<U>(JsonConvert.SerializeObject(source));
-        }
-
-        public static U GetClone<T, U>(this T source, JsonSerializerSettings settings)
-        {
-            if (Object.ReferenceEquals(source, null))
-            {
-                return default(U);
-            }
-
-            return JsonConvert.DeserializeObject<U>(JsonConvert.SerializeObject(source, settings), settings);
+            return JsonConvert.DeserializeObject<U>(JsonConvert.SerializeObject(source, jsonSerializerSettings));
         }
 
         public static bool IsEqualJson(this object source, object targer)
         {
-            var first = JsonConvert.SerializeObject(source);
-            var second = JsonConvert.SerializeObject(targer);
+            var first = JsonConvert.SerializeObject(source, jsonSerializerSettings);
+            var second = JsonConvert.SerializeObject(targer, jsonSerializerSettings);
             return first == second;
         }
 
@@ -79,8 +94,8 @@ namespace System
             Type typeDest = destination.GetType();
             Type typeSrc = source.GetType();
 
-            // Iterate the Properties of the source instance and  
-            // populate them from their desination counterparts  
+            // Iterate the Properties of the source instance and
+            // populate them from their desination counterparts
             PropertyInfo[] srcProps = typeSrc.GetProperties();
             foreach (PropertyInfo srcProp in srcProps)
             {
@@ -120,7 +135,7 @@ namespace System
                     continue;
                 }
 
-                if (acceptJsonIgnore && targetProperty.GetCustomAttributes(typeof(JsonIgnoreAttribute), true).Length > 0)
+                if (acceptJsonIgnore && (Attribute.IsDefined(targetProperty, typeof(DontSerializeAttribute)) || Attribute.IsDefined(targetProperty, typeof(JsonIgnoreAttribute))))
                 {
                     continue;
                 }
@@ -132,6 +147,7 @@ namespace System
                     continue;
                 }
 
+                // TODO Add support for lists
                 if (sourceValue is IComparable && diffOnly)
                 {
                     var equal = ((IComparable)sourceValue).CompareTo(targetValue) == 0;
@@ -162,5 +178,4 @@ namespace System
             }
         }
     }
-
 }

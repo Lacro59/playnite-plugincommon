@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Web;
 
 namespace System
 {
@@ -152,6 +157,36 @@ namespace System
             }
 
             return Regex.IsMatch(str, @"^https?:\/\/", RegexOptions.IgnoreCase);
+        }
+
+        public static bool IsUri(this string str)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                return false;
+            }
+
+            return Uri.IsWellFormedUriString(str, UriKind.Absolute);
+        }
+
+        public static string UrlEncode(this string str)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                return str;
+            }
+
+            return HttpUtility.UrlPathEncode(str);
+        }
+
+        public static string UrlDecode(this string str)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                return str;
+            }
+
+            return HttpUtility.UrlDecode(str);
         }
 
         // Courtesy of https://stackoverflow.com/questions/6275980/string-replace-ignoring-case

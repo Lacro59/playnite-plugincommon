@@ -9,7 +9,6 @@
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\CodeSharing\Microsoft.CodeSharing.Common.props" />
   <PropertyGroup />
   <ItemGroup>
-    <Compile Include="CheckVersion.cs" />
     <Compile Include="CodeLang.cs" />
     <Compile Include="Collections\PluginDataBaseGame.cs" />
     <Compile Include="Collections\PluginDataBaseGameBase.cs" />

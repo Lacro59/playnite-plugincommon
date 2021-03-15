@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,25 +8,24 @@ using System.Threading.Tasks;
 namespace CommonPluginsPlaynite.Common
 {
     // Originally from https://stackoverflow.com/questions/9746538/fastest-safest-file-finding-parsing
-    public class SafeFileEnumerator : IEnumerable<FileSystemInfoBase>
+    public class SafeFileEnumerator : IEnumerable<FileSystemInfo>
     {
-
         /// <summary>
         /// Helper class to enumerate the file system.
         /// </summary>
-        private class Enumerator : IEnumerator<FileSystemInfoBase>
+        private class Enumerator : IEnumerator<FileSystemInfo>
         {
             // Core enumerator that we will be walking though
-            private IEnumerator<FileSystemInfoBase> fileEnumerator;
+            private IEnumerator<FileSystemInfo> fileEnumerator;
             // Directory enumerator to capture access errors
-            private IEnumerator<DirectoryInfoBase> directoryEnumerator;
+            private IEnumerator<DirectoryInfo> directoryEnumerator;
 
-            private DirectoryInfoBase root;
+            private DirectoryInfo root;
             private string pattern;
             private SearchOption searchOption;
             private IList<Exception> errors;
 
-            public Enumerator(DirectoryInfoBase root, string pattern, SearchOption option, IList<Exception> errors)
+            public Enumerator(DirectoryInfo root, string pattern, SearchOption option, IList<Exception> errors)
             {
                 this.root = root;
                 this.pattern = pattern;
@@ -40,12 +38,12 @@ namespace CommonPluginsPlaynite.Common
             /// <summary>
             /// Current item the primary itterator is pointing to
             /// </summary>
-            public FileSystemInfoBase Current
+            public FileSystemInfo Current
             {
                 get
                 {
                     //if (fileEnumerator == null) throw new ObjectDisposedException("FileEnumerator");
-                    return fileEnumerator.Current as FileSystemInfoBase;
+                    return fileEnumerator.Current as FileSystemInfo;
                 }
             }
 
@@ -125,7 +123,7 @@ namespace CommonPluginsPlaynite.Common
                 {
                     try
                     {
-                        fileEnumerator = root.GetFileSystemInfos(pattern, SearchOption.TopDirectoryOnly).AsEnumerable<FileSystemInfoBase>().GetEnumerator();
+                        fileEnumerator = root.GetFileSystemInfos(pattern, SearchOption.TopDirectoryOnly).AsEnumerable<FileSystemInfo>().GetEnumerator();
                     }
                     catch (Exception ex)
                     {
@@ -135,7 +133,7 @@ namespace CommonPluginsPlaynite.Common
 
                     try
                     {
-                        directoryEnumerator = root.GetDirectories("*", SearchOption.TopDirectoryOnly).AsEnumerable<DirectoryInfoBase>().GetEnumerator();
+                        directoryEnumerator = root.GetDirectories("*", SearchOption.TopDirectoryOnly).AsEnumerable<DirectoryInfo>().GetEnumerator();
                     }
                     catch (Exception ex)
                     {
@@ -149,7 +147,7 @@ namespace CommonPluginsPlaynite.Common
         /// <summary>
         /// Starting directory to search from
         /// </summary>
-        private DirectoryInfoBase root;
+        private DirectoryInfo root;
 
         /// <summary>
         /// Filter pattern
@@ -173,7 +171,7 @@ namespace CommonPluginsPlaynite.Common
         /// <param name="pattern">Filter pattern</param>
         /// <param name="option">Recursive or not</param>
         public SafeFileEnumerator(string root, string pattern, SearchOption option)
-            : this(new DirectoryInfoWrapper(new DirectoryInfo(root)), pattern, option)
+            : this(new DirectoryInfo(root), pattern, option)
         { }
 
         /// <summary>
@@ -182,12 +180,12 @@ namespace CommonPluginsPlaynite.Common
         /// <param name="root">Starting Directory</param>
         /// <param name="pattern">Filter pattern</param>
         /// <param name="option">Recursive or not</param>
-        public SafeFileEnumerator(DirectoryInfoBase root, string pattern, SearchOption option)
+        public SafeFileEnumerator(DirectoryInfo root, string pattern, SearchOption option)
             : this(root, pattern, option, new List<Exception>())
         { }
 
         // Internal constructor for recursive itterator
-        private SafeFileEnumerator(DirectoryInfoBase root, string pattern, SearchOption option, IList<Exception> errors)
+        private SafeFileEnumerator(DirectoryInfo root, string pattern, SearchOption option, IList<Exception> errors)
         {
             if (root == null || !root.Exists)
             {
@@ -212,7 +210,7 @@ namespace CommonPluginsPlaynite.Common
             }
         }
 
-        public IEnumerator<FileSystemInfoBase> GetEnumerator()
+        public IEnumerator<FileSystemInfo> GetEnumerator()
         {
             return new Enumerator(root, pattern, searchOption, errors);
         }

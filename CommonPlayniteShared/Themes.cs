@@ -1,76 +1,28 @@
-﻿using Playnite.SDK;
-using Playnite.SDK.Models;
-using CommonPluginsPlaynite;
-using CommonPluginsPlaynite.API;
-using CommonPluginsPlaynite.Common;
-using CommonPluginsPlaynite.Converters;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using YamlDotNet.Serialization;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using Playnite;
 using System.Windows;
-using Playnite.SDK.Data;
+using System.Windows.Markup;
+using System.Text.RegularExpressions;
+using CommonPluginsPlaynite.Extensions.Markup;
+using CommonPluginsPlaynite.Common;
+using Playnite.SDK;
+using YamlDotNet.Serialization;
+using CommonPluginsPlaynite.API;
+using CommonPlayniteShared.Manifests;
+using System.Windows.Input;
 
 namespace CommonPluginsPlaynite
 {
-    public class ThemeManifest : BaseExtensionManifest
-    {
-        public string ThemeApiVersion { get; set; }
-
-        public ApplicationMode Mode { get; set; }
-
-        [YamlIgnore]
-        public bool IsBuiltInTheme { get; }
-
-        [YamlIgnore]
-        public bool IsCustomTheme => !IsBuiltInTheme;
-
-        [YamlIgnore]
-        public bool IsCompatible { get; } = false;
-
-        public ThemeManifest()
-        {
-        }
-
-        public ThemeManifest(string manifestPath)
-        {
-            var thm = Playnite.SDK.Data.Serialization.FromYaml<ThemeManifest>(File.ReadAllText(manifestPath));
-            thm.CopyProperties(this, false);
-            DescriptionPath = manifestPath;
-            DirectoryPath = Path.GetDirectoryName(manifestPath);
-            DirectoryName = Path.GetFileNameWithoutExtension(DirectoryPath);
-            if (Mode == ApplicationMode.Desktop)
-            {
-                IsBuiltInTheme = BuiltinExtensions.BuiltinDesktopThemeFolders.Contains(DirectoryName);
-            }
-            else
-            {
-                IsBuiltInTheme = BuiltinExtensions.BuiltinFullscreenThemeFolders.Contains(DirectoryName);
-            }
-
-            var apiVesion = Mode == ApplicationMode.Desktop ? ThemeManager.DesktopApiVersion : ThemeManager.FullscreenApiVersion;
-            if (!ThemeApiVersion.IsNullOrEmpty())
-            {
-                var themeVersion = new Version(ThemeApiVersion);
-                if (themeVersion.Major == apiVesion.Major && themeVersion <= apiVesion)
-                {
-                    IsCompatible = true;
-                }
-            }
-        }
-
-        public override string ToString()
-        {
-            return Name;
-        }
-    }
-
     public class ThemeManager
     {
         private static ILogger logger = LogManager.GetLogger();
-        public static System.Version DesktopApiVersion => new System.Version("1.7.0");
-        public static System.Version FullscreenApiVersion => new System.Version("1.7.0");
+        public static System.Version DesktopApiVersion => new System.Version("1.9.0");
+        public static System.Version FullscreenApiVersion => new System.Version("1.9.0");
         public static ThemeManifest CurrentTheme { get; private set; }
         public static ThemeManifest DefaultTheme { get; private set; }
 
@@ -94,49 +46,53 @@ namespace CommonPluginsPlaynite
             DefaultTheme = theme;
         }
 
-        /*
-        public static void ApplyFullscreenButtonPrompts(Application app, FullscreenButtonPrompts prompts)
-        {
-            if (prompts == FullscreenSettings.DefaultButtonPrompts)
-            {
-                var defaultXaml = $"{FullscreenSettings.DefaultButtonPrompts.ToString()}.xaml";
-                foreach (var dir in PlayniteApplication.CurrentNative.Resources.MergedDictionaries.ToList())
-                {
-                    if (dir.Source == null)
-                    {
-                        continue;
-                    }
-
-                    if (dir.Source.OriginalString.Contains("ButtonPrompts") &&
-                        !dir.Source.OriginalString.EndsWith(defaultXaml))
-                    {
-                        PlayniteApplication.CurrentNative.Resources.MergedDictionaries.Remove(dir);
-                    }
-                }
-            }
-            else
-            {
-                var promptsPath = Path.Combine(ThemeManager.DefaultTheme.DirectoryPath, "Images", "ButtonPrompts");
-                foreach (var dir in Directory.GetDirectories(promptsPath))
-                {
-                    var dirInfo = new DirectoryInfo(dir);
-                    var promptXaml = Path.Combine(dir, $"{dirInfo.Name}.xaml");
-                    if (File.Exists(promptXaml) && dirInfo.Name == prompts.ToString())
-                    {
-                        var xaml = Xaml.FromFile(promptXaml);
-                        if (xaml is ResourceDictionary xamlDir)
-                        {
-                            xamlDir.Source = new Uri(promptXaml, UriKind.Absolute);
-                            PlayniteApplication.CurrentNative.Resources.MergedDictionaries.Add(xamlDir);
-                        }
-                    }
-                }
-            }
-        }
-        */
+        //public static void ApplyFullscreenButtonPrompts(Application app, FullscreenButtonPrompts prompts)
+        //{
+        //    if (prompts == FullscreenSettings.DefaultButtonPrompts)
+        //    {
+        //        var defaultXaml = $"{FullscreenSettings.DefaultButtonPrompts.ToString()}.xaml";
+        //        foreach (var dir in PlayniteApplication.CurrentNative.Resources.MergedDictionaries.ToList())
+        //        {
+        //            if (dir.Source == null)
+        //            {
+        //                continue;
+        //            }
+        //
+        //            if (dir.Source.OriginalString.Contains("ButtonPrompts") &&
+        //                !dir.Source.OriginalString.EndsWith(defaultXaml))
+        //            {
+        //                PlayniteApplication.CurrentNative.Resources.MergedDictionaries.Remove(dir);
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        var promptsPath = Path.Combine(ThemeManager.DefaultTheme.DirectoryPath, "Images", "ButtonPrompts");
+        //        foreach (var dir in Directory.GetDirectories(promptsPath))
+        //        {
+        //            var dirInfo = new DirectoryInfo(dir);
+        //            var promptXaml = Path.Combine(dir, $"{dirInfo.Name}.xaml");
+        //            if (File.Exists(promptXaml) && dirInfo.Name == prompts.ToString())
+        //            {
+        //                var xaml = Xaml.FromFile(promptXaml);
+        //                if (xaml is ResourceDictionary xamlDir)
+        //                {
+        //                    xamlDir.Source = new Uri(promptXaml, UriKind.Absolute);
+        //                    PlayniteApplication.CurrentNative.Resources.MergedDictionaries.Add(xamlDir);
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
         public static bool ApplyTheme(Application app, ThemeManifest theme, ApplicationMode mode)
         {
+            if (theme.Id.IsNullOrEmpty())
+            {
+                logger.Error($"Theme {theme.Name}, doesn't have ID.");
+                return false;
+            }
+
             var apiVesion = mode == ApplicationMode.Desktop ? DesktopApiVersion : FullscreenApiVersion;
             if (!theme.ThemeApiVersion.IsNullOrEmpty())
             {
@@ -189,6 +145,24 @@ namespace CommonPluginsPlaynite
                 }
             }
 
+            try
+            {
+                var cursorFile = ThemeFile.GetFilePath("cursor.cur");
+                if (cursorFile.IsNullOrEmpty())
+                {
+                    cursorFile = ThemeFile.GetFilePath("cursor.ani");
+                }
+
+                if (!cursorFile.IsNullOrEmpty())
+                {
+                    Mouse.OverrideCursor = new Cursor(cursorFile, true);
+                }
+            }
+            catch (Exception e) //when (!PlayniteEnvironment.ThrowAllErrors)
+            {
+                logger.Error(e, "Failed to set custom mouse cursor.");
+            }
+
             if (allLoaded)
             {
                 loadedXamls.ForEach(a => app.Resources.MergedDictionaries.Add(a));
@@ -196,6 +170,19 @@ namespace CommonPluginsPlaynite
             }
 
             return false;
+        }
+
+        public static IEnumerable<ThemeManifest> GetAvailableThemes()
+        {
+            foreach (var theme in GetAvailableThemes(ApplicationMode.Desktop))
+            {
+                yield return theme;
+            }
+
+            foreach (var theme in GetAvailableThemes(ApplicationMode.Fullscreen))
+            {
+                yield return theme;
+            }
         }
 
         public static List<ThemeManifest> GetAvailableThemes(ApplicationMode mode)
@@ -216,7 +203,11 @@ namespace CommonPluginsPlaynite
                         {
                             var info = new FileInfo(descriptorPath);
                             added.Add(info.Directory.Name);
-                            themes.Add(new ThemeManifest(descriptorPath));
+                            var man = new ThemeManifest(descriptorPath);
+                            if (!man.Id.IsNullOrEmpty())
+                            {
+                                themes.Add(man);
+                            }
                         }
                     }
                     catch (Exception e) //when (!PlayniteEnvironment.ThrowAllErrors)
@@ -239,7 +230,11 @@ namespace CommonPluginsPlaynite
                             var info = new FileInfo(descriptorPath);
                             if (!added.Contains(info.Directory.Name))
                             {
-                                themes.Add(new ThemeManifest(descriptorPath));
+                                var man = new ThemeManifest(descriptorPath);
+                                if (!man.Id.IsNullOrEmpty())
+                                {
+                                    themes.Add(man);
+                                }
                             }
                         }
                     }

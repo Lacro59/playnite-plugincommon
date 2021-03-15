@@ -1,4 +1,8 @@
-﻿using Playnite.SDK;
+﻿using AngleSharp.Parser.Html;
+using CommonPlayniteShared.PluginLibrary.HumbleLibrary.Models;
+//using Playnite.Common;
+using Playnite.SDK;
+using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,8 +16,8 @@ namespace CommonPluginsPlaynite.PluginLibrary.HumbleLibrary.Services
 {
     public class HumbleAccountClient
     {
-        public static readonly ILogger logger = LogManager.GetLogger();
-        public readonly IWebView webView;
+        private static readonly ILogger logger = LogManager.GetLogger();
+        private readonly IWebView webView;
         private const string loginUrl = @"https://www.humblebundle.com/login?goto=%2Fhome%2Flibrary&qs=hmb_source%3Dnavbar";
         private const string libraryUrl = @"https://www.humblebundle.com/home/library?hmb_source=navbar";
         private const string logoutUrl = @"https://www.humblebundle.com/logout?goto=/";
@@ -46,7 +50,6 @@ namespace CommonPluginsPlaynite.PluginLibrary.HumbleLibrary.Services
             return webView.GetPageSource().Contains("\"gamekeys\":");
         }
 
-        /*
         internal List<string> GetLibraryKeys()
         {
             webView.NavigateAndWait(libraryUrl);
@@ -87,6 +90,5 @@ namespace CommonPluginsPlaynite.PluginLibrary.HumbleLibrary.Services
 
             return orders;
         }
-        */
     }
 }
