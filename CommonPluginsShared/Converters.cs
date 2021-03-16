@@ -434,7 +434,7 @@ namespace CommonPluginsShared
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var height = (double)value;
-            return .45 * height;
+            return .5 * height;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

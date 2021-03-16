@@ -5,6 +5,8 @@
     <sys:String x:Key="LOCCommonRecentlyAdded">Recently Added</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Only download missing</sys:String>
     
+    <sys:String x:Key="LOCCommonTotal">Total</sys:String>
+    
     <!-- login -->
 
     <sys:String x:Key="LOCCommonAuthenticateLabel">Authenticate</sys:String>
