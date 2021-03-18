@@ -42,7 +42,8 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, $"Error On GetImapeProperty({srcPath})");
+                Common.LogError(ex, true, $"Error On GetImapeProperty({srcPath})");
+                logger.Error("Error on get image property");
                 return null;
             }
         }
@@ -61,7 +62,8 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, true);
+                logger.Error("Error on get image property");
                 return null;
             }
         }
@@ -78,7 +80,8 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, true);
+                logger.Error("Error on get image property");
                 return null;
             }
         }
