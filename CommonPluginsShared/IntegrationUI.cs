@@ -1158,7 +1158,7 @@ namespace CommonPluginsShared
 
 
         #region GameSelectedDescription
-        private FrameworkElement elGameSelectedDescriptionContenerFS = null;
+        //private FrameworkElement elGameSelectedDescriptionContenerFS = null;
 
         public void AddElementInGameSelectedDescriptionFS(FrameworkElement elGameSelectedDescriptionFS)
         {

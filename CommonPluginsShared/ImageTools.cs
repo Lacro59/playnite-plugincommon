@@ -24,7 +24,7 @@ namespace CommonPluginsShared
 
     public class ImageTools
     {
-        private static ILogger logger = LogManager.GetLogger();
+        private static readonly ILogger logger = LogManager.GetLogger();
 
 
         #region ImageProperty
@@ -42,7 +42,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, $"Error On GetImapeProperty({srcPath})");
                 return null;
             }
         }

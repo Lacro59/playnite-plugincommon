@@ -46,13 +46,17 @@ namespace CommonPluginsShared
         public static bool IsGameEmulated(IPlayniteAPI PlayniteApi, Game game)
         {
             List<Emulator> ListEmulators = GetListEmulators(PlayniteApi);
-            return game.PlayAction != null && game.PlayAction.EmulatorId != null && ListEmulators.FindAll(x => x.Id == game.PlayAction.EmulatorId).Count > 0;
+            GameAction PlayAction = game.GameActions.Where(x => x.IsPlayAction).FirstOrDefault();
+
+            return PlayAction != null && PlayAction.EmulatorId != null && ListEmulators.FindAll(x => x.Id == PlayAction.EmulatorId).Count > 0;
         }
 
         public static bool GameUseRpcs3(IPlayniteAPI PlayniteApi, Game game)
         {
             List<Emulator> ListEmulators = GetListEmulators(PlayniteApi);
-            return ListEmulators.Find(x => x.Id == game.PlayAction.EmulatorId).Profiles[0].Executable.ToLower().Contains("rpcs3.exe");
+            GameAction PlayAction = game.GameActions.Where(x => x.IsPlayAction).FirstOrDefault();
+
+            return ListEmulators.Find(x => x.Id == PlayAction.EmulatorId).Profiles[0].Executable.ToLower().Contains("rpcs3.exe");
         }
         #endregion
 

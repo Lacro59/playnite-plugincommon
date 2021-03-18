@@ -160,13 +160,13 @@ namespace CommonPluginsShared
             {
                 Message = $"[Ignored] ";
             }
-
-            Message += $"[{traceInfos.FileName} {traceInfos.LineNumber}]";
-
+            
             if (!traceInfos.InitialCaller.IsNullOrEmpty())
             {
-                Message += $" - Error on {traceInfos.InitialCaller}()";
+                Message += $"Error on {traceInfos.InitialCaller}()";
             }
+
+            Message += $"|{traceInfos.FileName}|{traceInfos.LineNumber}";
 
 #if DEBUG
             logger.Error(ex, $"{Message}");
@@ -181,12 +181,13 @@ namespace CommonPluginsShared
         public static void LogError(Exception ex, bool IsIgnored, string Message)
         {
             TraceInfos traceInfos = new TraceInfos(ex);
-            Message = $"[{traceInfos.FileName} {traceInfos.LineNumber}] - {Message}";
-
+            
             if (IsIgnored)
             {
                 Message = $"[Ignored] {Message}";
             }
+
+            Message = $"{Message}|{traceInfos.FileName}|{traceInfos.LineNumber}";
 
 #if DEBUG
             logger.Error(ex, $"{Message}");
