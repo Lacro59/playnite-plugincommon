@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -19,7 +20,11 @@ namespace CommonPluginsShared.Controls
         internal static readonly ILogger logger = LogManager.GetLogger();
         internal static IResourceProvider resources = new ResourceProvider();
 
+        internal abstract IPluginDatabase _PluginDatabase { get; set; }
+        internal abstract IDataContext _ControlDataContext { get; set; }
 
+
+        #region Properties
         public bool MustDisplay
         {
             get { return (bool)GetValue(MustDisplayProperty); }
@@ -79,16 +84,67 @@ namespace CommonPluginsShared.Controls
                 obj.PluginSettings_PropertyChanged(null, null);
             }
         }
+        #endregion
 
 
         #region OnPropertyChange
         // When plugin settings is updated
-        public abstract void PluginSettings_PropertyChanged(object sender, PropertyChangedEventArgs e);
+        internal virtual void PluginSettings_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            // Publish changes for the currently displayed game
+            GameContextChanged(null, GameContext);
+        }
 
-        // When plugin datbase is udpated
+        // When game selection is changed
+        public override void GameContextChanged(Game oldContext, Game newContext)
+        {
+            if (_PluginDatabase == null || !_PluginDatabase.IsLoaded)
+            {
+                return;
+            }
+
+            if (newContext == null || (oldContext != null && oldContext.Id == newContext.Id))
+            {
+                return;
+            }
+
+            Task.Run(() =>
+            {
+                SetDefaultDataContext();
+
+                this.Dispatcher.BeginInvoke(DispatcherPriority.Render, new ThreadStart(delegate
+                {
+                    MustDisplay = _ControlDataContext.IsActivated;
+                }));
+
+                // When control is not used
+                if (!_ControlDataContext.IsActivated)
+                {
+                    return;
+                }
+
+                //DatabaseObject
+                PluginDataBaseGameBase PluginGameData = _PluginDatabase.Get(newContext, true);
+                if (PluginGameData.HasData)
+                {
+                    SetData(newContext, PluginGameData);
+                }
+                else
+                {
+                    // When there is no plugin data
+                    this.Dispatcher.BeginInvoke(DispatcherPriority.Render, new ThreadStart(delegate
+                    {
+                        MustDisplay = false;
+                    }));
+                    return;
+                }
+            });
+        }
+
+        // When plugin database is udpated
         internal virtual void Database_ItemUpdated<TItem>(object sender, ItemUpdatedEventArgs<TItem> e) where TItem : DatabaseObject
         {
-            this.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new ThreadStart(delegate
+            this.Dispatcher.BeginInvoke(DispatcherPriority.Render, new ThreadStart(delegate
             {
                 if (GameContext == null)
                 {
@@ -107,9 +163,11 @@ namespace CommonPluginsShared.Controls
                 }
             }));
         }
+        
+        // When plugin database is udpated
         internal virtual void Database_ItemCollectionChanged<TItem>(object sender, ItemCollectionChangedEventArgs<TItem> e) where TItem : DatabaseObject
         {
-            this.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new ThreadStart(delegate
+            this.Dispatcher.BeginInvoke(DispatcherPriority.Render, new ThreadStart(delegate
             {
                 if (GameContext == null)
                 {
@@ -140,5 +198,10 @@ namespace CommonPluginsShared.Controls
             }
         }
         #endregion
+
+
+        public abstract void SetDefaultDataContext();
+
+        public abstract void SetData(Game newContext, PluginDataBaseGameBase PluginGameData);
     }
 }

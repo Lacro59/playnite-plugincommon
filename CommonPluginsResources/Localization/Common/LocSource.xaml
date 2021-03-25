@@ -40,6 +40,8 @@
     <sys:String x:Key="LOCCommonIntegrationButtonDetails">Button with details</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonIsToggle">With a toggle button</sys:String>
 
+    <sys:String x:Key="LOCCommonIntegrationViewItemOptions">View item options</sys:String>
+    
     <sys:String x:Key="LOCCommonIntegrationListOptions">List options</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationChartOptions">Chart options</sys:String>

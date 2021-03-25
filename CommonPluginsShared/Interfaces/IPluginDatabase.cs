@@ -1,4 +1,6 @@
-﻿using Playnite.SDK;
+﻿using CommonPluginsShared.Collections;
+using Playnite.SDK;
+using Playnite.SDK.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,6 +11,10 @@ namespace CommonPluginsShared.Interfaces
 {
     public interface IPluginDatabase
     {
+        bool IsLoaded { get; set; }
+
         Task<bool> InitializeDatabase();
+
+        PluginDataBaseGameBase Get(Game game, bool OnlyCache = false);
     }
 }

@@ -36,7 +36,6 @@ namespace CommonPluginsShared
             return ListEmulators;
         }
 
-
         public static bool IsGameEmulated(IPlayniteAPI PlayniteApi, Guid Id)
         {
             Game game = PlayniteApi.Database.Games.Get(Id);

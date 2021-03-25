@@ -94,9 +94,6 @@ namespace CommonPluginsShared.Collections
         }
 
 
-        public abstract void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e);
-
-
         #region Database
         public Task<bool> InitializeDatabase()
         {
@@ -109,9 +106,47 @@ namespace CommonPluginsShared.Collections
                 }
 
                 IsLoaded = LoadDatabase();
+
+                if (IsLoaded)
+                {
+                    Database.ItemCollectionChanged += Database_ItemCollectionChanged;
+                    Database.ItemUpdated += Database_ItemUpdated;
+                }
+
                 return IsLoaded;
             });
         }
+
+
+        private void Database_ItemUpdated(object sender, ItemUpdatedEventArgs<TItem> e)
+        {
+            if (GameContext == null)
+            {
+                return;
+            }
+
+            // Publish changes for the currently displayed game if updated
+            var ActualItem = e.UpdatedItems.Find(x => x.NewData.Id == GameContext.Id);
+            if (ActualItem != null)
+            {
+                Guid Id = ActualItem.NewData.Id;
+                if (Id != null)
+                {
+                    SetThemesResources(GameContext);
+                }
+            }
+        }
+
+        private void Database_ItemCollectionChanged(object sender, ItemCollectionChangedEventArgs<TItem> e)
+        {
+            if (GameContext == null)
+            {
+                return;
+            }
+
+            SetThemesResources(GameContext);
+        }
+
 
         protected abstract bool LoadDatabase();
 
@@ -397,6 +432,11 @@ namespace CommonPluginsShared.Collections
         }
 
 
+        PluginDataBaseGameBase IPluginDatabase.Get(Game game, bool OnlyCache)
+        {
+            return Get(game, OnlyCache);
+        }
+
         public abstract TItem Get(Guid Id, bool OnlyCache = false);
 
         public virtual TItem Get(Game game, bool OnlyCache = false)
@@ -634,6 +674,8 @@ namespace CommonPluginsShared.Collections
         }
         #endregion
 
+
+        public abstract void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e);
 
         public virtual void SetThemesResources(Game game)
         {

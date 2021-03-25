@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CumulsErrors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IntegrationUI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IDataContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginDatabase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Localization.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\PluginPaths.cs" />
