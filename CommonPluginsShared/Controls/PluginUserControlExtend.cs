@@ -25,6 +25,10 @@ namespace CommonPluginsShared.Controls
 
 
         #region Properties
+        public static readonly DependencyProperty AlwaysShowProperty;
+        public bool AlwaysShow { get; set; }
+
+
         public bool MustDisplay
         {
             get { return (bool)GetValue(MustDisplayProperty); }
@@ -88,6 +92,15 @@ namespace CommonPluginsShared.Controls
 
 
         #region OnPropertyChange
+        // When a control properties is changed
+        private static void ControlsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (sender is PluginUserControlExtend obj && e.NewValue != e.OldValue)
+            {
+                obj.GameContextChanged(null, obj.GameContext);
+            }
+        }
+
         // When plugin settings is updated
         internal virtual void PluginSettings_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -118,17 +131,19 @@ namespace CommonPluginsShared.Controls
                 return;
             }
 
-            //DatabaseObject
             PluginDataBaseGameBase PluginGameData = _PluginDatabase.Get(newContext, true);
             if (PluginGameData.HasData)
             {
                 SetData(newContext, PluginGameData);
             }
+            else if(AlwaysShow)
+            {
+                SetData(newContext, PluginGameData);
+            }
+            // When there is no plugin data
             else
             {
-                // When there is no plugin data
                 MustDisplay = false;
-                return;
             }
         }
 
