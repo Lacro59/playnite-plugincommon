@@ -108,37 +108,28 @@ namespace CommonPluginsShared.Controls
                 return;
             }
 
-            Task.Run(() =>
+            SetDefaultDataContext();
+
+            MustDisplay = _ControlDataContext.IsActivated;
+
+            // When control is not used
+            if (!_ControlDataContext.IsActivated)
             {
-                SetDefaultDataContext();
+                return;
+            }
 
-                this.Dispatcher.BeginInvoke(DispatcherPriority.Render, new ThreadStart(delegate
-                {
-                    MustDisplay = _ControlDataContext.IsActivated;
-                }));
-
-                // When control is not used
-                if (!_ControlDataContext.IsActivated)
-                {
-                    return;
-                }
-
-                //DatabaseObject
-                PluginDataBaseGameBase PluginGameData = _PluginDatabase.Get(newContext, true);
-                if (PluginGameData.HasData)
-                {
-                    SetData(newContext, PluginGameData);
-                }
-                else
-                {
-                    // When there is no plugin data
-                    this.Dispatcher.BeginInvoke(DispatcherPriority.Render, new ThreadStart(delegate
-                    {
-                        MustDisplay = false;
-                    }));
-                    return;
-                }
-            });
+            //DatabaseObject
+            PluginDataBaseGameBase PluginGameData = _PluginDatabase.Get(newContext, true);
+            if (PluginGameData.HasData)
+            {
+                SetData(newContext, PluginGameData);
+            }
+            else
+            {
+                // When there is no plugin data
+                MustDisplay = false;
+                return;
+            }
         }
 
         // When plugin database is udpated
@@ -202,6 +193,6 @@ namespace CommonPluginsShared.Controls
 
         public abstract void SetDefaultDataContext();
 
-        public abstract void SetData(Game newContext, PluginDataBaseGameBase PluginGameData);
+        public abstract Task<bool> SetData(Game newContext, PluginDataBaseGameBase PluginGameData);
     }
 }
