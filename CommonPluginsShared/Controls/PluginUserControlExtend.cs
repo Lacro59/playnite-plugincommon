@@ -93,7 +93,7 @@ namespace CommonPluginsShared.Controls
 
         #region OnPropertyChange
         // When a control properties is changed
-        private static void ControlsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        internal static void ControlsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             if (sender is PluginUserControlExtend obj && e.NewValue != e.OldValue)
             {
