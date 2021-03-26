@@ -15,6 +15,6 @@ namespace CommonPluginsShared.Interfaces
 
         Task<bool> InitializeDatabase();
 
-        PluginDataBaseGameBase Get(Game game, bool OnlyCache = false);
+        PluginDataBaseGameBase Get(Game game, bool OnlyCache = false, bool Force = false);
     }
 }
