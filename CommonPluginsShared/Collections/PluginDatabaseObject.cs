@@ -316,7 +316,12 @@ namespace CommonPluginsShared.Collections
 
             foreach (var item in Database.Items)
             {
-                GamesList.Add(PlayniteApi.Database.Games.Get(item.Key));
+                Game game = PlayniteApi.Database.Games.Get(item.Key);
+
+                if (game != null)
+                {
+                    GamesList.Add(game);
+                }
             }
 
             return GamesList;
