@@ -42,8 +42,7 @@ namespace CommonPluginsShared.Controls
 
         private static void MustDisplayPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            PluginUserControlExtend obj = sender as PluginUserControlExtend;            
-            if (obj != null && e.NewValue != e.OldValue)
+            if (sender is PluginUserControlExtend obj && e.NewValue != e.OldValue)
             {
                 ContentControl contentControl = obj.Parent as ContentControl;
 
@@ -81,8 +80,7 @@ namespace CommonPluginsShared.Controls
 
         private static void SettingsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            PluginUserControlExtend obj = sender as PluginUserControlExtend;
-            if (obj != null && e.NewValue != e.OldValue)
+            if (sender is PluginUserControlExtend obj && e.NewValue != e.OldValue)
             {
                 obj.PluginSettings_PropertyChanged(null, null);
             }
