@@ -44,6 +44,11 @@ namespace CommonPluginsShared
 
         public static bool IsGameEmulated(IPlayniteAPI PlayniteApi, Game game)
         {
+            if (game.GameActions == null)
+            {
+                return false;
+            }
+
             List<Emulator> ListEmulators = GetListEmulators(PlayniteApi);
             GameAction PlayAction = game.GameActions.Where(x => x.IsPlayAction).FirstOrDefault();
 
@@ -52,6 +57,11 @@ namespace CommonPluginsShared
 
         public static bool GameUseRpcs3(IPlayniteAPI PlayniteApi, Game game)
         {
+            if (game.GameActions == null)
+            {
+                return false;
+            }
+
             List<Emulator> ListEmulators = GetListEmulators(PlayniteApi);
             GameAction PlayAction = game.GameActions.Where(x => x.IsPlayAction).FirstOrDefault();
 

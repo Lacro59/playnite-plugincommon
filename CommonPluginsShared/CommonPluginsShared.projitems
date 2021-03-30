@@ -16,6 +16,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDatabaseObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginItemCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\DataVirtualization\AsyncVirtualizingCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\DataVirtualization\IItemsProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\DataVirtualization\VirtualizingCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ListBoxExtend.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ListViewExtend.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PluginUserControlExtendBase.cs" />
