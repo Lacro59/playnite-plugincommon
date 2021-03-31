@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace CommonPluginsShared.Controls
 {
@@ -21,7 +23,7 @@ namespace CommonPluginsShared.Controls
 
         // Using a DependencyProperty as the backing store for HideExpanderArrow.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty HideExpanderArrowProperty =
-            DependencyProperty.RegisterAttached("HideExpanderArrow", typeof(bool), typeof(AttachedProperties), new UIPropertyMetadata(false, OnHideExpanderArrowChanged));
+            DependencyProperty.RegisterAttached("HideExpanderArrow", typeof(bool), typeof(ExpanderAttachedProperties), new UIPropertyMetadata(false, OnHideExpanderArrowChanged));
 
         private static void OnHideExpanderArrowChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
