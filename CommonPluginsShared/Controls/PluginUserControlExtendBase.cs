@@ -15,12 +15,12 @@ using System.Windows.Threading;
 
 namespace CommonPluginsShared.Controls
 {
-    public abstract class PluginUserControlExtendBase : PluginUserControl
+    public class PluginUserControlExtendBase : PluginUserControl
     {
         internal static readonly ILogger logger = LogManager.GetLogger();
         internal static IResourceProvider resources = new ResourceProvider();
 
-        internal abstract IDataContext _ControlDataContext { get; set; }
+        internal virtual IDataContext _ControlDataContext { get; set; }
 
 
         #region Properties
@@ -192,7 +192,10 @@ namespace CommonPluginsShared.Controls
         #endregion
 
 
-        public abstract void SetDefaultDataContext();
+        public virtual void SetDefaultDataContext()
+        {
+
+        }
 
         public virtual Task<bool> SetData(Game newContext)
         {

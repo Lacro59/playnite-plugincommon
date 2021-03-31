@@ -15,9 +15,9 @@ using System.Windows.Threading;
 
 namespace CommonPluginsShared.Controls
 {
-    public abstract class PluginUserControlExtend : PluginUserControlExtendBase
+    public class PluginUserControlExtend : PluginUserControlExtendBase
     {
-        internal abstract IPluginDatabase _PluginDatabase { get; set; }
+        internal virtual IPluginDatabase _PluginDatabase { get; set; }
 
 
         #region OnPropertyChange
