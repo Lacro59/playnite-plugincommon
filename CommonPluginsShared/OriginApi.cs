@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CommonPluginsPlaynite;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Playnite.SDK;
 using System;
@@ -21,37 +22,28 @@ namespace CommonPluginsShared
         public OriginApi(string PluginUserDataPath)
         {
             // Class variable
-            string PluginCachePath = PluginUserDataPath + "\\cache\\";
+            string PluginCachePath = PlaynitePaths.DataCachePath;
             string PluginCacheFile = PluginCachePath + "\\OriginListApp.json";
 
             // Load Origin list app
             try
             {
-                if (Directory.Exists(PluginCachePath))
-                {
-                    // From cache if it exists
-                    if (File.Exists(PluginCacheFile))
-                    {
-                        // If not expired
-                        if (File.GetLastWriteTime(PluginCacheFile).AddDays(3) > DateTime.Now)
-                        {
-                            logger.Info("GetOriginAppListFromCache");
-                            OriginListApp = JsonConvert.DeserializeObject<List<GameStoreDataResponseAppsList>>(File.ReadAllText(PluginCacheFile));
-                        }
-                        else
-                        {
-                            OriginListApp = GetOriginAppListFromWeb(PluginCacheFile);
-                        }
-                    }
-                    // From web
-                    else
-                    {
-                        OriginListApp = GetOriginAppListFromWeb(PluginCacheFile);
-                    }
-                }
-                else
+                if (!Directory.Exists(PluginCachePath))
                 {
                     Directory.CreateDirectory(PluginCachePath);
+                }
+
+                // From cache if exists & not expired
+                if (File.Exists(PluginCacheFile) && File.GetLastWriteTime(PluginCacheFile).AddDays(3) > DateTime.Now)
+                {
+                    Common.LogDebug(true, "GetOriginAppListFromCache");
+                    OriginListApp = JsonConvert.DeserializeObject<List<GameStoreDataResponseAppsList>>(File.ReadAllText(PluginCacheFile));
+                }
+                // From web
+                else
+                {
+                    Common.LogDebug(true, "GetOriginAppListFromWeb");
+                    OriginListApp = GetOriginAppListFromWeb(PluginCacheFile);
                 }
             }
             catch (Exception ex)
@@ -62,8 +54,6 @@ namespace CommonPluginsShared
 
         private List<GameStoreDataResponseAppsList> GetOriginAppListFromWeb(string PluginCacheFile)
         {
-            logger.Info("GetOriginAppListFromWeb");
-
             string responseData = string.Empty;
             try
             {
@@ -96,6 +86,7 @@ namespace CommonPluginsShared
             return string.Empty;
         }
     }
+
 
     public class GameStoreDataResponseAppsList
     {
