@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CommonPluginsPlaynite;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Playnite.SDK;
 using System;
@@ -18,37 +19,28 @@ namespace CommonPluginsShared
         public SteamApi(string PluginUserDataPath)
         {
             // Class variable
-            string PluginCachePath = PluginUserDataPath + "\\cache\\";
+            string PluginCachePath = PlaynitePaths.DataCachePath;
             string PluginCacheFile = PluginCachePath + "\\SteamListApp.json";
 
             // Load Steam list app
             try
             {
-                if (Directory.Exists(PluginCachePath))
-                {
-                    // From cache if it exists
-                    if (File.Exists(PluginCacheFile))
-                    {
-                        // If not expired
-                        if (File.GetLastWriteTime(PluginCacheFile).AddDays(3) > DateTime.Now)
-                        {
-                            logger.Info("GetSteamAppListFromCache");
-                            SteamListApp = JObject.Parse(File.ReadAllText(PluginCacheFile));
-                        }
-                        else
-                        {
-                            SteamListApp = GetSteamAppListFromWeb(PluginCacheFile);
-                        }
-                    }
-                    // From web
-                    else
-                    {
-                        SteamListApp = GetSteamAppListFromWeb(PluginCacheFile);
-                    }
-                }
-                else
+                if (!Directory.Exists(PluginCachePath))
                 {
                     Directory.CreateDirectory(PluginCachePath);
+                }
+
+                // From cache if exists & not expired
+                if (File.Exists(PluginCacheFile) && File.GetLastWriteTime(PluginCacheFile).AddDays(3) > DateTime.Now)
+                {
+                    Common.LogDebug(true, "GetSteamAppListFromCache");
+                    SteamListApp = JObject.Parse(File.ReadAllText(PluginCacheFile));
+                }
+                // From web
+                else
+                {
+                    Common.LogDebug(true, "GetSteamAppListFromWeb");
+                    SteamListApp = GetSteamAppListFromWeb(PluginCacheFile);
                 }
             }
             catch (Exception ex)
@@ -60,8 +52,6 @@ namespace CommonPluginsShared
         // TODO transform to task and identified object and saved in playnite temp
         private JObject GetSteamAppListFromWeb(string PluginCacheFile)
         {
-            Common.LogDebug(true, "GetSteamAppListFromWeb");
-
             string responseData = string.Empty;
             try
             {
@@ -95,7 +85,7 @@ namespace CommonPluginsShared
                 {
                     string SteamAppsListString = JsonConvert.SerializeObject(SteamListApp["applist"]["apps"]);
                     var SteamAppsList = JsonConvert.DeserializeObject<List<SteamApps>>(SteamAppsListString);
-                    SteamAppsList.Sort((x, y) => y.AppId.CompareTo(x.AppId));
+                    SteamAppsList.Sort((x, y) => x.AppId.CompareTo(y.AppId));
 
                     foreach (SteamApps Game in SteamAppsList)
                     {
@@ -107,6 +97,10 @@ namespace CommonPluginsShared
                             return Game.AppId;
                         }
                     }
+                }
+                else
+                {
+                    logger.Warn($"No SteamListApp data");
                 }
             }
             catch (Exception ex)
@@ -122,6 +116,7 @@ namespace CommonPluginsShared
             return SteamId;
         }
     }
+
 
     public class SteamApps
     {
