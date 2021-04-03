@@ -37,12 +37,12 @@ namespace CommonPluginsShared.Controls
         public static readonly DependencyProperty MustDisplayProperty = DependencyProperty.Register(
             nameof(MustDisplay), 
             typeof(bool), 
-            typeof(PluginUserControlExtend),
+            typeof(PluginUserControlExtendBase),
             new FrameworkPropertyMetadata(true, MustDisplayPropertyChangedCallback));
 
         private static void MustDisplayPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            if (sender is PluginUserControlExtend obj && e.NewValue != e.OldValue)
+            if (sender is PluginUserControlExtendBase obj && e.NewValue != e.OldValue)
             {
                 ContentControl contentControl = obj.Parent as ContentControl;
 
@@ -75,12 +75,12 @@ namespace CommonPluginsShared.Controls
         public static readonly DependencyProperty IgnoreSettingsProperty = DependencyProperty.Register(
             nameof(IgnoreSettings),
             typeof(bool),
-            typeof(PluginUserControlExtend),
+            typeof(PluginUserControlExtendBase),
             new FrameworkPropertyMetadata(false, SettingsPropertyChangedCallback));
 
         private static void SettingsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            if (sender is PluginUserControlExtend obj && e.NewValue != e.OldValue)
+            if (sender is PluginUserControlExtendBase obj && e.NewValue != e.OldValue)
             {
                 obj.PluginSettings_PropertyChanged(null, null);
             }
@@ -92,7 +92,7 @@ namespace CommonPluginsShared.Controls
         // When a control properties is changed
         internal static void ControlsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            if (sender is PluginUserControlExtend obj && e.NewValue != e.OldValue)
+            if (sender is PluginUserControlExtendBase obj && e.NewValue != e.OldValue)
             {
                 obj.GameContextChanged(null, obj.GameContext);
             }

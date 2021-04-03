@@ -442,4 +442,24 @@ namespace CommonPluginsShared
             throw new NotImplementedException();
         }
     }
+
+
+    public class ImageToGrayConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string str)
+            {
+                BitmapImage tmpImg = BitmapExtensions.BitmapFromFile(str);
+                return ImageTools.ConvertBitmapImage(tmpImg, ImageColor.Gray);
+            }
+
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

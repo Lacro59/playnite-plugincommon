@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using Playnite.SDK;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace CommonPluginsShared
@@ -92,14 +93,18 @@ namespace CommonPluginsShared
             {
                 if (SteamListApp != null && SteamListApp["applist"] != null && SteamListApp["applist"]["apps"] != null)
                 {
-                    foreach (JObject Game in SteamListApp["applist"]["apps"])
+                    string SteamAppsListString = JsonConvert.SerializeObject(SteamListApp["applist"]["apps"]);
+                    var SteamAppsList = JsonConvert.DeserializeObject<List<SteamApps>>(SteamAppsListString);
+                    SteamAppsList.Sort((x, y) => y.AppId.CompareTo(x.AppId));
+
+                    foreach (SteamApps Game in SteamAppsList)
                     {
-                        string NameSteam = Common.NormalizeGameName((string)Game["name"]);
+                        string NameSteam = Common.NormalizeGameName(Game.Name);
                         string NameSearch = Common.NormalizeGameName(Name);
 
                         if (NameSteam == NameSearch)
                         {
-                            return (int)Game["appid"];
+                            return Game.AppId;
                         }
                     }
                 }
@@ -116,5 +121,13 @@ namespace CommonPluginsShared
         
             return SteamId;
         }
+    }
+
+    public class SteamApps
+    {
+        [JsonProperty("appid")]
+        public int AppId { get; set; }
+        [JsonProperty("name")]
+        public string Name { get; set; }
     }
 }
