@@ -85,8 +85,6 @@ namespace CommonPluginsShared
                 {
                     return PathImageFileName + ".png";
                 }
-
-                Common.LogDebug(true, $"GetCacheFile() not find - {PathImageFileName}");
             }
             catch(Exception ex)
             {
