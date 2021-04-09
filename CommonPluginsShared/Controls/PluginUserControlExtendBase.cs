@@ -136,7 +136,7 @@ namespace CommonPluginsShared.Controls
         // When plugin database is udpated
         internal virtual void Database_ItemUpdated<TItem>(object sender, ItemUpdatedEventArgs<TItem> e) where TItem : DatabaseObject
         {
-            this.Dispatcher.BeginInvoke(DispatcherPriority.Render, new ThreadStart(delegate
+            this.Dispatcher?.Invoke(() =>
             {
                 if (GameContext == null)
                 {
@@ -153,13 +153,13 @@ namespace CommonPluginsShared.Controls
                         GameContextChanged(null, GameContext);
                     }
                 }
-            }));
+            }, DispatcherPriority.Render);
         }
         
         // When plugin database is udpated
         internal virtual void Database_ItemCollectionChanged<TItem>(object sender, ItemCollectionChangedEventArgs<TItem> e) where TItem : DatabaseObject
         {
-            this.Dispatcher.BeginInvoke(DispatcherPriority.Render, new ThreadStart(delegate
+            this.Dispatcher?.Invoke(() =>
             {
                 if (GameContext == null)
                 {
@@ -167,27 +167,30 @@ namespace CommonPluginsShared.Controls
                 }
 
                 GameContextChanged(null, GameContext);
-            }));
+            }, DispatcherPriority.Render);
         }
 
         // When game is updated
         internal virtual void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e)
         {
-            // Publish changes for the currently displayed game if updated
-            if (GameContext == null)
+            this.Dispatcher?.Invoke(() =>
             {
-                return;
-            }
-
-            var ActualItem = e.UpdatedItems.Find(x => x.NewData.Id == GameContext.Id);
-            if (ActualItem != null)
-            {
-                Game newContext = ActualItem.NewData;
-                if (newContext != null)
+                // Publish changes for the currently displayed game if updated
+                if (GameContext == null)
                 {
-                    GameContextChanged(null, newContext);
+                    return;
                 }
-            }
+
+                var ActualItem = e.UpdatedItems.Find(x => x.NewData.Id == GameContext.Id);
+                if (ActualItem != null)
+                {
+                    Game newContext = ActualItem.NewData;
+                    if (newContext != null)
+                    {
+                        GameContextChanged(null, newContext);
+                    }
+                }
+            }, DispatcherPriority.Send);
         }
         #endregion
 
