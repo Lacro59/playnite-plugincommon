@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)API\ScriptFunctionDescription.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Behaviors\LeftClickContextMenuBehavior.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Constants.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\DesignerTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\CloneObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\Enums.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\ItemsControlExtensions.cs" />
@@ -22,10 +23,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\Images.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\IniParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\InteropMethods.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\MemoryCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Paths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\SafeFileEnumerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Sizes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\TGASharpLib.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Units.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Web\Downloader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Web\HttpDownloader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Xaml.cs" />
@@ -43,6 +46,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\IProvideValueTarget.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\Markup\ThemeFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\ObjectExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HttpFileCache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImageSourceManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Manifests\ExtensionManifest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Manifests\ThemeManifest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Models\Order.cs" />
