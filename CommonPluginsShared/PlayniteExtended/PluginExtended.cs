@@ -48,6 +48,20 @@ namespace CommonPluginsShared.PlayniteExtended
             {
                 Directory.Move(OldDirectory, NewDirectory);
             }
+
+            OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "Achievements");
+            NewDirectory = Path.Combine(this.GetPluginUserDataPath(), "SuccessStory");
+            if (Directory.Exists(OldDirectory))
+            {
+                Directory.Move(OldDirectory, NewDirectory);
+            }
+
+            OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "Requierements");
+            NewDirectory = Path.Combine(this.GetPluginUserDataPath(), "SystemChecker");
+            if (Directory.Exists(OldDirectory))
+            {
+                Directory.Move(OldDirectory, NewDirectory);
+            }
         }
         private void CleanOldDatabase()
         {

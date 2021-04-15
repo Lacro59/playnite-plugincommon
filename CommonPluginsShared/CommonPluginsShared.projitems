@@ -16,14 +16,17 @@
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDatabaseObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginItemCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\AttachedProperties.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ListBoxExtend.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ListViewExtend.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\PluginUserControlExtendBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PluginUserControlExtend.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\SidebarItemControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CumulsErrors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IntegrationUI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IDataContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginDatabase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Localization.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\PluginPaths.cs" />
