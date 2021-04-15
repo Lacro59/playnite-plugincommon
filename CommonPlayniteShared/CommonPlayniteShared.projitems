@@ -23,8 +23,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\Images.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\IniParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\InteropMethods.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Media\Icons\IconExtractor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\MemoryCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Paths.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\ProcessMonitor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\SafeFileEnumerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Sizes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\TGASharpLib.cs" />
