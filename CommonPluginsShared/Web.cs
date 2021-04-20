@@ -125,13 +125,21 @@ namespace CommonPluginsShared
 
                 foreach (var cookie in Cookies)
                 {
-                    Cookie c = new Cookie();
-                    c.Name = cookie.Name;
-                    c.Value = cookie.Value;
-                    c.Domain = cookie.Domain;
-                    c.Path = cookie.Path;
+                    try
+                    {
+                        Cookie c = new Cookie();
+                        c.Name = cookie.Name;
+                        c.Value = cookie.Value;
+                        c.Domain = cookie.Domain;
+                        c.Path = cookie.Path;
 
-                    cookieContainer.Add(c);
+                        cookieContainer.Add(c);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Ignored
+                        Common.LogError(ex, "");
+                    }
                 }
 
                 handler.CookieContainer = cookieContainer;
@@ -290,7 +298,7 @@ namespace CommonPluginsShared
             var response = string.Empty;
             using (var client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36");
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
                 client.DefaultRequestHeaders.Add("accept", "application/json, text/javascript, */*; q=0.01");
                 client.DefaultRequestHeaders.Add("Vary", "Accept-Encoding");
                 HttpContent c = new StringContent(payload, Encoding.UTF8, "application/json");
@@ -305,7 +313,7 @@ namespace CommonPluginsShared
                     }
                     else
                     {
-                        logger.Error($"CommonPluginsShared - Web error with status code {result.StatusCode.ToString()}");
+                        logger.Warn($"{result.StatusCode} - {result.ReasonPhrase} - {url}");
                     }
                 }
                 catch (Exception ex)
@@ -337,13 +345,21 @@ namespace CommonPluginsShared
 
                 foreach (var cookie in Cookies)
                 {
-                    Cookie c = new Cookie();
-                    c.Name = cookie.Name;
-                    c.Value = cookie.Value;
-                    c.Domain = cookie.Domain;
-                    c.Path = cookie.Path;
+                    try
+                    {
+                        Cookie c = new Cookie();
+                        c.Name = cookie.Name;
+                        c.Value = cookie.Value;
+                        c.Domain = cookie.Domain;
+                        c.Path = cookie.Path;
 
-                    cookieContainer.Add(c);
+                        cookieContainer.Add(c);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Ignored
+                        Common.LogError(ex, "");
+                    }
                 }
 
                 handler.CookieContainer = cookieContainer;
@@ -351,7 +367,7 @@ namespace CommonPluginsShared
 
             using (var client = new HttpClient(handler))
             {
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36");
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
 
                 HttpResponseMessage result;
                 try
@@ -363,7 +379,7 @@ namespace CommonPluginsShared
                     }
                     else
                     {
-                        logger.Error($"CommonPluginsShared - Web error with status code {result.StatusCode.ToString()}");
+                        logger.Warn($"{result.StatusCode} - {result.ReasonPhrase} - {url}");
                     }
                 }
                 catch (Exception ex)
@@ -387,13 +403,21 @@ namespace CommonPluginsShared
 
                 foreach (var cookie in Cookies)
                 {
-                    Cookie c = new Cookie();
-                    c.Name = cookie.Name;
-                    c.Value = cookie.Value;
-                    c.Domain = cookie.Domain;
-                    c.Path = cookie.Path;
+                    try
+                    {
+                        Cookie c = new Cookie();
+                        c.Name = cookie.Name;
+                        c.Value = cookie.Value;
+                        c.Domain = cookie.Domain;
+                        c.Path = cookie.Path;
 
-                    cookieContainer.Add(c);
+                        cookieContainer.Add(c);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Ignored
+                        Common.LogError(ex, "");
+                    }
                 }
 
                 handler.CookieContainer = cookieContainer;
@@ -401,7 +425,7 @@ namespace CommonPluginsShared
 
             using (var client = new HttpClient(handler))
             {
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36");
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
 
                 HttpResponseMessage result;
                 try
@@ -413,7 +437,7 @@ namespace CommonPluginsShared
                     }
                     else
                     {
-                        logger.Error($"CommonPluginsShared - Web error with status code {result.StatusCode.ToString()}");
+                        logger.Warn($"{result.StatusCode} - {result.ReasonPhrase} - {url}");
                     }
                 }
                 catch (Exception ex)
