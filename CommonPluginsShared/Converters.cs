@@ -1,4 +1,5 @@
-﻿using Playnite.SDK;
+﻿using CommonPlayniteShared;
+using Playnite.SDK;
 using System;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -394,9 +395,12 @@ namespace CommonPluginsShared
                 }
 
 
+                string str = ImageSourceManager.GetImagePath((string)values[0]);
+
+
                 if (((string)values[0]).EndsWith(".tga", StringComparison.OrdinalIgnoreCase))
                 {
-                    BitmapImage bitmapImage = BitmapExtensions.TgaToBitmap((string)values[0]);
+                    BitmapImage bitmapImage = BitmapExtensions.TgaToBitmap(str);
 
                     if (bitmapLoadProperties == null)
                     {
@@ -411,11 +415,11 @@ namespace CommonPluginsShared
 
                 if (bitmapLoadProperties == null)
                 {
-                    return BitmapExtensions.BitmapFromFile((string)values[0]);
+                    return BitmapExtensions.BitmapFromFile(str);
                 }
                 else
                 {
-                    return BitmapExtensions.BitmapFromFile((string)values[0], bitmapLoadProperties);
+                    return BitmapExtensions.BitmapFromFile(str, bitmapLoadProperties);
                 }
             }
 
@@ -450,6 +454,7 @@ namespace CommonPluginsShared
         {
             if (value is string str)
             {
+                str = ImageSourceManager.GetImagePath(str);
                 BitmapImage tmpImg = BitmapExtensions.BitmapFromFile(str);
                 return ImageTools.ConvertBitmapImage(tmpImg, ImageColor.Gray);
             }
