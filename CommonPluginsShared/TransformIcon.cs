@@ -3,32 +3,34 @@
     public class TransformIcon
     {
         #region font
-        private static string steam = "\ue906";                  // e906
-        private static string gogGalaxy = "\ue903";              // e903
-        private static string gog = "\uea35";                    // ea35
-        private static string battleNET = "\ue900";              // e900
-        private static string origin = "\ue904";                 // e904
-        private static string xbox = "\ue908";                   // e908
-        private static string uplay = "\ue907";                  // e907
-        private static string epic = "\ue902";                   // e902
-        private static string playnite = "\ue905";               // e905
-        private static string bethesda = "\ue901";               // e901
-        private static string humble = "\ue909";                 // e909
-        private static string twitch = "\ue90a";                 // e90a
-        private static string itchio = "\ue90b";                 // e90b
-        private static string indiegala = "\ue911";              // e911
+        private static string steam = "\ue906";                  
+        private static string gogGalaxy = "\ue903";              
+        private static string gog = "\uea35";                    
+        private static string battleNET = "\ue900";              
+        private static string origin = "\ue904";                 
+        private static string xbox = "\ue908";                   
+        private static string uplay = "\ue907";                  
+        private static string epic = "\ue902";                   
+        private static string playnite = "\ue905";               
+        private static string bethesda = "\ue901";               
+        private static string humble = "\ue909";                 
+        private static string twitch = "\ue90a";                 
+        private static string itchio = "\ue90b";                 
+        private static string indiegala = "\ue911";              
+        private static string amazonGame = "\uea55";              
 
-        private static string retroachievements = "\ue910";      // e910
-        private static string rpcs3 = "\uea37";                  // ea37
+        private static string retroachievements = "\ue910";      
+        private static string rpcs3 = "\uea37";                  
 
-        private static string statistics = "\ue90c";             // e90c
-        private static string howlongtobeat = "\ue90d";          // e90d
-        private static string successstory = "\uea33";           // ea33
-        private static string gameactivity = "\ue90f";           // e90f
-        private static string checklocalizations = "\uea2c";     // ea2c
-        private static string screenshotsvisualizer = "\uea38";  // ea38
+        private static string statistics = "\ue90c";             
+        private static string howlongtobeat = "\ue90d";          
+        private static string successstory = "\uea33";           
+        private static string gameactivity = "\ue90f";           
+        private static string checklocalizations = "\uea2c";     
+        private static string screenshotsvisualizer = "\uea38";  
 
-        private static string gameHacked = "\uea36";             // ea36
+        private static string gameHacked = "\uea36";             
+        private static string manualAchievements = "\uea54";     
         #endregion
 
         #region retrogaming
@@ -85,7 +87,14 @@
                 case "hacked":
                     stringReturn = gameHacked;
                     break;
+                case "manual achievements":
+                    stringReturn = manualAchievements;
+                    break;
 
+                    
+                case "amazon":
+                    stringReturn = amazonGame;
+                    break;
                 case "retroachievements":
                     stringReturn = retroachievements;
                     break;
