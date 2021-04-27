@@ -51,6 +51,14 @@ namespace CommonPluginsShared.Controls
                 {
                     el.Visibility = Visibility.Hidden;
                 }
+                if (el.Name == "CollapsedIcon")
+                {
+                    el.Visibility = Visibility.Hidden;
+                }
+                if (el.Name == "ExpandedIcon")
+                {
+                    el.Visibility = Visibility.Hidden;
+                }
             }
         }
         #endregion
