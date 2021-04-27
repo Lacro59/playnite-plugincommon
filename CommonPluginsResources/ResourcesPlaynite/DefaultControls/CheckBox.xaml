@@ -24,11 +24,11 @@
                                 <Grid Width="18" Height="18" Background="{DynamicResource NormalBrushDark}">
                                     <Viewbox x:Name="CheckIcon" Visibility="Collapsed">
                                         <TextBlock Text="b" FontFamily="Marlett" Foreground="{DynamicResource GlyphBrush}"
-                                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Viewbox>
                                     <Viewbox x:Name="IndeterminateIcon" Visibility="Collapsed" Margin="2">
                                         <TextBlock Text="g" FontFamily="Marlett" Foreground="{DynamicResource GlyphBrush}"
-                                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Viewbox>
                                 </Grid>
                             </Border>                            
@@ -41,7 +41,7 @@
                                 <Condition Property="IsChecked" Value="{x:Null}" />
                                 <Condition Property="IsThreeState" Value="True" />
                             </MultiTrigger.Conditions>
-                            <Setter Property="Visibility" Value="Visible" TargetName="IndeterminateIcon" />
+                            <Setter Property="Visibility" Value="Visible" TargetName="IndeterminateIcon"/>
                         </MultiTrigger>
                         <Trigger Property="IsChecked" Value="True">
                             <Setter Property="Visibility" Value="Visible" TargetName="CheckIcon" />

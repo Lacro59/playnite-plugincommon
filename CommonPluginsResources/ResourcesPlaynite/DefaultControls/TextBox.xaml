@@ -12,8 +12,8 @@
         <Setter Property="AllowDrop" Value="True" />
         <Setter Property="CaretBrush" Value="{DynamicResource TextBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource NormalBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource NormalBorderBrush}"/>
         <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}" />
         <Setter Property="Padding" Value="3" />
         <Setter Property="Template">
@@ -21,10 +21,10 @@
                 <ControlTemplate TargetType="{x:Type TextBox}">
                     <Border x:Name="Border" BorderThickness="{TemplateBinding BorderThickness}"
                             Background="{TemplateBinding Background}" CornerRadius="{DynamicResource ControlCornerRadius}"
-                            Style="{DynamicResource HighlightBorder}">
+                            Style="{DynamicResource HighlightBorder}" BorderBrush="{TemplateBinding BorderBrush}">
                         <ScrollViewer x:Name="PART_ContentHost"
                                       VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}"
-                                      HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}" />
+                                      HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsFocused" Value="True">
@@ -34,5 +34,10 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{DynamicResource GlyphBrush}" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 </ResourceDictionary>

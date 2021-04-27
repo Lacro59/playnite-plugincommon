@@ -21,49 +21,49 @@
                             <Button x:Name="PART_PreviousButton" DockPanel.Dock="Left"
                                     FontWeight="Bold" FontFamily="Marlett" Padding="4,2,4,2"
                                     Content="3" Focusable="False" BorderThickness="0"
-                                    Background="Transparent" />
+                                    Background="Transparent"/>
                             <Button x:Name="PART_NextButton" DockPanel.Dock="Right"
                                     FontWeight="Bold" FontFamily="Marlett" Padding="4,2,4,2"
                                     Content="4" BorderThickness="0"
                                     Focusable="False"
-                                    Background="Transparent" />
+                                    Background="Transparent"/>
                             <Button x:Name="PART_HeaderButton" DockPanel.Dock="Top"
                                     Padding="2" Height="30" Focusable="False"
-                                    BorderThickness="0" Background="Transparent" />
+                                    BorderThickness="0" Background="Transparent"/>
                             <Grid>
                                 <Grid x:Name="PART_MonthView" Visibility="Visible">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                 </Grid>
                                 <Grid x:Name="PART_YearView"  Visibility="Hidden">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
 
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                 </Grid>
                             </Grid>
@@ -86,7 +86,7 @@
 
     <Style x:Key="CalendarButtonStyle" TargetType="{x:Type CalendarButton}">
         <Setter Property="SnapsToDevicePixels" Value="True" />
-        <Setter Property="FontFamily" Value="{DynamicResource FontFamily}" />
+        <Setter Property="FontFamily" Value="{DynamicResource FontFamily}"/>
         <Setter Property="FontSize" Value="{DynamicResource FontSize}" />
         <Setter Property="Width" Value="40" />
         <Setter Property="Height" Value="40" />
@@ -118,9 +118,9 @@
 
     <Style x:Key="CalendarDayButtonStyle" TargetType="{x:Type CalendarDayButton}">
         <Setter Property="SnapsToDevicePixels" Value="True" />
-        <Setter Property="FontFamily" Value="{DynamicResource FontFamily}" />
+        <Setter Property="FontFamily" Value="{DynamicResource FontFamily}"/>
         <Setter Property="FontSize" Value="{DynamicResource FontSize}" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Width" Value="40" />
         <Setter Property="Height" Value="40" />
         <Setter Property="Template">
@@ -157,8 +157,8 @@
 
     <Style x:Key="CalendarStyle" TargetType="{x:Type Calendar}">
         <Setter Property="SnapsToDevicePixels" Value="True" />
-        <Setter Property="CalendarDayButtonStyle" Value="{DynamicResource CalendarDayButtonStyle}" />
-        <Setter Property="CalendarButtonStyle" Value="{DynamicResource CalendarButtonStyle}" />
+        <Setter Property="CalendarDayButtonStyle" Value="{DynamicResource CalendarDayButtonStyle}"/>
+        <Setter Property="CalendarButtonStyle" Value="{DynamicResource CalendarButtonStyle}"/>
         <Setter Property="Background" Value="{DynamicResource PopupBackgroundBrush}" />
         <Setter Property="Template">
             <Setter.Value>
@@ -196,9 +196,9 @@
                                    PlacementTarget="{Binding ElementName=PART_TextBox}" />
                             <ToggleButton x:Name="PART_Button" DockPanel.Dock="Right" Content="🗓"
                                           BorderThickness="0" Padding="5,0,5,0"
-                                          IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+                                          IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"/>
                             <DatePickerTextBox x:Name="PART_TextBox" DockPanel.Dock="Left"
-                                               Background="Transparent" BorderThickness="0" />
+                                               Background="Transparent" BorderThickness="0"/>
                         </DockPanel>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -223,8 +223,8 @@
         <Setter Property="AllowDrop" Value="True" />
         <Setter Property="CaretBrush" Value="{DynamicResource TextBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource NormalBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource NormalBorderBrush}"/>
         <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}" />
         <Setter Property="Template">
             <Setter.Value>
@@ -235,7 +235,7 @@
                         <Grid>
                             <ScrollViewer x:Name="PART_ContentHost"
                                           VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}"
-                                          HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}" />
+                                          HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}"/>
                         </Grid>
                     </Border>
                 </ControlTemplate>

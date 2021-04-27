@@ -54,10 +54,10 @@
                             <Setter Property="Grid.Row" TargetName="ContentPanel" Value="0" />
                             <Setter Property="Height" TargetName="RowDefinition0" Value="*" />
                             <Setter Property="Height" TargetName="RowDefinition1" Value="Auto" />
-                            <Setter Property="Grid.Row" TargetName="HeaderBorder" Value="1" />
-                            <Setter Property="BorderThickness" TargetName="HeaderBorder" Value="0,1,0,0" />
-                            <Setter Property="CornerRadius" TargetName="ContentPanel" Value="2,2,0,0" />
-                            <Setter Property="CornerRadius" TargetName="HeaderBorder" Value="0,0,2,2" />
+                            <Setter Property="Grid.Row" TargetName="HeaderBorder" Value="1"/>
+                            <Setter Property="BorderThickness" TargetName="HeaderBorder" Value="0,1,0,0"/>
+                            <Setter Property="CornerRadius" TargetName="ContentPanel" Value="2,2,0,0"/>
+                            <Setter Property="CornerRadius" TargetName="HeaderBorder" Value="0,0,2,2"/>
                         </Trigger>
                         <Trigger Property="TabStripPlacement" Value="Left">
                             <Setter Property="Grid.Row" TargetName="HeaderPanel" Value="0" />
@@ -67,12 +67,12 @@
                             <Setter Property="Width" TargetName="ColumnDefinition1" Value="*" />
                             <Setter Property="Height" TargetName="RowDefinition0" Value="*" />
                             <Setter Property="Height" TargetName="RowDefinition1" Value="0" />
-                            <Setter Property="Grid.Column" TargetName="HeaderBorder" Value="0" />
-                            <Setter Property="BorderThickness" TargetName="HeaderBorder" Value="0,0,1,0" />
-                            <Setter Property="Margin" TargetName="HeaderBorder" Value="0,0,0,0" />
-                            <Setter Property="Margin" TargetName="ContentPanel" Value="0,0,0,0" />
-                            <Setter Property="CornerRadius" TargetName="HeaderBorder" Value="0,2,2,0" />
-                            <Setter Property="CornerRadius" TargetName="ContentPanel" Value="0,2,2,0" />
+                            <Setter Property="Grid.Column" TargetName="HeaderBorder" Value="0"/>
+                            <Setter Property="BorderThickness" TargetName="HeaderBorder" Value="0,0,1,0"/>
+                            <Setter Property="Margin" TargetName="HeaderBorder" Value="0,0,0,0"/>
+                            <Setter Property="Margin" TargetName="ContentPanel" Value="0,0,0,0"/>
+                            <Setter Property="CornerRadius" TargetName="HeaderBorder" Value="0,2,2,0"/>
+                            <Setter Property="CornerRadius" TargetName="ContentPanel" Value="0,2,2,0"/>
                         </Trigger>
                         <Trigger Property="TabStripPlacement" Value="Right">
                             <Setter Property="Grid.Row" TargetName="HeaderPanel" Value="0" />
@@ -82,10 +82,10 @@
                             <Setter Property="Width" TargetName="ColumnDefinition1" Value="Auto" />
                             <Setter Property="Height" TargetName="RowDefinition0" Value="*" />
                             <Setter Property="Height" TargetName="RowDefinition1" Value="0" />
-                            <Setter Property="Grid.Column" TargetName="HeaderBorder" Value="1" />
-                            <Setter Property="BorderThickness" TargetName="HeaderBorder" Value="1,0,0,0" />
-                            <Setter Property="CornerRadius" TargetName="ContentPanel" Value="2,0,0,2" />
-                            <Setter Property="CornerRadius" TargetName="HeaderBorder" Value="0,2,2,0" />
+                            <Setter Property="Grid.Column" TargetName="HeaderBorder" Value="1"/>
+                            <Setter Property="BorderThickness" TargetName="HeaderBorder" Value="1,0,0,0"/>
+                            <Setter Property="CornerRadius" TargetName="ContentPanel" Value="2,0,0,2"/>
+                            <Setter Property="CornerRadius" TargetName="HeaderBorder" Value="0,2,2,0"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -102,7 +102,7 @@
                     <Grid x:Name="TabGrid">
                         <Border x:Name="SelectedBorder" Visibility="Collapsed" Margin="1,0,1,0"
                                 SnapsToDevicePixels="True"
-                                BorderThickness="0,0,0,2" BorderBrush="{DynamicResource GlyphBrush}" />
+                                BorderThickness="0,0,0,2" BorderBrush="{DynamicResource GlyphBrush}"/>
                         <TextBlock x:Name="TextContent" Padding="5" Style="{DynamicResource BaseTextBlockStyle}"
                                    Foreground="{TemplateBinding Foreground}">
                             <ContentPresenter x:Name="ContentSite" RecognizesAccessKey="True" ContentSource="Header"
@@ -121,7 +121,7 @@
                             <Setter Property="LayoutTransform" TargetName="TabGrid">
                                 <Setter.Value>
                                     <TransformGroup>
-                                        <RotateTransform Angle="270" />
+                                        <RotateTransform Angle="270"/>
                                     </TransformGroup>
                                 </Setter.Value>
                             </Setter>
@@ -146,26 +146,26 @@
                             <Setter Property="LayoutTransform" TargetName="TabGrid">
                                 <Setter.Value>
                                     <TransformGroup>
-                                        <RotateTransform Angle="180" />
+                                        <RotateTransform Angle="180"/>
                                     </TransformGroup>
                                 </Setter.Value>
                             </Setter>
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Foreground" Value="{DynamicResource GlyphBrush}" TargetName="TextContent" />
+                            <Setter Property="Foreground" Value="{DynamicResource GlyphBrush}" TargetName="TextContent"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="Visibility" Value="Visible" TargetName="SelectedBorder" />
-                            <Setter Property="Opacity" Value="1" TargetName="TextContent" />
+                            <Setter Property="Opacity" Value="1" TargetName="TextContent"/>
                         </Trigger>
                         <Trigger Property="IsFocused" Value="True">
                             <Setter Property="Visibility" Value="Visible" TargetName="SelectedBorder" />
                             <Setter Property="BorderThickness" Value="1,1,1,2" TargetName="SelectedBorder" />
-                            <Setter Property="Opacity" Value="1" TargetName="TextContent" />
+                            <Setter Property="Opacity" Value="1" TargetName="TextContent"/>
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Visibility" Value="Visible" TargetName="SelectedBorder" />
-                            <Setter Property="Opacity" Value="1" TargetName="TextContent" />
+                            <Setter Property="Opacity" Value="1" TargetName="TextContent"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

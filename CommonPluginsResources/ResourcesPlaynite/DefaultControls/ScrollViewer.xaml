@@ -94,7 +94,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger SourceName="PART_VerticalScrollBar" Property="Visibility" Value="Visible">
-                            <Setter Property="IsTabStop" Value="True" />
+                            <Setter Property="IsTabStop" Value="True"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

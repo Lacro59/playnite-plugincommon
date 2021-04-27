@@ -17,7 +17,7 @@
                     <Border BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}">
                         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                            <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
+                            <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle"/>
                         </ScrollViewer>
                     </Border>
                 </ControlTemplate>

@@ -24,13 +24,13 @@
                                             StrokeThickness="{DynamicResource EllipseBorderThickness}" />
                                     <Viewbox x:Name="CheckIcon" Visibility="Collapsed" >
                                         <TextBlock Text="h" FontFamily="Marlett" Foreground="{DynamicResource GlyphBrush}"
-                                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Viewbox>
                                 </Grid>
                             </Border>
                         </BulletDecorator.Bullet>
                         <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}">
-                            <ContentPresenter RecognizesAccessKey="True" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                            <ContentPresenter RecognizesAccessKey="True" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                         </Border>
                     </BulletDecorator>
                     <ControlTemplate.Triggers>

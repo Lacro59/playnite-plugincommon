@@ -54,7 +54,7 @@ If you want to help us fix this issue, please send diagnostic information. Thank
     <sys:String x:Key="LOCCrashUserActionsDescription">Actions taken before the crash (in English):</sys:String>
     <sys:String x:Key="LOCLibraryManager">Library Manager</sys:String>
     <sys:String x:Key="LOCGameRemoveAskTitle">Remove Game(s)?</sys:String>
-    <sys:String x:Key="LOCGameRemoveRunningError">Cannot remove - Game or installer is running.</sys:String>
+    <sys:String x:Key="LOCGameRemoveRunningError">Cannot remove - Game or installer is running. </sys:String>
     <sys:String x:Key="LOCGameUninstallRunningError">Cannot uninstall - Game is running.</sys:String>
     <sys:String x:Key="LOCGameRemoveAskMessage" xml:space="preserve">Are you sure you want to remove this game?</sys:String>
     <sys:String x:Key="LOCGamesRemoveAskMessage" xml:space="preserve">Are you sure you want to remove {0} games?</sys:String>
@@ -301,7 +301,6 @@ Results in: -image "c:\folder\image.iso" -fullscreen</sys:String>
     <sys:String x:Key="LOCSettingsDisableAcceleration">Disable hardware acceleration</sys:String>
     <sys:String x:Key="LOCSettingsDisableAccelerationTooltip">Use when experiencing stuttering or similar UI issues</sys:String>
     <sys:String x:Key="LOCSettingsDisableDpiAwareness">Disable DPI Scaling</sys:String>
-    <sys:String x:Key="LOCSettingsShowSteamFriendsButton">Show Steam friends button</sys:String>
     <sys:String x:Key="LOCSettingsHiddenInQuickLaunch">Show hidden games in quick launch lists</sys:String>
     <sys:String x:Key="LOCSettingsHiddenInQuickLaunchTooltip">Affects Jump List and tray menu lists.</sys:String>
     <sys:String x:Key="LOCSettingsQuicLaunchItems">Number of quick launch items</sys:String>
@@ -400,6 +399,8 @@ If disabled, background artwork is downloaded only when first needed, using less
     <sys:String x:Key="LOCImportError">Import Error</sys:String>
     <sys:String x:Key="LOCLoginRequired">Authentification required</sys:String>
     <sys:String x:Key="LOCLoginFailed">Authentification failed</sys:String>
+    <sys:String x:Key="LOCSettingsAltWebViewRendering">Alternative web view rendering mode</sys:String>
+    <sys:String x:Key="LOCSettingsAltWebViewRenderingTooltip">Use when experiencing issues with web views, for example integration authentication dialogs.</sys:String>
     <!--Meta Import-->
     <sys:String x:Key="LOCMetaImportWindowTitle">Metadata Import</sys:String>
     <sys:String x:Key="LOCDownloadMetaButton">Download Metadata</sys:String>
@@ -423,23 +424,19 @@ You can also configure and import any custom emulator from the configuration men
     <sys:String x:Key="LOCEmuWizardScanning">Scanning…</sys:String>
     <!--FirstTime Wizard-->
     <sys:String x:Key="LOCFirstWindowTitle">First Time Configuration</sys:String>
-    <sys:String x:Key="LOCFirstIntro" xml:space="preserve">This wizard will guide you through the automatic import and configuration process of external game libraries. Playnite can automatically import games from multiple game services, such as Steam or GOG, and also keep your library up-to-date by updating it automatically when the application is started.
+    <sys:String x:Key="LOCFirstIntro" xml:space="preserve">This process will guide you through an automatic import and configuration of external game libraries. Playnite can automatically import games from multiple game services, such as Steam or GOG.
 
-Keep in mind that you can manually add any custom game for any platform later by clicking the 'Playnite' button in the main menu.</sys:String>
-    <sys:String x:Key="LOCFirstDBLocDefault">Default program data location for all users</sys:String>
-    <sys:String x:Key="LOCFirstDBLocCustom">Custom location</sys:String>
+Keep in mind that you can also manually add any custom or emulated game for any platform later from main menu.</sys:String>
     <sys:String x:Key="LOCFirstExternalTitle">Library Integration</sys:String>
-    <sys:String x:Key="LOCFirstImportIntroduction" xml:space="preserve">Automatically import games from the services listed below. Any later game changes (Installation Status) will be updated automatically on Playnite startup or when triggered manually. The selected settings will affect the initial and all subsequent imports.</sys:String>
-    <sys:String x:Key="LOCFirstOtherGamesTitle">Other games</sys:String>
-    <sys:String x:Key="LOCFirstOtherGamesText">Click on the button below to import other installed games or browse for them manually (including Microsoft Store games).</sys:String>
-    <sys:String x:Key="LOCFirstOtherGamesImportButton">Import Games</sys:String>
-    <sys:String x:Key="LOCFirstConfigFinishedTitle">Configuration Finished</sys:String>
-    <sys:String x:Key="LOCFirstConfigFinishedText" xml:space="preserve">The initial setup has been completed. Remember that you can change all settings later in the 'Settings' menu.
+    <sys:String x:Key="LOCFirstImportIntroduction" xml:space="preserve">Following is the list of some curated library integrations Playnite supports. Please select ones you want to install.
 
-You can also add any other game later by clicking the Playnite logo menu.</sys:String>
-    <sys:String x:Key="LOCFirstConfigOpenEmuImport">Begin the Emulation Import Wizard</sys:String>
-    <sys:String x:Key="LOCFirstConfigGridViewLayout">Grid View Layout</sys:String>
-    <sys:String x:Key="LOCFirstConfigGridViewLayoutDesc">Select preferred layout for Playnite's grid view. Image layout can be changed at any time in application settings, including image stretching options.</sys:String>
+More integrations can be installed later from "Add-ons" menu.</sys:String>
+    <sys:String x:Key="LOCFirstConfigFinishedTitle">Configuration Finished</sys:String>
+    <sys:String x:Key="LOCFirstConfigFinishedText" xml:space="preserve">The initial setup has been completed. Remember that you can change all settings later as well as add additional integrations from main menu.</sys:String>
+    <sys:String x:Key="LOCFirstPluginDownloadError" xml:space="preserve">Failed to download one or more extensions.
+
+You can try to re-download integrations from add-ons menu after first run wizard finishes.</sys:String>
+    <sys:String x:Key="LOCFirstDownloadingAddon">Downloading {0} integration…</sys:String>
     <!--Platforms Settings-->
     <sys:String x:Key="LOCPlatformsWindowTitle">Configure Platforms and Emulators</sys:String>
     <sys:String x:Key="LOCEmulatorsWindowTitle">Configure Emulators</sys:String>
@@ -683,14 +680,15 @@ You can try to resolve the issue:
     <sys:String x:Key="LOCThemeTestWatchChanges">Watch file changes</sys:String>
     <sys:String x:Key="LOCThemeTestWatchChangesTooltip">Automatically apply theme when the source file changes</sys:String>
     <sys:String x:Key="LOCScriptRuntime">Script runtime</sys:String>
-    <sys:String x:Key="LOCPreScriptDescription">Script to execute before starting a game</sys:String>
-    <sys:String x:Key="LOCPostScriptDescription">Script to execute after exiting a game</sys:String>
-    <sys:String x:Key="LOCGameStartedScriptDescription">Script to execute after a game is started</sys:String>
+    <sys:String x:Key="LOCPreScriptDescription">Execute before starting a game</sys:String>
+    <sys:String x:Key="LOCPostScriptDescription">Execute after exiting a game</sys:String>
+    <sys:String x:Key="LOCGameStartedScriptDescription">Execute after a game is started</sys:String>
     <sys:String x:Key="LOCExecuteGlobalScript">Execute global script</sys:String>
     <sys:String x:Key="LOCStatsGlobal">Global</sys:String>
     <sys:String x:Key="LOCStatsFiltered">Filtered</sys:String>
     <sys:String x:Key="LOCMetadataDiffCurrent">Current</sys:String>
     <sys:String x:Key="LOCMetadataDiffNew">New</sys:String>
+    <sys:String x:Key="LOCTestScript">Test script</sys:String>
     <!--Game actions-->
     <sys:String x:Key="LOCSaveAsDefault">Save as default</sys:String>
     <sys:String x:Key="LOCFavoriteGame">Add to Favorites</sys:String>
@@ -830,7 +828,7 @@ Backgrounds: {2} mega pixels</sys:String>
 Application restart is requred to finish the process. Do you want to reset settings?</sys:String>
     <sys:String x:Key="LOCSettingsForDevelopers">For developers</sys:String>
     <sys:String x:Key="LOCSettingsExternalExtensions">External extensions</sys:String>
-    <sys:String x:Key="LOCSettingsNewExternalExtensionBox">Enter full directory path.</sys:String>
+    <sys:String x:Key="LOCSettingsNewExternalExtensionBox">Enter full directory path.</sys:String>    
     <!--Common Library-->
     <sys:String x:Key="LOCCommonLinksAchievements">Achievements</sys:String>
     <sys:String x:Key="LOCCommonLinksForum">Forum</sys:String>
@@ -853,6 +851,7 @@ Application restart is requred to finish the process. Do you want to reset setti
     <sys:String x:Key="LOCExtensionsUpdates">Updates</sys:String>
     <sys:String x:Key="LOCExtensionsUpdatesCount">Updates ({0})</sys:String>
     <sys:String x:Key="LOCAddonsConfigMoveInfo">Management of installed extensions and themes has been moved to a new "Add-ons" menu.</sys:String>
+    <sys:String x:Key="LOCIntegrationsConfigMoveInfo">Library integration settings have been moved to "Library -> Configure Integrations" menu.</sys:String>
     <sys:String x:Key="LOCAddonsThemesDesktop">Themes Desktop</sys:String>
     <sys:String x:Key="LOCAddonsThemesFullscren">Themes Fullscren</sys:String>
     <sys:String x:Key="LOCAddonsSearching">Searching…</sys:String>
@@ -897,7 +896,7 @@ Application restart is requred to finish the process. Do you want to reset setti
     <sys:String x:Key="LOCGridViewSpacingModeStartAndEndOnly">Start and end only</sys:String>
     <sys:String x:Key="LOCGridViewScrollAmountModifier">Scroll amount modifier</sys:String>
     <sys:String x:Key="LOCAskRemoveItemTitle">Remove item?</sys:String>
-    <sys:String x:Key="LOCAskRemoveItemMessage">Are you sure you want to remove this item?</sys:String>
+    <sys:String x:Key="LOCAskRemoveItemMessage">Are you sure you want to remove this item?</sys:String>    
     <sys:String x:Key="LOCSettingsTopPanelItems">Show buttons on top panel:</sys:String>
     <sys:String x:Key="LOCSettingsTopPanelGeneralViewItem">General view settings</sys:String>
     <sys:String x:Key="LOCSettingsTopPanelGroupingItem">Grouping settings</sys:String>
@@ -941,4 +940,22 @@ Disable in you use tools that translate XInput inputs to mouse/keyboards inputs 
     <sys:String x:Key="LOCSettingsFSSectionLayout">Layout</sys:String>
     <sys:String x:Key="LOCSettingsFSSectionMenus">Menus</sys:String>
     <sys:String x:Key="LOCSettingsFSSection">Input</sys:String>
+    <sys:String x:Key="LOCGameIsStarting">{0} is starting…</sys:String>
+    <sys:String x:Key="LOCGameIsRunning">{0} is running…</sys:String>
+    <sys:String x:Key="LOCTextInputCapitalize">Caps</sys:String>
+    <sys:String x:Key="LOCSettingsImageScalerMode">Image rendering scaler</sys:String>
+    <sys:String x:Key="LOCSettingsImageScalingAlternative">Alternative</sys:String>
+    <sys:String x:Key="LOCSettingsImageScalingBalanced">Balanced</sys:String>
+    <sys:String x:Key="LOCSettingsImageScalingQuality">Quality</sys:String>
+    <sys:String x:Key="LOCSettingsImageScalerModeTooltip" xml:space="preserve">Quality:
+Best image quality, slow, high memory usage.
+    
+Balanced:
+Good quality, fast, low memory usage.
+    
+Alternative:
+Better quality, medium speed, low memory usage.</sys:String>
+    <sys:String x:Key="LOCAddonPerfNotice" xml:space="preserve">Please note that both extensions and themes can greatly affect Playnite's performance, stability and security.
+    
+If you start experiencing some issues after installing a theme or an extension, try disabling/uninstalling them first to see if they are root of the issue.</sys:String>
 </ResourceDictionary>

@@ -9,8 +9,8 @@
     <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource BaseStyle}">
         <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
-        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource NormalBrush}" />
+        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource NormalBrush}"/>
         <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}" />        
         <Setter Property="Template">
             <Setter.Value>
@@ -25,7 +25,7 @@
                                         <DockPanel LastChildFill="False" Background="Transparent">
                                             <Viewbox DockPanel.Dock="Right" Width="20" >
                                                 <TextBlock Text="6" FontFamily="Marlett" Foreground="{DynamicResource GlyphBrush}"
-                                                           VerticalAlignment="Center" />
+                                                           VerticalAlignment="Center"/>
                                             </Viewbox>
                                         </DockPanel>
                                     </ControlTemplate>

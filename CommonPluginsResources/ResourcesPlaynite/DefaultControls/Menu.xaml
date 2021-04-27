@@ -9,7 +9,7 @@
     <Style TargetType="{x:Type Separator}">
         <Setter Property="Background" Value="{DynamicResource NormalBorderBrush}" />
         <Setter Property="Margin" Value="0,2,0,2" />
-        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Focusable" Value="False"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Separator}">
@@ -17,7 +17,7 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             Background="{TemplateBinding Background}" 
                             Height="1"
-                            SnapsToDevicePixels="true" />
+                            SnapsToDevicePixels="true"/>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -26,7 +26,7 @@
     <Style TargetType="{x:Type Menu}">
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
+        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Menu">
@@ -90,11 +90,11 @@
             </Grid>
             <TextBlock Grid.Column="1" Padding="5" VerticalAlignment="Center" Style="{DynamicResource BaseTextBlockStyle}"
                        Foreground="{TemplateBinding Foreground}">
-                <ContentPresenter RecognizesAccessKey="True" Margin="5,0,5,0" ContentSource="Header" />
+                <ContentPresenter RecognizesAccessKey="True" Margin="5,0,5,0" ContentSource="Header"/>
             </TextBlock>
             <TextBlock x:Name="GestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}"
                        TextAlignment="Left" HorizontalAlignment="Stretch" Margin="20,5,10,5"
-                       VerticalAlignment="Center" Background="Transparent" Opacity="0.6" />
+                       VerticalAlignment="Center" Background="Transparent" Opacity="0.6"/>
             <Grid Grid.Column="3" Margin="0,0,5,0">
                 <TextBlock FontFamily="Marlett" Text="4" VerticalAlignment="Center" Style="{DynamicResource BaseTextBlockStyle}" />
             </Grid>
@@ -142,7 +142,7 @@
                 </Grid>
                 <TextBlock VerticalAlignment="Center" Grid.Column="1" Margin="5,0,5,0" Padding="5" Style="{DynamicResource BaseTextBlockStyle}"
                            Foreground="{TemplateBinding Foreground}">
-                    <ContentPresenter RecognizesAccessKey="True" ContentSource="Header" />
+                    <ContentPresenter RecognizesAccessKey="True" ContentSource="Header"/>
                 </TextBlock>
                 <TextBlock x:Name="GestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}"
                            TextAlignment="Left" HorizontalAlignment="Stretch"
@@ -168,9 +168,9 @@
 
     <Style TargetType="{x:Type MenuItem}" BasedOn="{StaticResource BaseStyle}">
         <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
-        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
         <Style.Triggers>
             <Trigger Property="Role" Value="TopLevelHeader">
                 <Setter Property="Template" Value="{DynamicResource {x:Static MenuItem.TopLevelHeaderTemplateKey}}" />
