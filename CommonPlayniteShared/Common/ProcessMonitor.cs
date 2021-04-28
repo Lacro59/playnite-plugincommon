@@ -39,7 +39,7 @@ namespace CommonPlayniteShared.Common
 
         public async void WatchDirectoryProcesses(string directory, bool alreadyRunning, bool byProcessNames = false)
         {
-            logger.Debug($"Watching dir processes {directory}, {alreadyRunning}, {byProcessNames}");
+            //logger.Debug($"Watching dir processes {directory}, {alreadyRunning}, {byProcessNames}");
             // Get real path in case that original path is symlink or junction point
             var realPath = directory;
             try
@@ -68,7 +68,7 @@ namespace CommonPlayniteShared.Common
 
         public async void WatchUwpApp(string familyName, bool alreadyRunning)
         {
-            logger.Debug($"Starting UWP {familyName} app watcher.");
+            //logger.Debug($"Starting UWP {familyName} app watcher.");
             watcherToken = new CancellationTokenSource();
             var startedCalled = false;
             var processStarted = false;

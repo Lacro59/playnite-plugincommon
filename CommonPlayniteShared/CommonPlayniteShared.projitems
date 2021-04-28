@@ -52,6 +52,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ImageSourceManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Manifests\ExtensionManifest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Manifests\ThemeManifest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\BattleNetLibrary\Models\BattleNetApiStatus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Models\Order.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Models\UserHome.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Settings\PlaynitePaths.cs" />

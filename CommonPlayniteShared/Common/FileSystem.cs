@@ -74,7 +74,7 @@ namespace CommonPluginsPlaynite.Common
 
         public static void CopyFile(string sourcePath, string targetPath, bool overwrite = true)
         {
-            logger.Debug($"Copying file {sourcePath} to {targetPath}");
+            //logger.Debug($"Copying file {sourcePath} to {targetPath}");
             PrepareSaveFile(targetPath);
             File.Copy(sourcePath, targetPath, overwrite);
         }
@@ -180,7 +180,7 @@ namespace CommonPluginsPlaynite.Common
                 }
                 catch (IOException exc)
                 {
-                    logger.Debug($"Can't read from file, trying again. {path}");
+                    //logger.Debug($"Can't read from file, trying again. {path}");
                     ioException = exc;
                     Task.Delay(500).Wait();
                 }
@@ -200,7 +200,7 @@ namespace CommonPluginsPlaynite.Common
                 }
                 catch (IOException exc)
                 {
-                    logger.Debug($"Can't read from file, trying again. {path}");
+                    //logger.Debug($"Can't read from file, trying again. {path}");
                     ioException = exc;
                     Task.Delay(500).Wait();
                 }
@@ -220,7 +220,7 @@ namespace CommonPluginsPlaynite.Common
                 }
                 catch (IOException exc)
                 {
-                    logger.Debug($"Can't open write file stream, trying again. {path}");
+                    //logger.Debug($"Can't open write file stream, trying again. {path}");
                     ioException = exc;
                     Task.Delay(500).Wait();
                 }
@@ -240,7 +240,7 @@ namespace CommonPluginsPlaynite.Common
                 }
                 catch (IOException exc)
                 {
-                    logger.Debug($"Can't open read file stream, trying again. {path}");
+                    //logger.Debug($"Can't open read file stream, trying again. {path}");
                     ioException = exc;
                     Task.Delay(500).Wait();
                 }
@@ -268,7 +268,7 @@ namespace CommonPluginsPlaynite.Common
                 }
                 catch (IOException exc)
                 {
-                    logger.Debug($"Can't write to a file, trying again. {path}");
+                    //logger.Debug($"Can't write to a file, trying again. {path}");
                     ioException = exc;
                     Task.Delay(500).Wait();
                 }
@@ -294,7 +294,7 @@ namespace CommonPluginsPlaynite.Common
                 }
                 catch (IOException exc)
                 {
-                    logger.Debug($"Can't detele file, trying again. {path}");
+                    //logger.Debug($"Can't detele file, trying again. {path}");
                     ioException = exc;
                     Task.Delay(500).Wait();
                 }

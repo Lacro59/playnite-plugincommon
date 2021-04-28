@@ -47,7 +47,7 @@ namespace CommonPluginsPlaynite.Common.Web
 
         public string DownloadString(IEnumerable<string> mirrors)
         {
-            logger.Debug($"Downloading string content from multiple mirrors.");
+            //logger.Debug($"Downloading string content from multiple mirrors.");
             foreach (var mirror in mirrors)
             {
                 try
@@ -70,7 +70,7 @@ namespace CommonPluginsPlaynite.Common.Web
 
         public string DownloadString(string url, Encoding encoding)
         {
-            logger.Debug($"Downloading string content from {url} using {encoding} encoding.");
+            //logger.Debug($"Downloading string content from {url} using {encoding} encoding.");
             using (var webClient = new WebClient { Encoding = encoding })
             {
                 return webClient.DownloadString(url);
@@ -84,7 +84,7 @@ namespace CommonPluginsPlaynite.Common.Web
 
         public string DownloadString(string url, List<Cookie> cookies, Encoding encoding)
         {
-            logger.Debug($"Downloading string content from {url} using cookies and {encoding} encoding.");
+            //logger.Debug($"Downloading string content from {url} using cookies and {encoding} encoding.");
             using (var webClient = new WebClient { Encoding = encoding })
             {
                 if (cookies?.Any() == true)
@@ -104,7 +104,7 @@ namespace CommonPluginsPlaynite.Common.Web
 
         public void DownloadString(string url, string path, Encoding encoding)
         {
-            logger.Debug($"Downloading string content from {url} to {path} using {encoding} encoding.");
+            //logger.Debug($"Downloading string content from {url} to {path} using {encoding} encoding.");
             using (var webClient = new WebClient { Encoding = encoding })
             {
                 var data = webClient.DownloadString(url);
@@ -114,7 +114,7 @@ namespace CommonPluginsPlaynite.Common.Web
 
         public byte[] DownloadData(string url)
         {
-            logger.Debug($"Downloading data from {url}.");
+            //logger.Debug($"Downloading data from {url}.");
             using (var webClient = new WebClient())
             {
                 return webClient.DownloadData(url);
@@ -123,7 +123,7 @@ namespace CommonPluginsPlaynite.Common.Web
 
         public void DownloadFile(string url, string path)
         {
-            logger.Debug($"Downloading data from {url} to {path}.");
+            //logger.Debug($"Downloading data from {url} to {path}.");
             FileSystem.CreateDirectory(Path.GetDirectoryName(path));
             using (var webClient = new WebClient())
             {
@@ -133,7 +133,7 @@ namespace CommonPluginsPlaynite.Common.Web
 
         public void DownloadFile(string url, string path, CancellationTokenSource cancelToken)
         {
-            logger.Debug($"Downloading data from {url} to {path}.");
+            //logger.Debug($"Downloading data from {url} to {path}.");
             FileSystem.CreateDirectory(Path.GetDirectoryName(path));
 
             try
@@ -152,7 +152,7 @@ namespace CommonPluginsPlaynite.Common.Web
 
         public async Task DownloadFileAsync(string url, string path, Action<DownloadProgressChangedEventArgs> progressHandler)
         {
-            logger.Debug($"Downloading data async from {url} to {path}.");
+            //logger.Debug($"Downloading data async from {url} to {path}.");
             FileSystem.CreateDirectory(Path.GetDirectoryName(path));
             using (var webClient = new WebClient())
             {
@@ -164,7 +164,7 @@ namespace CommonPluginsPlaynite.Common.Web
 
         public async Task DownloadFileAsync(IEnumerable<string> mirrors, string path, Action<DownloadProgressChangedEventArgs> progressHandler)
         {
-            logger.Debug($"Downloading data async from multiple mirrors.");
+            //logger.Debug($"Downloading data async from multiple mirrors.");
             foreach (var mirror in mirrors)
             {
                 try
@@ -183,7 +183,7 @@ namespace CommonPluginsPlaynite.Common.Web
 
         public void DownloadFile(IEnumerable<string> mirrors, string path)
         {
-            logger.Debug($"Downloading data from multiple mirrors.");
+            //logger.Debug($"Downloading data from multiple mirrors.");
             foreach (var mirror in mirrors)
             {
                 try

@@ -37,7 +37,7 @@ namespace CommonPlayniteShared
             {
                 if (File.Exists(cacheFile) && (new FileInfo(cacheFile)).Length != 0)
                 {
-                    logger.Debug($"Returning {url} from file cache {cacheFile}.");
+                    //logger.Debug($"Returning {url} from file cache {cacheFile}.");
                     return cacheFile;
                 }
                 else
@@ -82,7 +82,7 @@ namespace CommonPlayniteShared
                 var cacheFile = Path.Combine(CacheDirectory, GetFileNameFromUrl(url));
                 if (File.Exists(cacheFile))
                 {
-                    logger.Debug($"Removing {url} from file cache: {cacheFile}");
+                    //logger.Debug($"Removing {url} from file cache: {cacheFile}");
                     try
                     {
                         FileSystem.DeleteFileSafe(cacheFile);

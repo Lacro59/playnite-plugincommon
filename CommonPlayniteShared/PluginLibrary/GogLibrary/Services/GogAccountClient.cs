@@ -120,7 +120,7 @@ namespace CommonPluginsPlaynite.PluginLibrary.Services.GogLibrary
             catch (Exception e)
             {
                 logger.Error(e, $"Failed to library from new API for account {account.username}, falling back to legacy.");
-                logger.Debug(stringLibContent);
+                //logger.Debug(stringLibContent);
                 return GetOwnedGames();
             }
         }
