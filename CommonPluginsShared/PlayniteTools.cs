@@ -127,7 +127,7 @@ namespace CommonPluginsShared
                 }
                 else
                 {
-                    Common.LogDebug(false, $"DisabledPlugins is null");
+                    Common.LogDebug(true, $"DisabledPlugins is null");
                     return false;
                 }
             }

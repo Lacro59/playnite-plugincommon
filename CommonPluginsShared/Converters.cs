@@ -18,7 +18,6 @@ namespace CommonPluginsShared
     {
         public static IResourceProvider resources = new ResourceProvider();
 
-
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             try

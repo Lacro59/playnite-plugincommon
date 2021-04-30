@@ -22,6 +22,7 @@ using System.Windows.Automation;
 using CommonPluginsControls.Controls;
 using CommonPluginsPlaynite.Common;
 using CommonPluginsShared.Interfaces;
+using Playnite.SDK.Plugins;
 
 namespace CommonPluginsShared.Collections
 {
@@ -365,44 +366,68 @@ namespace CommonPluginsShared.Collections
 
         public virtual void Add(TItem itemToAdd)
         {
-            itemToAdd.IsSaved = true;
-            Application.Current.Dispatcher?.Invoke(() => Database.Add(itemToAdd), DispatcherPriority.Send);
-            
-            // If tag system
-            var Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
-            PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
-
-            if (propertyInfo != null)
+            try
             {
-                bool EnableTag = (bool)propertyInfo.GetValue(Settings);
-                if (EnableTag)
+                itemToAdd.IsSaved = true;
+                Application.Current.Dispatcher?.Invoke(() => Database.Add(itemToAdd), DispatcherPriority.Send);
+
+                // If tag system
+                var Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
+                PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
+
+                if (propertyInfo != null)
                 {
-                    Common.LogDebug(true, $"RemoveTag & AddTag for {itemToAdd.Name} with {itemToAdd.Id.ToString()}");
-                    RemoveTag(itemToAdd.Id, true);
-                    AddTag(itemToAdd.Id);
+                    bool EnableTag = (bool)propertyInfo.GetValue(Settings);
+                    if (EnableTag)
+                    {
+                        Common.LogDebug(true, $"RemoveTag & AddTag for {itemToAdd.Name} with {itemToAdd.Id.ToString()}");
+                        RemoveTag(itemToAdd.Id, true);
+                        AddTag(itemToAdd.Id);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                PlayniteApi.Notifications.Add(new NotificationMessage(
+                    $"{PluginName}-Error-Add",
+                    $"{PluginName}\r\n{ex.Message}",
+                    NotificationType.Error
+                ));
             }
         }
 
         public virtual void Update(TItem itemToUpdate)
         {
-            itemToUpdate.IsSaved = true;
-            Database.Items.TryUpdate(itemToUpdate.Id, itemToUpdate, Get(itemToUpdate.Id, true));
-            Application.Current.Dispatcher?.Invoke(() => Database.Update(itemToUpdate), DispatcherPriority.Send);
-
-            // If tag system
-            var Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
-            PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
-
-            if (propertyInfo != null)
+            try
             {
-                bool EnableTag = (bool)propertyInfo.GetValue(Settings);
-                if (EnableTag)
+                itemToUpdate.IsSaved = true;
+                Database.Items.TryUpdate(itemToUpdate.Id, itemToUpdate, Get(itemToUpdate.Id, true));
+                Application.Current.Dispatcher?.Invoke(() => Database.Update(itemToUpdate), DispatcherPriority.Send);
+
+                // If tag system
+                var Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
+                PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
+
+                if (propertyInfo != null)
                 {
-                    Common.LogDebug(true, $"RemoveTag & AddTag for {itemToUpdate.Name} with {itemToUpdate.Id.ToString()}");
-                    RemoveTag(itemToUpdate.Id, true);
-                    AddTag(itemToUpdate.Id);
+                    bool EnableTag = (bool)propertyInfo.GetValue(Settings);
+                    if (EnableTag)
+                    {
+                        Common.LogDebug(true, $"RemoveTag & AddTag for {itemToUpdate.Name} with {itemToUpdate.Id.ToString()}");
+                        RemoveTag(itemToUpdate.Id, true);
+                        AddTag(itemToUpdate.Id);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                PlayniteApi.Notifications.Add(new NotificationMessage(
+                    $"{PluginName}-Error-Update",
+                    $"{PluginName}\r\n{ex.Message}",
+                    NotificationType.Error
+                ));
             }
         }
 
