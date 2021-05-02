@@ -32,12 +32,13 @@ namespace CommonPluginsShared
         {
             try
             {
-                Image image = Image.FromFile(srcPath);
-
-                return new ImageProperty
+                using (Image image = Image.FromFile(srcPath))
                 {
-                    Width = image.Width,
-                    Height = image.Height,
+                    return new ImageProperty
+                    {
+                        Width = image.Width,
+                        Height = image.Height,
+                    };
                 };
             }
             catch (Exception ex)
@@ -52,12 +53,13 @@ namespace CommonPluginsShared
         {
             try
             {
-                Image image = Image.FromStream(imgStream);
-
-                return new ImageProperty
+                using (Image image = Image.FromStream(imgStream))
                 {
-                    Width = image.Width,
-                    Height = image.Height,
+                    return new ImageProperty
+                    {
+                        Width = image.Width,
+                        Height = image.Height,
+                    };
                 };
             }
             catch (Exception ex)
@@ -98,6 +100,9 @@ namespace CommonPluginsShared
                 string newPath = srcPath.Replace(".png", "_" + width + "x" + height + ".png");
                 resultImage.Save(newPath);
 
+                image.Dispose();
+                resultImage.Dispose();
+
                 return newPath;
             }
             catch (Exception ex)
@@ -116,6 +121,9 @@ namespace CommonPluginsShared
                 Image image = Image.FromStream(imgStream);
                 Bitmap resultImage = Resize(image, width, height);
                 resultImage.Save(path + ".png");
+
+                image.Dispose();
+                resultImage.Dispose();
 
                 return true;
             }
