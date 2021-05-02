@@ -58,6 +58,7 @@ namespace CommonPluginsShared
                 Stream imageStream;
                 try
                 {
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
                     HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
                     imageStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
                 }
@@ -105,6 +106,7 @@ namespace CommonPluginsShared
             {
                 try
                 {
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
                     HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
                     return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
                 }
@@ -179,6 +181,7 @@ namespace CommonPluginsShared
                 HttpResponseMessage response;
                 try
                 {
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
                     response = await client.SendAsync(request).ConfigureAwait(false);
                 }
                 catch (Exception ex)
@@ -223,9 +226,7 @@ namespace CommonPluginsShared
         public static async Task<string> DownloadStringData(string url, WebUserAgentType UserAgentType)
         {
             using (var client = new HttpClient())
-            {
-                client.DefaultRequestHeaders.UserAgent.TryParseAdd(StrWebUserAgentType(UserAgentType));
-
+            {                
                 var request = new HttpRequestMessage()
                 {
                     RequestUri = new Uri(url),
@@ -235,6 +236,7 @@ namespace CommonPluginsShared
                 HttpResponseMessage response;
                 try
                 {
+                    client.DefaultRequestHeaders.UserAgent.TryParseAdd(StrWebUserAgentType(UserAgentType));
                     response = await client.SendAsync(request).ConfigureAwait(false);
                 }
                 catch (Exception ex)
