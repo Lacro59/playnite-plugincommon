@@ -140,7 +140,7 @@ namespace CommonPluginsShared
                     catch (Exception ex)
                     {
                         // Ignored
-                        Common.LogError(ex, "");
+                        //Common.LogError(ex, "");
                     }
                 }
 
@@ -360,7 +360,7 @@ namespace CommonPluginsShared
                     catch (Exception ex)
                     {
                         // Ignored
-                        Common.LogError(ex, "");
+                        //Common.LogError(ex, "");
                     }
                 }
 
@@ -418,7 +418,7 @@ namespace CommonPluginsShared
                     catch (Exception ex)
                     {
                         // Ignored
-                        Common.LogError(ex, "");
+                        //Common.LogError(ex, "");
                     }
                 }
 
