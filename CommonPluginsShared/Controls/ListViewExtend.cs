@@ -21,7 +21,6 @@ namespace CommonPluginsShared.Controls
         public bool WidthStretch { get; set; }
         #endregion  
 
-
         #region BubblingScrollEvents
         public bool BubblingScrollEvents
         {
@@ -158,7 +157,6 @@ namespace CommonPluginsShared.Controls
         }
 
 
-
         private GridViewColumnHeader _lastHeaderClicked = null;
         private ListSortDirection? _lastDirection;
 
@@ -198,6 +196,7 @@ namespace CommonPluginsShared.Controls
             }
         }
 
+
         private GridViewColumnHeader FindGridViewColumn(string DataName)
         {
             if (this.View != null && this.View is GridView)
@@ -224,7 +223,8 @@ namespace CommonPluginsShared.Controls
             }
             return null;
         }
-        
+
+
         private void ListViewExtend_onHeaderClick(object sender, RoutedEventArgs e)
         {
             if (SortingEnable)
@@ -286,48 +286,62 @@ namespace CommonPluginsShared.Controls
                                 }
 
                                 Sort(sortBy, direction);
+
+
+                                if (_lastHeaderClicked != null)
+                                {
+                                    StackPanel stackPanel_Last = _lastHeaderClicked.Content as StackPanel;
+                                    Label label_Last = stackPanel_Last.Children[0] as Label;
+
+                                    _lastHeaderClicked.Content = label_Last.Content;
+                                }
+
+
+                                // Show caret
+                                if (headerClicked is GridViewColumnHeaderExtend)
+                                {
+                                    int RefIndex = ((GridViewColumnHeaderExtend)headerClicked).RefIndex;
+
+                                    if (RefIndex != -1)
+                                    {
+                                        GridView gridView = this.View as GridView;
+                                        GridViewColumn gridViewColumn = gridView.Columns[RefIndex];
+                                        headerClicked = gridViewColumn.Header as GridViewColumnHeader;
+                                    }
+                                }
+
+                                Label labelHeader = new Label();
+                                labelHeader.Content = headerClicked.Content;
+
+                                Label labelCaret = new Label();
+                                labelCaret.FontFamily = Application.Current?.TryFindResource("FontIcoFont") as FontFamily;
+
+                                if (direction == ListSortDirection.Ascending)
+                                {
+                                    labelCaret.Content = $" {CaretUp}";
+                                }
+                                else
+                                {
+                                    labelCaret.Content = $" {CaretDown}";
+                                }
+
+                                StackPanel stackPanel = new StackPanel();
+                                stackPanel.Orientation = Orientation.Horizontal;
+                                stackPanel.Children.Add(labelHeader);
+                                stackPanel.Children.Add(labelCaret);
+
+                                headerClicked.Content = stackPanel;
+
+
+                                // Remove arrow from previously sorted header
+                                if (_lastHeaderClicked != null && _lastHeaderClicked != headerClicked)
+                                {
+                                    _lastHeaderClicked.Column.HeaderTemplate = null;
+                                }
+
+                                _lastHeaderClicked = headerClicked;
+                                _lastDirection = direction;
                             }
-
-                            if (_lastHeaderClicked != null)
-                            {
-                                StackPanel stackPanel_Last = _lastHeaderClicked.Content as StackPanel;
-                                Label label_Last = stackPanel_Last.Children[0] as Label;
-
-                                _lastHeaderClicked.Content = label_Last.Content;
-                            }
-
-
-                            Label labelHeader = new Label();
-                            labelHeader.Content = headerClicked.Content;
-
-                            Label labelCaret = new Label();
-                            labelCaret.FontFamily = Application.Current?.TryFindResource("FontIcoFont") as FontFamily;
-
-                            if (direction == ListSortDirection.Ascending)
-                            {
-                                labelCaret.Content = $" {CaretUp}";
-                            }
-                            else
-                            {
-                                labelCaret.Content = $" {CaretDown}";
-                            }
-
-                            StackPanel stackPanel = new StackPanel();
-                            stackPanel.Orientation = Orientation.Horizontal;
-                            stackPanel.Children.Add(labelHeader);
-                            stackPanel.Children.Add(labelCaret);
-
-                            headerClicked.Content = stackPanel;
-
-
-                            // Remove arrow from previously sorted header
-                            if (_lastHeaderClicked != null && _lastHeaderClicked != headerClicked)
-                            {
-                                _lastHeaderClicked.Column.HeaderTemplate = null;
-                            }
-
-                            _lastHeaderClicked = headerClicked;
-                            _lastDirection = direction;
                         }
                     }
                 }
@@ -337,7 +351,8 @@ namespace CommonPluginsShared.Controls
                 }
             }
         }
-        
+
+
         public void Sorting()
         {
             if (_lastHeaderClicked != null)
@@ -380,5 +395,21 @@ namespace CommonPluginsShared.Controls
             dataView.Refresh();
         }
         #endregion
+    }
+
+
+    public class GridViewColumnHeaderExtend : GridViewColumnHeader
+    {
+        public int RefIndex
+        {
+            get { return (int)GetValue(RefIndexProperty); }
+            set { SetValue(RefIndexProperty, value); }
+        }
+
+        public static readonly DependencyProperty RefIndexProperty = DependencyProperty.Register(
+            nameof(RefIndex),
+            typeof(int),
+            typeof(GridViewColumnHeaderExtend),
+            new FrameworkPropertyMetadata(-1));
     }
 }

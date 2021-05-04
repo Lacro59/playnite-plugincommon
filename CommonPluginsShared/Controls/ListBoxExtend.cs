@@ -29,12 +29,12 @@ namespace CommonPluginsShared.Controls
         public static readonly DependencyProperty BubblingScrollEventsProperty = DependencyProperty.Register(
             nameof(BubblingScrollEvents),
             typeof(bool),
-            typeof(ListViewExtend),
+            typeof(ListBoxExtend),
             new FrameworkPropertyMetadata(false, BubblingScrollEventsChangedCallback));
 
         private static void BubblingScrollEventsChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var obj = sender as ListViewExtend;
+            var obj = sender as ListBoxExtend;
             if (obj != null && e.NewValue != e.OldValue)
             {
                 if ((bool)e.NewValue)
