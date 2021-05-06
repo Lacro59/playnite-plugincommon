@@ -234,6 +234,11 @@ namespace CommonPluginsShared.Controls
                     var headerClicked = e.OriginalSource as GridViewColumnHeader;
                     ListSortDirection direction;
 
+                    if (headerClicked == null)
+                    {
+                        return;
+                    }
+
                     // No sort
                     if (headerClicked.Tag != null && ((string)headerClicked.Tag).ToLower() == "nosort")
                     {
@@ -388,11 +393,14 @@ namespace CommonPluginsShared.Controls
 
         private void Sort(string sortBy, ListSortDirection direction)
         {
-            ICollectionView dataView = CollectionViewSource.GetDefaultView(this.ItemsSource);
-            dataView.SortDescriptions.Clear();
-            SortDescription sd = new SortDescription(sortBy, direction);
-            dataView.SortDescriptions.Add(sd);
-            dataView.Refresh();
+            if (this.ItemsSource != null)
+            {
+                ICollectionView dataView = CollectionViewSource.GetDefaultView(this.ItemsSource);
+                dataView.SortDescriptions.Clear();
+                SortDescription sd = new SortDescription(sortBy, direction);
+                dataView.SortDescriptions.Add(sd);
+                dataView.Refresh();
+            }
         }
         #endregion
     }
