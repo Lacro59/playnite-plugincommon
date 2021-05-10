@@ -21,6 +21,8 @@
     <sys:String x:Key="LOCCommon90to100">90 to 100 hours</sys:String>
     <sys:String x:Key="LOCCommon100plus">More 100 hours</sys:String>
 
+    <sys:String x:Key="LOCCommonDefaultSorting">Default game list sorting</sys:String>
+
 
     <!-- login -->
 
@@ -79,6 +81,7 @@
     <!-- CommonMenus -->
 
     <sys:String x:Key="LOCCommonRefreshGameData">Refresh data</sys:String>
+    <sys:String x:Key="LOCCommonRefreshAllData">Refresh all data</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">Delete data</sys:String>
 
     <sys:String x:Key="LOCCommonSelectGames">Select games</sys:String>

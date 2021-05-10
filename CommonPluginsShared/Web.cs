@@ -141,7 +141,6 @@ namespace CommonPluginsShared
                     catch (Exception ex)
                     {
                         Common.LogError(ex, true);
-                        logger.Warn($"Cookies ignored for {url}");
                     }
                 }
 
@@ -364,7 +363,6 @@ namespace CommonPluginsShared
                     catch (Exception ex)
                     {
                         Common.LogError(ex, true);
-                        logger.Warn($"Cookies ignored for {url}");
                     }
                 }
 
@@ -422,7 +420,6 @@ namespace CommonPluginsShared
                     catch (Exception ex)
                     {
                         Common.LogError(ex, true);
-                        logger.Warn($"Cookies ignored for {url}");
                     }
                 }
 

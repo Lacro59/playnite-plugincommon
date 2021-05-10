@@ -24,6 +24,8 @@ namespace CommonPluginsShared
         public static readonly ILogger logger = LogManager.GetLogger();
         public static IResourceProvider resources = new ResourceProvider();
 
+        // TODO Used?
+        /*
         public readonly IPlayniteAPI _PlayniteApi;
         public abstract string _PluginUserDataPath { get; set; }
 
@@ -259,64 +261,6 @@ namespace CommonPluginsShared
         #endregion
 
 
-        public static void HandleEsc(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Escape)
-            {
-                if (sender is Window)
-                {
-                    e.Handled = true;
-                    ((Window)sender).Close();
-                }
-            }
-            else
-            {
-            }
-        }
-
-        public static Window CreateExtensionWindow(IPlayniteAPI PlayniteApi, string Title, UserControl ViewExtension, 
-            WindowCreationOptions windowCreationOptions = null)
-        {
-            if (windowCreationOptions == null)
-            {
-                windowCreationOptions = new WindowCreationOptions
-                {
-                    ShowMinimizeButton = false,
-                    ShowMaximizeButton = false,
-                    ShowCloseButton = true
-                };
-            }
-
-            Window windowExtension = PlayniteApi.Dialogs.CreateWindow(windowCreationOptions);
-
-            windowExtension.Title = Title;
-            windowExtension.ShowInTaskbar = false;
-            windowExtension.ResizeMode = ResizeMode.NoResize;
-            windowExtension.Owner = PlayniteApi.Dialogs.GetCurrentAppWindow();
-            windowExtension.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            windowExtension.Content = ViewExtension;
-
-            if (!double.IsNaN(ViewExtension.Height) && !double.IsNaN(ViewExtension.Width))
-            {
-                windowExtension.Height = ViewExtension.Height + 25;
-                windowExtension.Width = ViewExtension.Width;
-            }
-            else if(!double.IsNaN(ViewExtension.MinHeight) && !double.IsNaN(ViewExtension.MinWidth) && ViewExtension.MinHeight > 0 && ViewExtension.MinWidth > 0)
-            {
-                windowExtension.Height = ViewExtension.MinHeight + 25;
-                windowExtension.Width = ViewExtension.MinWidth;
-            }
-            else
-            {
-                windowExtension.SizeToContent = SizeToContent.WidthAndHeight;
-            }
-
-            windowExtension.PreviewKeyDown += new KeyEventHandler(HandleEsc);
-
-            return windowExtension;
-        }
-
-
         public static void ResetToggle()
         {
             Common.LogDebug(true, "ResetToggle()");
@@ -371,16 +315,14 @@ namespace CommonPluginsShared
 
                 dynamic PART_ElemDescriptionParent = (FrameworkElement)PART_ElemDescription.Parent;
 
-                /*
-                if (NotesVisibility == null)
-                {
-                    FrameworkElement PART_ElemNotes = IntegrationUI.SearchElementByName("PART_ElemNotes");
-                    if (PART_ElemNotes != null)
-                    {
-                        NotesVisibility = PART_ElemNotes.Visibility;
-                    }
-                }
-                */
+                //if (NotesVisibility == null)
+                //{
+                //    FrameworkElement PART_ElemNotes = IntegrationUI.SearchElementByName("PART_ElemNotes");
+                //    if (PART_ElemNotes != null)
+                //    {
+                //        NotesVisibility = PART_ElemNotes.Visibility;
+                //    }
+                //}
 
                 FrameworkElement PART_GaButton = IntegrationUI.SearchElementByName("PART_GaButton", true);
                 FrameworkElement PART_ScButton = IntegrationUI.SearchElementByName("PART_ScButton", true);
@@ -497,6 +439,64 @@ namespace CommonPluginsShared
                 Common.LogError(ex, false);
             }
         }
+        */
+
+        public static void HandleEsc(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                if (sender is Window)
+                {
+                    e.Handled = true;
+                    ((Window)sender).Close();
+                }
+            }
+            else
+            {
+            }
+        }
+
+        public static Window CreateExtensionWindow(IPlayniteAPI PlayniteApi, string Title, UserControl ViewExtension,
+            WindowCreationOptions windowCreationOptions = null)
+        {
+            if (windowCreationOptions == null)
+            {
+                windowCreationOptions = new WindowCreationOptions
+                {
+                    ShowMinimizeButton = false,
+                    ShowMaximizeButton = false,
+                    ShowCloseButton = true
+                };
+            }
+
+            Window windowExtension = PlayniteApi.Dialogs.CreateWindow(windowCreationOptions);
+
+            windowExtension.Title = Title;
+            windowExtension.ShowInTaskbar = false;
+            windowExtension.ResizeMode = ResizeMode.NoResize;
+            windowExtension.Owner = PlayniteApi.Dialogs.GetCurrentAppWindow();
+            windowExtension.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            windowExtension.Content = ViewExtension;
+
+            if (!double.IsNaN(ViewExtension.Height) && !double.IsNaN(ViewExtension.Width))
+            {
+                windowExtension.Height = ViewExtension.Height + 25;
+                windowExtension.Width = ViewExtension.Width;
+            }
+            else if (!double.IsNaN(ViewExtension.MinHeight) && !double.IsNaN(ViewExtension.MinWidth) && ViewExtension.MinHeight > 0 && ViewExtension.MinWidth > 0)
+            {
+                windowExtension.Height = ViewExtension.MinHeight + 25;
+                windowExtension.Width = ViewExtension.MinWidth;
+            }
+            else
+            {
+                windowExtension.SizeToContent = SizeToContent.WidthAndHeight;
+            }
+
+            windowExtension.PreviewKeyDown += new KeyEventHandler(HandleEsc);
+
+            return windowExtension;
+        }
     }
 
 
@@ -551,6 +551,8 @@ namespace CommonPluginsShared
         }
 
 
+        // TODO Used?
+        /*
         #region Header button
         private FrameworkElement btHeaderChild = null;
 
@@ -663,7 +665,7 @@ namespace CommonPluginsShared
                         spContener.Name = "PART_spContener";
                         spContener.Orientation = Orientation.Horizontal;
                         spContener.SetValue(Grid.ColumnProperty, 3);
-        
+
                         ((Grid)(btGameSelectedActionBarChild.Parent)).Children.Add(spContener);
                         ((Grid)(btGameSelectedActionBarChild.Parent)).UpdateLayout();
                     }
@@ -979,7 +981,7 @@ namespace CommonPluginsShared
                     }
                 }
 
-                 ListCustomElement = new List<FrameworkElement>();
+                ListCustomElement = new List<FrameworkElement>();
                 return;
             }
             catch (Exception ex)
@@ -991,7 +993,7 @@ namespace CommonPluginsShared
         }
         #endregion
 
-        
+
 
 
         #region GameSelectedInfoBarFS
@@ -1186,8 +1188,7 @@ namespace CommonPluginsShared
             }
         }
         #endregion
-
-
+        */
 
 
         private static FrameworkElement SearchElementByNameInExtander(object control, string ElementName)
@@ -1226,7 +1227,7 @@ namespace CommonPluginsShared
                                 {
                                     tmp = SearchElementByNameInExtander(((TabItem)subItem).Content, ElementName);
                                 }
-                               
+
                                 if (tmp != null)
                                 {
                                     return tmp;
@@ -1270,7 +1271,7 @@ namespace CommonPluginsShared
                         {
                             tmpEl = SearchElementByNameInExtander(((Expander)el).Content, ElementName);
                         }
-                        
+
                         if (el.ToString().ToLower().Contains("tabitem"))
                         {
                             tmpEl = SearchElementByNameInExtander(((TabItem)el).Content, ElementName);
@@ -1309,7 +1310,7 @@ namespace CommonPluginsShared
                             }
                         }
                     }
-                    else if(el.Name == ElementName)
+                    else if (el.Name == ElementName)
                     {
                         count++;
 

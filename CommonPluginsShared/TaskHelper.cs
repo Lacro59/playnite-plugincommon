@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace CommonPluginsShared
 {
+    // TODO Used?
+    /*
     public class SystemTask
     {
         public CancellationTokenSource tokenSource { get; set; }
@@ -64,4 +66,5 @@ namespace CommonPluginsShared
             }
         }
     }
+    */
 }
