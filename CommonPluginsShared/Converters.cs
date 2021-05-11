@@ -466,4 +466,36 @@ namespace CommonPluginsShared
             throw new NotImplementedException();
         }
     }
+
+
+    public class VisibilityLessThanConverter : IValueConverter
+    {
+        private static ILogger logger = LogManager.GetLogger();
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            try
+            {
+                double.TryParse(value.ToString(), out double valueDouble);
+                double.TryParse(parameter.ToString(), out double parameterDouble);
+
+                if (valueDouble > parameterDouble)
+                {
+                    return Visibility.Visible;
+                }
+
+                return Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                return Visibility.Visible;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
 }

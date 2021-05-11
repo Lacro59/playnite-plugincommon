@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,13 @@ namespace CommonPluginsControls.Controls
     /// </summary>
     public partial class ProgressBarExtend : UserControl
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyRaised(string propertyname)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
+        }
+
+
         #region Text property
         public string TextValue
         {
@@ -183,6 +191,7 @@ namespace CommonPluginsControls.Controls
             typeof(ProgressBarExtend),
             new PropertyMetadata(double.NaN, ProgressBarChangedCallback));
 
+
         public double MarginWidth
         {
             get
@@ -202,6 +211,68 @@ namespace CommonPluginsControls.Controls
             typeof(ProgressBarExtend),
             new PropertyMetadata(double.NaN, ProgressBarChangedCallback));
 
+
+        public double IndicatorHeight
+        {
+            get
+            {
+                return (double)GetValue(IndicatorHeightProperty);
+            }
+
+            set
+            {
+                SetValue(IndicatorHeightProperty, value);
+                OnPropertyRaised(nameof(IndicatorHeight));
+            }
+        }
+
+        public static readonly DependencyProperty IndicatorHeightProperty = DependencyProperty.Register(
+            nameof(IndicatorHeight),
+            typeof(double),
+            typeof(ProgressBarExtend),
+            new PropertyMetadata(double.NaN));
+
+        public double IndicatorDemiHeight
+        {
+            get
+            {
+                return (double)GetValue(IndicatorDemiHeightProperty);
+            }
+
+            set
+            {
+                SetValue(IndicatorDemiHeightProperty, value);
+                OnPropertyRaised(nameof(IndicatorDemiHeight));
+            }
+        }
+
+        public static readonly DependencyProperty IndicatorDemiHeightProperty = DependencyProperty.Register(
+            nameof(IndicatorDemiHeight),
+            typeof(double),
+            typeof(ProgressBarExtend),
+            new PropertyMetadata(double.NaN));
+
+        public double IndicatorWidth
+        {
+            get
+            {
+                return (double)GetValue(IndicatorWidthProperty);
+            }
+
+            set
+            {
+                SetValue(IndicatorWidthProperty, value);
+                OnPropertyRaised(nameof(IndicatorWidth));
+            }
+        }
+
+        public static readonly DependencyProperty IndicatorWidthProperty = DependencyProperty.Register(
+            nameof(IndicatorWidth),
+            typeof(double),
+            typeof(ProgressBarExtend),
+            new PropertyMetadata(double.NaN));
+
+
         public double TextWidth
         {
             get
@@ -220,6 +291,7 @@ namespace CommonPluginsControls.Controls
             typeof(double),
             typeof(ProgressBarExtend),
             new PropertyMetadata(double.NaN));
+
 
         private static void ProgressBarChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
@@ -254,6 +326,7 @@ namespace CommonPluginsControls.Controls
             InitializeComponent();
         }
 
+
         public double GetIndicatorWidth()
         {
             Decorator indicator = (Decorator)PART_ProgressBar.Template.FindName("PART_Indicator", PART_ProgressBar);
@@ -270,7 +343,20 @@ namespace CommonPluginsControls.Controls
 
         public double GetIndicatorHeight()
         {
+            if (PART_ProgressBar == null)
+            {
+                return 0;
+            }
+
             return PART_ProgressBar.ActualHeight;
+        }
+
+
+        private void PART_ProgressBar_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            IndicatorHeight = GetIndicatorHeight();
+            IndicatorDemiHeight = IndicatorHeight / 2;
+            IndicatorWidth = GetIndicatorWidth();
         }
     }
 }

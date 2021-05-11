@@ -86,7 +86,7 @@
             </ProgressBar.Style>
         </ProgressBar>
 
-        <ProgressBar Grid.Row="1" Name="PART_ProgressBar"
+        <ProgressBar Grid.Row="1" Name="PART_ProgressBar" SizeChanged="PART_ProgressBar_SizeChanged"
                      Value="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue=30}"
                      Minimum="{Binding Minimum, RelativeSource={RelativeSource AncestorType=UserControl}}"
                      Maximum="{Binding Maximum, RelativeSource={RelativeSource AncestorType=UserControl}}">
