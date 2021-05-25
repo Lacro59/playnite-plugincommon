@@ -1,5 +1,4 @@
-﻿using CommonPlayniteShared;
-using Playnite.SDK;
+﻿using Playnite.SDK;
 using System;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -17,6 +16,7 @@ namespace CommonPluginsShared
     public class CompareValueConverter : IMultiValueConverter
     {
         public static IResourceProvider resources = new ResourceProvider();
+
 
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
@@ -358,6 +358,11 @@ namespace CommonPluginsShared
         {
             if (values[0] is string && !((string)values[0]).IsNullOrEmpty() && File.Exists((string)values[0]))
             {
+                if (((string)values[0]).EndsWith(".mp4", StringComparison.OrdinalIgnoreCase))
+                {
+                    return values[0];
+                }
+
                 BitmapLoadProperties bitmapLoadProperties = null;
                 if (parameter is string && (string)parameter == "1")
                 {
@@ -394,12 +399,9 @@ namespace CommonPluginsShared
                 }
 
 
-                string str = ImageSourceManager.GetImagePath((string)values[0]);
-
-
                 if (((string)values[0]).EndsWith(".tga", StringComparison.OrdinalIgnoreCase))
                 {
-                    BitmapImage bitmapImage = BitmapExtensions.TgaToBitmap(str);
+                    BitmapImage bitmapImage = BitmapExtensions.TgaToBitmap((string)values[0]);
 
                     if (bitmapLoadProperties == null)
                     {
@@ -414,11 +416,11 @@ namespace CommonPluginsShared
 
                 if (bitmapLoadProperties == null)
                 {
-                    return BitmapExtensions.BitmapFromFile(str);
+                    return BitmapExtensions.BitmapFromFile((string)values[0]);
                 }
                 else
                 {
-                    return BitmapExtensions.BitmapFromFile(str, bitmapLoadProperties);
+                    return BitmapExtensions.BitmapFromFile((string)values[0], bitmapLoadProperties);
                 }
             }
 
@@ -453,7 +455,6 @@ namespace CommonPluginsShared
         {
             if (value is string str)
             {
-                str = ImageSourceManager.GetImagePath(str);
                 BitmapImage tmpImg = BitmapExtensions.BitmapFromFile(str);
                 return ImageTools.ConvertBitmapImage(tmpImg, ImageColor.Gray);
             }
@@ -464,38 +465,6 @@ namespace CommonPluginsShared
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
-        }
-    }
-
-
-    public class VisibilityLessThanConverter : IValueConverter
-    {
-        private static ILogger logger = LogManager.GetLogger();
-
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            try
-            {
-                double.TryParse(value.ToString(), out double valueDouble);
-                double.TryParse(parameter.ToString(), out double parameterDouble);
-
-                if (valueDouble > parameterDouble)
-                {
-                    return Visibility.Visible;
-                }
-
-                return Visibility.Collapsed;
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false);
-                return Visibility.Visible;
-            }
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotSupportedException();
         }
     }
 }
