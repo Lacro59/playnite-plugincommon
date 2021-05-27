@@ -111,4 +111,12 @@
     <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Error adding tag.
 Please clear all the tags in the plugin menu.</sys:String>
 
+
+
+    <sys:String x:Key="LOCCommonDimensions">Dimensions</sys:String>
+    <sys:String x:Key="LOCCommonStyles">Styles</sys:String>
+    <sys:String x:Key="LOCCommonTypes">Types</sys:String>
+    <sys:String x:Key="LOCCommonSortByDate">Sort by date</sys:String>
+    <sys:String x:Key="LOCCommonSortByScore">Sort by score</sys:String>
+
 </ResourceDictionary>
