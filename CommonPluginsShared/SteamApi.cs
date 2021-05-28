@@ -81,7 +81,7 @@ namespace CommonPluginsShared
         
             try
             {
-                if (SteamListApp != null && SteamListApp["applist"] != null && SteamListApp["applist"]["apps"] != null)
+                if (SteamListApp?["applist"]?["apps"] != null)
                 {
                     string SteamAppsListString = JsonConvert.SerializeObject(SteamListApp["applist"]["apps"]);
                     var SteamAppsList = JsonConvert.DeserializeObject<List<SteamApps>>(SteamAppsListString);

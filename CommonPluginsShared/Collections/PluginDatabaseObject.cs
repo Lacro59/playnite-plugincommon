@@ -551,7 +551,7 @@ namespace CommonPluginsShared.Collections
 
         public void RemoveTag(Game game, bool noUpdate = false)
         {
-            if (game != null && game.TagIds != null)
+            if (game?.TagIds != null)
             {
                 if (game.TagIds.Where(x => PluginTags.Any(y => x == y.Id)).Count() > 0)
                 {

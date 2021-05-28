@@ -240,7 +240,7 @@ namespace CommonPluginsShared.Controls
                     }
 
                     // No sort
-                    if (headerClicked.Tag != null && ((string)headerClicked.Tag).ToLower() == "nosort")
+                    if (((string)headerClicked.Tag)?.ToLower() == "nosort")
                     {
                         headerClicked = null;
                     }
