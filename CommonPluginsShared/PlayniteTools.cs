@@ -186,6 +186,18 @@ namespace CommonPluginsShared
         }
 
 
+        public static string GetPlatformIcon(IPlayniteAPI PlayniteApi, string PlatformName)
+        {
+            Platform PlatformFinded = PlayniteApi.Database.Platforms.Where(x => x.Name.ToLower() == PlatformName.ToLower()).FirstOrDefault();
+            if (!(PlatformFinded?.Icon).IsNullOrEmpty())
+            {
+                return PlayniteApi.Database.GetFullFilePath(PlatformFinded.Icon);
+            }
+
+            return string.Empty;
+        }
+
+
         public static void SetThemeInformation(IPlayniteAPI PlayniteApi)
         {
             string defaultThemeName = "Default";
