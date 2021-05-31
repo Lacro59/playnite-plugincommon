@@ -92,6 +92,12 @@ namespace CommonPluginsShared.Collections
         }
 
         /// <summary>
+        /// Gets or sets Platform.
+        /// </summary>
+        [JsonIgnore]
+        public Platform Platform { get; set; }
+
+        /// <summary>
         /// Gets or sets played time in seconds.
         /// </summary>
         [JsonIgnore]

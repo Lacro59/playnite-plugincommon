@@ -36,6 +36,7 @@ namespace CommonPluginsShared.Collections
                     item.BackgroundImage = game.BackgroundImage;
                     item.GenreIds = game.GenreIds;
                     item.Genres = game.Genres;
+                    item.Platform = game.Platform;
                     item.Playtime = game.Playtime;
                     item.LastActivity = game.LastActivity;
                     item.IsSaved = true;
@@ -78,6 +79,7 @@ namespace CommonPluginsShared.Collections
                     item.BackgroundImage = game.BackgroundImage;
                     item.GenreIds = game.GenreIds;
                     item.Genres = game.Genres;
+                    item.Platform = game.Platform;
                     item.Playtime = game.Playtime;
                     item.LastActivity = game.LastActivity;
                     item.IsSaved = true;
