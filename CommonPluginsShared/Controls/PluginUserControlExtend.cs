@@ -44,19 +44,27 @@ namespace CommonPluginsShared.Controls
                 return;
             }
 
-            PluginDataBaseGameBase PluginGameData = _PluginDatabase.Get(newContext, true);
-            if (PluginGameData.HasData)
+            try
             {
-                SetData(newContext, PluginGameData);
+                PluginDataBaseGameBase PluginGameData = _PluginDatabase.Get(newContext, true);
+                if (PluginGameData.HasData)
+                {
+                    SetData(newContext, PluginGameData);
+                }
+                else if (AlwaysShow)
+                {
+                    SetData(newContext, PluginGameData);
+                }
+                // When there is no plugin data
+                else
+                {
+                    MustDisplay = false;
+                }
+
             }
-            else if(AlwaysShow)
+            catch (Exception ex)
             {
-                SetData(newContext, PluginGameData);
-            }
-            // When there is no plugin data
-            else
-            {
-                MustDisplay = false;
+                Common.LogError(ex, false);
             }
         }
         #endregion

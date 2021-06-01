@@ -57,6 +57,18 @@ namespace CommonPluginsControls.LiveChartsCommon
             typeof(bool),
             typeof(CustomerToolTipForMultipleTime),
             new FrameworkPropertyMetadata(false));
+
+        public bool ShowTitle
+        {
+            get { return (bool)GetValue(ShowTitleProperty); }
+            set { SetValue(ShowTitleProperty, value); }
+        }
+
+        public static readonly DependencyProperty ShowTitleProperty = DependencyProperty.Register(
+            nameof(ShowTitle),
+            typeof(bool),
+            typeof(CustomerToolTipForMultipleTime),
+            new FrameworkPropertyMetadata(true));
         #endregion
 
 

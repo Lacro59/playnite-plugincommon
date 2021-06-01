@@ -123,13 +123,20 @@ namespace CommonPluginsShared.Controls
                 return;
             }
 
-            if (MustDisplay)
+            try
             {
-                SetData(newContext);
+                if (MustDisplay)
+                {
+                    SetData(newContext);
+                }
+                else if (AlwaysShow)
+                {
+                    SetData(newContext);
+                }
             }
-            else if (AlwaysShow)
+            catch (Exception ex)
             {
-                SetData(newContext);
+                Common.LogError(ex, false);
             }
         }
 
