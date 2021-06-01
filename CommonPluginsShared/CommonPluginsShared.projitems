@@ -29,6 +29,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IDataContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginDatabase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Localization.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LocalSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\PluginPaths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\TraceInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OriginApi.cs" />
