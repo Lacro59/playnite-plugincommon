@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Data;
+using CommonPluginsControls.Controls;
 using CommonPluginsShared;
 using LiveCharts;
 using LiveCharts.Wpf;
@@ -14,36 +15,16 @@ namespace CommonPluginsControls.LiveChartsCommon
     /// </summary>
     public partial class CustomerToolTipForMultipleTime : IChartTooltip
     {
-        private TooltipData _data;
-
-        public static readonly DependencyProperty ShowIconProperty = DependencyProperty.Register(
-            "ShowIcon", typeof(Boolean), typeof(CustomerToolTipForMultipleTime), new PropertyMetadata(false));
-
-        public static bool _ShowIcon = false;
-
-        public bool ShowIcon
-        {
-            get { return (bool)GetValue(ShowIconProperty); }
-            set { SetValue(ShowIconProperty, value); }
-        }
-
-        public CustomerToolTipForMultipleTime()
-        {
-            InitializeComponent();
-
-            //LiveCharts will inject the tooltip data in the Data property
-            //your job is only to display this data as required
-
-            DataContext = this;
-        }
-
+        public TooltipSelectionMode? SelectionMode { get; set; }
         public event PropertyChangedEventHandler PropertyChanged;
 
+
+        #region Properties
+        private TooltipData _data;
         public TooltipData Data
         {
             get
             {
-                _ShowIcon = ShowIcon;
                 return _data;
             }
             set
@@ -53,31 +34,49 @@ namespace CommonPluginsControls.LiveChartsCommon
             }
         }
 
-        public TooltipSelectionMode? SelectionMode { get; set; }
+        public TextBlockWithIconMode Mode
+        {
+            get { return (TextBlockWithIconMode)GetValue(ModeProperty); }
+            set { SetValue(ModeProperty, value); }
+        }
+
+        public static readonly DependencyProperty ModeProperty = DependencyProperty.Register(
+            nameof(Mode),
+            typeof(TextBlockWithIconMode),
+            typeof(CustomerToolTipForMultipleTime),
+            new FrameworkPropertyMetadata(TextBlockWithIconMode.IconTextFirstWithText));
+
+        public bool ShowIcon
+        {
+            get { return (bool)GetValue(ShowIconProperty); }
+            set { SetValue(ShowIconProperty, value); }
+        }
+
+        public static readonly DependencyProperty ShowIconProperty = DependencyProperty.Register(
+            nameof(ShowIcon),
+            typeof(bool),
+            typeof(CustomerToolTipForMultipleTime),
+            new FrameworkPropertyMetadata(false));
+        #endregion
+
 
         protected virtual void OnPropertyChanged(string propertyName = null)
         {
             if (PropertyChanged != null)
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-    }
-
-    public class ShowIconConverterMultipleTime : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            string Result = "";
-            if (TransformIcon.Get((string)value).Length == 1 && CustomerToolTipForMultipleTime._ShowIcon)
             {
-                Result = TransformIcon.Get((string)value);
+                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
             }
-
-            return Result;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+
+        public CustomerToolTipForMultipleTime()
         {
-            return "";
+            InitializeComponent();
+
+            //LiveCharts will inject the tooltip data in the Data property
+            //your job is only to display this data as required
+
+            DataContext = this;
         }
     }
 }

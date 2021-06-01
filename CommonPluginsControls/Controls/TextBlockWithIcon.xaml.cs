@@ -149,7 +149,7 @@ namespace CommonPluginsControls.Controls
                     break;
 
                 case TextBlockWithIconMode.IconTextFirstOnly:
-                    if (!IconText.IsNullOrEmpty() && File.Exists(IconText))
+                    if (!IconText.IsNullOrEmpty())
                     {
                         UseIconText = true;
                     }
@@ -160,7 +160,7 @@ namespace CommonPluginsControls.Controls
                     break;
 
                 case TextBlockWithIconMode.IconTextFirstWithText:
-                    if (!IconText.IsNullOrEmpty() && File.Exists(IconText))
+                    if (!IconText.IsNullOrEmpty())
                     {
                         UseIconText = true;
                     }

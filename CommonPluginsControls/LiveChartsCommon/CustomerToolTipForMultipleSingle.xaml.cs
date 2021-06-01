@@ -10,20 +10,12 @@ namespace CommonPluginsControls.LiveChartsCommon
     /// </summary>
     public partial class CustomerToolTipForMultipleSingle : IChartTooltip
     {
-        private TooltipData _data;
-
-        public CustomerToolTipForMultipleSingle()
-        {
-            InitializeComponent();
-
-            //LiveCharts will inject the tooltip data in the Data property
-            //your job is only to display this data as required
-
-            DataContext = this;
-        }
-
+        public TooltipSelectionMode? SelectionMode { get; set; }
         public event PropertyChangedEventHandler PropertyChanged;
 
+
+        #region Properties
+        private TooltipData _data;
         public TooltipData Data
         {
             get
@@ -36,13 +28,26 @@ namespace CommonPluginsControls.LiveChartsCommon
                 OnPropertyChanged("Data");
             }
         }
+        #endregion
 
-        public TooltipSelectionMode? SelectionMode { get; set; }
 
         protected virtual void OnPropertyChanged(string propertyName = null)
         {
             if (PropertyChanged != null)
+            {
                 PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+
+        public CustomerToolTipForMultipleSingle()
+        {
+            InitializeComponent();
+
+            //LiveCharts will inject the tooltip data in the Data property
+            //your job is only to display this data as required
+
+            DataContext = this;
         }
     }
 }

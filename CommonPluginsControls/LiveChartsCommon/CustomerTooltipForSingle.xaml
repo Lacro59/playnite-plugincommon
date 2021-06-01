@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
              xmlns:livechartscommon="clr-namespace:CommonPluginsControls.LiveChartsCommon"
-             mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300">
+             mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300"
+             d:DataContext="{d:DesignInstance Type=livechartscommon:CustomerToolTipForSingle}">
 
     <UserControl.Template>
         <ControlTemplate>
@@ -19,16 +20,15 @@
                                 <Grid Margin="2">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
+                                        <ColumnDefinition Width="40" />
                                         <ColumnDefinition Width="Auto" SharedSizeGroup="Value" />
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0" Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Name)}"
-                                               FontSize="16"
-                                               Margin="5 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
+                                               FontSize="16" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
 
-                                    <TextBlock Grid.Column="1" Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Values)}" 
-                                               FontSize="16"
-                                               Margin="10 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
+                                    <TextBlock Grid.Column="2" Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Values)}" 
+                                               FontSize="16" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

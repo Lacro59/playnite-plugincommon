@@ -4,7 +4,8 @@
            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
            xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
            xmlns:local="clr-namespace:CommonPluginsControls.Controls"
-           mc:Ignorable="d">
+           mc:Ignorable="d"
+           FontSize="16">
 
     <TextBlock.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
@@ -18,16 +19,17 @@
         </Grid.ColumnDefinitions>
         
         <Image Grid.Column="0" Name="PART_Icon" Source="{Binding Icon, IsAsync=True}"
+               Height="28" VerticalAlignment="Center"
                Visibility="{Binding UseIcon, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=True}" />
         <TextBlock Grid.Column="0"  Name="PART_IconText" FontFamily="{DynamicResource CommonFont}" Text="{Binding IconText, FallbackValue='X'}"
-                   Style="{DynamicResource BaseTextBlockStyle}" 
-                   FontSize="{Binding RelativeSource={RelativeSource AncestorType=TextBlock}, Path=FontSize}"
+                   Style="{DynamicResource BaseTextBlockStyle}" VerticalAlignment="Center"
+                   FontSize="24" Margin="0,-4,0,0"
                    Visibility="{Binding UseIconText, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=True}" />
         
         <StackPanel Grid.Column="1" Margin="5,0,0,0" Visibility="{Binding UseMargin, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=True}" />
         
         <TextBlock Grid.Column="3" Name="PART_Text" Text="{Binding Text, FallbackValue='Generic Name'}" 
-                   Style="{DynamicResource BaseTextBlockStyle}" 
+                   Style="{DynamicResource BaseTextBlockStyle}" VerticalAlignment="Center"
                    FontSize="{Binding RelativeSource={RelativeSource AncestorType=TextBlock}, Path=FontSize}"
                    Visibility="{Binding UseText, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=True}" />
     </Grid>
