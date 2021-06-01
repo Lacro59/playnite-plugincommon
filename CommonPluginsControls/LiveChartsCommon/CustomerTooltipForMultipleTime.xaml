@@ -22,18 +22,22 @@
                 <Border Background="{DynamicResource CommonToolTipBackgroundBrush}" CornerRadius="{DynamicResource CommonToolTipCornerRadius}"
                         BorderThickness="{DynamicResource CommonToolTipBorderThickness}" Padding="{DynamicResource CommonToolTipPadding}"
                         BorderBrush="{DynamicResource CommonToolTipBorderBrush}">
-
                     <StackPanel>
-                        <TextBlock Text="{Binding Data}" HorizontalAlignment="Center" FontWeight="Bold"
-                                   FontSize="20"
-                                   Foreground="{DynamicResource CommonToolTipForeground}" Margin="0, 0, 0, 10">
-                            <TextBlock.Visibility>
+                        <StackPanel Margin="0,0,0,10">
+                            <StackPanel.Visibility>
                                 <MultiBinding Converter="{StaticResource SharedVisibilityConverter}">
                                     <Binding Path="Data" />
                                     <Binding Path="ShowTitle" />
                                 </MultiBinding>
-                            </TextBlock.Visibility>
-                        </TextBlock>
+                            </StackPanel.Visibility>
+
+                            <TextBlock Text="{Binding DataTitle}" HorizontalAlignment="Center" FontWeight="Bold"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource CommonToolTipForeground}" />
+                            <TextBlock Text="{Binding DataTitleInfo}" HorizontalAlignment="Center" FontWeight="Bold"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource CommonToolTipForeground}" />
+                        </StackPanel>
 
                         <ItemsControl ItemsSource="{Binding Data.Points}" Grid.IsSharedSizeScope="True">
                             <ItemsControl.ItemTemplate>

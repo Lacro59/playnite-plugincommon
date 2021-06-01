@@ -53,6 +53,25 @@ namespace CommonPluginsShared
             return CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(date.AddDays(4 - (day == 0 ? 7 : day)), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
         }
 
+        public static DateTime YearWeekDayToDateTime(int year, DayOfWeek day, int week)
+        {
+            DateTime startOfYear = new DateTime(year, 1, 1);
+
+            // The +7 and %7 stuff is to avoid negative numbers etc.
+            int daysToFirstCorrectDay = (((int)day - (int)startOfYear.DayOfWeek) + 7) % 7;
+
+            return startOfYear.AddDays(7 * (week - 1) + daysToFirstCorrectDay);
+        }
+
+        public static int GetWeeksInYear(int year)
+        {
+            DateTimeFormatInfo dfi = DateTimeFormatInfo.CurrentInfo;
+            DateTime date1 = new DateTime(year, 12, 31);
+            System.Globalization.Calendar cal = dfi.Calendar;
+            return cal.GetWeekOfYear(date1, dfi.CalendarWeekRule, dfi.FirstDayOfWeek);
+        }
+
+
         /// <summary>
         /// Gel all control in depObj.
         /// </summary>
