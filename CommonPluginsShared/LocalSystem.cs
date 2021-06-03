@@ -1,6 +1,7 @@
 ﻿using CommonPluginsPlaynite.Common;
 using Newtonsoft.Json;
 using Playnite.SDK;
+using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,22 +14,72 @@ namespace CommonPluginsShared
     {
         private static readonly ILogger logger = LogManager.GetLogger();
 
+        private SystemConfiguration systemConfiguration;
+        private int IdConfiguration = -1;
+        private List<SystemConfiguration> Configurations = new List<SystemConfiguration>();
 
-        public static bool CallIsNvidia(string GpuName)
+
+        public LocalSystem(string ConfigurationsPath, bool WithDiskInfos = true)
+        {
+            systemConfiguration = GetPcInfo(WithDiskInfos);
+
+            if (File.Exists(ConfigurationsPath))
+            {
+                try
+                {
+                    string JsonStringData = FileSystem.ReadFileAsStringSafe(ConfigurationsPath);
+                    Configurations = Serialization.FromJson<List<SystemConfiguration>>(JsonStringData);
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Failed to load {ConfigurationsPath}");
+                }
+            }
+
+            IdConfiguration = Configurations.FindIndex(x => x.Cpu == systemConfiguration.Cpu && x.Name == systemConfiguration.Name
+                && x.GpuName == systemConfiguration.GpuName && x.RamUsage == systemConfiguration.RamUsage);
+
+            if (IdConfiguration == -1)
+            {
+                Configurations.Add(systemConfiguration);
+                FileSystem.WriteStringToFileSafe(ConfigurationsPath, Serialization.ToJson(Configurations));
+
+                IdConfiguration = Configurations.Count - 1;
+            }
+        }
+
+
+        private bool CallIsNvidia(string GpuName)
         {
             return (GpuName.ToLower().IndexOf("nvidia") > -1 || GpuName.ToLower().IndexOf("geforce") > -1 || GpuName.ToLower().IndexOf("gtx") > -1 || GpuName.ToLower().IndexOf("rtx") > -1);
         }
-        public static bool CallIsAmd(string GpuName)
+        private bool CallIsAmd(string GpuName)
         {
             return (GpuName.ToLower().IndexOf("amd") > -1 || GpuName.ToLower().IndexOf("radeon") > -1 || GpuName.ToLower().IndexOf("ati ") > -1);
         }
-        public static bool CallIsIntel(string GpuName)
+        private bool CallIsIntel(string GpuName)
         {
             return GpuName.ToLower().IndexOf("intel") > -1;
         }
 
 
-        public static SystemConfiguration GetPcInfo(bool WithDiskInfos = true)
+        public SystemConfiguration GetSystemConfiguration()
+        {
+            return systemConfiguration;
+        }
+
+        public List<SystemConfiguration> GetConfigurations()
+        {
+            return Configurations;
+        }
+
+        public int GetIdConfiguration()
+        {
+            return IdConfiguration;
+        }
+
+
+        private SystemConfiguration GetPcInfo(bool WithDiskInfos = true)
         {
             string Name = Environment.MachineName;
 
@@ -151,7 +202,7 @@ namespace CommonPluginsShared
             return systemConfiguration;
         }
 
-        public static List<SystemDisk> GetInfoDisks()
+        private List<SystemDisk> GetInfoDisks()
         {
             List<SystemDisk> Disks = new List<SystemDisk>();
             DriveInfo[] allDrives = DriveInfo.GetDrives();
@@ -213,7 +264,7 @@ namespace CommonPluginsShared
     }
 
 
-    public class SystemConfiguration : ObservableObject
+    public class SystemConfiguration
     {
         public string Name { get; set; }
         public string Os { get; set; }
@@ -229,7 +280,7 @@ namespace CommonPluginsShared
     }
 
 
-    public class SystemDisk : ObservableObject
+    public class SystemDisk
     {
         public string Name { get; set; }
         public string Drive { get; set; }
