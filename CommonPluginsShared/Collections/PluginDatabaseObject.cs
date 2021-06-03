@@ -349,15 +349,7 @@ namespace CommonPluginsShared.Collections
 
             newItem.Id = game.Id;
             newItem.Name = game.Name;
-            newItem.SourceId = game.SourceId;
-            newItem.Hidden = game.Hidden;
-            newItem.Icon = game.Icon;
-            newItem.CoverImage = game.CoverImage;
-            newItem.BackgroundImage = game.BackgroundImage;
-            newItem.GenreIds = game.GenreIds;
-            newItem.Genres = game.Genres;
-            newItem.Playtime = game.Playtime;
-            newItem.LastActivity = game.LastActivity;
+            newItem.Game = game;
             newItem.IsSaved = false;
 
             return newItem;

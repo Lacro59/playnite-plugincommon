@@ -11,107 +11,44 @@ namespace CommonPluginsShared.Collections
 {
     public class PluginDataBaseGameBase : DatabaseObject
     {
-        /// <summary>
-        /// Gets or sets source of the game.
-        /// </summary>
         [JsonIgnore]
-        public Guid SourceId { get; set; }
+        internal Game Game { get; set; }
 
-        /// <summary>
-        /// Gets or sets last played date.
-        /// </summary>
+
         [JsonIgnore]
-        public DateTime? LastActivity { get; set; }
+        public Guid SourceId { get { return Game.SourceId; } }
 
-        /// <summary>
-        /// Gets or sets value indicating if the game is hidden in library.
-        /// </summary>
         [JsonIgnore]
-        public bool Hidden { get; set; }
+        public DateTime? LastActivity { get { return Game.LastActivity; } }
 
-        /// <summary>
-        /// Gets or sets game icon. Local file path, HTTP URL or database file ids are supported.
-        /// </summary>
         [JsonIgnore]
-        public string Icon { get; set; }
+        public bool Hidden { get { return Game.Hidden; } }
 
-        /// <summary>
-        /// Gets or sets game cover image. Local file path, HTTP URL or database file ids are supported.
-        /// </summary>
         [JsonIgnore]
-        public string CoverImage { get; set; }
+        public string Icon { get { return Game.Icon; } }
 
-        /// <summary>
-        /// Gets or sets background image. Local file path, HTTP URL or database file ids are supported.
-        /// </summary>
         [JsonIgnore]
-        public string BackgroundImage { get; set; }
+        public string CoverImage { get { return Game.CoverImage; } }
 
-        private List<Genre> _Genres;
-        /// <summary>
-        /// Gets game's genres.
-        /// </summary>
         [JsonIgnore]
-        public List<Genre> Genres
-        {
-            get
-            {
-                if (_Genres == null)
-                {
-                    return new List<Genre>();
-                }
-                return _Genres;
-            }
+        public string BackgroundImage { get { return Game.BackgroundImage; } }
 
-            set
-            {
-                _Genres = value;
-            }
-        }
-
-        private List<Guid> _GenreIds;
-        /// <summary>
-        /// Gets or sets list of genres.
-        /// </summary>
         [JsonIgnore]
-        public List<Guid> GenreIds
-        {
-            get
-            {
-                if (_GenreIds == null)
-                {
-                    return new List<Guid>();
-                }
-                return _GenreIds;
-            }
+        public List<Genre> Genres { get { return Game.Genres; } }
 
-            set
-            {
-                _GenreIds = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets Platform.
-        /// </summary>
         [JsonIgnore]
-        public Platform Platform { get; set; }
+        public List<Guid> GenreIds { get { return Game.GenreIds; } }
 
-        /// <summary>
-        /// Gets or sets played time in seconds.
-        /// </summary>
         [JsonIgnore]
-        public long Playtime { get; set; }
+        public Platform Platform { get { return Game.Platform; } }
 
-        /// <summary>
-        /// Gets or sets value indicating if the game is deleted in library.
-        /// </summary>
+        [JsonIgnore]
+        public long Playtime { get { return Game.Playtime; } }
+
+
         [JsonIgnore]
         public bool IsDeleted { get; set; }
 
-        /// <summary>
-        /// Gets or sets value indicating if the game is saved in disk.
-        /// </summary>
         [JsonIgnore]
         public bool IsSaved { get; set; }
 
