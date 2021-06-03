@@ -43,7 +43,10 @@ namespace CommonPluginsShared.Collections
                 }
                 else
                 {
-                    item.IsDeleted = true;
+                    if (item != null)
+                    {
+                        item.IsDeleted = true;
+                    }
                 }
             }
             catch (Exception ex)
@@ -86,7 +89,10 @@ namespace CommonPluginsShared.Collections
                 }
                 else
                 {
-                    item.IsDeleted = true;
+                    if (item != null)
+                    {
+                        item.IsDeleted = true;
+                    }
                 }
             }
             catch (Exception ex)
