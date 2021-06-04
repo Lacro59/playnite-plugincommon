@@ -52,6 +52,7 @@ namespace CommonPluginsControls.LiveChartsCommon
                     }
                 }
                 OnPropertyChanged("DataTitle");
+                OnPropertyChanged("DataTitleInfo");
 
                 return _data;
             }

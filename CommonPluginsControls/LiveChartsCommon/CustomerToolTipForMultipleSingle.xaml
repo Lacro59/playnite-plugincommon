@@ -34,11 +34,13 @@
                                                   Stroke="{Binding Series.Stroke}" Fill="{Binding Series.Fill}" 
                                                   Stretch="Fill" Data="{Binding Series.PointGeometry}" />
 
-                                            <TextBlock Grid.Column="2" Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Name)}"
-                                                       FontSize="16" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
+                                            <TextBlock Grid.Column="2" 
+                                                       Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Name), FallbackValue='test'}"
+                                                       FontSize="16" VerticalAlignment="Center" Style="{DynamicResource BaseTextBlockStyle}" />
 
-                                            <TextBlock Grid.Column="4" Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Values)}" 
-                                                       FontSize="16" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
+                                            <TextBlock Grid.Column="4" 
+                                                       Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Values), FallbackValue=12}" 
+                                                       FontSize="16" VerticalAlignment="Center" Style="{DynamicResource BaseTextBlockStyle}" />
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>

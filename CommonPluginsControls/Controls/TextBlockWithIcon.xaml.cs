@@ -186,6 +186,14 @@ namespace CommonPluginsControls.Controls
                 IconText
             };
         }
+
+
+        private void Grid_Loaded(object sender, RoutedEventArgs e)
+        {
+            double FontSize = PART_Text.FontSize;
+            PART_IconText.FontSize = FontSize + 8;
+            PART_Icon.Height = FontSize + 12;
+        }
     }
 
 

@@ -24,11 +24,12 @@
                                         <ColumnDefinition Width="Auto" SharedSizeGroup="Value" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Column="0" Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Name)}"
-                                               FontSize="16" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
+                                    <TextBlock Grid.Column="0" 
+                                               Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Name), FallbackValue='test'}"
+                                               FontSize="16" VerticalAlignment="Center" Style="{DynamicResource BaseTextBlockStyle}" />
 
-                                    <TextBlock Grid.Column="2" Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Values)}" 
-                                               FontSize="16" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
+                                    <TextBlock Grid.Column="2" Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Values), FallbackValue=10}" 
+                                               FontSize="16" VerticalAlignment="Center" Style="{DynamicResource BaseTextBlockStyle}" />
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

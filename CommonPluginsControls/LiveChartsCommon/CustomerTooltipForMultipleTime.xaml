@@ -11,6 +11,7 @@
              d:DataContext="{d:DesignInstance Type=livechartscommon:CustomerToolTipForMultipleTime}">
 
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <converters:LongToTimePlayedConverter x:Key="LongToTimePlayedConverter" />
         <wpf:SharedConverter x:Key="SharedConverter" />
         <wpf:SharedVisibilityConverter x:Key="SharedVisibilityConverter" />
@@ -23,20 +24,11 @@
                         BorderThickness="{DynamicResource CommonToolTipBorderThickness}" Padding="{DynamicResource CommonToolTipPadding}"
                         BorderBrush="{DynamicResource CommonToolTipBorderBrush}">
                     <StackPanel>
-                        <StackPanel Margin="0,0,0,10">
-                            <StackPanel.Visibility>
-                                <MultiBinding Converter="{StaticResource SharedVisibilityConverter}">
-                                    <Binding Path="Data" />
-                                    <Binding Path="ShowTitle" />
-                                </MultiBinding>
-                            </StackPanel.Visibility>
-
+                        <StackPanel Margin="0,0,0,10" Visibility="{Binding ShowTitle, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <TextBlock Text="{Binding DataTitle}" HorizontalAlignment="Center" FontWeight="Bold"
-                                       FontSize="16"
-                                       Foreground="{DynamicResource CommonToolTipForeground}" />
+                                       FontSize="16" Style="{DynamicResource BaseTextBlockStyle}" />
                             <TextBlock Text="{Binding DataTitleInfo}" HorizontalAlignment="Center" FontWeight="Bold"
-                                       FontSize="16"
-                                       Foreground="{DynamicResource CommonToolTipForeground}" />
+                                       FontSize="16" Style="{DynamicResource BaseTextBlockStyle}" />
                         </StackPanel>
 
                         <ItemsControl ItemsSource="{Binding Data.Points}" Grid.IsSharedSizeScope="True">
@@ -57,23 +49,23 @@
                                               Stroke="{Binding Series.Stroke}" Fill="{Binding Series.Fill}" 
                                               Stretch="Fill" Data="{Binding Series.PointGeometry}" />
 
-                                        <commonpluginscontrols:TextBlockWithIcon Grid.Column="2" 
+                                        <commonpluginscontrols:TextBlockWithIcon Grid.Column="2" Style="{DynamicResource BaseTextBlockStyle}"
                                                                              Mode="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.Mode}"
                                                                              Icon="{Binding ElementName=PART_Icon, Path=Text}"
                                                                              IconText="{Binding ElementName=PART_IconText, Path=Text}"
                                                                              Text="{Binding ElementName=PART_Text, Path=Text}"
                                                                              FontSize="16" VerticalAlignment="Center" />
 
-                                        <TextBlock Grid.Column="0"  Visibility="Collapsed" Name="PART_Text"
+                                        <TextBlock Grid.Column="0"  Visibility="Collapsed" Name="PART_Text" Style="{DynamicResource BaseTextBlockStyle}"
                                                    Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Name)}" />
-                                        <TextBlock Grid.Column="0"  Visibility="Collapsed" Name="PART_IconText"
+                                        <TextBlock Grid.Column="0"  Visibility="Collapsed" Name="PART_IconText" Style="{DynamicResource BaseTextBlockStyle}"
                                                    Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.IconText)}" />
-                                        <TextBlock Grid.Column="0"  Visibility="Collapsed" Name="PART_Icon"
+                                        <TextBlock Grid.Column="0"  Visibility="Collapsed" Name="PART_Icon" Style="{DynamicResource BaseTextBlockStyle}"
                                                    Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Icon)}" />
 
                                         <TextBlock Grid.Column="4" FontSize="16" HorizontalAlignment="Right"
                                                    Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Values), Mode=OneWay, Converter={StaticResource LongToTimePlayedConverter}}" 
-                                                   VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
+                                                   VerticalAlignment="Center" Style="{DynamicResource BaseTextBlockStyle}" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
