@@ -1,7 +1,6 @@
 ﻿using CommonPluginsPlaynite;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Playnite.SDK;
+using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -37,7 +36,7 @@ namespace CommonPluginsShared
                 if (File.Exists(PluginCacheFile) && File.GetLastWriteTime(PluginCacheFile).AddDays(3) > DateTime.Now)
                 {
                     Common.LogDebug(true, "GetOriginAppListFromCache");
-                    OriginListApp = JsonConvert.DeserializeObject<List<GameStoreDataResponseAppsList>>(File.ReadAllText(PluginCacheFile));
+                    OriginListApp = Serialization.FromJsonFile<List<GameStoreDataResponseAppsList>>(PluginCacheFile);
                 }
                 // From web
                 else
@@ -58,25 +57,23 @@ namespace CommonPluginsShared
             try
             {
                 string result = Web.DownloadStringDataWithGz(urlOriginListApp).GetAwaiter().GetResult();
-                JObject resultObject = JObject.Parse(result);
-                responseData = JsonConvert.SerializeObject(resultObject["offers"]);
-
+                dynamic resultObject = Serialization.FromJson<dynamic>(result);
                 // Write file for cache usage
-                File.WriteAllText(PluginCacheFile, responseData);
+                responseData = Serialization.ToFile(resultObject["offers"], PluginCacheFile, Format.Json);
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, false, $"Failed to load from {urlOriginListApp}");
             }
 
-            return JsonConvert.DeserializeObject<List<GameStoreDataResponseAppsList>>(responseData);
+            return Serialization.FromJson<List<GameStoreDataResponseAppsList>>(responseData);
         }
 
         public string GetOriginId(string Name)
         {
             GameStoreDataResponseAppsList findGame = OriginListApp.Find(x => x.masterTitle.ToLower() == Name.ToLower());
 
-            Common.LogDebug(true, $"Find Origin data for {Name} - {JsonConvert.SerializeObject(findGame)}");
+            Common.LogDebug(true, $"Find Origin data for {Name} - {Serialization.ToJson(findGame)}");
 
             if (findGame != null)
             {

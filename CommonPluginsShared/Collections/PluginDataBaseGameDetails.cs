@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using Playnite.SDK.Models;
+﻿using Playnite.SDK.Models;
+using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +15,7 @@ namespace CommonPluginsShared.Collections
         public abstract Y ItemsDetails { get; set; }
 
 
-        [JsonIgnore]
+        [DontSerialize]
         public override bool HasData
         {
             get

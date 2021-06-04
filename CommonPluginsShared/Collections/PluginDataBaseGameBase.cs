@@ -1,6 +1,6 @@
 ﻿using CommonPluginsShared.Interfaces;
-using Newtonsoft.Json;
 using Playnite.SDK.Models;
+using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,48 +11,49 @@ namespace CommonPluginsShared.Collections
 {
     public class PluginDataBaseGameBase : DatabaseObject
     {
-        [JsonIgnore]
+        [DontSerialize]
         internal Game Game { get; set; }
 
 
-        [JsonIgnore]
+        [DontSerialize]
         public Guid SourceId { get { return Game.SourceId; } }
 
-        [JsonIgnore]
+        [DontSerialize]
         public DateTime? LastActivity { get { return Game.LastActivity; } }
 
-        [JsonIgnore]
+        [DontSerialize]
         public bool Hidden { get { return Game.Hidden; } }
 
-        [JsonIgnore]
+        [DontSerialize]
         public string Icon { get { return Game.Icon; } }
 
-        [JsonIgnore]
+        [DontSerialize]
         public string CoverImage { get { return Game.CoverImage; } }
 
-        [JsonIgnore]
+        [DontSerialize]
         public string BackgroundImage { get { return Game.BackgroundImage; } }
 
-        [JsonIgnore]
+        [DontSerialize]
         public List<Genre> Genres { get { return Game.Genres; } }
 
-        [JsonIgnore]
+        [DontSerialize]
         public List<Guid> GenreIds { get { return Game.GenreIds; } }
 
-        [JsonIgnore]
+        [DontSerialize]
         public Platform Platform { get { return Game.Platform; } }
 
-        [JsonIgnore]
+        [DontSerialize]
         public long Playtime { get { return Game.Playtime; } }
 
 
-        [JsonIgnore]
+        [DontSerialize]
         public bool IsDeleted { get; set; }
 
-        [JsonIgnore]
+        [DontSerialize]
         public bool IsSaved { get; set; }
 
-        [JsonIgnore]
+
+        [DontSerialize]
         public virtual bool HasData
         {
             get

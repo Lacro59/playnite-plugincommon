@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Playnite.SDK;
+﻿using Playnite.SDK;
 using CommonPluginsPlaynite.Common;
 using System;
 using System.Linq;
@@ -10,6 +9,7 @@ using System.Windows;
 using CommonPluginsShared.Models;
 using System.Windows.Automation;
 using System.Windows.Media;
+using Playnite.SDK.Data;
 
 namespace CommonPluginsShared
 {
@@ -62,7 +62,7 @@ namespace CommonPluginsShared
                         return;
                     }
 
-                    Common.LogDebug(true, $"res: {JsonConvert.SerializeObject(res)}");
+                    Common.LogDebug(true, $"res: {Serialization.ToJson(res)}");
 
                     Application.Current.Resources.MergedDictionaries.Add(res);
                 }

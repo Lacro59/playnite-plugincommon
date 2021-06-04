@@ -7,9 +7,9 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Newtonsoft.Json;
 using Playnite.SDK;
 using Playnite.SDK.Models;
+using Playnite.SDK.Data;
 
 namespace CommonPluginsShared
 {
@@ -507,7 +507,7 @@ namespace CommonPluginsShared
 
         public bool AddResources(List<ResourcesList> ResourcesList)
         {
-            Common.LogDebug(true, $"AddResources() - {JsonConvert.SerializeObject(ResourcesList)}");
+            Common.LogDebug(true, $"AddResources() - {Serialization.ToJson(ResourcesList)}");
 
             string ItemKey = string.Empty;
 

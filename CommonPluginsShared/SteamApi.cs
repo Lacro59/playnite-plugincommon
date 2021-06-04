@@ -1,7 +1,6 @@
 ﻿using CommonPluginsPlaynite;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Playnite.SDK;
+using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +12,7 @@ namespace CommonPluginsShared
         private static readonly ILogger logger = LogManager.GetLogger();
 
         private readonly string urlSteamListApp = "https://api.steampowered.com/ISteamApps/GetAppList/v2/";
-        private readonly JObject SteamListApp = new JObject();
+        private readonly dynamic SteamListApp = null;
 
 
         public SteamApi(string PluginUserDataPath)
@@ -34,7 +33,7 @@ namespace CommonPluginsShared
                 if (File.Exists(PluginCacheFile) && File.GetLastWriteTime(PluginCacheFile).AddDays(3) > DateTime.Now)
                 {
                     Common.LogDebug(true, "GetSteamAppListFromCache");
-                    SteamListApp = JObject.Parse(File.ReadAllText(PluginCacheFile));
+                    SteamListApp = Serialization.FromJsonFile<dynamic>(PluginCacheFile);
                 }
                 // From web
                 else
@@ -50,7 +49,7 @@ namespace CommonPluginsShared
         }
 
         // TODO transform to task and identified object and saved in playnite temp
-        private JObject GetSteamAppListFromWeb(string PluginCacheFile)
+        private dynamic GetSteamAppListFromWeb(string PluginCacheFile)
         {
             string responseData = string.Empty;
             try
@@ -58,7 +57,7 @@ namespace CommonPluginsShared
                 responseData = Web.DownloadStringData(urlSteamListApp).GetAwaiter().GetResult();
                 if (responseData.IsNullOrEmpty() || responseData == "{\"applist\":{\"apps\":[]}}")
                 {
-                    responseData = JsonConvert.SerializeObject(new JObject());
+                    responseData = "{}";
                 }
                 else
                 {
@@ -72,7 +71,7 @@ namespace CommonPluginsShared
                 responseData = "{\"applist\":{\"apps\":[]}}";
             }
 
-            return JObject.Parse(responseData);
+            return Serialization.FromJson<dynamic>(responseData);
         }
 
         public int GetSteamId(string Name)
@@ -83,8 +82,8 @@ namespace CommonPluginsShared
             {
                 if (SteamListApp != null && SteamListApp["applist"] != null && SteamListApp["applist"]["apps"] != null)
                 {
-                    string SteamAppsListString = JsonConvert.SerializeObject(SteamListApp["applist"]["apps"]);
-                    var SteamAppsList = JsonConvert.DeserializeObject<List<SteamApps>>(SteamAppsListString);
+                    string SteamAppsListString = Serialization.ToJson(SteamListApp["applist"]["apps"]);
+                    List<SteamApps> SteamAppsList = Serialization.FromJson<List<SteamApps>>(SteamAppsListString);
                     SteamAppsList.Sort((x, y) => x.AppId.CompareTo(y.AppId));
 
                     foreach (SteamApps Game in SteamAppsList)
@@ -120,9 +119,9 @@ namespace CommonPluginsShared
 
     public class SteamApps
     {
-        [JsonProperty("appid")]
+        [SerializationPropertyName("appid")]
         public int AppId { get; set; }
-        [JsonProperty("name")]
+        [SerializationPropertyName("name")]
         public string Name { get; set; }
     }
 }
