@@ -62,16 +62,28 @@ namespace CommonPluginsShared
         }
 
 
+        /// <summary>
+        /// Get actual system configuration
+        /// </summary>
+        /// <returns></returns>
         public SystemConfiguration GetSystemConfiguration()
         {
             return systemConfiguration;
         }
 
+        /// <summary>
+        /// Get configurations list saved
+        /// </summary>
+        /// <returns></returns>
         public List<SystemConfiguration> GetConfigurations()
         {
             return Configurations;
         }
 
+        /// <summary>
+        /// Get Id in configuration list for actual system configuration
+        /// </summary>
+        /// <returns></returns>
         public int GetIdConfiguration()
         {
             return IdConfiguration;
@@ -84,13 +96,17 @@ namespace CommonPluginsShared
 
             SystemConfiguration systemConfiguration = new SystemConfiguration();
 
-            List<SystemDisk> Disks = new List<SystemDisk>();
+
+            #region Disks infos
+            List <SystemDisk> Disks = new List<SystemDisk>();
             if (WithDiskInfos)
             {
                 Disks = GetInfoDisks();
             }
+            #endregion
 
 
+            #region Ssytem informations
             string Os = string.Empty;
             string Cpu = string.Empty;
             uint CpuMaxClockSpeed = 0;
@@ -184,6 +200,7 @@ namespace CommonPluginsShared
             {
                 Common.LogError(ex, false, "Error on Win32_ComputerSystem");
             }
+            #endregion
 
 
             systemConfiguration.Name = Name.Trim();
@@ -205,6 +222,7 @@ namespace CommonPluginsShared
         {
             List<SystemDisk> Disks = new List<SystemDisk>();
             DriveInfo[] allDrives = DriveInfo.GetDrives();
+
             foreach (DriveInfo d in allDrives)
             {
                 if (d.DriveType == DriveType.Fixed)
@@ -258,6 +276,7 @@ namespace CommonPluginsShared
                     });
                 }
             }
+
             return Disks;
         }
     }

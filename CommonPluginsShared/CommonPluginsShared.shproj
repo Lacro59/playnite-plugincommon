@@ -19,7 +19,6 @@
     <Compile Include="Converters.cs" />
     <Compile Include="CumulsErrors.cs" />
     <Compile Include="ImageTools.cs" />
-    <Compile Include="IntegrationUI.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="Models\TraceInfos.cs" />
     <Compile Include="OriginApi.cs" />

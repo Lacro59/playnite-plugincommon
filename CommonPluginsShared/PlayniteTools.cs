@@ -251,6 +251,32 @@ namespace CommonPluginsShared
             }
             return string.Empty;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string NormalizeGameName(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return string.Empty;
+            }
+
+            var newName = name.ToLower();
+            newName = newName.RemoveTrademarks();
+            newName = newName.Replace("_", "");
+            newName = newName.Replace(".", "");
+            newName = newName.Replace('’', '\'');
+            newName = newName.Replace(":", "");
+            newName = newName.Replace("-", "");
+            newName = newName.Replace("goty", "");
+            newName = newName.Replace("game of the year edition", "");
+            newName = newName.Replace("  ", " ");
+
+            return newName.Trim();
+        }
         #endregion
 
 

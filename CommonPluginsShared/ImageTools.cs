@@ -16,11 +16,13 @@ namespace CommonPluginsShared
         Black = 2
     }
 
+
     public class ImageProperty
     {
         public int Width { get; set; } 
         public int Height { get; set; } 
     }
+
 
     public class ImageTools
     {

@@ -88,8 +88,8 @@ namespace CommonPluginsShared
 
                     foreach (SteamApps Game in SteamAppsList)
                     {
-                        string NameSteam = Common.NormalizeGameName(Game.Name);
-                        string NameSearch = Common.NormalizeGameName(Name);
+                        string NameSteam = PlayniteTools.NormalizeGameName(Game.Name);
+                        string NameSearch = PlayniteTools.NormalizeGameName(Name);
 
                         if (NameSteam == NameSearch)
                         {

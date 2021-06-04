@@ -36,7 +36,7 @@ namespace CommonPluginsShared.Collections
         public IPlayniteAPI PlayniteApi;
         public TSettings PluginSettings;
 
-        public IntegrationUI ui = new IntegrationUI();
+        public UI ui = new UI();
 
         public string PluginName { get; set; }
         public PluginPaths Paths { get; set; }

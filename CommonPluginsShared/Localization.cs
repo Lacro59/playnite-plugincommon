@@ -14,7 +14,7 @@ namespace CommonPluginsShared
 
 
         /// <summary>
-        /// Load common localization.
+        /// Load common localization
         /// </summary>
         /// <param name="pluginFolder"></param>
         /// <param name="language"></param>

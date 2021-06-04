@@ -51,16 +51,20 @@
         private static string supernintendo = "\uea47";          
         private static string nintendoswitch = "\uea48";         
         private static string wii = "\uea49";                    
-        private static string mame = "\uea4a";                   
+        private static string mame = "\uea4a";
         #endregion
 
 
         /// <summary>
-        /// Get icon from name for "font.ttf".
+        /// Get icon from name for common "font.ttf"
         /// </summary>
+        /// <param name="Name"></param>
+        /// <param name="ReturnEmpy"></param>
+        /// <returns></returns>
         public static string Get(string Name, bool ReturnEmpy = false)
         {
             string stringReturn = string.Empty;
+
             switch (Name.ToLower())
             {
                 #region plugin
@@ -221,6 +225,7 @@
                     }
                     break;
             }
+
             return stringReturn;
         }
     }
