@@ -349,6 +349,17 @@ namespace CommonPluginsShared
             result = result.Replace(ExpandableVariables.Version, game.Version);
 
 
+            // Steam
+            if (result.Contains("{Steam"))
+            {
+                SteamApi steamApi = new SteamApi();
+
+                result = result.Replace("{SteamId}", steamApi.GetUserSteamId());
+                result = result.Replace("{SteamInstallDir}", steamApi.GetInstallationPath());
+                result = result.Replace("{SteamScreenshotsDir}", steamApi.GetPathScreeshotsFolder());
+            }
+
+
             // Windows variables
             result = result.Replace("{WinDir}", Environment.GetEnvironmentVariable("WinDir"));
             result = result.Replace("{AllUsersProfile}", Environment.GetEnvironmentVariable("AllUsersProfile"));

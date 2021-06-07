@@ -119,4 +119,32 @@ Please clear all the tags in the plugin menu.</sys:String>
     <sys:String x:Key="LOCCommonSortByDate">Sort by date</sys:String>
     <sys:String x:Key="LOCCommonSortByScore">Sort by score</sys:String>
 
+
+
+    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
+{InstallDir} - Game installation directory
+{InstallDirName} - Installation folder name
+{ImagePath} - Game ISO/ROM path if set
+{ImageName} - Game ISO/ROM file name
+{ImageNameNoExt} - Game ISO/ROM file name without extension
+{PlayniteDir} - Playnite installation directory
+{Name} - Game name
+       
+Steam variables can be used to add a dynamic string:        
+{SteamId} - Steam user Id
+{SteamInstallDir} - Steam installation directory
+{SteamScreenshotsDir} - Steam screenshots directory
+        
+Windows variables can be used to add a dynamic string:        
+{WinDir}
+{AllUsersProfile}
+{AppData}
+{HomePath}
+{UserName}
+{UserProfile}
+{HomeDrive}
+{SystemDrive}
+{SystemRoot}
+{ProgramFiles(x86)}</sys:String>
+
 </ResourceDictionary>
