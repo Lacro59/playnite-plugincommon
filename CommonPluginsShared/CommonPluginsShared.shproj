@@ -16,7 +16,6 @@
     <Compile Include="Collections\PluginDatabaseObject.cs" />
     <Compile Include="Collections\PluginItemCollection.cs" />
     <Compile Include="Common.cs" />
-    <Compile Include="Converters.cs" />
     <Compile Include="CumulsErrors.cs" />
     <Compile Include="ImageTools.cs" />
     <Compile Include="Localization.cs" />
