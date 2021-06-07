@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommonPlayniteShared.Manifests;
+using CommonPluginsPlaynite.Common;
 
 namespace CommonPluginsShared
 {
@@ -306,6 +307,63 @@ namespace CommonPluginsShared
                     ThemeManager.SetCurrentTheme(customTheme);
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Remplace Playnite & Windows variables
+        /// </summary>
+        /// <param name="game"></param>
+        /// <param name="inputString"></param>
+        /// <param name="fixSeparators"></param>
+        /// <returns></returns>
+        public static string StringExpand(Game game, string inputString, bool fixSeparators = false)
+        {
+            if (string.IsNullOrEmpty(inputString) || !inputString.Contains('{'))
+            {
+                return inputString;
+            }
+
+
+            // Playnite variables
+            var result = inputString;
+            if (!game.InstallDirectory.IsNullOrWhiteSpace())
+            {
+                result = result.Replace(ExpandableVariables.InstallationDirectory, game.InstallDirectory);
+                result = result.Replace(ExpandableVariables.InstallationDirName, Path.GetFileName(Path.GetDirectoryName(game.InstallDirectory)));
+            }
+
+            if (!game.GameImagePath.IsNullOrWhiteSpace())
+            {
+                result = result.Replace(ExpandableVariables.ImagePath, game.GameImagePath);
+                result = result.Replace(ExpandableVariables.ImageNameNoExtension, Path.GetFileNameWithoutExtension(game.GameImagePath));
+                result = result.Replace(ExpandableVariables.ImageName, Path.GetFileName(game.GameImagePath));
+            }
+
+            result = result.Replace(ExpandableVariables.PlayniteDirectory, PlaynitePaths.ProgramPath);
+            result = result.Replace(ExpandableVariables.Name, game.Name);
+            result = result.Replace(ExpandableVariables.Platform, game.Platform?.Name);
+            result = result.Replace(ExpandableVariables.PluginId, game.PluginId.ToString());
+            result = result.Replace(ExpandableVariables.GameId, game.GameId);
+            result = result.Replace(ExpandableVariables.DatabaseId, game.Id.ToString());
+            result = result.Replace(ExpandableVariables.Version, game.Version);
+
+
+            // Windows variables
+            result = result.Replace("{WinDir}", Environment.GetEnvironmentVariable("WinDir"));
+            result = result.Replace("{AllUsersProfile}", Environment.GetEnvironmentVariable("AllUsersProfile"));
+            result = result.Replace("{AppData}", Environment.GetEnvironmentVariable("AppData"));
+            result = result.Replace("{HomePath}", Environment.GetEnvironmentVariable("HomePath"));
+            result = result.Replace("{UserName}", Environment.GetEnvironmentVariable("UserName"));
+            result = result.Replace("{UserProfile}", Environment.GetEnvironmentVariable("UserProfile"));
+            result = result.Replace("{HomeDrive}", Environment.GetEnvironmentVariable("HomeDrive"));
+            result = result.Replace("{SystemDrive}", Environment.GetEnvironmentVariable("SystemDrive"));
+            result = result.Replace("{SystemRoot}", Environment.GetEnvironmentVariable("SystemRoot"));
+            result = result.Replace("{ProgramFiles}", Environment.GetEnvironmentVariable("ProgramFiles"));
+            result = result.Replace("{ProgramFiles(x86)}", Environment.GetEnvironmentVariable("ProgramFiles(x86)"));
+
+
+            return fixSeparators ? Paths.FixSeparators(result) : result;
         }
     }
 }
