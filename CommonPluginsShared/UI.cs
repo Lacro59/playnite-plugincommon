@@ -1030,6 +1030,37 @@ namespace CommonPluginsShared
 
             }
         }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <remarks>https://stackoverflow.com/questions/1585462/bubbling-scroll-events-from-a-listview-to-its-parent</remarks>
+        public static void HandlePreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (!e.Handled)
+            {
+                var scrollViewer = UI.FindVisualChildren<ScrollViewer>((FrameworkElement)sender).FirstOrDefault();
+
+                if (scrollViewer == null)
+                {
+                    return;
+                }
+
+                var scrollPos = scrollViewer.ContentVerticalOffset;
+                if ((scrollPos == scrollViewer.ScrollableHeight && e.Delta < 0) || (scrollPos == 0 && e.Delta > 0))
+                {
+                    e.Handled = true;
+                    var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta);
+                    eventArg.RoutedEvent = UIElement.MouseWheelEvent;
+                    eventArg.Source = sender;
+                    var parent = ((Control)sender).Parent as UIElement;
+                    parent.RaiseEvent(eventArg);
+                }
+            }
+        }
     }
 
 

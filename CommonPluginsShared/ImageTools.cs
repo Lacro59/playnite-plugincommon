@@ -45,8 +45,8 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, true, $"Error On GetImapeProperty({srcPath})");
-                logger.Error("Error on get image property");
+                Common.LogError(ex, true, $"Error on GetImapeProperty({srcPath})");
+                logger.Error("Error on GetImapeProperty()");
                 return null;
             }
         }
@@ -67,7 +67,7 @@ namespace CommonPluginsShared
             catch (Exception ex)
             {
                 Common.LogError(ex, true);
-                logger.Error("Error on get image property");
+                logger.Error("Error on GetImapeProperty()");
                 return null;
             }
         }
@@ -85,7 +85,7 @@ namespace CommonPluginsShared
             catch (Exception ex)
             {
                 Common.LogError(ex, true);
-                logger.Error("Error on get image property");
+                logger.Error("Error on GetImapeProperty()");
                 return null;
             }
         }
@@ -163,6 +163,7 @@ namespace CommonPluginsShared
         #endregion
 
 
+        #region Convert
         public static FormatConvertedBitmap ConvertBitmapImage(BitmapImage IconImage, ImageColor imageColor = ImageColor.None)
         {
             FormatConvertedBitmap ConvertBitmapSource = new FormatConvertedBitmap();
@@ -244,5 +245,6 @@ namespace CommonPluginsShared
                 return bitmapImage;
             }
         }
+        #endregion
     }
 }

@@ -283,6 +283,62 @@ namespace CommonPluginsShared
             }
         }
 
+        public static async Task<string> DownloadStringData(string url, List<HttpCookie> Cookies = null)
+        {
+            var response = string.Empty;
+
+            HttpClientHandler handler = new HttpClientHandler();
+            if (Cookies != null)
+            {
+                CookieContainer cookieContainer = new CookieContainer();
+
+                foreach (var cookie in Cookies)
+                {
+                    Cookie c = new Cookie();
+                    c.Name = cookie.Name;
+                    c.Value = cookie.Value;
+                    c.Domain = cookie.Domain;
+                    c.Path = cookie.Path;
+
+                    try
+                    {
+                        cookieContainer.Add(c);
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, true);
+                    }
+                }
+
+                handler.CookieContainer = cookieContainer;
+            }
+
+            using (var client = new HttpClient(handler))
+            {
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+
+                HttpResponseMessage result;
+                try
+                {
+                    result = await client.GetAsync(url).ConfigureAwait(false);
+                    if (result.IsSuccessStatusCode)
+                    {
+                        response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        logger.Error($"Web error with status code {result.StatusCode.ToString()}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Error on Post {url}");
+                }
+            }
+
+            return response;
+        }
+
 
         /// <summary>
         /// Post data with a payload.
@@ -333,11 +389,6 @@ namespace CommonPluginsShared
             return response;
         }
 
-        //var formContent = new FormUrlEncodedContent(new[]
-        //{
-        //    new KeyValuePair<string, string>("comment", comment),
-        //    new KeyValuePair<string, string>("questionId", questionId)
-        //});
         public static async Task<string> PostStringDataCookies(string url, FormUrlEncodedContent formContent, List<HttpCookie> Cookies = null)
         {
             var response = string.Empty;
@@ -376,63 +427,6 @@ namespace CommonPluginsShared
                 try
                 {
                     result = await client.PostAsync(url, formContent).ConfigureAwait(false);
-                    if (result.IsSuccessStatusCode)
-                    {
-                        response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        logger.Error($"Web error with status code {result.StatusCode.ToString()}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, $"Error on Post {url}");
-                }
-            }
-
-            return response;
-        }
-
-
-        public static async Task<string> DownloadStringData(string url, List<HttpCookie> Cookies = null)
-        {
-            var response = string.Empty;
-
-            HttpClientHandler handler = new HttpClientHandler();
-            if (Cookies != null)
-            {
-                CookieContainer cookieContainer = new CookieContainer();
-
-                foreach (var cookie in Cookies)
-                {
-                    Cookie c = new Cookie();
-                    c.Name = cookie.Name;
-                    c.Value = cookie.Value;
-                    c.Domain = cookie.Domain;
-                    c.Path = cookie.Path;
-
-                    try
-                    {
-                        cookieContainer.Add(c);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, true);
-                    }
-                }
-
-                handler.CookieContainer = cookieContainer;
-            }
-
-            using (var client = new HttpClient(handler))
-            {
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
-
-                HttpResponseMessage result;
-                try
-                {
-                    result = await client.GetAsync(url).ConfigureAwait(false);
                     if (result.IsSuccessStatusCode)
                     {
                         response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
