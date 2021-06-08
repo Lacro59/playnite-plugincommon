@@ -20,9 +20,7 @@
     <Compile Include="ImageTools.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="Models\TraceInfos.cs" />
-    <Compile Include="OriginApi.cs" />
     <Compile Include="PlayniteTools.cs" />
-    <Compile Include="SteamApi.cs" />
     <Compile Include="TaskHelper.cs" />
     <Compile Include="Tools.cs" />
     <Compile Include="TransformIcon.cs" />

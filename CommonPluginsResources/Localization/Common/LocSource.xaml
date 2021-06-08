@@ -134,6 +134,10 @@ Steam variables can be used to add a dynamic string:
 {SteamId} - Steam user Id
 {SteamInstallDir} - Steam installation directory
 {SteamScreenshotsDir} - Steam screenshots directory
+       
+Ubisoft Connect variables can be used to add a dynamic string:        
+{UbisoftInstallDir} - Ubisoft installation directory
+{UbisoftScreenshotsDir} - Ubisoft screenshots directory
         
 Windows variables can be used to add a dynamic string:        
 {WinDir}

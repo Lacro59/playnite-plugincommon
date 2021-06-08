@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CommonPlayniteShared.Manifests;
 using CommonPluginsPlaynite.Common;
+using CommonPluginsShared.StoresAPI;
 
 namespace CommonPluginsShared
 {
@@ -356,7 +357,17 @@ namespace CommonPluginsShared
 
                 result = result.Replace("{SteamId}", steamApi.GetUserSteamId());
                 result = result.Replace("{SteamInstallDir}", steamApi.GetInstallationPath());
-                result = result.Replace("{SteamScreenshotsDir}", steamApi.GetPathScreeshotsFolder());
+                result = result.Replace("{SteamScreenshotsDir}", steamApi.GetScreeshotsPath());
+            }
+
+
+            // Ubisoft Connect
+            if (result.Contains("{Ubisoft"))
+            {
+                UbisoftAPI ubisoftAPI = new UbisoftAPI();
+                
+                result = result.Replace("{UbisoftInstallDir}", ubisoftAPI.GetInstallationPath());
+                result = result.Replace("{UbisoftScreenshotsDir}", ubisoftAPI.GetScreeshotsPath());
             }
 
 

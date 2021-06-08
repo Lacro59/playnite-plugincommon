@@ -28,6 +28,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\MemoryCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Paths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\ProcessMonitor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Programs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\SafeFileEnumerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Sizes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\TGASharpLib.cs" />

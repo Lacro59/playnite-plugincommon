@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace CommonPluginsShared
+namespace CommonPluginsShared.StoresAPI
 {
     public class SteamApi
     {
@@ -167,7 +167,7 @@ namespace CommonPluginsShared
             return string.Empty;
         }
 
-        public string GetPathScreeshotsFolder()
+        public string GetScreeshotsPath()
         {
             string PathScreeshotsFolder = string.Empty;
 

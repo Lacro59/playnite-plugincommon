@@ -41,6 +41,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)CumulsErrors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteUiHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StoresAPI\OriginApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StoresAPI\SteamApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StoresAPI\UbisoftAPI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IDataContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginDatabase.cs" />
@@ -48,10 +51,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)LocalSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\PluginPaths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\TraceInfos.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)OriginApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteExtended\PluginExtended.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteTools.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SteamApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TaskHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransformIcon.cs" />
