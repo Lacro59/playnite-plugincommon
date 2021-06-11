@@ -120,6 +120,8 @@ Please clear all the tags in the plugin menu.</sys:String>
     <sys:String x:Key="LOCCommonSortByScore">Sort by score</sys:String>
 
 
+    <sys:String x:Key="LOCCommonMisc">Misc</sys:String>
+
 
     <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
 {InstallDir} - Game installation directory
@@ -130,6 +132,9 @@ Please clear all the tags in the plugin menu.</sys:String>
 {PlayniteDir} - Playnite installation directory
 {Name} - Game name
        
+Cloud variables can be used to add a dynamic string:        
+{DropboxFolder}
+       
 Steam variables can be used to add a dynamic string:        
 {SteamId} - Steam user Id
 {SteamInstallDir} - Steam installation directory
@@ -138,17 +143,23 @@ Steam variables can be used to add a dynamic string:
 Ubisoft Connect variables can be used to add a dynamic string:        
 {UbisoftInstallDir} - Ubisoft installation directory
 {UbisoftScreenshotsDir} - Ubisoft screenshots directory
-        
+            
 Windows variables can be used to add a dynamic string:        
 {WinDir}
 {AllUsersProfile}
 {AppData}
 {HomePath}
 {UserName}
+{ComputerName}
 {UserProfile}
 {HomeDrive}
 {SystemDrive}
 {SystemRoot}
-{ProgramFiles(x86)}</sys:String>
+{Public}
+{CommonProgramW6432}
+{CommonProgramFiles}
+{ProgramFiles}
+{CommonProgramFiles(x86)}
+{ProgramFiles(x86)</sys:String>
 
 </ResourceDictionary>

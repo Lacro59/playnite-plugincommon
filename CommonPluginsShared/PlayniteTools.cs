@@ -371,17 +371,34 @@ namespace CommonPluginsShared
             }
 
 
+            // Dropbox
+            if (result.Contains("{Dropbox"))
+            {
+                string DropboxInfoFile = Path.Combine(Environment.GetEnvironmentVariable("AppData"), "..", "Local", "Dropbox", "info.json");
+                if (File.Exists(DropboxInfoFile))
+                {
+                    dynamic DropboxInfo = Serialization.FromJsonFile<dynamic>(DropboxInfoFile);
+                    result = result.Replace("{DropboxFolder}", ((dynamic)DropboxInfo["personal"]["path"]).Value);
+                }
+            }
+
+
             // Windows variables
             result = result.Replace("{WinDir}", Environment.GetEnvironmentVariable("WinDir"));
             result = result.Replace("{AllUsersProfile}", Environment.GetEnvironmentVariable("AllUsersProfile"));
             result = result.Replace("{AppData}", Environment.GetEnvironmentVariable("AppData"));
             result = result.Replace("{HomePath}", Environment.GetEnvironmentVariable("HomePath"));
             result = result.Replace("{UserName}", Environment.GetEnvironmentVariable("UserName"));
+            result = result.Replace("{ComputerName}", Environment.GetEnvironmentVariable("ComputerName"));
             result = result.Replace("{UserProfile}", Environment.GetEnvironmentVariable("UserProfile"));
             result = result.Replace("{HomeDrive}", Environment.GetEnvironmentVariable("HomeDrive"));
             result = result.Replace("{SystemDrive}", Environment.GetEnvironmentVariable("SystemDrive"));
             result = result.Replace("{SystemRoot}", Environment.GetEnvironmentVariable("SystemRoot"));
+            result = result.Replace("{Public}", Environment.GetEnvironmentVariable("Public"));
             result = result.Replace("{ProgramFiles}", Environment.GetEnvironmentVariable("ProgramFiles"));
+            result = result.Replace("{CommonProgramFiles}", Environment.GetEnvironmentVariable("CommonProgramFiles"));
+            result = result.Replace("{CommonProgramFiles(x86)}", Environment.GetEnvironmentVariable("CommonProgramFiles(x86)"));
+            result = result.Replace("{CommonProgramW6432}", Environment.GetEnvironmentVariable("CommonProgramW6432"));
             result = result.Replace("{ProgramFiles(x86)}", Environment.GetEnvironmentVariable("ProgramFiles(x86)"));
 
 
