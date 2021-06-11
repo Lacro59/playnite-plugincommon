@@ -318,7 +318,7 @@ namespace CommonPluginsShared
         /// <param name="inputString"></param>
         /// <param name="fixSeparators"></param>
         /// <returns></returns>
-        public static string StringExpand(Game game, string inputString, bool fixSeparators = false)
+        public static string StringExpand(Game game, string inputString, bool fixSeparators = false, bool SafeName = true)
         {
             if (string.IsNullOrEmpty(inputString) || !inputString.Contains('{'))
             {
@@ -342,8 +342,18 @@ namespace CommonPluginsShared
             }
 
             result = result.Replace(ExpandableVariables.PlayniteDirectory, PlaynitePaths.ProgramPath);
-            result = result.Replace(ExpandableVariables.Name, game.Name);
-            result = result.Replace(ExpandableVariables.Platform, game.Platform?.Name);
+
+            if (SafeName)
+            {
+                result = result.Replace(ExpandableVariables.Name, Paths.GetSafeFilename(game.Name));
+                result = result.Replace(ExpandableVariables.Platform, Paths.GetSafeFilename(game.Platform?.Name));
+            }
+            else
+            {
+                result = result.Replace(ExpandableVariables.Name, game.Name);
+                result = result.Replace(ExpandableVariables.Platform, game.Platform?.Name);
+            }
+            
             result = result.Replace(ExpandableVariables.PluginId, game.PluginId.ToString());
             result = result.Replace(ExpandableVariables.GameId, game.GameId);
             result = result.Replace(ExpandableVariables.DatabaseId, game.Id.ToString());
