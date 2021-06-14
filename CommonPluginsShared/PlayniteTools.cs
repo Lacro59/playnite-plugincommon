@@ -10,7 +10,6 @@ using System.Text;
 using System.Threading.Tasks;
 using CommonPlayniteShared.Manifests;
 using CommonPluginsPlaynite.Common;
-using CommonPluginsShared.StoresAPI;
 
 namespace CommonPluginsShared
 {
@@ -318,7 +317,7 @@ namespace CommonPluginsShared
         /// <param name="inputString"></param>
         /// <param name="fixSeparators"></param>
         /// <returns></returns>
-        public static string StringExpand(Game game, string inputString, bool fixSeparators = false, bool SafeName = true)
+        public static string StringExpandWithoutStore(Game game, string inputString, bool fixSeparators = false, bool SafeName = true)
         {
             if (string.IsNullOrEmpty(inputString) || !inputString.Contains('{'))
             {
@@ -358,27 +357,6 @@ namespace CommonPluginsShared
             result = result.Replace(ExpandableVariables.GameId, game.GameId);
             result = result.Replace(ExpandableVariables.DatabaseId, game.Id.ToString());
             result = result.Replace(ExpandableVariables.Version, game.Version);
-
-
-            // Steam
-            if (result.Contains("{Steam"))
-            {
-                SteamApi steamApi = new SteamApi();
-
-                result = result.Replace("{SteamId}", steamApi.GetUserSteamId());
-                result = result.Replace("{SteamInstallDir}", steamApi.GetInstallationPath());
-                result = result.Replace("{SteamScreenshotsDir}", steamApi.GetScreeshotsPath());
-            }
-
-
-            // Ubisoft Connect
-            if (result.Contains("{Ubisoft"))
-            {
-                UbisoftAPI ubisoftAPI = new UbisoftAPI();
-                
-                result = result.Replace("{UbisoftInstallDir}", ubisoftAPI.GetInstallationPath());
-                result = result.Replace("{UbisoftScreenshotsDir}", ubisoftAPI.GetScreeshotsPath());
-            }
 
 
             // Dropbox

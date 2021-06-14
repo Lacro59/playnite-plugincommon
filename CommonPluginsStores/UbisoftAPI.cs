@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-namespace CommonPluginsShared.StoresAPI
+namespace CommonPluginsStores
 {
     public class UbisoftAPI
     {

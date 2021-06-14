@@ -42,9 +42,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)CumulsErrors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteUiHelper.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StoresAPI\OriginApi.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StoresAPI\SteamApi.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)StoresAPI\UbisoftAPI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IDataContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginDatabase.cs" />

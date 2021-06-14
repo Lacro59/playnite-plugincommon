@@ -8,7 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace CommonPluginsShared.StoresAPI
+namespace CommonPluginsStores
 {
     public class OriginApi
     {
