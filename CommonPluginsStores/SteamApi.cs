@@ -1,4 +1,5 @@
 ﻿using CommonPluginsPlaynite;
+using CommonPluginsShared;
 using Microsoft.Win32;
 using Playnite.SDK;
 using Playnite.SDK.Data;
@@ -98,8 +99,8 @@ namespace CommonPluginsStores
 
                     foreach (SteamApps Game in SteamAppsList)
                     {
-                        string NameSteam = PlayniteTools.NormalizeGameName(Game.Name);
-                        string NameSearch = PlayniteTools.NormalizeGameName(Name);
+                        string NameSteam = CommonPluginsShared.PlayniteTools.NormalizeGameName(Game.Name);
+                        string NameSearch = CommonPluginsShared.PlayniteTools.NormalizeGameName(Name);
 
                         if (NameSteam == NameSearch)
                         {
