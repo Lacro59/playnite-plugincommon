@@ -283,7 +283,7 @@ namespace CommonPluginsShared
             }
         }
 
-        public static async Task<string> DownloadStringData(string url, List<HttpCookie> Cookies = null)
+        public static async Task<string> DownloadStringData(string url, List<HttpCookie> Cookies = null, string UserAgent = "")
         {
             var response = string.Empty;
 
@@ -315,7 +315,14 @@ namespace CommonPluginsShared
 
             using (var client = new HttpClient(handler))
             {
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                if (UserAgent.IsNullOrEmpty())
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                }
+                else
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+                }
 
                 HttpResponseMessage result;
                 try
