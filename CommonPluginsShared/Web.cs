@@ -355,12 +355,12 @@ namespace CommonPluginsShared
         /// <returns></returns>
         public static async Task<string> PostStringDataPayload(string url, string payload)
         {
-            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            var settings = (SettingsSection)config.GetSection("system.net/settings");
-            var defaultValue = settings.HttpWebRequest.UseUnsafeHeaderParsing;
-            settings.HttpWebRequest.UseUnsafeHeaderParsing = true;
-            config.Save(ConfigurationSaveMode.Modified);
-            ConfigurationManager.RefreshSection("system.net/settings");
+            //var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            //var settings = (SettingsSection)config.GetSection("system.net/settings");
+            //var defaultValue = settings.HttpWebRequest.UseUnsafeHeaderParsing;
+            //settings.HttpWebRequest.UseUnsafeHeaderParsing = true;
+            //config.Save(ConfigurationSaveMode.Modified);
+            //ConfigurationManager.RefreshSection("system.net/settings");
 
             var response = string.Empty;
             using (var client = new HttpClient())
