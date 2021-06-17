@@ -18,11 +18,11 @@
         <controls:ColorPicker Name="PART_AkrColorPicker" DockPanel.Dock="Left" Background="Transparent" Margin="0,0,20,0"
                               SelectedColorChanged="PART_AkrColorPicker_SelectedColorChanged" IsVisibleChanged="PART_AkrColorPicker_IsVisibleChanged" />
 
-            <StackPanel Height="45" Width="200" 
+            <!--StackPanel Height="45" Width="200" 
                         Background="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=Background}"
                         Visibility="{Binding ElementName=PART_tbGradient, Path=IsChecked, Converter={StaticResource InvertedBooleanToVisibilityConverter}}"
                         VerticalAlignment="Top" HorizontalAlignment="Right">
-            </StackPanel>
+            </StackPanel-->
         </Grid>
 
         

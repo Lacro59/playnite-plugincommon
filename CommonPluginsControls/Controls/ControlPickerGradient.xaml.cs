@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CommonPluginsShared;
+using Newtonsoft.Json;
 using Playnite.SDK;
 using System;
 using System.Collections.Generic;
@@ -355,6 +356,14 @@ namespace CommonPluginsControls.Controls
             PART_ColorPickerGradient.Visibility = Visibility.Visible;
             PART_GradientDetailsLinearGrid.Visibility = Visibility.Visible;
             PART_ButtonSetColorGradient.Visibility = Visibility.Visible;
+
+
+            var BorderElements = UI.FindVisualChildren<Border>(PART_AkrColorPicker);
+            var BorderElement = BorderElements?.Where(x => x.Background?.ToString() == new SolidColorBrush(SimpleColor)?.ToString()).FirstOrDefault();
+            if (BorderElement != null)
+            {
+                BorderElement.Visibility = Visibility.Hidden;
+            }
         }
 
         private void PART_tbGradient_Unchecked(object sender, RoutedEventArgs e)
@@ -365,6 +374,14 @@ namespace CommonPluginsControls.Controls
             PART_ColorPickerGradient.Visibility = Visibility.Hidden;
             PART_GradientDetailsLinearGrid.Visibility = Visibility.Hidden;
             PART_ButtonSetColorGradient.Visibility = Visibility.Hidden;
+
+
+            var BorderElements = UI.FindVisualChildren<Border>(PART_AkrColorPicker);
+            var BorderElement = BorderElements?.Where(x => x.Background?.ToString() == new SolidColorBrush(SimpleColor)?.ToString()).FirstOrDefault();
+            if (BorderElement != null)
+            {
+                BorderElement.Visibility = Visibility.Visible;
+            }
         }
 
 

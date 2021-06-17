@@ -25,8 +25,6 @@ namespace CommonPluginsShared
         private static ILogger logger = LogManager.GetLogger();
 
 
-        // TODO Used?
-        /*
         public bool AddResources(List<ResourcesList> ResourcesList)
         {
             Common.LogDebug(true, $"AddResources() - {Serialization.ToJson(ResourcesList)}");
@@ -35,10 +33,15 @@ namespace CommonPluginsShared
 
             foreach (ResourcesList item in ResourcesList)
             {
+                ItemKey = item.Key;
+
                 try
                 {
-                    ItemKey = item.Key;
-                    if (Application.Current.Resources[ItemKey] != null)
+                    try
+                    {
+                        Application.Current.Resources.Add(item.Key, item.Value);
+                    }
+                    catch
                     {
                         Type TypeActual = Application.Current.Resources[ItemKey].GetType();
                         Type TypeNew = item.Value.GetType();
@@ -58,10 +61,6 @@ namespace CommonPluginsShared
 
                         Application.Current.Resources[ItemKey] = item.Value;
                     }
-                    else
-                    {
-                        Application.Current.Resources.Add(item.Key, item.Value);
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -71,7 +70,6 @@ namespace CommonPluginsShared
             }
             return true;
         }
-        */
 
         // TODO Used?
         /*
@@ -1064,12 +1062,10 @@ namespace CommonPluginsShared
     }
 
 
-    // TODO Used?
-    /*
+
     public class ResourcesList
     {
         public string Key { get; set; }
         public object Value { get; set; }
     }
-    */
 }
