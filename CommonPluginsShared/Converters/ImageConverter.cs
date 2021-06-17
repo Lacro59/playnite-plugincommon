@@ -1,16 +1,16 @@
-﻿using CommonPlayniteShared;
-using Playnite.SDK;
+﻿using CommonPluginsShared;
 using System;
-using System.Linq;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
-using System.Text.RegularExpressions;
-using System.Windows;
-using System.Windows.Controls;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Markup;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace CommonPluginsShared.Converters
@@ -28,6 +28,10 @@ namespace CommonPluginsShared.Converters
                 }
 
                 BitmapLoadProperties bitmapLoadProperties = null;
+                if (parameter is string && (string)parameter == "-")
+                {
+                    bitmapLoadProperties = null;
+                }
                 if (parameter is string && (string)parameter == "1")
                 {
                     bitmapLoadProperties = new BitmapLoadProperties(100, 0)
@@ -42,16 +46,69 @@ namespace CommonPluginsShared.Converters
                         Source = (string)values[0]
                     };
                 }
+                if (parameter is string && (string)parameter == "3")
+                {
+                    bitmapLoadProperties = new BitmapLoadProperties(300, 0)
+                    {
+                        Source = (string)values[0]
+                    };
+                }
+                if (parameter is string && (string)parameter == "4")
+                {
+                    bitmapLoadProperties = new BitmapLoadProperties(400, 0)
+                    {
+                        Source = (string)values[0]
+                    };
+                }
                 if (parameter is string && (string)parameter == "0")
                 {
                     double ActualHeight = (double)values[1];
 
-                    if (ActualHeight > 200)
+                    if (ActualHeight < 100)
                     {
-                        bitmapLoadProperties = new BitmapLoadProperties((int)ActualHeight, 0)
+                        bitmapLoadProperties = new BitmapLoadProperties(100, 0)
                         {
                             Source = (string)values[0]
                         };
+                    }
+                    else if (ActualHeight < 200)
+                    {
+                        bitmapLoadProperties = new BitmapLoadProperties(200, 0)
+                        {
+                            Source = (string)values[0]
+                        };
+                    }
+                    else if (ActualHeight < 300)
+                    {
+                        bitmapLoadProperties = new BitmapLoadProperties(300, 0)
+                        {
+                            Source = (string)values[0]
+                        };
+                    }
+                    else if (ActualHeight < 400)
+                    {
+                        bitmapLoadProperties = new BitmapLoadProperties(400, 0)
+                        {
+                            Source = (string)values[0]
+                        };
+                    }
+                    else if (ActualHeight < 500)
+                    {
+                        bitmapLoadProperties = new BitmapLoadProperties(500, 0)
+                        {
+                            Source = (string)values[0]
+                        };
+                    }
+                    else if (ActualHeight < 600)
+                    {
+                        bitmapLoadProperties = new BitmapLoadProperties(600, 0)
+                        {
+                            Source = (string)values[0]
+                        };
+                    }
+                    else if (ActualHeight >= 600)
+                    {
+                        bitmapLoadProperties = null;
                     }
                     else
                     {

@@ -53,8 +53,6 @@ namespace CommonPluginsControls.Controls
         #endregion
 
 
-
-
         public MediaElementExtend()
         {
             InitializeComponent();
@@ -135,6 +133,8 @@ namespace CommonPluginsControls.Controls
                 timer.Stop();
                 timer = null;
             }
+
+            PART_Video.Source = null;
         }
 
 
