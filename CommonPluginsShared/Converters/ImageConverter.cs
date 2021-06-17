@@ -1,6 +1,7 @@
 ﻿using CommonPlayniteShared;
 using Playnite.SDK;
 using System;
+using System.Linq;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
@@ -20,7 +21,8 @@ namespace CommonPluginsShared.Converters
         {
             if (values[0] is string && !((string)values[0]).IsNullOrEmpty() && File.Exists((string)values[0]))
             {
-                if (((string)values[0]).EndsWith(".mp4", StringComparison.OrdinalIgnoreCase))
+                string[] extensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".jfif", ".tga" };
+                if (!extensions.Contains(Path.GetExtension((string)values[0])))
                 {
                     return values[0];
                 }

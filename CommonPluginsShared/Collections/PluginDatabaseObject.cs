@@ -22,6 +22,7 @@ using CommonPluginsControls.Controls;
 using CommonPluginsPlaynite.Common;
 using CommonPluginsShared.Interfaces;
 using Playnite.SDK.Plugins;
+using CommonPluginsPlaynite;
 
 namespace CommonPluginsShared.Collections
 {
@@ -77,7 +78,7 @@ namespace CommonPluginsShared.Collections
                 PluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                 PluginUserDataPath = PluginUserDataPath,
                 PluginDatabasePath = Path.Combine(PluginUserDataPath, PluginName),
-                PluginCachePath = Path.Combine(PluginUserDataPath, "Cache"),
+                PluginCachePath = Path.Combine(PlaynitePaths.DataCachePath, PluginName),
             };
 
             FileSystem.CreateDirectory(Paths.PluginDatabasePath);

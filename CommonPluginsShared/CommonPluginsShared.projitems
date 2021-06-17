@@ -25,6 +25,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\CompareValueConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\DefaultIconConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\GetImageConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\GetMediaTypeConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\HeightToFontSizeConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\ImageConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\ImageToGrayConverter.cs" />
