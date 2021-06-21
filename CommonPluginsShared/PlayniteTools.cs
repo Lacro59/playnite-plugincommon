@@ -267,13 +267,20 @@ namespace CommonPluginsShared
 
             var newName = name.ToLower();
             newName = newName.RemoveTrademarks();
+            newName = newName.Replace(">", "");
+            newName = newName.Replace("<", "");
             newName = newName.Replace("_", "");
             newName = newName.Replace(".", "");
             newName = newName.Replace('’', '\'');
             newName = newName.Replace(":", "");
             newName = newName.Replace("-", "");
+
+            newName = newName.Replace("standard edition", "");
+            newName = newName.Replace("deluxe edition", "");
+            newName = newName.Replace("gold edition", "");
             newName = newName.Replace("goty", "");
             newName = newName.Replace("game of the year edition", "");
+
             newName = newName.Replace("  ", " ");
 
             return newName.Trim();
