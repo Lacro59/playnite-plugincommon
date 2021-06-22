@@ -85,6 +85,7 @@ namespace CommonPluginsStores
             return Serialization.FromJson<dynamic>(responseData);
         }
 
+
         public int GetSteamId(string Name)
         {
             int SteamId = 0;
@@ -124,6 +125,37 @@ namespace CommonPluginsStores
             }
         
             return SteamId;
+        }
+
+        public string GetGameName(int SteamId)
+        {
+            string GameName = string.Empty;
+
+            try
+            {
+                if (SteamListApp != null && SteamListApp["applist"] != null && SteamListApp["applist"]["apps"] != null)
+                {
+                    string SteamAppsListString = Serialization.ToJson(SteamListApp["applist"]["apps"]);
+                    List<SteamApps> SteamAppsList = Serialization.FromJson<List<SteamApps>>(SteamAppsListString);
+
+                    string tempName = SteamAppsList.Find(x => x.AppId == SteamId)?.Name;
+
+                    if (!tempName.IsNullOrEmpty())
+                    {
+                        GameName = tempName;
+                    }
+                }
+                else
+                {
+                    logger.Warn($"No SteamListApp data");
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+            }
+
+            return GameName;
         }
 
 

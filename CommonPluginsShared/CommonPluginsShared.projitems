@@ -42,6 +42,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\VisibilityZeroConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CumulsErrors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageTools.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\SourceLink.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteUiHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IDataContext.cs" />
