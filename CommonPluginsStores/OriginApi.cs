@@ -59,8 +59,10 @@ namespace CommonPluginsStores
             {
                 string result = Web.DownloadStringDataWithGz(urlOriginListApp).GetAwaiter().GetResult();
                 dynamic resultObject = Serialization.FromJson<dynamic>(result);
+                responseData = Serialization.ToJson(resultObject["offers"]);
+
                 // Write file for cache usage
-                responseData = Serialization.ToFile(resultObject["offers"], PluginCacheFile, Format.Json);
+                Serialization.ToFile(resultObject["offers"], PluginCacheFile, Format.Json);
             }
             catch (Exception ex)
             {
