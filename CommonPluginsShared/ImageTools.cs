@@ -166,6 +166,12 @@ namespace CommonPluginsShared
         #region Convert
         public static FormatConvertedBitmap ConvertBitmapImage(BitmapImage IconImage, ImageColor imageColor = ImageColor.None)
         {
+            if (IconImage is null)
+            {
+                return null;
+            }
+
+
             FormatConvertedBitmap ConvertBitmapSource = new FormatConvertedBitmap();
 
             try

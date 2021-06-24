@@ -20,7 +20,7 @@ namespace CommonPluginsShared.Converters
         {
             if (value is string str)
             {
-                BitmapImage tmpImg = BitmapExtensions.BitmapFromFile(str);
+                BitmapImage tmpImg = BitmapExtensions.BitmapFromFile(ImageSourceManager.GetImagePath(str));
                 return ImageTools.ConvertBitmapImage(tmpImg, ImageColor.Gray);
             }
 
