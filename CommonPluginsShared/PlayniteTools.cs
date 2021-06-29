@@ -207,6 +207,38 @@ namespace CommonPluginsShared
         /// <returns></returns>
         public static string GetSourceName(IPlayniteAPI PlayniteApi, Game game)
         {
+            BuiltinExtension PluginSource = Playnite.SDK.BuiltinExtensions.GetExtensionFromId(game.PluginId);
+            switch (PluginSource)
+            {
+                case BuiltinExtension.AmazonGamesLibrary:
+                    return "Amazon Games";
+                case BuiltinExtension.BattleNetLibrary:
+                    return "Battle.NET";
+                case BuiltinExtension.BethesdaLibrary:
+                    return "Bethesda";
+                case BuiltinExtension.EpicLibrary:
+                    return "Epic";
+                case BuiltinExtension.GogLibrary:
+                    return "GOG";
+                case BuiltinExtension.HumbleLibrary:
+                    return "Humble";
+                case BuiltinExtension.ItchioLibrary:
+                    return "itch.io";
+                case BuiltinExtension.OriginLibrary:
+                    return "Origin";
+                case BuiltinExtension.PSNLibrary:
+                    return "";
+                case BuiltinExtension.SteamLibrary:
+                    return "Steam";
+                case BuiltinExtension.TwitchLibrary:
+                    return "Twitch";
+                case BuiltinExtension.UplayLibrary:
+                    return "Ubisoft Connect";
+                case BuiltinExtension.XboxLibrary:
+                    return "Xbox";
+            }
+
+
             string SourceName = string.Empty;
 
             try
