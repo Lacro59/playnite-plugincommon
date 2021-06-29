@@ -163,6 +163,67 @@ namespace CommonPluginsShared
         }
 
 
+        public static async Task<string> DownloadStringDataKeepParam(string url)
+        {
+            using (var client = new HttpClient())
+            {
+                var request = new HttpRequestMessage()
+                {
+                    RequestUri = new Uri(url),
+                    Method = HttpMethod.Get
+                };
+
+                HttpResponseMessage response;
+                try
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                    response = await client.SendAsync(request).ConfigureAwait(false);
+
+                    var uri = response.RequestMessage.RequestUri.ToString();
+                    if (uri != url)
+                    {
+                        var urlParams = url.Split('?').ToList();
+                        if (urlParams.Count == 2)
+                        {
+                            uri += "?" + urlParams[1];
+                        }
+                        
+                        return await DownloadStringDataKeepParam(uri);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Error on download {url}");
+                    return string.Empty;
+                }
+
+                if (response == null)
+                {
+                    return string.Empty;
+                }
+
+                int statusCode = (int)response.StatusCode;
+
+                // We want to handle redirects ourselves so that we can determine the final redirect Location (via header)
+                if (statusCode >= 300 && statusCode <= 399)
+                {
+                    var redirectUri = response.Headers.Location;
+                    if (!redirectUri.IsAbsoluteUri)
+                    {
+                        redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
+                    }
+
+                    Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
+
+                    return await DownloadStringDataKeepParam(redirectUri.ToString());
+                }
+                else
+                {
+                    return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                }
+            }
+        }
+
         /// <summary>
         /// Download string data with manage redirect url.
         /// </summary>
