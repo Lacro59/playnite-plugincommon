@@ -19,6 +19,7 @@
         private static string indiegala = "\ue911";              
         private static string amazonGame = "\uea55";
         private static string android = "\uea5b";        
+        private static string psn = "\uea5c";        
 
         private static string retroachievements = "\ue910";      
         private static string rpcs3 = "\uea37";                  
@@ -157,6 +158,9 @@
                     break;
                 case "rpcs3":
                     stringReturn = rpcs3;
+                    break;
+                case "playstation":
+                    stringReturn = psn;
                     break;
                 #endregion
 

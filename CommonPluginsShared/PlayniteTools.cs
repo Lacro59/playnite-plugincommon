@@ -226,8 +226,6 @@ namespace CommonPluginsShared
                     return "itch.io";
                 case BuiltinExtension.OriginLibrary:
                     return "Origin";
-                case BuiltinExtension.PSNLibrary:
-                    return "";
                 case BuiltinExtension.SteamLibrary:
                     return "Steam";
                 case BuiltinExtension.TwitchLibrary:
@@ -236,6 +234,8 @@ namespace CommonPluginsShared
                     return "Ubisoft Connect";
                 case BuiltinExtension.XboxLibrary:
                     return "Xbox";
+                case BuiltinExtension.PSNLibrary:
+                    return "Playstation";
             }
 
 

@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)OriginApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteTools.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PsnApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SteamApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UbisoftAPI.cs" />
   </ItemGroup>

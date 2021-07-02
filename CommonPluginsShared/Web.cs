@@ -163,6 +163,11 @@ namespace CommonPluginsShared
         }
 
 
+        /// <summary>
+        /// Download string data and keep url parameter when there is a redirection.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public static async Task<string> DownloadStringDataKeepParam(string url)
         {
             using (var client = new HttpClient())
@@ -344,6 +349,13 @@ namespace CommonPluginsShared
             }
         }
 
+        /// <summary>
+        /// Download string data with custom cookies.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="Cookies"></param>
+        /// <param name="UserAgent"></param>
+        /// <returns></returns>
         public static async Task<string> DownloadStringData(string url, List<HttpCookie> Cookies = null, string UserAgent = "")
         {
             var response = string.Empty;
@@ -405,6 +417,31 @@ namespace CommonPluginsShared
             }
 
             return response;
+        }
+
+        /// <summary>
+        /// Download string data with a bearer token.
+        /// </summary>
+        /// <param name="UrlAchievements"></param>
+        /// <param name="token"></param>
+        /// <param name="UrlBefore"></param>
+        /// <returns></returns>
+        public static async Task<string> DownloadStringData(string UrlAchievements, string token, string UrlBefore = "")
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+
+                if (!UrlBefore.IsNullOrEmpty())
+                {
+                    await client.GetStringAsync(UrlBefore).ConfigureAwait(false);
+                }
+
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+                string result = await client.GetStringAsync(UrlAchievements).ConfigureAwait(false);
+
+                return result;
+            }
         }
 
 
