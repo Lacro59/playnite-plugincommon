@@ -60,6 +60,12 @@ namespace CommonPluginsShared
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
                     HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
+
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        return false;
+                    }
+
                     imageStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
                 }
                 catch (Exception ex)
@@ -94,6 +100,38 @@ namespace CommonPluginsShared
 
             return true;
         }
+
+
+        public static async Task<bool> DownloadFileImageTest(string url)
+        {
+            if (!url.ToLower().Contains("http"))
+            {
+                return false;
+            }
+
+            using (var client = new HttpClient())
+            {
+                try
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                    HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
+
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        return false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Error on download {url}");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+
 
         /// <summary>
         /// Download file stream.
