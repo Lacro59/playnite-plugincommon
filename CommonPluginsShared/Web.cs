@@ -331,6 +331,64 @@ namespace CommonPluginsShared
             return response;
         }
 
+        public static async Task<string> PostStringDataPayload(string url, string payload, List<HttpCookie> Cookies = null)
+        {
+            HttpClientHandler handler = new HttpClientHandler();
+            if (Cookies != null)
+            {
+                CookieContainer cookieContainer = new CookieContainer();
+
+                foreach (var cookie in Cookies)
+                {
+                    Cookie c = new Cookie();
+                    c.Name = cookie.Name;
+                    c.Value = cookie.Value;
+                    c.Domain = cookie.Domain;
+                    c.Path = cookie.Path;
+
+                    try
+                    {
+                        cookieContainer.Add(c);
+                    }
+                    catch (Exception ex)
+                    {
+                        //Common.LogError(ex, true);
+                    }
+                }
+
+                handler.CookieContainer = cookieContainer;
+            }
+
+            var response = string.Empty;
+            using (var client = new HttpClient(handler))
+            {
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                client.DefaultRequestHeaders.Add("accept", "application/json, text/javascript, */*; q=0.01");
+                client.DefaultRequestHeaders.Add("Vary", "Accept-Encoding");
+                HttpContent c = new StringContent(payload, Encoding.UTF8, "application/json");
+
+                HttpResponseMessage result;
+                try
+                {
+                    result = await client.PostAsync(url, c).ConfigureAwait(false);
+                    if (result.IsSuccessStatusCode)
+                    {
+                        response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        logger.Error($"Web error with status code {result.StatusCode.ToString()}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //Common.LogError(ex, false, $"Error on Post {url}");
+                }
+            }
+
+            return response;
+        }
+
         //var formContent = new FormUrlEncodedContent(new[]
         //{
         //    new KeyValuePair<string, string>("comment", comment),
