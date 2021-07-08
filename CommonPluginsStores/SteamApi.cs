@@ -92,7 +92,7 @@ namespace CommonPluginsStores
         
             try
             {
-                if (SteamListApp != null && SteamListApp["applist"] != null && SteamListApp["applist"]["apps"] != null)
+                if (SteamListApp?["applist"]?["apps"] != null)
                 {
                     string SteamAppsListString = Serialization.ToJson(SteamListApp["applist"]["apps"]);
                     List<SteamApps> SteamAppsList = Serialization.FromJson<List<SteamApps>>(SteamAppsListString);
@@ -133,7 +133,7 @@ namespace CommonPluginsStores
 
             try
             {
-                if (SteamListApp != null && SteamListApp["applist"] != null && SteamListApp["applist"]["apps"] != null)
+                if (SteamListApp?["applist"]?["apps"] != null)
                 {
                     string SteamAppsListString = Serialization.ToJson(SteamListApp["applist"]["apps"]);
                     List<SteamApps> SteamAppsList = Serialization.FromJson<List<SteamApps>>(SteamAppsListString);

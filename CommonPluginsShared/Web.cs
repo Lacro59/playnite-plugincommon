@@ -101,7 +101,6 @@ namespace CommonPluginsShared
             return true;
         }
 
-
         public static async Task<bool> DownloadFileImageTest(string url)
         {
             if (!url.ToLower().Contains("http"))
@@ -130,7 +129,6 @@ namespace CommonPluginsShared
 
             return true;
         }
-
 
 
         /// <summary>
@@ -267,6 +265,27 @@ namespace CommonPluginsShared
             }
         }
 
+
+        /// <summary>
+        /// Download compressed string data.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static async Task<string> DownloadStringDataWithGz(string url)
+        {
+            HttpClientHandler handler = new HttpClientHandler()
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
+
+            using (HttpClient client = new HttpClient(handler))
+            {
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                return await client.GetStringAsync(url).ConfigureAwait(false);
+            }
+        }
+
+
         /// <summary>
         /// Download string data with manage redirect url.
         /// </summary>
@@ -365,25 +384,6 @@ namespace CommonPluginsShared
                     logger.Warn($"DownloadStringData() with statuscode {statusCode} for {url}");
                     return string.Empty;
                 }
-            }
-        }
-
-        /// <summary>
-        /// Download compressed string data.
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public static async Task<string> DownloadStringDataWithGz(string url)
-        {
-            HttpClientHandler handler = new HttpClientHandler()
-            {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-            };
-
-            using (HttpClient client = new HttpClient(handler))
-            {
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
-                return await client.GetStringAsync(url).ConfigureAwait(false);
             }
         }
 
