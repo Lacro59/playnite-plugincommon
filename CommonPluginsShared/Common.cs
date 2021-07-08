@@ -1,15 +1,14 @@
-﻿using Newtonsoft.Json;
-using Playnite.SDK;
+﻿using Playnite.SDK;
 using CommonPluginsPlaynite.Common;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using CommonPluginsShared.Models;
 using System.Windows.Automation;
 using System.Windows.Media;
+using Playnite.SDK.Data;
 
 namespace CommonPluginsShared
 {
@@ -19,14 +18,13 @@ namespace CommonPluginsShared
 
 
         /// <summary>
-        /// Load the common ressources.
+        /// Load the common ressources
         /// </summary>
         /// <param name="pluginFolder"></param>
         public static void Load(string pluginFolder, string language)
         {
-            #region Common localization
+            // Common localization
             PluginLocalization.SetPluginLanguage(pluginFolder, language);
-            #endregion
 
             #region Common xaml
             List<string> ListCommonFiles = new List<string>
@@ -62,7 +60,7 @@ namespace CommonPluginsShared
                         return;
                     }
 
-                    Common.LogDebug(true, $"res: {JsonConvert.SerializeObject(res)}");
+                    Common.LogDebug(true, $"res: {Serialization.ToJson(res)}");
 
                     Application.Current.Resources.MergedDictionaries.Add(res);
                 }
@@ -103,6 +101,10 @@ namespace CommonPluginsShared
         }
 
 
+        /// <summary>
+        /// Load common event
+        /// </summary>
+        /// <param name="PlayniteAPI"></param>
         public static void SetEvent(IPlayniteAPI PlayniteAPI)
         {
             if (PlayniteAPI.ApplicationInfo.Mode == ApplicationMode.Desktop)
@@ -111,13 +113,16 @@ namespace CommonPluginsShared
             }
         }
 
+        #region Common event
         private static void WindowBase_LoadedEvent(object sender, System.EventArgs e)
         {
             string WinIdProperty = string.Empty;
+            string WinName = string.Empty;
 
             try
             {
                 WinIdProperty = ((Window)sender).GetValue(AutomationProperties.AutomationIdProperty).ToString();
+                WinName = ((Window)sender).Name;
 
                 if (WinIdProperty == "WindowSettings")
                 {
@@ -126,14 +131,18 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, $"Error on WindowBase_LoadedEvent for {WinIdProperty}");
+                Common.LogError(ex, false, $"Error on WindowBase_LoadedEvent for {WinName} - {WinIdProperty}");
             }
         }
-
-
+        #endregion
 
 
         #region Logs
+        /// <summary>
+        /// Debug log with ignore when no debug mode
+        /// </summary>
+        /// <param name="IsIgnored"></param>
+        /// <param name="Message"></param>
         public static void LogDebug(bool IsIgnored, string Message)
         {
             if (IsIgnored)
@@ -151,6 +160,11 @@ namespace CommonPluginsShared
 #endif
         }
 
+        /// <summary>
+        /// Error log with ignore when no debug mode
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <param name="IsIgnored"></param>
         public static void LogError(Exception ex, bool IsIgnored)
         {
             TraceInfos traceInfos = new TraceInfos(ex);
@@ -178,6 +192,12 @@ namespace CommonPluginsShared
 #endif
         }
 
+        /// <summary>
+        /// Error log with ignore when no debug mode
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <param name="IsIgnored"></param>
+        /// <param name="Message"></param>
         public static void LogError(Exception ex, bool IsIgnored, string Message)
         {
             TraceInfos traceInfos = new TraceInfos(ex);
@@ -199,27 +219,5 @@ namespace CommonPluginsShared
 #endif
         }
         #endregion
-
-
-        public static string NormalizeGameName(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                return string.Empty;
-            }
-
-            var newName = name.ToLower();
-            newName = newName.RemoveTrademarks();
-            newName = newName.Replace("_", "");
-            newName = newName.Replace(".", "");
-            newName = newName.Replace('’', '\'');
-            newName = newName.Replace(":", "");
-            newName = newName.Replace("-", "");
-            newName = newName.Replace("goty", "");
-            newName = newName.Replace("game of the year edition", "");
-            newName = newName.Replace("  ", " ");
-
-            return newName.Trim();
-        }
     }
 }

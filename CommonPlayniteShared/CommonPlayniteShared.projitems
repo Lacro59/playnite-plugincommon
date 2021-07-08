@@ -28,6 +28,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\MemoryCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Paths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\ProcessMonitor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Programs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\SafeFileEnumerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Sizes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\TGASharpLib.cs" />
@@ -56,6 +57,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\BattleNetLibrary\Models\BattleNetApiStatus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Models\Order.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Models\UserHome.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\PSNLibrary\PSNAccountClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Settings\PlaynitePaths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Settings\PlayniteSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Models\WebStoreModels.cs" />

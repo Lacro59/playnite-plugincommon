@@ -4,7 +4,12 @@ namespace CommonPluginsShared
 {
     public class CodeLang
     {
-        //https://partner.steamgames.com/doc/store/localization?#supported_languages
+        /// <summary>
+        /// String lang format for Steam
+        /// </summary>
+        /// <param name="PlayniteLanguage"></param>
+        /// <returns></returns>
+        /// <remarks>https://partner.steamgames.com/doc/store/localization?#supported_languages</remarks>
         public static string GetSteamLang(string PlayniteLanguage)
         {
             string SteamLang = "english";
@@ -93,6 +98,11 @@ namespace CommonPluginsShared
         }
 
 
+        /// <summary>
+        /// String lang format for GOG
+        /// </summary>
+        /// <param name="PlayniteLanguage"></param>
+        /// <returns></returns>
         public static string GetGogLang(string PlayniteLanguage)
         {
             // Only languages available
@@ -108,7 +118,11 @@ namespace CommonPluginsShared
         }
 
 
-        // If not exist, Oring return english data.
+        /// <summary>
+        /// String lang format for Origin
+        /// </summary>
+        /// <param name="PlayniteLanguage"></param>
+        /// <returns></returns>
         public static string GetOriginLang(string PlayniteLanguage)
         {
             if (PlayniteLanguage == "english")
@@ -118,13 +132,22 @@ namespace CommonPluginsShared
             return PlayniteLanguage;
         }
 
+        /// <summary>
+        /// String lang country for Origin
+        /// </summary>
+        /// <param name="PlayniteLanguage"></param>
+        /// <returns></returns>
         public static string GetOriginLangCountry(string PlayniteLanguage)
         {
             return PlayniteLanguage.Substring((PlayniteLanguage.Length - 2));
         }
 
 
-        // If not exist, Epic return english data.
+        /// <summary>
+        /// String lang format for Epic Game
+        /// </summary>
+        /// <param name="PlayniteLanguage"></param>
+        /// <returns></returns>
         public static string GetEpicLang(string PlayniteLanguage)
         {
             if (PlayniteLanguage == "english")
@@ -134,6 +157,11 @@ namespace CommonPluginsShared
             return PlayniteLanguage.Replace("_", "-");
         }
 
+        /// <summary>
+        /// String lang country for Epic Game
+        /// </summary>
+        /// <param name="PlayniteLanguage"></param>
+        /// <returns></returns>
         public static string GetEpicLangCountry(string PlayniteLanguage)
         {
             if (PlayniteLanguage == "english")
@@ -144,7 +172,11 @@ namespace CommonPluginsShared
         }
 
 
-        // If not exist, Xbox return english data.
+        /// <summary>
+        /// String lang format for Xbox / Windows Store
+        /// </summary>
+        /// <param name="PlayniteLanguage"></param>
+        /// <returns></returns>
         public static string GetXboxLang(string PlayniteLanguage)
         {
             if (PlayniteLanguage == "english")

@@ -19,26 +19,28 @@
                             <ItemsControl ItemsSource="{Binding Data.Points}" Grid.IsSharedSizeScope="True">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate DataType="{x:Type wpf:DataPointViewModel}">
-                                        <Grid Margin="2" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Name)}">
-
+                                        <Grid Margin="2" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                                              Tag="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Name)}">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="10" />
                                                 <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
-                                                <ColumnDefinition Width="Auto" SharedSizeGroup="Time" />
+                                                <ColumnDefinition Width="40" />
+                                                <ColumnDefinition Width="*" SharedSizeGroup="Time" />
                                             </Grid.ColumnDefinitions>
 
-                                            <Path Width="10" Height="10" 
+                                            <Path Width="14" Height="14" 
                                                   StrokeThickness="{Binding Series.StrokeThickness}" 
                                                   Stroke="{Binding Series.Stroke}" Fill="{Binding Series.Fill}" 
                                                   Stretch="Fill" Data="{Binding Series.PointGeometry}" />
 
-                                            <TextBlock Grid.Column="1" Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Name)}"
-                                                       FontSize="16"
-                                                       Margin="5 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
+                                            <TextBlock Grid.Column="2" 
+                                                       Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Name), FallbackValue='test'}"
+                                                       FontSize="16" VerticalAlignment="Center" Style="{DynamicResource BaseTextBlockStyle}" />
 
-                                            <TextBlock Grid.Column="2" Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Values)}" 
-                                                       FontSize="16"
-                                                       Margin="10 0 0 0" VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
+                                            <TextBlock Grid.Column="4" 
+                                                       Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Values), FallbackValue=12}" 
+                                                       FontSize="16" VerticalAlignment="Center" Style="{DynamicResource BaseTextBlockStyle}" />
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>

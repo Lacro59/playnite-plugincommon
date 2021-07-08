@@ -16,11 +16,13 @@ namespace CommonPluginsShared
         Black = 2
     }
 
+
     public class ImageProperty
     {
         public int Width { get; set; } 
         public int Height { get; set; } 
     }
+
 
     public class ImageTools
     {
@@ -43,8 +45,8 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, true, $"Error On GetImapeProperty({srcPath})");
-                logger.Error("Error on get image property");
+                Common.LogError(ex, true, $"Error on GetImapeProperty({srcPath})");
+                logger.Error("Error on GetImapeProperty()");
                 return null;
             }
         }
@@ -65,7 +67,7 @@ namespace CommonPluginsShared
             catch (Exception ex)
             {
                 Common.LogError(ex, true);
-                logger.Error("Error on get image property");
+                logger.Error("Error on GetImapeProperty()");
                 return null;
             }
         }
@@ -83,7 +85,7 @@ namespace CommonPluginsShared
             catch (Exception ex)
             {
                 Common.LogError(ex, true);
-                logger.Error("Error on get image property");
+                logger.Error("Error on GetImapeProperty()");
                 return null;
             }
         }
@@ -161,8 +163,15 @@ namespace CommonPluginsShared
         #endregion
 
 
+        #region Convert
         public static FormatConvertedBitmap ConvertBitmapImage(BitmapImage IconImage, ImageColor imageColor = ImageColor.None)
         {
+            if (IconImage is null)
+            {
+                return null;
+            }
+
+
             FormatConvertedBitmap ConvertBitmapSource = new FormatConvertedBitmap();
 
             try
@@ -242,5 +251,6 @@ namespace CommonPluginsShared
                 return bitmapImage;
             }
         }
+        #endregion
     }
 }

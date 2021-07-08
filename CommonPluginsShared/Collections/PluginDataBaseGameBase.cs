@@ -1,6 +1,6 @@
 ﻿using CommonPluginsShared.Interfaces;
-using Newtonsoft.Json;
 using Playnite.SDK.Models;
+using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,105 +11,49 @@ namespace CommonPluginsShared.Collections
 {
     public class PluginDataBaseGameBase : DatabaseObject
     {
-        /// <summary>
-        /// Gets or sets source of the game.
-        /// </summary>
-        [JsonIgnore]
-        public Guid SourceId { get; set; }
+        [DontSerialize]
+        internal Game Game { get; set; }
 
-        /// <summary>
-        /// Gets or sets last played date.
-        /// </summary>
-        [JsonIgnore]
-        public DateTime? LastActivity { get; set; }
 
-        /// <summary>
-        /// Gets or sets value indicating if the game is hidden in library.
-        /// </summary>
-        [JsonIgnore]
-        public bool Hidden { get; set; }
+        [DontSerialize]
+        public Guid SourceId { get { return Game.SourceId; } }
 
-        /// <summary>
-        /// Gets or sets game icon. Local file path, HTTP URL or database file ids are supported.
-        /// </summary>
-        [JsonIgnore]
-        public string Icon { get; set; }
+        [DontSerialize]
+        public DateTime? LastActivity { get { return Game.LastActivity; } }
 
-        /// <summary>
-        /// Gets or sets game cover image. Local file path, HTTP URL or database file ids are supported.
-        /// </summary>
-        [JsonIgnore]
-        public string CoverImage { get; set; }
+        [DontSerialize]
+        public bool Hidden { get { return Game.Hidden; } }
 
-        /// <summary>
-        /// Gets or sets background image. Local file path, HTTP URL or database file ids are supported.
-        /// </summary>
-        [JsonIgnore]
-        public string BackgroundImage { get; set; }
+        [DontSerialize]
+        public string Icon { get { return Game.Icon; } }
 
-        private List<Genre> _Genres;
-        /// <summary>
-        /// Gets game's genres.
-        /// </summary>
-        [JsonIgnore]
-        public List<Genre> Genres
-        {
-            get
-            {
-                if (_Genres == null)
-                {
-                    return new List<Genre>();
-                }
-                return _Genres;
-            }
+        [DontSerialize]
+        public string CoverImage { get { return Game.CoverImage; } }
 
-            set
-            {
-                _Genres = value;
-            }
-        }
+        [DontSerialize]
+        public string BackgroundImage { get { return Game.BackgroundImage; } }
 
-        private List<Guid> _GenreIds;
-        /// <summary>
-        /// Gets or sets list of genres.
-        /// </summary>
-        [JsonIgnore]
-        public List<Guid> GenreIds
-        {
-            get
-            {
-                if (_GenreIds == null)
-                {
-                    return new List<Guid>();
-                }
-                return _GenreIds;
-            }
+        [DontSerialize]
+        public List<Genre> Genres { get { return Game.Genres; } }
 
-            set
-            {
-                _GenreIds = value;
-            }
-        }
+        [DontSerialize]
+        public List<Guid> GenreIds { get { return Game.GenreIds; } }
 
-        /// <summary>
-        /// Gets or sets played time in seconds.
-        /// </summary>
-        [JsonIgnore]
-        public long Playtime { get; set; }
+        [DontSerialize]
+        public Platform Platform { get { return Game.Platform; } }
 
-        /// <summary>
-        /// Gets or sets value indicating if the game is deleted in library.
-        /// </summary>
-        [JsonIgnore]
+        [DontSerialize]
+        public long Playtime { get { return Game.Playtime; } }
+
+
+        [DontSerialize]
         public bool IsDeleted { get; set; }
 
-        /// <summary>
-        /// Gets or sets value indicating if the game is saved in disk.
-        /// </summary>
-        [JsonIgnore]
+        [DontSerialize]
         public bool IsSaved { get; set; }
 
-        [JsonIgnore]
+
+        [DontSerialize]
         public virtual bool HasData
         {
             get

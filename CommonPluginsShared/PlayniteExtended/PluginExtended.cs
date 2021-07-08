@@ -36,7 +36,8 @@ namespace CommonPluginsShared.PlayniteExtended
         }
 
 
-        // TEMP Transfert database directory
+        // TODO Temp; must be deleted
+        #region Transfert database directory
         private void TransfertOldDatabase()
         {
             string OldDirectory = string.Empty;
@@ -63,6 +64,7 @@ namespace CommonPluginsShared.PlayniteExtended
                 Directory.Move(OldDirectory, NewDirectory);
             }
         }
+
         private void CleanOldDatabase()
         {
             string OldDirectory = string.Empty;
@@ -81,6 +83,7 @@ namespace CommonPluginsShared.PlayniteExtended
 
             }
         }
+        #endregion
     }
 
 

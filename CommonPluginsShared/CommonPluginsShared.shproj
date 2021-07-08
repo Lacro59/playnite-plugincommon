@@ -16,15 +16,11 @@
     <Compile Include="Collections\PluginDatabaseObject.cs" />
     <Compile Include="Collections\PluginItemCollection.cs" />
     <Compile Include="Common.cs" />
-    <Compile Include="Converters.cs" />
     <Compile Include="CumulsErrors.cs" />
     <Compile Include="ImageTools.cs" />
-    <Compile Include="IntegrationUI.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="Models\TraceInfos.cs" />
-    <Compile Include="OriginApi.cs" />
     <Compile Include="PlayniteTools.cs" />
-    <Compile Include="SteamApi.cs" />
     <Compile Include="TaskHelper.cs" />
     <Compile Include="Tools.cs" />
     <Compile Include="TransformIcon.cs" />

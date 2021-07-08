@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using Playnite.SDK.Data;
 using Playnite.SDK.Models;
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ namespace CommonPluginsShared.Collections
 
         public DateTime DateLastRefresh { get; set; } = default(DateTime);
 
-        [JsonIgnore]
+        [DontSerialize]
         public override bool HasData
         {
             get

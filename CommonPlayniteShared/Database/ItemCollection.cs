@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Playnite.SDK;
+﻿using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
 using CommonPluginsPlaynite.Common;
@@ -137,19 +136,7 @@ namespace CommonPluginsPlaynite.Database
 
         internal void SaveItemData(TItem item)
         {
-            using (var fs = FileSystem.CreateWriteFileStreamSafe(GetItemFilePath(item.Id)))
-            using (var sw = new StreamWriter(fs))
-            using (var writer = new JsonTextWriter(sw))
-            {
-                var ser = JsonSerializer.Create(new JsonSerializerSettings()
-                {
-                    Formatting = Formatting.None,
-                    NullValueHandling = NullValueHandling.Ignore,
-                    DefaultValueHandling = DefaultValueHandling.Ignore
-                });
-
-                ser.Serialize(writer, item);
-            }
+            Serialization.ToFile(item, GetItemFilePath(item.Id), Format.Json);
         }
 
         internal TItem GetItemData(Guid id)

@@ -41,11 +41,11 @@ namespace CommonPluginsShared.Controls
             {
                 if ((bool)e.NewValue)
                 {
-                    obj.PreviewMouseWheel += Tools.HandlePreviewMouseWheel;
+                    obj.PreviewMouseWheel += UI.HandlePreviewMouseWheel;
                 }
                 else
                 {
-                    obj.PreviewMouseWheel -= Tools.HandlePreviewMouseWheel;
+                    obj.PreviewMouseWheel -= UI.HandlePreviewMouseWheel;
                 }
             }
         }

@@ -85,6 +85,12 @@
     <Compile Include="Controls\TextBlockTrimmed.xaml.cs">
       <DependentUpon>TextBlockTrimmed.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\TextBlockWithIcon.xaml.cs">
+      <DependentUpon>TextBlockWithIcon.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MediaElementExtend.xaml.cs">
+      <DependentUpon>MediaElementExtend.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LiveChartsCommon\CustomerForSingle.cs" />
     <Compile Include="LiveChartsCommon\CustomerForTime.cs" />
     <Compile Include="LiveChartsCommon\CustomerToolTipForMultipleSingle.xaml.cs">
@@ -132,6 +138,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\TextBlockTrimmed.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TextBlockWithIcon.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\MediaElementExtend.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

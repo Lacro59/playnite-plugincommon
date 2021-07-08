@@ -29,20 +29,15 @@ namespace CommonPluginsShared.Collections
                 if (game != null && item is PluginDataBaseGame<T>)
                 {
                     item.Name = game.Name;
-                    item.SourceId = game.SourceId;
-                    item.Hidden = game.Hidden;
-                    item.Icon = game.Icon;
-                    item.CoverImage = game.CoverImage;
-                    item.BackgroundImage = game.BackgroundImage;
-                    item.GenreIds = game.GenreIds;
-                    item.Genres = game.Genres;
-                    item.Playtime = game.Playtime;
-                    item.LastActivity = game.LastActivity;
+                    item.Game = game;
                     item.IsSaved = true;
                 }
                 else
                 {
-                    item.IsDeleted = true;
+                    if (item != null)
+                    {
+                        item.IsDeleted = true;
+                    }
                 }
             }
             catch (Exception ex)
@@ -71,20 +66,15 @@ namespace CommonPluginsShared.Collections
                 if (game != null && item is PluginDataBaseGameDetails<T, Y>)
                 {
                     item.Name = game.Name;
-                    item.SourceId = game.SourceId;
-                    item.Hidden = game.Hidden;
-                    item.Icon = game.Icon;
-                    item.CoverImage = game.CoverImage;
-                    item.BackgroundImage = game.BackgroundImage;
-                    item.GenreIds = game.GenreIds;
-                    item.Genres = game.Genres;
-                    item.Playtime = game.Playtime;
-                    item.LastActivity = game.LastActivity;
+                    item.Game = game;
                     item.IsSaved = true;
                 }
                 else
                 {
-                    item.IsDeleted = true;
+                    if (item != null)
+                    {
+                        item.IsDeleted = true;
+                    }
                 }
             }
             catch (Exception ex)

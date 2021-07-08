@@ -17,7 +17,9 @@
         private static string twitch = "\ue90a";                 
         private static string itchio = "\ue90b";                 
         private static string indiegala = "\ue911";              
-        private static string amazonGame = "\uea55";              
+        private static string amazonGame = "\uea55";
+        private static string android = "\uea5b";        
+        private static string psn = "\uea5c";        
 
         private static string retroachievements = "\ue910";      
         private static string rpcs3 = "\uea37";                  
@@ -34,32 +36,36 @@
         #endregion
 
         #region retrogaming
-        private static string psp = "\uea46";                    // ea46
-        private static string dreamcast = "\uea3c";              // ea3c
-        private static string dos = "\uea3b";                    // ea3b
-        private static string commodore64 = "\uea3a";            // ea3a
-        private static string ds = "\ue904";                     // e904
-        private static string gameboy = "\uea3d";                // ea3d
-        private static string gameboyadvance = "\uea3f";         // ea3f
-        private static string gamecube = "\uea40";               // ea40
-        private static string megadrive = "\uea41";              // ea41
-        private static string nintendo = "\uea42";               // ea42
-        private static string nintendo64 = "\uea43";             // ea43
-        private static string playstation = "\uea44";            // ea44
-        private static string playstation4 = "\uea45";           // ea45
-        private static string supernintendo = "\uea47";          // ea47
-        private static string nintendoswitch = "\uea48";         // ea48
-        private static string wii = "\uea49";                    // ea49
-        private static string mame = "\uea4a";                   // ea4a
+        private static string psp = "\uea46";                    
+        private static string dreamcast = "\uea3c";              
+        private static string dos = "\uea3b";                    
+        private static string commodore64 = "\uea3a";            
+        private static string ds = "\ue904";                     
+        private static string gameboy = "\uea3d";                
+        private static string gameboyadvance = "\uea3f";         
+        private static string gamecube = "\uea40";               
+        private static string megadrive = "\uea41";              
+        private static string nintendo = "\uea42";               
+        private static string nintendo64 = "\uea43";             
+        private static string playstation = "\uea44";            
+        private static string playstation4 = "\uea45";           
+        private static string supernintendo = "\uea47";          
+        private static string nintendoswitch = "\uea48";         
+        private static string wii = "\uea49";                    
+        private static string mame = "\uea4a";
         #endregion
 
 
         /// <summary>
-        /// Get icon from name for "font.ttf".
+        /// Get icon from name for common "font.ttf"
         /// </summary>
+        /// <param name="Name"></param>
+        /// <param name="ReturnEmpy"></param>
+        /// <returns></returns>
         public static string Get(string Name, bool ReturnEmpy = false)
         {
             string stringReturn = string.Empty;
+
             switch (Name.ToLower())
             {
                 #region plugin
@@ -92,6 +98,12 @@
                     break;
 
                     
+                case "google play store":
+                case "play store":
+                case "android":
+                    stringReturn = android;
+                    break;
+
                 case "amazon":
                     stringReturn = amazonGame;
                     break;
@@ -146,6 +158,9 @@
                     break;
                 case "rpcs3":
                     stringReturn = rpcs3;
+                    break;
+                case "playstation":
+                    stringReturn = psn;
                     break;
                 #endregion
 
@@ -214,6 +229,7 @@
                     }
                     break;
             }
+
             return stringReturn;
         }
     }

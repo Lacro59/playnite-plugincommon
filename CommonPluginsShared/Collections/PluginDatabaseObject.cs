@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Playnite.SDK;
+﻿using Playnite.SDK;
 using Playnite.SDK.Models;
 using CommonPluginsShared.Models;
 using CommonPluginsPlaynite.Database;
@@ -23,6 +22,7 @@ using CommonPluginsControls.Controls;
 using CommonPluginsPlaynite.Common;
 using CommonPluginsShared.Interfaces;
 using Playnite.SDK.Plugins;
+using CommonPluginsPlaynite;
 
 namespace CommonPluginsShared.Collections
 {
@@ -37,7 +37,7 @@ namespace CommonPluginsShared.Collections
         public IPlayniteAPI PlayniteApi;
         public TSettings PluginSettings;
 
-        public IntegrationUI ui = new IntegrationUI();
+        public UI ui = new UI();
 
         public string PluginName { get; set; }
         public PluginPaths Paths { get; set; }
@@ -78,7 +78,7 @@ namespace CommonPluginsShared.Collections
                 PluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                 PluginUserDataPath = PluginUserDataPath,
                 PluginDatabasePath = Path.Combine(PluginUserDataPath, PluginName),
-                PluginCachePath = Path.Combine(PluginUserDataPath, "Cache"),
+                PluginCachePath = Path.Combine(PlaynitePaths.DataCachePath, PluginName),
             };
 
             FileSystem.CreateDirectory(Paths.PluginDatabasePath);
@@ -349,15 +349,7 @@ namespace CommonPluginsShared.Collections
 
             newItem.Id = game.Id;
             newItem.Name = game.Name;
-            newItem.SourceId = game.SourceId;
-            newItem.Hidden = game.Hidden;
-            newItem.Icon = game.Icon;
-            newItem.CoverImage = game.CoverImage;
-            newItem.BackgroundImage = game.BackgroundImage;
-            newItem.GenreIds = game.GenreIds;
-            newItem.Genres = game.Genres;
-            newItem.Playtime = game.Playtime;
-            newItem.LastActivity = game.LastActivity;
+            newItem.Game = game;
             newItem.IsSaved = false;
 
             return newItem;

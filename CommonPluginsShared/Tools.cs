@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using Playnite.SDK;
+﻿using Playnite.SDK;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -16,15 +15,21 @@ namespace CommonPluginsShared
         private static readonly ILogger logger = LogManager.GetLogger();
 
 
-        public static string SizeSuffix(double value, bool WithoutDouble = false)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Value"></param>
+        /// <param name="WithoutDouble"></param>
+        /// <returns></returns>
+        public static string SizeSuffix(double Value, bool WithoutDouble = false)
         {
             string[] SizeSuffixes = { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
 
-            if (value < 0) { return "-" + SizeSuffix(-value); }
-            if (value == 0) { return "0" + CultureInfo.CurrentUICulture.NumberFormat.NumberDecimalSeparator + "0 bytes"; }
+            if (Value < 0) { return "-" + SizeSuffix(-Value); }
+            if (Value == 0) { return "0" + CultureInfo.CurrentUICulture.NumberFormat.NumberDecimalSeparator + "0 bytes"; }
 
-            int mag = (int)Math.Log(value, 1024);
-            decimal adjustedSize = (decimal)value / (1L << (mag * 10));
+            int mag = (int)Math.Log(Value, 1024);
+            decimal adjustedSize = (decimal)Value / (1L << (mag * 10));
 
             if (WithoutDouble)
             {
@@ -34,79 +39,66 @@ namespace CommonPluginsShared
         }
 
 
+        // TODO Used?
         // https://stackoverflow.com/a/48735199
-        public static JArray RemoveValue(JArray oldArray, dynamic obj)
+        //public static JArray RemoveValue(JArray oldArray, dynamic obj)
+        //{
+        //    List<string> newArray = oldArray.ToObject<List<string>>();
+        //    newArray.Remove(obj);
+        //    return JArray.FromObject(newArray);
+        //}
+
+
+        #region Date manipulations
+        /// <summary>
+        /// Get number week from a DateTime
+        /// </summary>
+        /// <param name="Date"></param>
+        /// <returns></returns>
+        public static int WeekOfYearISO8601(DateTime Date)
         {
-            List<string> newArray = oldArray.ToObject<List<string>>();
-            newArray.Remove(obj);
-            return JArray.FromObject(newArray);
+            var day = (int)CultureInfo.CurrentCulture.Calendar.GetDayOfWeek(Date);
+            return CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(Date.AddDays(4 - (day == 0 ? 7 : day)), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
         }
 
         /// <summary>
-        /// Get number week.
+        /// Get a Datetime from a week number
         /// </summary>
-        /// <param name="date"></param>
+        /// <param name="Year"></param>
+        /// <param name="Day"></param>
+        /// <param name="Week"></param>
         /// <returns></returns>
-        public static int WeekOfYearISO8601(DateTime date)
+        public static DateTime YearWeekDayToDateTime(int Year, DayOfWeek Day, int Week)
         {
-            var day = (int)CultureInfo.CurrentCulture.Calendar.GetDayOfWeek(date);
-            return CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(date.AddDays(4 - (day == 0 ? 7 : day)), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+            DateTime startOfYear = new DateTime(Year, 1, 1);
+
+            // The +7 and %7 stuff is to avoid negative numbers etc.
+            int daysToFirstCorrectDay = (((int)Day - (int)startOfYear.DayOfWeek) + 7) % 7;
+
+            return startOfYear.AddDays(7 * (Week - 1) + daysToFirstCorrectDay);
         }
 
         /// <summary>
-        /// Gel all control in depObj.
+        /// Get week count from a year
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="depObj"></param>
+        /// <param name="Year"></param>
         /// <returns></returns>
-        public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+        public static int GetWeeksInYear(int Year)
         {
-            if (depObj != null)
-            {
-                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
-                {
-                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-                    if (child != null && child is T)
-                    {
-                        yield return (T)child;
-                    }
-
-                    foreach (T childOfChild in FindVisualChildren<T>(child))
-                    {
-                        yield return childOfChild;
-                    }
-                }
-            }
+            DateTimeFormatInfo dfi = DateTimeFormatInfo.CurrentInfo;
+            DateTime date1 = new DateTime(Year, 12, 31);
+            System.Globalization.Calendar cal = dfi.Calendar;
+            return cal.GetWeekOfYear(date1, dfi.CalendarWeekRule, dfi.FirstDayOfWeek);
         }
+        #endregion
 
-        // https://www.infragistics.com/community/blogs/b/blagunas/posts/find-the-parent-control-of-a-specific-type-in-wpf-and-silverlight
+
         /// <summary>
-        /// Get control's parent by type.
+        /// 
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="child"></param>
+        /// <param name="bytes"></param>
+        /// <remarks>https://stackoverflow.com/a/3974535</remarks>
         /// <returns></returns>
-        public static T FindParent<T>(DependencyObject child) where T : DependencyObject
-        {
-            //get parent item
-            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
-
-            //we've reached the end of the tree
-            if (parentObject == null) return null;
-
-            //check if the parent matches the type we're looking for
-            T parent = parentObject as T;
-            if (parent != null)
-            {
-                return parent;
-            }
-            else
-            {
-                return FindParent<T>(parentObject);
-            }
-        }
-
-        //https://stackoverflow.com/a/3974535
         public static string ToHex(byte[] bytes)
         {
             char[] c = new char[bytes.Length * 2];
@@ -124,6 +116,12 @@ namespace CommonPluginsShared
 
             return new string(c);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
         public static byte[] HexToBytes(string str)
         {
             if (str.Length == 0 || str.Length % 2 != 0)
@@ -143,32 +141,6 @@ namespace CommonPluginsShared
             }
 
             return buffer;
-        }
-
-
-        //https://stackoverflow.com/questions/1585462/bubbling-scroll-events-from-a-listview-to-its-parent
-        public static void HandlePreviewMouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            if (!e.Handled)
-            {
-                var scrollViewer = Tools.FindVisualChildren<ScrollViewer>((FrameworkElement)sender).FirstOrDefault();
-
-                if (scrollViewer == null)
-                {
-                    return;
-                }
-
-                var scrollPos = scrollViewer.ContentVerticalOffset;
-                if ((scrollPos == scrollViewer.ScrollableHeight && e.Delta < 0) || (scrollPos == 0 && e.Delta > 0))
-                {
-                    e.Handled = true;
-                    var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta);
-                    eventArg.RoutedEvent = UIElement.MouseWheelEvent;
-                    eventArg.Source = sender;
-                    var parent = ((Control)sender).Parent as UIElement;
-                    parent.RaiseEvent(eventArg);
-                }
-            }
         }
     }
 }

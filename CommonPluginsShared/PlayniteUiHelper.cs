@@ -3,33 +3,26 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Threading;
-using Newtonsoft.Json;
 using Playnite.SDK;
 using Playnite.SDK.Models;
+using Playnite.SDK.Data;
 
 namespace CommonPluginsShared
 {
-    public class CustomElement
-    {
-        public string ParentElementName { get; set; }
-        public FrameworkElement Element { get; set; }
-    }
-
-    public abstract class PlayniteUiHelper
+    public class PlayniteUiHelper
     {
         public static readonly ILogger logger = LogManager.GetLogger();
         public static IResourceProvider resources = new ResourceProvider();
+
 
         // TODO Used?
         /*
         public readonly IPlayniteAPI _PlayniteApi;
         public abstract string _PluginUserDataPath { get; set; }
 
-        public IntegrationUI ui = new IntegrationUI();
+        public UI ui = new UI();
         public readonly TaskHelper taskHelper = new TaskHelper();
 
         public abstract bool IsFirstLoad { get; set; }
@@ -267,7 +260,7 @@ namespace CommonPluginsShared
 
             try
             {
-                FrameworkElement PART_GaButton = IntegrationUI.SearchElementByName("PART_GaButton", true);
+                FrameworkElement PART_GaButton = UI.SearchElementByName("PART_GaButton", true);
                 if (PART_GaButton != null && PART_GaButton is ToggleButton && (bool)((ToggleButton)PART_GaButton).IsChecked)
                 {
                     Common.LogDebug(true, "Reset PART_GaButton");
@@ -277,7 +270,7 @@ namespace CommonPluginsShared
                     return;
                 }
 
-                FrameworkElement PART_ScButton = IntegrationUI.SearchElementByName("PART_ScButton", true);
+                FrameworkElement PART_ScButton = UI.SearchElementByName("PART_ScButton", true);
                 if (PART_ScButton != null && PART_ScButton is ToggleButton && (bool)((ToggleButton)PART_ScButton).IsChecked)
                 {
                     Common.LogDebug(true, "Reset PART_ScButton");
@@ -304,7 +297,7 @@ namespace CommonPluginsShared
             {
                 if (PART_ElemDescription == null)
                 {
-                    PART_ElemDescription = (StackPanel)IntegrationUI.SearchElementByName("PART_ElemDescription", false, true);
+                    PART_ElemDescription = (StackPanel)UI.SearchElementByName("PART_ElemDescription", false, true);
                 }
 
                 if (PART_ElemDescription == null)
@@ -317,15 +310,15 @@ namespace CommonPluginsShared
 
                 //if (NotesVisibility == null)
                 //{
-                //    FrameworkElement PART_ElemNotes = IntegrationUI.SearchElementByName("PART_ElemNotes");
+                //    FrameworkElement PART_ElemNotes = UI.SearchElementByName("PART_ElemNotes");
                 //    if (PART_ElemNotes != null)
                 //    {
                 //        NotesVisibility = PART_ElemNotes.Visibility;
                 //    }
                 //}
 
-                FrameworkElement PART_GaButton = IntegrationUI.SearchElementByName("PART_GaButton", true);
-                FrameworkElement PART_ScButton = IntegrationUI.SearchElementByName("PART_ScButton", true);
+                FrameworkElement PART_GaButton = UI.SearchElementByName("PART_GaButton", true);
+                FrameworkElement PART_ScButton = UI.SearchElementByName("PART_ScButton", true);
 
                 ToggleButton tgButton = sender as ToggleButton;
 
@@ -441,6 +434,11 @@ namespace CommonPluginsShared
         }
         */
 
+        /// <summary>
+        /// Can to exit window with escape  key
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public static void HandleEsc(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
@@ -451,14 +449,19 @@ namespace CommonPluginsShared
                     ((Window)sender).Close();
                 }
             }
-            else
-            {
-            }
         }
 
-        public static Window CreateExtensionWindow(IPlayniteAPI PlayniteApi, string Title, UserControl ViewExtension,
-            WindowCreationOptions windowCreationOptions = null)
+        /// <summary>
+        /// Create Window with Playnite SDK
+        /// </summary>
+        /// <param name="PlayniteApi"></param>
+        /// <param name="Title"></param>
+        /// <param name="ViewExtension"></param>
+        /// <param name="windowCreationOptions"></param>
+        /// <returns></returns>
+        public static Window CreateExtensionWindow(IPlayniteAPI PlayniteApi, string Title, UserControl ViewExtension, WindowCreationOptions windowCreationOptions = null)
         {
+            // Default window options
             if (windowCreationOptions == null)
             {
                 windowCreationOptions = new WindowCreationOptions
@@ -478,6 +481,7 @@ namespace CommonPluginsShared
             windowExtension.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             windowExtension.Content = ViewExtension;
 
+            // TODO Still useful to add margin?
             if (!double.IsNaN(ViewExtension.Height) && !double.IsNaN(ViewExtension.Width))
             {
                 windowExtension.Height = ViewExtension.Height + 25;
@@ -490,334 +494,14 @@ namespace CommonPluginsShared
             }
             else
             {
+                // TODO A black border is visible; SDK problem?
                 windowExtension.SizeToContent = SizeToContent.WidthAndHeight;
             }
 
+            // Add escape event
             windowExtension.PreviewKeyDown += new KeyEventHandler(HandleEsc);
 
             return windowExtension;
         }
-    }
-
-
-    public class IntegrationUI
-    {
-        private static ILogger logger = LogManager.GetLogger();
-
-
-        public bool AddResources(List<ResourcesList> ResourcesList)
-        {
-            Common.LogDebug(true, $"AddResources() - {JsonConvert.SerializeObject(ResourcesList)}");
-
-            string ItemKey = string.Empty;
-
-            foreach (ResourcesList item in ResourcesList)
-            {
-                try
-                {
-                    ItemKey = item.Key;
-                    if (Application.Current.Resources[ItemKey] != null)
-                    {
-                        Type TypeActual = Application.Current.Resources[ItemKey].GetType();
-                        Type TypeNew = item.Value.GetType();
-
-                        if (TypeActual != TypeNew)
-                        {
-                            if ((TypeActual.Name == "SolidColorBrush" || TypeActual.Name == "LinearGradientBrush")
-                                && (TypeNew.Name == "SolidColorBrush" || TypeNew.Name == "LinearGradientBrush"))
-                            {
-                            }
-                            else
-                            {
-                                logger.Warn($"Different type for {ItemKey}");
-                                continue;
-                            }
-                        }
-
-                        Application.Current.Resources[ItemKey] = item.Value;
-                    }
-                    else
-                    {
-                        Application.Current.Resources.Add(item.Key, item.Value);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    logger.Error($"Error in AddResources({ItemKey})");
-                    Common.LogError(ex, true, $"Error in AddResources({ItemKey})");
-                }
-            }
-            return true;
-        }
-
-
-        private static FrameworkElement SearchElementByNameInExtander(object control, string ElementName)
-        {
-            if (control is FrameworkElement)
-            {
-                if (((FrameworkElement)control).Name == ElementName)
-                {
-                    return (FrameworkElement)control;
-                }
-
-
-                var children = LogicalTreeHelper.GetChildren((FrameworkElement)control);
-                foreach (object child in children)
-                {
-                    if (child is FrameworkElement)
-                    {
-                        if (((FrameworkElement)child).Name == ElementName)
-                        {
-                            return (FrameworkElement)child;
-                        }
-
-                        var subItems = LogicalTreeHelper.GetChildren((FrameworkElement)child);
-                        foreach (object subItem in subItems)
-                        {
-                            if (subItem.ToString().ToLower().Contains("expander") || subItem.ToString().ToLower().Contains("tabitem"))
-                            {
-                                FrameworkElement tmp = null;
-
-                                if (subItem.ToString().ToLower().Contains("expander"))
-                                {
-                                    tmp = SearchElementByNameInExtander(((Expander)subItem).Content, ElementName);
-                                }
-
-                                if (subItem.ToString().ToLower().Contains("tabitem"))
-                                {
-                                    tmp = SearchElementByNameInExtander(((TabItem)subItem).Content, ElementName);
-                                }
-
-                                if (tmp != null)
-                                {
-                                    return tmp;
-                                }
-                            }
-                            else
-                            {
-                                var tmp = SearchElementByNameInExtander(child, ElementName);
-                                if (tmp != null)
-                                {
-                                    return tmp;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return null;
-        }
-
-        public static FrameworkElement SearchElementByName(string ElementName, bool MustVisible = false, bool ParentMustVisible = false, int counter = 1)
-        {
-            return SearchElementByName(ElementName, Application.Current.MainWindow, MustVisible, ParentMustVisible, counter);
-        }
-
-        public static FrameworkElement SearchElementByName(string ElementName, DependencyObject dpObj, bool MustVisible = false, bool ParentMustVisible = false, int counter = 1)
-        {
-            FrameworkElement ElementFind = null;
-
-            int count = 0;
-
-            if (ElementFind == null)
-            {
-                foreach (FrameworkElement el in Tools.FindVisualChildren<FrameworkElement>(dpObj))
-                {
-                    if (el.ToString().ToLower().Contains("expander") || el.ToString().ToLower().Contains("tabitem"))
-                    {
-                        FrameworkElement tmpEl = null;
-
-                        if (el.ToString().ToLower().Contains("expander"))
-                        {
-                            tmpEl = SearchElementByNameInExtander(((Expander)el).Content, ElementName);
-                        }
-
-                        if (el.ToString().ToLower().Contains("tabitem"))
-                        {
-                            tmpEl = SearchElementByNameInExtander(((TabItem)el).Content, ElementName);
-                        }
-
-                        if (tmpEl != null)
-                        {
-                            if (tmpEl.Name == ElementName)
-                            {
-                                if (!MustVisible)
-                                {
-                                    if (!ParentMustVisible)
-                                    {
-                                        ElementFind = tmpEl;
-                                        break;
-                                    }
-                                    else if (((FrameworkElement)el.Parent).IsVisible)
-                                    {
-                                        ElementFind = tmpEl;
-                                        break;
-                                    }
-                                }
-                                else if (tmpEl.IsVisible)
-                                {
-                                    if (!ParentMustVisible)
-                                    {
-                                        ElementFind = tmpEl;
-                                        break;
-                                    }
-                                    else if (((FrameworkElement)el.Parent).IsVisible)
-                                    {
-                                        ElementFind = tmpEl;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else if (el.Name == ElementName)
-                    {
-                        count++;
-
-                        if (!MustVisible)
-                        {
-                            if (!ParentMustVisible)
-                            {
-                                if (count == counter)
-                                {
-                                    ElementFind = el;
-                                    break;
-                                }
-                            }
-                            else if (((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)el.Parent).Parent).Parent).Parent).Parent).IsVisible)
-                            {
-                                if (count == counter)
-                                {
-                                    ElementFind = el;
-                                    break;
-                                }
-                            }
-                        }
-                        else if (el.IsVisible)
-                        {
-                            if (!ParentMustVisible)
-                            {
-                                if (count == counter)
-                                {
-                                    ElementFind = el;
-                                    break;
-                                }
-                            }
-                            else if (((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)el.Parent).Parent).Parent).Parent).Parent).IsVisible)
-                            {
-                                if (count == counter)
-                                {
-                                    ElementFind = el;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return ElementFind;
-        }
-
-
-        private static bool SearchElementInsert(List<FrameworkElement> SearchList, string ElSearchName)
-        {
-            foreach (FrameworkElement el in SearchList)
-            {
-                if (ElSearchName == el.Name)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private static bool SearchElementInsert(List<FrameworkElement> SearchList, FrameworkElement ElSearch)
-        {
-            foreach (FrameworkElement el in SearchList)
-            {
-                if (ElSearch.Name == el.Name)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-
-        public static T GetAncestorOfType<T>(FrameworkElement child) where T : FrameworkElement
-        {
-            var parent = VisualTreeHelper.GetParent(child);
-            if (parent != null && !(parent is T))
-            {
-                return (T)GetAncestorOfType<T>((FrameworkElement)parent);
-            }
-            return (T)parent;
-        }
-
-
-        public static void SetControlSize(FrameworkElement ControlElement)
-        {
-            SetControlSize(ControlElement, 0, 0);
-        }
-
-        public static void SetControlSize(FrameworkElement ControlElement, double DefaultHeight, double DefaultWidth)
-        {
-            try
-            {
-                UserControl ControlParent = IntegrationUI.GetAncestorOfType<UserControl>(ControlElement);
-                FrameworkElement ControlContener = (FrameworkElement)ControlParent.Parent;
-
-                Common.LogDebug(true, $"SetControlSize({ControlElement.Name}) - parent.name: {ControlContener.Name} - parent.Height: {ControlContener.Height} - parent.Width: {ControlContener.Width} - parent.MaxHeight: {ControlContener.MaxHeight} - parent.MaxWidth: {ControlContener.MaxWidth}");
-
-                // Set Height
-                if (!double.IsNaN(ControlContener.Height))
-                {
-                    ControlElement.Height = ControlContener.Height;
-                }
-                else if (DefaultHeight != 0)
-                {
-                    ControlElement.Height = DefaultHeight;
-                }
-                // Control with MaxHeight
-                if (!double.IsNaN(ControlContener.MaxHeight))
-                {
-                    if (ControlElement.Height > ControlContener.MaxHeight)
-                    {
-                        ControlElement.Height = ControlContener.MaxHeight;
-                    }
-                }
-
-
-                // Set Width
-                if (!double.IsNaN(ControlContener.Width))
-                {
-                    ControlElement.Width = ControlContener.Width;
-                }
-                else if (DefaultWidth != 0)
-                {
-                    ControlElement.Width = DefaultWidth;
-                }
-                // Control with MaxWidth
-                if (!double.IsNaN(ControlContener.MaxWidth))
-                {
-                    if (ControlElement.Width > ControlContener.MaxWidth)
-                    {
-                        ControlElement.Width = ControlContener.MaxWidth;
-                    }
-                }
-            }
-            catch
-            {
-
-            }
-        }
-    }
-
-
-    public class ResourcesList
-    {
-        public string Key { get; set; }
-        public object Value { get; set; }
     }
 }

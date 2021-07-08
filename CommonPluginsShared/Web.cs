@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Playnite.SDK;
+﻿using Playnite.SDK;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -61,6 +60,12 @@ namespace CommonPluginsShared
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
                     HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
+
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        return false;
+                    }
+
                     imageStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
                 }
                 catch (Exception ex)
@@ -95,6 +100,38 @@ namespace CommonPluginsShared
 
             return true;
         }
+
+
+        public static async Task<bool> DownloadFileImageTest(string url)
+        {
+            if (!url.ToLower().Contains("http"))
+            {
+                return false;
+            }
+
+            using (var client = new HttpClient())
+            {
+                try
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                    HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
+
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        return false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Error on download {url}");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+
 
         /// <summary>
         /// Download file stream.
@@ -163,6 +200,72 @@ namespace CommonPluginsShared
             }
         }
 
+
+        /// <summary>
+        /// Download string data and keep url parameter when there is a redirection.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static async Task<string> DownloadStringDataKeepParam(string url)
+        {
+            using (var client = new HttpClient())
+            {
+                var request = new HttpRequestMessage()
+                {
+                    RequestUri = new Uri(url),
+                    Method = HttpMethod.Get
+                };
+
+                HttpResponseMessage response;
+                try
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                    response = await client.SendAsync(request).ConfigureAwait(false);
+
+                    var uri = response.RequestMessage.RequestUri.ToString();
+                    if (uri != url)
+                    {
+                        var urlParams = url.Split('?').ToList();
+                        if (urlParams.Count == 2)
+                        {
+                            uri += "?" + urlParams[1];
+                        }
+                        
+                        return await DownloadStringDataKeepParam(uri);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Error on download {url}");
+                    return string.Empty;
+                }
+
+                if (response == null)
+                {
+                    return string.Empty;
+                }
+
+                int statusCode = (int)response.StatusCode;
+
+                // We want to handle redirects ourselves so that we can determine the final redirect Location (via header)
+                if (statusCode >= 300 && statusCode <= 399)
+                {
+                    var redirectUri = response.Headers.Location;
+                    if (!redirectUri.IsAbsoluteUri)
+                    {
+                        redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
+                    }
+
+                    Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
+
+                    return await DownloadStringDataKeepParam(redirectUri.ToString());
+                }
+                else
+                {
+                    return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                }
+            }
+        }
 
         /// <summary>
         /// Download string data with manage redirect url.
@@ -284,6 +387,101 @@ namespace CommonPluginsShared
             }
         }
 
+        /// <summary>
+        /// Download string data with custom cookies.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="Cookies"></param>
+        /// <param name="UserAgent"></param>
+        /// <returns></returns>
+        public static async Task<string> DownloadStringData(string url, List<HttpCookie> Cookies = null, string UserAgent = "")
+        {
+            var response = string.Empty;
+
+            HttpClientHandler handler = new HttpClientHandler();
+            if (Cookies != null)
+            {
+                CookieContainer cookieContainer = new CookieContainer();
+
+                foreach (var cookie in Cookies)
+                {
+                    Cookie c = new Cookie();
+                    c.Name = cookie.Name;
+                    c.Value = cookie.Value;
+                    c.Domain = cookie.Domain;
+                    c.Path = cookie.Path;
+
+                    try
+                    {
+                        cookieContainer.Add(c);
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, true);
+                    }
+                }
+
+                handler.CookieContainer = cookieContainer;
+            }
+
+            using (var client = new HttpClient(handler))
+            {
+                if (UserAgent.IsNullOrEmpty())
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                }
+                else
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+                }
+
+                HttpResponseMessage result;
+                try
+                {
+                    result = await client.GetAsync(url).ConfigureAwait(false);
+                    if (result.IsSuccessStatusCode)
+                    {
+                        response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        logger.Error($"Web error with status code {result.StatusCode.ToString()}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Error on Post {url}");
+                }
+            }
+
+            return response;
+        }
+
+        /// <summary>
+        /// Download string data with a bearer token.
+        /// </summary>
+        /// <param name="UrlAchievements"></param>
+        /// <param name="token"></param>
+        /// <param name="UrlBefore"></param>
+        /// <returns></returns>
+        public static async Task<string> DownloadStringData(string UrlAchievements, string token, string UrlBefore = "")
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+
+                if (!UrlBefore.IsNullOrEmpty())
+                {
+                    await client.GetStringAsync(UrlBefore).ConfigureAwait(false);
+                }
+
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+                string result = await client.GetStringAsync(UrlAchievements).ConfigureAwait(false);
+
+                return result;
+            }
+        }
+
 
         /// <summary>
         /// Post data with a payload.
@@ -293,12 +491,12 @@ namespace CommonPluginsShared
         /// <returns></returns>
         public static async Task<string> PostStringDataPayload(string url, string payload)
         {
-            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            var settings = (SettingsSection)config.GetSection("system.net/settings");
-            var defaultValue = settings.HttpWebRequest.UseUnsafeHeaderParsing;
-            settings.HttpWebRequest.UseUnsafeHeaderParsing = true;
-            config.Save(ConfigurationSaveMode.Modified);
-            ConfigurationManager.RefreshSection("system.net/settings");
+            //var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            //var settings = (SettingsSection)config.GetSection("system.net/settings");
+            //var defaultValue = settings.HttpWebRequest.UseUnsafeHeaderParsing;
+            //settings.HttpWebRequest.UseUnsafeHeaderParsing = true;
+            //config.Save(ConfigurationSaveMode.Modified);
+            //ConfigurationManager.RefreshSection("system.net/settings");
 
             var response = string.Empty;
             using (var client = new HttpClient())
@@ -334,11 +532,6 @@ namespace CommonPluginsShared
             return response;
         }
 
-        //var formContent = new FormUrlEncodedContent(new[]
-        //{
-        //    new KeyValuePair<string, string>("comment", comment),
-        //    new KeyValuePair<string, string>("questionId", questionId)
-        //});
         public static async Task<string> PostStringDataCookies(string url, FormUrlEncodedContent formContent, List<HttpCookie> Cookies = null)
         {
             var response = string.Empty;
@@ -377,63 +570,6 @@ namespace CommonPluginsShared
                 try
                 {
                     result = await client.PostAsync(url, formContent).ConfigureAwait(false);
-                    if (result.IsSuccessStatusCode)
-                    {
-                        response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        logger.Error($"Web error with status code {result.StatusCode.ToString()}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, $"Error on Post {url}");
-                }
-            }
-
-            return response;
-        }
-
-
-        public static async Task<string> DownloadStringData(string url, List<HttpCookie> Cookies = null)
-        {
-            var response = string.Empty;
-
-            HttpClientHandler handler = new HttpClientHandler();
-            if (Cookies != null)
-            {
-                CookieContainer cookieContainer = new CookieContainer();
-
-                foreach (var cookie in Cookies)
-                {
-                    Cookie c = new Cookie();
-                    c.Name = cookie.Name;
-                    c.Value = cookie.Value;
-                    c.Domain = cookie.Domain;
-                    c.Path = cookie.Path;
-
-                    try
-                    {
-                        cookieContainer.Add(c);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, true);
-                    }
-                }
-
-                handler.CookieContainer = cookieContainer;
-            }
-
-            using (var client = new HttpClient(handler))
-            {
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
-
-                HttpResponseMessage result;
-                try
-                {
-                    result = await client.GetAsync(url).ConfigureAwait(false);
                     if (result.IsSuccessStatusCode)
                     {
                         response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
