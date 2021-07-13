@@ -25,7 +25,7 @@ namespace CommonPluginsShared.Collections
         public bool Hidden { get { return Game.Hidden; } }
 
         [DontSerialize]
-        public string Icon { get { return Game.Icon; } }
+        public string Icon { get { return Game?.Icon == null ? string.Empty : Game.Icon; } }
 
         [DontSerialize]
         public string CoverImage { get { return Game.CoverImage; } }
