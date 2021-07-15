@@ -67,9 +67,7 @@ namespace CommonPluginsShared
             }
 
             List<Emulator> ListEmulators = GetListEmulators(PlayniteApi);
-            GameAction PlayAction = game.GameActions.Where(x => x.IsPlayAction).FirstOrDefault();
-
-            return ListEmulators.FindAll(x => x.Id == PlayAction?.EmulatorId).Count > 0;
+            return game.GameActions.Where(x => x.IsPlayAction && ListEmulators.Any(y => y.Id == x?.EmulatorId)).Count() > 0;
         }
 
         /// <summary>
