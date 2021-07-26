@@ -21,7 +21,7 @@ namespace CommonPluginsShared.Converters
         {
             if (values[0] is string && !((string)values[0]).IsNullOrEmpty() && File.Exists((string)values[0]))
             {
-                string[] extensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".jfif", ".tga" };
+                string[] extensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".jfif", ".tga", ".webp" };
                 if (!extensions.Contains(Path.GetExtension((string)values[0])))
                 {
                     return values[0];
