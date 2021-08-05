@@ -603,7 +603,7 @@ namespace CommonPluginsShared.Collections
                         try
                         { 
                             RemoveTag(game, true);
-                            AddTag(game, true);
+                            AddTag(game);
                         }
                         catch (Exception ex)
                         {
@@ -668,7 +668,7 @@ namespace CommonPluginsShared.Collections
                         try
                         {
                             RemoveTag(game, true);
-                            AddTag(game, true);
+                            AddTag(game);
                         }
                         catch (Exception ex)
                         {
