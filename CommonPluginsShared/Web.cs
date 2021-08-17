@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Configuration;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -478,6 +479,19 @@ namespace CommonPluginsShared
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
                 string result = await client.GetStringAsync(UrlAchievements).ConfigureAwait(false);
 
+                return result;
+            }
+        }
+
+
+        public static async Task<string> DownloadStringDataJson(string Url)
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                client.DefaultRequestHeaders.Add("Accept", "*/*");
+
+                string result = await client.GetStringAsync(Url).ConfigureAwait(false);
                 return result;
             }
         }
