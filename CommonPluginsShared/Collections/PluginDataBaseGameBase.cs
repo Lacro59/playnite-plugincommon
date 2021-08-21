@@ -16,10 +16,10 @@ namespace CommonPluginsShared.Collections
 
 
         [DontSerialize]
-        public Guid SourceId { get { return Game.SourceId; } }
+        public Guid SourceId { get { return Game == null ? default(Guid) : Game.SourceId; } }
 
         [DontSerialize]
-        public DateTime? LastActivity { get { return Game.LastActivity; } }
+        public DateTime? LastActivity { get { return Game?.LastActivity; } }
 
         [DontSerialize]
         public bool Hidden { get { return Game.Hidden; } }
