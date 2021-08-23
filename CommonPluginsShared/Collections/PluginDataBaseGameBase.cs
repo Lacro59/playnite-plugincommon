@@ -22,28 +22,28 @@ namespace CommonPluginsShared.Collections
         public DateTime? LastActivity { get { return Game?.LastActivity; } }
 
         [DontSerialize]
-        public bool Hidden { get { return Game.Hidden; } }
+        public bool Hidden { get { return Game == null ? default(bool) : Game.Hidden; } }
 
         [DontSerialize]
         public string Icon { get { return Game?.Icon == null ? string.Empty : Game.Icon; } }
 
         [DontSerialize]
-        public string CoverImage { get { return Game.CoverImage; } }
+        public string CoverImage { get { return Game == null ? string.Empty : Game.CoverImage; } }
 
         [DontSerialize]
-        public string BackgroundImage { get { return Game.BackgroundImage; } }
+        public string BackgroundImage { get { return Game == null ? string.Empty : Game.BackgroundImage; } }
 
         [DontSerialize]
-        public List<Genre> Genres { get { return Game.Genres; } }
+        public List<Genre> Genres { get { return Game == null ? null : Game.Genres; } }
 
         [DontSerialize]
-        public List<Guid> GenreIds { get { return Game.GenreIds; } }
+        public List<Guid> GenreIds { get { return Game == null ? null : Game.GenreIds; } }
 
         [DontSerialize]
-        public Platform Platform { get { return Game.Platform; } }
+        public Platform Platform { get { return Game == null ? null : Game.Platform; } }
 
         [DontSerialize]
-        public long Playtime { get { return Game.Playtime; } }
+        public long Playtime { get { return Game == null ? default(long) : Game.Playtime; } }
 
 
         [DontSerialize]
