@@ -13,5 +13,5 @@
                 <Setter Property="BorderBrush" Value="{DynamicResource GlyphBrush}" />
             </Trigger>
         </Style.Triggers>
-    </Style>                  
+    </Style>
 </ResourceDictionary>
