@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using Playnite.SDK.Data;
 using Playnite.SDK;
 using CommonPluginsPlaynite.PluginLibrary.OriginLibrary.Models;
 using System;
@@ -30,7 +30,7 @@ namespace CommonPluginsPlaynite.PluginLibrary.OriginLibrary.Services
             client.Headers.Add("accept", "application/vnd.origin.v3+json; x-cache/force-write");
 
             var stringData = client.DownloadString(string.Format(@"https://api1.origin.com/ecommerce2/consolidatedentitlements/{0}?machine_hash=1", userId));
-            var data = JsonConvert.DeserializeObject<AccountEntitlementsResponse>(stringData);
+            var data = Serialization.FromJson<AccountEntitlementsResponse>(stringData);
             return data.entitlements;
         }
 
@@ -39,7 +39,7 @@ namespace CommonPluginsPlaynite.PluginLibrary.OriginLibrary.Services
             var client = new WebClient();
             client.Headers.Add("Authorization", token.token_type + " " + token.access_token);
             var stringData = client.DownloadString(@"https://gateway.ea.com/proxy/identity/pids/me");
-            return JsonConvert.DeserializeObject<AccountInfoResponse>(stringData);
+            return Serialization.FromJson<AccountInfoResponse>(stringData);
         }
 
         public UsageResponse GetUsage(long userId, string gameId, AuthTokenResponse token)
@@ -64,7 +64,7 @@ namespace CommonPluginsPlaynite.PluginLibrary.OriginLibrary.Services
         {
             webView.NavigateAndWait(tokenUrl);
             var stringInfo = webView.GetPageText();
-            var tokenData = JsonConvert.DeserializeObject<AuthTokenResponse>(stringInfo);
+            var tokenData = Serialization.FromJson<AuthTokenResponse>(stringInfo);
             return tokenData;
         }
 

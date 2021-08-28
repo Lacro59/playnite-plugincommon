@@ -86,7 +86,12 @@ namespace CommonPluginsShared
             List<Emulator> ListEmulators = GetListEmulators(PlayniteApi);
             GameAction PlayAction = game.GameActions.Where(x => x.IsPlayAction).FirstOrDefault();
 
-            return (bool)(ListEmulators.Find(x => x.Id == PlayAction?.EmulatorId)?.Profiles[0]?.Executable?.ToLower().Contains("rpcs3.exe"));
+            if (PlayAction == null || PlayAction.EmulatorId == default(Guid))
+            {
+                return false;
+            }
+
+            return (bool)(ListEmulators.Find(x => x.Id == PlayAction?.EmulatorId)?.BuiltInConfigId?.Contains("rpcs3"));
         }
         #endregion
 
@@ -318,7 +323,6 @@ namespace CommonPluginsShared
         #endregion
 
 
-        // TODO ?
         public static void SetThemeInformation(IPlayniteAPI PlayniteApi)
         {
             string defaultThemeName = "Default";
@@ -354,46 +358,17 @@ namespace CommonPluginsShared
         /// <param name="inputString"></param>
         /// <param name="fixSeparators"></param>
         /// <returns></returns>
-        public static string StringExpandWithoutStore(Game game, string inputString, bool fixSeparators = false, bool SafeName = true)
+        public static string StringExpandWithoutStore(IPlayniteAPI PlayniteAPI, Game game, string inputString, bool fixSeparators = false)
         {
             if (string.IsNullOrEmpty(inputString) || !inputString.Contains('{'))
             {
                 return inputString;
             }
 
+            string result = inputString;
 
             // Playnite variables
-            var result = inputString;
-            if (!game.InstallDirectory.IsNullOrWhiteSpace())
-            {
-                result = result.Replace(ExpandableVariables.InstallationDirectory, game.InstallDirectory);
-                result = result.Replace(ExpandableVariables.InstallationDirName, Path.GetFileName(Path.GetDirectoryName(game.InstallDirectory)));
-            }
-
-            if (!game.GameImagePath.IsNullOrWhiteSpace())
-            {
-                result = result.Replace(ExpandableVariables.ImagePath, game.GameImagePath);
-                result = result.Replace(ExpandableVariables.ImageNameNoExtension, Path.GetFileNameWithoutExtension(game.GameImagePath));
-                result = result.Replace(ExpandableVariables.ImageName, Path.GetFileName(game.GameImagePath));
-            }
-
-            result = result.Replace(ExpandableVariables.PlayniteDirectory, PlaynitePaths.ProgramPath);
-
-            if (SafeName)
-            {
-                result = result.Replace(ExpandableVariables.Name, Paths.GetSafeFilename(game.Name));
-                result = result.Replace(ExpandableVariables.Platform, Paths.GetSafeFilename(game.Platform?.Name));
-            }
-            else
-            {
-                result = result.Replace(ExpandableVariables.Name, game.Name);
-                result = result.Replace(ExpandableVariables.Platform, game.Platform?.Name);
-            }
-            
-            result = result.Replace(ExpandableVariables.PluginId, game.PluginId.ToString());
-            result = result.Replace(ExpandableVariables.GameId, game.GameId);
-            result = result.Replace(ExpandableVariables.DatabaseId, game.Id.ToString());
-            result = result.Replace(ExpandableVariables.Version, game.Version);
+            result = PlayniteAPI.ExpandGameVariables(game, inputString);
 
 
             // Dropbox

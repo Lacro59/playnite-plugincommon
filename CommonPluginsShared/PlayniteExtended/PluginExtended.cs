@@ -87,7 +87,7 @@ namespace CommonPluginsShared.PlayniteExtended
     }
 
 
-    public abstract class PlaynitePlugin<ISettings> : Plugin
+    public abstract class PlaynitePlugin<ISettings> : GenericPlugin
     {
         internal static readonly ILogger logger = LogManager.GetLogger();
         internal static IResourceProvider resources = new ResourceProvider();

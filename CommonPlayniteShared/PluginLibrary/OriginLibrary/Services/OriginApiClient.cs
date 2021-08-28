@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using Playnite.SDK.Data;
 using Playnite.SDK;
 using CommonPluginsPlaynite.Common.Web;
 using CommonPluginsPlaynite.PluginLibrary.OriginLibrary.Models;
@@ -19,7 +19,7 @@ namespace CommonPluginsPlaynite.PluginLibrary.OriginLibrary.Services
         {
             var url = string.Format(@"https://api2.origin.com/ecommerce2/public/supercat/{0}/en_IE?country=IE", gameId);
             var stringData = Encoding.UTF8.GetString(HttpDownloader.DownloadData(url));
-            return JsonConvert.DeserializeObject<GameStoreDataResponse>(stringData);
+            return Serialization.FromJson<GameStoreDataResponse>(stringData);
         }
 
         public static StorePageMetadata GetStoreMetadata(string offerPath)
@@ -31,7 +31,7 @@ namespace CommonPluginsPlaynite.PluginLibrary.OriginLibrary.Services
             if (HttpDownloader.GetResponseCode(url) == System.Net.HttpStatusCode.OK)
             {
                 var stringData = Encoding.UTF8.GetString(HttpDownloader.DownloadData(url));
-                return JsonConvert.DeserializeObject<StorePageMetadata>(stringData);
+                return Serialization.FromJson<StorePageMetadata>(stringData);
             }
             else
             {
@@ -45,7 +45,7 @@ namespace CommonPluginsPlaynite.PluginLibrary.OriginLibrary.Services
             {
                 var url = string.Format(@"https://api1.origin.com/ecommerce2/public/{0}/en_US", gameId);
                 var stringData = Encoding.UTF8.GetString(HttpDownloader.DownloadData(url));
-                return JsonConvert.DeserializeObject<GameLocalDataResponse>(stringData);
+                return Serialization.FromJson<GameLocalDataResponse>(stringData);
             }
             catch (Exception e)
             {

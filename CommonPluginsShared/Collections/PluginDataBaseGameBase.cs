@@ -34,16 +34,16 @@ namespace CommonPluginsShared.Collections
         public string BackgroundImage { get { return Game == null ? string.Empty : Game.BackgroundImage; } }
 
         [DontSerialize]
-        public List<Genre> Genres { get { return Game == null ? null : Game.Genres; } }
+        public List<Genre> Genres { get { return Game?.Genres; } }
 
         [DontSerialize]
-        public List<Guid> GenreIds { get { return Game == null ? null : Game.GenreIds; } }
+        public List<Guid> GenreIds { get { return Game?.GenreIds; } }
 
         [DontSerialize]
-        public Platform Platform { get { return Game == null ? null : Game.Platform; } }
+        public List<Platform> Platform { get { return Game?.Platforms; } }
 
         [DontSerialize]
-        public long Playtime { get { return Game == null ? default(long) : Game.Playtime; } }
+        public ulong Playtime { get { return Game == null ? default(ulong) : Game.Playtime; } }
 
 
         [DontSerialize]

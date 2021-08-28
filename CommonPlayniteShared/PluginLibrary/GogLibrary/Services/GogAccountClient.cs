@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using Playnite.SDK;
+﻿using Playnite.SDK;
+using Playnite.SDK.Data;
 using CommonPluginsPlaynite.Common.Web;
 using CommonPluginsPlaynite.PluginLibrary.GogLibrary;
 using CommonPluginsPlaynite.PluginLibrary.GogLibrary.Models;
@@ -13,8 +13,8 @@ namespace CommonPluginsPlaynite.PluginLibrary.Services.GogLibrary
 {
     public class GogAccountClient
     {
-        public ILogger logger = LogManager.GetLogger();
-        public IWebView webView;
+        private ILogger logger = LogManager.GetLogger();
+        private IWebView webView;
 
         public GogAccountClient(IWebView webView)
         {
@@ -52,7 +52,7 @@ namespace CommonPluginsPlaynite.PluginLibrary.Services.GogLibrary
         {
             webView.NavigateAndWait(@"https://menu.gog.com/v1/account/basic");
             var stringInfo = webView.GetPageText();
-            var accountInfo = JsonConvert.DeserializeObject<AccountBasicRespose>(stringInfo);
+            var accountInfo = Serialization.FromJson<AccountBasicRespose>(stringInfo);
             return accountInfo;
         }
 
@@ -62,7 +62,7 @@ namespace CommonPluginsPlaynite.PluginLibrary.Services.GogLibrary
             var url = string.Format(baseUrl, accountName, 1);
             var gamesList = HttpDownloader.DownloadString(url);
             var games = new List<LibraryGameResponse>();
-            var libraryData = JsonConvert.DeserializeObject<PagedResponse<LibraryGameResponse>>(gamesList);
+            var libraryData = Serialization.FromJson<PagedResponse<LibraryGameResponse>>(gamesList);
 
             if (libraryData == null)
             {
@@ -77,7 +77,7 @@ namespace CommonPluginsPlaynite.PluginLibrary.Services.GogLibrary
                 for (int i = 2; i <= libraryData.pages; i++)
                 {
                     gamesList = HttpDownloader.DownloadString(string.Format(baseUrl, accountName, i));
-                    var pageData = JsonConvert.DeserializeObject<PagedResponse<LibraryGameResponse>>(gamesList);
+                    var pageData = Serialization.FromJson<PagedResponse<LibraryGameResponse>>(gamesList);
                     games.AddRange(pageData._embedded.items);
                 }
             }
@@ -96,7 +96,7 @@ namespace CommonPluginsPlaynite.PluginLibrary.Services.GogLibrary
                 var url = string.Format(baseUrl, account.username, 1);
                 webView.NavigateAndWait(url);
                 stringLibContent = webView.GetPageText();
-                var libraryData = JsonConvert.DeserializeObject<PagedResponse<LibraryGameResponse>>(stringLibContent);
+                var libraryData = Serialization.FromJson<PagedResponse<LibraryGameResponse>>(stringLibContent);
                 if (libraryData == null)
                 {
                     logger.Error("GOG library content is empty.");
@@ -110,7 +110,7 @@ namespace CommonPluginsPlaynite.PluginLibrary.Services.GogLibrary
                     {
                         webView.NavigateAndWait(string.Format(baseUrl, account.username, i));
                         stringLibContent = webView.GetPageText();
-                        var pageData = JsonConvert.DeserializeObject<PagedResponse<LibraryGameResponse>>(stringLibContent);
+                        var pageData = Serialization.FromJson<PagedResponse<LibraryGameResponse>>(stringLibContent);
                         games.AddRange(pageData._embedded.items);
                     }
                 }
@@ -120,7 +120,7 @@ namespace CommonPluginsPlaynite.PluginLibrary.Services.GogLibrary
             catch (Exception e)
             {
                 logger.Error(e, $"Failed to library from new API for account {account.username}, falling back to legacy.");
-                //logger.Debug(stringLibContent);
+                logger.Debug(stringLibContent);
                 return GetOwnedGames();
             }
         }
@@ -132,7 +132,7 @@ namespace CommonPluginsPlaynite.PluginLibrary.Services.GogLibrary
             webView.NavigateAndWait(string.Format(baseUrl, 1));
             var gamesList = webView.GetPageText();
 
-            var libraryData = JsonConvert.DeserializeObject<GetOwnedGamesResult>(gamesList);
+            var libraryData = Serialization.FromJson<GetOwnedGamesResult>(gamesList);
             if (libraryData == null)
             {
                 logger.Error("GOG library content is empty.");
@@ -156,7 +156,7 @@ namespace CommonPluginsPlaynite.PluginLibrary.Services.GogLibrary
                 {
                     webView.NavigateAndWait(string.Format(baseUrl, i));
                     gamesList = webView.GetPageText();
-                    var pageData = libraryData = JsonConvert.DeserializeObject<GetOwnedGamesResult>(gamesList);
+                    var pageData = libraryData = Serialization.FromJson<GetOwnedGamesResult>(gamesList);
                     games.AddRange(pageData.products.Select(a => new LibraryGameResponse()
                     {
                         game = new LibraryGameResponse.Game()
