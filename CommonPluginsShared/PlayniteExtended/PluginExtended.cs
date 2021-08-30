@@ -99,6 +99,8 @@ namespace CommonPluginsShared.PlayniteExtended
 
         protected PlaynitePlugin(IPlayniteAPI api) : base(api)
         {
+            Properties = new GenericPluginProperties { HasSettings = true };
+
             // Get plugin's settings 
             PluginSettings = typeof(ISettings).CrateInstance<ISettings>(this);
 
