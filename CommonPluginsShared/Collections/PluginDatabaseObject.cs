@@ -458,6 +458,35 @@ namespace CommonPluginsShared.Collections
             }, globalProgressOptions);
         }
 
+        public virtual void Refresh(List<Guid> Ids)
+        {
+            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
+                $"{PluginName} - {resources.GetString("LOCCommonProcessing")}",
+                false
+            );
+            globalProgressOptions.IsIndeterminate = true;
+
+            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            {
+                foreach (Guid Id in Ids)
+                {
+                    var loadedItem = Get(Id, true);
+                    var webItem = GetWeb(Id);
+
+                    if (webItem != null && !ReferenceEquals(loadedItem, webItem))
+                    {
+                        Update(webItem);
+                    }
+                }
+            }, globalProgressOptions);
+        }
+
+
+
+        public virtual bool Remove(Game game)
+        {
+            return Remove(game.Id);
+        }
 
         public virtual bool Remove(Guid Id)
         {
@@ -479,9 +508,27 @@ namespace CommonPluginsShared.Collections
             return false;
         }
 
-        public virtual bool Remove(Game game)
+        public virtual bool Remove(List<Guid> Ids)
         {
-            return Remove(game.Id);
+            // If tag system
+            var Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
+            PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
+
+            foreach (Guid Id in Ids)
+            {
+                if (propertyInfo != null)
+                {
+                    Common.LogDebug(true, $"RemoveTag for {Id.ToString()}");
+                    RemoveTag(Id);
+                }
+
+                if (Database.Items.ContainsKey(Id))
+                {
+                    Application.Current.Dispatcher?.Invoke(() => { Database.Remove(Id); }, DispatcherPriority.Send);
+                }
+            }
+
+            return true;
         }
 
 
