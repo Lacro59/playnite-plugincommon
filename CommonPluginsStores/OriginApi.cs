@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace CommonPluginsStores
@@ -62,7 +63,7 @@ namespace CommonPluginsStores
                 responseData = Serialization.ToJson(resultObject["offers"]);
 
                 // Write file for cache usage
-                Serialization.ToFile(resultObject["offers"], PluginCacheFile, Format.Json);
+                File.WriteAllText(PluginCacheFile, Serialization.ToJson(resultObject["offers"]), Encoding.UTF8);
             }
             catch (Exception ex)
             {

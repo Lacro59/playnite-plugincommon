@@ -136,7 +136,6 @@ namespace CommonPluginsPlaynite.Database
 
         internal void SaveItemData(TItem item)
         {
-            //Serialization.ToFile(item, GetItemFilePath(item.Id), Format.Json);
             File.WriteAllText(GetItemFilePath(item.Id), Serialization.ToJson(item), Encoding.UTF8);
         }
 
@@ -359,7 +358,6 @@ namespace CommonPluginsPlaynite.Database
                     if (oldData == null)
                     {
                         logger.Error("Failed to read stored item data.");
-                        //oldData = this[itemToUpdate.Id].GetClone();
                         oldData = Serialization.GetClone(this[itemToUpdate.Id]);
                     }
                 }
@@ -409,7 +407,6 @@ namespace CommonPluginsPlaynite.Database
                             // which mess with Playnite process and dump their log entries to our files.
                             // This will most likely cause some other issues, but at least it won't crash the whole app.
                             logger.Error(e, "Failed to read stored item data.");
-                            //oldData = this[item.Id].GetClone();
                             oldData = Serialization.GetClone(this[item.Id]);
                         }
                     }
@@ -545,13 +542,23 @@ namespace CommonPluginsPlaynite.Database
 
         public IEnumerable<TItem> GetClone()
         {
-            //return this.Select(a => a.GetClone());
             return this.Select(a => Serialization.GetClone(a));
         }
 
         public void Dispose()
         {
             this.Dispose();
+        }
+
+
+        public TItem Add(MetadataProperty property)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<TItem> Add(IEnumerable<MetadataProperty> properties)
+        {
+            throw new NotImplementedException();
         }
     }
 }
