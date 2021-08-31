@@ -45,6 +45,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\NegateConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\StringNullOrEmptyToBoolConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\StringNullOrEmptyToVisibilityConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\TwoBooleanToBooleanConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Database\ItemCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\BitpmapExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\IProvideValueTarget.cs" />
@@ -52,6 +53,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\ObjectExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpFileCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageSourceManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Localization\LocalizationKeys.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Manifests\ExtensionManifest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Manifests\ThemeManifest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\BattleNetLibrary\Models\BattleNetApiStatus.cs" />
