@@ -10,7 +10,7 @@ using System.Windows.Markup;
 
 namespace CommonPluginsPlaynite.Converters
 {
-    public class LongToTimePlayedConverter : MarkupExtension, IValueConverter
+    public class PlayTimeToStringConverter : MarkupExtension, IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
@@ -18,8 +18,8 @@ namespace CommonPluginsPlaynite.Converters
             {
                 return ResourceProvider.GetString("LOCPlayedNone");
             }
-
-            var seconds = (long)value;
+           
+            var seconds = (value is long) ? ulong.Parse(((long)value).ToString()) : (ulong)value;
             if (seconds == 0)
             {
                 return ResourceProvider.GetString("LOCPlayedNone");

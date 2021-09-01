@@ -41,7 +41,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\VirtualizingUniformPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\InvertableBooleanToVisibilityConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\InvertedBoolenConverter.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Converters\LongToTimePlayedConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\PlayTimeToStringConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\NegateConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\StringNullOrEmptyToBoolConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\StringNullOrEmptyToVisibilityConverter.cs" />

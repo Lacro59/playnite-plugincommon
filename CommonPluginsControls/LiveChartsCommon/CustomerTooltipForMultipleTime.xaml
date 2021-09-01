@@ -12,7 +12,7 @@
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <converters:LongToTimePlayedConverter x:Key="LongToTimePlayedConverter" />
+        <converters:PlayTimeToStringConverter x:Key="PlayTimeToStringConverter" />
         <wpf:SharedConverter x:Key="SharedConverter" />
         <wpf:SharedVisibilityConverter x:Key="SharedVisibilityConverter" />
     </UserControl.Resources>
@@ -64,7 +64,7 @@
                                                    Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Icon)}" />
 
                                         <TextBlock Grid.Column="4" FontSize="16" HorizontalAlignment="Right"
-                                                   Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Values), Mode=OneWay, Converter={StaticResource LongToTimePlayedConverter}}" 
+                                                   Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Values), Mode=OneWay, Converter={StaticResource PlayTimeToStringConverter}}" 
                                                    VerticalAlignment="Center" Style="{DynamicResource BaseTextBlockStyle}" />
                                     </Grid>
                                 </DataTemplate>
