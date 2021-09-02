@@ -503,7 +503,7 @@ namespace CommonPluginsShared
         /// <param name="url"></param>
         /// <param name="payload"></param>
         /// <returns></returns>
-        public static async Task<string> PostStringDataPayload(string url, string payload)
+        public static async Task<string> PostStringDataPayload(string url, string payload, List<HttpCookie> Cookies = null)
         {
             //var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             //var settings = (SettingsSection)config.GetSection("system.net/settings");
@@ -513,7 +513,34 @@ namespace CommonPluginsShared
             //ConfigurationManager.RefreshSection("system.net/settings");
 
             var response = string.Empty;
-            using (var client = new HttpClient())
+
+            HttpClientHandler handler = new HttpClientHandler();
+            if (Cookies != null)
+            {
+                CookieContainer cookieContainer = new CookieContainer();
+
+                foreach (var cookie in Cookies)
+                {
+                    Cookie c = new Cookie();
+                    c.Name = cookie.Name;
+                    c.Value = cookie.Value;
+                    c.Domain = cookie.Domain;
+                    c.Path = cookie.Path;
+
+                    try
+                    {
+                        cookieContainer.Add(c);
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, true);
+                    }
+                }
+
+                handler.CookieContainer = cookieContainer;
+            }
+
+            using (var client = new HttpClient(handler))
             {
                 client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
                 client.DefaultRequestHeaders.Add("accept", "application/json, text/javascript, */*; q=0.01");

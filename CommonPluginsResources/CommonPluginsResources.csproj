@@ -419,6 +419,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <None Include="ResourcesPlaynite\ExtensionsLocSource.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </None>
     <Page Include="ResourcesPlaynite\Media.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
