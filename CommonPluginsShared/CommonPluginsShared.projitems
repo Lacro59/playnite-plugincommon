@@ -9,6 +9,7 @@
     <Import_RootNamespace>CommonPluginsShared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Behaviors\DatePickerCalendar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeLang.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDataBaseGame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDataBaseGameBase.cs" />
