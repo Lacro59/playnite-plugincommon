@@ -142,6 +142,7 @@
                     stringReturn = epic;
                     break;
                 case "playnite":
+                case "pc (windows)":
                     stringReturn = playnite;
                     break;
                 case "bethesda":
