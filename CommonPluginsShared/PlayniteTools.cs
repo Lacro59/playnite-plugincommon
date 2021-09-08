@@ -254,6 +254,10 @@ namespace CommonPluginsShared
                         SourceName = "Rpcs3";
                     }
                 }
+                else if (PlayniteApi.Database.Sources.Get(game.SourceId)?.Name.ToLower() == "xbox game pass")
+                {
+                    SourceName = "Xbox";
+                }
                 else if (game.SourceId != null && game.SourceId != default(Guid))
                 {
                     SourceName = PlayniteApi.Database.Sources.Get(game.SourceId)?.Name;

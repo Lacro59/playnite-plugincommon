@@ -14,6 +14,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Behaviors\MediaElementBehaviors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\DesignerTools.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\Encryption.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\CloneObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\Enums.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Extensions\ItemsControlExtensions.cs" />
