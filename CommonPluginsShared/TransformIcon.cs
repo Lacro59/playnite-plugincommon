@@ -105,6 +105,7 @@
                     break;
 
                 case "amazon":
+                case "amazon games":
                     stringReturn = amazonGame;
                     break;
                 case "retroachievements":
