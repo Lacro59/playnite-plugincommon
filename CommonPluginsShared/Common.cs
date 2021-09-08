@@ -128,11 +128,14 @@ namespace CommonPluginsShared
                 {
                     ((Window)sender).Width = 860;
                 }
-                else if (((Window)sender).DataContext.GetType().GetProperty("SettingsView") != null 
-                    && (((dynamic)(Window)sender).DataContext).SettingsView.DataContext is ISettings)
+                else if (((Window)sender).DataContext != null)
                 {
-                    ((Window)sender).Width = 700;
-                    ((Window)sender).Height = 500;
+                    if (((Window)sender).DataContext.GetType().GetProperty("SettingsView") != null
+                        && (((dynamic)(Window)sender).DataContext).SettingsView.DataContext is ISettings)
+                    {
+                        ((Window)sender).Width = 700;
+                        ((Window)sender).Height = 500;
+                    }
                 }
             }
             catch (Exception ex)
