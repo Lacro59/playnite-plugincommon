@@ -15,10 +15,14 @@ namespace CommonPluginsShared
 {
     public class PlayniteTools
     {
+        private static HashSet<string> _disabledPlugins;
         private static readonly ILogger logger = LogManager.GetLogger();
 
         private static List<Emulator> ListEmulators = null;
-        private static dynamic DisabledPlugins = null;
+        private static HashSet<string> DisabledPlugins
+        {
+            get { return _disabledPlugins ?? (_disabledPlugins = GetDisabledPlugins()); }
+        }
 
 
         #region Emulators
@@ -84,7 +88,7 @@ namespace CommonPluginsShared
             }
 
             List<Emulator> ListEmulators = GetListEmulators(PlayniteApi);
-            GameAction PlayAction = game.GameActions.Where(x => x.IsPlayAction).FirstOrDefault();
+            GameAction PlayAction = game.GameActions.FirstOrDefault(x => x.IsPlayAction);
 
             if (PlayAction == null || PlayAction.EmulatorId == default(Guid))
             {
@@ -112,7 +116,7 @@ namespace CommonPluginsShared
                 {
                     Directory.CreateDirectory(Path.Combine(PlaynitePaths.DataCachePath, PluginName));
                 }
-                
+
                 string PathImageFileName = Path.Combine(PlaynitePaths.DataCachePath, PluginName, FileName);
 
                 if (File.Exists(PathImageFileName))
@@ -125,7 +129,7 @@ namespace CommonPluginsShared
                     return PathImageFileName + ".png";
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Common.LogError(ex, false);
             }
@@ -140,48 +144,40 @@ namespace CommonPluginsShared
         /// <param name="PluginName"></param>
         /// <returns></returns>
         public static bool IsDisabledPlaynitePlugins(string PluginName)
-        {            
-            dynamic PlayniteConfig = null;
+        {
+            return DisabledPlugins?.Contains(PluginName) ?? false;
+        }
+
+        private static HashSet<string> GetDisabledPlugins()
+        {
             try
             {
-                if (DisabledPlugins == null)
+                string FileConfig = PlaynitePaths.ConfigFilePath;
+                if (File.Exists(FileConfig))
                 {
-                    string FileConfig = PlaynitePaths.ConfigFilePath;
-                    if (File.Exists(FileConfig))
+                    dynamic playniteConfig = Serialization.FromJsonFile<dynamic>(FileConfig);
+                    dynamic disabledPlugins = playniteConfig.DisabledPlugins;
+                    var output = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    if (disabledPlugins != null)
                     {
-                        PlayniteConfig = Serialization.FromJsonFile<dynamic>(FileConfig);
-                        DisabledPlugins = PlayniteConfig["DisabledPlugins"];
-                    }
-                    else
-                    {
-                        logger.Warn($"File not found {FileConfig}");
-                        return false;
-                    }
-                }
-
-                if (DisabledPlugins != null)
-                {
-                    foreach (string name in DisabledPlugins)
-                    {
-                        if (name.ToLower() == PluginName.ToLower())
+                        foreach (var pluginName in disabledPlugins)
                         {
-                            return true;
+                            output.Add(pluginName);
                         }
                     }
+                    return output;
                 }
                 else
                 {
-                    Common.LogDebug(true, $"DisabledPlugins is null");
-                    return false;
+                    logger.Warn($"File not found {FileConfig}");
+                    return new HashSet<string>();
                 }
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, false);
-                return false;
+                return null;
             }
-
-            return false;
         }
 
 
