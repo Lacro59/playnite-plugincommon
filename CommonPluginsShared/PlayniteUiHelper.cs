@@ -457,14 +457,14 @@ namespace CommonPluginsShared
         /// <param name="PlayniteApi"></param>
         /// <param name="Title"></param>
         /// <param name="ViewExtension"></param>
-        /// <param name="windowCreationOptions"></param>
+        /// <param name="windowOptions"></param>
         /// <returns></returns>
-        public static Window CreateExtensionWindow(IPlayniteAPI PlayniteApi, string Title, UserControl ViewExtension, WindowCreationOptions windowCreationOptions = null)
+        public static Window CreateExtensionWindow(IPlayniteAPI PlayniteApi, string Title, UserControl ViewExtension, WindowOptions windowOptions = null)
         {
             // Default window options
-            if (windowCreationOptions == null)
+            if (windowOptions == null)
             {
-                windowCreationOptions = new WindowCreationOptions
+                windowOptions = new WindowOptions
                 {
                     ShowMinimizeButton = false,
                     ShowMaximizeButton = false,
@@ -472,11 +472,11 @@ namespace CommonPluginsShared
                 };
             }
 
-            Window windowExtension = PlayniteApi.Dialogs.CreateWindow(windowCreationOptions);
+            Window windowExtension = PlayniteApi.Dialogs.CreateWindow(windowOptions);
 
             windowExtension.Title = Title;
             windowExtension.ShowInTaskbar = false;
-            windowExtension.ResizeMode = ResizeMode.NoResize;
+            windowExtension.ResizeMode = windowOptions.CanBeResizable ? ResizeMode.CanResize : ResizeMode.NoResize;
             windowExtension.Owner = PlayniteApi.Dialogs.GetCurrentAppWindow();
             windowExtension.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             windowExtension.Content = ViewExtension;
@@ -492,6 +492,11 @@ namespace CommonPluginsShared
                 windowExtension.Height = ViewExtension.MinHeight + 25;
                 windowExtension.Width = ViewExtension.MinWidth;
             }
+            else if (windowOptions.Width != 0 && windowOptions.Height != 0)
+            {
+                windowExtension.Width = windowOptions.Width;
+                windowExtension.Height = windowOptions.Height;
+            }
             else
             {
                 // TODO A black border is visible; SDK problem?
@@ -503,5 +508,14 @@ namespace CommonPluginsShared
 
             return windowExtension;
         }
+    }
+
+    public class WindowOptions : WindowCreationOptions
+    {
+        public double Width { get; set; }
+        public double Height { get; set; }
+
+        public bool CanBeResizable { get; set; } = false;
+
     }
 }
