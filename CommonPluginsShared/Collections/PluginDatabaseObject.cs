@@ -448,13 +448,7 @@ namespace CommonPluginsShared.Collections
 
             PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
-                var loadedItem = Get(Id, true);
-                var webItem = GetWeb(Id);
-
-                if (webItem != null && !ReferenceEquals(loadedItem, webItem))
-                {
-                    Update(webItem);
-                }
+                RefreshNoLoader(Id);
             }, globalProgressOptions);
         }
 
@@ -470,17 +464,21 @@ namespace CommonPluginsShared.Collections
             {
                 foreach (Guid Id in Ids)
                 {
-                    var loadedItem = Get(Id, true);
-                    var webItem = GetWeb(Id);
-
-                    if (webItem != null && !ReferenceEquals(loadedItem, webItem))
-                    {
-                        Update(webItem);
-                    }
+                    RefreshNoLoader(Id);
                 }
             }, globalProgressOptions);
         }
 
+        public virtual void RefreshNoLoader(Guid Id)
+        {
+            var loadedItem = Get(Id, true);
+            var webItem = GetWeb(Id);
+
+            if (webItem != null && !ReferenceEquals(loadedItem, webItem))
+            {
+                Update(webItem);
+            }
+        }
 
 
         public virtual bool Remove(Game game)
