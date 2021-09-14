@@ -128,6 +128,10 @@ namespace CommonPluginsShared
                 {
                     ((Window)sender).Width = 860;
                 }
+                else if (WinIdProperty == "WindowExtensions")
+                {
+                    ((Window)sender).Height = 700;
+                }
                 else if (((Window)sender).DataContext != null)
                 {
                     if (((Window)sender).DataContext.GetType().GetProperty("SettingsView") != null
