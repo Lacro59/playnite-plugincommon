@@ -77,6 +77,9 @@ namespace CommonPluginsShared.PlayniteExtended
 
                 OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "activityDetails_old");
                 FileSystem.DeleteDirectory(OldDirectory);
+
+                OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "cache");
+                FileSystem.DeleteDirectory(OldDirectory);
             }
             catch
             {
