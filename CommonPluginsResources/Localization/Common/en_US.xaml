@@ -103,6 +103,7 @@
     <sys:String x:Key="LOCCommonRemovingAllTag">Removing tag from all games...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Clearing database...</sys:String>
     <sys:String x:Key="LOCCommonProcessing">Processing, please wait...</sys:String>
+    <sys:String x:Key="LOCCommonConverting">Converting, please wait...</sys:String>
 
     <!-- CommonNotifications -->
 
