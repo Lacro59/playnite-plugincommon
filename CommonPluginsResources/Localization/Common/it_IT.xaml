@@ -103,6 +103,7 @@
     <sys:String x:Key="LOCCommonRemovingAllTag">Rimozione dell'etichetta da tutti i giochi...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Pulizia del database...</sys:String>
     <sys:String x:Key="LOCCommonProcessing">Elaborazione, attendere prego...</sys:String>
+    <sys:String x:Key="LOCCommonConverting">Converting, please wait...</sys:String>
 
     <!-- CommonNotifications -->
 
