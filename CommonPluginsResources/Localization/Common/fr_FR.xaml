@@ -29,13 +29,13 @@
 
     <sys:String x:Key="LOCCommonAuthenticateLabel">Connexion</sys:String>
     <sys:String x:Key="LOCCommonNotLoggedIn">Authentification requise</sys:String>
-    <sys:String x:Key="LOCCommonLoggedIn">Utilisateur connecté</sys:String>
+    <sys:String x:Key="LOCCommonLoggedIn">Utilisateur connect</sys:String>
     <sys:String x:Key="LOCCommonAccountName">Nom du compte</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Vérification du statut d'authentification…</sys:String>
 
     <!-- CommonMenus -->
 
-    <sys:String x:Key="LOCCommonTotalFound">Total trouvé</sys:String>
+    <sys:String x:Key="LOCCommonTotalFound">Total trouv</sys:String>
 
     <!-- CommonSettingsView -->
 
@@ -103,6 +103,7 @@
     <sys:String x:Key="LOCCommonRemovingAllTag">Suppression des étiquettes...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Nettoyage de la base de données...</sys:String>
     <sys:String x:Key="LOCCommonProcessing">Traitement en cours, veuillez patienter...</sys:String>
+    <sys:String x:Key="LOCCommonConverting">Converting, please wait...</sys:String>
 
     <!-- CommonNotifications -->
 
