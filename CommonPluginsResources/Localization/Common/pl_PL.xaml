@@ -65,7 +65,7 @@
     <sys:String x:Key="LOCCommonIntegrationChartOptions">Opcje wykresu</sys:String>
     
     <sys:String x:Key="LOCGameActivityIntegrationDescriptionOptions">Opcje integracji opisu</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationShowTitle">Pokaż tytuł</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationShowTitle">Pokaż tytu</sys:String>
     <sys:String x:Key="LOCCommonIntegrationTopGameDetails">Pokaż powyżej opisu gry</sys:String>
 
     <sys:String x:Key="LOCCommonAddTagAuto">Automatyczne dodawanie tagów z danymi</sys:String>
@@ -103,6 +103,7 @@
     <sys:String x:Key="LOCCommonRemovingAllTag">Usuwanie tagu ze wszystkich gier...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Czyszczenie bazy danych...</sys:String>
     <sys:String x:Key="LOCCommonProcessing">Przetwarzanie, proszę czekać...</sys:String>
+    <sys:String x:Key="LOCCommonConverting">Converting, please wait...</sys:String>
 
     <!-- CommonNotifications -->
 

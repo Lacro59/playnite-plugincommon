@@ -103,6 +103,7 @@
     <sys:String x:Key="LOCCommonRemovingAllTag">Entferne Tag von allen Spielen...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Datenbank wird geleert...</sys:String>
     <sys:String x:Key="LOCCommonProcessing">In Arbeit, bitte warten...</sys:String>
+    <sys:String x:Key="LOCCommonConverting">Converting, please wait...</sys:String>
 
     <!-- CommonNotifications -->
 
