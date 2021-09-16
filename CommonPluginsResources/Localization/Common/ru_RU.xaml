@@ -70,7 +70,7 @@
 
     <sys:String x:Key="LOCCommonAddTagAuto">Automatic tag addition with data addition</sys:String>
     
-    <sys:String x:Key="LOCCommonDatabase">База данных</sys:String>
+    <sys:String x:Key="LOCCommonDatabase">База данны</sys:String>
 
     <sys:String x:Key="LOCCommonControlsAvailable">Items available for the supported themes</sys:String>
     <sys:String x:Key="LOCCommonControlsPluginButtonShow">Display the plugin button</sys:String>
@@ -90,7 +90,7 @@
     <sys:String x:Key="LOCCommonAddTPlugin">Add plugin tag...</sys:String>
     <sys:String x:Key="LOCCommonSelectData">Download data for selected games</sys:String>
     <sys:String x:Key="LOCCommonDownloadPluginData">Download plugin data...</sys:String>
-    <sys:String x:Key="LOCCommonGetAllDatas">Скачать данные для всех игр</sys:String>
+    <sys:String x:Key="LOCCommonGetAllDatas">Скачать данные для всех иг</sys:String>
     <sys:String x:Key="LOCCommonDeletePluginData">Delete plugin data</sys:String>
     <sys:String x:Key="LOCCommonClearAllDatas">Delete data from all games</sys:String>
     <sys:String x:Key="LOCCommonRemoveAllTags">Remove plugin tag</sys:String>
@@ -103,6 +103,7 @@
     <sys:String x:Key="LOCCommonRemovingAllTag">Removing tag from all games...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Clearing database...</sys:String>
     <sys:String x:Key="LOCCommonProcessing">Processing, please wait...</sys:String>
+    <sys:String x:Key="LOCCommonConverting">Converting, please wait...</sys:String>
 
     <!-- CommonNotifications -->
 
