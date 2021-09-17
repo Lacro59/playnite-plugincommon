@@ -8,7 +8,7 @@
     <sys:String x:Key="LOCCommonTotal">Total</sys:String>
 
 
-    <sys:String x:Key="LOCCommon0to5">0 to 5 hours</sys:String>
+    <sys:String x:Key="LOCCommon0to5">0 à 5 heures</sys:String>
     <sys:String x:Key="LOCCommon1to5">1 à 5 heures</sys:String>
     <sys:String x:Key="LOCCommon5to10">5 à 10 heures</sys:String>
     <sys:String x:Key="LOCCommon10to20">10 à 20 heures</sys:String>
@@ -20,7 +20,7 @@
     <sys:String x:Key="LOCCommon70to80">70 à 80 heures</sys:String>
     <sys:String x:Key="LOCCommon80to90">80 à 90 heures</sys:String>
     <sys:String x:Key="LOCCommon90to100">90 à 100 heures</sys:String>
-    <sys:String x:Key="LOCCommon100plus">100 hours and more</sys:String>
+    <sys:String x:Key="LOCCommon100plus">100 heures ou plus</sys:String>
 
     <sys:String x:Key="LOCCommonDefaultSorting">Tri par défaut de la liste des jeux</sys:String>
 
@@ -103,7 +103,7 @@
     <sys:String x:Key="LOCCommonRemovingAllTag">Suppression des étiquettes...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Nettoyage de la base de données...</sys:String>
     <sys:String x:Key="LOCCommonProcessing">Traitement en cours, veuillez patienter...</sys:String>
-    <sys:String x:Key="LOCCommonConverting">Converting, please wait...</sys:String>
+    <sys:String x:Key="LOCCommonConverting">Conversion en cours, veuillez patienter...</sys:String>
 
     <!-- CommonNotifications -->
 
@@ -122,31 +122,31 @@ Veuillez effacer toutes les étiquettes du menu du plugin.</sys:String>
     <sys:String x:Key="LOCCommonSortByScore">Trier par note</sys:String>
 
 
-    <sys:String x:Key="LOCCommonMisc">Misc</sys:String>
+    <sys:String x:Key="LOCCommonMisc">Divers</sys:String>
 
 
-    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
-{InstallDir} - Game installation directory
-{InstallDirName} - Installation folder name
-{ImagePath} - Game ISO/ROM path if set
-{ImageName} - Game ISO/ROM file name
-{ImageNameNoExt} - Game ISO/ROM file name without extension
-{PlayniteDir} - Playnite installation directory
-{Name} - Game name
+    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Des variables spéciales peuvent être utilisées pour ajouter des chaînes de caractères dynamiques :
+{InstallDir} - Dossier d'installation du jeu
+{InstallDirName} - Nom du dossier d'installation du jeu
+{ImagePath} - Chemin vers le fichier ISO/ROM du jeu si défini
+{ImageName} - Nom de fichier de l'ISO/ROM du jeu
+{ImageNameNoExt} - Nom de fichier de l'ISO/ROM du jeu sans extension
+{PlayniteDir} - Dossier d'installation de Playnite
+{Name} - Nom du jeu
        
-Cloud variables can be used to add a dynamic string:        
+Des variables de Cloud peuvent être utilisées pour ajouter une chaîne de caractères dynamiques :        
 {DropboxFolder}
        
-Steam variables can be used to add a dynamic string:        
-{SteamId} - Steam user Id
-{SteamInstallDir} - Steam installation directory
-{SteamScreenshotsDir} - Steam screenshots directory
+Des variables Steam peuvent être utilisées pour ajouter une chaîne de caractères dynamique :        
+{SteamId} - ID d'utilisateur Steam
+{SteamInstallDir} - Dossier d'installation de Steam
+{SteamScreenshotsDir} - Dossier de captures d'écran de Steam
        
-Ubisoft Connect variables can be used to add a dynamic string:        
-{UbisoftInstallDir} - Ubisoft installation directory
-{UbisoftScreenshotsDir} - Ubisoft screenshots directory
+Des variables Ubisoft Connect peuvent être utilisées pour ajouter une chaîne de caractères dynamique :        
+{UbisoftInstallDir} - Dossier d'installation d'Ubisoft Connect
+{UbisoftScreenshotsDir} - Dossier de captures d'écran d'Ubisoft
             
-Windows variables can be used to add a dynamic string:        
+Des variables Windows pour ajouter une chaîne de caractères dynamique :        
 {WinDir}
 {AllUsersProfile}
 {AppData}
