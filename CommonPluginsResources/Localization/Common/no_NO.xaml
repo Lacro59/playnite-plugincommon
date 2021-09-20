@@ -8,7 +8,7 @@
     <sys:String x:Key="LOCCommonTotal">Total</sys:String>
 
 
-    <sys:String x:Key="LOCCommon0to5">0 to 5 hours</sys:String>
+    <sys:String x:Key="LOCCommon0to1">0 til 1 time</sys:String>
     <sys:String x:Key="LOCCommon1to5">1 to 5 hours</sys:String>
     <sys:String x:Key="LOCCommon5to10">5 to 10 hours</sys:String>
     <sys:String x:Key="LOCCommon10to20">10 to 20 hours</sys:String>
