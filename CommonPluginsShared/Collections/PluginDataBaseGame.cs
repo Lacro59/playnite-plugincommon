@@ -19,7 +19,7 @@ namespace CommonPluginsShared.Collections
         {
             get
             {
-                return Items.Count > 0;
+                return Items?.Count > 0;
             }
         }
     }
