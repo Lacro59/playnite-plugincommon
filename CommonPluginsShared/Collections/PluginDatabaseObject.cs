@@ -699,12 +699,11 @@ namespace CommonPluginsShared.Collections
             windowExtension.ShowDialog();
 
             var PlayniteDb = View.GetFilteredGames();
-            PlayniteDb = PlayniteDb.FindAll(x => Get(x.Id, true).HasData);
-
             if (PlayniteDb == null)
             {
                 return;
             }
+            PlayniteDb = PlayniteDb.FindAll(x => Get(x.Id, true).HasData);
 
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
                 $"{PluginName} - {resources.GetString("LOCCommonAddingAllTag")}",
@@ -853,9 +852,9 @@ namespace CommonPluginsShared.Collections
         }
 
 
-        public virtual Guid? FindGoodPluginTags(string CompletTagName)
+        public virtual Guid? FindGoodPluginTags(string TagName)
         {
-            return PluginTags.Find(x => x.Name == CompletTagName)?.Id;
+            return CheckTagExist(TagName);
         }
         #endregion
 
