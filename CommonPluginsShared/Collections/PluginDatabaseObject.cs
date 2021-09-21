@@ -43,6 +43,8 @@ namespace CommonPluginsShared.Collections
         public PluginPaths Paths { get; set; }
         public TDatabase Database { get; set; }
         public Game GameContext { get; set; }
+
+        protected string TagBefore = string.Empty;
         public List<Tag> PluginTags { get; set; } = new List<Tag>();
 
 
@@ -586,20 +588,24 @@ namespace CommonPluginsShared.Collections
 
 
         #region Tag system
-        public void GetPluginTags(string StringBefore)
+        public void GetPluginTags()
         {
-            PluginTags = PlayniteApi.Database.Tags.Where(x => (bool)x.Name?.StartsWith(StringBefore)).ToList();
+            PluginTags = new List<Tag>();
+            if (!TagBefore.IsNullOrEmpty())
+            {
+                PluginTags = PlayniteApi.Database.Tags.Where(x => (bool)x.Name?.StartsWith(TagBefore)).ToList();
+            }
         }
 
-        internal Guid? CheckTagExist(string StringBefore, string TagName)
+        internal Guid? CheckTagExist(string TagName)
         {
-            string CompletTagName = StringBefore + " " + TagName;
+            string CompletTagName = TagBefore.IsNullOrEmpty() ? TagName : TagBefore + " " + TagName;
 
             Guid? FindGoodPluginTags = PluginTags.Find(x => x.Name == CompletTagName)?.Id;
             if (FindGoodPluginTags == null)
             {
                 PlayniteApi.Database.Tags.Add(new Tag { Name = CompletTagName });
-                GetPluginTags(StringBefore);
+                GetPluginTags();
                 FindGoodPluginTags = PluginTags.Find(x => x.Name == CompletTagName).Id;
             }
             return FindGoodPluginTags;
@@ -745,6 +751,11 @@ namespace CommonPluginsShared.Collections
         {
             if (game?.TagIds != null)
             {
+                if (PluginTags.Count == 0)
+                {
+                    GetPluginTags();
+                }
+
                 if (game.TagIds.Where(x => PluginTags.Any(y => x == y.Id)).Count() > 0)
                 {
                     game.TagIds = game.TagIds.Where(x => !PluginTags.Any(y => x == y.Id)).ToList();
