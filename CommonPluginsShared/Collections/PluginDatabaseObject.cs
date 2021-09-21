@@ -313,7 +313,7 @@ namespace CommonPluginsShared.Collections
         }
 
 
-        public List<Game> GetGamesList()
+        public virtual List<Game> GetGamesList()
         {
             List<Game> GamesList = new List<Game>();
 
@@ -328,6 +328,17 @@ namespace CommonPluginsShared.Collections
             }
 
             return GamesList;
+        }
+
+        public virtual List<Game> GetGamesWithNoData()
+        {
+            List<Game> GamesWithNoData = Database.Items.Where(x => !x.Value.HasData).Select(x => PlayniteApi.Database.Games.Get(x.Key)).Where(x => x != null).ToList();
+            List<Game> GamesNotInDb = PlayniteApi.Database.Games.Where(x => !Database.Items.Any(y => y.Key == x.Id)).ToList();
+            List<Game> mergedList = GamesWithNoData.Union(GamesNotInDb).Distinct().ToList();
+
+            mergedList = mergedList.Where(x => !x.Hidden).ToList();
+
+            return mergedList;
         }
         #endregion
 
