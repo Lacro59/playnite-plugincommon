@@ -586,10 +586,25 @@ namespace CommonPluginsShared.Collections
 
 
         #region Tag system
-        protected virtual void GetPluginTags()
+        public void GetPluginTags(string StringBefore)
         {
-
+            PluginTags = PlayniteApi.Database.Tags.Where(x => (bool)x.Name?.StartsWith(StringBefore)).ToList();
         }
+
+        internal Guid? CheckTagExist(string StringBefore, string TagName)
+        {
+            string CompletTagName = StringBefore + " " + TagName;
+
+            Guid? FindGoodPluginTags = PluginTags.Find(x => x.Name == CompletTagName)?.Id;
+            if (FindGoodPluginTags == null)
+            {
+                PlayniteApi.Database.Tags.Add(new Tag { Name = CompletTagName });
+                GetPluginTags(StringBefore);
+                FindGoodPluginTags = PluginTags.Find(x => x.Name == CompletTagName).Id;
+            }
+            return FindGoodPluginTags;
+        }
+
 
         public virtual void AddTag(Game game, bool noUpdate = false)
         {
@@ -602,34 +617,6 @@ namespace CommonPluginsShared.Collections
             if (game != null)
             {
                 AddTag(game, noUpdate);
-            }
-        }
-
-        public void RemoveTag(Game game, bool noUpdate = false)
-        {
-            if (game?.TagIds != null)
-            {
-                if (game.TagIds.Where(x => PluginTags.Any(y => x == y.Id)).Count() > 0)
-                {
-                    game.TagIds = game.TagIds.Where(x => !PluginTags.Any(y => x == y.Id)).ToList();
-                    if (!noUpdate)
-                    {
-                        Application.Current.Dispatcher?.Invoke(() =>
-                        {
-                            PlayniteApi.Database.Games.Update(game);
-                            game.OnPropertyChanged();
-                        }, DispatcherPriority.Send);
-                    }
-                }
-            }
-        }
-
-        public void RemoveTag(Guid Id, bool noUpdate = false)
-        {
-            Game game = PlayniteApi.Database.Games.Get(Id);
-            if (game != null)
-            {
-                RemoveTag(game, noUpdate);
             }
         }
 
@@ -754,6 +741,35 @@ namespace CommonPluginsShared.Collections
         }
 
 
+        public void RemoveTag(Game game, bool noUpdate = false)
+        {
+            if (game?.TagIds != null)
+            {
+                if (game.TagIds.Where(x => PluginTags.Any(y => x == y.Id)).Count() > 0)
+                {
+                    game.TagIds = game.TagIds.Where(x => !PluginTags.Any(y => x == y.Id)).ToList();
+                    if (!noUpdate)
+                    {
+                        Application.Current.Dispatcher?.Invoke(() =>
+                        {
+                            PlayniteApi.Database.Games.Update(game);
+                            game.OnPropertyChanged();
+                        }, DispatcherPriority.Send);
+                    }
+                }
+            }
+        }
+
+        public void RemoveTag(Guid Id, bool noUpdate = false)
+        {
+            Game game = PlayniteApi.Database.Games.Get(Id);
+            if (game != null)
+            {
+                RemoveTag(game, noUpdate);
+            }
+        }
+
+
         public void RemoveTagAllGame(bool FromClearDatabase = false)
         {
             Common.LogDebug(true, "RemoveTagAllGame()");
@@ -815,9 +831,9 @@ namespace CommonPluginsShared.Collections
         }
 
 
-        public virtual Guid? FindGoodPluginTags(string TagName)
+        public virtual Guid? FindGoodPluginTags(string CompletTagName)
         {
-            return PluginTags.Find(x => x.Name.ToLower() == TagName.ToLower()).Id;
+            return PluginTags.Find(x => x.Name == CompletTagName)?.Id;
         }
         #endregion
 
