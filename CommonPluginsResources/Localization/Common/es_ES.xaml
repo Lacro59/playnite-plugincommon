@@ -81,6 +81,8 @@
 
     <!-- CommonMenus -->
 
+    <sys:String x:Key="LOCCommonViewNoData">View games without plugin data</sys:String>
+    
     <sys:String x:Key="LOCCommonRefreshGameData">Actualizar datos</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">Actualizar todos los datos</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">Borrar datos</sys:String>
