@@ -1,4 +1,6 @@
-﻿using Playnite.SDK;
+﻿using CommonPluginsShared.Interfaces;
+using Playnite.SDK;
+using Playnite.SDK.Data;
 using Playnite.SDK.Models;
 using System;
 using System.Collections.Generic;
@@ -22,19 +24,44 @@ namespace CommonPluginsControls.Views
     /// </summary>
     public partial class ListWithNoData : UserControl
     {
-        public ListWithNoData(IPlayniteAPI PlayniteApi, List<Game> games)
+        private IPluginDatabase PluginDatabase { get; set; }
+        private List<GameData> gameData = new List<GameData>();
+
+        RelayCommand<Guid> GoToGame { get; set; }
+
+        public ListWithNoData(IPlayniteAPI PlayniteApi, IPluginDatabase PluginDatabase)
         {
+            this.PluginDatabase = PluginDatabase;
+
             InitializeComponent();
 
-            RelayCommand<Guid> GoToGame = new RelayCommand<Guid>((Id) =>
+            GoToGame = new RelayCommand<Guid>((Id) =>
             {
                 PlayniteApi.MainView.SelectGame(Id);
                 PlayniteApi.MainView.SwitchToLibraryView();
             });
 
-            List<GameData> gameData = games.Select(x => new GameData { Id = x.Id,  Name = x.Name, GoToGame = GoToGame }).ToList();
+            RefreshData();
+        }
 
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            List<Guid> Ids = gameData.Select(x => x.Id).ToList();
+            PluginDatabase.Refresh(Ids);
+
+            RefreshData();
+        }
+
+
+        private void RefreshData()
+        {
+            ListViewGames.ItemsSource = null;
+            List<Game> games = PluginDatabase.GetGamesWithNoData();
+            gameData = games.Select(x => new GameData { Id = x.Id, Name = x.Name, GoToGame = GoToGame }).ToList();            
             ListViewGames.ItemsSource = gameData;
+
+            PART_Count.Content = gameData.Count;
         }
     }
 
