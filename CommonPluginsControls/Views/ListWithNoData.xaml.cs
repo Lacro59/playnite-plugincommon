@@ -62,6 +62,8 @@ namespace CommonPluginsControls.Views
             ListViewGames.ItemsSource = gameData;
 
             PART_Count.Content = gameData.Count;
+
+            ListViewGames.Sorting();
         }
     }
 
