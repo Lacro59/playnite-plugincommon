@@ -512,6 +512,11 @@ namespace CommonPluginsShared.Collections
             }
         }
 
+        public virtual void RefreshWithNoData(List<Guid> Ids)
+        {
+            Refresh(Ids);
+        }
+
 
         public virtual bool Remove(Game game)
         {
