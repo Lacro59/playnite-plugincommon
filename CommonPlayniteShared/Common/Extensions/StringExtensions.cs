@@ -14,6 +14,43 @@ namespace System
     {
         private static readonly CultureInfo enUSCultInfo = new CultureInfo("en-US", false);
 
+        private static Regex TrimmableWhitespace = new Regex(@"^\s+|\s+$", RegexOptions.Compiled);
+        private static Regex NonWordCharactersAndTrimmableWhitespace = new Regex(@"(^[\s\W_]+)|([\s\W_]+$)|([\W_]+)", RegexOptions.Compiled);
+
+        public static string TrimWhitespace(this string input)
+        {
+            return TrimmableWhitespace.Replace(input, "");
+        }
+
+        public static string NormalizeTitleForComparison(this string title)
+        {
+            MatchEvaluator matchEvaluator = (Match match) =>
+            {
+                if (match.Groups["3"].Success) //if the match group is the last one in the regex (non-word characters in the middle of a string)
+                    return " ";
+                else
+                    return ""; //remove white space and non-word characters at the start and end of the string
+            };
+            return NonWordCharactersAndTrimmableWhitespace.Replace(title, matchEvaluator).RemoveDiacritics();
+        }
+
+        public static string RemoveDiacritics(this string text)
+        {
+            var normalizedString = text.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder();
+
+            foreach (var c in normalizedString)
+            {
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+        }
+
         public static string MD5(this string s)
         {
             using (var provider = System.Security.Cryptography.MD5.Create())
@@ -190,7 +227,7 @@ namespace System
         }
 
         // Courtesy of https://stackoverflow.com/questions/6275980/string-replace-ignoring-case
-        public static string Replace(this string str, string oldValue, string @newValue, StringComparison comparisonType)
+        public static string Replace(this string str, string oldValue, string newValue, StringComparison comparisonType)
         {
             // Check inputs.
             if (str == null)
@@ -219,7 +256,7 @@ namespace System
             StringBuilder resultStringBuilder = new StringBuilder(str.Length);
 
             // Analyze the replacement: replace or remove.
-            bool isReplacementNullOrEmpty = string.IsNullOrEmpty(@newValue);
+            bool isReplacementNullOrEmpty = string.IsNullOrEmpty(newValue);
 
             // Replace all values.
             const int valueNotFound = -1;
@@ -238,7 +275,7 @@ namespace System
                 // Process the replacement.
                 if (!isReplacementNullOrEmpty)
                 {
-                    resultStringBuilder.Append(@newValue);
+                    resultStringBuilder.Append(newValue);
                 }
 
                 // Prepare start index for the next search.
