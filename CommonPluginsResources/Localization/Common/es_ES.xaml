@@ -8,7 +8,7 @@
     <sys:String x:Key="LOCCommonTotal">Total</sys:String>
 
 
-    <sys:String x:Key="LOCCommon0to1">0 to 1 hours</sys:String>
+    <sys:String x:Key="LOCCommon0to1">0 a 1 horas</sys:String>
     <sys:String x:Key="LOCCommon1to5">1 a 5 horas</sys:String>
     <sys:String x:Key="LOCCommon5to10">5 a 10 horas</sys:String>
     <sys:String x:Key="LOCCommon10to20">10 a 20 horas</sys:String>
@@ -81,7 +81,7 @@
 
     <!-- CommonMenus -->
 
-    <sys:String x:Key="LOCCommonViewNoData">View games without plugin data</sys:String>
+    <sys:String x:Key="LOCCommonViewNoData">Ver juegos sin datos del plugin</sys:String>
     
     <sys:String x:Key="LOCCommonRefreshGameData">Actualizar datos</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">Actualizar todos los datos</sys:String>
