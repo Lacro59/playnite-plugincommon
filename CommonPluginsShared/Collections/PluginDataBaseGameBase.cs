@@ -25,13 +25,13 @@ namespace CommonPluginsShared.Collections
         public bool Hidden { get { return Game == null ? default(bool) : Game.Hidden; } }
 
         [DontSerialize]
-        public string Icon { get { return Game?.Icon == null ? string.Empty : Game.Icon; } }
+        public string Icon { get { return Game?.Icon ?? string.Empty; } }
 
         [DontSerialize]
-        public string CoverImage { get { return Game == null ? string.Empty : Game.CoverImage; } }
+        public string CoverImage { get { return Game?.CoverImage ?? string.Empty; } }
 
         [DontSerialize]
-        public string BackgroundImage { get { return Game == null ? string.Empty : Game.BackgroundImage; } }
+        public string BackgroundImage { get { return Game?.BackgroundImage ?? string.Empty; } }
 
         [DontSerialize]
         public List<Genre> Genres { get { return Game?.Genres; } }
@@ -40,7 +40,7 @@ namespace CommonPluginsShared.Collections
         public List<Guid> GenreIds { get { return Game?.GenreIds; } }
 
         [DontSerialize]
-        public List<Platform> Platform { get { return Game?.Platforms; } }
+        public List<Platform> Platforms { get { return Game?.Platforms; } }
 
         [DontSerialize]
         public ulong Playtime { get { return Game == null ? default(ulong) : Game.Playtime; } }
