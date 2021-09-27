@@ -15,7 +15,7 @@ namespace System
         private static readonly CultureInfo enUSCultInfo = new CultureInfo("en-US", false);
 
         private static Regex TrimmableWhitespace = new Regex(@"^\s+|\s+$", RegexOptions.Compiled);
-        private static Regex NonWordCharactersAndTrimmableWhitespace = new Regex(@"(^[\s\W_]+)|([\s\W_]+$)|([\W_]+)", RegexOptions.Compiled);
+        private static Regex NonWordCharactersAndTrimmableWhitespace = new Regex(@"(?<start>^[\W_]+)|(?<end>[\W_]+$)|(?<middle>[\W_]+)", RegexOptions.Compiled);
 
         public static string TrimWhitespace(this string input)
         {
@@ -26,10 +26,10 @@ namespace System
         {
             MatchEvaluator matchEvaluator = (Match match) =>
             {
-                if (match.Groups["3"].Success) //if the match group is the last one in the regex (non-word characters in the middle of a string)
+                if (match.Groups["middle"].Success) //if the match group is the last one in the regex (non-word characters, including whitespace, in the middle of a string)
                     return " ";
                 else
-                    return ""; //remove white space and non-word characters at the start and end of the string
+                    return ""; //remove non-word characters (including white space) at the start and end of the string
             };
             return NonWordCharactersAndTrimmableWhitespace.Replace(title, matchEvaluator).RemoveDiacritics();
         }
@@ -72,11 +72,7 @@ namespace System
             {
                 return string.Empty;
             }
-
-            var newName = name;
-            newName = Regex.Replace(newName, @"^the\s+", "", RegexOptions.IgnoreCase);
-            newName = Regex.Replace(newName, @"^a\s+", "", RegexOptions.IgnoreCase);
-            newName = Regex.Replace(newName, @"^an\s+", "", RegexOptions.IgnoreCase);
+            string newName = Regex.Replace(name, @"^(the|an?)\s+", "", RegexOptions.IgnoreCase);
             return newName;
         }
 
