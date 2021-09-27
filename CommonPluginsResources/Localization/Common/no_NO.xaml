@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <sys:String x:Key="LOCCommonSelectFilters">Select filters</sys:String>
-    <sys:String x:Key="LOCCommonRecentlyAdded">Recently Added</sys:String>
+    <sys:String x:Key="LOCCommonSelectFilters">Velg filtre</sys:String>
+    <sys:String x:Key="LOCCommonRecentlyAdded">Nylig lagt til</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Only download missing</sys:String>
     
     <sys:String x:Key="LOCCommonTotal">Total</sys:String>
 
 
-    <sys:String x:Key="LOCCommon0to5">0 to 5 hours</sys:String>
+    <sys:String x:Key="LOCCommon0to1">0 til 1 time</sys:String>
     <sys:String x:Key="LOCCommon1to5">1 to 5 hours</sys:String>
     <sys:String x:Key="LOCCommon5to10">5 to 10 hours</sys:String>
     <sys:String x:Key="LOCCommon10to20">10 to 20 hours</sys:String>
@@ -81,6 +81,8 @@
 
     <!-- CommonMenus -->
 
+    <sys:String x:Key="LOCCommonViewNoData">View games without plugin data</sys:String>
+    
     <sys:String x:Key="LOCCommonRefreshGameData">Refresh data</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">Refresh all data</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">Delete data</sys:String>

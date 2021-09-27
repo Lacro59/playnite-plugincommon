@@ -8,7 +8,7 @@
     <sys:String x:Key="LOCCommonTotal">Totale</sys:String>
 
 
-    <sys:String x:Key="LOCCommon0to5">0 to 5 hours</sys:String>
+    <sys:String x:Key="LOCCommon0to1">da 0 a 1 ora</sys:String>
     <sys:String x:Key="LOCCommon1to5">da 1 a 5 ore</sys:String>
     <sys:String x:Key="LOCCommon5to10">da 5 a 10 ore</sys:String>
     <sys:String x:Key="LOCCommon10to20">da 10 a 20 ore</sys:String>
@@ -20,7 +20,7 @@
     <sys:String x:Key="LOCCommon70to80">da 70 a 80 ore</sys:String>
     <sys:String x:Key="LOCCommon80to90">da 80 a 90 ore</sys:String>
     <sys:String x:Key="LOCCommon90to100">da 90 a 100 ore</sys:String>
-    <sys:String x:Key="LOCCommon100plus">100 hours and more</sys:String>
+    <sys:String x:Key="LOCCommon100plus">100 ore e più</sys:String>
 
     <sys:String x:Key="LOCCommonDefaultSorting">Ordinamento predefinito della lista giochi</sys:String>
 
@@ -81,6 +81,8 @@
 
     <!-- CommonMenus -->
 
+    <sys:String x:Key="LOCCommonViewNoData">Visualizza giochi senza i dati dei plugin</sys:String>
+    
     <sys:String x:Key="LOCCommonRefreshGameData">Aggiorna dati</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">Aggiorna tutti i dati</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">Elimina dati</sys:String>
@@ -103,7 +105,7 @@
     <sys:String x:Key="LOCCommonRemovingAllTag">Rimozione dell'etichetta da tutti i giochi...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Pulizia del database...</sys:String>
     <sys:String x:Key="LOCCommonProcessing">Elaborazione, attendere prego...</sys:String>
-    <sys:String x:Key="LOCCommonConverting">Converting, please wait...</sys:String>
+    <sys:String x:Key="LOCCommonConverting">Conversione, sei pregato di attendere...</sys:String>
 
     <!-- CommonNotifications -->
 
@@ -122,31 +124,31 @@ Si prega di cancellare tutti le etichette nel menu del plugin.</sys:String>
     <sys:String x:Key="LOCCommonSortByScore">Ordina per punteggio</sys:String>
 
 
-    <sys:String x:Key="LOCCommonMisc">Misc</sys:String>
+    <sys:String x:Key="LOCCommonMisc">Varie</sys:String>
 
 
-    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
-{InstallDir} - Game installation directory
-{InstallDirName} - Installation folder name
-{ImagePath} - Game ISO/ROM path if set
-{ImageName} - Game ISO/ROM file name
-{ImageNameNoExt} - Game ISO/ROM file name without extension
-{PlayniteDir} - Playnite installation directory
-{Name} - Game name
+    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Variabili speciali che possono essere utilizzate per aggiungere una stringa dinamica:
+{InstallDir} - Cartella di installazione del gioco
+{InstallDirName} - Nome della cartella di installazione
+{ImagePath} - Percorso della ISO/ROM del gioco se impostato
+{ImageName} - Nome del file della ISO/ROM del gioco
+{ImageNameNoExt} - Nome del file senza estensione della ISO/ROM del gioco
+{PlayniteDir} - Cartella di installazione di Playnite
+{Name} - Nome del gioco
        
-Cloud variables can be used to add a dynamic string:        
+Variabili cloud possono essere utilizzate per aggiungere una stringa dinamica:        
 {DropboxFolder}
        
-Steam variables can be used to add a dynamic string:        
-{SteamId} - Steam user Id
-{SteamInstallDir} - Steam installation directory
-{SteamScreenshotsDir} - Steam screenshots directory
+Variabili steam che possono essere utilizzate per aggiungere una stringa dinamica:        
+{SteamId} - ID utente di Steam
+{SteamInstallDir} - Cartella di installazione di Steam
+{SteamScreenshotsDir} - Cartella delle catture di schermate di Steam
        
-Ubisoft Connect variables can be used to add a dynamic string:        
-{UbisoftInstallDir} - Ubisoft installation directory
-{UbisoftScreenshotsDir} - Ubisoft screenshots directory
+Variabili di Ubisoft Connect che possono essere utilizzate per aggiungere una stringa dinamica:        
+{UbisoftInstallDir} - Cartella di installazione di Ubisoft
+{UbisoftScreenshotsDir} - Cartella delle catture di schermate di Ubisoft
             
-Windows variables can be used to add a dynamic string:        
+Variabili di Windows che possono essere utilizzate per aggiungere una stringa dinamica:        
 {WinDir}
 {AllUsersProfile}
 {AppData}
