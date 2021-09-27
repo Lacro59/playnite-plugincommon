@@ -162,7 +162,7 @@ namespace CommonPluginsShared
                     {
                         foreach (var pluginName in disabledPlugins)
                         {
-                            output.Add(pluginName);
+                            output.Add(pluginName.ToString());
                         }
                     }
                     return output;
