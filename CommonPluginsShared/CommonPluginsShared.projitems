@@ -57,7 +57,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\TraceInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteExtended\PluginExtended.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteTools.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TaskHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransformIcon.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web.cs" />

@@ -21,7 +21,6 @@
     <Compile Include="Localization.cs" />
     <Compile Include="Models\TraceInfos.cs" />
     <Compile Include="PlayniteTools.cs" />
-    <Compile Include="TaskHelper.cs" />
     <Compile Include="Tools.cs" />
     <Compile Include="TransformIcon.cs" />
     <Compile Include="Web.cs" />
