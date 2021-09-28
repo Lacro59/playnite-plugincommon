@@ -20,24 +20,35 @@
                       ScrubbingEnabled="True" Stretch="Uniform" 
                       MediaOpened="PART_Video_MediaOpened" pbeh:MediaElementBehaviors.Repeat="True" />
 
-        <StackPanel Name="PART_Controls" 
-                    Grid.Row="2" HorizontalAlignment="Center" Orientation="Horizontal" VerticalAlignment="Bottom">
+        <Grid Name="PART_Controls" Grid.Row="2" VerticalAlignment="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            
             <!-- Play button. -->
-            <Button FontFamily="{DynamicResource FontIcoFont}" Content="&#xec74;" Click="OnMouseDownPlayMedia" Margin="5" />
+            <Button Grid.Column="0" FontFamily="{DynamicResource FontIcoFont}" Content="&#xec74;" Click="OnMouseDownPlayMedia" Margin="5" />
 
             <!-- Pause button. -->
-            <Button FontFamily="{DynamicResource FontIcoFont}" Content="&#xec72;" Click="OnMouseDownPauseMedia" Margin="5" />
+            <Button Grid.Column="1" FontFamily="{DynamicResource FontIcoFont}" Content="&#xec72;" Click="OnMouseDownPauseMedia" Margin="5" />
 
             <!-- Seek to slider. Ths slider allows you to jump to different parts of the media playback. -->
-            <Slider Name="timelineSlider" Margin="50,5,5,5" Width="350" VerticalAlignment="Center"
-                    Thumb.DragStarted="TimelineSlider_DragStarted" Thumb.DragCompleted="TimelineSlider_DragCompleted" />
-            <Label Name="lblStatus" Content="00:00:00 / 00:00:00" Margin="5" VerticalAlignment="Center" />
+            <Grid Name="PART_timelineSlider" Margin="50,5,5,5" Grid.Column="2">
+                <Slider Name="timelineSlider" VerticalAlignment="Center"
+                        Width="{Binding ElementName=PART_timelineSlider, Path=ActualWidth}"
+                        Thumb.DragStarted="TimelineSlider_DragStarted" Thumb.DragCompleted="TimelineSlider_DragCompleted" />
+            </Grid>
+            <Label Grid.Column="3" Name="lblStatus" Content="00:00:00 / 00:00:00" Margin="5" VerticalAlignment="Center" />
 
             <!-- Volume slider. This slider allows a Volume range between 0 and 1. -->
-            <Label FontFamily="{DynamicResource FontIcoFont}" Content="&#xec94;" FontSize="24"  VerticalAlignment="Center" Margin="50,5,5,5" />
-            <Slider Name="volumeSlider" VerticalAlignment="Center" ValueChanged="ChangeMediaVolume" 
+            <Label Grid.Column="4" FontFamily="{DynamicResource FontIcoFont}" Content="&#xec94;" FontSize="24"  VerticalAlignment="Center" Margin="50,5,5,5" />
+            <Slider Grid.Column="5" Name="volumeSlider" VerticalAlignment="Center" ValueChanged="ChangeMediaVolume" 
                     Minimum="0" Maximum="1" Value="0.5" Width="70" Margin="5" />
 
-        </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>
