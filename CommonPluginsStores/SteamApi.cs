@@ -100,8 +100,9 @@ namespace CommonPluginsStores
 
                     foreach (SteamApps Game in SteamAppsList)
                     {
-                        string NameSteam = CommonPluginsShared.PlayniteTools.NormalizeGameName(Game.Name);
-                        string NameSearch = CommonPluginsShared.PlayniteTools.NormalizeGameName(Name);
+                        //TODO: Decide if editions should be removed here
+                        string NameSteam = CommonPluginsShared.PlayniteTools.NormalizeGameName(Game.Name, true);
+                        string NameSearch = CommonPluginsShared.PlayniteTools.NormalizeGameName(Name, true);
 
                         if (NameSteam == NameSearch)
                         {
