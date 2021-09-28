@@ -35,11 +35,7 @@ namespace System
             {
                 return string.Empty;
             }
-
-            var newName = name;
-            newName = Regex.Replace(newName, @"^the\s+", "", RegexOptions.IgnoreCase);
-            newName = Regex.Replace(newName, @"^a\s+", "", RegexOptions.IgnoreCase);
-            newName = Regex.Replace(newName, @"^an\s+", "", RegexOptions.IgnoreCase);
+            string newName = Regex.Replace(name, @"^(the|an?)\s+", "", RegexOptions.IgnoreCase);
             return newName;
         }
 
@@ -190,7 +186,7 @@ namespace System
         }
 
         // Courtesy of https://stackoverflow.com/questions/6275980/string-replace-ignoring-case
-        public static string Replace(this string str, string oldValue, string @newValue, StringComparison comparisonType)
+        public static string Replace(this string str, string oldValue, string newValue, StringComparison comparisonType)
         {
             // Check inputs.
             if (str == null)
@@ -219,7 +215,7 @@ namespace System
             StringBuilder resultStringBuilder = new StringBuilder(str.Length);
 
             // Analyze the replacement: replace or remove.
-            bool isReplacementNullOrEmpty = string.IsNullOrEmpty(@newValue);
+            bool isReplacementNullOrEmpty = string.IsNullOrEmpty(newValue);
 
             // Replace all values.
             const int valueNotFound = -1;
@@ -238,7 +234,7 @@ namespace System
                 // Process the replacement.
                 if (!isReplacementNullOrEmpty)
                 {
-                    resultStringBuilder.Append(@newValue);
+                    resultStringBuilder.Append(newValue);
                 }
 
                 // Prepare start index for the next search.

@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading.Tasks;
 using CommonPlayniteShared.Manifests;
 using CommonPluginsPlaynite.Common;
+using System.Text.RegularExpressions;
+using CommonPluginsShared.Extensions;
 
 namespace CommonPluginsShared
 {
@@ -288,37 +290,34 @@ namespace CommonPluginsShared
             return string.Empty;
         }
 
+        private static Regex NonWordCharactersAndTrimmableWhitespace = new Regex(@"(?<start>^[\W_]+)|(?<end>[\W_]+$)|(?<middle>[\W_]+)", RegexOptions.Compiled);
+        private static Regex EditionInGameName = new Regex(@"\b(goty|game of the year|standard|deluxe|definitive|ultimate|platinum|gold|extended|complete|special|anniversary|enhanced)( edition)?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
         /// <summary>
-        /// 
+        /// Remove all non-letter and non-number characters from a string, remove diacritics, make lowercase. For use when comparing game titles.
         /// </summary>
         /// <param name="name"></param>
+        /// <param name="removeEditions">Remove "game of the year", "complete edition" and the like from the string too</param>
         /// <returns></returns>
-        public static string NormalizeGameName(string name)
+        public static string NormalizeGameName(string name, bool removeEditions = false)
         {
             if (string.IsNullOrEmpty(name))
-            {
                 return string.Empty;
-            }
 
-            var newName = name.ToLower();
-            newName = newName.RemoveTrademarks();
-            newName = newName.Replace(">", "");
-            newName = newName.Replace("<", "");
-            newName = newName.Replace("_", "");
-            newName = newName.Replace(".", "");
-            newName = newName.Replace('’', '\'');
-            newName = newName.Replace(":", "");
-            newName = newName.Replace("-", "");
+            string newName = name;
+            if (removeEditions)
+                newName = EditionInGameName.Replace(newName, string.Empty);
 
-            newName = newName.Replace("standard edition", "");
-            newName = newName.Replace("deluxe edition", "");
-            newName = newName.Replace("gold edition", "");
-            newName = newName.Replace("goty", "");
-            newName = newName.Replace("game of the year edition", "");
+            MatchEvaluator matchEvaluator = (Match match) =>
+            {
+                if (match.Groups["middle"].Success) //if the match group is the last one in the regex (non-word characters, including whitespace, in the middle of a string)
+                    return " "; //replace (multiple) non-word character(s) in the middle of the string with a space
+                else
+                    return string.Empty; //remove non-word characters (including white space) at the start and end of the string
+            };
+            newName = NonWordCharactersAndTrimmableWhitespace.Replace(newName, matchEvaluator).RemoveDiacritics();
 
-            newName = newName.Replace("  ", " ");
-
-            return newName.Trim();
+            return newName.ToLowerInvariant();
         }
         #endregion
 
