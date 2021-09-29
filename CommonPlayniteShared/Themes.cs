@@ -12,7 +12,7 @@ using CommonPluginsPlaynite.Extensions.Markup;
 using CommonPluginsPlaynite.Common;
 using Playnite.SDK;
 using YamlDotNet.Serialization;
-using CommonPluginsPlaynite.API;
+//using CommonPluginsPlaynite.API;
 using CommonPlayniteShared.Manifests;
 using System.Windows.Input;
 
