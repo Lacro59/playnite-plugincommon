@@ -97,7 +97,7 @@ namespace CommonPluginsShared
                 return false;
             }
 
-            return (bool)(ListEmulators.Find(x => x.Id == PlayAction?.EmulatorId)?.BuiltInConfigId?.Contains("rpcs3"));
+            return ListEmulators.Find(x => x.Id == PlayAction?.EmulatorId)?.BuiltInConfigId?.Contains("rpcs3") ?? false;
         }
         #endregion
 
