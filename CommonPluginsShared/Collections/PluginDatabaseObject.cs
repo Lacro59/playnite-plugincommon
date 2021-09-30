@@ -373,6 +373,12 @@ namespace CommonPluginsShared.Collections
         {
             try
             {
+                if (itemToAdd == null)
+                {
+                    logger.Warn("itemToAdd is null in Add()");
+                    return;
+                }
+
                 itemToAdd.IsSaved = true;
                 Application.Current.Dispatcher?.Invoke(() => Database.Add(itemToAdd), DispatcherPriority.Send);
 
@@ -406,6 +412,12 @@ namespace CommonPluginsShared.Collections
         {
             try
             {
+                if (itemToUpdate == null)
+                {
+                    logger.Warn("itemToAdd is null in Update()");
+                    return;
+                }
+
                 itemToUpdate.IsSaved = true;
                 Database.Items.TryUpdate(itemToUpdate.Id, itemToUpdate, Get(itemToUpdate.Id, true));
                 Application.Current.Dispatcher?.Invoke(() => Database.Update(itemToUpdate), DispatcherPriority.Send);
@@ -438,6 +450,12 @@ namespace CommonPluginsShared.Collections
 
         public virtual void AddOrUpdate(TItem item)
         {
+            if (item == null)
+            {
+                logger.Warn("item is null in AddOrUpdate()");
+                return;
+            }
+
             var itemCached = GetOnlyCache(item.Id);
 
             if (itemCached == null)
