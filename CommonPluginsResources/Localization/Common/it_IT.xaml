@@ -6,6 +6,7 @@
     <sys:String x:Key="LOCCommonOnlyMissing">Scarica solo i dati mancanti</sys:String>
     
     <sys:String x:Key="LOCCommonTotal">Totale</sys:String>
+    <sys:String x:Key="LOCCommonCut">Taglia</sys:String>
 
 
     <sys:String x:Key="LOCCommon0to1">da 0 a 1 ora</sys:String>
@@ -23,6 +24,10 @@
     <sys:String x:Key="LOCCommon100plus">100 ore e più</sys:String>
 
     <sys:String x:Key="LOCCommonDefaultSorting">Ordinamento predefinito della lista giochi</sys:String>
+
+    <sys:String x:Key="LOCCommonChartHideOptions">Nascondi le opzioni del grafico sul controllo</sys:String>
+    <sys:String x:Key="LOCCommonChartAllPeriod">Mostra tutti i dati sul grafico per impostazione predefinita</sys:String>
+    <sys:String x:Key="LOCCommonChartCutPeriod">Visualizza solo i dati con valore predefinito</sys:String>
 
 
     <!-- login -->

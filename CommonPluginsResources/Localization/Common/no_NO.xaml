@@ -6,6 +6,7 @@
     <sys:String x:Key="LOCCommonOnlyMissing">Only download missing</sys:String>
     
     <sys:String x:Key="LOCCommonTotal">Total</sys:String>
+    <sys:String x:Key="LOCCommonCut">Cut</sys:String>
 
 
     <sys:String x:Key="LOCCommon0to1">0 til 1 time</sys:String>
@@ -23,6 +24,10 @@
     <sys:String x:Key="LOCCommon100plus">100 hours and more</sys:String>
 
     <sys:String x:Key="LOCCommonDefaultSorting">Default game list sorting</sys:String>
+
+    <sys:String x:Key="LOCCommonChartHideOptions">Hide chart options on control</sys:String>
+    <sys:String x:Key="LOCCommonChartAllPeriod">Display all data on chart by default</sys:String>
+    <sys:String x:Key="LOCCommonChartCutPeriod">Display only data with value by default</sys:String>
 
 
     <!-- login -->
