@@ -227,7 +227,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
 
         private string RefreshToken()
         {
-            logger.Debug("Trying to refresh PSN token.");
+            //logger.Debug("Trying to refresh PSN token.");
             if (File.Exists(tokenPath))
             {
                 File.Delete(tokenPath);
