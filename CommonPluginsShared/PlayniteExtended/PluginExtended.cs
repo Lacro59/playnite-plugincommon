@@ -47,21 +47,42 @@ namespace CommonPluginsShared.PlayniteExtended
             NewDirectory = Path.Combine(this.GetPluginUserDataPath(), "GameActivity");
             if (Directory.Exists(OldDirectory))
             {
-                Directory.Move(OldDirectory, NewDirectory);
+                if (Directory.Exists(NewDirectory))
+                {
+                    logger.Warn($"{NewDirectory} already exists");
+                }
+                else
+                {
+                    Directory.Move(OldDirectory, NewDirectory);
+                }
             }
 
             OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "Achievements");
             NewDirectory = Path.Combine(this.GetPluginUserDataPath(), "SuccessStory");
             if (Directory.Exists(OldDirectory))
             {
-                Directory.Move(OldDirectory, NewDirectory);
+                if (Directory.Exists(NewDirectory))
+                {
+                    logger.Warn($"{NewDirectory} already exists");
+                }
+                else
+                {
+                    Directory.Move(OldDirectory, NewDirectory);
+                }
             }
 
             OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "Requierements");
             NewDirectory = Path.Combine(this.GetPluginUserDataPath(), "SystemChecker");
             if (Directory.Exists(OldDirectory))
             {
-                Directory.Move(OldDirectory, NewDirectory);
+                if (Directory.Exists(NewDirectory))
+                {
+                    logger.Warn($"{NewDirectory} already exists");
+                }
+                else
+                {
+                    Directory.Move(OldDirectory, NewDirectory);
+                }
             }
         }
 
