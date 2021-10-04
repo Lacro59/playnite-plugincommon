@@ -67,7 +67,7 @@ namespace CommonPluginsShared
         /// <returns></returns>
         public static bool IsGameEmulated(IPlayniteAPI PlayniteApi, Game game)
         {
-            if (game.GameActions == null)
+            if (game?.GameActions == null)
             {
                 return false;
             }
@@ -84,21 +84,29 @@ namespace CommonPluginsShared
         /// <returns></returns>
         public static bool GameUseRpcs3(IPlayniteAPI PlayniteApi, Game game)
         {
-            if (game.GameActions == null)
+            if (game?.GameActions == null)
+            {
                 return false;
+            }
 
             List<Emulator> ListEmulators = GetListEmulators(PlayniteApi);
             foreach (var action in game.GameActions)
             {
                 if (action == null || !action.IsPlayAction || action.EmulatorId == Guid.Empty)
+                {
                     continue;
+                }
 
                 var emulator = ListEmulators.FirstOrDefault(e => e.Id == action.EmulatorId);
-                if (emulator == null)
+                if (emulator == null || emulator.BuiltInConfigId.IsNullOrEmpty())
+                {
                     continue;
+                }
 
                 if (emulator.BuiltInConfigId == "rpcs3")
+                {
                     return true;
+                }
             }
             return false;
         }
