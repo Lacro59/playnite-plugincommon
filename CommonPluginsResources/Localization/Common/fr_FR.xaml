@@ -6,7 +6,7 @@
     <sys:String x:Key="LOCCommonOnlyMissing">Télécharger uniquement manquant</sys:String>
     
     <sys:String x:Key="LOCCommonTotal">Total</sys:String>
-    <sys:String x:Key="LOCCommonCut">Cut</sys:String>
+    <sys:String x:Key="LOCCommonCut">Tronquer</sys:String>
 
 
     <sys:String x:Key="LOCCommon0to1">0 à 1 heure</sys:String>
