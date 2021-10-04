@@ -123,7 +123,8 @@ namespace CommonPluginsShared
                 ManagementObjectSearcher myOperativeSystemObject = new ManagementObjectSearcher("select * from Win32_OperatingSystem");
                 foreach (ManagementObject obj in myOperativeSystemObject.Get())
                 {
-                    Os = (string)obj["Caption"];
+                    Os = obj["Caption"] != null ? obj["Caption"].ToString() : string.Empty;
+                    Common.LogDebug(true, $"Os: {Os}");
                 }
             }
             catch (Exception ex)
@@ -137,8 +138,13 @@ namespace CommonPluginsShared
                 ManagementObjectSearcher myProcessorObject = new ManagementObjectSearcher("select * from Win32_Processor");
                 foreach (ManagementObject obj in myProcessorObject.Get())
                 {
-                    Cpu = (string)obj["Name"];
-                    CpuMaxClockSpeed = (uint)obj["MaxClockSpeed"];
+                    Cpu = obj["Name"] != null ? obj["Name"].ToString() : string.Empty;
+                    Common.LogDebug(true, $"Cpu: {Cpu}");
+
+                    if (obj["MaxClockSpeed"] != null)
+                    {
+                        uint.TryParse(obj["MaxClockSpeed"].ToString(), out CpuMaxClockSpeed);
+                    }
                 }
             }
             catch (Exception ex)
@@ -152,32 +158,29 @@ namespace CommonPluginsShared
                 ManagementObjectSearcher myVideoObject = new ManagementObjectSearcher("select * from Win32_VideoController");
                 foreach (ManagementObject obj in myVideoObject.Get())
                 {
-                    string GpuNameTemp = (string)obj["Name"];
+                    string GpuNameTemp = obj["Name"].ToString();
+                    Common.LogDebug(true, $"Gpu: {GpuNameTemp}");
 
-                    Common.LogDebug(true, $"GpuName: {GpuNameTemp}");
+                    if (CallIsNvidia(GpuNameTemp) || CallIsAmd(GpuNameTemp) || CallIsIntel(GpuNameTemp))
+                    {
+                        GpuName = obj["Name"] != null ? obj["Name"].ToString() : string.Empty;
 
-                    if (CallIsNvidia(GpuNameTemp))
-                    {
-                        GpuName = (string)obj["Name"];
-                        GpuRam = (long)Convert.ToDouble(obj["AdapterRAM"]);
-                        CurrentHorizontalResolution = (uint)obj["CurrentHorizontalResolution"];
-                        CurrentVerticalResolution = (uint)obj["CurrentVerticalResolution"];
+                        if (obj["AdapterRAM"] != null)
+                        {
+                            long.TryParse(obj["AdapterRAM"].ToString(), out GpuRam);
+                        }
+
+                        if (obj["CurrentHorizontalResolution"] != null)
+                        {
+                            uint.TryParse(obj["CurrentHorizontalResolution"].ToString(), out CurrentHorizontalResolution);
+                        }
+
+                        if (obj["CurrentVerticalResolution"] != null)
+                        {
+                            uint.TryParse(obj["CurrentVerticalResolution"].ToString(), out CurrentHorizontalResolution);
+                        }
+
                         break;
-                    }
-                    if (CallIsAmd(GpuNameTemp))
-                    {
-                        GpuName = (string)obj["Name"];
-                        GpuRam = (long)Convert.ToDouble(obj["AdapterRAM"]);
-                        CurrentHorizontalResolution = (uint)obj["CurrentHorizontalResolution"];
-                        CurrentVerticalResolution = (uint)obj["CurrentVerticalResolution"];
-                        break;
-                    }
-                    if (CallIsIntel(GpuNameTemp))
-                    {
-                        GpuName = (string)obj["Name"];
-                        GpuRam = (long)Convert.ToDouble(obj["AdapterRAM"]);
-                        CurrentHorizontalResolution = (uint)obj["CurrentHorizontalResolution"];
-                        CurrentVerticalResolution = (uint)obj["CurrentVerticalResolution"];
                     }
                 }
             }
@@ -192,7 +195,14 @@ namespace CommonPluginsShared
                 ManagementObjectSearcher myComputerSystemObject = new ManagementObjectSearcher("select * from Win32_ComputerSystem");
                 foreach (ManagementObject obj in myComputerSystemObject.Get())
                 {
-                    double TempRam = Math.Ceiling(Convert.ToDouble(obj["TotalPhysicalMemory"]) / 1024 / 1024 / 1024);
+                    double TempRam = 0;
+
+                    if (obj["TotalPhysicalMemory"] != null)
+                    {
+                        double.TryParse(obj["TotalPhysicalMemory"].ToString(), out TempRam);
+                    }
+
+                    TempRam = Math.Ceiling(TempRam / 1024 / 1024 / 1024);
                     Ram = (long)(TempRam * 1024 * 1024 * 1024);
                 }
             }
