@@ -67,6 +67,13 @@ namespace CommonPluginsShared
         };
 
 
+        public static ExternalPlugin GetPluginType(Guid PluginId)
+        {
+            PluginsById.TryGetValue(PluginId, out ExternalPlugin PluginSource);
+            return PluginSource;
+        }
+
+
         #region Emulators
         /// <summary>
         /// Get configured emulators list
@@ -333,11 +340,56 @@ namespace CommonPluginsShared
             return string.Empty;
         }
 
-        public static ExternalPlugin GetPluginType(Guid PluginId)
+        public static string GetSourceBySourceIdOrPlatformId(IPlayniteAPI PlayniteApi, Guid SourceId, List<Guid> PlatformsIds)
         {
-            PluginsById.TryGetValue(PluginId, out ExternalPlugin PluginSource);
-            return PluginSource;
+            string SourceName = "Playnite";
+
+            if (SourceId != Guid.Parse("00000000-0000-0000-0000-000000000000"))
+            {
+                try
+                {
+                    var Source = PlayniteApi.Database.Sources.Get(SourceId);
+
+                    if (Source == null)
+                    {
+                        logger.Warn($"SourceName not find for {SourceId.ToString()}");
+                        return "Playnite";
+                    }
+
+                    return Source.Name;
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"SourceId: {SourceId.ToString()}");
+                    return "Playnite";
+                }
+            }
+
+            foreach (Guid PlatformID in PlatformsIds)
+            {
+                if (PlatformID != Guid.Parse("00000000-0000-0000-0000-000000000000"))
+                {
+                    var platform = PlayniteApi.Database.Platforms.Get(PlatformID);
+
+                    if (platform != null)
+                    {
+                        switch (platform.Name.ToLower())
+                        {
+                            case "pc":
+                            case "pc (windows)":
+                            case "pc (mac)":
+                            case "pc (linux)":
+                                return "Playnite";
+                            default:
+                                return platform.Name;
+                        }
+                    }
+                }
+            }
+
+            return SourceName;
         }
+
 
         /// <summary>
         /// Get platform icon if defined
