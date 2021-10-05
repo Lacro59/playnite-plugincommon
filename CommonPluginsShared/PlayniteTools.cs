@@ -27,7 +27,7 @@ namespace CommonPluginsShared
         }
 
 
-        private enum ExternalPlugin
+        public enum ExternalPlugin
         {
             None,
             BattleNetLibrary,
@@ -333,6 +333,11 @@ namespace CommonPluginsShared
             return string.Empty;
         }
 
+        public static ExternalPlugin GetPluginType(Guid PluginId)
+        {
+            PluginsById.TryGetValue(PluginId, out ExternalPlugin PluginSource);
+            return PluginSource;
+        }
 
         /// <summary>
         /// Get platform icon if defined
