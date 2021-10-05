@@ -27,6 +27,46 @@ namespace CommonPluginsShared
         }
 
 
+        private enum ExternalPlugin
+        {
+            None,
+            BattleNetLibrary,
+            GogLibrary,
+            OriginLibrary,
+            PSNLibrary,
+            SteamLibrary,
+            XboxLibrary,
+            IndiegalaLibrary,
+            AmazonGamesLibrary,
+            BethesdaLibrary,
+            EpicLibrary,
+            HumbleLibrary,
+            ItchioLibrary,
+            RockstarLibrary,
+            TwitchLibrary,
+            UplayLibrary
+        }
+
+        private static readonly Dictionary<Guid, ExternalPlugin> PluginsById = new Dictionary<Guid, ExternalPlugin>
+        {
+            { new Guid("e3c26a3d-d695-4cb7-a769-5ff7612c7edd"), ExternalPlugin.BattleNetLibrary },
+            { new Guid("aebe8b7c-6dc3-4a66-af31-e7375c6b5e9e"), ExternalPlugin.GogLibrary },
+            { new Guid("85dd7072-2f20-4e76-a007-41035e390724"), ExternalPlugin.OriginLibrary },
+            { new Guid("e4ac81cb-1b1a-4ec9-8639-9a9633989a71"), ExternalPlugin.PSNLibrary },
+            { new Guid("cb91dfc9-b977-43bf-8e70-55f46e410fab"), ExternalPlugin.SteamLibrary },
+            { new Guid("7e4fbb5e-2ae3-48d4-8ba0-6b30e7a4e287"), ExternalPlugin.XboxLibrary },
+            { new Guid("f7da6eb0-17d7-497c-92fd-347050914954"), ExternalPlugin.IndiegalaLibrary },
+            { new Guid("402674cd-4af6-4886-b6ec-0e695bfa0688"), ExternalPlugin.AmazonGamesLibrary },
+            { new Guid("0E2E793E-E0DD-4447-835C-C44A1FD506EC"), ExternalPlugin.BethesdaLibrary },
+            { new Guid("00000002-DBD1-46C6-B5D0-B1BA559D10E4"), ExternalPlugin.EpicLibrary },
+            { new Guid("96e8c4bc-ec5c-4c8b-87e7-18ee5a690626"), ExternalPlugin.HumbleLibrary },
+            { new Guid("00000001-EBB2-4EEC-ABCB-7C89937A42BB"), ExternalPlugin.ItchioLibrary },
+            { new Guid("88409022-088a-4de8-805a-fdbac291f00a"), ExternalPlugin.RockstarLibrary },
+            { new Guid("E2A7D494-C138-489D-BB3F-1D786BEEB675"), ExternalPlugin.TwitchLibrary },
+            { new Guid("C2F038E5-8B92-4877-91F1-DA9094155FC5"), ExternalPlugin.UplayLibrary }
+        };
+
+
         #region Emulators
         /// <summary>
         /// Get configured emulators list
@@ -219,39 +259,11 @@ namespace CommonPluginsShared
         /// <returns></returns>
         public static string GetSourceName(IPlayniteAPI PlayniteApi, Game game)
         {
-            BuiltinExtension PluginSource = Playnite.SDK.BuiltinExtensions.GetExtensionFromId(game.PluginId);
-            switch (PluginSource)
+            string SourceName = GetSourceByPluginId(game.PluginId);
+            if (!SourceName.IsNullOrEmpty())
             {
-                case BuiltinExtension.AmazonGamesLibrary:
-                    return "Amazon Games";
-                case BuiltinExtension.BattleNetLibrary:
-                    return "Battle.NET";
-                case BuiltinExtension.BethesdaLibrary:
-                    return "Bethesda";
-                case BuiltinExtension.EpicLibrary:
-                    return "Epic";
-                case BuiltinExtension.GogLibrary:
-                    return "GOG";
-                case BuiltinExtension.HumbleLibrary:
-                    return "Humble";
-                case BuiltinExtension.ItchioLibrary:
-                    return "itch.io";
-                case BuiltinExtension.OriginLibrary:
-                    return "Origin";
-                case BuiltinExtension.SteamLibrary:
-                    return "Steam";
-                case BuiltinExtension.TwitchLibrary:
-                    return "Twitch";
-                case BuiltinExtension.UplayLibrary:
-                    return "Ubisoft Connect";
-                case BuiltinExtension.XboxLibrary:
-                    return "Xbox";
-                case BuiltinExtension.PSNLibrary:
-                    return "Playstation";
+                return SourceName;
             }
-
-
-            string SourceName = string.Empty;
 
             try
             {
@@ -284,6 +296,43 @@ namespace CommonPluginsShared
 
             return SourceName;
         }
+
+        public static string GetSourceByPluginId(Guid PluginId)
+        {
+            PluginsById.TryGetValue(PluginId, out ExternalPlugin PluginSource);
+            switch (PluginSource)
+            {
+                case ExternalPlugin.AmazonGamesLibrary:
+                    return "Amazon Games";
+                case ExternalPlugin.BattleNetLibrary:
+                    return "Battle.NET";
+                case ExternalPlugin.BethesdaLibrary:
+                    return "Bethesda";
+                case ExternalPlugin.EpicLibrary:
+                    return "Epic";
+                case ExternalPlugin.GogLibrary:
+                    return "GOG";
+                case ExternalPlugin.HumbleLibrary:
+                    return "Humble";
+                case ExternalPlugin.ItchioLibrary:
+                    return "itch.io";
+                case ExternalPlugin.OriginLibrary:
+                    return "Origin";
+                case ExternalPlugin.SteamLibrary:
+                    return "Steam";
+                case ExternalPlugin.TwitchLibrary:
+                    return "Twitch";
+                case ExternalPlugin.UplayLibrary:
+                    return "Ubisoft Connect";
+                case ExternalPlugin.XboxLibrary:
+                    return "Xbox";
+                case ExternalPlugin.PSNLibrary:
+                    return "Playstation";
+            }
+
+            return string.Empty;
+        }
+
 
         /// <summary>
         /// Get platform icon if defined
