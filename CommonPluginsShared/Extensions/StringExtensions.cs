@@ -23,5 +23,10 @@ namespace CommonPluginsShared.Extensions
             return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
 
+
+        public static string RemoveWhiteSpace(this string text)
+        {
+            return Regex.Replace(text, @"s", "");
+        }
     }
 }
