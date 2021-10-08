@@ -28,6 +28,10 @@
     <sys:String x:Key="LOCCommonChartHideOptions">Hide chart options on control</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">Display all data on chart by default</sys:String>
     <sys:String x:Key="LOCCommonChartCutPeriod">Display only data with value by default</sys:String>
+    
+    <sys:String x:Key="LOCCommonExportData">Export data</sys:String>
+    <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} data has been exported.
+Do you want to open the directory?</sys:String>
 
 
     <!-- login -->
