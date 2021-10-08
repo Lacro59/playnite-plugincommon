@@ -59,6 +59,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\BattleNetLibrary\Models\BattleNetApiStatus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Models\Order.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Models\UserHome.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\PSNLibrary\Models\PSNModels.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\PSNLibrary\PSNAccountClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Settings\PlaynitePaths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Settings\PlayniteSettings.cs" />

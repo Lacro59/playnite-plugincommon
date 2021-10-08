@@ -451,7 +451,50 @@ namespace CommonPluginsShared
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false, $"Error on Post {url}");
+                    Common.LogError(ex, false, $"Error on Get {url}");
+                }
+            }
+
+            return response;
+        }
+        
+        public static async Task<string> DownloadStringData(string url, CookieContainer Cookies = null, string UserAgent = "")
+        {
+            var response = string.Empty;
+
+            HttpClientHandler handler = new HttpClientHandler();
+            if (Cookies.Count > 0)
+            {
+                handler.CookieContainer = Cookies;
+            }
+
+            using (var client = new HttpClient(handler))
+            {
+                if (UserAgent.IsNullOrEmpty())
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                }
+                else
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+                }
+
+                HttpResponseMessage result;
+                try
+                {
+                    result = await client.GetAsync(url).ConfigureAwait(false);
+                    if (result.IsSuccessStatusCode)
+                    {
+                        response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        logger.Error($"Web error with status code {result.StatusCode.ToString()}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Error on Get {url}");
                 }
             }
 
@@ -465,11 +508,16 @@ namespace CommonPluginsShared
         /// <param name="token"></param>
         /// <param name="UrlBefore"></param>
         /// <returns></returns>
-        public static async Task<string> DownloadStringData(string UrlAchievements, string token, string UrlBefore = "")
+        public static async Task<string> DownloadStringData(string UrlAchievements, string token, string UrlBefore = "", string LangHeader = "")
         {
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+
+                if (!LangHeader.IsNullOrEmpty())
+                {
+                    client.DefaultRequestHeaders.Add("Accept-Language", LangHeader);
+                }
 
                 if (!UrlBefore.IsNullOrEmpty())
                 {
