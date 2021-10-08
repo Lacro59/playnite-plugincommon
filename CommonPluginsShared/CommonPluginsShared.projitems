@@ -43,6 +43,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\TwoBooleanToVisibilityConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\VisibilityZeroConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CumulsErrors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\ListExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Folder.cs" />
