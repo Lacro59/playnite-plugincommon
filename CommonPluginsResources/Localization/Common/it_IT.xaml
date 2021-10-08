@@ -28,6 +28,8 @@
     <sys:String x:Key="LOCCommonChartHideOptions">Nascondi le opzioni del grafico sul controllo</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">Mostra tutti i dati sul grafico per impostazione predefinita</sys:String>
     <sys:String x:Key="LOCCommonChartCutPeriod">Visualizza solo i dati con valore predefinito</sys:String>
+    
+    <sys:String x:Key="LOCCommonExportData">Esporta dati</sys:String>
 
 
     <!-- login -->
