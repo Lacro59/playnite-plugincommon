@@ -29,7 +29,9 @@
     <sys:String x:Key="LOCCommonChartAllPeriod">Mostrar todos os dados no gráfico por padrão</sys:String>
     <sys:String x:Key="LOCCommonChartCutPeriod">Exibir apenas dados com valor por padrão</sys:String>
     
-    <sys:String x:Key="LOCCommonExportData">Export data</sys:String>
+    <sys:String x:Key="LOCCommonExportData">Exportar dados</sys:String>
+    <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} dados foram exportados.
+Você quer abrir o diretório?</sys:String>
 
 
     <!-- login -->
