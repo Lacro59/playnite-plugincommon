@@ -30,6 +30,8 @@
     <sys:String x:Key="LOCCommonChartCutPeriod">Visualizza solo i dati con valore predefinito</sys:String>
     
     <sys:String x:Key="LOCCommonExportData">Esporta dati</sys:String>
+    <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} dati sono stati esportati.
+Vuoi aprire la cartella?</sys:String>
 
 
     <!-- login -->
