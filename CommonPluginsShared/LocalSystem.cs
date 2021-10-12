@@ -50,14 +50,26 @@ namespace CommonPluginsShared
 
         private bool CallIsNvidia(string GpuName)
         {
+            if (GpuName.IsNullOrEmpty())
+            {
+                return false;
+            }
             return (GpuName.ToLower().IndexOf("nvidia") > -1 || GpuName.ToLower().IndexOf("geforce") > -1 || GpuName.ToLower().IndexOf("gtx") > -1 || GpuName.ToLower().IndexOf("rtx") > -1);
         }
         private bool CallIsAmd(string GpuName)
         {
+            if (GpuName.IsNullOrEmpty())
+            {
+                return false;
+            }
             return (GpuName.ToLower().IndexOf("amd") > -1 || GpuName.ToLower().IndexOf("radeon") > -1 || GpuName.ToLower().IndexOf("ati ") > -1);
         }
         private bool CallIsIntel(string GpuName)
         {
+            if (GpuName.IsNullOrEmpty())
+            {
+                return false;
+            }
             return GpuName.ToLower().IndexOf("intel") > -1;
         }
 
@@ -123,7 +135,7 @@ namespace CommonPluginsShared
                 ManagementObjectSearcher myOperativeSystemObject = new ManagementObjectSearcher("select * from Win32_OperatingSystem");
                 foreach (ManagementObject obj in myOperativeSystemObject.Get())
                 {
-                    Os = obj["Caption"] != null ? obj["Caption"].ToString() : string.Empty;
+                    Os = obj["Name"]?.ToString();
                     Common.LogDebug(true, $"Os: {Os}");
                 }
             }
@@ -138,7 +150,7 @@ namespace CommonPluginsShared
                 ManagementObjectSearcher myProcessorObject = new ManagementObjectSearcher("select * from Win32_Processor");
                 foreach (ManagementObject obj in myProcessorObject.Get())
                 {
-                    Cpu = obj["Name"] != null ? obj["Name"].ToString() : string.Empty;
+                    Cpu = obj["Name"]?.ToString();
                     Common.LogDebug(true, $"Cpu: {Cpu}");
 
                     if (obj["MaxClockSpeed"] != null)
@@ -158,13 +170,11 @@ namespace CommonPluginsShared
                 ManagementObjectSearcher myVideoObject = new ManagementObjectSearcher("select * from Win32_VideoController");
                 foreach (ManagementObject obj in myVideoObject.Get())
                 {
-                    string GpuNameTemp = obj["Name"].ToString();
-                    Common.LogDebug(true, $"Gpu: {GpuNameTemp}");
+                    GpuName = obj["Name"]?.ToString();
+                    Common.LogDebug(true, $"Gpu: {GpuName}");
 
-                    if (CallIsNvidia(GpuNameTemp) || CallIsAmd(GpuNameTemp) || CallIsIntel(GpuNameTemp))
-                    {
-                        GpuName = obj["Name"] != null ? obj["Name"].ToString() : string.Empty;
-
+                    if (CallIsNvidia(GpuName) || CallIsAmd(GpuName) || CallIsIntel(GpuName))
+                    { 
                         if (obj["AdapterRAM"] != null)
                         {
                             long.TryParse(obj["AdapterRAM"].ToString(), out GpuRam);
@@ -213,11 +223,11 @@ namespace CommonPluginsShared
             #endregion
 
 
-            systemConfiguration.Name = Name.Trim();
-            systemConfiguration.Os = Os.Trim();
-            systemConfiguration.Cpu = Cpu.Trim();
+            systemConfiguration.Name = Name?.Trim();
+            systemConfiguration.Os = Os?.Trim();
+            systemConfiguration.Cpu = Cpu?.Trim();
             systemConfiguration.CpuMaxClockSpeed = CpuMaxClockSpeed;
-            systemConfiguration.GpuName = GpuName.Trim();
+            systemConfiguration.GpuName = GpuName?.Trim();
             systemConfiguration.GpuRam = GpuRam;
             systemConfiguration.CurrentHorizontalResolution = CurrentHorizontalResolution;
             systemConfiguration.CurrentVerticalResolution = CurrentVerticalResolution;
