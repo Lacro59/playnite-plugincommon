@@ -30,8 +30,8 @@
     <sys:String x:Key="LOCCommonChartCutPeriod">Par défaut, ne montrer que les données avec des valeurs</sys:String>
     
     <sys:String x:Key="LOCCommonExportData">Exporter les données</sys:String>
-    <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} data has been exported.
-Do you want to open the directory?</sys:String>
+    <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} données ont été exportées.
+Voulez-vous ouvrir le répertoire ?</sys:String>
 
 
     <!-- login -->
