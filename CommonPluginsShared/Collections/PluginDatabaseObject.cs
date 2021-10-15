@@ -885,6 +885,38 @@ namespace CommonPluginsShared.Collections
         #endregion
 
 
+        public void ClearCache()
+        {
+            string PathDirectory = Path.Combine(PlaynitePaths.DataCachePath, PluginName);
+
+            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
+                $"{PluginName} - {resources.GetString("LOCCommonProcessing")}",
+                false
+            );
+            globalProgressOptions.IsIndeterminate = true;
+
+            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            {
+                try
+                {
+                    if (Directory.Exists(PathDirectory))
+                    {
+                        Thread.Sleep(2000);
+                        Directory.Delete(PathDirectory, true);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false);
+                    PlayniteApi.Dialogs.ShowErrorMessage(
+                        string.Format(resources.GetString("LOCCommonErrorDeleteCache"), PathDirectory),
+                        PluginName
+                    );
+                }
+            }, globalProgressOptions);
+        }
+
+
         public abstract void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e);
 
         public virtual void SetThemesResources(Game game)

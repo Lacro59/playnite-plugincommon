@@ -183,11 +183,6 @@ namespace CommonPluginsShared
                 {
                     return PathImageFileName;
                 }
-                // TODO If used, must be changed
-                if (File.Exists(PathImageFileName + ".png"))
-                {
-                    return PathImageFileName + ".png";
-                }
             }
             catch (Exception ex)
             {

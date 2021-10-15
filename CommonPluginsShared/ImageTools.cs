@@ -114,15 +114,34 @@ namespace CommonPluginsShared
             }
         }
 
+
+        public static bool Resize(string srcPath, int width, int height, string path)
+        {
+            try
+            {
+                Image image = Image.FromFile(srcPath);
+                Bitmap resultImage = Resize(image, width, height);
+                resultImage.Save(path);
+
+                image.Dispose();
+                resultImage.Dispose();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                return false;
+            }
+        }
+
         public static bool Resize(Stream imgStream, int width, int height, string path)
         {
             try
             {
-                Common.LogDebug(true, $"Resize: {path}.png");
-
                 Image image = Image.FromStream(imgStream);
                 Bitmap resultImage = Resize(image, width, height);
-                resultImage.Save(path + ".png");
+                resultImage.Save(path);
 
                 image.Dispose();
                 resultImage.Dispose();
@@ -135,6 +154,7 @@ namespace CommonPluginsShared
                 return false;
             }
         }
+
 
         public static Bitmap Resize(Image image, int width, int height)
         {

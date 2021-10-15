@@ -1,4 +1,5 @@
-﻿using Playnite.SDK;
+﻿using CommonPlayniteShared;
+using Playnite.SDK;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -49,35 +50,28 @@ namespace CommonPluginsShared
         {
             string PathImageFileName = Path.Combine(ImagesCachePath, PluginName.ToLower(), ImageFileName);
 
-            if (!url.ToLower().Contains("http"))
+            if (!StringExtensions.IsHttpUrl(url))
             {
                 return false;
             }
 
             using (var client = new HttpClient())
             {               
-                Stream imageStream;
                 try
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
-                    HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
-
-                    if (response.StatusCode != HttpStatusCode.OK)
+                    var cachedFile = HttpFileCache.GetWebFile(url);
+                    if (string.IsNullOrEmpty(cachedFile))
                     {
+                        logger.Warn("Web file not found: " + url);
                         return false;
                     }
 
-                    imageStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                    ImageTools.Resize(cachedFile, 64, 64, PathImageFileName);
                 }
                 catch (Exception ex)
                 {
                     Common.LogError(ex, false, $"Error on download {url}");
                     return false;
-                }
-
-                if (imageStream != null)
-                {
-                    ImageTools.Resize(imageStream, 64, 64, PathImageFileName);
                 }
             }
 
