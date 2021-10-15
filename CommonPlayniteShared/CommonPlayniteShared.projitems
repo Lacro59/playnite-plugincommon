@@ -61,6 +61,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Models\UserHome.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\PSNLibrary\Models\PSNModels.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\PSNLibrary\PSNAccountClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\XboxLibrary\XboxAccountClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Settings\PlaynitePaths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Settings\PlayniteSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Models\WebStoreModels.cs" />
