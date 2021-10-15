@@ -504,11 +504,11 @@ namespace CommonPluginsShared
         /// <summary>
         /// Download string data with a bearer token.
         /// </summary>
-        /// <param name="UrlAchievements"></param>
+        /// <param name="url"></param>
         /// <param name="token"></param>
         /// <param name="UrlBefore"></param>
         /// <returns></returns>
-        public static async Task<string> DownloadStringData(string UrlAchievements, string token, string UrlBefore = "", string LangHeader = "")
+        public static async Task<string> DownloadStringData(string url, string token, string UrlBefore = "", string LangHeader = "")
         {
             using (var client = new HttpClient())
             {
@@ -525,21 +525,21 @@ namespace CommonPluginsShared
                 }
 
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-                string result = await client.GetStringAsync(UrlAchievements).ConfigureAwait(false);
+                string result = await client.GetStringAsync(url).ConfigureAwait(false);
 
                 return result;
             }
         }
 
 
-        public static async Task<string> DownloadStringDataJson(string Url)
+        public static async Task<string> DownloadStringDataJson(string url)
         {
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
                 client.DefaultRequestHeaders.Add("Accept", "*/*");
 
-                string result = await client.GetStringAsync(Url).ConfigureAwait(false);
+                string result = await client.GetStringAsync(url).ConfigureAwait(false);
                 return result;
             }
         }

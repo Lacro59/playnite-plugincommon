@@ -350,7 +350,6 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
             return titles;
         }
 
-
         //public async Task<List<TrophyTitlesWithIdsMobile.TrophyTitleWithIdsMobile>> GetTrohpiesWithIdsMobile(string[] titleIdsArray)
         //{
         //    await CheckAuthentication();
