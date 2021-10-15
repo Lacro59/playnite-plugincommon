@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommonPluginsPlaynite.PluginLibrary.OriginLibrary.Models
+namespace CommonPlayniteShared.PluginLibrary.OriginLibrary.Models
 {
     public class AuthTokenResponse
     {

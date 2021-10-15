@@ -1,4 +1,6 @@
-﻿using CommonPluginsPlaynite.Common;
+﻿//using PhotoSauce.MagicScaler;
+using CommonPlayniteShared;//using Playnite;
+using CommonPlayniteShared.Common;//using Playnite.Common;
 using Playnite.SDK;
 using System;
 using System.Collections.Generic;
@@ -7,6 +9,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
@@ -18,9 +21,14 @@ namespace System.Drawing.Imaging
 {
     public class BitmapLoadProperties : IEquatable<BitmapLoadProperties>
     {
+        public ImageLoadScaling Scaling { get; set; } = ImageLoadScaling.BitmapDotNet;
         public DpiScale? DpiScale { get; set; }
         public int MaxDecodePixelWidth { get; set; } = 0;
         public int MaxDecodePixelHeight { get; set; } = 0;
+        public int DpiAwareMaxDecodePixelWidth =>
+            DpiScale == null ? MaxDecodePixelWidth : (int)Math.Round(MaxDecodePixelWidth * DpiScale.Value.DpiScaleX);
+        public int DpiAwareMaxDecodePixelHeight =>
+            DpiScale == null ? MaxDecodePixelHeight : (int)Math.Round(MaxDecodePixelHeight * DpiScale.Value.DpiScaleY);
         public string Source { get; set; }
 
         public BitmapLoadProperties(int decodePixelWidth, int decodePixelHeight)
@@ -29,11 +37,14 @@ namespace System.Drawing.Imaging
             MaxDecodePixelHeight = decodePixelHeight;
         }
 
-        public BitmapLoadProperties(int decodePixelWidth, int decodePixelHeight, DpiScale? dpiScale)
+        public BitmapLoadProperties(int decodePixelWidth, int decodePixelHeight, DpiScale? dpiScale) : this(decodePixelWidth, decodePixelHeight)
         {
-            MaxDecodePixelWidth = decodePixelWidth;
-            MaxDecodePixelHeight = decodePixelHeight;
             DpiScale = dpiScale;
+        }
+
+        public BitmapLoadProperties(int decodePixelWidth, int decodePixelHeight, DpiScale? dpiScale, ImageLoadScaling scaling) : this(decodePixelWidth, decodePixelHeight, dpiScale)
+        {
+            Scaling = scaling;
         }
 
         public bool Equals(BitmapLoadProperties other)
@@ -59,6 +70,11 @@ namespace System.Drawing.Imaging
             }
 
             if (!string.Equals(Source, other.Source, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            if (Scaling != other.Scaling)
             {
                 return false;
             }
@@ -92,7 +108,7 @@ namespace System.Drawing.Imaging
 
         public override string ToString()
         {
-            return $"{MaxDecodePixelWidth}x{MaxDecodePixelHeight};{DpiScale?.DpiScaleX}x{DpiScale?.DpiScaleY};{Source}";
+            return $"{MaxDecodePixelWidth}x{MaxDecodePixelHeight};{DpiScale?.DpiScaleX}x{DpiScale?.DpiScaleY};{Source};{Scaling}";
         }
     }
 
@@ -128,7 +144,7 @@ namespace System.Drawing.Imaging
 
         public static BitmapImage GetClone(this BitmapImage image, BitmapLoadProperties loadProperties = null)
         {
-            var encoder = new PngBitmapEncoder();
+            var encoder = new BmpBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create(image));
             using (var stream = new MemoryStream())
             {
@@ -164,54 +180,94 @@ namespace System.Drawing.Imaging
             }
         }
 
+        // TODO: Modify scaling to scale by both axies.
+        // This will currently work properly only if load properties force only width or height, not both.
         public static BitmapImage BitmapFromStream(Stream stream, BitmapLoadProperties loadProperties = null)
         {
             try
             {
+                stream.Seek(0, SeekOrigin.Begin);
                 var properties = Images.GetImageProperties(stream);
                 var aspect = new AspectRatio(properties.Width, properties.Height);
                 stream.Seek(0, SeekOrigin.Begin);
                 var bitmap = new BitmapImage();
                 bitmap.BeginInit();
+                MemoryStream tempStream = null;
+                var shouldRescale = false;
 
-                if (loadProperties?.MaxDecodePixelWidth > 0 && properties?.Width > loadProperties?.MaxDecodePixelWidth)
+                if ((loadProperties?.MaxDecodePixelWidth > 0 && properties?.Width > loadProperties?.MaxDecodePixelWidth) ||
+                    (loadProperties?.MaxDecodePixelHeight > 0 && properties?.Height > loadProperties?.MaxDecodePixelHeight))
                 {
-                    if (loadProperties.DpiScale != null)
-                    {
-                        bitmap.DecodePixelWidth = (int)Math.Round(loadProperties.MaxDecodePixelWidth * loadProperties.DpiScale.Value.DpiScaleX);
-                    }
-                    else
-                    {
-                        bitmap.DecodePixelWidth = loadProperties.MaxDecodePixelWidth;
-                    }
+                    shouldRescale = true;
                 }
 
-                if (loadProperties?.MaxDecodePixelHeight > 0 && properties?.Height > loadProperties?.MaxDecodePixelHeight)
+                if (loadProperties?.Scaling == ImageLoadScaling.None)
                 {
-                    if (loadProperties.DpiScale != null)
-                    {
-                        bitmap.DecodePixelHeight = Convert.ToInt32(loadProperties.MaxDecodePixelHeight * loadProperties.DpiScale.Value.DpiScaleY);
-                    }
-                    else
-                    {
-                        bitmap.DecodePixelHeight = loadProperties.MaxDecodePixelHeight;
-                    }
+                    shouldRescale = false;
                 }
 
-                if (bitmap.DecodePixelHeight != 0 && bitmap.DecodePixelWidth == 0)
+                if (shouldRescale)
                 {
-                    bitmap.DecodePixelWidth = (int)Math.Round(aspect.GetWidth(bitmap.DecodePixelHeight));
-                }
-                else if (bitmap.DecodePixelWidth != 0 && bitmap.DecodePixelHeight == 0)
-                {
-                    bitmap.DecodePixelHeight = (int)Math.Round(aspect.GetHeight(bitmap.DecodePixelWidth));
+                    if (loadProperties?.Scaling == ImageLoadScaling.BitmapDotNet)
+                    {
+                        if (loadProperties?.MaxDecodePixelWidth > 0 && properties?.Width > loadProperties?.MaxDecodePixelWidth)
+                        {
+                            bitmap.DecodePixelWidth = loadProperties.DpiAwareMaxDecodePixelWidth;
+                        }
+
+                        if (loadProperties?.MaxDecodePixelHeight > 0 && properties?.Height > loadProperties?.MaxDecodePixelHeight)
+                        {
+                            bitmap.DecodePixelHeight = loadProperties.DpiAwareMaxDecodePixelHeight;
+                        }
+
+                        if (bitmap.DecodePixelHeight != 0 && bitmap.DecodePixelWidth == 0)
+                        {
+                            bitmap.DecodePixelWidth = (int)Math.Round(aspect.GetWidth(bitmap.DecodePixelHeight));
+                        }
+                        else if (bitmap.DecodePixelWidth != 0 && bitmap.DecodePixelHeight == 0)
+                        {
+                            bitmap.DecodePixelHeight = (int)Math.Round(aspect.GetHeight(bitmap.DecodePixelWidth));
+                        }
+                    }
+                    //else if (loadProperties?.Scaling == ImageLoadScaling.Custom)
+                    //{
+                    //    var settings = new ProcessImageSettings
+                    //    {
+                    //        SaveFormat = FileFormat.Bmp,
+                    //        Sharpen = false
+                    //    };
+                    //
+                    //    if (loadProperties.MaxDecodePixelWidth > 0 && properties?.Width > loadProperties?.MaxDecodePixelWidth)
+                    //    {
+                    //        settings.Width = loadProperties.DpiAwareMaxDecodePixelWidth;
+                    //    }
+                    //
+                    //    if (loadProperties.MaxDecodePixelHeight > 0 && properties?.Height > loadProperties?.MaxDecodePixelHeight)
+                    //    {
+                    //        settings.Height = loadProperties.DpiAwareMaxDecodePixelHeight;
+                    //    }
+                    //
+                    //    tempStream = new MemoryStream();
+                    //    // MagicImage can't run on UI thread.
+                    //    if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
+                    //    {
+                    //        Task.Run(() => MagicImageProcessor.ProcessImage(stream, tempStream, settings)).Wait();
+                    //    }
+                    //    else
+                    //    {
+                    //        MagicImageProcessor.ProcessImage(stream, tempStream, settings);
+                    //    }
+                    //
+                    //    tempStream.Seek(0, SeekOrigin.Begin);
+                    //}
                 }
 
-                bitmap.StreamSource = stream;
+                bitmap.StreamSource = tempStream ?? stream;
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
                 bitmap.CreateOptions = BitmapCreateOptions.IgnoreColorProfile;
                 bitmap.EndInit();
                 bitmap.Freeze();
+                tempStream?.Dispose();
                 return bitmap;
             }
             catch (Exception e)
@@ -223,7 +279,15 @@ namespace System.Drawing.Imaging
 
         public static long GetSizeInMemory(this BitmapImage image)
         {
-            return Convert.ToInt64(image.PixelHeight * image.PixelWidth * 4);
+            try
+            {
+                return Convert.ToInt64(image.PixelHeight * image.PixelWidth * 4);
+            }
+            catch (Exception e) //when (!PlayniteEnvironment.ThrowAllErrors)
+            {
+                logger.Error(e, "Failed to get image size from bitmap.");
+                return 0;
+            }
         }
 
         public static BitmapImage TgaToBitmap(TGA tga)

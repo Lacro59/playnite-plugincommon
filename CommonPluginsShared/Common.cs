@@ -1,5 +1,5 @@
 ﻿using Playnite.SDK;
-using CommonPluginsPlaynite.Common;
+using CommonPlayniteShared.Common;
 using System;
 using System.Linq;
 using System.Collections.Generic;

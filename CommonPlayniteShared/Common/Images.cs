@@ -9,7 +9,7 @@ using System.Windows.Media;
 using System.IO;
 using Playnite.SDK;
 
-namespace CommonPluginsPlaynite.Common
+namespace CommonPlayniteShared.Common
 {
     public class ImageProperties
     {

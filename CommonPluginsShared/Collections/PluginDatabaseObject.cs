@@ -1,7 +1,7 @@
 ﻿using Playnite.SDK;
 using Playnite.SDK.Models;
 using CommonPluginsShared.Models;
-using CommonPluginsPlaynite.Database;
+using CommonPlayniteShared.Database;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -19,10 +19,10 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Windows.Automation;
 using CommonPluginsControls.Controls;
-using CommonPluginsPlaynite.Common;
+using CommonPlayniteShared.Common;
 using CommonPluginsShared.Interfaces;
 using Playnite.SDK.Plugins;
-using CommonPluginsPlaynite;
+using CommonPlayniteShared;
 
 namespace CommonPluginsShared.Collections
 {

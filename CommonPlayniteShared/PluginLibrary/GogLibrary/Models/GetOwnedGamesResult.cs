@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommonPluginsPlaynite.PluginLibrary.GogLibrary.Models
+namespace CommonPlayniteShared.PluginLibrary.GogLibrary.Models
 {
     public class GetOwnedGamesResult
     {

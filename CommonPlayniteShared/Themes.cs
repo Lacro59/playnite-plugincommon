@@ -8,15 +8,15 @@ using Playnite;
 using System.Windows;
 using System.Windows.Markup;
 using System.Text.RegularExpressions;
-using CommonPluginsPlaynite.Extensions.Markup;
-using CommonPluginsPlaynite.Common;
+using CommonPlayniteShared.Extensions.Markup;
+using CommonPlayniteShared.Common;
 using Playnite.SDK;
 using YamlDotNet.Serialization;
-//using CommonPluginsPlaynite.API;
+//using CommonPlayniteShared.API;
 using CommonPlayniteShared.Manifests;
 using System.Windows.Input;
 
-namespace CommonPluginsPlaynite
+namespace CommonPlayniteShared
 {
     public class ThemeManager
     {

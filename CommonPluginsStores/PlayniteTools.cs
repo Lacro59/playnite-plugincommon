@@ -1,7 +1,7 @@
 ﻿using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
-using CommonPluginsPlaynite;
+using CommonPlayniteShared;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommonPlayniteShared.Manifests;
-using CommonPluginsPlaynite.Common;
+using CommonPlayniteShared.Common;
 
 namespace CommonPluginsStores
 {

@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
 
-namespace CommonPluginsPlaynite.Converters
+namespace CommonPlayniteShared.Converters
 {
     public class StringNullOrEmptyToVisibilityConverter : MarkupExtension, IValueConverter
     {

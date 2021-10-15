@@ -1,12 +1,14 @@
-﻿using CommonPluginsPlaynite;
-using CommonPluginsPlaynite.Common;
-using CommonPluginsPlaynite.Common.Web;
+﻿using CommonPlayniteShared.Common;//using Playnite.Common;
+using CommonPlayniteShared.Common.Web;//using Playnite.Common.Web;
 using Playnite.SDK;
+using CommonPlayniteShared;//using Playnite.Settings;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace CommonPlayniteShared
 {
@@ -37,7 +39,7 @@ namespace CommonPlayniteShared
             {
                 if (File.Exists(cacheFile) && (new FileInfo(cacheFile)).Length != 0)
                 {
-                    //logger.Debug($"Returning {url} from file cache {cacheFile}.");
+                    logger.Debug($"Returning {url} from file cache {cacheFile}.");
                     return cacheFile;
                 }
                 else
@@ -82,7 +84,7 @@ namespace CommonPlayniteShared
                 var cacheFile = Path.Combine(CacheDirectory, GetFileNameFromUrl(url));
                 if (File.Exists(cacheFile))
                 {
-                    //logger.Debug($"Removing {url} from file cache: {cacheFile}");
+                    logger.Debug($"Removing {url} from file cache: {cacheFile}");
                     try
                     {
                         FileSystem.DeleteFileSafe(cacheFile);

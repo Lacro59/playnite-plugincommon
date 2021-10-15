@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace CommonPluginsPlaynite.Common
+namespace CommonPlayniteShared.Common
 {
     public class AspectRatioTypeConverter : TypeConverter
     {

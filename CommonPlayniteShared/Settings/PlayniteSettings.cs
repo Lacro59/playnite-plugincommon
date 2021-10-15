@@ -1,7 +1,17 @@
 ﻿using System.IO;
 
-namespace CommonPluginsPlaynite
+namespace CommonPlayniteShared
 {
+    public enum ImageLoadScaling
+    {
+        //[Description(LOC.SettingsImageScalingQuality)]
+        None,
+        //[Description(LOC.SettingsImageScalingBalanced)]
+        BitmapDotNet,
+        //[Description(LOC.SettingsImageScalingAlternative)]
+        Custom
+    }
+
     public class PlayniteSettings
     {
         public static bool IsPortable

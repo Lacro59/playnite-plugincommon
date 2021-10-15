@@ -1,7 +1,7 @@
 ﻿using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
-using CommonPluginsPlaynite.Common;
+using CommonPlayniteShared.Common;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommonPluginsPlaynite.Database
+namespace CommonPlayniteShared.Database
 {
     public class ItemCollection<TItem> : IItemCollection<TItem> where TItem : DatabaseObject
     {

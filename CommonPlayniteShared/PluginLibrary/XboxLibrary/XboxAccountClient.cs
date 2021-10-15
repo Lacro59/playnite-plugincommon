@@ -12,7 +12,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-using CommonPluginsPlaynite.PluginLibrary.XboxLibrary.Models;//using XboxLibrary.Models;
+using CommonPlayniteShared.PluginLibrary.XboxLibrary.Models;//using XboxLibrary.Models;
 
 namespace CommonPlayniteShared.PluginLibrary.XboxLibrary
 {

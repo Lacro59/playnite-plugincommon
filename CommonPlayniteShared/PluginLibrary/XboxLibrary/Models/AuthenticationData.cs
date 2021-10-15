@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommonPluginsPlaynite.PluginLibrary.XboxLibrary.Models
+namespace CommonPlayniteShared.PluginLibrary.XboxLibrary.Models
 {
     public class AuthenticationData
     {

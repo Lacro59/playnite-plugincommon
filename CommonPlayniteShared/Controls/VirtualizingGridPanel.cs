@@ -8,7 +8,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using Playnite;
 
-namespace CommonPluginsPlaynite.Controls
+namespace CommonPlayniteShared.Controls
 {
     public class VirtualizingGridPanel : VirtualizingPanel, IScrollInfo
     {

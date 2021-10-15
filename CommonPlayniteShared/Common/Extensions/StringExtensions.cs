@@ -16,16 +16,20 @@ namespace System
 
         public static string MD5(this string s)
         {
+            var builder = new StringBuilder();
+            foreach (byte b in MD5Bytes(s))
+            {
+                builder.Append(b.ToString("x2").ToLower());
+            }
+
+            return builder.ToString();
+        }
+
+        public static byte[] MD5Bytes(this string s)
+        {
             using (var provider = System.Security.Cryptography.MD5.Create())
             {
-                var builder = new StringBuilder();
-
-                foreach (byte b in provider.ComputeHash(Encoding.UTF8.GetBytes(s)))
-                {
-                    builder.Append(b.ToString("x2").ToLower());
-                }
-
-                return builder.ToString();
+                return provider.ComputeHash(Encoding.UTF8.GetBytes(s));
             }
         }
 
@@ -35,7 +39,11 @@ namespace System
             {
                 return string.Empty;
             }
-            string newName = Regex.Replace(name, @"^(the|an?)\s+", "", RegexOptions.IgnoreCase);
+
+            var newName = name;
+            newName = Regex.Replace(newName, @"^the\s+", "", RegexOptions.IgnoreCase);
+            newName = Regex.Replace(newName, @"^a\s+", "", RegexOptions.IgnoreCase);
+            newName = Regex.Replace(newName, @"^an\s+", "", RegexOptions.IgnoreCase);
             return newName;
         }
 
@@ -91,6 +99,17 @@ namespace System
             }
         }
 
+        private static string RemoveUnlessThatEmptiesTheString(string input, string pattern)
+        {
+            string output = Regex.Replace(input, pattern, string.Empty);
+
+            if (string.IsNullOrWhiteSpace(output))
+            {
+                return input;
+            }
+            return output;
+        }
+
         public static string NormalizeGameName(this string name)
         {
             if (string.IsNullOrEmpty(name))
@@ -102,10 +121,9 @@ namespace System
             newName = newName.RemoveTrademarks();
             newName = newName.Replace("_", " ");
             newName = newName.Replace(".", " ");
-            newName = RemoveTrademarks(newName);
             newName = newName.Replace('’', '\'');
-            newName = Regex.Replace(newName, @"\[.*?\]", "");
-            newName = Regex.Replace(newName, @"\(.*?\)", "");
+            newName = RemoveUnlessThatEmptiesTheString(newName, @"\[.*?\]");
+            newName = RemoveUnlessThatEmptiesTheString(newName, @"\(.*?\)");
             newName = Regex.Replace(newName, @"\s*:\s*", ": ");
             newName = Regex.Replace(newName, @"\s+", " ");
             if (Regex.IsMatch(newName, @",\s*The$"))
@@ -186,7 +204,7 @@ namespace System
         }
 
         // Courtesy of https://stackoverflow.com/questions/6275980/string-replace-ignoring-case
-        public static string Replace(this string str, string oldValue, string newValue, StringComparison comparisonType)
+        public static string Replace(this string str, string oldValue, string @newValue, StringComparison comparisonType)
         {
             // Check inputs.
             if (str == null)
@@ -215,7 +233,7 @@ namespace System
             StringBuilder resultStringBuilder = new StringBuilder(str.Length);
 
             // Analyze the replacement: replace or remove.
-            bool isReplacementNullOrEmpty = string.IsNullOrEmpty(newValue);
+            bool isReplacementNullOrEmpty = string.IsNullOrEmpty(@newValue);
 
             // Replace all values.
             const int valueNotFound = -1;
@@ -234,7 +252,7 @@ namespace System
                 // Process the replacement.
                 if (!isReplacementNullOrEmpty)
                 {
-                    resultStringBuilder.Append(newValue);
+                    resultStringBuilder.Append(@newValue);
                 }
 
                 // Prepare start index for the next search.

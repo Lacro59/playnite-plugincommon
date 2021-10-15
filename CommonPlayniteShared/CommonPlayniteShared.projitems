@@ -56,6 +56,15 @@
     <Compile Include="$(MSBuildThisFileDirectory)Localization\LocalizationKeys.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Manifests\ExtensionManifest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Manifests\ThemeManifest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Native\Fileapi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Native\Kernel32.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Native\Ntdll.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Native\Processthreadsapi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Native\Shlwapi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Native\Winbase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Native\Windef.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Native\Winnt.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Native\Winuser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\BattleNetLibrary\Models\BattleNetApiStatus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Models\Order.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Models\UserHome.cs" />

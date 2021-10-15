@@ -6,7 +6,7 @@
              xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
              xmlns:livechartscommon="clr-namespace:CommonPluginsControls.LiveChartsCommon"
              xmlns:commonpluginscontrols="clr-namespace:CommonPluginsControls.Controls"
-             xmlns:converters="clr-namespace:CommonPluginsPlaynite.Converters"
+             xmlns:converters="clr-namespace:CommonPlayniteShared.Converters"
              mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300" 
              d:DataContext="{d:DesignInstance Type=livechartscommon:CustomerToolTipForTime}">
 

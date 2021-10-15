@@ -1,4 +1,4 @@
-﻿using CommonPluginsPlaynite;
+﻿using CommonPlayniteShared;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;

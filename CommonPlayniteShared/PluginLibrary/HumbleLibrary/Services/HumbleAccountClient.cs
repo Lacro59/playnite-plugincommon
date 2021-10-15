@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CommonPluginsPlaynite.PluginLibrary.HumbleLibrary.Services
+namespace CommonPlayniteShared.PluginLibrary.HumbleLibrary.Services
 {
     public class HumbleAccountClient
     {

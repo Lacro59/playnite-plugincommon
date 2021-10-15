@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommonPluginsPlaynite
+namespace CommonPlayniteShared
 {
     public class PlaynitePaths
     {
@@ -41,18 +41,15 @@ namespace CommonPluginsPlaynite
         public static string ConfigFilePath => Path.Combine(ConfigRootPath, "config.json");
         public static string FullscreenConfigFilePath => Path.Combine(ConfigRootPath, "fullscreenConfig.json");
         public static string WindowPositionsPath => Path.Combine(ConfigRootPath, "windowPositions.json");
-        public static string ExclusionListConfigFilePath => Path.Combine(ConfigRootPath, "exclusionList.json");
-        public static string FilterPresetsFilePath => Path.Combine(ConfigRootPath, "filters.json");
         public static string BackupConfigFilePath => Path.Combine(ConfigRootPath, "Backup", "config.json");
         public static string BackupFullscreenConfigFilePath => Path.Combine(ConfigRootPath, "Backup", "fullscreenConfig.json");
         public static string BackupWindowPositionsPath => Path.Combine(ConfigRootPath, "Backup", "windowPositions.json");
-        public static string BackupExclusionListConfigFilePath => Path.Combine(ConfigRootPath, "Backup", "exclusionList.json");
-        public static string BackupFilterPresetsFilePath => Path.Combine(ConfigRootPath, "Backup", "filters.json");
         public static string DataCachePath => Path.Combine(ConfigRootPath, "cache");
         public static string ImagesCachePath => Path.Combine(DataCachePath, "images");
         public static string IconsCachePath => Path.Combine(DataCachePath, "icons");
         public static string UserProgramDataPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Playnite");
         public static string JitProfilesPath => Path.Combine(ConfigRootPath, "JITProfiles");
+        public static string EmulationDatabasePath => Path.Combine(ProgramPath, "Emulation", "Database");
         public static string ConfigRootPath
         {
             get

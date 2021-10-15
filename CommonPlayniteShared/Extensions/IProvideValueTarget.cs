@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Markup;
 
-namespace CommonPluginsPlaynite.Extensions
+namespace CommonPlayniteShared.Extensions
 {
     public static class IProvideValueTargetExtensions
     {

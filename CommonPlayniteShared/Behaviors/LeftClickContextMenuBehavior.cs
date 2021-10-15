@@ -10,7 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 
-namespace CommonPluginsPlaynite.Behaviors
+namespace CommonPlayniteShared.Behaviors
 {
     public class LeftClickContextMenuBehavior
     {

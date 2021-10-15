@@ -8,7 +8,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
 
-namespace CommonPluginsPlaynite.Converters
+namespace CommonPlayniteShared.Converters
 {
     [ValueConversion(typeof(bool), typeof(Visibility))]
     public class InvertedBooleanToVisibilityConverter : MarkupExtension, IValueConverter

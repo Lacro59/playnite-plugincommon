@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CommonPluginsControls.Controls"
              xmlns:controls="clr-namespace:akr.WPF.Controls;assembly=akr.WPF.Controls.ColorPicker"
-             xmlns:converters="clr-namespace:CommonPluginsPlaynite.Converters"
+             xmlns:converters="clr-namespace:CommonPlayniteShared.Converters"
              mc:Ignorable="d" Height="400" Width="450">
 
     <UserControl.Resources>

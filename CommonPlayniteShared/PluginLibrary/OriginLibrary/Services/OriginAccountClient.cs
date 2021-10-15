@@ -1,6 +1,6 @@
 ﻿using Playnite.SDK.Data;
 using Playnite.SDK;
-using CommonPluginsPlaynite.PluginLibrary.OriginLibrary.Models;
+using CommonPlayniteShared.PluginLibrary.OriginLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommonPluginsPlaynite.PluginLibrary.OriginLibrary.Services
+namespace CommonPlayniteShared.PluginLibrary.OriginLibrary.Services
 {
     public class OriginAccountClient
     {

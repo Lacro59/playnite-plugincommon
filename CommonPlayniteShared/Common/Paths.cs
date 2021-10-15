@@ -6,19 +6,20 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using CommonPlayniteShared.Native;//using Playnite.Native;
 
-namespace CommonPluginsPlaynite.Common
+namespace CommonPlayniteShared.Common
 {
     public class Paths
     {
         public static string GetFinalPathName(string path)
         {
-            var h = Interop.CreateFile(path,
-                Interop.FILE_READ_EA,
+            var h = Kernel32.CreateFile(path,
+                Winnt.FILE_READ_EA,
                 FileShare.ReadWrite | FileShare.Delete,
                 IntPtr.Zero,
                 FileMode.Open,
-                Interop.FILE_FLAG_BACKUP_SEMANTICS,
+                Fileapi.FILE_FLAG_BACKUP_SEMANTICS,
                 IntPtr.Zero);
 
             if (path.StartsWith(@"\\"))
@@ -26,7 +27,7 @@ namespace CommonPluginsPlaynite.Common
                 return path;
             }
 
-            if (h == Interop.INVALID_HANDLE_VALUE)
+            if (h == Winuser.INVALID_HANDLE_VALUE)
             {
                 throw new Win32Exception();
             }
@@ -34,7 +35,7 @@ namespace CommonPluginsPlaynite.Common
             try
             {
                 var sb = new StringBuilder(1024);
-                var res = Interop.GetFinalPathNameByHandle(h, sb, 1024, 0);
+                var res = Kernel32.GetFinalPathNameByHandle(h, sb, 1024, 0);
                 if (res == 0)
                 {
                     throw new Win32Exception();
@@ -52,7 +53,7 @@ namespace CommonPluginsPlaynite.Common
             }
             finally
             {
-                Interop.CloseHandle(h);
+                Kernel32.CloseHandle(h);
             }
         }
 
@@ -140,7 +141,7 @@ namespace CommonPluginsPlaynite.Common
             }
         }
 
-        public static string GetSafeFilename(string filename)
+        public static string GetSafePathName(string filename)
         {
             var path = string.Join(" ", filename.Split(Path.GetInvalidFileNameChars()));
             return Regex.Replace(path, @"\s+", " ").Trim();
@@ -148,13 +149,61 @@ namespace CommonPluginsPlaynite.Common
 
         public static bool IsFullPath(string path)
         {
-            try
-            {
-                return Path.GetFullPath(path) == path;
-            }
-            catch
+            if (string.IsNullOrWhiteSpace(path))
             {
                 return false;
+            }
+
+            // Don't use Path.IsPathRooted because it fails on paths starting with one backslash.
+            return Regex.IsMatch(path, @"^([a-zA-Z]:\\|\\\\)");
+        }
+
+        public static string GetCommonDirectory(string[] paths)
+        {
+            int k = paths[0].Length;
+            for (int i = 1; i < paths.Length; i++)
+            {
+                k = Math.Min(k, paths[i].Length);
+                for (int j = 0; j < k; j++)
+                {
+                    if (paths[i][j] != paths[0][j])
+                    {
+                        k = j;
+                        break;
+                    }
+                }
+            }
+
+            var common = paths[0].Substring(0, k);
+            if (common.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            if (common[common.Length - 1] == Path.DirectorySeparatorChar)
+            {
+                return common;
+            }
+            else
+            {
+                return common.Substring(0, common.LastIndexOf(Path.DirectorySeparatorChar) + 1);
+            }
+        }
+
+        public static bool MathcesFilePattern(string filePath, string pattern)
+        {
+            if (filePath.IsNullOrEmpty() || pattern.IsNullOrEmpty())
+            {
+                return false;
+            }
+
+            if (pattern.Contains(';'))
+            {
+                return Shlwapi.PathMatchSpecExW(filePath, pattern, MatchPatternFlags.Multiple) == 0;
+            }
+            else
+            {
+                return Shlwapi.PathMatchSpecExW(filePath, pattern, MatchPatternFlags.Normal) == 0;
             }
         }
     }

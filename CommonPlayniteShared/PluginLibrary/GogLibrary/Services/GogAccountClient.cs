@@ -1,15 +1,15 @@
 ﻿using Playnite.SDK;
 using Playnite.SDK.Data;
-using CommonPluginsPlaynite.Common.Web;
-using CommonPluginsPlaynite.PluginLibrary.GogLibrary;
-using CommonPluginsPlaynite.PluginLibrary.GogLibrary.Models;
+using CommonPlayniteShared.Common.Web;
+using CommonPlayniteShared.PluginLibrary.GogLibrary;
+using CommonPlayniteShared.PluginLibrary.GogLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace CommonPluginsPlaynite.PluginLibrary.Services.GogLibrary
+namespace CommonPlayniteShared.PluginLibrary.Services.GogLibrary
 {
     public class GogAccountClient
     {

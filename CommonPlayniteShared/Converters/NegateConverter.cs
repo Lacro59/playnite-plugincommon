@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Markup;
 
-namespace CommonPluginsPlaynite.Converters
+namespace CommonPlayniteShared.Converters
 {
     public class NegateConverter : MarkupExtension, IValueConverter
     {
