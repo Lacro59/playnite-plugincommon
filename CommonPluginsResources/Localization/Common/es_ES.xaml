@@ -33,6 +33,8 @@
     <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} datos han sido exportados.
 ¿Quieres abrir el directorio?</sys:String>
 
+    <sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">No se puede eliminar la carpeta de caché:
+{0}</sys:String>
 
     <!-- login -->
 
