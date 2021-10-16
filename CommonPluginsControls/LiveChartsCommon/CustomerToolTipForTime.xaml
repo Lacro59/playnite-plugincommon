@@ -6,13 +6,13 @@
              xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
              xmlns:livechartscommon="clr-namespace:CommonPluginsControls.LiveChartsCommon"
              xmlns:commonpluginscontrols="clr-namespace:CommonPluginsControls.Controls"
-             xmlns:converters="clr-namespace:CommonPlayniteShared.Converters"
+             xmlns:converters="clr-namespace:CommonPluginsShared.Converters"
              mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300" 
              d:DataContext="{d:DesignInstance Type=livechartscommon:CustomerToolTipForTime}">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <converters:PlayTimeToStringConverter x:Key="PlayTimeToStringConverter" />
+        <converters:PlayTimeToStringConverterWithZero x:Key="PlayTimeToStringConverterWithZero" />
         <wpf:SharedConverter x:Key="SharedConverter" />
         <wpf:SharedVisibilityConverter x:Key="SharedVisibilityConverter" />
     </UserControl.Resources>
@@ -57,7 +57,7 @@
                                                    Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Icon)}" />
 
                                         <TextBlock Grid.Column="2" FontSize="16" HorizontalAlignment="Right" Style="{DynamicResource BaseTextBlockStyle}"
-                                                   Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Values), Mode=OneWay, Converter={StaticResource PlayTimeToStringConverter}}" 
+                                                   Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Values), Mode=OneWay, Converter={StaticResource PlayTimeToStringConverterWithZero}}" 
                                                    VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
                                     </Grid>
                                 </DataTemplate>
