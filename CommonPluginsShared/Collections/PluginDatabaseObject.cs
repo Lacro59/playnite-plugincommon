@@ -23,6 +23,7 @@ using CommonPlayniteShared.Common;
 using CommonPluginsShared.Interfaces;
 using Playnite.SDK.Plugins;
 using CommonPlayniteShared;
+using Playnite.SDK.Data;
 
 namespace CommonPluginsShared.Collections
 {
@@ -188,6 +189,15 @@ namespace CommonPluginsShared.Collections
             return IsOk;
         }
 
+        public virtual void DeleteDataWithDeletedGame()
+        {
+            List<Guid> GameDeleted = Database.Items.Where(x => PlayniteApi.Database.Games.Get(x.Key) == null).Select(x => x.Key).ToList();
+            foreach(Guid guid in GameDeleted)
+            {
+                Database.Remove(guid);
+            }
+        }
+
 
         public virtual void GetSelectData()
         {
@@ -259,58 +269,6 @@ namespace CommonPluginsShared.Collections
         }
 
         [Obsolete("GetAllDatas() is deprecated, please use GetSelectData() instead.")]
-        public virtual void GetAllDatas()
-        {
-            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
-                $"{PluginName} - {resources.GetString("LOCCommonGettingAllDatas")}",
-                true
-            );
-            globalProgressOptions.IsIndeterminate = false;
-
-            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
-            {
-                try
-                {
-                    Stopwatch stopWatch = new Stopwatch();
-                    stopWatch.Start();
-
-                    var PlayniteDb = PlayniteApi.Database.Games.Where(x => x.Hidden == false);
-                    activateGlobalProgress.ProgressMaxValue = (double)PlayniteDb.Count();
-
-                    string CancelText = string.Empty;
-
-                    foreach (Game game in PlayniteDb)
-                    {
-                        if (activateGlobalProgress.CancelToken.IsCancellationRequested)
-                        {
-                            CancelText = " canceled";
-                            break;
-                        }
-
-                        Thread.Sleep(10);
-
-                        try
-                        {
-                            Get(game, false, true);
-                        }
-                        catch (Exception ex)
-                        {
-                            Common.LogError(ex, false);
-                        }
-
-                        activateGlobalProgress.CurrentProgressValue++;
-                    }
-
-                    stopWatch.Stop();
-                    TimeSpan ts = stopWatch.Elapsed;
-                    logger.Info($"Task GetAllDatas(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false);
-                }
-            }, globalProgressOptions);
-        }
 
 
         public virtual List<Game> GetGamesList()
