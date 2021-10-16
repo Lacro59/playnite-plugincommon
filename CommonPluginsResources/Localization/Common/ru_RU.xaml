@@ -29,10 +29,12 @@
     <sys:String x:Key="LOCCommonChartAllPeriod">Display all data on chart by default</sys:String>
     <sys:String x:Key="LOCCommonChartCutPeriod">Display only data with value by default</sys:String>
     
-    <sys:String x:Key="LOCCommonExportData">Export data</sys:String>
-    <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} data has been exported.
-Do you want to open the directory?</sys:String>
+    <sys:String x:Key="LOCCommonExportData">Экспорт данных</sys:String>
+    <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">Данные {0} были экспортированы.
+Хотите открыть каталог?</sys:String>
 
+    <sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Impossible to delete cache folder:
+{0}</sys:String>
 
     <!-- login -->
 
