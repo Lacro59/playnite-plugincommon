@@ -449,7 +449,7 @@ namespace CommonPluginsShared
             var theme = PlayniteApi.ApplicationSettings.DesktopTheme;
             if (theme != ThemeManager.DefaultTheme.Name)
             {
-                customTheme = ThemeManager.GetAvailableThemes(ApplicationMode.Desktop).SingleOrDefault(a => a.Id == theme);
+                customTheme = ThemeManager.GetAvailableThemes(ApplicationMode.Desktop).FirstOrDefault(a => a.Id == theme);
                 if (customTheme == null)
                 {
                     ThemeManager.SetCurrentTheme(defaultTheme);
