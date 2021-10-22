@@ -14,7 +14,7 @@ namespace CommonPlayniteShared.PluginLibrary.Services.GogLibrary
     public class GogAccountClient
     {
         private ILogger logger = LogManager.GetLogger();
-        private IWebView webView;
+        internal IWebView webView;//private IWebView webView;
 
         public GogAccountClient(IWebView webView)
         {
