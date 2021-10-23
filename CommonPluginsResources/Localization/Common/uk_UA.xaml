@@ -23,13 +23,13 @@
     <sys:String x:Key="LOCCommon90to100">Від 90 до 100 годин</sys:String>
     <sys:String x:Key="LOCCommon100plus">100 годин і більше</sys:String>
 
-    <sys:String x:Key="LOCCommonDefaultSorting">Типове сортування списку іго</sys:String>
+    <sys:String x:Key="LOCCommonDefaultSorting">Типове сортування списку ігор</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">Сховати параметри діаграми на елементі керування</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">Відображати усі дані на графіку за замовчуванням</sys:String>
     <sys:String x:Key="LOCCommonChartCutPeriod">Показувати тільки дані зі значенням за замовчуванням</sys:String>
     
-    <sys:String x:Key="LOCCommonExportData">Експортування дани</sys:String>
+    <sys:String x:Key="LOCCommonExportData">Експортування даних</sys:String>
     <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">Дані {0} було експортовано.
 Хочете відкрити каталог?</sys:String>
 
@@ -71,24 +71,24 @@
 
     <sys:String x:Key="LOCCommonIntegrationViewItemOptions">Переглянути параметри елемента</sys:String>
     
-    <sys:String x:Key="LOCCommonIntegrationListOptions">Параметри списк</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationListOptions">Параметри списку</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationChartOptions">Параметри графіка</sys:String>
     
-    <sys:String x:Key="LOCGameActivityIntegrationDescriptionOptions">Параметри інтеграції в опи</sys:String>
+    <sys:String x:Key="LOCGameActivityIntegrationDescriptionOptions">Параметри інтеграції в опис</sys:String>
     <sys:String x:Key="LOCCommonIntegrationShowTitle">Показувати заголовок</sys:String>
     <sys:String x:Key="LOCCommonIntegrationTopGameDetails">Показувати над описом гри</sys:String>
 
-    <sys:String x:Key="LOCCommonAddTagAuto">Автоматичне додавання тегів разом з додаванням дани</sys:String>
+    <sys:String x:Key="LOCCommonAddTagAuto">Автоматичне додавання тегів разом з додаванням даних</sys:String>
     
-    <sys:String x:Key="LOCCommonDatabase">База дани</sys:String>
+    <sys:String x:Key="LOCCommonDatabase">База даних</sys:String>
 
     <sys:String x:Key="LOCCommonControlsAvailable">Елементи доступні для підтримуваних тем</sys:String>
     <sys:String x:Key="LOCCommonControlsPluginButtonShow">Відображати кнопку плагін</sys:String>
     <sys:String x:Key="LOCCommonControlsPluginButtonShowInContextMenu">Відображати дані в контекстному меню</sys:String>
-    <sys:String x:Key="LOCCommonControlsPluginViewItemShow">Відображати дані в списку іго</sys:String>
+    <sys:String x:Key="LOCCommonControlsPluginViewItemShow">Відображати дані в списку ігор</sys:String>
 
-    <sys:String x:Key="LOCCommonControlsVisibleNoData">Відображати якщо немає дани</sys:String>
+    <sys:String x:Key="LOCCommonControlsVisibleNoData">Відображати якщо немає даних</sys:String>
 
     <!-- CommonMenus -->
 
@@ -99,13 +99,13 @@
     <sys:String x:Key="LOCCommonDeleteGameData">Видалити дані</sys:String>
 
     <sys:String x:Key="LOCCommonSelectGames">Виберіть ігри</sys:String>
-    <sys:String x:Key="LOCCommonAddAllTags">Додати тег до всіх іго</sys:String>
+    <sys:String x:Key="LOCCommonAddAllTags">Додати тег до всіх ігор</sys:String>
     <sys:String x:Key="LOCCommonAddTPlugin">Додати тег плагіну...</sys:String>
-    <sys:String x:Key="LOCCommonSelectData">Завантажити дані для вибраних іго</sys:String>
+    <sys:String x:Key="LOCCommonSelectData">Завантажити дані для вибраних ігор</sys:String>
     <sys:String x:Key="LOCCommonDownloadPluginData">Завантажити дані плагіну...</sys:String>
-    <sys:String x:Key="LOCCommonGetAllDatas">Завантажити дані для всіх іго</sys:String>
+    <sys:String x:Key="LOCCommonGetAllDatas">Завантажити дані для всіх ігор</sys:String>
     <sys:String x:Key="LOCCommonDeletePluginData">Видалити дані плагін</sys:String>
-    <sys:String x:Key="LOCCommonClearAllDatas">Видалити дані з усіх іго</sys:String>
+    <sys:String x:Key="LOCCommonClearAllDatas">Видалити дані з усіх ігор</sys:String>
     <sys:String x:Key="LOCCommonRemoveAllTags">Вилучити тег плагін</sys:String>
 
     <!-- CommonGlobalProgress -->
