@@ -175,6 +175,6 @@ Variabili di Windows che possono essere utilizzate per aggiungere una stringa di
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)</sys:String>
+{ProgramFiles(x86)}</sys:String>
 
 </ResourceDictionary>

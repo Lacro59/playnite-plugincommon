@@ -41,7 +41,7 @@
     <sys:String x:Key="LOCCommonAuthenticateLabel">Автентифікація</sys:String>
     <sys:String x:Key="LOCCommonNotLoggedIn">Необхідна автентифікація</sys:String>
     <sys:String x:Key="LOCCommonLoggedIn">Користувача автентифіковано</sys:String>
-    <sys:String x:Key="LOCCommonAccountName">Ім'я облікового запису</sys:String>
+    <sys:String x:Key="LOCCommonAccountName">Ім'я облікового запис</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Перевірка стану автентифікації…</sys:String>
 
     <!-- CommonMenus -->
@@ -62,7 +62,7 @@
     <sys:String x:Key="LOCCommonIntegrationButton">Відображати кнопку плагіну у деталях гри</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInDescription">Відображати інформацію плагіну у деталях гри</sys:String>
 
-    <sys:String x:Key="LOCCommonIntegrationSelectElements">Компоненти детального перегляду</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationSelectElements">Компоненти детального перегляд</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationButtonOptions">Параметри кнопки</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">Only show a icon</sys:String>
@@ -84,7 +84,7 @@
     <sys:String x:Key="LOCCommonDatabase">База даних</sys:String>
 
     <sys:String x:Key="LOCCommonControlsAvailable">Елементи доступні для підтримуваних тем</sys:String>
-    <sys:String x:Key="LOCCommonControlsPluginButtonShow">Відображати кнопку плагіну</sys:String>
+    <sys:String x:Key="LOCCommonControlsPluginButtonShow">Відображати кнопку плагін</sys:String>
     <sys:String x:Key="LOCCommonControlsPluginButtonShowInContextMenu">Відображати дані в контекстному меню</sys:String>
     <sys:String x:Key="LOCCommonControlsPluginViewItemShow">Відображати дані в списку ігор</sys:String>
 
@@ -92,7 +92,7 @@
 
     <!-- CommonMenus -->
 
-    <sys:String x:Key="LOCCommonViewNoData">Показати ігри без даних плагіну</sys:String>
+    <sys:String x:Key="LOCCommonViewNoData">Показати ігри без даних плагін</sys:String>
     
     <sys:String x:Key="LOCCommonRefreshGameData">Оновити дані</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">Оновити всі дані</sys:String>
@@ -104,9 +104,9 @@
     <sys:String x:Key="LOCCommonSelectData">Завантажити дані для вибраних ігор</sys:String>
     <sys:String x:Key="LOCCommonDownloadPluginData">Завантажити дані плагіну...</sys:String>
     <sys:String x:Key="LOCCommonGetAllDatas">Завантажити дані для всіх ігор</sys:String>
-    <sys:String x:Key="LOCCommonDeletePluginData">Видалити дані плагіну</sys:String>
+    <sys:String x:Key="LOCCommonDeletePluginData">Видалити дані плагін</sys:String>
     <sys:String x:Key="LOCCommonClearAllDatas">Видалити дані з усіх ігор</sys:String>
-    <sys:String x:Key="LOCCommonRemoveAllTags">Вилучити тег плагіну</sys:String>
+    <sys:String x:Key="LOCCommonRemoveAllTags">Вилучити тег плагін</sys:String>
 
     <!-- CommonGlobalProgress -->
 
