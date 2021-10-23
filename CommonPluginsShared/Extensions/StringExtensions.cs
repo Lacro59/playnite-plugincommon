@@ -28,5 +28,11 @@ namespace CommonPluginsShared.Extensions
         {
             return Regex.Replace(text, @"s", "");
         }
+
+
+        public static bool IsEqual(this string source, string text)
+        {
+            return source.ToLower() == text.ToLower();
+        }
     }
 }
