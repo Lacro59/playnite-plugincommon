@@ -66,6 +66,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Native\Winnt.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Native\Winuser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\BattleNetLibrary\Models\BattleNetApiStatus.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Models\ProductApiDetail.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Models\Order.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Models\UserHome.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\PSNLibrary\Models\PSNModels.cs" />

@@ -29,7 +29,7 @@
     <sys:String x:Key="LOCCommonChartAllPeriod">Display all data on chart by default</sys:String>
     <sys:String x:Key="LOCCommonChartCutPeriod">Display only data with value by default</sys:String>
     
-    <sys:String x:Key="LOCCommonExportData">Экспорт данных</sys:String>
+    <sys:String x:Key="LOCCommonExportData">Экспорт данны</sys:String>
     <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">Данные {0} были экспортированы.
 Хотите открыть каталог?</sys:String>
 
