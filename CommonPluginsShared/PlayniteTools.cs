@@ -136,25 +136,18 @@ namespace CommonPluginsShared
                 return false;
             }
 
-            List<Emulator> ListEmulators = GetListEmulators(PlayniteApi);
             foreach (var action in game.GameActions)
             {
-                if (action == null || !action.IsPlayAction || action.EmulatorId == Guid.Empty)
-                {
-                    continue;
-                }
+                var emulator = API.Instance.Database.Emulators.FirstOrDefault(e => e.Id == action.EmulatorId);
 
-                var emulator = ListEmulators.FirstOrDefault(e => e.Id == action.EmulatorId);
-                if (emulator == null || emulator.BuiltInConfigId.IsNullOrEmpty())
-                {
-                    continue;
-                }
-
-                if (emulator.BuiltInConfigId == "rpcs3")
+                if (emulator.BuiltInConfigId.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)
+                    || emulator.Name.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)
+                    || emulator.InstallDir.Contains("rpcs3", StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
             }
+
             return false;
         }
         #endregion
