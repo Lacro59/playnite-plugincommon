@@ -15,7 +15,7 @@ namespace CommonPluginsStores
 {
     public class PlayniteTools
     {
-        public static string StringExpandWithStores(IPlayniteAPI PlayniteAPI, Game game, string inputString, bool fixSeparators = false)
+        public static string StringExpandWithStores(Game game, string inputString, bool fixSeparators = false)
         {
             if (string.IsNullOrEmpty(inputString) || !inputString.Contains('{'))
             {
@@ -23,7 +23,7 @@ namespace CommonPluginsStores
             }
 
             string result = inputString;
-            result = CommonPluginsShared.PlayniteTools.StringExpandWithoutStore(PlayniteAPI, game, result, fixSeparators);
+            result = CommonPluginsShared.PlayniteTools.StringExpandWithoutStore(game, result, fixSeparators);
 
 
             // Steam

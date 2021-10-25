@@ -78,14 +78,13 @@ namespace CommonPluginsShared
         /// <summary>
         /// Get configured emulators list
         /// </summary>
-        /// <param name="PlayniteApi"></param>
         /// <returns></returns>
-        public static List<Emulator> GetListEmulators(IPlayniteAPI PlayniteApi)
+        public static List<Emulator> GetListEmulators()
         {
             if (ListEmulators == null)
             {
                 ListEmulators = new List<Emulator>();
-                foreach (Emulator item in PlayniteApi.Database.Emulators)
+                foreach (Emulator item in API.Instance.Database.Emulators)
                 {
                     ListEmulators.Add(item);
                 }
@@ -97,39 +96,36 @@ namespace CommonPluginsShared
         /// <summary>
         /// Check if the game used an emulator
         /// </summary>
-        /// <param name="PlayniteApi"></param>
         /// <param name="Id"></param>
         /// <returns></returns>
-        public static bool IsGameEmulated(IPlayniteAPI PlayniteApi, Guid Id)
+        public static bool IsGameEmulated(Guid Id)
         {
-            Game game = PlayniteApi.Database.Games.Get(Id);
-            return IsGameEmulated(PlayniteApi, game);
+            Game game = API.Instance.Database.Games.Get(Id);
+            return IsGameEmulated(game);
         }
 
         /// <summary>
         /// Check if the game used an emulator
         /// </summary>
-        /// <param name="PlayniteApi"></param>
         /// <param name="game"></param>
         /// <returns></returns>
-        public static bool IsGameEmulated(IPlayniteAPI PlayniteApi, Game game)
+        public static bool IsGameEmulated(Game game)
         {
             if (game?.GameActions == null)
             {
                 return false;
             }
 
-            List<Emulator> ListEmulators = GetListEmulators(PlayniteApi);
+            List<Emulator> ListEmulators = GetListEmulators();
             return game.GameActions.Where(x => x.IsPlayAction && ListEmulators.Any(y => y.Id == x?.EmulatorId)).Count() > 0;
         }
 
         /// <summary>
         /// Check if a game used RPCS3 emulator
         /// </summary>
-        /// <param name="PlayniteApi"></param>
         /// <param name="game"></param>
         /// <returns></returns>
-        public static bool GameUseRpcs3(IPlayniteAPI PlayniteApi, Game game)
+        public static bool GameUseRpcs3(Game game)
         {
             if (game?.GameActions == null)
             {
@@ -233,26 +229,24 @@ namespace CommonPluginsShared
         /// <summary>
         /// Get normalized source name
         /// </summary>
-        /// <param name="PlayniteApi"></param>
         /// <param name="Id"></param>
         /// <returns></returns>
-        public static string GetSourceName(IPlayniteAPI PlayniteApi, Guid Id)
+        public static string GetSourceName(Guid Id)
         {
-            Game game = PlayniteApi.Database.Games.Get(Id);
+            Game game = API.Instance.Database.Games.Get(Id);
             if (game == null)
             {
                 return "Playnite";
             }
-            return GetSourceName(PlayniteApi, game);
+            return GetSourceName(game);
         }
 
         /// <summary>
         /// Get normalized source name
         /// </summary>
-        /// <param name="PlayniteApi"></param>
         /// <param name="game"></param>
         /// <returns></returns>
-        public static string GetSourceName(IPlayniteAPI PlayniteApi, Game game)
+        public static string GetSourceName(Game game)
         {
             string SourceName = GetSourceByPluginId(game.PluginId);
             if (!SourceName.IsNullOrEmpty())
@@ -262,21 +256,21 @@ namespace CommonPluginsShared
 
             try
             {
-                if (IsGameEmulated(PlayniteApi, game))
+                if (IsGameEmulated( game))
                 {
                     SourceName = "RetroAchievements";
-                    if (GameUseRpcs3(PlayniteApi, game))
+                    if (GameUseRpcs3(game))
                     {
                         SourceName = "Rpcs3";
                     }
                 }
-                else if (PlayniteApi.Database.Sources.Get(game.SourceId)?.Name.ToLower() == "xbox game pass")
+                else if (API.Instance.Database.Sources.Get(game.SourceId)?.Name.ToLower() == "xbox game pass")
                 {
                     SourceName = "Xbox";
                 }
                 else if (game.SourceId != null && game.SourceId != default(Guid))
                 {
-                    SourceName = PlayniteApi.Database.Sources.Get(game.SourceId)?.Name;
+                    SourceName = API.Instance.Database.Sources.Get(game.SourceId)?.Name;
                 }
                 else
                 {
@@ -328,7 +322,7 @@ namespace CommonPluginsShared
             return string.Empty;
         }
 
-        public static string GetSourceBySourceIdOrPlatformId(IPlayniteAPI PlayniteApi, Guid SourceId, List<Guid> PlatformsIds)
+        public static string GetSourceBySourceIdOrPlatformId(Guid SourceId, List<Guid> PlatformsIds)
         {
             string SourceName = "Playnite";
 
@@ -336,7 +330,7 @@ namespace CommonPluginsShared
             {
                 try
                 {
-                    var Source = PlayniteApi.Database.Sources.Get(SourceId);
+                    var Source = API.Instance.Database.Sources.Get(SourceId);
 
                     if (Source == null)
                     {
@@ -357,7 +351,7 @@ namespace CommonPluginsShared
             {
                 if (PlatformID != Guid.Parse("00000000-0000-0000-0000-000000000000"))
                 {
-                    var platform = PlayniteApi.Database.Platforms.Get(PlatformID);
+                    var platform = API.Instance.Database.Platforms.Get(PlatformID);
 
                     if (platform != null)
                     {
@@ -382,15 +376,14 @@ namespace CommonPluginsShared
         /// <summary>
         /// Get platform icon if defined
         /// </summary>
-        /// <param name="PlayniteApi"></param>
         /// <param name="PlatformName"></param>
         /// <returns></returns>
-        public static string GetPlatformIcon(IPlayniteAPI PlayniteApi, string PlatformName)
+        public static string GetPlatformIcon(string PlatformName)
         {
-            Platform PlatformFinded = PlayniteApi.Database.Platforms?.Where(x => x.Name.ToLower() == PlatformName.ToLower()).FirstOrDefault();
+            Platform PlatformFinded = API.Instance.Database.Platforms?.Where(x => x.Name.ToLower() == PlatformName.ToLower()).FirstOrDefault();
             if (!(PlatformFinded?.Icon).IsNullOrEmpty())
             {
-                return PlayniteApi.Database.GetFullFilePath(PlatformFinded.Icon);
+                return API.Instance.Database.GetFullFilePath(PlatformFinded.Icon);
             }
             return string.Empty;
         }
@@ -427,7 +420,7 @@ namespace CommonPluginsShared
         #endregion
 
 
-        public static void SetThemeInformation(IPlayniteAPI PlayniteApi)
+        public static void SetThemeInformation()
         {
             string defaultThemeName = "Default";
             ThemeManifest defaultTheme = new ThemeManifest()
@@ -439,7 +432,7 @@ namespace CommonPluginsShared
             ThemeManager.SetDefaultTheme(defaultTheme);
 
             ThemeManifest customTheme = null;
-            var theme = PlayniteApi.ApplicationSettings.DesktopTheme;
+            var theme = API.Instance.ApplicationSettings.DesktopTheme;
             if (theme != ThemeManager.DefaultTheme.Name)
             {
                 customTheme = ThemeManager.GetAvailableThemes(ApplicationMode.Desktop).FirstOrDefault(a => a.Id == theme);
@@ -462,7 +455,7 @@ namespace CommonPluginsShared
         /// <param name="inputString"></param>
         /// <param name="fixSeparators"></param>
         /// <returns></returns>
-        public static string StringExpandWithoutStore(IPlayniteAPI PlayniteAPI, Game game, string inputString, bool fixSeparators = false)
+        public static string StringExpandWithoutStore(Game game, string inputString, bool fixSeparators = false)
         {
             if (string.IsNullOrEmpty(inputString) || !inputString.Contains('{'))
             {
@@ -472,7 +465,7 @@ namespace CommonPluginsShared
             string result = inputString;
 
             // Playnite variables
-            result = PlayniteAPI.ExpandGameVariables(game, inputString);
+            result = API.Instance.ExpandGameVariables(game, inputString);
 
 
             // Dropbox
