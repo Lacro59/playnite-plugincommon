@@ -191,10 +191,11 @@ namespace CommonPluginsShared.Collections
 
         public virtual void DeleteDataWithDeletedGame()
         {
-            List<Guid> GameDeleted = Database.Items.Where(x => PlayniteApi.Database.Games.Get(x.Key) == null).Select(x => x.Key).ToList();
-            foreach(Guid guid in GameDeleted)
+            var GamesDeleted = Database.Items.Where(x => PlayniteApi.Database.Games.Get(x.Key) == null).Select(x => x).ToList();
+            foreach(var el in GamesDeleted)
             {
-                Database.Remove(guid);
+                logger.Info($"Delete date for missing game: {el.Value.Name} - {el.Key}");
+                Database.Remove(el.Key);
             }
         }
 
