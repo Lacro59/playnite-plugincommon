@@ -134,9 +134,25 @@ namespace CommonPluginsShared
 
             foreach (var action in game.GameActions)
             {
-                var emulator = API.Instance.Database.Emulators.FirstOrDefault(e => e.Id == action.EmulatorId);
+                var emulator = API.Instance.Database.Emulators?.FirstOrDefault(e => e.Id == action?.EmulatorId);
 
-                if (emulator.BuiltInConfigId.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)
+                if (emulator == null)
+                {
+                    logger.Warn($"No emulator find for {game.Name}");
+                    return false;
+                }
+
+                string BuiltInConfigId = string.Empty;
+                if (emulator.BuiltInConfigId == null)
+                {
+                    logger.Warn($"No BuiltInConfigId find for {emulator.Name}");
+                }
+                else
+                {
+                    BuiltInConfigId = emulator.BuiltInConfigId;
+                }
+
+                if (BuiltInConfigId.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)
                     || emulator.Name.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)
                     || emulator.InstallDir.Contains("rpcs3", StringComparison.OrdinalIgnoreCase))
                 {
