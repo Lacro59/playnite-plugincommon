@@ -1,29 +1,20 @@
 ﻿using Playnite.SDK;
 using Playnite.SDK.Models;
 using CommonPluginsShared.Models;
-using CommonPlayniteShared.Database;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Threading;
-using System.Windows.Automation;
 using CommonPluginsControls.Controls;
 using CommonPlayniteShared.Common;
 using CommonPluginsShared.Interfaces;
-using Playnite.SDK.Plugins;
 using CommonPlayniteShared;
-using Playnite.SDK.Data;
 
 namespace CommonPluginsShared.Collections
 {
@@ -268,8 +259,6 @@ namespace CommonPluginsShared.Collections
                 }
             }, globalProgressOptions);
         }
-
-        [Obsolete("GetAllDatas() is deprecated, please use GetSelectData() instead.")]
 
 
         public virtual List<Game> GetGamesList()
