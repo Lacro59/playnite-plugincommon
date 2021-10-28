@@ -1,5 +1,6 @@
 ﻿using CommonPlayniteShared;
 using CommonPluginsShared;
+using CommonPluginsShared.Extensions;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
@@ -75,7 +76,7 @@ namespace CommonPluginsStores
 
         public string GetOriginId(string Name)
         {
-            GameStoreDataResponseAppsList findGame = OriginListApp.Find(x => x.masterTitle.ToLower() == Name.ToLower());
+            GameStoreDataResponseAppsList findGame = OriginListApp.Find(x => x.masterTitle.IsEqual(Name));
 
             Common.LogDebug(true, $"Find Origin data for {Name} - {Serialization.ToJson(findGame)}");
 

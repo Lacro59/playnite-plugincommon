@@ -6,8 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CommonPlayniteShared.Manifests;
 using CommonPlayniteShared.Common;
 using System.Text.RegularExpressions;
@@ -109,6 +107,7 @@ namespace CommonPluginsShared
         /// </summary>
         /// <param name="game"></param>
         /// <returns></returns>
+        // TODO can be better
         public static bool IsGameEmulated(Game game)
         {
             if (game?.GameActions == null)
@@ -280,7 +279,7 @@ namespace CommonPluginsShared
                         SourceName = "Rpcs3";
                     }
                 }
-                else if (API.Instance.Database.Sources.Get(game.SourceId)?.Name.ToLower() == "xbox game pass")
+                else if (API.Instance.Database.Sources.Get(game.SourceId)?.Name.IsEqual("Xbox Game Pass") ?? false)
                 {
                     SourceName = "Xbox";
                 }
@@ -396,7 +395,7 @@ namespace CommonPluginsShared
         /// <returns></returns>
         public static string GetPlatformIcon(string PlatformName)
         {
-            Platform PlatformFinded = API.Instance.Database.Platforms?.Where(x => x.Name.ToLower() == PlatformName.ToLower()).FirstOrDefault();
+            Platform PlatformFinded = API.Instance.Database.Platforms?.Where(x => x.Name.IsEqual(PlatformName)).FirstOrDefault();
             if (!(PlatformFinded?.Icon).IsNullOrEmpty())
             {
                 return API.Instance.Database.GetFullFilePath(PlatformFinded.Icon);

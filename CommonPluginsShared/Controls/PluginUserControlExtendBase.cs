@@ -1,13 +1,10 @@
-﻿using CommonPluginsShared.Collections;
-using CommonPluginsShared.Interfaces;
+﻿using CommonPluginsShared.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Controls;
 using Playnite.SDK.Models;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
