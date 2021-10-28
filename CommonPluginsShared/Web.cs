@@ -66,7 +66,10 @@ namespace CommonPluginsShared
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false, $"Error on download {url}");
+                    if (!url.Contains("steamcdn-a.akamaihd.net", StringComparison.InvariantCultureIgnoreCase) && !ex.Message.Contains("(403)"))
+                    {
+                        Common.LogError(ex, false, $"Error on download {url}");
+                    }
                     return false;
                 }
             }
