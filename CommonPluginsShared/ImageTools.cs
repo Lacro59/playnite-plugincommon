@@ -211,6 +211,7 @@ namespace CommonPluginsShared
                 }
 
                 ConvertBitmapSource.EndInit();
+                ConvertBitmapSource.Freeze();
             }
             catch (Exception ex)
             {

@@ -10,6 +10,7 @@ using CommonPlayniteShared.Manifests;
 using CommonPlayniteShared.Common;
 using System.Text.RegularExpressions;
 using CommonPluginsShared.Extensions;
+using System.Threading.Tasks;
 
 namespace CommonPluginsShared
 {
@@ -170,7 +171,7 @@ namespace CommonPluginsShared
         /// <param name="FileName"></param>
         /// <param name="PluginName"></param>
         /// <returns></returns>
-        public static string GetCacheFile(string FileName, string PluginName)
+        public static string GetCacheFile(string FileName, string PluginName, dynamic Options = null)
         {
             PluginName = PluginName.ToLower();
 
@@ -186,6 +187,17 @@ namespace CommonPluginsShared
                 if (File.Exists(PathImageFileName))
                 {
                     return PathImageFileName;
+                }
+                else
+                {
+                    if (!FileName.IsNullOrEmpty() && Options?.CachedFileIfMissing ?? false)
+                    {
+                        Task.Run(() =>
+                        {
+                            Common.LogDebug(true, $"DownloadFileImage is missing - {FileName}");
+                            Web.DownloadFileImage(FileName, Options.Url, PlaynitePaths.DataCachePath, PluginName).GetAwaiter().GetResult();
+                        });
+                    }
                 }
             }
             catch (Exception ex)
