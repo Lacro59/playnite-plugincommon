@@ -350,8 +350,9 @@ namespace CommonPluginsShared.Collections
                 Common.LogError(ex, false);
                 PlayniteApi.Notifications.Add(new NotificationMessage(
                     $"{PluginName}-Error-Add",
-                    $"{PluginName}\r\n{ex.Message}",
-                    NotificationType.Error
+                    $"{PluginName}" + System.Environment.NewLine + $"{ex.Message}",
+                    NotificationType.Error,
+                    () => PlayniteTools.CreateLogPackage(PluginName)
                 ));
             }
         }
@@ -390,8 +391,9 @@ namespace CommonPluginsShared.Collections
                 Common.LogError(ex, false);
                 PlayniteApi.Notifications.Add(new NotificationMessage(
                     $"{PluginName}-Error-Update",
-                    $"{PluginName}\r\n{ex.Message}",
-                    NotificationType.Error
+                    $"{PluginName}" + System.Environment.NewLine + $"{ex.Message}",
+                    NotificationType.Error,
+                    () => PlayniteTools.CreateLogPackage(PluginName)
                 ));
             }
         }

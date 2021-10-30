@@ -11,6 +11,8 @@ using CommonPlayniteShared.Common;
 using System.Text.RegularExpressions;
 using CommonPluginsShared.Extensions;
 using System.Threading.Tasks;
+using System.IO.Compression;
+using System.Diagnostics;
 
 namespace CommonPluginsShared
 {
@@ -18,6 +20,7 @@ namespace CommonPluginsShared
     {
         private static HashSet<string> _disabledPlugins;
         private static readonly ILogger logger = LogManager.GetLogger();
+        protected static IResourceProvider resources = new ResourceProvider();
 
         private static List<Emulator> ListEmulators = null;
         private static HashSet<string> DisabledPlugins
@@ -527,6 +530,36 @@ namespace CommonPluginsShared
 
 
             return fixSeparators ? Paths.FixSeparators(result) : result;
+        }
+
+
+        public static void CreateLogPackage(string PluginName)
+        {
+            var response = API.Instance.Dialogs.ShowMessage(resources.GetString("LOCCommonCreateLog"), PluginName, System.Windows.MessageBoxButton.YesNo);
+
+            if (response == System.Windows.MessageBoxResult.Yes)
+            {
+                string path = Path.Combine(PlaynitePaths.DataCachePath, PluginName + "_" + DateTime.Now.ToString("yyyy-MM-dd") + ".zip");
+
+                FileSystem.DeleteFile(path);
+                using (FileStream zipToOpen = new FileStream(path, FileMode.Create))
+                using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+                {
+                    foreach (var logFile in Directory.GetFiles(PlaynitePaths.ConfigRootPath, "*.log", SearchOption.TopDirectoryOnly))
+                    {
+                        if (Path.GetFileName(logFile) == "cef.log" || Path.GetFileName(logFile) == "debug.log")
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            archive.CreateEntryFromFile(logFile, Path.GetFileName(logFile));
+                        }
+                    }
+                }
+
+                Process.Start(PlaynitePaths.DataCachePath);
+            }
         }
     }
 }
