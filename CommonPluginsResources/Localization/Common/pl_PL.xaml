@@ -120,6 +120,8 @@ Do you want to open the directory?</sys:String>
 
     <!-- CommonNotifications -->
 
+    <sys:String x:Key="LOCCommonCreateLog">Do you want create a log package?</sys:String>
+    
     <sys:String x:Key="LOCCommonDataRemove">Dane wtyczki zostały usunięte.</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">Błąd podczas usuwania danych wtyczki. Proszę spróbować ponownie.</sys:String>
 
