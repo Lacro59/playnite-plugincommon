@@ -136,7 +136,7 @@ namespace CommonPlayniteShared.Database
 
         internal void SaveItemData(TItem item)
         {
-            File.WriteAllText(GetItemFilePath(item.Id), Serialization.ToJson(item), Encoding.UTF8);
+            FileSystem.WriteStringToFileSafe(GetItemFilePath(item.Id), Serialization.ToJson(item));
         }
 
         internal TItem GetItemData(Guid id)
