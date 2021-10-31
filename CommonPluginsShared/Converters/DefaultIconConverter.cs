@@ -27,6 +27,28 @@ namespace CommonPluginsShared.Converters
                         return ResourceProvider.GetResource("DefaultGameIcon");
                     }
                 }
+                else
+                {
+                    if (!(value is string))
+                    {
+                        return value;
+                    }
+
+                    if (!File.Exists((string)value))
+                    {
+                        if (File.Exists(API.Instance.Database.GetFullFilePath((string)value)))
+                        { 
+                            return API.Instance.Database.GetFullFilePath((string)value);
+                        }
+                        else
+                        {
+                            if (ResourceProvider.GetResource("DefaultGameIcon") != null)
+                            {
+                                return ResourceProvider.GetResource("DefaultGameIcon");
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
