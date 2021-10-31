@@ -221,7 +221,7 @@ namespace CommonPluginsShared
         /// <param name="ex"></param>
         /// <param name="IsIgnored"></param>
         /// <param name="Message"></param>
-        public static void LogError(Exception ex, bool IsIgnored, string Message)
+        public static void LogError(Exception ex, bool IsIgnored, string Message, bool ShowNotification = false, string PluginName = "")
         {
             TraceInfos traceInfos = new TraceInfos(ex);
             
@@ -240,6 +240,16 @@ namespace CommonPluginsShared
                 logger.Error(ex, $"{Message}");
             }
 #endif
+
+            if (ShowNotification)
+            {
+                API.Instance.Notifications.Add(new NotificationMessage(
+                     $"{PluginName}-{new Guid()}",
+                     $"{PluginName}" + System.Environment.NewLine + $"{ex.Message}",
+                     NotificationType.Error,
+                     () => PlayniteTools.CreateLogPackage(PluginName)
+                 ));
+            }
         }
         #endregion
     }
