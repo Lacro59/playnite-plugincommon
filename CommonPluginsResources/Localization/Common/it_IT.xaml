@@ -120,7 +120,7 @@ Vuoi aprire la cartella?</sys:String>
 
     <!-- CommonNotifications -->
 
-    <sys:String x:Key="LOCCommonCreateLog">Do you want create a log package?</sys:String>
+    <sys:String x:Key="LOCCommonCreateLog">Vuoi creare un pacchetto di registri?</sys:String>
     
     <sys:String x:Key="LOCCommonDataRemove">I dati del plugin sono stati rimossi.</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">Errore nella rimozione dei dati del plugin. Riprova.</sys:String>
