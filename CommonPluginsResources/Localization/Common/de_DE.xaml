@@ -120,7 +120,7 @@ Soll das Verzeichnis geöffnet werden?</sys:String>
 
     <!-- CommonNotifications -->
 
-    <sys:String x:Key="LOCCommonCreateLog">Do you want create a log package?</sys:String>
+    <sys:String x:Key="LOCCommonCreateLog">Wollen Sie ein Log Paket erstellen?</sys:String>
     
     <sys:String x:Key="LOCCommonDataRemove">Die Plugin-Daten wurden entfernt.</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">Fehler beim Entfernen der Plugin-Daten. Bitte versuchen Sie es erneut.</sys:String>
