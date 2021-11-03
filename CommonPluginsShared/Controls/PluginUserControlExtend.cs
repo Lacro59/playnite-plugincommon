@@ -62,9 +62,8 @@ namespace CommonPluginsShared.Controls
         #endregion
 
 
-        public virtual Task<bool> SetData(Game newContext, PluginDataBaseGameBase PluginGameData)
+        public virtual void SetData(Game newContext)
         {
-            return new Task<bool>(() => false);
         }
     }
 }
