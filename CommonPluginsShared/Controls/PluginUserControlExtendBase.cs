@@ -201,12 +201,10 @@ namespace CommonPluginsShared.Controls
 
         public virtual void SetDefaultDataContext()
         {
-
         }
 
-        public virtual Task<bool> SetData(Game newContext)
+        public virtual void SetData(Game newContext)
         {
-            return new Task<bool>(() => false);
         }
     }
 }
