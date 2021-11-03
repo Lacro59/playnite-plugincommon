@@ -62,7 +62,7 @@ namespace CommonPluginsShared.Controls
         #endregion
 
 
-        public virtual void SetData(Game newContext)
+        public virtual void SetData(Game newContext, PluginDataBaseGameBase PluginGameData)
         {
         }
     }
