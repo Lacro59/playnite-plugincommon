@@ -481,11 +481,19 @@ namespace CommonPluginsShared.Collections
             {
                 Update(webItem);
             }
+
+            ActionAfterRefresh(webItem);
         }
 
         public virtual void RefreshWithNoData(List<Guid> Ids)
         {
             Refresh(Ids);
+        }
+
+
+        public virtual void ActionAfterRefresh(TItem item)
+        {
+
         }
 
 
