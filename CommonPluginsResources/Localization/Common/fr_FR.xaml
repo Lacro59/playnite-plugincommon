@@ -112,7 +112,7 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 
     <sys:String x:Key="LOCCommonGettingData">Téléchargement des données...</sys:String>
     <sys:String x:Key="LOCCommonGettingAllDatas">Téléchargement des données...</sys:String>
-    <sys:String x:Key="LOCCommonAddingAllTag">Ajouter des étiquettes...</sys:String>
+    <sys:String x:Key="LOCCommonAddingAllTag">Ajouter des étiquettes pour tous les jeux...</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Suppression des étiquettes...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Nettoyage de la base de données...</sys:String>
     <sys:String x:Key="LOCCommonProcessing">Traitement en cours, veuillez patienter...</sys:String>
