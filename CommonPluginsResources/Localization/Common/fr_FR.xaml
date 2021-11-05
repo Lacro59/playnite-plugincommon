@@ -112,7 +112,7 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 
     <sys:String x:Key="LOCCommonGettingData">Téléchargement des données...</sys:String>
     <sys:String x:Key="LOCCommonGettingAllDatas">Téléchargement des données...</sys:String>
-    <sys:String x:Key="LOCCommonAddingAllTag">Ajouter des étiquettes...</sys:String>
+    <sys:String x:Key="LOCCommonAddingAllTag">Ajouter des étiquettes pour tous les jeux...</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Suppression des étiquettes...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Nettoyage de la base de données...</sys:String>
     <sys:String x:Key="LOCCommonProcessing">Traitement en cours, veuillez patienter...</sys:String>
@@ -120,7 +120,7 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 
     <!-- CommonNotifications -->
 
-    <sys:String x:Key="LOCCommonCreateLog">Do you want create a log package?</sys:String>
+    <sys:String x:Key="LOCCommonCreateLog">Voulez-vous créer un paquet de journalisation ?</sys:String>
     
     <sys:String x:Key="LOCCommonDataRemove">Les données du plugin ont été supprimées.</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">Erreur lors de la suppression des données du plugin. Veuillez réessayer.</sys:String>
