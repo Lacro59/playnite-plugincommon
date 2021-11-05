@@ -377,6 +377,12 @@ namespace CommonPluginsShared
                 }
             }
 
+            if (PlatformsIds == null)
+            {
+                logger.Warn($"No PlatformsIds for {SourceId.ToString()}");
+                return SourceName;
+            }
+
             foreach (Guid PlatformID in PlatformsIds)
             {
                 if (PlatformID != Guid.Parse("00000000-0000-0000-0000-000000000000"))
