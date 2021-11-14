@@ -472,7 +472,7 @@ namespace CommonPluginsShared.Collections
         public virtual void RefreshNoLoader(Guid Id)
         {
             var game = PlayniteApi.Database.Games.Get(Id);
-            logger.Info($"RefreshNoLoader({game?.Name})");
+            logger.Info($"RefreshNoLoader({game?.Name} - {game?.Id})");
 
             var loadedItem = Get(Id, true);
             var webItem = GetWeb(Id);
