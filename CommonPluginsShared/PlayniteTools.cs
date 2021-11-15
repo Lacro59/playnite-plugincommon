@@ -439,6 +439,8 @@ namespace CommonPluginsShared
                 return string.Empty;
 
             string newName = name;
+            newName = newName.Replace(" (CD)", string.Empty);
+
             if (removeEditions)
                 newName = EditionInGameName.Replace(newName, string.Empty);
 
