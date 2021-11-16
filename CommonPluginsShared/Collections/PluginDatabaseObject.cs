@@ -548,11 +548,13 @@ namespace CommonPluginsShared.Collections
 
         public virtual TItem GetOnlyCache(Guid Id)
         {
+            System.Threading.SpinWait.SpinUntil(() => IsLoaded, -1);
             return Database.Get(Id);
         }
 
         public virtual TItem GetOnlyCache(Game game)
         {
+            System.Threading.SpinWait.SpinUntil(() => IsLoaded, -1);
             return Database.Get(game.Id);
         }
 
@@ -566,6 +568,7 @@ namespace CommonPluginsShared.Collections
 
         public virtual TItem Get(Game game, bool OnlyCache = false, bool Force = false)
         {
+            System.Threading.SpinWait.SpinUntil(() => IsLoaded, -1);
             return Get(game.Id, OnlyCache, Force);
         }
 
