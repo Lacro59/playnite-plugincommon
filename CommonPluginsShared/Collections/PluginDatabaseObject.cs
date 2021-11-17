@@ -1,28 +1,20 @@
 ﻿using Playnite.SDK;
 using Playnite.SDK.Models;
 using CommonPluginsShared.Models;
-using CommonPluginsPlaynite.Database;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Threading;
-using System.Windows.Automation;
 using CommonPluginsControls.Controls;
-using CommonPluginsPlaynite.Common;
+using CommonPlayniteShared.Common;
 using CommonPluginsShared.Interfaces;
-using Playnite.SDK.Plugins;
-using CommonPluginsPlaynite;
+using CommonPlayniteShared;
 
 namespace CommonPluginsShared.Collections
 {
@@ -188,6 +180,16 @@ namespace CommonPluginsShared.Collections
             return IsOk;
         }
 
+        public virtual void DeleteDataWithDeletedGame()
+        {
+            var GamesDeleted = Database.Items.Where(x => PlayniteApi.Database.Games.Get(x.Key) == null).Select(x => x).ToList();
+            foreach(var el in GamesDeleted)
+            {
+                logger.Info($"Delete date for missing game: {el.Value.Name} - {el.Key}");
+                Database.Remove(el.Key);
+            }
+        }
+
 
         public virtual void GetSelectData()
         {
@@ -250,60 +252,6 @@ namespace CommonPluginsShared.Collections
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
                     logger.Info($"Task GetSelectData(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false);
-                }
-            }, globalProgressOptions);
-        }
-
-        [Obsolete("GetAllDatas() is deprecated, please use GetSelectData() instead.")]
-        public virtual void GetAllDatas()
-        {
-            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
-                $"{PluginName} - {resources.GetString("LOCCommonGettingAllDatas")}",
-                true
-            );
-            globalProgressOptions.IsIndeterminate = false;
-
-            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
-            {
-                try
-                {
-                    Stopwatch stopWatch = new Stopwatch();
-                    stopWatch.Start();
-
-                    var PlayniteDb = PlayniteApi.Database.Games.Where(x => x.Hidden == false);
-                    activateGlobalProgress.ProgressMaxValue = (double)PlayniteDb.Count();
-
-                    string CancelText = string.Empty;
-
-                    foreach (Game game in PlayniteDb)
-                    {
-                        if (activateGlobalProgress.CancelToken.IsCancellationRequested)
-                        {
-                            CancelText = " canceled";
-                            break;
-                        }
-
-                        Thread.Sleep(10);
-
-                        try
-                        {
-                            Get(game, false, true);
-                        }
-                        catch (Exception ex)
-                        {
-                            Common.LogError(ex, false);
-                        }
-
-                        activateGlobalProgress.CurrentProgressValue++;
-                    }
-
-                    stopWatch.Stop();
-                    TimeSpan ts = stopWatch.Elapsed;
-                    logger.Info($"Task GetAllDatas(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
                 }
                 catch (Exception ex)
                 {
@@ -402,8 +350,9 @@ namespace CommonPluginsShared.Collections
                 Common.LogError(ex, false);
                 PlayniteApi.Notifications.Add(new NotificationMessage(
                     $"{PluginName}-Error-Add",
-                    $"{PluginName}\r\n{ex.Message}",
-                    NotificationType.Error
+                    $"{PluginName}" + System.Environment.NewLine + $"{ex.Message}",
+                    NotificationType.Error,
+                    () => PlayniteTools.CreateLogPackage(PluginName)
                 ));
             }
         }
@@ -442,8 +391,9 @@ namespace CommonPluginsShared.Collections
                 Common.LogError(ex, false);
                 PlayniteApi.Notifications.Add(new NotificationMessage(
                     $"{PluginName}-Error-Update",
-                    $"{PluginName}\r\n{ex.Message}",
-                    NotificationType.Error
+                    $"{PluginName}" + System.Environment.NewLine + $"{ex.Message}",
+                    NotificationType.Error,
+                    () => PlayniteTools.CreateLogPackage(PluginName)
                 ));
             }
         }
@@ -522,7 +472,7 @@ namespace CommonPluginsShared.Collections
         public virtual void RefreshNoLoader(Guid Id)
         {
             var game = PlayniteApi.Database.Games.Get(Id);
-            logger.Info($"RefreshNoLoader({game?.Name})");
+            logger.Info($"RefreshNoLoader({game?.Name} - {game?.Id})");
 
             var loadedItem = Get(Id, true);
             var webItem = GetWeb(Id);
@@ -531,11 +481,19 @@ namespace CommonPluginsShared.Collections
             {
                 Update(webItem);
             }
+
+            ActionAfterRefresh(webItem);
         }
 
         public virtual void RefreshWithNoData(List<Guid> Ids)
         {
             Refresh(Ids);
+        }
+
+
+        public virtual void ActionAfterRefresh(TItem item)
+        {
+
         }
 
 
@@ -590,11 +548,13 @@ namespace CommonPluginsShared.Collections
 
         public virtual TItem GetOnlyCache(Guid Id)
         {
+            System.Threading.SpinWait.SpinUntil(() => IsLoaded, -1);
             return Database.Get(Id);
         }
 
         public virtual TItem GetOnlyCache(Game game)
         {
+            System.Threading.SpinWait.SpinUntil(() => IsLoaded, -1);
             return Database.Get(game.Id);
         }
 
@@ -608,6 +568,7 @@ namespace CommonPluginsShared.Collections
 
         public virtual TItem Get(Game game, bool OnlyCache = false, bool Force = false)
         {
+            System.Threading.SpinWait.SpinUntil(() => IsLoaded, -1);
             return Get(game.Id, OnlyCache, Force);
         }
 
@@ -883,6 +844,38 @@ namespace CommonPluginsShared.Collections
             return CheckTagExist(TagName);
         }
         #endregion
+
+
+        public void ClearCache()
+        {
+            string PathDirectory = Path.Combine(PlaynitePaths.DataCachePath, PluginName);
+
+            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
+                $"{PluginName} - {resources.GetString("LOCCommonProcessing")}",
+                false
+            );
+            globalProgressOptions.IsIndeterminate = true;
+
+            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            {
+                try
+                {
+                    if (Directory.Exists(PathDirectory))
+                    {
+                        Thread.Sleep(2000);
+                        Directory.Delete(PathDirectory, true);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false);
+                    PlayniteApi.Dialogs.ShowErrorMessage(
+                        string.Format(resources.GetString("LOCCommonErrorDeleteCache"), PathDirectory),
+                        PluginName
+                    );
+                }
+            }, globalProgressOptions);
+        }
 
 
         public abstract void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e);

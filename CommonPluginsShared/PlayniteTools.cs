@@ -1,17 +1,18 @@
 ﻿using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
-using CommonPluginsPlaynite;
+using CommonPlayniteShared;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CommonPlayniteShared.Manifests;
-using CommonPluginsPlaynite.Common;
+using CommonPlayniteShared.Common;
 using System.Text.RegularExpressions;
 using CommonPluginsShared.Extensions;
+using System.Threading.Tasks;
+using System.IO.Compression;
+using System.Diagnostics;
 
 namespace CommonPluginsShared
 {
@@ -19,6 +20,7 @@ namespace CommonPluginsShared
     {
         private static HashSet<string> _disabledPlugins;
         private static readonly ILogger logger = LogManager.GetLogger();
+        protected static IResourceProvider resources = new ResourceProvider();
 
         private static List<Emulator> ListEmulators = null;
         private static HashSet<string> DisabledPlugins
@@ -78,14 +80,13 @@ namespace CommonPluginsShared
         /// <summary>
         /// Get configured emulators list
         /// </summary>
-        /// <param name="PlayniteApi"></param>
         /// <returns></returns>
-        public static List<Emulator> GetListEmulators(IPlayniteAPI PlayniteApi)
+        public static List<Emulator> GetListEmulators()
         {
             if (ListEmulators == null)
             {
                 ListEmulators = new List<Emulator>();
-                foreach (Emulator item in PlayniteApi.Database.Emulators)
+                foreach (Emulator item in API.Instance.Database.Emulators)
                 {
                     ListEmulators.Add(item);
                 }
@@ -97,64 +98,71 @@ namespace CommonPluginsShared
         /// <summary>
         /// Check if the game used an emulator
         /// </summary>
-        /// <param name="PlayniteApi"></param>
         /// <param name="Id"></param>
         /// <returns></returns>
-        public static bool IsGameEmulated(IPlayniteAPI PlayniteApi, Guid Id)
+        public static bool IsGameEmulated(Guid Id)
         {
-            Game game = PlayniteApi.Database.Games.Get(Id);
-            return IsGameEmulated(PlayniteApi, game);
+            Game game = API.Instance.Database.Games.Get(Id);
+            return IsGameEmulated(game);
         }
 
         /// <summary>
         /// Check if the game used an emulator
         /// </summary>
-        /// <param name="PlayniteApi"></param>
         /// <param name="game"></param>
         /// <returns></returns>
-        public static bool IsGameEmulated(IPlayniteAPI PlayniteApi, Game game)
+        // TODO can be better
+        public static bool IsGameEmulated(Game game)
         {
             if (game?.GameActions == null)
             {
                 return false;
             }
 
-            List<Emulator> ListEmulators = GetListEmulators(PlayniteApi);
+            List<Emulator> ListEmulators = GetListEmulators();
             return game.GameActions.Where(x => x.IsPlayAction && ListEmulators.Any(y => y.Id == x?.EmulatorId)).Count() > 0;
         }
 
         /// <summary>
         /// Check if a game used RPCS3 emulator
         /// </summary>
-        /// <param name="PlayniteApi"></param>
         /// <param name="game"></param>
         /// <returns></returns>
-        public static bool GameUseRpcs3(IPlayniteAPI PlayniteApi, Game game)
+        public static bool GameUseRpcs3(Game game)
         {
             if (game?.GameActions == null)
             {
                 return false;
             }
 
-            List<Emulator> ListEmulators = GetListEmulators(PlayniteApi);
             foreach (var action in game.GameActions)
             {
-                if (action == null || !action.IsPlayAction || action.EmulatorId == Guid.Empty)
+                var emulator = API.Instance.Database.Emulators?.FirstOrDefault(e => e.Id == action?.EmulatorId);
+
+                if (emulator == null)
                 {
-                    continue;
+                    logger.Warn($"No emulator find for {game.Name}");
+                    return false;
                 }
 
-                var emulator = ListEmulators.FirstOrDefault(e => e.Id == action.EmulatorId);
-                if (emulator == null || emulator.BuiltInConfigId.IsNullOrEmpty())
+                string BuiltInConfigId = string.Empty;
+                if (emulator.BuiltInConfigId == null)
                 {
-                    continue;
+                    logger.Warn($"No BuiltInConfigId find for {emulator.Name}");
+                }
+                else
+                {
+                    BuiltInConfigId = emulator.BuiltInConfigId;
                 }
 
-                if (emulator.BuiltInConfigId == "rpcs3")
+                if (BuiltInConfigId.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)
+                    || emulator.Name.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)
+                    || emulator.InstallDir.Contains("rpcs3", StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
             }
+
             return false;
         }
         #endregion
@@ -166,7 +174,7 @@ namespace CommonPluginsShared
         /// <param name="FileName"></param>
         /// <param name="PluginName"></param>
         /// <returns></returns>
-        public static string GetCacheFile(string FileName, string PluginName)
+        public static string GetCacheFile(string FileName, string PluginName, dynamic Options = null)
         {
             PluginName = PluginName.ToLower();
 
@@ -183,10 +191,16 @@ namespace CommonPluginsShared
                 {
                     return PathImageFileName;
                 }
-                // TODO If used, must be changed
-                if (File.Exists(PathImageFileName + ".png"))
+                else
                 {
-                    return PathImageFileName + ".png";
+                    if (!FileName.IsNullOrEmpty() && Options?.CachedFileIfMissing ?? false)
+                    {
+                        Task.Run(() =>
+                        {
+                            Common.LogDebug(true, $"DownloadFileImage is missing - {FileName}");
+                            Web.DownloadFileImage(FileName, Options.Url, PlaynitePaths.DataCachePath, PluginName).GetAwaiter().GetResult();
+                        });
+                    }
                 }
             }
             catch (Exception ex)
@@ -245,26 +259,24 @@ namespace CommonPluginsShared
         /// <summary>
         /// Get normalized source name
         /// </summary>
-        /// <param name="PlayniteApi"></param>
         /// <param name="Id"></param>
         /// <returns></returns>
-        public static string GetSourceName(IPlayniteAPI PlayniteApi, Guid Id)
+        public static string GetSourceName(Guid Id)
         {
-            Game game = PlayniteApi.Database.Games.Get(Id);
+            Game game = API.Instance.Database.Games.Get(Id);
             if (game == null)
             {
                 return "Playnite";
             }
-            return GetSourceName(PlayniteApi, game);
+            return GetSourceName(game);
         }
 
         /// <summary>
         /// Get normalized source name
         /// </summary>
-        /// <param name="PlayniteApi"></param>
         /// <param name="game"></param>
         /// <returns></returns>
-        public static string GetSourceName(IPlayniteAPI PlayniteApi, Game game)
+        public static string GetSourceName(Game game)
         {
             string SourceName = GetSourceByPluginId(game.PluginId);
             if (!SourceName.IsNullOrEmpty())
@@ -274,21 +286,21 @@ namespace CommonPluginsShared
 
             try
             {
-                if (IsGameEmulated(PlayniteApi, game))
+                if (IsGameEmulated( game))
                 {
                     SourceName = "RetroAchievements";
-                    if (GameUseRpcs3(PlayniteApi, game))
+                    if (GameUseRpcs3(game))
                     {
                         SourceName = "Rpcs3";
                     }
                 }
-                else if (PlayniteApi.Database.Sources.Get(game.SourceId)?.Name.ToLower() == "xbox game pass")
+                else if (API.Instance.Database.Sources.Get(game.SourceId)?.Name.IsEqual("Xbox Game Pass") ?? false)
                 {
                     SourceName = "Xbox";
                 }
                 else if (game.SourceId != null && game.SourceId != default(Guid))
                 {
-                    SourceName = PlayniteApi.Database.Sources.Get(game.SourceId)?.Name;
+                    SourceName = API.Instance.Database.Sources.Get(game.SourceId)?.Name;
                 }
                 else
                 {
@@ -340,7 +352,7 @@ namespace CommonPluginsShared
             return string.Empty;
         }
 
-        public static string GetSourceBySourceIdOrPlatformId(IPlayniteAPI PlayniteApi, Guid SourceId, List<Guid> PlatformsIds)
+        public static string GetSourceBySourceIdOrPlatformId(Guid SourceId, List<Guid> PlatformsIds)
         {
             string SourceName = "Playnite";
 
@@ -348,7 +360,7 @@ namespace CommonPluginsShared
             {
                 try
                 {
-                    var Source = PlayniteApi.Database.Sources.Get(SourceId);
+                    var Source = API.Instance.Database.Sources.Get(SourceId);
 
                     if (Source == null)
                     {
@@ -365,11 +377,17 @@ namespace CommonPluginsShared
                 }
             }
 
+            if (PlatformsIds == null)
+            {
+                logger.Warn($"No PlatformsIds for {SourceId.ToString()}");
+                return SourceName;
+            }
+
             foreach (Guid PlatformID in PlatformsIds)
             {
                 if (PlatformID != Guid.Parse("00000000-0000-0000-0000-000000000000"))
                 {
-                    var platform = PlayniteApi.Database.Platforms.Get(PlatformID);
+                    var platform = API.Instance.Database.Platforms.Get(PlatformID);
 
                     if (platform != null)
                     {
@@ -394,15 +412,14 @@ namespace CommonPluginsShared
         /// <summary>
         /// Get platform icon if defined
         /// </summary>
-        /// <param name="PlayniteApi"></param>
         /// <param name="PlatformName"></param>
         /// <returns></returns>
-        public static string GetPlatformIcon(IPlayniteAPI PlayniteApi, string PlatformName)
+        public static string GetPlatformIcon(string PlatformName)
         {
-            Platform PlatformFinded = PlayniteApi.Database.Platforms?.Where(x => x.Name.ToLower() == PlatformName.ToLower()).FirstOrDefault();
+            Platform PlatformFinded = API.Instance.Database.Platforms?.Where(x => x.Name.IsEqual(PlatformName)).FirstOrDefault();
             if (!(PlatformFinded?.Icon).IsNullOrEmpty())
             {
-                return PlayniteApi.Database.GetFullFilePath(PlatformFinded.Icon);
+                return API.Instance.Database.GetFullFilePath(PlatformFinded.Icon);
             }
             return string.Empty;
         }
@@ -422,6 +439,8 @@ namespace CommonPluginsShared
                 return string.Empty;
 
             string newName = name;
+            newName = newName.Replace(" (CD)", string.Empty);
+
             if (removeEditions)
                 newName = EditionInGameName.Replace(newName, string.Empty);
 
@@ -439,7 +458,7 @@ namespace CommonPluginsShared
         #endregion
 
 
-        public static void SetThemeInformation(IPlayniteAPI PlayniteApi)
+        public static void SetThemeInformation()
         {
             string defaultThemeName = "Default";
             ThemeManifest defaultTheme = new ThemeManifest()
@@ -451,10 +470,10 @@ namespace CommonPluginsShared
             ThemeManager.SetDefaultTheme(defaultTheme);
 
             ThemeManifest customTheme = null;
-            var theme = PlayniteApi.ApplicationSettings.DesktopTheme;
+            var theme = API.Instance.ApplicationSettings.DesktopTheme;
             if (theme != ThemeManager.DefaultTheme.Name)
             {
-                customTheme = ThemeManager.GetAvailableThemes(ApplicationMode.Desktop).SingleOrDefault(a => a.Id == theme);
+                customTheme = ThemeManager.GetAvailableThemes(ApplicationMode.Desktop).FirstOrDefault(a => a.Id == theme);
                 if (customTheme == null)
                 {
                     ThemeManager.SetCurrentTheme(defaultTheme);
@@ -474,7 +493,7 @@ namespace CommonPluginsShared
         /// <param name="inputString"></param>
         /// <param name="fixSeparators"></param>
         /// <returns></returns>
-        public static string StringExpandWithoutStore(IPlayniteAPI PlayniteAPI, Game game, string inputString, bool fixSeparators = false)
+        public static string StringExpandWithoutStore(Game game, string inputString, bool fixSeparators = false)
         {
             if (string.IsNullOrEmpty(inputString) || !inputString.Contains('{'))
             {
@@ -484,7 +503,7 @@ namespace CommonPluginsShared
             string result = inputString;
 
             // Playnite variables
-            result = PlayniteAPI.ExpandGameVariables(game, inputString);
+            result = API.Instance.ExpandGameVariables(game, inputString);
 
 
             // Dropbox
@@ -519,6 +538,36 @@ namespace CommonPluginsShared
 
 
             return fixSeparators ? Paths.FixSeparators(result) : result;
+        }
+
+
+        public static void CreateLogPackage(string PluginName)
+        {
+            var response = API.Instance.Dialogs.ShowMessage(resources.GetString("LOCCommonCreateLog"), PluginName, System.Windows.MessageBoxButton.YesNo);
+
+            if (response == System.Windows.MessageBoxResult.Yes)
+            {
+                string path = Path.Combine(PlaynitePaths.DataCachePath, PluginName + "_" + DateTime.Now.ToString("yyyy-MM-dd") + ".zip");
+
+                FileSystem.DeleteFile(path);
+                using (FileStream zipToOpen = new FileStream(path, FileMode.Create))
+                using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+                {
+                    foreach (var logFile in Directory.GetFiles(PlaynitePaths.ConfigRootPath, "*.log", SearchOption.TopDirectoryOnly))
+                    {
+                        if (Path.GetFileName(logFile) == "cef.log" || Path.GetFileName(logFile) == "debug.log")
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            archive.CreateEntryFromFile(logFile, Path.GetFileName(logFile));
+                        }
+                    }
+                }
+
+                Process.Start(PlaynitePaths.DataCachePath);
+            }
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommonPluginsPlaynite.Common
+namespace CommonPlayniteShared.Common
 {
     // Originally from https://stackoverflow.com/questions/9746538/fastest-safest-file-finding-parsing
     public class SafeFileEnumerator : IEnumerable<FileSystemInfo>

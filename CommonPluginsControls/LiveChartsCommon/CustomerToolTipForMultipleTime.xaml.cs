@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Data;
 using CommonPluginsControls.Controls;
-using CommonPluginsPlaynite.Common;
+using CommonPlayniteShared.Common;
 using CommonPluginsShared;
 using LiveCharts;
 using LiveCharts.Wpf;

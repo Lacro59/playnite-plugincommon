@@ -25,14 +25,16 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">Tri par défaut de la liste des jeux</sys:String>
 
-    <sys:String x:Key="LOCCommonChartHideOptions">Hide chart options on control</sys:String>
+    <sys:String x:Key="LOCCommonChartHideOptions">Masquer les options du graphique</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">Par défaut, montrer toutes les données sur le graphique</sys:String>
     <sys:String x:Key="LOCCommonChartCutPeriod">Par défaut, ne montrer que les données avec des valeurs</sys:String>
     
     <sys:String x:Key="LOCCommonExportData">Exporter les données</sys:String>
-    <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} data has been exported.
-Do you want to open the directory?</sys:String>
+    <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} données ont été exportées.
+Voulez-vous ouvrir le répertoire ?</sys:String>
 
+    <sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Impossible de supprimer le dossier de cache :
+{0}</sys:String>
 
     <!-- login -->
 
@@ -110,7 +112,7 @@ Do you want to open the directory?</sys:String>
 
     <sys:String x:Key="LOCCommonGettingData">Téléchargement des données...</sys:String>
     <sys:String x:Key="LOCCommonGettingAllDatas">Téléchargement des données...</sys:String>
-    <sys:String x:Key="LOCCommonAddingAllTag">Ajouter des étiquettes...</sys:String>
+    <sys:String x:Key="LOCCommonAddingAllTag">Ajouter des étiquettes pour tous les jeux...</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Suppression des étiquettes...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Nettoyage de la base de données...</sys:String>
     <sys:String x:Key="LOCCommonProcessing">Traitement en cours, veuillez patienter...</sys:String>
@@ -118,6 +120,8 @@ Do you want to open the directory?</sys:String>
 
     <!-- CommonNotifications -->
 
+    <sys:String x:Key="LOCCommonCreateLog">Voulez-vous créer un paquet de journalisation ?</sys:String>
+    
     <sys:String x:Key="LOCCommonDataRemove">Les données du plugin ont été supprimées.</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">Erreur lors de la suppression des données du plugin. Veuillez réessayer.</sys:String>
 

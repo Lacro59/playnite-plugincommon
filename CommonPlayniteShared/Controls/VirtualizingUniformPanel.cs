@@ -7,8 +7,10 @@ using System.Diagnostics;
 using System.Collections.Specialized;
 using System.ComponentModel;
 
-namespace CommonPluginsPlaynite.Controls
+namespace CommonPlayniteShared.Controls
 {
+    // TODO Must delete if no used
+    /*
     public class VirtualizingUniformPanel : VirtualizingPanel, IScrollInfo
     {
         private IRecyclingItemContainerGenerator generator;
@@ -444,4 +446,5 @@ namespace CommonPluginsPlaynite.Controls
 
         #endregion IScrollInfo
     }
+    */
 }

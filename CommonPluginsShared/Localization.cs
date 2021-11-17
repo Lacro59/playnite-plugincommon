@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 using System.Windows;
-using CommonPluginsPlaynite.Common;
+using CommonPlayniteShared.Common;
 using System.Threading.Tasks;
 using System.Threading;
 

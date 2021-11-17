@@ -1,4 +1,4 @@
-﻿using CommonPluginsPlaynite.Common;
+﻿using CommonPlayniteShared.Common;
 //using Playnite.Extensions;
 using Playnite.SDK;
 //using Playnite.Settings;
@@ -19,7 +19,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using CommonPlayniteShared.Manifests;
 
-namespace CommonPluginsPlaynite.Extensions.Markup
+namespace CommonPlayniteShared.Extensions.Markup
 {
     public class ThemeFile : MarkupExtension
     {

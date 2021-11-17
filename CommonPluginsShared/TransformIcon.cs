@@ -53,6 +53,7 @@
         private static string nintendoswitch = "\uea48";         
         private static string wii = "\uea49";                    
         private static string mame = "\uea4a";
+        private static string wiiu = "\uea5e";
         #endregion
 
 
@@ -218,6 +219,9 @@
                     break;
                 case "nintendo wii":
                     stringReturn = wii;
+                    break;
+                case "nintendo wii u":
+                    stringReturn = wiiu;
                     break;
                 case "mame 2003 plus":
                     stringReturn = mame;

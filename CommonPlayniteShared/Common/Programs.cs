@@ -1,4 +1,4 @@
-﻿using CommonPluginsPlaynite.Common;
+﻿using CommonPlayniteShared.Common;
 using Microsoft.Win32;
 using Playnite.SDK;
 using System;

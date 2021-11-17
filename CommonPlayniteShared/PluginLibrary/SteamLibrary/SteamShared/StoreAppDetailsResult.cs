@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommonPluginsPlaynite.PluginLibrary.SteamLibrary.SteamShared
+namespace CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared
 {
     public class AppReviewsResult
     {

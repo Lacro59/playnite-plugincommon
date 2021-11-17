@@ -38,9 +38,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\LocalDateTimeConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\LocalDateYMConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\LocalTimeConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\PlayTimeToStringConverterWithZero.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\StringRemoveConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\StringToBooleanConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\TwoBooleanToVisibilityConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\ValueOperationConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\VisibilityZeroConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CumulsErrors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\ListExtensions.cs" />

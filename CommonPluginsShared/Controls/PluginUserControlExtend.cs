@@ -1,17 +1,9 @@
 ﻿using CommonPluginsShared.Collections;
 using CommonPluginsShared.Interfaces;
-using Playnite.SDK;
-using Playnite.SDK.Controls;
 using Playnite.SDK.Models;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Threading;
 
 namespace CommonPluginsShared.Controls
 {
@@ -70,9 +62,8 @@ namespace CommonPluginsShared.Controls
         #endregion
 
 
-        public virtual Task<bool> SetData(Game newContext, PluginDataBaseGameBase PluginGameData)
+        public virtual void SetData(Game newContext, PluginDataBaseGameBase PluginGameData)
         {
-            return new Task<bool>(() => false);
         }
     }
 }

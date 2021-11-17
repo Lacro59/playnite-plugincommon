@@ -33,6 +33,8 @@
     <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} dati sono stati esportati.
 Vuoi aprire la cartella?</sys:String>
 
+    <sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Impossibile eliminare la cartella cache:
+{0}</sys:String>
 
     <!-- login -->
 
@@ -118,6 +120,8 @@ Vuoi aprire la cartella?</sys:String>
 
     <!-- CommonNotifications -->
 
+    <sys:String x:Key="LOCCommonCreateLog">Vuoi creare un pacchetto di registri?</sys:String>
+    
     <sys:String x:Key="LOCCommonDataRemove">I dati del plugin sono stati rimossi.</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">Errore nella rimozione dei dati del plugin. Riprova.</sys:String>
 
@@ -173,6 +177,6 @@ Variabili di Windows che possono essere utilizzate per aggiungere una stringa di
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)</sys:String>
+{ProgramFiles(x86)}</sys:String>
 
 </ResourceDictionary>

@@ -1,4 +1,4 @@
-﻿using CommonPluginsPlaynite.Common;
+﻿using CommonPlayniteShared.Common;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
@@ -34,6 +34,19 @@ namespace CommonPluginsShared
                     Common.LogError(ex, false, $"Failed to load {ConfigurationsPath}");
                 }
             }
+
+
+            // TODO Temp
+            for (int i = 0; i < Configurations.Count; i++)
+            {
+                try
+                {
+                    Configurations[i].Os = Configurations[i].Os.Split('|')[0].Trim();
+                }
+                catch { }
+                FileSystem.WriteStringToFileSafe(ConfigurationsPath, Serialization.ToJson(Configurations));
+            }
+
 
             IdConfiguration = Configurations.FindIndex(x => x.Cpu == systemConfiguration.Cpu && x.Name == systemConfiguration.Name
                 && x.GpuName == systemConfiguration.GpuName && x.RamUsage == systemConfiguration.RamUsage);
@@ -118,7 +131,7 @@ namespace CommonPluginsShared
             #endregion
 
 
-            #region Ssytem informations
+            #region System informations
             string Os = string.Empty;
             string Cpu = string.Empty;
             uint CpuMaxClockSpeed = 0;
@@ -135,7 +148,7 @@ namespace CommonPluginsShared
                 ManagementObjectSearcher myOperativeSystemObject = new ManagementObjectSearcher("select * from Win32_OperatingSystem");
                 foreach (ManagementObject obj in myOperativeSystemObject.Get())
                 {
-                    Os = obj["Name"]?.ToString();
+                    Os = obj["Name"]?.ToString().Split('|')[0];
                     Common.LogDebug(true, $"Os: {Os}");
                 }
             }

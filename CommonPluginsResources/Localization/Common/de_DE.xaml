@@ -5,40 +5,42 @@
     <sys:String x:Key="LOCCommonRecentlyAdded">Kürzlich hinzugefügt</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Nur fehlende Metadaten herunterladen</sys:String>
     
-    <sys:String x:Key="LOCCommonTotal">Total</sys:String>
+    <sys:String x:Key="LOCCommonTotal">Gesamt</sys:String>
     <sys:String x:Key="LOCCommonCut">Cut</sys:String>
 
 
-    <sys:String x:Key="LOCCommon0to1">0 to 1 hours</sys:String>
-    <sys:String x:Key="LOCCommon1to5">1 to 5 hours</sys:String>
-    <sys:String x:Key="LOCCommon5to10">5 to 10 hours</sys:String>
-    <sys:String x:Key="LOCCommon10to20">10 to 20 hours</sys:String>
-    <sys:String x:Key="LOCCommon20to30">20 to 30 hours</sys:String>
-    <sys:String x:Key="LOCCommon30to40">30 to 40 hours</sys:String>
-    <sys:String x:Key="LOCCommon40to50">40 to 50 hours</sys:String>
-    <sys:String x:Key="LOCCommon50to60">50 to 60 hours</sys:String>
-    <sys:String x:Key="LOCCommon60to70">60 to 70 hours</sys:String>
-    <sys:String x:Key="LOCCommon70to80">70 to 80 hours</sys:String>
-    <sys:String x:Key="LOCCommon80to90">80 to 90 hours</sys:String>
-    <sys:String x:Key="LOCCommon90to100">90 to 100 hours</sys:String>
-    <sys:String x:Key="LOCCommon100plus">100 hours and more</sys:String>
+    <sys:String x:Key="LOCCommon0to1">0 bis 1 Stunde</sys:String>
+    <sys:String x:Key="LOCCommon1to5">1 bis 5 Stunden</sys:String>
+    <sys:String x:Key="LOCCommon5to10">5 bis 10 Stunden</sys:String>
+    <sys:String x:Key="LOCCommon10to20">10 bis 20 Stunden</sys:String>
+    <sys:String x:Key="LOCCommon20to30">20 bis 30 Stunden</sys:String>
+    <sys:String x:Key="LOCCommon30to40">30 bis 40 Stunden</sys:String>
+    <sys:String x:Key="LOCCommon40to50">40 bis 50 Stunden</sys:String>
+    <sys:String x:Key="LOCCommon50to60">50 bis 60 Stunden</sys:String>
+    <sys:String x:Key="LOCCommon60to70">60 bis 70 Stunden</sys:String>
+    <sys:String x:Key="LOCCommon70to80">70 bis 80 Stunden</sys:String>
+    <sys:String x:Key="LOCCommon80to90">80 bis 90 Stunden</sys:String>
+    <sys:String x:Key="LOCCommon90to100">90 bis 100 Stunden</sys:String>
+    <sys:String x:Key="LOCCommon100plus">100 Stunden und mehr</sys:String>
 
-    <sys:String x:Key="LOCCommonDefaultSorting">Default game list sorting</sys:String>
+    <sys:String x:Key="LOCCommonDefaultSorting">Standardsortierung der Spielliste</sys:String>
 
-    <sys:String x:Key="LOCCommonChartHideOptions">Hide chart options on control</sys:String>
-    <sys:String x:Key="LOCCommonChartAllPeriod">Display all data on chart by default</sys:String>
-    <sys:String x:Key="LOCCommonChartCutPeriod">Display only data with value by default</sys:String>
+    <sys:String x:Key="LOCCommonChartHideOptions">Diagrammoptionen ausblenden</sys:String>
+    <sys:String x:Key="LOCCommonChartAllPeriod">Standardmäßig alle Daten auf Diagramm anzeigen</sys:String>
+    <sys:String x:Key="LOCCommonChartCutPeriod">Standardmäßig nur Daten mit Wert anzeigen</sys:String>
     
-    <sys:String x:Key="LOCCommonExportData">Export data</sys:String>
-    <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} data has been exported.
-Do you want to open the directory?</sys:String>
+    <sys:String x:Key="LOCCommonExportData">Daten exportieren</sys:String>
+    <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} Daten wurden exportiert.
+Soll das Verzeichnis geöffnet werden?</sys:String>
 
+    <sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Cache Ordner konnte nicht gelöscht werden:
+{0}</sys:String>
 
     <!-- login -->
 
     <sys:String x:Key="LOCCommonAuthenticateLabel">Authentifizieren</sys:String>
     <sys:String x:Key="LOCCommonNotLoggedIn">Authentifizierung erforderlich</sys:String>
-    <sys:String x:Key="LOCCommonLoggedIn">Angemeldet</sys:String>
+    <sys:String x:Key="LOCCommonLoggedIn">Benutzer ist authentifiziert</sys:String>
     <sys:String x:Key="LOCCommonAccountName">Kontoname</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Authentifizierungsstatus wird überprüft …</sys:String>
 
@@ -48,16 +50,16 @@ Do you want to open the directory?</sys:String>
 
     <!-- CommonSettingsView -->
 
-    <sys:String x:Key="LOCCommonMenuInExtensions">Plugin-Menü im Erweiterungsmenü anzeigen *</sys:String>
-    <sys:String x:Key="LOCCommonIconStore">Shopsymbol anzeigen</sys:String>
+    <sys:String x:Key="LOCCommonMenuInExtensions">Plugin Menü im Erweiterungsmenü anzeigen *</sys:String>
+    <sys:String x:Key="LOCCommonIconStore">Shop Symbol anzeigen</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationFullScreen">Vollbildmodus</sys:String>
     <sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Vollbildintegration aktivieren</sys:String>
 
     <sys:String x:Key="LOCCommonIntegration">Darstellung</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationInCustomTheme">Benutzerdefinierte Theme-Integration aktivieren (nur wenn in benutzerdefiniertes Theme integriert)</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationInCustomTheme">Benutzerdefinierte Theme Integration aktivieren (nur wenn in benutzerdefiniertes Theme integriert)</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonHeader">Zeigt die Plugin-Schaltfläche in der Titelleiste des Fensters an *</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButton">Plugin-Schaltfläche in Spieldetails anzeigen</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButton">Plugin Schaltfläche in Spieldetails anzeigen</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInDescription">Plugin-Informationen in Spieldetails anzeigen</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationSelectElements">Details anzeigen</sys:String>
@@ -90,10 +92,10 @@ Do you want to open the directory?</sys:String>
 
     <!-- CommonMenus -->
 
-    <sys:String x:Key="LOCCommonViewNoData">View games without plugin data</sys:String>
+    <sys:String x:Key="LOCCommonViewNoData">Spiele ohne Plugindaten anzeigen</sys:String>
     
     <sys:String x:Key="LOCCommonRefreshGameData">Daten aktualisieren</sys:String>
-    <sys:String x:Key="LOCCommonRefreshAllData">Refresh all data</sys:String>
+    <sys:String x:Key="LOCCommonRefreshAllData">Alle Daten aktualisieren</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">Daten löschen</sys:String>
 
     <sys:String x:Key="LOCCommonSelectGames">Spiele auswählen</sys:String>
@@ -114,10 +116,12 @@ Do you want to open the directory?</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Entferne Tag von allen Spielen...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Datenbank wird geleert...</sys:String>
     <sys:String x:Key="LOCCommonProcessing">In Arbeit, bitte warten...</sys:String>
-    <sys:String x:Key="LOCCommonConverting">Converting, please wait...</sys:String>
+    <sys:String x:Key="LOCCommonConverting">Konvertierung, bitte warten...</sys:String>
 
     <!-- CommonNotifications -->
 
+    <sys:String x:Key="LOCCommonCreateLog">Wollen Sie ein Log Paket erstellen?</sys:String>
+    
     <sys:String x:Key="LOCCommonDataRemove">Die Plugin-Daten wurden entfernt.</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">Fehler beim Entfernen der Plugin-Daten. Bitte versuchen Sie es erneut.</sys:String>
 
@@ -126,38 +130,38 @@ Bitte alle Tags im Plugin-Menü löschen.</sys:String>
 
 
 
-    <sys:String x:Key="LOCCommonDimensions">Dimensions</sys:String>
+    <sys:String x:Key="LOCCommonDimensions">Abmessungen</sys:String>
     <sys:String x:Key="LOCCommonStyles">Styles</sys:String>
-    <sys:String x:Key="LOCCommonTypes">Types</sys:String>
-    <sys:String x:Key="LOCCommonSortByDate">Sort by date</sys:String>
-    <sys:String x:Key="LOCCommonSortByScore">Sort by score</sys:String>
+    <sys:String x:Key="LOCCommonTypes">Typen</sys:String>
+    <sys:String x:Key="LOCCommonSortByDate">Nach Datum sortieren</sys:String>
+    <sys:String x:Key="LOCCommonSortByScore">Nach Punkten sortieren</sys:String>
 
 
-    <sys:String x:Key="LOCCommonMisc">Misc</sys:String>
+    <sys:String x:Key="LOCCommonMisc">Sonstige</sys:String>
 
 
-    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
-{InstallDir} - Game installation directory
-{InstallDirName} - Installation folder name
-{ImagePath} - Game ISO/ROM path if set
-{ImageName} - Game ISO/ROM file name
-{ImageNameNoExt} - Game ISO/ROM file name without extension
-{PlayniteDir} - Playnite installation directory
-{Name} - Game name
+    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Spezielle Variablen können verwendet werden, um einen dynamischen String hinzuzufügen:
+{InstallDir} - Installationsverzeichnis des Spiels
+{InstallDirName} - Name des Installationsordners
+{ImagePath} - Spiel ISO/ROM Pfad, falls gesetzt
+{ImageName} - Spiel ISO/ROM Datei Name
+{ImageNameNoExt} - Spiel ISO/ROM Datei Name ohne erweiterung
+{PlayniteDir} - Playnite Installation Verzeichnis
+{Name} - Spiel Name
        
-Cloud variables can be used to add a dynamic string:        
+Cloud Variablen können verwendet werden, um einen dynamischen String hinzuzufügen:
 {DropboxFolder}
        
-Steam variables can be used to add a dynamic string:        
-{SteamId} - Steam user Id
-{SteamInstallDir} - Steam installation directory
-{SteamScreenshotsDir} - Steam screenshots directory
+Steam Variablen können verwendet werden, um einen dynamischen String hinzuzufügen:
+{SteamId} - Steam User ID
+{SteamInstallDir} - Steam Installation Verzeichnis
+{SteamScreenshotsDir} - Steam Screenshots directory
        
-Ubisoft Connect variables can be used to add a dynamic string:        
-{UbisoftInstallDir} - Ubisoft installation directory
-{UbisoftScreenshotsDir} - Ubisoft screenshots directory
+Ubisoft Connect Variablen können verwendet werden, um einen dynamischen String hinzuzufügen:   
+{UbisoftInstallDir} - Ubisoft Installation Verzeichnis
+{UbisoftScreenshotsDir} - Ubisoft Screenshots Verzeichnis
             
-Windows variables can be used to add a dynamic string:        
+Windows Variablen können verwendet werden, um einen dynamischen String hinzuzufügen:    
 {WinDir}
 {AllUsersProfile}
 {AppData}

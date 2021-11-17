@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using CommonPluginsPlaynite.Common;
+using CommonPlayniteShared.Common;
 using Playnite.SDK;
 using System;
 using System.Collections.Generic;

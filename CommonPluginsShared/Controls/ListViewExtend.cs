@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using CommonPluginsShared.Extensions;
+using System;
 using System.ComponentModel;
 using System.Text;
 using System.Windows;
@@ -240,7 +240,7 @@ namespace CommonPluginsShared.Controls
                     }
 
                     // No sort
-                    if (((string)headerClicked.Tag)?.ToLower() == "nosort")
+                    if (((string)headerClicked.Tag)?.IsEqual("nosort") ?? false)
                     {
                         headerClicked = null;
                     }

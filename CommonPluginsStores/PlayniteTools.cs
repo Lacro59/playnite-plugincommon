@@ -1,7 +1,7 @@
 ﻿using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
-using CommonPluginsPlaynite;
+using CommonPlayniteShared;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,13 +9,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommonPlayniteShared.Manifests;
-using CommonPluginsPlaynite.Common;
+using CommonPlayniteShared.Common;
 
 namespace CommonPluginsStores
 {
     public class PlayniteTools
     {
-        public static string StringExpandWithStores(IPlayniteAPI PlayniteAPI, Game game, string inputString, bool fixSeparators = false)
+        public static string StringExpandWithStores(Game game, string inputString, bool fixSeparators = false)
         {
             if (string.IsNullOrEmpty(inputString) || !inputString.Contains('{'))
             {
@@ -23,7 +23,7 @@ namespace CommonPluginsStores
             }
 
             string result = inputString;
-            result = CommonPluginsShared.PlayniteTools.StringExpandWithoutStore(PlayniteAPI, game, result, fixSeparators);
+            result = CommonPluginsShared.PlayniteTools.StringExpandWithoutStore(game, result, fixSeparators);
 
 
             // Steam

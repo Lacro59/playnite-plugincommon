@@ -20,7 +20,7 @@ using System.Net.Http.Headers;
 using System.Security;
 
 /*
-using CommonPluginsPlaynite.Common;
+using CommonPlayniteShared.Common;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 //using PSNLibrary.Models;
@@ -349,7 +349,6 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
 
             return titles;
         }
-
 
         //public async Task<List<TrophyTitlesWithIdsMobile.TrophyTitleWithIdsMobile>> GetTrohpiesWithIdsMobile(string[] titleIdsArray)
         //{

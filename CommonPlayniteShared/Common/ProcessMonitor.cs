@@ -9,7 +9,6 @@ using System.Threading;
 using System.IO;
 using Playnite.SDK;
 using System.Text.RegularExpressions;
-using CommonPluginsPlaynite.Common;
 
 namespace CommonPlayniteShared.Common
 {

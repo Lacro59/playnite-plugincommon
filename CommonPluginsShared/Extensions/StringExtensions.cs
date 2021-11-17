@@ -28,5 +28,16 @@ namespace CommonPluginsShared.Extensions
         {
             return Regex.Replace(text, @"s", "");
         }
+
+
+        public static bool IsEqual(this string source, string text)
+        {
+            if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(text))
+            {
+                return false;
+            }
+
+            return source.Trim().ToLower() == text.Trim().ToLower();
+        }
     }
 }

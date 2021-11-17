@@ -1,12 +1,9 @@
 ﻿using Playnite.SDK;
 using Playnite.SDK.Models;
-using CommonPluginsPlaynite.Database;
+using CommonPlayniteShared.Database;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 
 namespace CommonPluginsShared.Collections
 {

@@ -1,14 +1,11 @@
-﻿using Playnite.SDK;
+﻿using CommonPlayniteShared;
+using Playnite.SDK;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Configuration;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -49,35 +46,31 @@ namespace CommonPluginsShared
         {
             string PathImageFileName = Path.Combine(ImagesCachePath, PluginName.ToLower(), ImageFileName);
 
-            if (!url.ToLower().Contains("http"))
+            if (!StringExtensions.IsHttpUrl(url))
             {
                 return false;
             }
 
             using (var client = new HttpClient())
-            {               
-                Stream imageStream;
+            {
                 try
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
-                    HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
-
-                    if (response.StatusCode != HttpStatusCode.OK)
+                    var cachedFile = HttpFileCache.GetWebFile(url);
+                    if (string.IsNullOrEmpty(cachedFile))
                     {
+                        logger.Warn("Web file not found: " + url);
                         return false;
                     }
 
-                    imageStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                    ImageTools.Resize(cachedFile, 64, 64, PathImageFileName);
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false, $"Error on download {url}");
+                    if (!url.Contains("steamcdn-a.akamaihd.net", StringComparison.InvariantCultureIgnoreCase) && !ex.Message.Contains("(403)"))
+                    {
+                        Common.LogError(ex, false, $"Error on download {url}");
+                    }
                     return false;
-                }
-
-                if (imageStream != null)
-                {
-                    ImageTools.Resize(imageStream, 64, 64, PathImageFileName);
                 }
             }
 
@@ -504,11 +497,11 @@ namespace CommonPluginsShared
         /// <summary>
         /// Download string data with a bearer token.
         /// </summary>
-        /// <param name="UrlAchievements"></param>
+        /// <param name="url"></param>
         /// <param name="token"></param>
         /// <param name="UrlBefore"></param>
         /// <returns></returns>
-        public static async Task<string> DownloadStringData(string UrlAchievements, string token, string UrlBefore = "", string LangHeader = "")
+        public static async Task<string> DownloadStringData(string url, string token, string UrlBefore = "", string LangHeader = "")
         {
             using (var client = new HttpClient())
             {
@@ -525,21 +518,21 @@ namespace CommonPluginsShared
                 }
 
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-                string result = await client.GetStringAsync(UrlAchievements).ConfigureAwait(false);
+                string result = await client.GetStringAsync(url).ConfigureAwait(false);
 
                 return result;
             }
         }
 
 
-        public static async Task<string> DownloadStringDataJson(string Url)
+        public static async Task<string> DownloadStringDataJson(string url)
         {
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
                 client.DefaultRequestHeaders.Add("Accept", "*/*");
 
-                string result = await client.GetStringAsync(Url).ConfigureAwait(false);
+                string result = await client.GetStringAsync(url).ConfigureAwait(false);
                 return result;
             }
         }

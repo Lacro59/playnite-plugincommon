@@ -1,12 +1,14 @@
-﻿using CommonPluginsPlaynite;
-using CommonPluginsPlaynite.Common;
-using CommonPluginsPlaynite.Common.Web;
+﻿using CommonPlayniteShared.Common;//using Playnite.Common;
+using CommonPlayniteShared.Common.Web;//using Playnite.Common.Web;
 using Playnite.SDK;
+using CommonPlayniteShared;//using Playnite.Settings;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace CommonPlayniteShared
 {

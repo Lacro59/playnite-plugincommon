@@ -7,8 +7,10 @@ using System.Diagnostics;
 using System.Collections.Specialized;
 using System.ComponentModel;
 
-namespace CommonPluginsPlaynite.Controls
+namespace CommonPlayniteShared.Controls
 {
+    // TODO Must delete if no used
+    /*
     public class VirtualizingTilePanel : VirtualizingPanel, IScrollInfo
     {
         public double Columns
@@ -598,4 +600,5 @@ namespace CommonPluginsPlaynite.Controls
         #endregion
 
     }
+    */
 }

@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CommonPluginsPlaynite.Common.Web
+namespace CommonPlayniteShared.Common.Web
 {
     public interface IDownloader
     {

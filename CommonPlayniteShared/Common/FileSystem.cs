@@ -9,7 +9,7 @@ using System.Security.Cryptography;
 using Playnite.SDK;
 using System.Diagnostics;
 
-namespace CommonPluginsPlaynite.Common
+namespace CommonPlayniteShared.Common
 {
     public static class FileSystem
     {

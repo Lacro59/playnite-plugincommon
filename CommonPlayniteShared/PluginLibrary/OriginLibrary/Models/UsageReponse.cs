@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace CommonPluginsPlaynite.PluginLibrary.OriginLibrary.Models
+namespace CommonPlayniteShared.PluginLibrary.OriginLibrary.Models
 {
     public class UsageResponse
     {

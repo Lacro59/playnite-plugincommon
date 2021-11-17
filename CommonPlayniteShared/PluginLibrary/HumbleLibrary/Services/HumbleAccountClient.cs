@@ -12,12 +12,12 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CommonPluginsPlaynite.PluginLibrary.HumbleLibrary.Services
+namespace CommonPlayniteShared.PluginLibrary.HumbleLibrary.Services
 {
     public class HumbleAccountClient
     {
-        private static readonly ILogger logger = LogManager.GetLogger();
-        private readonly IWebView webView;
+        internal static readonly ILogger logger = LogManager.GetLogger();//private static readonly ILogger logger = LogManager.GetLogger();
+        internal readonly IWebView webView;//private readonly IWebView webView;
         private const string loginUrl = @"https://www.humblebundle.com/login?goto=%2Fhome%2Flibrary&qs=hmb_source%3Dnavbar";
         private const string libraryUrl = @"https://www.humblebundle.com/home/library?hmb_source=navbar";
         private const string logoutUrl = @"https://www.humblebundle.com/logout?goto=/";

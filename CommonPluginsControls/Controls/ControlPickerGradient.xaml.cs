@@ -35,13 +35,24 @@ namespace CommonPluginsControls.Controls
         public bool OnlySimpleColor = false;
 
         public Color SimpleColor;
-        public SolidColorBrush SimpleSolidColorBrush;
-        public LinearGradientBrush linearGradientBrush = new LinearGradientBrush();
+        private SolidColorBrush SimpleSolidColorBrush;
+        private LinearGradientBrush linearGradientBrush = new LinearGradientBrush();
 
 
         public ControlPickerGradient()
         {
             InitializeComponent();
+        }
+
+
+        public SolidColorBrush GetSolidColorBrush()
+        {
+            return SimpleSolidColorBrush.CloneCurrentValue();
+        }
+
+        public LinearGradientBrush GetLinearGradientBrush()
+        {
+            return linearGradientBrush.CloneCurrentValue();
         }
 
 
