@@ -12,6 +12,7 @@ namespace CommonPluginsShared.Collections
     {
         public abstract List<T> Items { get; set; }
 
+        // TODO DateLastRefresh not used???
         public DateTime DateLastRefresh { get; set; } = default(DateTime);
 
         [DontSerialize]
