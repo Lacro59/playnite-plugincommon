@@ -19,6 +19,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Commands.cs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\AttachedProperties.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\ImageAsync.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ListBoxExtend.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\ListViewExtend.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\PluginUserControlExtendBase.cs" />
