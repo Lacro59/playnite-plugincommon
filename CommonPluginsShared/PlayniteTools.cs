@@ -165,6 +165,44 @@ namespace CommonPluginsShared
 
             return false;
         }
+
+        public static bool GameUseRetroArch(Game game)
+        {
+            if (game?.GameActions == null)
+            {
+                return false;
+            }
+
+            foreach (var action in game.GameActions)
+            {
+                var emulator = API.Instance.Database.Emulators?.FirstOrDefault(e => e.Id == action?.EmulatorId);
+
+                if (emulator == null)
+                {
+                    logger.Warn($"No emulator find for {game.Name}");
+                    return false;
+                }
+
+                string BuiltInConfigId = string.Empty;
+                if (emulator.BuiltInConfigId == null)
+                {
+                    logger.Warn($"No BuiltInConfigId find for {emulator.Name}");
+                }
+                else
+                {
+                    BuiltInConfigId = emulator.BuiltInConfigId;
+                }
+
+                if (BuiltInConfigId.Contains("RetroArch", StringComparison.OrdinalIgnoreCase)
+                    || emulator.Name.Contains("RetroArch", StringComparison.OrdinalIgnoreCase)
+                    || emulator.InstallDir.Contains("RetroArch", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
         #endregion
 
 
@@ -515,6 +553,36 @@ namespace CommonPluginsShared
                     dynamic DropboxInfo = Serialization.FromJsonFile<dynamic>(DropboxInfoFile);
                     result = result.Replace("{DropboxFolder}", ((dynamic)DropboxInfo["personal"]["path"]).Value);
                 }
+            }
+
+            //RetroArchScreenshotsDir
+            if (result.Contains("{RetroArchScreenshotsDir"))
+            {
+                string RetroarchScreenshots = string.Empty;
+                var emulator = API.Instance.Database.Emulators.Where(x => x.Name.Contains("RetroArch", StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+                if (emulator != null)
+                {
+                    string cfg = Path.Combine(emulator.InstallDir, "retroarch.cfg");
+                    if (File.Exists(cfg))
+                    {
+                        string line = string.Empty;
+                        string Name = string.Empty;
+                        StreamReader file = new StreamReader(cfg);
+                        while ((line = file.ReadLine()) != null)
+                        {
+                            if (line.Contains("screenshot_directory", StringComparison.OrdinalIgnoreCase))
+                            {
+                                RetroarchScreenshots = line.Replace("screenshot_directory = ", string.Empty)
+                                                            .Replace("\"", string.Empty)
+                                                            .Trim()
+                                                            .Replace(":", emulator.InstallDir);
+                            }
+                        }
+                        file.Close();
+                    }
+                }
+
+                result = result.Replace("{RetroArchScreenshotsDir}", RetroarchScreenshots);
             }
 
 
