@@ -609,6 +609,82 @@ namespace CommonPluginsShared
         }
 
 
+        public static string PathToRelativeWithoutStores(Game game, string inputString)
+        {
+            if (string.IsNullOrEmpty(inputString))
+            {
+                return inputString;
+            }
+
+            string result = inputString;
+
+
+            string DropboxFolder = StringExpandWithoutStore(game, "{DropboxFolder}");
+            if (!DropboxFolder.IsNullOrEmpty())
+            {
+                result = result.Replace(DropboxFolder, "{DropboxFolder}");
+            }
+
+            string RetroArchScreenshotsDir = StringExpandWithoutStore(game, "{RetroArchScreenshotsDir}");
+            if (!RetroArchScreenshotsDir.IsNullOrEmpty())
+            {
+                result = result.Replace(RetroArchScreenshotsDir, "{RetroArchScreenshotsDir}");
+            }
+
+
+            string AppData = StringExpandWithoutStore(game, "{AppData}");
+            result = result.Replace(AppData, "{AppData}");
+
+            string AllUsersProfile = StringExpandWithoutStore(game, "{AllUsersProfile}");
+            result = result.Replace(AllUsersProfile, "{AllUsersProfile}");
+
+            string CommonProgramFiles = StringExpandWithoutStore(game, "{CommonProgramFiles}");
+            result = result.Replace(CommonProgramFiles, "{CommonProgramFiles}");
+
+            string CommonProgramFiles_x86 = StringExpandWithoutStore(game, "{CommonProgramFiles(x86)}");
+            result = result.Replace(CommonProgramFiles_x86, "{CommonProgramFiles(x86)}");
+
+            string CommonProgramW6432 = StringExpandWithoutStore(game, "{CommonProgramW6432}");
+            result = result.Replace(CommonProgramW6432, "{CommonProgramW6432}");
+
+            string ProgramFiles = StringExpandWithoutStore(game, "{ProgramFiles}");
+            result = result.Replace(ProgramFiles, "{ProgramFiles}");
+
+            string ProgramFiles_x86 = StringExpandWithoutStore(game, "{ProgramFiles(x86)}");
+            result = result.Replace(ProgramFiles_x86, "{ProgramFiles(x86)}");
+
+            string Public = StringExpandWithoutStore(game, "{Public}");
+            result = result.Replace(Public, "{Public}");
+
+            string WinDir = StringExpandWithoutStore(game, "{WinDir}");
+            result = result.Replace(WinDir, "{WinDir}");
+
+            string UserProfile = StringExpandWithoutStore(game, "{UserProfile}");
+            result = result.Replace(UserProfile, "{UserProfile}");
+
+            string SystemRoot = StringExpandWithoutStore(game, "{SystemRoot}");
+            result = result.Replace(SystemRoot, "{SystemRoot}");
+
+            string HomePath = StringExpandWithoutStore(game, "{HomePath}");
+            result = result.Replace(HomePath, "{HomePath}");
+
+            string SystemDrive = StringExpandWithoutStore(game, "{SystemDrive}");
+            result = result.Replace(SystemDrive, "{SystemDrive}");
+
+            string HomeDrive = StringExpandWithoutStore(game, "{HomeDrive}");
+            result = result.Replace(HomeDrive, "{HomeDrive}");
+
+            string UserName = StringExpandWithoutStore(game, "{UserName}");
+            result = result.Replace(UserName, "{UserName}");
+
+            string ComputerName = StringExpandWithoutStore(game, "{ComputerName}");
+            result = result.Replace(ComputerName, "{ComputerName}");
+
+            return result;
+        }
+
+
+
         public static void CreateLogPackage(string PluginName)
         {
             var response = API.Instance.Dialogs.ShowMessage(resources.GetString("LOCCommonCreateLog"), PluginName, System.Windows.MessageBoxButton.YesNo);

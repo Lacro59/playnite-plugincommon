@@ -34,11 +34,10 @@ namespace CommonPluginsStores
 
         public string GetScreeshotsPath()
         {
-            string ConfigPath = Path.Combine(Environment.GetEnvironmentVariable("AppData"), "..", "Local", "Ubisoft Game Launcher", "settings.yml");
+            string ConfigPath = Path.Combine(Environment.GetEnvironmentVariable("AppData"), "..", "Local", "Ubisoft Game Launcher", "settings.yaml");
             if (File.Exists(ConfigPath))
             {
                 dynamic SettingsData = Serialization.FromYamlFile<dynamic>(ConfigPath);
-
                 return ((string)SettingsData["misc"]["screenshot_root_path"]).Replace('/', Path.DirectorySeparatorChar);
             }
 
