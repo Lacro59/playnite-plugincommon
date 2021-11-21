@@ -25,6 +25,8 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">Tri par défaut de la liste des jeux</sys:String>
 
+    <sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated</sys:String>
+
     <sys:String x:Key="LOCCommonChartHideOptions">Masquer les options du graphique</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">Par défaut, montrer toutes les données sur le graphique</sys:String>
     <sys:String x:Key="LOCCommonChartCutPeriod">Par défaut, ne montrer que les données avec des valeurs</sys:String>
