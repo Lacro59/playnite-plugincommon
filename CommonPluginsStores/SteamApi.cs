@@ -21,6 +21,11 @@ namespace CommonPluginsStores
 
         private string InstallationPath { get; set; }
 
+        public string LoginUsersPath
+        {
+            get => Path.Combine(InstallationPath, "config", "loginusers.vdf");
+        }
+
 
         public SteamApi()
         {
@@ -231,6 +236,36 @@ namespace CommonPluginsStores
             logger.Warn("No find Steam installation");
             return PathScreeshotsFolder;
         }
+
+        internal List<LocalSteamUser> GetSteamUsers()
+        {
+            var users = new List<LocalSteamUser>();
+            if (File.Exists(LoginUsersPath))
+            {
+                var config = new KeyValue();
+
+                try
+                {
+                    config.ReadFileAsText(LoginUsersPath);
+                    foreach (var user in config.Children)
+                    {
+                        users.Add(new LocalSteamUser()
+                        {
+                            Id = ulong.Parse(user.Name),
+                            AccountName = user["AccountName"].Value,
+                            PersonaName = user["PersonaName"].Value,
+                            Recent = user["mostrecent"].AsBoolean()
+                        });
+                    }
+                }
+                catch (Exception e) 
+                {
+
+                }
+            }
+
+            return users;
+        }
     }
 
 
@@ -262,5 +297,28 @@ namespace CommonPluginsStores
         public string Name { get; set; }
         [SerializationPropertyName("desc")]
         public string Desc { get; set; }
+    }
+
+    public class LocalSteamUser
+    {
+        public ulong Id
+        {
+            get; set;
+        }
+
+        public string AccountName
+        {
+            get; set;
+        }
+
+        public string PersonaName
+        {
+            get; set;
+        }
+
+        public bool Recent
+        {
+            get; set;
+        }
     }
 }

@@ -25,6 +25,8 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">Типове сортування списку ігор</sys:String>
 
+    <sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated</sys:String>
+
     <sys:String x:Key="LOCCommonChartHideOptions">Сховати параметри діаграми на елементі керування</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">Відображати усі дані на графіку за замовчуванням</sys:String>
     <sys:String x:Key="LOCCommonChartCutPeriod">Показувати тільки дані зі значенням за замовчуванням</sys:String>
