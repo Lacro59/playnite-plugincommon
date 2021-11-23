@@ -12,16 +12,13 @@ namespace CommonPluginsShared.Converters
         {
             try
             {
-                if (values[0] is double && values[1] is double)
+                if (parameter.ToString() == "-")
                 {
-                    if (parameter.ToString() == "-")
-                    {
-                        return (double)values[0] - (double)values[1];
-                    }
-                    else
-                    {
-                        return (double)values[0] + (double)values[1];
-                    }
+                    return double.Parse(values[0].ToString()) - double.Parse(values[1].ToString());
+                }
+                else
+                {
+                    return double.Parse(values[0].ToString()) + double.Parse(values[1].ToString());
                 }
             }
             catch
