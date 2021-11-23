@@ -60,7 +60,8 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 
     <sys:String x:Key="LOCCommonIntegration">Apparence</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInCustomTheme">Intégration dans les thèmes personnalisés (si intégré)</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Afficher le bouton du plugin dans la barre de titre de la fenêtre *</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Display the plugin button in window title bar</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonSide">Display the plugin button in the side bar</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButton">Afficher le bouton du plugin dans les détails du jeu</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInDescription">Afficher les informations du plugin dans les détails du jeu</sys:String>
 
