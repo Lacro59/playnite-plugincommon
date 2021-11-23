@@ -60,7 +60,8 @@
 
     <sys:String x:Key="LOCCommonIntegration">Внешний вид</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInCustomTheme">Интеграция в нестандартные темы (если поддерживается темой)</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Display the plugin button in window title bar *</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Display the plugin button in window title bar</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonSide">Display the plugin button in the side bar</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButton">Показать кнопку плагина в подробностях игры</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInDescription">Показать кнопку плагина в подробностях игры</sys:String>
 
