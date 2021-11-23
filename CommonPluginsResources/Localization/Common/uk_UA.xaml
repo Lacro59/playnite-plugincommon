@@ -60,7 +60,8 @@
 
     <sys:String x:Key="LOCCommonIntegration">Вигляд</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInCustomTheme">Увімкнути інтеграцію в користувацьку тему (лише якщо інтегровано в користувацьку тему)</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Add plugin button to Playnite window</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Відображати кнопку плагіну в заголовку вікна</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonSide">Відображати кнопку плагіну на бічній панелі</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButton">Відображати кнопку плагіну у деталях гри</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInDescription">Відображати інформацію плагіну у деталях гри</sys:String>
 

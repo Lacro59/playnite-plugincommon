@@ -60,7 +60,8 @@ Vuoi aprire la cartella?</sys:String>
 
     <sys:String x:Key="LOCCommonIntegration">Aspetto</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInCustomTheme">Abilita l'integrazione del tema personalizzato (Solo se integrata nel tema personalizzato)</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Mostra il pulsante plug-in nella barra del titolo della finestra *</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Visualizza il pulsante del plugin nella barra del titolo della finestra</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonSide">Visualizza il pulsante del plugin nella barra laterale</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButton">Mostra pulsante del plugin nei dettagli del gioco</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInDescription">Mostra informazioni del plugin nei dettagli del gioco</sys:String>
 
