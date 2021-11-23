@@ -60,7 +60,8 @@ Do you want to open the directory?</sys:String>
 
     <sys:String x:Key="LOCCommonIntegration">Wygląd</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInCustomTheme">Włącz niestandardową integrację motywu (tylko wtedy, gdy zintegrowano z niestandardowym motywem)</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Wyświetl przycisk wtyczki na pasku tytułu okna *</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Display the plugin button in window title bar</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonSide">Display the plugin button in the side bar</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButton">Pokaż przycisk wtyczki w szczegółach gry</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInDescription">Pokaż informacje o wtyczce w szczegółach gry</sys:String>
 
