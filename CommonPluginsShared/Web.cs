@@ -22,6 +22,8 @@ namespace CommonPluginsShared
     {
         private static ILogger logger = LogManager.GetLogger();
 
+        public static string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:93.0) Gecko/20100101 Firefox/93.0";
+
 
         private static string StrWebUserAgentType(WebUserAgentType UserAgentType)
         {
@@ -106,7 +108,7 @@ namespace CommonPluginsShared
             {
                 try
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                    client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                     HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
 
                     if (response.StatusCode != HttpStatusCode.OK)
@@ -136,7 +138,7 @@ namespace CommonPluginsShared
             {
                 try
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                    client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                     HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
                     return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
                 }
@@ -180,7 +182,7 @@ namespace CommonPluginsShared
             {
                 try
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                    client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                     HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(false);
                     return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
                 }
@@ -211,7 +213,7 @@ namespace CommonPluginsShared
                 HttpResponseMessage response;
                 try
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                    client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                     response = await client.SendAsync(request).ConfigureAwait(false);
 
                     var uri = response.RequestMessage.RequestUri.ToString();
@@ -274,7 +276,7 @@ namespace CommonPluginsShared
 
             using (HttpClient client = new HttpClient(handler))
             {
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                 return await client.GetStringAsync(url).ConfigureAwait(false);
             }
         }
@@ -298,7 +300,7 @@ namespace CommonPluginsShared
                 HttpResponseMessage response;
                 try
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                    client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                     response = await client.SendAsync(request).ConfigureAwait(false);
                 }
                 catch (Exception ex)
@@ -353,7 +355,7 @@ namespace CommonPluginsShared
                 HttpResponseMessage response;
                 try
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                    client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                     client.DefaultRequestHeaders.UserAgent.TryParseAdd(StrWebUserAgentType(UserAgentType));
                     response = await client.SendAsync(request).ConfigureAwait(false);
                 }
@@ -422,7 +424,7 @@ namespace CommonPluginsShared
             {
                 if (UserAgent.IsNullOrEmpty())
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                    client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                 }
                 else
                 {
@@ -465,7 +467,7 @@ namespace CommonPluginsShared
             {
                 if (UserAgent.IsNullOrEmpty())
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                    client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                 }
                 else
                 {
@@ -505,7 +507,7 @@ namespace CommonPluginsShared
         {
             using (var client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
 
                 if (!LangHeader.IsNullOrEmpty())
                 {
@@ -529,7 +531,7 @@ namespace CommonPluginsShared
         {
             using (var client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                 client.DefaultRequestHeaders.Add("Accept", "*/*");
 
                 string result = await client.GetStringAsync(url).ConfigureAwait(false);
@@ -583,7 +585,7 @@ namespace CommonPluginsShared
 
             using (var client = new HttpClient(handler))
             {
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                 client.DefaultRequestHeaders.Add("accept", "application/json, text/javascript, */*; q=0.01");
                 client.DefaultRequestHeaders.Add("Vary", "Accept-Encoding");
                 HttpContent c = new StringContent(payload, Encoding.UTF8, "application/json");
@@ -646,7 +648,7 @@ namespace CommonPluginsShared
 
             using (var client = new HttpClient(handler))
             {
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
 
                 HttpResponseMessage result;
                 try
