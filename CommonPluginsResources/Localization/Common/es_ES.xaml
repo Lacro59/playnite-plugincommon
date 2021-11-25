@@ -123,7 +123,7 @@
 
     <!-- CommonNotifications -->
 
-    <sys:String x:Key="LOCCommonCreateLog">¿Quieres crear un paquete de registro?</sys:String>
+    <sys:String x:Key="LOCCommonCreateLog"></sys:String>
     
     <sys:String x:Key="LOCCommonDataRemove">Se han eliminado los datos del plugin.</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">Error al eliminar datos del plugin. Por favor, inténtelo de nuevo.</sys:String>
