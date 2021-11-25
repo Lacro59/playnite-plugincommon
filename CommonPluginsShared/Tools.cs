@@ -26,16 +26,16 @@ namespace CommonPluginsShared
             string[] SizeSuffixes = { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
 
             if (Value < 0) { return "-" + SizeSuffix(-Value); }
-            if (Value == 0) { return "0" + CultureInfo.CurrentUICulture.NumberFormat.NumberDecimalSeparator + "0 bytes"; }
+            if (Value == 0) { return "0" + CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator + "0 bytes"; }
 
             int mag = (int)Math.Log(Value, 1024);
             decimal adjustedSize = (decimal)Value / (1L << (mag * 10));
 
             if (WithoutDouble)
             {
-                return string.Format("{0} {1}", adjustedSize.ToString("0", CultureInfo.CurrentUICulture), SizeSuffixes[mag]);
+                return string.Format("{0} {1}", adjustedSize.ToString("0", CultureInfo.CurrentCulture), SizeSuffixes[mag]);
             }
-            return string.Format("{0} {1}", adjustedSize.ToString("0.0", CultureInfo.CurrentUICulture), SizeSuffixes[mag]);
+            return string.Format("{0} {1}", adjustedSize.ToString("0.0", CultureInfo.CurrentCulture), SizeSuffixes[mag]);
         }
 
 
