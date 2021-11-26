@@ -115,6 +115,9 @@
       <DependentUpon>SearchBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Views\ListDataUpdated.xaml.cs">
+      <DependentUpon>ListDataUpdated.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ListWithNoData.xaml.cs">
       <DependentUpon>ListWithNoData.xaml</DependentUpon>
     </Compile>
@@ -179,6 +182,10 @@
     <Page Include="PlayniteControls\SearchBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ListDataUpdated.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\ListWithNoData.xaml">
       <SubType>Designer</SubType>
