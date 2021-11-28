@@ -9,10 +9,10 @@
     <Slider.Resources>
         <local:ElementToTrianglePointsConverter x:Key="ElementToTrianglePointsConverter" />
     </Slider.Resources>
-    
+
     <Slider.Style>
-        <Style TargetType="{x:Type Slider}" BasedOn="{StaticResource BaseStyle}">
-            <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Style TargetType="{x:Type Slider}" BasedOn="{StaticResource {x:Type Slider}}">
+                <Setter Property="SnapsToDevicePixels" Value="True" />
             <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource NormalBorderBrush}" />
             <Setter Property="Template">

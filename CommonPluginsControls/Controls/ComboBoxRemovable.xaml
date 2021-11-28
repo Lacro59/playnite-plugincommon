@@ -6,7 +6,7 @@
              mc:Ignorable="d" d:DesignHeight="20" d:DesignWidth="100">
 
     <ComboBox.Style>
-        <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource BaseStyle}">
+        <Style TargetType="{x:Type ComboBox}" BasedOn="{StaticResource {x:Type ComboBox}}">
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
             <Setter Property="SnapsToDevicePixels" Value="True" />
             <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
