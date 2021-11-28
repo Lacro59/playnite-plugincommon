@@ -60,8 +60,8 @@ Soll das Verzeichnis geöffnet werden?</sys:String>
 
     <sys:String x:Key="LOCCommonIntegration">Darstellung</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInCustomTheme">Benutzerdefinierte Theme Integration aktivieren (nur wenn in benutzerdefiniertes Theme integriert)</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Display the plugin button in window title bar</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonSide">Display the plugin button in the side bar</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Plugin Schaltfläche in der Titelleiste des Fensters anzeigen</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonSide">Plugin Schaltfläche in der Seitenleiste anzeigen</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButton">Plugin Schaltfläche in Spieldetails anzeigen</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInDescription">Plugin-Informationen in Spieldetails anzeigen</sys:String>
 
