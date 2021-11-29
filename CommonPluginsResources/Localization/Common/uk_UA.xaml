@@ -52,11 +52,11 @@
 
     <!-- CommonSettingsView -->
 
-    <sys:String x:Key="LOCCommonMenuInExtensions">Plugin main menus in extensions menu *</sys:String>
-    <sys:String x:Key="LOCCommonIconStore">Show icon store</sys:String>
+    <sys:String x:Key="LOCCommonMenuInExtensions">Показувати меню плагіну у підменю розширень *</sys:String>
+    <sys:String x:Key="LOCCommonIconStore">Показувати іконку магазину</sys:String>
 
-    <sys:String x:Key="LOCCommonIntegrationFullScreen">Full screen</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Enable full screen integration</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationFullScreen">Повноекранний режим</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Включити інтеграцію в повноекранний режим</sys:String>
 
     <sys:String x:Key="LOCCommonIntegration">Вигляд</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInCustomTheme">Увімкнути інтеграцію в користувацьку тему (лише якщо інтегровано в користувацьку тему)</sys:String>
@@ -87,7 +87,7 @@
     <sys:String x:Key="LOCCommonDatabase">База даних</sys:String>
 
     <sys:String x:Key="LOCCommonControlsAvailable">Елементи доступні для підтримуваних тем</sys:String>
-    <sys:String x:Key="LOCCommonControlsPluginButtonShow">Відображати кнопку плагін</sys:String>
+    <sys:String x:Key="LOCCommonControlsPluginButtonShow">Відображати кнопку плагіну</sys:String>
     <sys:String x:Key="LOCCommonControlsPluginButtonShowInContextMenu">Відображати дані в контекстному меню</sys:String>
     <sys:String x:Key="LOCCommonControlsPluginViewItemShow">Відображати дані в списку ігор</sys:String>
 
@@ -95,7 +95,7 @@
 
     <!-- CommonMenus -->
 
-    <sys:String x:Key="LOCCommonViewNoData">Показати ігри без даних плагін</sys:String>
+    <sys:String x:Key="LOCCommonViewNoData">Показати ігри без даних плагіну</sys:String>
     
     <sys:String x:Key="LOCCommonRefreshGameData">Оновити дані</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">Оновити всі дані</sys:String>
@@ -107,9 +107,9 @@
     <sys:String x:Key="LOCCommonSelectData">Завантажити дані для вибраних ігор</sys:String>
     <sys:String x:Key="LOCCommonDownloadPluginData">Завантажити дані плагіну...</sys:String>
     <sys:String x:Key="LOCCommonGetAllDatas">Завантажити дані для всіх ігор</sys:String>
-    <sys:String x:Key="LOCCommonDeletePluginData">Видалити дані плагін</sys:String>
+    <sys:String x:Key="LOCCommonDeletePluginData">Видалити дані плагіну</sys:String>
     <sys:String x:Key="LOCCommonClearAllDatas">Видалити дані з усіх ігор</sys:String>
-    <sys:String x:Key="LOCCommonRemoveAllTags">Вилучити тег плагін</sys:String>
+    <sys:String x:Key="LOCCommonRemoveAllTags">Вилучити тег плагіну</sys:String>
 
     <!-- CommonGlobalProgress -->
 
