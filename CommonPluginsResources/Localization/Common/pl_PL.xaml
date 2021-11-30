@@ -123,6 +123,9 @@ Do you want to open the directory?</sys:String>
 
     <!-- CommonNotifications -->
 
+    <sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">Error retrieving data from {0}.
+Please try again.</sys:String>
+    
     <sys:String x:Key="LOCCommonCreateLog">Do you want create a log package?</sys:String>
     
     <sys:String x:Key="LOCCommonDataRemove">Dane wtyczki zostały usunięte.</sys:String>

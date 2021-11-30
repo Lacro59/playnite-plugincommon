@@ -60,8 +60,8 @@
 
     <sys:String x:Key="LOCCommonIntegration">Apariencia</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInCustomTheme">Activar integración de temas personalizados (sólo si se integra en un tema personalizado)</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Display the plugin button in window title bar</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonSide">Display the plugin button in the side bar</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Mostrar el botón del plugin en la barra de título de la ventana</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonSide">Mostrar el botón del plugin en la barra lateral</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButton">Mostrar botón del plugin en los detalles del juego</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInDescription">Mostrar botón del plugin en los detalles del juego</sys:String>
 
@@ -123,6 +123,9 @@
 
     <!-- CommonNotifications -->
 
+    <sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">Error retrieving data from {0}.
+Please try again.</sys:String>
+    
     <sys:String x:Key="LOCCommonCreateLog"></sys:String>
     
     <sys:String x:Key="LOCCommonDataRemove">Se han eliminado los datos del plugin.</sys:String>
