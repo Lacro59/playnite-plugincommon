@@ -123,6 +123,9 @@
 
     <!-- CommonNotifications -->
 
+    <sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">Error retrieving data from {0}.
+Please try again.</sys:String>
+    
     <sys:String x:Key="LOCCommonCreateLog">Бажаєте створити пакет журналу?</sys:String>
     
     <sys:String x:Key="LOCCommonDataRemove">Дані плагіну були видалені.</sys:String>
