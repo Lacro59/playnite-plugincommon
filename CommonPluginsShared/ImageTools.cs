@@ -45,8 +45,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, true, $"Error on GetImapeProperty({srcPath})");
-                logger.Error("Error on GetImapeProperty()");
+                Common.LogError(ex, false, $"Error on GetImapeProperty({srcPath})");
                 return null;
             }
         }
@@ -66,8 +65,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, true);
-                logger.Error("Error on GetImapeProperty()");
+                Common.LogError(ex, false);
                 return null;
             }
         }
@@ -84,8 +82,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, true);
-                logger.Error("Error on GetImapeProperty()");
+                Common.LogError(ex, false);
                 return null;
             }
         }
@@ -113,7 +110,6 @@ namespace CommonPluginsShared
                 return string.Empty;
             }
         }
-
 
         public static bool Resize(string srcPath, int width, int height, string path)
         {
@@ -150,35 +146,42 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, true);
+                Common.LogError(ex, false);
                 return false;
             }
         }
 
-
         public static Bitmap Resize(Image image, int width, int height)
         {
-            Rectangle destRect = new Rectangle(0, 0, width, height);
-            Bitmap destImage = new Bitmap(width, height);
+            try
+            { 
+                Rectangle destRect = new Rectangle(0, 0, width, height);
+                Bitmap destImage = new Bitmap(width, height);
 
-            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+                destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-            using (Graphics graphics = Graphics.FromImage(destImage))
-            {
-                graphics.CompositingMode = CompositingMode.SourceCopy;
-                graphics.CompositingQuality = CompositingQuality.HighQuality;
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = SmoothingMode.HighQuality;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-                using (ImageAttributes wrapMode = new ImageAttributes())
+                using (Graphics graphics = Graphics.FromImage(destImage))
                 {
-                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
-                }
-            }
+                    graphics.CompositingMode = CompositingMode.SourceCopy;
+                    graphics.CompositingQuality = CompositingQuality.HighQuality;
+                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    graphics.SmoothingMode = SmoothingMode.HighQuality;
+                    graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-            return destImage;
+                    using (ImageAttributes wrapMode = new ImageAttributes())
+                    {
+                        wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                        graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                    }
+                }
+
+                return destImage;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                return null;
+            }
         }
         #endregion
 
@@ -223,53 +226,77 @@ namespace CommonPluginsShared
 
         public static BitmapSource ConvertBitmapToBitmapSource(Bitmap bitmap)
         {
-            var bitmapData = bitmap.LockBits(
-                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                ImageLockMode.ReadOnly, bitmap.PixelFormat);
+            try
+            {
+                var bitmapData = bitmap.LockBits(
+                    new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                    ImageLockMode.ReadOnly, bitmap.PixelFormat);
 
-            var bitmapSource = BitmapSource.Create(
-                bitmapData.Width, bitmapData.Height,
-                bitmap.HorizontalResolution, bitmap.VerticalResolution,
-                PixelFormats.Bgr24, null,
-                bitmapData.Scan0, bitmapData.Stride * bitmapData.Height, bitmapData.Stride);
+                var bitmapSource = BitmapSource.Create(
+                    bitmapData.Width, bitmapData.Height,
+                    bitmap.HorizontalResolution, bitmap.VerticalResolution,
+                    PixelFormats.Bgr24, null,
+                    bitmapData.Scan0, bitmapData.Stride * bitmapData.Height, bitmapData.Stride);
 
-            bitmap.UnlockBits(bitmapData);
+                bitmap.UnlockBits(bitmapData);
 
-            return bitmapSource;
+                return bitmapSource;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                return null;
+            }
         }
 
         public static BitmapImage ConvertBitmapToBitmapImage(Bitmap bitmap)
         {
-            using (var memory = new MemoryStream())
+            try
             {
-                bitmap.Save(memory, ImageFormat.Png);
-                memory.Position = 0;
+                using (var memory = new MemoryStream())
+                {
+                    bitmap.Save(memory, ImageFormat.Png);
+                    memory.Position = 0;
 
-                var bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-                bitmapImage.Freeze();
+                    var bitmapImage = new BitmapImage();
+                    bitmapImage.BeginInit();
+                    bitmapImage.StreamSource = memory;
+                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmapImage.EndInit();
+                    bitmapImage.Freeze();
 
-                return bitmapImage;
+                    return bitmapImage;
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                return null;
             }
         }
 
         public static BitmapImage ConvertImageToBitmapImage(Image image)
         {
-            using (var memory = new MemoryStream())
+            try
             {
-                image.Save(memory, ImageFormat.Png);
-                memory.Position = 0;
+                using (var memory = new MemoryStream())
+                {
+                    image.Save(memory, ImageFormat.Png);
+                    memory.Position = 0;
 
-                var bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
+                    var bitmapImage = new BitmapImage();
+                    bitmapImage.BeginInit();
+                    bitmapImage.StreamSource = memory;
+                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmapImage.EndInit();
 
-                return bitmapImage;
+                    return bitmapImage;
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                return null;
             }
         }
         #endregion
