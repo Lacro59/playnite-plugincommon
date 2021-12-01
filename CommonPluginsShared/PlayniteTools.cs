@@ -148,7 +148,7 @@ namespace CommonPluginsShared
                 string BuiltInConfigId = string.Empty;
                 if (emulator.BuiltInConfigId == null)
                 {
-                    logger.Warn($"No BuiltInConfigId find for {emulator.Name}");
+                    //logger.Warn($"No BuiltInConfigId find for {emulator.Name}");
                 }
                 else
                 {
