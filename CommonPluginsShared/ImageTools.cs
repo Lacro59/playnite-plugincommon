@@ -32,6 +32,11 @@ namespace CommonPluginsShared
         #region ImageProperty
         public static ImageProperty GetImapeProperty(string srcPath)
         {
+            if (!File.Exists(srcPath))
+            {
+                return null;
+            }
+
             try
             {
                 using (Image image = Image.FromFile(srcPath))
@@ -92,6 +97,11 @@ namespace CommonPluginsShared
         #region Resize
         public static string Resize(string srcPath, int width, int height)
         {
+            if (!File.Exists(srcPath))
+            {
+                return false;
+            }
+
             try
             {
                 Image image = Image.FromFile(srcPath);
@@ -113,6 +123,11 @@ namespace CommonPluginsShared
 
         public static bool Resize(string srcPath, int width, int height, string path)
         {
+            if (!File.Exists(srcPath))
+            {
+                return false;
+            }
+
             try
             {
                 Image image = Image.FromFile(srcPath);
