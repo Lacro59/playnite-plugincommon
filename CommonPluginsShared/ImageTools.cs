@@ -99,7 +99,7 @@ namespace CommonPluginsShared
         {
             if (!File.Exists(srcPath))
             {
-                return false;
+                return string.Empty;
             }
 
             try
