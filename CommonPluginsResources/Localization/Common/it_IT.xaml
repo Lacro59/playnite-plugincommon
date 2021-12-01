@@ -123,8 +123,8 @@ Vuoi aprire la cartella?</sys:String>
 
     <!-- CommonNotifications -->
 
-    <sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">Error retrieving data from {0}.
-Please try again.</sys:String>
+    <sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">Errore nel recupero dei dati da {0}.
+Riprova.</sys:String>
     
     <sys:String x:Key="LOCCommonCreateLog">Vuoi creare un pacchetto di registri?</sys:String>
     
