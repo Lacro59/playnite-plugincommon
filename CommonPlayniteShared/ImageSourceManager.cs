@@ -71,7 +71,7 @@ namespace CommonPlayniteShared
                     var cachedFile = HttpFileCache.GetWebFile(source);
                     if (string.IsNullOrEmpty(cachedFile))
                     {
-                        logger.Warn("Web file not found: " + source);
+                        //logger.Warn("Web file not found: " + source);
                         return null;
                     }
 
@@ -217,7 +217,7 @@ namespace CommonPlayniteShared
                     var cachedFile = HttpFileCache.GetWebFile(source);
                     if (string.IsNullOrEmpty(cachedFile))
                     {
-                        logger.Warn("Web file not found: " + source);
+                        //logger.Warn("Web file not found: " + source);
                         return null;
                     }
 

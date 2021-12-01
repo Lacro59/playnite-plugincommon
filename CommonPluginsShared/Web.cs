@@ -60,7 +60,7 @@ namespace CommonPluginsShared
                     var cachedFile = HttpFileCache.GetWebFile(url);
                     if (string.IsNullOrEmpty(cachedFile))
                     {
-                        logger.Warn("Web file not found: " + url);
+                        //logger.Warn("Web file not found: " + url);
                         return false;
                     }
 
