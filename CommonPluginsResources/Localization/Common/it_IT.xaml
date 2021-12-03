@@ -1,6 +1,11 @@
 ﻿<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
+    <sys:String x:Key="LOCCommonProgression">Progressione</sys:String>
+    <sys:String x:Key="LOCCommonCompleted">Completato</sys:String>
+
+    <sys:String x:Key="LOCCommonGameTime">Tempo di gioco</sys:String>
+    
     <sys:String x:Key="LOCCommonSelectFilters">Seleziona filtri</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Aggiunti Di Recente</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Scarica solo i dati mancanti</sys:String>
