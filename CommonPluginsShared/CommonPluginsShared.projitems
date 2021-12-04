@@ -51,6 +51,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ImageTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Folder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\SourceLink.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Paths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteUiHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IDataContext.cs" />
