@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <sys:String x:Key="LOCCommonProgression">Progression</sys:String>
-    <sys:String x:Key="LOCCommonCompleted">Completed</sys:String>
+    <sys:String x:Key="LOCCommonProgression">Просування</sys:String>
+    <sys:String x:Key="LOCCommonCompleted">Завершено</sys:String>
 
-    <sys:String x:Key="LOCCommonGameTime">Game time</sys:String>
+    <sys:String x:Key="LOCCommonGameTime">Час гри</sys:String>
     
     <sys:String x:Key="LOCCommonSelectFilters">Обрати фільтри</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Нещодавно додано</sys:String>
