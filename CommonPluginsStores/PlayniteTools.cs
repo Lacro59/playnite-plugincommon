@@ -1,14 +1,7 @@
-﻿using Playnite.SDK;
-using Playnite.SDK.Data;
-using Playnite.SDK.Models;
-using CommonPlayniteShared;
+﻿using Playnite.SDK.Models;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CommonPlayniteShared.Manifests;
 using CommonPlayniteShared.Common;
 
 namespace CommonPluginsStores
@@ -23,6 +16,18 @@ namespace CommonPluginsStores
         private static string UbisoftScreenshotsDir = "null";
 
 
+
+        public static List<string> ListVariables = new List<string>
+        {
+            "{InstallDir}", "{InstallDirName}", "{ImagePath}", "{ImageName}", "{ImageNameNoExt}", "{PlayniteDir}", "{Name}",
+            "{DropboxFolder}", "{OneDriveFolder}",
+            "{SteamId}", "{SteamInstallDir}", "{SteamScreenshotsDir}",
+            "{UbisoftInstallDir}", "{UbisoftScreenshotsDir}",
+            "{RetroArchScreenshotsDir}",
+            "{WinDir}", "{AllUsersProfile}", "{AppData}", "{HomePath}", "{UserName}", "{ComputerName}", "{UserProfile}",
+            "{HomeDrive}", "{SystemDrive}", "{SystemRoot}", "{Public}", "{CommonProgramW6432}", "{CommonProgramFiles}",
+            "{ProgramFiles}", "{CommonProgramFiles(x86)}", "{ProgramFiles(x86)"
+        };
 
         public static string StringExpandWithStores(Game game, string inputString, bool fixSeparators = false)
         {
