@@ -13,6 +13,7 @@ using CommonPluginsShared.Extensions;
 using System.Threading.Tasks;
 using System.IO.Compression;
 using System.Diagnostics;
+using Microsoft.Win32;
 
 namespace CommonPluginsShared
 {
@@ -555,6 +556,12 @@ namespace CommonPluginsShared
                 }
             }
 
+            // OneDrive
+            if (result.Contains("{OneDrive"))
+            {
+                result = result.Replace("{OneDriveFolder}", GetOneDriveInstallationPath());
+            }
+
             //RetroArchScreenshotsDir
             if (result.Contains("{RetroArchScreenshotsDir"))
             {
@@ -605,9 +612,8 @@ namespace CommonPluginsShared
             result = result.Replace("{ProgramFiles(x86)}", Environment.GetEnvironmentVariable("ProgramFiles(x86)"));
 
 
-            return fixSeparators ? Paths.FixSeparators(result) : result;
+            return fixSeparators ? CommonPlayniteShared.Common.Paths.FixSeparators(result) : result;
         }
-
 
         public static string PathToRelativeWithoutStores(Game game, string inputString)
         {
@@ -623,6 +629,12 @@ namespace CommonPluginsShared
             if (!DropboxFolder.IsNullOrEmpty())
             {
                 result = result.Replace(DropboxFolder, "{DropboxFolder}");
+            }
+
+            string OneDriveFolder = StringExpandWithoutStore(game, "{OneDriveFolder}");
+            if (!OneDriveFolder.IsNullOrEmpty())
+            {
+                result = result.Replace(OneDriveFolder, "{OneDriveFolder}");
             }
 
             string RetroArchScreenshotsDir = StringExpandWithoutStore(game, "{RetroArchScreenshotsDir}");
@@ -683,6 +695,18 @@ namespace CommonPluginsShared
             return result;
         }
 
+        private static string GetOneDriveInstallationPath()
+        {
+            using (var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\OneDrive"))
+            {
+                if (key?.GetValueNames().Contains("UserFolder") == true)
+                {
+                    return key.GetValue("UserFolder")?.ToString().Replace('/', '\\') ?? string.Empty;
+                }
+            }
+
+            return string.Empty;
+        }
 
 
         public static void CreateLogPackage(string PluginName)
