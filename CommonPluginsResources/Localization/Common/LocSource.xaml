@@ -162,6 +162,7 @@ Please clear all the tags in the plugin menu.</sys:String>
        
 Cloud variables can be used to add a dynamic string:        
 {DropboxFolder}
+{OneDriveFolder}
        
 Steam variables can be used to add a dynamic string:        
 {SteamId} - Steam user Id
