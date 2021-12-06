@@ -149,34 +149,34 @@ Veuillez effacer toutes les étiquettes du menu du plugin.</sys:String>
 
 
     <sys:String x:Key="LOCCommonMisc">Divers</sys:String>
-    <sys:String x:Key="LOCCommonSelectVariable">Select variable</sys:String>
+    <sys:String x:Key="LOCCommonSelectVariable">Sélectionner une variable</sys:String>
 
 
-    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
-{InstallDir} - Game installation directory
-{InstallDirName} - Installation folder name
-{ImagePath} - Game ISO/ROM path if set
-{ImageName} - Game ISO/ROM file name
-{ImageNameNoExt} - Game ISO/ROM file name without extension
-{PlayniteDir} - Playnite installation directory
-{Name} - Game name
+    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Des variables spéciales peuvent être utilisées pour ajouter des chaînes de caractères dynamiques :
+{InstallDir} - Dossier d'installation du jeu
+{InstallDirName} - Nom du dossier d'installation du jeu
+{ImagePath} - Chemin vers le fichier ISO/ROM du jeu si défini
+{ImageName} - Nom de fichier de l'ISO/ROM du jeu
+{ImageNameNoExt} - Nom de fichier de l'ISO/ROM du jeu sans extension
+{PlayniteDir} - Dossier d'installation de Playnite
+{Name} - Nom du jeu
        
-Cloud variables can be used to add a dynamic string:        
+Des variables de Cloud peuvent être utilisées pour ajouter une chaîne de caractères dynamiques :        
 {DropboxFolder}
 {OneDriveFolder}
        
-Steam variables can be used to add a dynamic string:        
-{SteamId} - Steam user Id
-{SteamInstallDir} - Steam installation directory
-{SteamScreenshotsDir} - Steam screenshots directory
+Des variables Steam peuvent être utilisées pour ajouter une chaîne de caractères dynamique :        
+{SteamId} - ID d'utilisateur Steam
+{SteamInstallDir} - Dossier d'installation de Steam
+{SteamScreenshotsDir} - Dossier de captures d'écran de Steam
        
-Ubisoft Connect variables can be used to add a dynamic string:        
-{UbisoftInstallDir} - Ubisoft installation directory
-{UbisoftScreenshotsDir} - Ubisoft screenshots directory
-        
+Des variables Ubisoft Connect peuvent être utilisées pour ajouter une chaîne de caractères dynamique :        
+{UbisoftInstallDir} - Dossier d'installation d'Ubisoft Connect
+{UbisoftScreenshotsDir} - Dossier de captures d'écran d'Ubisoft
+
 {RetroArchScreenshotsDir}
             
-Windows variables can be used to add a dynamic string:        
+Des variables Windows pour ajouter une chaîne de caractères dynamique :        
 {WinDir}
 {AllUsersProfile}
 {AppData}
