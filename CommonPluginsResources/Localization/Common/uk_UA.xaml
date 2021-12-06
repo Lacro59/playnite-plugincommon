@@ -149,6 +149,7 @@
 
 
     <sys:String x:Key="LOCCommonMisc">Різне</sys:String>
+    <sys:String x:Key="LOCCommonSelectVariable">Виберіть змінну</sys:String>
 
 
     <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Спеціальні змінні, що можна використовувати для додавання до динамічного рядка:
@@ -162,6 +163,7 @@
         
 Хмарні змінні, що можна використовувати для додавання до динамічного рядка:
 {DropboxFolder} 
+{OneDriveFolder}
        
 Змінні Steam, що можна використовувати для додавання до динамічного рядка:
 {SteamId} - ідентифікатор користувача Steam
@@ -171,6 +173,8 @@
 Змінні Ubisoft Connect, що можна використовувати для додавання до динамічного рядка:
 {UbisoftInstallDir} - каталог встановлення Ubisoft
 {UbisoftScreenshotsDir} - каталог знімків екрану Ubisoft 
+            
+{RetroArchScreenshotsDir}
             
 Змінні Windows, що можна використовувати для додавання до динамічного рядка:
 {WinDir}
@@ -188,6 +192,6 @@
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)</sys:String>
+{ProgramFiles(x86)}</sys:String>
 
 </ResourceDictionary>
