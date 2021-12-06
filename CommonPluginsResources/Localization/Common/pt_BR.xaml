@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <sys:String x:Key="LOCCommonProgression">Progression</sys:String>
-    <sys:String x:Key="LOCCommonCompleted">Completed</sys:String>
+    <sys:String x:Key="LOCCommonProgression">Progressão</sys:String>
+    <sys:String x:Key="LOCCommonCompleted">Concluído</sys:String>
 
-    <sys:String x:Key="LOCCommonGameTime">Game time</sys:String>
+    <sys:String x:Key="LOCCommonGameTime">Tempo de jogo</sys:String>
     
     <sys:String x:Key="LOCCommonSelectFilters">Selecionar filtros</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Adicionado Recentemente</sys:String>
@@ -149,30 +149,34 @@ Por favor, limpe todas as tags no menu do plugin.</sys:String>
 
 
     <sys:String x:Key="LOCCommonMisc">Diversos</sys:String>
+    <sys:String x:Key="LOCCommonSelectVariable">Select variable</sys:String>
 
 
-    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Variáveis especiais podem ser usadas para adicionar uma expressão dinâmica:
-{InstallDir} - Diretório de instalação do jogo
-{InstallDirName} - Nome da pasta de instalação
-{ImagePath} - Caminho da ISO/ROM do jogo, se configurada
-{ImageName} - Nome do arquivo ISO/ROM do jogo
-{ImageNameNoExt} - Nome do arquivo ISO/ROM do jogo sem extensão
-{PlayniteDir} - Diretório de Instalação do Playnite
-{Name} - Nome do Jogo
+    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
+{InstallDir} - Game installation directory
+{InstallDirName} - Installation folder name
+{ImagePath} - Game ISO/ROM path if set
+{ImageName} - Game ISO/ROM file name
+{ImageNameNoExt} - Game ISO/ROM file name without extension
+{PlayniteDir} - Playnite installation directory
+{Name} - Game name
        
-Variáveis de nuvem podem ser usadas para adicionar uma expressão dinâmica:        
+Cloud variables can be used to add a dynamic string:        
 {DropboxFolder}
+{OneDriveFolder}
        
-Variáveis do Steam podem ser usadas para adicionar uma expressão dinâmica:        
-{SteamId} - Id de usuário do Steam
-{SteamInstallDir} - Diretório de instalação do Steam
-{SteamScreenshotsDir} - Diretório de capturas de tela do Steam
+Steam variables can be used to add a dynamic string:        
+{SteamId} - Steam user Id
+{SteamInstallDir} - Steam installation directory
+{SteamScreenshotsDir} - Steam screenshots directory
        
-Variáveis da Ubisoft Connect podem ser usadas para adicionar uma expressão dinâmica:        
-{UbisoftInstallDir} - Diretório de instalação da Ubisoft
-{UbisoftScreenshotsDir} - Diretório de capturas de tela da Ubisoft
+Ubisoft Connect variables can be used to add a dynamic string:        
+{UbisoftInstallDir} - Ubisoft installation directory
+{UbisoftScreenshotsDir} - Ubisoft screenshots directory
+        
+{RetroArchScreenshotsDir}
             
-Variáveis do Windows podem ser usadas para adicionar uma expressão dinâmica:        
+Windows variables can be used to add a dynamic string:        
 {WinDir}
 {AllUsersProfile}
 {AppData}

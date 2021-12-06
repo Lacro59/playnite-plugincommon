@@ -149,6 +149,7 @@ Si prega di cancellare tutti le etichette nel menu del plugin.</sys:String>
 
 
     <sys:String x:Key="LOCCommonMisc">Varie</sys:String>
+    <sys:String x:Key="LOCCommonSelectVariable">Seleziona variabile</sys:String>
 
 
     <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Variabili speciali che possono essere utilizzate per aggiungere una stringa dinamica:
@@ -162,7 +163,8 @@ Si prega di cancellare tutti le etichette nel menu del plugin.</sys:String>
        
 Variabili cloud possono essere utilizzate per aggiungere una stringa dinamica:        
 {DropboxFolder}
-       
+{OneDriveFolder}
+      
 Variabili steam che possono essere utilizzate per aggiungere una stringa dinamica:        
 {SteamId} - ID utente di Steam
 {SteamInstallDir} - Cartella di installazione di Steam
@@ -171,6 +173,8 @@ Variabili steam che possono essere utilizzate per aggiungere una stringa dinamic
 Variabili di Ubisoft Connect che possono essere utilizzate per aggiungere una stringa dinamica:        
 {UbisoftInstallDir} - Cartella di installazione di Ubisoft
 {UbisoftScreenshotsDir} - Cartella delle catture di schermate di Ubisoft
+
+{RetroArchScreenshotsDir}
             
 Variabili di Windows che possono essere utilizzate per aggiungere una stringa dinamica:        
 {WinDir}

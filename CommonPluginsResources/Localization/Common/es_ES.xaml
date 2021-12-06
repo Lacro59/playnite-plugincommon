@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <sys:String x:Key="LOCCommonProgression">Progression</sys:String>
-    <sys:String x:Key="LOCCommonCompleted">Completed</sys:String>
+    <sys:String x:Key="LOCCommonProgression">Progresión</sys:String>
+    <sys:String x:Key="LOCCommonCompleted">Completado</sys:String>
 
-    <sys:String x:Key="LOCCommonGameTime">Game time</sys:String>
+    <sys:String x:Key="LOCCommonGameTime">Tiempo de juego</sys:String>
     
     <sys:String x:Key="LOCCommonSelectFilters">Selecciona Filtros</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Añadido recientemente</sys:String>
@@ -149,6 +149,7 @@ Por favor, borre todas las etiquetas en la configuración del plugin.</sys:Strin
 
 
     <sys:String x:Key="LOCCommonMisc">Otros</sys:String>
+    <sys:String x:Key="LOCCommonSelectVariable">Seleccionar variable</sys:String>
 
 
     <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Se pueden usar variables especiales para agregar una cadena dinámica:
@@ -162,6 +163,7 @@ Por favor, borre todas las etiquetas en la configuración del plugin.</sys:Strin
        
 Las variables de la nube se pueden usar para agregar una cadena dinámica: 
 {DropboxFolder}
+{OneDriveFolder}
        
 Las variables de vapor se pueden usar para agregar una cadena dinámica:    
 {SteamId} - Id de usuario de Steam
@@ -171,6 +173,8 @@ Las variables de vapor se pueden usar para agregar una cadena dinámica:
 Se pueden usar variables de Ubisoft Connect para agregar una cadena dinámica:   
 {UbisoftInstallDir} - Ubisoft installation directory
 {UbisoftScreenshotsDir} - Ubisoft screenshots directory
+        
+{RetroArchScreenshotsDir}
             
 Las variables de Windows se pueden usar para agregar una cadena dinámica:
 {WinDir}

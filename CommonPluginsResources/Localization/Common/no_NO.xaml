@@ -149,6 +149,7 @@ Please clear all the tags in the plugin menu.</sys:String>
 
 
     <sys:String x:Key="LOCCommonMisc">Misc</sys:String>
+    <sys:String x:Key="LOCCommonSelectVariable">Velg variabel</sys:String>
 
 
     <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
@@ -162,6 +163,7 @@ Please clear all the tags in the plugin menu.</sys:String>
        
 Cloud variables can be used to add a dynamic string:        
 {DropboxFolder}
+{OneDriveFolder}
        
 Steam variables can be used to add a dynamic string:        
 {SteamId} - Steam user Id
@@ -171,6 +173,8 @@ Steam variables can be used to add a dynamic string:
 Ubisoft Connect variables can be used to add a dynamic string:        
 {UbisoftInstallDir} - Ubisoft installation directory
 {UbisoftScreenshotsDir} - Ubisoft screenshots directory
+        
+{RetroArchScreenshotsDir}
             
 Windows variables can be used to add a dynamic string:        
 {WinDir}
