@@ -121,6 +121,46 @@ namespace CommonPluginsShared
             }
         }
 
+        public static bool Resize(string srcPath, int max, string path)
+        {
+            if (!File.Exists(srcPath))
+            {
+                return false;
+            }
+
+            try
+            {
+                Image image = Image.FromFile(srcPath);
+
+                int width = image.Width;
+                int height = image.Height;
+                if (width > height)
+                {
+                    width = max;
+                    height = height * max / image.Width;
+                }
+                else
+                {
+                    height = max;
+                    width = width * max / image.Height;
+                }
+
+                Bitmap resultImage = Resize(image, width, height);
+                resultImage.Save(path);
+
+                image.Dispose();
+                resultImage.Dispose();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                return false;
+            }
+        }
+
+
         public static bool Resize(string srcPath, int width, int height, string path)
         {
             if (!File.Exists(srcPath))
