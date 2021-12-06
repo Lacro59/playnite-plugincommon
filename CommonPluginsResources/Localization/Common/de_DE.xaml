@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <sys:String x:Key="LOCCommonProgression">Progression</sys:String>
-    <sys:String x:Key="LOCCommonCompleted">Completed</sys:String>
+    <sys:String x:Key="LOCCommonProgression">Fortschritt</sys:String>
+    <sys:String x:Key="LOCCommonCompleted">Abgeschlossen</sys:String>
 
-    <sys:String x:Key="LOCCommonGameTime">Game time</sys:String>
+    <sys:String x:Key="LOCCommonGameTime">Spielzeit</sys:String>
     
     <sys:String x:Key="LOCCommonSelectFilters">Filter wählen</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Kürzlich hinzugefügt</sys:String>
@@ -149,6 +149,7 @@ Bitte alle Tags im Plugin-Menü löschen.</sys:String>
 
 
     <sys:String x:Key="LOCCommonMisc">Sonstige</sys:String>
+    <sys:String x:Key="LOCCommonSelectVariable">Variable wählen</sys:String>
 
 
     <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Spezielle Variablen können verwendet werden, um einen dynamischen String hinzuzufügen:
@@ -156,22 +157,25 @@ Bitte alle Tags im Plugin-Menü löschen.</sys:String>
 {InstallDirName} - Name des Installationsordners
 {ImagePath} - Spiel ISO/ROM Pfad, falls gesetzt
 {ImageName} - Spiel ISO/ROM Datei Name
-{ImageNameNoExt} - Spiel ISO/ROM Datei Name ohne erweiterung
+{ImageNameNoExt} - Spiel ISO/ROM Datei Name ohne Erweiterung
 {PlayniteDir} - Playnite Installation Verzeichnis
 {Name} - Spiel Name
-       
+
 Cloud Variablen können verwendet werden, um einen dynamischen String hinzuzufügen:
 {DropboxFolder}
+{OneDriveFolder}
        
 Steam Variablen können verwendet werden, um einen dynamischen String hinzuzufügen:
 {SteamId} - Steam User ID
 {SteamInstallDir} - Steam Installation Verzeichnis
-{SteamScreenshotsDir} - Steam Screenshots directory
-       
+{SteamScreenshotsDir} - Steam Screenshots Verzeichnis
+
 Ubisoft Connect Variablen können verwendet werden, um einen dynamischen String hinzuzufügen:   
 {UbisoftInstallDir} - Ubisoft Installation Verzeichnis
 {UbisoftScreenshotsDir} - Ubisoft Screenshots Verzeichnis
-            
+
+{RetroArchScreenshotsDir}
+
 Windows Variablen können verwendet werden, um einen dynamischen String hinzuzufügen:    
 {WinDir}
 {AllUsersProfile}
