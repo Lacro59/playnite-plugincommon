@@ -1,6 +1,19 @@
 ﻿<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
+    <!-- Common Stores -->
+
+    <sys:String x:Key="LOCCommonAuthenticateLabel">Uwierzytelnianie</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedIn">Wymagane uwierzytelnienie</sys:String>
+    <sys:String x:Key="LOCCommonLoggedIn">Użytkownik jest uwierzytelniony</sys:String>
+    <sys:String x:Key="LOCCommonAccountName">Nazwa konta</sys:String>
+    <sys:String x:Key="LOCCommonLoginChecking">Sprawdzanie statusu uwierzytelnienia…</sys:String>
+
+    <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticate</sys:String>
+    <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: No API key</sys:String>
+
+
+
     <sys:String x:Key="LOCCommonProgression">Progression</sys:String>
     <sys:String x:Key="LOCCommonCompleted">Completed</sys:String>
 
@@ -42,14 +55,6 @@ Do you want to open the directory?</sys:String>
 
     <sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Impossible to delete cache folder:
 {0}</sys:String>
-
-    <!-- login -->
-
-    <sys:String x:Key="LOCCommonAuthenticateLabel">Uwierzytelnianie</sys:String>
-    <sys:String x:Key="LOCCommonNotLoggedIn">Wymagane uwierzytelnienie</sys:String>
-    <sys:String x:Key="LOCCommonLoggedIn">Użytkownik jest uwierzytelniony</sys:String>
-    <sys:String x:Key="LOCCommonAccountName">Nazwa konta</sys:String>
-    <sys:String x:Key="LOCCommonLoginChecking">Sprawdzanie statusu uwierzytelnienia…</sys:String>
 
     <!-- CommonMenus -->
 
