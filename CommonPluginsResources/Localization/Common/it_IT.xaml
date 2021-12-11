@@ -1,6 +1,19 @@
 ﻿<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
+    <!-- Common Stores -->
+
+    <sys:String x:Key="LOCCommonAuthenticateLabel">Autenticazione</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedIn">Richiede autenticazione</sys:String>
+    <sys:String x:Key="LOCCommonLoggedIn">L'utente è autenticato</sys:String>
+    <sys:String x:Key="LOCCommonAccountName">Nome Account</sys:String>
+    <sys:String x:Key="LOCCommonLoginChecking">Controllo dello stato di autenticazione…</sys:String>
+
+    <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticate</sys:String>
+    <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: No API key</sys:String>
+
+
+
     <sys:String x:Key="LOCCommonProgression">Progressione</sys:String>
     <sys:String x:Key="LOCCommonCompleted">Completato</sys:String>
 
@@ -42,14 +55,6 @@ Vuoi aprire la cartella?</sys:String>
 
     <sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Impossibile eliminare la cartella cache:
 {0}</sys:String>
-
-    <!-- login -->
-
-    <sys:String x:Key="LOCCommonAuthenticateLabel">Autenticazione</sys:String>
-    <sys:String x:Key="LOCCommonNotLoggedIn">Richiede autenticazione</sys:String>
-    <sys:String x:Key="LOCCommonLoggedIn">L'utente è autenticato</sys:String>
-    <sys:String x:Key="LOCCommonAccountName">Nome Account</sys:String>
-    <sys:String x:Key="LOCCommonLoginChecking">Controllo dello stato di autenticazione…</sys:String>
 
     <!-- CommonMenus -->
 
