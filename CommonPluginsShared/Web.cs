@@ -527,6 +527,28 @@ namespace CommonPluginsShared
         }
 
 
+        public static async Task<string> DownloadStringDataWithUrlBefore(string url, string UrlBefore = "", string LangHeader = "")
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
+
+                if (!LangHeader.IsNullOrEmpty())
+                {
+                    client.DefaultRequestHeaders.Add("Accept-Language", LangHeader);
+                }
+
+                if (!UrlBefore.IsNullOrEmpty())
+                {
+                    await client.GetStringAsync(UrlBefore).ConfigureAwait(false);
+                }
+                
+                string result = await client.GetStringAsync(url).ConfigureAwait(false);
+                return result;
+            }
+        }
+
+
         public static async Task<string> DownloadStringDataJson(string url)
         {
             using (var client = new HttpClient())
