@@ -9,8 +9,8 @@
     <sys:String x:Key="LOCCommonAccountName">Nombre de la cuenta</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Comprobando el estado de la autenticación…</sys:String>
 
-    <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticate</sys:String>
-    <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: No API key</sys:String>
+    <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: El usuario no está autenticado</sys:String>
+    <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: No hay clave API</sys:String>
 
 
 
