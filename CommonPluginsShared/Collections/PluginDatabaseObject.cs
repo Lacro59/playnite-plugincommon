@@ -609,7 +609,40 @@ namespace CommonPluginsShared.Collections
 
         public virtual void AddTag(Game game, bool noUpdate = false)
         {
+            GetPluginTags();
+            TItem item = Get(game, true);
 
+            if (item.HasData)
+            {
+                try
+                {
+                    Guid? TagId = FindGoodPluginTags(string.Empty);
+                    if (TagId != null)
+                    {
+                        if (game.TagIds != null)
+                        {
+                            game.TagIds.Add((Guid)TagId);
+                        }
+                        else
+                        {
+                            game.TagIds = new List<Guid> { (Guid)TagId };
+                        }
+
+                        if (!noUpdate)
+                        {
+                            Application.Current.Dispatcher?.Invoke(() =>
+                            {
+                                PlayniteApi.Database.Games.Update(game);
+                                game.OnPropertyChanged();
+                            }, DispatcherPriority.Send);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Tag insert error with {game.Name}", true, PluginName, string.Format(resources.GetString("LOCCommonNotificationTagError"), game.Name));
+                }
+            }
         }
 
         public void AddTag(Guid Id, bool noUpdate = false)

@@ -101,6 +101,7 @@ namespace CommonPluginsShared
         }
 
 
+        #region Common event
         /// <summary>
         /// Load common event
         /// </summary>
@@ -113,7 +114,6 @@ namespace CommonPluginsShared
             }
         }
 
-        #region Common event
         private static void WindowBase_LoadedEvent(object sender, System.EventArgs e)
         {
             string WinIdProperty = string.Empty;
@@ -173,63 +173,48 @@ namespace CommonPluginsShared
 #endif
         }
 
-        /// <summary>
-        /// Error log with ignore when no debug mode
-        /// </summary>
-        /// <param name="ex"></param>
-        /// <param name="IsIgnored"></param>
-        public static void LogError(Exception ex, bool IsIgnored, bool ShowNotification = false, string PluginName = "")
+
+        public static void LogError(Exception ex, bool IsIgnored)
         {
-            TraceInfos traceInfos = new TraceInfos(ex);
-            string Message = string.Empty;
-
-            if (IsIgnored)
-            {
-                Message = $"[Ignored] ";
-            }
-            
-            if (!traceInfos.InitialCaller.IsNullOrEmpty())
-            {
-                Message += $"Error on {traceInfos.InitialCaller}()";
-            }
-
-            Message += $"|{traceInfos.FileName}|{traceInfos.LineNumber}";
-
-#if DEBUG
-            logger.Error(ex, $"{Message}");
-#else
-            if (!IsIgnored) 
-            {
-                logger.Error(ex, $"{Message}");
-            }
-#endif
-
-            if (ShowNotification)
-            {
-                API.Instance.Notifications.Add(new NotificationMessage(
-                     $"{PluginName}-{new Guid()}",
-                     $"{PluginName}" + System.Environment.NewLine + $"{ex.Message}",
-                     NotificationType.Error,
-                     () => PlayniteTools.CreateLogPackage(PluginName)
-                 ));
-            }
+            LogError(ex, IsIgnored, string.Empty, false, string.Empty, string.Empty);
         }
 
-        /// <summary>
-        /// Error log with ignore when no debug mode
-        /// </summary>
-        /// <param name="ex"></param>
-        /// <param name="IsIgnored"></param>
-        /// <param name="Message"></param>
-        public static void LogError(Exception ex, bool IsIgnored, string Message, bool ShowNotification = false, string PluginName = "")
+        public static void LogError(Exception ex, bool IsIgnored, string Message)
+        {
+            LogError(ex, IsIgnored, Message, false, string.Empty, string.Empty);
+        }
+
+        public static void LogError(Exception ex, bool IsIgnored, bool ShowNotification, string PluginName)
+        {
+            LogError(ex, IsIgnored, string.Empty, ShowNotification, PluginName, string.Empty);
+        }
+
+        public static void LogError(Exception ex, bool IsIgnored, bool ShowNotification, string PluginName, string NotificationMessage)
+        {
+            LogError(ex, IsIgnored, string.Empty, ShowNotification, PluginName, NotificationMessage);
+        }
+
+        public static void LogError(Exception ex, bool IsIgnored, string Message, bool ShowNotification, string PluginName)
+        {
+            LogError(ex, IsIgnored, string.Empty, ShowNotification, PluginName, string.Empty);
+        }
+
+        public static void LogError(Exception ex, bool IsIgnored, string Message, bool ShowNotification, string PluginName, string NotificationMessage)
         {
             TraceInfos traceInfos = new TraceInfos(ex);
-            
+
+            if (Message.IsNullOrEmpty())
+            {
+                if (!traceInfos.InitialCaller.IsNullOrEmpty())
+                {
+                    Message += $"Error on {traceInfos.InitialCaller}()";
+                }
+            }
+
             if (IsIgnored)
             {
                 Message = $"[Ignored] {Message}";
             }
-
             Message = $"{Message}|{traceInfos.FileName}|{traceInfos.LineNumber}";
 
 #if DEBUG
@@ -245,7 +230,7 @@ namespace CommonPluginsShared
             {
                 API.Instance.Notifications.Add(new NotificationMessage(
                      $"{PluginName}-{new Guid()}",
-                     $"{PluginName}" + System.Environment.NewLine + $"{ex.Message}",
+                     $"{PluginName}" + System.Environment.NewLine + (NotificationMessage.IsNullOrEmpty() ? $"{ex.Message}" : NotificationMessage),
                      NotificationType.Error,
                      () => PlayniteTools.CreateLogPackage(PluginName)
                  ));
