@@ -14,22 +14,25 @@ using System.Threading.Tasks;
 using System.IO.Compression;
 using System.Diagnostics;
 using Microsoft.Win32;
+using Playnite.SDK.Plugins;
 
 namespace CommonPluginsShared
 {
     public class PlayniteTools
     {
-        private static HashSet<string> _disabledPlugins;
         private static readonly ILogger logger = LogManager.GetLogger();
-        protected static IResourceProvider resources = new ResourceProvider();
+        private static IResourceProvider resources = new ResourceProvider();
 
         private static List<Emulator> ListEmulators = null;
+
+        private static HashSet<string> _disabledPlugins;
         private static HashSet<string> DisabledPlugins
         {
             get { return _disabledPlugins ?? (_disabledPlugins = GetDisabledPlugins()); }
         }
 
 
+        #region External plugin
         public enum ExternalPlugin
         {
             None,
@@ -69,12 +72,17 @@ namespace CommonPluginsShared
             { new Guid("C2F038E5-8B92-4877-91F1-DA9094155FC5"), ExternalPlugin.UplayLibrary }
         };
 
-
         public static ExternalPlugin GetPluginType(Guid PluginId)
         {
             PluginsById.TryGetValue(PluginId, out ExternalPlugin PluginSource);
             return PluginSource;
         }
+
+        public static Guid GetPluginId(ExternalPlugin externalPlugin)
+        {
+            return PluginsById.FirstOrDefault(x => x.Value == externalPlugin).Key;
+        }
+        #endregion
 
 
         #region Emulators
@@ -735,6 +743,24 @@ namespace CommonPluginsShared
                 }
 
                 Process.Start(PlaynitePaths.DataCachePath);
+            }
+        }
+
+
+        public static void ShowPluginSettings(ExternalPlugin externalPlugin)
+        {
+            try
+            {
+                Guid PluginId = GetPluginId(externalPlugin);
+                Plugin plugin = API.Instance.Addons.Plugins.FirstOrDefault(x => x.Id == PluginId);
+                if (plugin != null)
+                {
+                    plugin.OpenSettingsView();
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
             }
         }
     }
