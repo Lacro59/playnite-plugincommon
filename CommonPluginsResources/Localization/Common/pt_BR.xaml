@@ -141,8 +141,8 @@ Por favor, tente novamente.</sys:String>
     <sys:String x:Key="LOCCommonDataRemove">Os dados do plugin foram apagados.</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">Erro ao remover dados do plugin. Por favor, tente novamente.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Erro ao adicionar a tag.
-Por favor, limpe todas as tags no menu do plugin.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Error adding tag with {0}.
+Please clear all the tags in the plugin menu.</sys:String>
 
 
 
