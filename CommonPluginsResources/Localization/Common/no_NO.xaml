@@ -141,8 +141,8 @@ Please try again.</sys:String>
     <sys:String x:Key="LOCCommonDataRemove">Plugin data has been removed.</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">Error removing plugin data. Please try again.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Error adding tag.
-Please clear all the tags in the plugin menu.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Feil ved tilordning av tag til {0}.
+Fjern alle taggene i programtillegg-menyen.</sys:String>
 
 
 

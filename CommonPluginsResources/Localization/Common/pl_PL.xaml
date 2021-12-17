@@ -141,8 +141,8 @@ Please try again.</sys:String>
     <sys:String x:Key="LOCCommonDataRemove">Dane wtyczki zostały usunięte.</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">Błąd podczas usuwania danych wtyczki. Proszę spróbować ponownie.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Błąd podczas dodawania tagu.
-Proszę wyczyść wszystkie tagi w menu wtyczki.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Error adding tag with {0}.
+Please clear all the tags in the plugin menu.</sys:String>
 
 
 

@@ -141,8 +141,8 @@ Veuillez réessayer.</sys:String>
     <sys:String x:Key="LOCCommonDataRemove">Les données du plugin ont été supprimées.</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">Erreur lors de la suppression des données du plugin. Veuillez réessayer.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Erreur lors de l'ajout du tag.
-Veuillez effacer toutes les étiquettes du menu du plugin.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Erreur lors de l'ajout de l'étiquette avec {0}.
+Veuillez effacer toutes les étiquettes dans le menu du plugin.</sys:String>
 
 
 
