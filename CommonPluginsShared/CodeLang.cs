@@ -106,12 +106,12 @@ namespace CommonPluginsShared
         public static string GetGogLang(string PlayniteLanguage)
         {
             // Only languages available
-            string[] arrayLang = { "de", "en", "fr", "ru", "zh", "zh-Hans" };
+            string[] arrayLang = { "de", "us", "fr", "ru", "zh", "zh-Hans" };
 
             PlayniteLanguage = PlayniteLanguage.Substring(0, 2);
             if (!arrayLang.ContainsString(PlayniteLanguage))
             {
-                PlayniteLanguage = "en";
+                PlayniteLanguage = "us";
             }
 
             return PlayniteLanguage;

@@ -91,6 +91,16 @@ namespace CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared
                 public string email;
             }
 
+            public class PriceOverview
+            {
+                public string currency;
+                public int initial;
+                public int final;
+                public int discount_percent;
+                public string initial_formatted;
+                public string final_formatted;
+            }
+
             public string type;
             public string name;
             public int steam_appid;
@@ -117,6 +127,7 @@ namespace CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared
             public List<Screenshot> screenshots;
             public List<Movie> movies;
             public Support support_info;
+            public PriceOverview price_overview;
         }
 
         public bool success
