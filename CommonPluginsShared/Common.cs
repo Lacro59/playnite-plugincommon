@@ -15,6 +15,7 @@ namespace CommonPluginsShared
     public class Common
     {
         private static ILogger logger = LogManager.GetLogger();
+        private static IResourceProvider resources = new ResourceProvider();
 
 
         /// <summary>
@@ -77,9 +78,9 @@ namespace CommonPluginsShared
             if (File.Exists(FontFile))
             {
                 long fileSize = 0;
-                if (Application.Current.Resources.FindName("CommonFontSize") != null)
+                if (resources.GetResource("CommonFontSize") != null)
                 {
-                    fileSize = (long)Application.Current.Resources.FindName("CommonFontSize");
+                    fileSize = (long)resources.GetResource("CommonFontSize");
                 }
 
                 // Load only the newest
