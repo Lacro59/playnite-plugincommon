@@ -12,8 +12,9 @@
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: Benutzer ist nicht authentifiziert</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: Kein API Schlüssel</sys:String>
 
-
-
+    <sys:String x:Key="LOCCommonIgnoredItems">Ignored items</sys:String>
+    <sys:String x:Key="LOCCommonInputItemIgnore">Input the item to ignore</sys:String>
+    
     <sys:String x:Key="LOCCommonProgression">Fortschritt</sys:String>
     <sys:String x:Key="LOCCommonCompleted">Abgeschlossen</sys:String>
 
