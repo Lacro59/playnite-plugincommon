@@ -1,11 +1,13 @@
 ﻿<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
+    <sys:String x:Key="LOCCommonYear">Year</sys:String>
+    
     <!-- Common Stores -->
 
     <sys:String x:Key="LOCCommonAuthenticateLabel">Connexion</sys:String>
     <sys:String x:Key="LOCCommonNotLoggedIn">Authentification requise</sys:String>
-    <sys:String x:Key="LOCCommonLoggedIn">Utilisateur connecté</sys:String>
+    <sys:String x:Key="LOCCommonLoggedIn">Utilisateur connect</sys:String>
     <sys:String x:Key="LOCCommonAccountName">Nom du compte</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Vérification du statut d'authentification…</sys:String>
 
@@ -59,7 +61,7 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 
     <!-- CommonMenus -->
 
-    <sys:String x:Key="LOCCommonTotalFound">Total trouvé</sys:String>
+    <sys:String x:Key="LOCCommonTotalFound">Total trouv</sys:String>
 
     <!-- CommonSettingsView -->
 
