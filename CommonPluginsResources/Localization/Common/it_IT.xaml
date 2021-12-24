@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
+    <sys:String x:Key="LOCCommonYear">Year</sys:String>
+    
     <!-- Common Stores -->
 
     <sys:String x:Key="LOCCommonAuthenticateLabel">Autenticazione</sys:String>
@@ -12,8 +14,8 @@
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: utente non autenticato</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: nessuna chiave API</sys:String>
 
-    <sys:String x:Key="LOCCommonIgnoredItems">Ignored items</sys:String>
-    <sys:String x:Key="LOCCommonInputItemIgnore">Input the item to ignore</sys:String>
+    <sys:String x:Key="LOCCommonIgnoredItems">Oggetti ignorati</sys:String>
+    <sys:String x:Key="LOCCommonInputItemIgnore">Inserisci l'oggetto da ignorare</sys:String>
     
     <sys:String x:Key="LOCCommonProgression">Progressione</sys:String>
     <sys:String x:Key="LOCCommonCompleted">Completato</sys:String>
