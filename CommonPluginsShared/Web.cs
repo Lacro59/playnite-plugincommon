@@ -446,7 +446,15 @@ namespace CommonPluginsShared
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false, $"Error on Get {url}");
+                    if (ex.Message.Contains("Section=ResponseHeader Detail=CR"))
+                    {
+                        logger.Warn($"Used UserAgent: Anything");
+                        return DownloadStringData(url, Cookies, "Anything").GetAwaiter().GetResult();
+                    }
+                    else
+                    {
+                        Common.LogError(ex, false, $"Error on Get {url}");
+                    }
                 }
             }
 
