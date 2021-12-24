@@ -22,22 +22,25 @@ namespace CommonPluginsShared.Converters
             {
                 if (value != null && (DateTime)value != default(DateTime))
                 {
-                    string tmpDate = ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern);
-                    string tmpDay = string.Empty;
-                    string tmpDateShort = string.Empty;
-
-                    tmpDay = ((DateTime)value).ToString("d");
-                    Regex rgx = new Regex(@"[/\.\- ]" + tmpDay + "|" + tmpDay + @"[/\.\- ]");
-                    tmpDateShort = rgx.Replace(tmpDate, string.Empty, 1);
-
-                    if (tmpDateShort.Length == tmpDate.Length)
+                    string ShortDatePattern = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
+                    string[] result = Regex.Split(ShortDatePattern, @"[/\.\- ]");
+                    string YMDatePattern = string.Empty;
+                    foreach(string str in result)
                     {
-                        tmpDay = ((DateTime)value).ToString("dd");
-                        rgx = new Regex(@"[/\.\- ]" + tmpDay + "|" + tmpDay + @"[/\.\- ]");
-                        tmpDateShort = rgx.Replace(tmpDate, string.Empty, 1);
+                        if (!str.Contains("d", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            if (YMDatePattern.IsNullOrEmpty())
+                            {
+                                YMDatePattern = str;
+                            }
+                            else
+                            {
+                                YMDatePattern += CultureInfo.CurrentCulture.DateTimeFormat.DateSeparator + str;
+                            }
+                        }
                     }
 
-                    return tmpDateShort;
+                    return ((DateTime)value).ToString(YMDatePattern);
                 }
                 else
                 {
