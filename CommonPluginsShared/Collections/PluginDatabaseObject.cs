@@ -481,6 +481,10 @@ namespace CommonPluginsShared.Collections
             {
                 Update(webItem);
             }
+            else
+            {
+                webItem = loadedItem;
+            }
 
             ActionAfterRefresh(webItem);
         }
