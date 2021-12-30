@@ -79,6 +79,9 @@
     <Compile Include="Controls\ProgressBarExtend.xaml.cs">
       <DependentUpon>ProgressBarExtend.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\RangeSlider.xaml.cs">
+      <DependentUpon>RangeSlider.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\SliderWithPointer.xaml.cs">
       <DependentUpon>SliderWithPointer.xaml</DependentUpon>
     </Compile>
@@ -136,6 +139,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\ProgressBarExtend.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\RangeSlider.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
