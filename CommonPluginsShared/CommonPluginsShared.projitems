@@ -50,6 +50,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Folder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\LinearGradient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\SourceLink.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Paths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteUiHelper.cs" />
