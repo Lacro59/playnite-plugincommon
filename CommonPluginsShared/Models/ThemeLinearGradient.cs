@@ -5,13 +5,13 @@ using System.Windows.Media;
 
 namespace CommonPluginsShared.Models
 {
-    public class LinearGradient
+    public class ThemeLinearGradient
     {
         public Point StartPoint { get; set; }
         public Point EndPoint { get; set; }
 
-        public GradientColor GradientStop1 { get; set; }
-        public GradientColor GradientStop2 { get; set; }
+        public ThemeGradientColor GradientStop1 { get; set; }
+        public ThemeGradientColor GradientStop2 { get; set; }
 
         [DontSerialize]
         public LinearGradientBrush ToLinearGradientBrush
@@ -39,18 +39,18 @@ namespace CommonPluginsShared.Models
             }
         }
 
-        public static LinearGradient ToThemeLinearGradient(LinearGradientBrush linearGradientBrush)
+        public static ThemeLinearGradient ToThemeLinearGradient(LinearGradientBrush linearGradientBrush)
         {
-            return new LinearGradient
+            return new ThemeLinearGradient
             {
                 StartPoint = linearGradientBrush.StartPoint,
                 EndPoint = linearGradientBrush.EndPoint,
-                GradientStop1 = new GradientColor
+                GradientStop1 = new ThemeGradientColor
                 {
                     ColorString = linearGradientBrush.GradientStops[0].Color.ToString(),
                     ColorOffset = linearGradientBrush.GradientStops[0].Offset
                 },
-                GradientStop2 = new GradientColor
+                GradientStop2 = new ThemeGradientColor
                 {
                     ColorString = linearGradientBrush.GradientStops[1].Color.ToString(),
                     ColorOffset = linearGradientBrush.GradientStops[1].Offset
@@ -59,7 +59,7 @@ namespace CommonPluginsShared.Models
         }
     }
 
-    public class GradientColor
+    public class ThemeGradientColor
     {
         public string ColorString { get; set; }
         public double ColorOffset { get; set; }
