@@ -39,12 +39,6 @@ namespace CommonPluginsShared.Models
             }
         }
 
-        public class GradientColor
-        {
-            public string ColorString { get; set; }
-            public double ColorOffset { get; set; }
-        }
-
         public static LinearGradient ToThemeLinearGradient(LinearGradientBrush linearGradientBrush)
         {
             return new LinearGradient
@@ -63,5 +57,11 @@ namespace CommonPluginsShared.Models
                 }
             };
         }
+    }
+
+    public class GradientColor
+    {
+        public string ColorString { get; set; }
+        public double ColorOffset { get; set; }
     }
 }
