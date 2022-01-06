@@ -18,7 +18,7 @@ using CommonPlayniteShared;
 
 namespace CommonPluginsShared.Collections
 {
-    public abstract class PluginDatabaseObject<TSettings, TDatabase, TItem> : ObservableObject, IPluginDatabase
+    public abstract class PluginDatabaseObject<TSettings, TDatabase, TItem, T> : ObservableObject, IPluginDatabase
         where TSettings : ISettings
         where TDatabase : PluginItemCollection<TItem>
         where TItem : PluginDataBaseGameBase
@@ -912,7 +912,17 @@ namespace CommonPluginsShared.Collections
         }
 
 
-        public abstract void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e);
+        public virtual void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e)
+        {
+            if (e?.UpdatedItems != null)
+            {
+                foreach (var GameUpdated in e.UpdatedItems)
+                {
+                    Database.SetGameInfo<T>(PlayniteApi, GameUpdated.NewData.Id);
+                    var data = Get(GameUpdated.NewData.Id);
+                }
+            }
+        }
 
         public virtual void SetThemesResources(Game game)
         {
