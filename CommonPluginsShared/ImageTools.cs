@@ -116,7 +116,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, $"Error on Resize({srcPath})");
                 return string.Empty;
             }
         }
@@ -155,7 +155,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, true);
+                Common.LogError(ex, true, $"Error on Resize({srcPath})");
                 return false;
             }
         }
@@ -181,7 +181,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, true);
+                Common.LogError(ex, true, $"Error on Resize({srcPath})");
                 return false;
             }
         }
