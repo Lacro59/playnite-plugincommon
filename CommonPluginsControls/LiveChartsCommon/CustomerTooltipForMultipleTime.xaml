@@ -35,6 +35,19 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate DataType="{x:Type wpf:DataPointViewModel}">
                                     <Grid Margin="2" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Grid.Style>
+                                            <Style TargetType="Grid">
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.HideIsZero)}" Value="True" />
+                                                            <Condition Binding="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Values)}" Value="0" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Grid.Style>
 
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
