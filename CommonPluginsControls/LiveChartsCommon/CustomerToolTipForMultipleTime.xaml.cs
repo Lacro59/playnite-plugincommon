@@ -9,7 +9,7 @@ using CommonPlayniteShared.Common;
 using CommonPluginsShared;
 using LiveCharts;
 using LiveCharts.Wpf;
-
+using System.Collections.Generic;
 
 namespace CommonPluginsControls.LiveChartsCommon
 {
@@ -31,23 +31,13 @@ namespace CommonPluginsControls.LiveChartsCommon
                 SharedConverter sharedConverter = new SharedConverter();
                 DataTitle = sharedConverter.Convert(_data, null, null, CultureInfo.CurrentCulture).ToString();
                 DataTitleInfo = string.Empty;
-                if (ShowWeekPeriode && DateFirstPeriode != default(DateTime))
+                if (ShowWeekPeriode && DatesPeriodes.Count > 0)
                 {
                     int.TryParse(Regex.Replace(DataTitle, @"[^\d]", string.Empty), out int WeekNumber);
                     if (WeekNumber > 0)
                     {
-                        DateTime First = Tools.YearWeekDayToDateTime(DateFirstPeriode.Year, DayOfWeek.Monday, WeekNumber);
-                        DateTime Last = default(DateTime);
-
-                        if ((WeekNumber + 1) > Tools.GetWeeksInYear(DateFirstPeriode.Year))
-                        {
-                            Last = Tools.YearWeekDayToDateTime(DateFirstPeriode.Year, DayOfWeek.Sunday, 1);
-                        }
-                        else
-                        {
-                            Last = Tools.YearWeekDayToDateTime(DateFirstPeriode.Year, DayOfWeek.Sunday, WeekNumber + 1);
-                        }
-
+                        DateTime First = DatesPeriodes.Find(x => x.Week == WeekNumber)?.Monday ?? default(DateTime);
+                        DateTime Last = DatesPeriodes.Find(x => x.Week == WeekNumber)?.Sunday ?? default(DateTime);
                         DataTitleInfo = "[" + First.ToString(Constants.DateUiFormat) + " - " + Last.ToString(Constants.DateUiFormat) + "]";
                     }
                 }
@@ -111,17 +101,17 @@ namespace CommonPluginsControls.LiveChartsCommon
             typeof(CustomerToolTipForMultipleTime),
             new FrameworkPropertyMetadata(false));
 
-        public DateTime DateFirstPeriode
+        public List<WeekStartEnd> DatesPeriodes
         {
-            get { return (DateTime)GetValue(DateFirstPeriodeProperty); }
-            set { SetValue(DateFirstPeriodeProperty, value); }
+            get { return (List<WeekStartEnd>)GetValue(DatesPeriodesProperty); }
+            set { SetValue(DatesPeriodesProperty, value); }
         }
 
-        public static readonly DependencyProperty DateFirstPeriodeProperty = DependencyProperty.Register(
-            nameof(DateFirstPeriode),
-            typeof(DateTime),
+        public static readonly DependencyProperty DatesPeriodesProperty = DependencyProperty.Register(
+            nameof(DatesPeriodes),
+            typeof(List<WeekStartEnd>),
             typeof(CustomerToolTipForMultipleTime),
-            new FrameworkPropertyMetadata(default(DateTime)));
+            new FrameworkPropertyMetadata(new List<WeekStartEnd>()));
 
         public string DataTitle { get; set; }
         public string DataTitleInfo { get; set; }
@@ -145,6 +135,20 @@ namespace CommonPluginsControls.LiveChartsCommon
             //your job is only to display this data as required
 
             DataContext = this;
+        }
+    }
+
+
+    public class WeekStartEnd
+    {
+        public DateTime Monday;
+        public DateTime Sunday;
+        public int Week
+        {
+            get
+            {
+                return Tools.WeekOfYearISO8601(Monday);
+            }
         }
     }
 }
