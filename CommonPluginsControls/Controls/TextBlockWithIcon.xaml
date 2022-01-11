@@ -22,6 +22,7 @@
                Visibility="{Binding UseIcon, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=True}" />
         <TextBlock Grid.Column="0"  Name="PART_IconText" FontFamily="{DynamicResource CommonFont}" Text="{Binding IconText, FallbackValue='X'}"
                    VerticalAlignment="Center" FontSize="24" 
+                   Background="{Binding RelativeSource={RelativeSource AncestorType=TextBlock}, Path=Background}"
                    Style="{Binding RelativeSource={RelativeSource AncestorType=TextBlock}, Path=Style}"
                    Visibility="{Binding UseIconText, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=True}" />
         
@@ -31,6 +32,7 @@
                    VerticalAlignment="Center"
                    Style="{Binding RelativeSource={RelativeSource AncestorType=TextBlock}, Path=Style}"
                    FontSize="{Binding RelativeSource={RelativeSource AncestorType=TextBlock}, Path=FontSize}"
+                   Background="{Binding RelativeSource={RelativeSource AncestorType=TextBlock}, Path=Background}"
                    Visibility="{Binding UseText, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=True}" />
     </Grid>
 </TextBlock>
