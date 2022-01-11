@@ -59,5 +59,15 @@ namespace CommonPluginsShared.Collections
                 return false;
             }
         }
+
+
+        [DontSerialize]
+        public virtual int Count
+        {
+            get
+            {
+                return 0;
+            }
+        }
     }
 }

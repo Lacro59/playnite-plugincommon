@@ -21,5 +21,14 @@ namespace CommonPluginsShared.Collections
                 return Items?.Count > 0;
             }
         }
+
+        [DontSerialize]
+        public override int Count
+        {
+            get
+            {
+                return Items?.Count ?? 0;
+            }
+        }
     }
 }

@@ -121,11 +121,20 @@
     <Compile Include="Views\ListDataUpdated.xaml.cs">
       <DependentUpon>ListDataUpdated.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\ListDataWithoutGame.xaml.cs">
+      <DependentUpon>ListDataWithoutGame.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ListWithNoData.xaml.cs">
       <DependentUpon>ListWithNoData.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\OptionsDownloadData.xaml.cs">
       <DependentUpon>OptionsDownloadData.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SelectVariable.xaml.cs">
+      <DependentUpon>SelectVariable.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TransfertData.xaml.cs">
+      <DependentUpon>TransfertData.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -194,6 +203,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\ListDataWithoutGame.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ListWithNoData.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -201,6 +214,14 @@
     <Page Include="Views\OptionsDownloadData.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\SelectVariable.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\TransfertData.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -288,6 +288,19 @@ namespace CommonPluginsShared.Collections
 
             return mergedList;
         }
+
+
+        public virtual List<DataGame> GetDataGames()
+        {
+            return Database.Items.Select(x => new DataGame
+            {
+                Id = x.Value.Id,
+                Icon = x.Value.Icon.IsNullOrEmpty() ? x.Value.Icon : API.Instance.Database.GetFullFilePath(x.Value.Icon),
+                Name = x.Value.Name,
+                IsDeleted = x.Value.IsDeleted,
+                CountData = x.Value.Count
+            }).Distinct().ToList();
+        }
         #endregion
 
 
@@ -565,6 +578,17 @@ namespace CommonPluginsShared.Collections
         {
             return Get(game, OnlyCache, Force);
         }
+
+        PluginDataBaseGameBase IPluginDatabase.Get(Guid Id, bool OnlyCache, bool Force = false)
+        {
+            return Get(Id, OnlyCache, Force);
+        }
+
+        void IPluginDatabase.AddOrUpdate(PluginDataBaseGameBase item)
+        {
+            AddOrUpdate((TItem)item);
+        }
+
 
         public abstract TItem Get(Guid Id, bool OnlyCache = false, bool Force = false);
 
