@@ -78,7 +78,7 @@
                         <VirtualizingStackPanel VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" />
                     </ItemsPanelTemplate>
                 </ComboBox.ItemsPanel>
-                
+
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
@@ -97,7 +97,6 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-
         </Grid>
 
         <Border BorderThickness="0,1,0,0" BorderBrush="{StaticResource NormalBorderBrush}"
@@ -107,9 +106,9 @@
                         DockPanel.Dock="Right"
                         Style="{StaticResource BottomButton}" Click="PART_BtClose_Click" />
 
-                <Button TabIndex="0" Name="PART_BtDTransfer" Content="{DynamicResource LOCCommonTransfer}" 
+                <Button TabIndex="0" Name="PART_BtTransfer" Content="{DynamicResource LOCCommonTransfer}" 
                         DockPanel.Dock="Right" IsEnabled="False"
-                        Style="{StaticResource BottomButton}" Click="PART_BtDTransfer_Click" />
+                        Style="{StaticResource BottomButton}" Click="PART_BtTransfer_Click" />
             </DockPanel>
         </Border>
     </Grid>

@@ -21,6 +21,12 @@ namespace CommonPluginsShared.Interfaces
         PluginDataBaseGameBase Get(Game game, bool OnlyCache = false, bool Force = false);
         PluginDataBaseGameBase Get(Guid Id, bool OnlyCache = false, bool Force = false);
 
+        PluginDataBaseGameBase GetClone(Guid Id);
+        PluginDataBaseGameBase GetClone(Game game);
+
+        bool Remove(Game game);
+        bool Remove(Guid Id);
+
         void AddOrUpdate(PluginDataBaseGameBase item);
 
 

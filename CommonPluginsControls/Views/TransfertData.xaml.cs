@@ -17,10 +17,24 @@ namespace CommonPluginsControls.Views
     {
         private IPluginDatabase PluginDatabase { get; set; }
 
+
         public TransfertData(List<DataGame> DataPluginGames, IPluginDatabase PluginDatabase)
         {
             this.PluginDatabase = PluginDatabase;
+            Init(DataPluginGames);
+        }
 
+        public TransfertData(DataGame DataPluginGame, IPluginDatabase PluginDatabase)
+        {
+            this.PluginDatabase = PluginDatabase;
+            Init(new List<DataGame> { DataPluginGame });
+            PART_CbPluginGame.SelectedIndex = 0;
+            PART_CbPluginGame.IsEnabled = false;
+        }
+
+
+        private void Init(List<DataGame> DataPluginGames)
+        {
             InitializeComponent();
 
 
@@ -31,7 +45,7 @@ namespace CommonPluginsControls.Views
                 Name = x.Name,
                 CountData = PluginDatabase.Get(x.Id, true)?.Count ?? 0
             }).Distinct().ToList();
-            
+
             PART_CbPluginGame.ItemsSource = DataPluginGames.OrderBy(x => x.Name).ToList();
             PART_CbGame.ItemsSource = DataGames.OrderBy(x => x.Name).ToList();
         }
@@ -42,11 +56,11 @@ namespace CommonPluginsControls.Views
             ((Window)this.Parent).Close();
         }
 
-        private void PART_BtDTransfer_Click(object sender, RoutedEventArgs e)
+        private void PART_BtTransfer_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                var PluginData = PluginDatabase.Get(((DataGame)PART_CbPluginGame.SelectedItem).Id, true);
+                var PluginData = PluginDatabase.GetClone(((DataGame)PART_CbPluginGame.SelectedItem).Id);
 
                 PluginData.Id = ((DataGame)PART_CbGame.SelectedItem).Id;
                 PluginData.Name = ((DataGame)PART_CbGame.SelectedItem).Name;
@@ -67,17 +81,17 @@ namespace CommonPluginsControls.Views
         {
             if (PART_CbPluginGame.SelectedIndex == -1 || PART_CbGame.SelectedIndex == -1)
             {
-                PART_BtDTransfer.IsEnabled = false;
+                PART_BtTransfer.IsEnabled = false;
             }
             else
             {
                 if (((DataGame)PART_CbPluginGame.SelectedItem).Id == ((DataGame)PART_CbGame.SelectedItem).Id)
                 {
-                    PART_BtDTransfer.IsEnabled = false;
+                    PART_BtTransfer.IsEnabled = false;
                 }
                 else
                 {
-                    PART_BtDTransfer.IsEnabled = true;
+                    PART_BtTransfer.IsEnabled = true;
                 }
             }
         }

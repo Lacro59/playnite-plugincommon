@@ -15,6 +15,7 @@ using CommonPluginsControls.Controls;
 using CommonPlayniteShared.Common;
 using CommonPluginsShared.Interfaces;
 using CommonPlayniteShared;
+using Playnite.SDK.Data;
 
 namespace CommonPluginsShared.Collections
 {
@@ -301,6 +302,19 @@ namespace CommonPluginsShared.Collections
                 CountData = x.Value.Count
             }).Distinct().ToList();
         }
+
+
+        public virtual List<DataGame> GetIsolatedDataGames()
+        {
+            return Database.Items.Where(x => x.Value.IsDeleted).Select(x => new DataGame
+            {
+                Id = x.Value.Id,
+                Icon = x.Value.Icon.IsNullOrEmpty() ? x.Value.Icon : API.Instance.Database.GetFullFilePath(x.Value.Icon),
+                Name = x.Value.Name,
+                IsDeleted = x.Value.IsDeleted,
+                CountData = x.Value.Count
+            }).Distinct().ToList();
+        }
         #endregion
 
 
@@ -574,6 +588,17 @@ namespace CommonPluginsShared.Collections
         }
 
 
+        public virtual TItem GetClone(Guid Id)
+        {
+            return Serialization.GetClone(Get(Id, true, false));
+        }
+
+        public virtual TItem GetClone(Game game)
+        {
+            return Serialization.GetClone(Get(game, true, false));
+        }
+
+
         PluginDataBaseGameBase IPluginDatabase.Get(Game game, bool OnlyCache, bool Force = false)
         {
             return Get(game, OnlyCache, Force);
@@ -583,6 +608,18 @@ namespace CommonPluginsShared.Collections
         {
             return Get(Id, OnlyCache, Force);
         }
+
+
+        PluginDataBaseGameBase IPluginDatabase.GetClone(Game game)
+        {
+            return GetClone(game);
+        }
+
+        PluginDataBaseGameBase IPluginDatabase.GetClone(Guid Id)
+        {
+            return GetClone(Id);
+        }
+
 
         void IPluginDatabase.AddOrUpdate(PluginDataBaseGameBase item)
         {
