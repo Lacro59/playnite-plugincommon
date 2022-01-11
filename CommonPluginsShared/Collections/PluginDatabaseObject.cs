@@ -79,7 +79,7 @@ namespace CommonPluginsShared.Collections
             FileSystem.CreateDirectory(Paths.PluginCachePath);
 
             PlayniteApi.Database.Games.ItemUpdated += Games_ItemUpdated;
-
+            PlayniteApi.Database.Games.ItemCollectionChanged += Games_ItemCollectionChanged;
 
             GoToGame = new RelayCommand<Guid>((Id) =>
             {
@@ -923,6 +923,18 @@ namespace CommonPluginsShared.Collections
                 }
             }
         }
+
+        private void Games_ItemCollectionChanged(object sender, ItemCollectionChangedEventArgs<Game> e)
+        {
+            if (e?.RemovedItems != null)
+            {
+                foreach (var GameRemoved in e.RemovedItems)
+                {
+                    Remove(GameRemoved);
+                }
+            }
+        }
+
 
         public virtual void SetThemesResources(Game game)
         {
