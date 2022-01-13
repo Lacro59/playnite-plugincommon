@@ -80,6 +80,8 @@
 
     <sys:String x:Key="LOCCommonMenuInExtensions">Показувати меню плагіну у підменю розширень *</sys:String>
     <sys:String x:Key="LOCCommonIconStore">Показувати іконку магазину</sys:String>
+    
+    <sys:String x:Key="LOCCommonSaveColumOrder">Зберегти порядок стовпців</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationFullScreen">Повноекранний режим</sys:String>
     <sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Включити інтеграцію в повноекранний режим</sys:String>
