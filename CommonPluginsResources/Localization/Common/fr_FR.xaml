@@ -80,6 +80,8 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 
     <sys:String x:Key="LOCCommonMenuInExtensions">Afficher le menu du plugin dans le sous-menu des extensions *</sys:String>
     <sys:String x:Key="LOCCommonIconStore">Afficher l'icône du magasin</sys:String>
+    
+    <sys:String x:Key="LOCCommonSaveColumOrder">Save column order</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationFullScreen">Plein écran</sys:String>
     <sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Activer l'intégration en plein écran</sys:String>
