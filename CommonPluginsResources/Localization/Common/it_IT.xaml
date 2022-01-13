@@ -80,6 +80,8 @@ Vuoi aprire la cartella?</sys:String>
 
     <sys:String x:Key="LOCCommonMenuInExtensions">Mostra menu plugin nel sottomenu estensioni *</sys:String>
     <sys:String x:Key="LOCCommonIconStore">Mostra icona negozio</sys:String>
+    
+    <sys:String x:Key="LOCCommonSaveColumOrder">Salva ordine colonne</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationFullScreen">Schermo intero</sys:String>
     <sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Abilita integrazione a schermo intero</sys:String>
