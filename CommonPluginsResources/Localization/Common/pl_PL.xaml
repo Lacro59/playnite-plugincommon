@@ -80,6 +80,8 @@ Do you want to open the directory?</sys:String>
 
     <sys:String x:Key="LOCCommonMenuInExtensions">Pokaż menu wtyczki w podmenu rozszerzeń *</sys:String>
     <sys:String x:Key="LOCCommonIconStore">Pokaż ikonę sklepu</sys:String>
+    
+    <sys:String x:Key="LOCCommonSaveColumOrder">Save column order</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationFullScreen">Pełny ekran</sys:String>
     <sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Włącz pełnoekranową integrację</sys:String>
