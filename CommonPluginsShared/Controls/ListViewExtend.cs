@@ -1,6 +1,11 @@
-﻿using CommonPluginsShared.Extensions;
+﻿using CommonPlayniteShared.Common;
+using CommonPluginsShared.Extensions;
+using Playnite.SDK.Data;
 using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -52,6 +57,15 @@ namespace CommonPluginsShared.Controls
         #endregion
 
 
+        #region Save column order
+        public static readonly DependencyProperty SaveColumnProperty;
+        public bool SaveColumn { get; set; }
+
+        public static readonly DependencyProperty SaveColumnFilePathProperty;
+        public string SaveColumnFilePath { get; set; }
+        #endregion
+
+
         public ListViewExtend()
         {
             this.Loaded += ListViewExtend_Loaded;
@@ -74,6 +88,11 @@ namespace CommonPluginsShared.Controls
             }
 
             ((FrameworkElement)this.Parent).SizeChanged += Parent_SizeChanged;
+
+
+            GridView gridView = (GridView)this.View;
+            gridView.Columns.CollectionChanged += Columns_CollectionChanged;
+            LoadColumnState();
         }
 
         private void Parent_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -400,6 +419,62 @@ namespace CommonPluginsShared.Controls
                 SortDescription sd = new SortDescription(sortBy, direction);
                 dataView.SortDescriptions.Add(sd);
                 dataView.Refresh();
+            }
+        }
+        #endregion
+
+
+        #region Save column order
+        private void Columns_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            try
+            {
+                if (e.Action == NotifyCollectionChangedAction.Move && SaveColumn && !SaveColumnFilePath.IsNullOrEmpty())
+                {
+                    List<string> columnOrder = new List<string>();
+                    foreach (var col in ((GridView)this.View).Columns)
+                    {
+                        columnOrder.Add(col.Header.ToString());
+                    }
+                    string dataOrder = Serialization.ToJson(columnOrder);
+                    File.WriteAllText(SaveColumnFilePath, dataOrder);
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+            }
+        }
+
+        private void LoadColumnState()
+        {
+            if (File.Exists(SaveColumnFilePath))
+            {
+                try
+                {
+                    List<string> columnOrder = Serialization.FromJsonFile<List<string>>(SaveColumnFilePath);
+                    if (columnOrder != null && columnOrder.Count > 0)
+                    {
+                        int newIndex = 0;
+                        foreach (var colName in columnOrder)
+                        {
+                            int oldIndex = 0;
+                            for (int i = 0; i < ((GridView)this.View).Columns.Count; i++)
+                            {
+                                if (((GridView)this.View).Columns[i].Header.ToString().Equals(colName))
+                                {
+                                    oldIndex = i;
+                                    break;
+                                }
+                            }
+                            ((GridView)this.View).Columns.Move(oldIndex, newIndex++);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false);
+                }
             }
         }
         #endregion
