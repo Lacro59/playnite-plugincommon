@@ -6,14 +6,14 @@
 
     <!-- Transfer plugin data -->
 
-    <sys:String x:Key="LOCCommonTransfer">Transfer</sys:String>
-    <sys:String x:Key="LOCCommonTransferPluginData">Transfer plugin data</sys:String>
-    <sys:String x:Key="LOCCommonSelectTransferData">Selecting the data to transfer</sys:String>
+    <sys:String x:Key="LOCCommonTransfer">Transferir</sys:String>
+    <sys:String x:Key="LOCCommonTransferPluginData">Transferir datos del plugin</sys:String>
+    <sys:String x:Key="LOCCommonSelectTransferData">Seleccionando los datos para transferir</sys:String>
 
 
     <!-- Remove plugin data -->
 
-    <sys:String x:Key="LOCCommonIsolatedPluginData">Isolated plugin data</sys:String>
+    <sys:String x:Key="LOCCommonIsolatedPluginData">Datos aislados del plugin</sys:String>
     
     
     <!-- Common Stores -->
@@ -80,6 +80,8 @@
 
     <sys:String x:Key="LOCCommonMenuInExtensions">Mostrar menú del plugin en el submenú de extensiones *</sys:String>
     <sys:String x:Key="LOCCommonIconStore">Mostrar icono de la tienda</sys:String>
+    
+    <sys:String x:Key="LOCCommonSaveColumOrder">Save column order</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationFullScreen">Pantalla completa</sys:String>
     <sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Habilitar integración en pantalla completa</sys:String>
