@@ -14,6 +14,12 @@ namespace CommonPluginsShared.Converters
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
+            PlayTimeFormat playTimeFormat = PlayTimeFormat.DefaultFormat;
+            if (parameter != null && parameter is PlayTimeFormat)
+            {
+                playTimeFormat = (PlayTimeFormat)parameter;
+            }
+
             if (value == null)
             {
                 string.Format(ResourceProvider.GetString("LOCPlayedMinutes"), 0);
@@ -26,23 +32,39 @@ namespace CommonPluginsShared.Converters
             }
 
             var time = TimeSpan.FromSeconds(seconds);
-            if (time.TotalSeconds < 60)
+
+            switch (playTimeFormat)
             {
-                return string.Format(ResourceProvider.GetString("LOCPlayedSeconds"), time.Seconds);
+                case PlayTimeFormat.DefaultFormat:
+                    if (time.TotalSeconds < 60)
+                    {
+                        return string.Format(ResourceProvider.GetString("LOCPlayedSeconds"), time.Seconds);
+                    }
+                    else if (time.TotalHours < 1)
+                    {
+                        return string.Format(ResourceProvider.GetString("LOCPlayedMinutes"), time.Minutes);
+                    }
+                    else
+                    {
+                        return string.Format(ResourceProvider.GetString("LOCPlayedHours"), Math.Floor(time.TotalHours), time.Minutes);
+                    }
+
+                case PlayTimeFormat.OnlyHour:
+                    return string.Format(ResourceProvider.GetString("LOCPlayedHoursOnly"), time.TotalHours.ToString("0.##"));
             }
-            else if (time.TotalHours < 1)
-            {
-                return string.Format(ResourceProvider.GetString("LOCPlayedMinutes"), time.Minutes);
-            }
-            else
-            {
-                return string.Format(ResourceProvider.GetString("LOCPlayedHours"), Math.Floor(time.TotalHours), time.Minutes);
-            }
+
+            return string.Empty;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             throw new NotSupportedException();
         }
+    }
+
+
+    public enum PlayTimeFormat
+    {
+        OnlyHour, DefaultFormat
     }
 }
