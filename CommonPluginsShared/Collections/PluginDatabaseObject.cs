@@ -980,7 +980,6 @@ namespace CommonPluginsShared.Collections
                 foreach (var GameUpdated in e.UpdatedItems)
                 {
                     Database.SetGameInfo<T>(PlayniteApi, GameUpdated.NewData.Id);
-                    var data = Get(GameUpdated.NewData.Id);
                 }
             }
         }
