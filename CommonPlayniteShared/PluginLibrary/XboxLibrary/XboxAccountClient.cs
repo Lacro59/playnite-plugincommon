@@ -22,7 +22,7 @@ namespace CommonPlayniteShared.PluginLibrary.XboxLibrary
         private IPlayniteAPI PlayniteApi;//private XboxLibrary library;
         private const string loginUrl = @"https://login.live.com/oauth20_authorize.srf?display=touch&scope=service%3A%3Auser.auth.xboxlive.com%3A%3AMBI_SSL&redirect_uri=https%3A%2F%2Flogin.live.com%2Foauth20_desktop.srf&locale=en&response_type=token&client_id=0000000048093EE3";
 
-        private readonly string liveTokensPath;
+        public readonly string liveTokensPath;//private readonly string liveTokensPath;
         private readonly string xstsLoginTokesPath;
 
         public XboxAccountClient(IPlayniteAPI PlayniteApi, string PluginUserDataPath)//public XboxAccountClient(XboxLibrary library)
@@ -171,7 +171,7 @@ namespace CommonPlayniteShared.PluginLibrary.XboxLibrary
             }
         }
 
-        internal async Task RefreshTokens()
+        public async Task RefreshTokens()//internal async Task RefreshTokens()
         {
             logger.Debug("Refreshing xbox tokens.");
             AuthenticationData tokens = null;
