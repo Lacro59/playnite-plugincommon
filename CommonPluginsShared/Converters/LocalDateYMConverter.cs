@@ -40,7 +40,8 @@ namespace CommonPluginsShared.Converters
                         }
                     }
 
-                    return ((DateTime)value).ToString(YMDatePattern);
+                    DateTime dt = ((DateTime)value).ToLocalTime();
+                    return dt.ToString(YMDatePattern);
                 }
                 else
                 {

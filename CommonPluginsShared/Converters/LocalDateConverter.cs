@@ -22,7 +22,8 @@ namespace CommonPluginsShared.Converters
             {
                 if (value != null && (DateTime)value != default(DateTime))
                 {
-                    return ((DateTime)value).ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern);
+                    DateTime dt = ((DateTime)value).ToLocalTime();
+                    return dt.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern);
                 }
                 else
                 {
