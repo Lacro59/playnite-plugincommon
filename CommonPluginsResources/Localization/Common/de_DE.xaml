@@ -81,7 +81,7 @@ Soll das Verzeichnis geöffnet werden?</sys:String>
     <sys:String x:Key="LOCCommonMenuInExtensions">Plugin Menü im Erweiterungsmenü anzeigen *</sys:String>
     <sys:String x:Key="LOCCommonIconStore">Shop Symbol anzeigen</sys:String>
     
-    <sys:String x:Key="LOCCommonSaveColumOrder">Save column order</sys:String>
+    <sys:String x:Key="LOCCommonSaveColumOrder">Spaltenreihenfolge speichern</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationFullScreen">Vollbildmodus</sys:String>
     <sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Vollbildintegration aktivieren</sys:String>
