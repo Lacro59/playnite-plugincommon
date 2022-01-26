@@ -108,7 +108,22 @@ namespace CommonPluginsShared
             // Only languages available
             string[] arrayLang = { "de", "en", "fr", "ru", "zh", "zh-Hans" };
 
-            PlayniteLanguage = PlayniteLanguage.Substring(0, 2);
+            PlayniteLanguage = PlayniteLanguage.Substring(0, 2).ToLower();
+            if (!arrayLang.ContainsString(PlayniteLanguage))
+            {
+                PlayniteLanguage = "en";
+            }
+
+            return PlayniteLanguage;
+        }
+
+
+        public static string GetGenshinLang(string PlayniteLanguage)
+        {
+            // Only languages available
+            string[] arrayLang = { "chs", "cht", "de", "en", "es", "fr", "id", "jp", "kr", "pt", "ru", "th", "vi" };
+
+            PlayniteLanguage = PlayniteLanguage.Substring(0, 2).ToLower();
             if (!arrayLang.ContainsString(PlayniteLanguage))
             {
                 PlayniteLanguage = "en";
