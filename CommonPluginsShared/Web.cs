@@ -390,10 +390,8 @@ namespace CommonPluginsShared
         /// <param name="Cookies"></param>
         /// <param name="UserAgent"></param>
         /// <returns></returns>
-        public static async Task<string> DownloadStringData(string url, List<HttpCookie> Cookies = null, string UserAgent = "")
+        public static async Task<string> DownloadStringData(string url, List<HttpCookie> Cookies = null, string UserAgent = "", bool KeepParam = false)
         {
-            var response = string.Empty;
-
             HttpClientHandler handler = new HttpClientHandler();
             if (Cookies != null)
             {
@@ -420,6 +418,13 @@ namespace CommonPluginsShared
                 handler.CookieContainer = cookieContainer;
             }
 
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri(url),
+                Method = HttpMethod.Get
+            };
+
+            HttpResponseMessage response;
             using (var client = new HttpClient(handler))
             {
                 if (UserAgent.IsNullOrEmpty())
@@ -431,18 +436,40 @@ namespace CommonPluginsShared
                     client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
                 }
 
-                HttpResponseMessage result;
                 try
                 {
-                    result = await client.GetAsync(url).ConfigureAwait(false);
-                    if (result.IsSuccessStatusCode)
+                    response = await client.SendAsync(request).ConfigureAwait(false);
+                    int statusCode = (int)response.StatusCode;
+                    bool IsRedirected = ((request.RequestUri.ToString() != url) || (statusCode >= 300 && statusCode <= 399));
+
+                    // We want to handle redirects ourselves so that we can determine the final redirect Location (via header)
+                    if (IsRedirected)
                     {
-                        response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        string urlNew = request.RequestUri.ToString();
+                        var redirectUri = response.Headers.Location;
+                        if (!redirectUri?.IsAbsoluteUri ?? false)
+                        {
+                            redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
+                            urlNew = redirectUri.ToString();
+                        }
+                        
+                        if (KeepParam)
+                        {
+                            var urlParams = url.Split('?').ToList();
+                            if (urlParams.Count == 2)
+                            {
+                                urlNew += "?" + urlParams[1];
+                            }
+                        }
+
+                        Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", urlNew));
+                        return await DownloadStringData(urlNew, Cookies, UserAgent);
                     }
                     else
                     {
-                        logger.Error($"Web error with status code {result.StatusCode.ToString()}");
+                        return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     }
+
                 }
                 catch (Exception ex)
                 {
@@ -458,7 +485,7 @@ namespace CommonPluginsShared
                 }
             }
 
-            return response;
+            return string.Empty;
         }
         
         public static async Task<string> DownloadStringData(string url, CookieContainer Cookies = null, string UserAgent = "")
