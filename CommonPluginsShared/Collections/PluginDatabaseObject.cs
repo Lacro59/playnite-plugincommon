@@ -653,7 +653,7 @@ namespace CommonPluginsShared.Collections
             PluginTags = new List<Tag>();
             if (!TagBefore.IsNullOrEmpty())
             {
-                PluginTags = PlayniteApi.Database.Tags.Where(x => (bool)x.Name?.StartsWith(TagBefore))?.ToList() ?? new List<Tag>();
+                PluginTags = PlayniteApi.Database.Tags?.Where(x => (bool)x.Name?.StartsWith(TagBefore))?.ToList() ?? new List<Tag>();
             }
         }
 
