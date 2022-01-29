@@ -20,6 +20,7 @@
         private static string amazonGame = "\uea55";
         private static string android = "\uea5b";        
         private static string psn = "\uea5c";        
+        private static string riot = "\uea6c";        
 
         private static string retroachievements = "\ue910";      
         private static string rpcs3 = "\uea37";                  
@@ -108,6 +109,10 @@
                 case "amazon":
                 case "amazon games":
                     stringReturn = amazonGame;
+                    break;
+                case "riot launcher":
+                case "riot games":
+                    stringReturn = riot;
                     break;
                 case "retroachievements":
                     stringReturn = retroachievements;
