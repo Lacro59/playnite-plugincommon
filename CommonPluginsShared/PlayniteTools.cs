@@ -50,6 +50,8 @@ namespace CommonPluginsShared
             ItchioLibrary,
             RockstarLibrary,
             TwitchLibrary,
+            OculusLibrary,
+            RiotLibrary,
             UplayLibrary
         }
 
@@ -69,7 +71,9 @@ namespace CommonPluginsShared
             { new Guid("00000001-EBB2-4EEC-ABCB-7C89937A42BB"), ExternalPlugin.ItchioLibrary },
             { new Guid("88409022-088a-4de8-805a-fdbac291f00a"), ExternalPlugin.RockstarLibrary },
             { new Guid("E2A7D494-C138-489D-BB3F-1D786BEEB675"), ExternalPlugin.TwitchLibrary },
-            { new Guid("C2F038E5-8B92-4877-91F1-DA9094155FC5"), ExternalPlugin.UplayLibrary }
+            { new Guid("C2F038E5-8B92-4877-91F1-DA9094155FC5"), ExternalPlugin.UplayLibrary },
+            { new Guid("77346DD6-B0CC-4F7D-80F0-C1D138CCAE58"), ExternalPlugin.OculusLibrary },
+            { new Guid("317A5E2E-EAC1-48BC-ADB3-FB9Z321AFD3F"), ExternalPlugin.RiotLibrary }
         };
 
         public static ExternalPlugin GetPluginType(Guid PluginId)
@@ -394,6 +398,14 @@ namespace CommonPluginsShared
                     return "Xbox";
                 case ExternalPlugin.PSNLibrary:
                     return "Playstation";
+                case ExternalPlugin.IndiegalaLibrary:
+                    return "Indiegala";
+                case ExternalPlugin.RockstarLibrary:
+                    return "Rockstar";
+                case ExternalPlugin.OculusLibrary:
+                    return "Oculus";
+                case ExternalPlugin.RiotLibrary:
+                    return "Riot Games";
             }
 
             return string.Empty;
@@ -408,13 +420,11 @@ namespace CommonPluginsShared
                 try
                 {
                     var Source = API.Instance.Database.Sources.Get(SourceId);
-
                     if (Source == null)
                     {
                         logger.Warn($"SourceName not find for {SourceId.ToString()}");
                         return "Playnite";
                     }
-
                     return Source.Name;
                 }
                 catch (Exception ex)
@@ -426,7 +436,7 @@ namespace CommonPluginsShared
 
             if (PlatformsIds == null)
             {
-                logger.Warn($"No PlatformsIds for {SourceId.ToString()}");
+                logger.Warn($"No PlatformsIds for {Serialization.ToJson(PlatformsIds)}");
                 return SourceName;
             }
 
@@ -435,7 +445,6 @@ namespace CommonPluginsShared
                 if (PlatformID != Guid.Parse("00000000-0000-0000-0000-000000000000"))
                 {
                     var platform = API.Instance.Database.Platforms.Get(PlatformID);
-
                     if (platform != null)
                     {
                         switch (platform.Name.ToLower())

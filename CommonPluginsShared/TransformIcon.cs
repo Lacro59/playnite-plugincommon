@@ -112,6 +112,7 @@
                     break;
                 case "riot launcher":
                 case "riot games":
+                case "riot":
                     stringReturn = riot;
                     break;
                 case "retroachievements":
