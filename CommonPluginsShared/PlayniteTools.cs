@@ -73,7 +73,7 @@ namespace CommonPluginsShared
             { new Guid("E2A7D494-C138-489D-BB3F-1D786BEEB675"), ExternalPlugin.TwitchLibrary },
             { new Guid("C2F038E5-8B92-4877-91F1-DA9094155FC5"), ExternalPlugin.UplayLibrary },
             { new Guid("77346DD6-B0CC-4F7D-80F0-C1D138CCAE58"), ExternalPlugin.OculusLibrary },
-            { new Guid("317A5E2E-EAC1-48BC-ADB3-FB9Z321AFD3F"), ExternalPlugin.RiotLibrary }
+            { new Guid("317a5e2e-eac1-48bc-adb3-fb9e321afd3f"), ExternalPlugin.RiotLibrary }
         };
 
         public static ExternalPlugin GetPluginType(Guid PluginId)
@@ -415,7 +415,7 @@ namespace CommonPluginsShared
         {
             string SourceName = "Playnite";
 
-            if (SourceId != Guid.Parse("00000000-0000-0000-0000-000000000000"))
+            if (SourceId != default(Guid))
             {
                 try
                 {
@@ -442,7 +442,7 @@ namespace CommonPluginsShared
 
             foreach (Guid PlatformID in PlatformsIds)
             {
-                if (PlatformID != Guid.Parse("00000000-0000-0000-0000-000000000000"))
+                if (PlatformID !=default(Guid))
                 {
                     var platform = API.Instance.Database.Platforms.Get(PlatformID);
                     if (platform != null)
