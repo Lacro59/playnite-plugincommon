@@ -228,6 +228,7 @@ namespace CommonPluginsShared
         public static string GetCacheFile(string FileName, string PluginName, dynamic Options = null)
         {
             PluginName = PluginName.ToLower();
+            FileName = CommonPlayniteShared.Common.Paths.GetSafePathName(FileName);
 
             try
             {
@@ -256,7 +257,7 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, $"Error on GetCacheFile({FileName})");
             }
 
             return string.Empty;
