@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CommonPluginsControls.Controls"
              mc:Ignorable="d" 
-             Height="300" Width="400">
+             Height="400" Width="800">
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -20,7 +20,14 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin="0,2">
-                            <TextBlock Text="{Binding}" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="1.5*" />
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="{Binding Name}" />
+                            <TextBlock Grid.Column="2" Text="{Binding Value}" />
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>

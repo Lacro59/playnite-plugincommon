@@ -560,7 +560,12 @@ namespace CommonPluginsShared
             string result = inputString;
 
             // Playnite variables
+            if (game == null)
+            {
+                game = new Game();
+            }
             result = API.Instance.ExpandGameVariables(game, inputString);
+            
 
 
             // Dropbox

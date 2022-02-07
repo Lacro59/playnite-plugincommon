@@ -1,6 +1,9 @@
 ﻿using CommonPluginsStores;
+using System.Collections.Generic;
 using System.Windows;
+using System.Linq;
 using System.Windows.Controls;
+using CommonPluginsShared.Extensions;
 
 namespace CommonPluginsControls.Controls
 {
@@ -13,7 +16,16 @@ namespace CommonPluginsControls.Controls
         {
             InitializeComponent();
 
-            PART_ListBox.ItemsSource = PlayniteTools.ListVariables;
+            List<string> ListVariables = PlayniteTools.ListVariables;
+            List<PluginVariable> pluginVariables = ListVariables
+                .Select(x => new PluginVariable
+                {
+                    Name = x,
+                    Value = x.IsEqual(PlayniteTools.StringExpandWithStores(null, x)) ? string.Empty : PlayniteTools.StringExpandWithStores(null, x)
+                })
+                .ToList();
+
+            PART_ListBox.ItemsSource = pluginVariables;
         }
 
 
@@ -24,7 +36,7 @@ namespace CommonPluginsControls.Controls
 
         private void PART_BtCopy_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            Clipboard.SetText(PART_ListBox.SelectedItem.ToString());
+            Clipboard.SetText(((PluginVariable)PART_ListBox.SelectedItem).Name.ToString());
             ((Window)this.Parent).Close();
         }
 
@@ -33,5 +45,12 @@ namespace CommonPluginsControls.Controls
         {
             PART_BtCopy.IsEnabled = true;
         }
+    }
+
+
+    public class PluginVariable
+    {
+        public string Name { get; set; }
+        public string Value { get; set; }
     }
 }

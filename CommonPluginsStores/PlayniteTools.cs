@@ -20,13 +20,17 @@ namespace CommonPluginsStores
         public static List<string> ListVariables = new List<string>
         {
             "{InstallDir}", "{InstallDirName}", "{ImagePath}", "{ImageName}", "{ImageNameNoExt}", "{PlayniteDir}", "{Name}",
+            "{Platform}", "{GameId}", "{DatabaseId}", "{PluginId}", "{Version}", "{EmulatorDir}",
+
             "{DropboxFolder}", "{OneDriveFolder}",
+
             "{SteamId}", "{SteamInstallDir}", "{SteamScreenshotsDir}",
             "{UbisoftInstallDir}", "{UbisoftScreenshotsDir}",
             "{RetroArchScreenshotsDir}",
+
             "{WinDir}", "{AllUsersProfile}", "{AppData}", "{HomePath}", "{UserName}", "{ComputerName}", "{UserProfile}",
             "{HomeDrive}", "{SystemDrive}", "{SystemRoot}", "{Public}", "{CommonProgramW6432}", "{CommonProgramFiles}",
-            "{ProgramFiles}", "{CommonProgramFiles(x86)}", "{ProgramFiles(x86)"
+            "{ProgramFiles}", "{CommonProgramFiles(x86)}", "{ProgramFiles(x86)}"
         };
 
         public static string StringExpandWithStores(Game game, string inputString, bool fixSeparators = false)
