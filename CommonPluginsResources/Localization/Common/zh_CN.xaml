@@ -5,6 +5,10 @@
     <sys:String x:Key="LOCCommonDateData">数据日期</sys:String>
 
 
+    <sys:String x:Key="LOCCommonAddFolder">添加文件夹</sys:String>
+    <sys:String x:Key="LOCCommonRemoveFolder">移除文件夹</sys:String>
+    <sys:String x:Key="LOCCommonAddFilePattern">添加文件模式</sys:String>
+    
     <!-- Transfer plugin data -->
 
     <sys:String x:Key="LOCCommonTransfer">转移</sys:String>

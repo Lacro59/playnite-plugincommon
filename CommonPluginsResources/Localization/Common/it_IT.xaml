@@ -5,6 +5,10 @@
     <sys:String x:Key="LOCCommonDateData">Data dei dati</sys:String>
 
 
+    <sys:String x:Key="LOCCommonAddFolder">Aggiungi cartella</sys:String>
+    <sys:String x:Key="LOCCommonRemoveFolder">Rimuovi cartella</sys:String>
+    <sys:String x:Key="LOCCommonAddFilePattern">Aggiungi sequenza file</sys:String>
+    
     <!-- Transfer plugin data -->
 
     <sys:String x:Key="LOCCommonTransfer">Trasferimento</sys:String>

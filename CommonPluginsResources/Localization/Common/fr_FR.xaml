@@ -5,6 +5,10 @@
     <sys:String x:Key="LOCCommonDateData">Date des données</sys:String>
 
 
+    <sys:String x:Key="LOCCommonAddFolder">Ajouter un dossier</sys:String>
+    <sys:String x:Key="LOCCommonRemoveFolder">Supprimer le dossier</sys:String>
+    <sys:String x:Key="LOCCommonAddFilePattern">Utiliser un modèle de fichier</sys:String>
+    
     <!-- Transfer plugin data -->
 
     <sys:String x:Key="LOCCommonTransfer">Transférer</sys:String>
