@@ -18,7 +18,7 @@
 
     <!-- Remove plugin data -->
 
-    <sys:String x:Key="LOCCommonIsolatedPluginData">孤立的插件数据</sys:String>
+    <sys:String x:Key="LOCCommonIsolatedPluginData">隔离插件数据</sys:String>
     
     
     <!-- Common Stores -->
