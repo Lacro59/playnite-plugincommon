@@ -3,6 +3,9 @@
 
     <sys:String x:Key="LOCCommonYear">Рік</sys:String>
     <sys:String x:Key="LOCCommonDateData">Дата даних</sys:String>
+    
+    
+    <sys:String x:Key="LOCCommonLastUpdate">Останнє оновлення</sys:String>
 
 
     <sys:String x:Key="LOCCommonAddFolder">Додати теку</sys:String>

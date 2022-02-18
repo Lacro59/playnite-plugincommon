@@ -3,6 +3,9 @@
 
     <sys:String x:Key="LOCCommonYear">Anno</sys:String>
     <sys:String x:Key="LOCCommonDateData">Data dei dati</sys:String>
+    
+    
+    <sys:String x:Key="LOCCommonLastUpdate">Ultimo aggiornamento</sys:String>
 
 
     <sys:String x:Key="LOCCommonAddFolder">Aggiungi cartella</sys:String>
