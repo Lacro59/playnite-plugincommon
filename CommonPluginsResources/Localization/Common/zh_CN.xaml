@@ -5,7 +5,7 @@
     <sys:String x:Key="LOCCommonDateData">数据日期</sys:String>
     
     
-    <sys:String x:Key="LOCCommonLastUpdate">Last update</sys:String>
+    <sys:String x:Key="LOCCommonLastUpdate">最近更新</sys:String>
 
 
     <sys:String x:Key="LOCCommonAddFolder">添加文件夹</sys:String>
