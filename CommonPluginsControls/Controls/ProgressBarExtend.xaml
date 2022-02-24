@@ -53,13 +53,20 @@
                                                         </Rectangle.RenderTransform>
                                                     </Rectangle>
                                                 </Grid>
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Width="{Binding MarginWidth, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBlock Width="{Binding MarginLeft, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                                     <TextBlock Text="{Binding TextValue, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue='empty text'}"                                                           
-                                                               Width="{Binding TextWidth, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                               Grid.Column="1"
                                                                Foreground="{DynamicResource TextBrush}"
                                                                TextAlignment="Center" VerticalAlignment="Center" />
-                                                </StackPanel>
+                                                    <TextBlock Width="{Binding MarginRight, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                </Grid>
                                             </Grid>
                                         </Decorator>
                                     </Grid>
@@ -86,7 +93,7 @@
             </ProgressBar.Style>
         </ProgressBar>
 
-        <ProgressBar Grid.Row="1" Name="PART_ProgressBar" SizeChanged="PART_ProgressBar_SizeChanged"
+        <ProgressBar Grid.Row="1" Name="PART_ProgressBar" LayoutUpdated="PART_ProgressBar_LayoutUpdated"
                      Value="{Binding Value, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue=30}"
                      Minimum="{Binding Minimum, RelativeSource={RelativeSource AncestorType=UserControl}}"
                      Maximum="{Binding Maximum, RelativeSource={RelativeSource AncestorType=UserControl}}">
@@ -119,14 +126,21 @@
                                                         </Rectangle.RenderTransform>
                                                     </Rectangle>
                                                 </Grid>
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Width="{Binding MarginWidth, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBlock Width="{Binding MarginLeft, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                                     <TextBlock Text="{Binding TextValue, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue='empty text'}"                                                           
-                                                               Width="{Binding TextWidth, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                               Grid.Column="1"
                                                                Foreground="{DynamicResource TextBrush}"
                                                                Visibility="{Binding TextInsideVisibility, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                                TextAlignment="Center" VerticalAlignment="Center" />
-                                                </StackPanel>
+                                                    <TextBlock Width="{Binding MarginRight, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                </Grid>
                                             </Grid>
                                         </Decorator>
                                     </Grid>
@@ -187,13 +201,20 @@
                                                         </Rectangle.RenderTransform>
                                                     </Rectangle>
                                                 </Grid>
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Width="{Binding MarginWidth, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                <Grid Grid.ColumnSpan="5">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBlock Width="{Binding MarginLeft, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                                     <TextBlock Text="{Binding TextValue, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue='empty text'}"                                                           
-                                                               Width="{Binding TextWidth, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                               Grid.Column="1"
                                                                Foreground="{DynamicResource TextBrush}"
                                                                TextAlignment="Center" VerticalAlignment="Center" />
-                                                </StackPanel>
+                                                    <TextBlock Width="{Binding MarginRight, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                </Grid>
                                             </Grid>
                                         </Decorator>
                                     </Grid>

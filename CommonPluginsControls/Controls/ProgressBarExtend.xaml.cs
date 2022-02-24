@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommonPluginsShared;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -21,10 +22,22 @@ namespace CommonPluginsControls.Controls
     /// </summary>
     public partial class ProgressBarExtend : UserControl
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyRaised(string propertyname)
+        private Decorator _indicator;
+        private Decorator indicator
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
+            get
+            {
+                if (_indicator == null)
+                {
+                    _indicator = (Decorator)PART_ProgressBar.Template.FindName("PART_Indicator", PART_ProgressBar);
+                }
+                return _indicator;
+            }
+
+            set
+            {
+                _indicator = value;
+            }
         }
 
 
@@ -192,21 +205,41 @@ namespace CommonPluginsControls.Controls
             new PropertyMetadata(double.NaN, ProgressBarChangedCallback));
 
 
-        public double MarginWidth
+        public double MarginLeft
         {
             get
             {
-                return (double)GetValue(MarginWidthProperty);
+                return (double)GetValue(MarginLeftProperty);
             }
 
             set
             {
-                SetValue(MarginWidthProperty, value);
+                SetValue(MarginLeftProperty, value);
             }
         }
 
-        public static readonly DependencyProperty MarginWidthProperty = DependencyProperty.Register(
-            nameof(MarginWidth),
+        public static readonly DependencyProperty MarginLeftProperty = DependencyProperty.Register(
+            nameof(MarginLeft),
+            typeof(double),
+            typeof(ProgressBarExtend),
+            new PropertyMetadata(double.NaN, ProgressBarChangedCallback));
+
+
+        public double MarginRight
+        {
+            get
+            {
+                return (double)GetValue(MarginRightProperty);
+            }
+
+            set
+            {
+                SetValue(MarginRightProperty, value);
+            }
+        }
+
+        public static readonly DependencyProperty MarginRightProperty = DependencyProperty.Register(
+            nameof(MarginRight),
             typeof(double),
             typeof(ProgressBarExtend),
             new PropertyMetadata(double.NaN, ProgressBarChangedCallback));
@@ -222,7 +255,6 @@ namespace CommonPluginsControls.Controls
             set
             {
                 SetValue(IndicatorHeightProperty, value);
-                OnPropertyRaised(nameof(IndicatorHeight));
             }
         }
 
@@ -242,7 +274,6 @@ namespace CommonPluginsControls.Controls
             set
             {
                 SetValue(IndicatorDemiHeightProperty, value);
-                OnPropertyRaised(nameof(IndicatorDemiHeight));
             }
         }
 
@@ -262,7 +293,6 @@ namespace CommonPluginsControls.Controls
             set
             {
                 SetValue(IndicatorWidthProperty, value);
-                OnPropertyRaised(nameof(IndicatorWidth));
             }
         }
 
@@ -309,8 +339,11 @@ namespace CommonPluginsControls.Controls
                     case "Value":
                         obj.Value = (double)e.NewValue;
                         break;
-                    case "MarginWidth":
-                        obj.MarginWidth = (double)e.NewValue;
+                    case "MarginLeft":
+                        obj.MarginLeft = (double)e.NewValue;
+                        break;
+                    case "MarginRight":
+                        obj.MarginRight = (double)e.NewValue;
                         break;
                     case "TextWidth":
                         obj.TextWidth = (double)e.NewValue;
@@ -329,8 +362,6 @@ namespace CommonPluginsControls.Controls
 
         public double GetIndicatorWidth()
         {
-            Decorator indicator = (Decorator)PART_ProgressBar.Template.FindName("PART_Indicator", PART_ProgressBar);
-
             if (indicator != null)
             {
                 return indicator.ActualWidth;
@@ -352,7 +383,7 @@ namespace CommonPluginsControls.Controls
         }
 
 
-        private void PART_ProgressBar_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void PART_ProgressBar_LayoutUpdated(object sender, EventArgs e)
         {
             IndicatorHeight = GetIndicatorHeight();
             IndicatorDemiHeight = IndicatorHeight / 2;
