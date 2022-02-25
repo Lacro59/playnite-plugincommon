@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommonPlayniteShared.Common;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -16,9 +17,6 @@ using System.Windows.Shapes;
 
 namespace CommonPluginsControls.PlayniteControls
 {
-    /// <summary>
-    /// Interaction logic for SearchBox.xaml
-    /// </summary>
     public partial class SearchBox : UserControl
     {
         private int oldCarret;
@@ -52,7 +50,7 @@ namespace CommonPluginsControls.PlayniteControls
                 SetValue(ShowImageProperty, value);
             }
         }
-        
+
         public static readonly DependencyProperty ShowImageProperty = DependencyProperty.Register(nameof(ShowImage), typeof(bool), typeof(SearchBox), new PropertyMetadata(true, ShowImagePropertyChangedCallback));
 
         public new bool IsFocused
@@ -73,18 +71,74 @@ namespace CommonPluginsControls.PlayniteControls
         public SearchBox()
         {
             InitializeComponent();
-            TextFilter.KeyUp += TextFilter_KeyUp;
+
+            if (PART_SeachIcon != null)
+            {
+            }
+
+            if (PART_ClearTextIcon != null)
+            {
+                PART_ClearTextIcon.MouseUp += ClearImage_MouseUp;
+            }
+
+            if (PART_TextInpuText != null)
+            {
+                PART_TextInpuText.TextChanged += TextFilter_TextChanged;
+                PART_TextInpuText.KeyUp += TextFilter_KeyUp;
+                PART_TextInpuText.GotFocus += PART_TextInpuText_GotFocus;
+                PART_TextInpuText.LostFocus += PART_TextInpuText_GotFocus;
+
+                BindingTools.SetBinding(
+                    PART_TextInpuText,
+                    TextBox.TextProperty,
+                    this,
+                    nameof(Text),
+                    mode: System.Windows.Data.BindingMode.OneWay,
+                    trigger: System.Windows.Data.UpdateSourceTrigger.PropertyChanged);
+            }
+
+            UpdateIconStates();
+        }
+
+        private void PART_TextInpuText_GotFocus(object sender, RoutedEventArgs e)
+        {
+            UpdateIconStates();
+        }
+
+        private void UpdateIconStates()
+        {
+            if (PART_TextInpuText.IsFocused)
+            {
+                PART_SeachIcon.Visibility = Visibility.Collapsed;
+            }
+
+            if (Text.IsNullOrEmpty())
+            {
+                PART_ClearTextIcon.Visibility = Visibility.Collapsed;
+                if (!PART_TextInpuText.IsFocused)
+                {
+                    PART_SeachIcon.Visibility = ShowImage ? Visibility.Visible : Visibility.Collapsed;
+                }
+            }
+            else
+            {
+                PART_ClearTextIcon.Visibility = Visibility.Visible;
+                if (!PART_TextInpuText.IsFocused)
+                {
+                    PART_SeachIcon.Visibility = Visibility.Collapsed;
+                }
+            }
         }
 
         public void ClearFocus()
         {
             if (previousFocus != null)
-            {                
+            {
                 Keyboard.Focus(previousFocus);
             }
             else
             {
-                TextFilter.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                PART_TextInpuText.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
             }
 
             previousFocus = null;
@@ -101,7 +155,20 @@ namespace CommonPluginsControls.PlayniteControls
 
         private void ClearImage_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            TextFilter.Clear();
+            PART_TextInpuText.Clear();
+        }
+
+        private void TextFilter_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (ignoreTextCallback)
+            {
+                return;
+            }
+
+            ignoreTextCallback = true;
+            Text = PART_TextInpuText.Text;
+            ignoreTextCallback = false;
+            UpdateIconStates();
         }
 
         private static void TextPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
@@ -112,13 +179,16 @@ namespace CommonPluginsControls.PlayniteControls
                 return;
             }
 
-            var currentCurret = obj.TextFilter.CaretIndex;                 
-            if (currentCurret == 0 && obj.TextFilter.Text.Length > 0 && obj.oldCarret != obj.TextFilter.Text.Length)
+            if (obj.PART_TextInpuText != null)
             {
-                obj.TextFilter.CaretIndex = obj.oldCarret;
-            }
+                var currentCurret = obj.PART_TextInpuText.CaretIndex;
+                if (currentCurret == 0 && obj.PART_TextInpuText.Text.Length > 0 && obj.oldCarret != obj.PART_TextInpuText.Text.Length)
+                {
+                    obj.PART_TextInpuText.CaretIndex = obj.oldCarret;
+                }
 
-            obj.oldCarret = obj.TextFilter.CaretIndex;
+                obj.oldCarret = obj.PART_TextInpuText.CaretIndex;
+            }
         }
 
         private static void ShowImagePropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
@@ -132,7 +202,7 @@ namespace CommonPluginsControls.PlayniteControls
             var obj = sender as SearchBox;
             var shouldFocus = (bool)e.NewValue;
 
-            if (!shouldFocus && !obj.TextFilter.IsFocused)
+            if (!shouldFocus && !obj.PART_TextInpuText.IsFocused)
             {
                 return;
             }
@@ -140,31 +210,21 @@ namespace CommonPluginsControls.PlayniteControls
             if (shouldFocus == true)
             {
                 obj.previousFocus = Keyboard.FocusedElement;
-                obj.TextFilter.Focus();
+                obj.PART_TextInpuText.Focus();
             }
             else
             {
                 obj.ClearFocus();
             }
-        }
 
-        private void TextFilter_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (ignoreTextCallback)
-            {
-                return;
-            }
-
-            ignoreTextCallback = true;
-            Text = TextFilter.Text;
-            ignoreTextCallback = false;
+            obj.UpdateIconStates();
         }
 
 
         public event TextChangedEventHandler TextChanged
         {
-            add { TextFilter.TextChanged += value; }
-            remove { TextFilter.TextChanged -= value; }
+            add { PART_TextInpuText.TextChanged += value; }
+            remove { PART_TextInpuText.TextChanged -= value; }
         }
     }
 }
