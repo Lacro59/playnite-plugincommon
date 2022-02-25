@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Behaviors\LeftClickContextMenuBehavior.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Behaviors\MediaElementBehaviors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\BindingTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\DesignerTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Encryption.cs" />

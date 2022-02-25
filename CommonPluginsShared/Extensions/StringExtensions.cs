@@ -30,14 +30,21 @@ namespace CommonPluginsShared.Extensions
         }
 
 
-        public static bool IsEqual(this string source, string text)
+        public static bool IsEqual(this string source, string text, bool Normalize = false)
         {
             if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(text))
             {
                 return false;
             }
 
-            return source.Trim().ToLower() == text.Trim().ToLower();
+            if (Normalize)
+            {
+                return PlayniteTools.NormalizeGameName(source).Trim().ToLower() == PlayniteTools.NormalizeGameName(text).Trim().ToLower();
+            }
+            else
+            {
+                return source.Trim().ToLower() == text.Trim().ToLower();
+            }
         }
     }
 }
