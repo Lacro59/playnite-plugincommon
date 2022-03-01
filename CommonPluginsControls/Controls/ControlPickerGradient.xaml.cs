@@ -222,7 +222,10 @@ namespace CommonPluginsControls.Controls
                 gs2.Offset = Offset2;
 
                 gs1.Color = ((SolidColorBrush)PART_Border_Color0.Background).Color;
-                gs2.Color = ((SolidColorBrush)PART_Border_Color1.Background).Color;
+                if (PART_Border_Color1 != null)
+                {
+                    gs2.Color = ((SolidColorBrush)PART_Border_Color1.Background).Color;
+                }
 
                 linearGradientBrush.GradientStops.Add(gs1);
                 linearGradientBrush.GradientStops.Add(gs2);
@@ -231,7 +234,10 @@ namespace CommonPluginsControls.Controls
 
 
                 PART_SlidderOffset0.Value = Offset1;
-                PART_SlidderOffset1.Value = Offset2;
+                if (PART_SlidderOffset1 != null)
+                {
+                    PART_SlidderOffset1.Value = Offset2;
+                }
             }
             catch
             {
