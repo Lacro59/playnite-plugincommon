@@ -39,7 +39,7 @@ namespace CommonPluginsShared.Controls
             try
             {
                 PluginDataBaseGameBase PluginGameData = _PluginDatabase.Get(newContext, true);
-                if (PluginGameData.HasData)
+                if (PluginGameData?.HasData ?? false)
                 {
                     SetData(newContext, PluginGameData);
                 }
