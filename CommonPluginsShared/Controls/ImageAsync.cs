@@ -1,8 +1,6 @@
 ﻿using CommonPlayniteShared;
 using CommonPluginsShared.Converters;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,27 +14,27 @@ namespace CommonPluginsShared.Controls
 
 
         #region Properties
-        public new static readonly DependencyProperty SourceProperty = DependencyProperty.Register(
+        public static new readonly DependencyProperty SourceProperty = DependencyProperty.Register(
             nameof(Source),
             typeof(string),
             typeof(ImageAsync),
             new FrameworkPropertyMetadata(string.Empty, SourceChanged)
         );
-        public string Source
+        public new string Source
         {
-            get { return (string)GetValue(SourceProperty); }
-            set { SetValue(SourceProperty, value); }
+            get => (string)GetValue(SourceProperty);
+            set => SetValue(SourceProperty, value);
         }
         private static void SourceChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
             try
             {
-                var control = (ImageAsync)obj;
+                ImageAsync control = (ImageAsync)obj;
                 control.LoadNewSource(args.NewValue, args.OldValue);
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, true, "ScreeshotsVisualizer");
+                Common.LogError(ex, false, true, "ImageAsync");
             }
         }
 
@@ -48,8 +46,8 @@ namespace CommonPluginsShared.Controls
         );
         public string Parameter
         {
-            get { return (string)GetValue(ParameterProperty); }
-            set { SetValue(ParameterProperty, value); }
+            get => (string)GetValue(ParameterProperty);
+            set => SetValue(ParameterProperty, value);
         }
 
         public static readonly DependencyProperty DecodePixelHeightProperty = DependencyProperty.Register(
@@ -60,8 +58,8 @@ namespace CommonPluginsShared.Controls
         );
         public double DecodePixelHeight
         {
-            get { return (double)GetValue(DecodePixelHeightProperty); }
-            set { SetValue(DecodePixelHeightProperty, value); }
+            get => (double)GetValue(DecodePixelHeightProperty);
+            set => SetValue(DecodePixelHeightProperty, value);
         }
         #endregion
 
