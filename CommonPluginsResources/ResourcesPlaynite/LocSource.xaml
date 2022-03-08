@@ -57,7 +57,7 @@ If you want to help us fix this issue, please send diagnostic information. Thank
     <sys:String x:Key="LOCCrashUserActionsDescription">Actions taken before the crash (in English):</sys:String>
     <sys:String x:Key="LOCLibraryManager">Library Manager</sys:String>
     <sys:String x:Key="LOCGameRemoveAskTitle">Remove Game(s)?</sys:String>
-    <sys:String x:Key="LOCGameRemoveRunningError">Cannot remove - Game or installer is running.</sys:String>
+    <sys:String x:Key="LOCGameRemoveRunningError">Cannot remove - Game or installer is running. </sys:String>
     <sys:String x:Key="LOCGameUninstallRunningError">Cannot uninstall - Game is running.</sys:String>
     <sys:String x:Key="LOCGameRemoveAskMessage" xml:space="preserve">Are you sure you want to remove this game?</sys:String>
     <sys:String x:Key="LOCGamesRemoveAskMessage" xml:space="preserve">Are you sure you want to remove {0} games?</sys:String>
@@ -70,7 +70,6 @@ Selecting "add to exclusion list" option will prevent games from being imported 
     <sys:String x:Key="LOCRemoveUnusedFieldsAskMessage">Are you sure you want to remove {0} entries that are currently not in use?</sys:String>
     <sys:String x:Key="LOCRemoveUnusedFieldsNoUnusedMessage">No unused fields found.</sys:String>
     <sys:String x:Key="LOCRemoveAskAddToExlusionListYesResponse">Yes (add to exclusion list)</sys:String>
-    <sys:String x:Key="LOCSteamFriendsTooltip">Steam Friends</sys:String>
     <sys:String x:Key="LOCGameEditChangeNotif">There are unsaved changes in this section</sys:String>
     <sys:String x:Key="LOCDBUpgradeProgress">Updating game library format…</sys:String>
     <sys:String x:Key="LOCDBUpgradeFail">Database update failed.</sys:String>
@@ -279,7 +278,6 @@ Selecting "add to exclusion list" option will prevent games from being imported 
     <sys:String x:Key="LOCSettingsLayoutLabel">Layout</sys:String>
     <sys:String x:Key="LOCSettingsAdvancedLabel">Advanced</sys:String>
     <sys:String x:Key="LOCSettingsFullscreenLabel">Fullscreen</sys:String>
-    <sys:String x:Key="LOCSettingsProvidersLabel">Providers</sys:String>
     <sys:String x:Key="LOCSettingsInputLabel">Input</sys:String>
     <sys:String x:Key="LOCSettingsPerformanceLabel">Performance</sys:String>
     <sys:String x:Key="LOCSettingsMetadataLabel">Metadata</sys:String>
@@ -572,12 +570,9 @@ You can try to resolve the issue:
     <sys:String x:Key="LOCAddRom">Add ROM</sys:String>
     <sys:String x:Key="LOCSaveChanges">Save Changes</sys:String>
     <sys:String x:Key="LOCGameEditChangeSaveTooltip">Apply field changes to game(s) being edited.</sys:String>
-    <sys:String x:Key="LOCPlayAction">Play Action</sys:String>
-    <sys:String x:Key="LOCAddPlayAction">Add Play Action</sys:String>
     <sys:String x:Key="LOCAddAction">Add Action</sys:String>
     <sys:String x:Key="LOCDeleteAction">Remove</sys:String>
     <sys:String x:Key="LOCRemovePlayAction">Remove Play Action</sys:String>
-    <sys:String x:Key="LOCOtherActions">Other Actions</sys:String>
     <sys:String x:Key="LOCAddGames">Add Games</sys:String>
     <sys:String x:Key="LOCScanFolder">Scan Folder…</sys:String>
     <sys:String x:Key="LOCDetectInstalled">Detect Installed</sys:String>
@@ -677,8 +672,9 @@ You can try to resolve the issue:
     <sys:String x:Key="LOCUpdateCheckFailMessage">Failed to check for new version.</sys:String>
     <sys:String x:Key="LOCUpdateNoNewUpdateMessage">No new version found, you are up to date.</sys:String>
     <sys:String x:Key="LOCGeneralUpdateFailMessage">Failed to download and install update.</sys:String>
-    <sys:String x:Key="LOCUpdateProgressCancelAsk">The background task is currently in progress. Do you want to cancel it and proceed with the update?</sys:String>
-    <sys:String x:Key="LOCBackgroundProgressCancelAskExit">The background task is currently in progress. Do you want to cancel it and exit Playnite?</sys:String>
+    <sys:String x:Key="LOCUpdateProgressCancelAsk">Some background task is currently in progress. Do you want to cancel it and proceed with the update?</sys:String>
+    <sys:String x:Key="LOCBackgroundProgressCancelAskExit">Some background task is currently in progress. Do you want to cancel it and exit Playnite?</sys:String>
+    <sys:String x:Key="LOCBackgroundProgressCancelAskSwitchMode">Some background task is currently in progress. Switching modes will cancel the task, do you want to switch anyways?</sys:String>
     <sys:String x:Key="LOCUpdateIsAvailableNotificationBody">An update for Playnite is available</sys:String>
     <sys:String x:Key="LOCThemeTestReloadList">Reload theme list</sys:String>
     <sys:String x:Key="LOCThemeTestApplySkin">Apply selected theme</sys:String>
@@ -770,7 +766,7 @@ You can try to resolve the issue:
     <sys:String x:Key="LOCSpecificExtensionLoadSDKError">Can't load "{0}" extension, current Playnite version is not supported.</sys:String>
     <sys:String x:Key="LOCSpecificThemeLoadError">Theme "{0}" failed to load properly.</sys:String>
     <sys:String x:Key="LOCSpecificThemeLoadSDKError">Can't load "{0}" theme, current Playnite version is not supported.</sys:String>
-    <sys:String x:Key="LOCGeneralExtensionLoadError">Extension failed to load properly.</sys:String>
+    <sys:String x:Key="LOCGeneralExtensionLoadError">Extension failed to load properly.</sys:String>    
     <sys:String x:Key="LOCGeneralThemeLoadError">Theme failed to load properly.</sys:String>
     <sys:String x:Key="LOCGeneralExtensionInstallApiVersionFails">Theme/Extension is using unsupported API version.</sys:String>
     <sys:String x:Key="LOCGeneralExtensionInstallSuccess">Installation was successful.</sys:String>
@@ -843,7 +839,7 @@ Backgrounds: {2} mega pixels</sys:String>
 Application restart is requred to finish the process. Do you want to reset settings?</sys:String>
     <sys:String x:Key="LOCSettingsForDevelopers">For developers</sys:String>
     <sys:String x:Key="LOCSettingsExternalExtensions">External extensions</sys:String>
-    <sys:String x:Key="LOCSettingsNewExternalExtensionBox">Enter full folder path.</sys:String>
+    <sys:String x:Key="LOCSettingsNewExternalExtensionBox">Enter full folder path.</sys:String>    
     <!--Common Library-->
     <sys:String x:Key="LOCCommonLinksAchievements">Achievements</sys:String>
     <sys:String x:Key="LOCCommonLinksForum">Forum</sys:String>
@@ -906,14 +902,14 @@ If you want to install or uninstall additional integrations, use "Add-ons" optio
     <sys:String x:Key="LOCActionTrackingModeProcess">Process</sys:String>
     <sys:String x:Key="LOCActionTrackingModeDirectory">Folder</sys:String>
     <sys:String x:Key="LOCDevelTraceLogEnable">Log trace messages</sys:String>
-    <sys:String x:Key="LOCMultiEditOverwriteWarning">Following changes overwrite data for all currently selected games!</sys:String>
+    <sys:String x:Key="LOCMultiEditOverwriteWarning">Following changes overwrite data for all currently selected games!</sys:String>    
     <sys:String x:Key="LOCGridViewSpacingModeNone">None</sys:String>
     <sys:String x:Key="LOCGridViewSpacingModeUniform">Uniform</sys:String>
     <sys:String x:Key="LOCGridViewSpacingModeBetweenItemsOnly">Items only</sys:String>
     <sys:String x:Key="LOCGridViewSpacingModeStartAndEndOnly">Start and end only</sys:String>
     <sys:String x:Key="LOCGridViewScrollAmountModifier">Scroll amount modifier</sys:String>
     <sys:String x:Key="LOCAskRemoveItemTitle">Remove item?</sys:String>
-    <sys:String x:Key="LOCAskRemoveItemMessage">Are you sure you want to remove this item?</sys:String>
+    <sys:String x:Key="LOCAskRemoveItemMessage">Are you sure you want to remove this item?</sys:String>    
     <sys:String x:Key="LOCSettingsTopPanelItems">Show buttons on top panel:</sys:String>
     <sys:String x:Key="LOCSettingsTopPanelGeneralViewItem">General view settings</sys:String>
     <sys:String x:Key="LOCSettingsTopPanelGroupingItem">Grouping settings</sys:String>
@@ -945,6 +941,8 @@ Disable if you use tools that translate XInput inputs to mouse/keyboards inputs 
     <sys:String x:Key="LOCSettingsShowItemsMainMenuHeader">Show items on main menu:</sys:String>
     <sys:String x:Key="LOCSettingsSwapMainViewXAButtons">Inverted X/A main view button binding</sys:String>
     <sys:String x:Key="LOCSettingsSwapMainViewXAButtonsDescriptions">Swaps button bindings for starting a game and showing game details page on main view.</sys:String>
+    <sys:String x:Key="LOCSettingsSwapConfirmCancelButtons">Swap confirmation/cancelation button binding</sys:String>
+    <sys:String x:Key="LOCSettingsSwapConfirmCancelButtonsDescriptions">Inverts default A button binding for confirmationa and B for cancellation.</sys:String>
     <sys:String x:Key="LOCSettingsInterfaceVolume">Interface volume</sys:String>
     <sys:String x:Key="LOCSettingsMusiVolume">Background volume</sys:String>
     <sys:String x:Key="LOCSettingsMuteBackground">Mute when in background</sys:String>
@@ -1000,12 +998,12 @@ If you start experiencing some issues after installing a theme or an extension, 
     <sys:String x:Key="LOCEmuScanConfigurations">Scan configurations</sys:String>
     <sys:String x:Key="LOCEmuCrcExcludeFileTypes">Exclude patterns from checksum scan</sys:String>
     <sys:String x:Key="LOCEmuCrcExcludeFileTypesTooltip">Files matching specified pattern(s) won't be scanned for checksum and will be matched by file name. See emulator help page for more information.</sys:String>
-    <sys:String x:Key="LOCEmuScanEmulator">Scan with emulator</sys:String>
+    <sys:String x:Key="LOCEmuScanEmulator">Scan with emulator</sys:String>    
     <sys:String x:Key="LOCScanConfigNameError">Name has to be set when saving new configuration.</sys:String>
     <sys:String x:Key="LOCScanConfigNoEmulatorError">Emulator or emulator profile is not set.</sys:String>
     <sys:String x:Key="LOCScanConfigDirectoryError">Directory to scan is not specified or it doesn't exist.</sys:String>
-    <sys:String x:Key="LOCScanConfigError">Scan configuration is not set properly.</sys:String>
-    <sys:String x:Key="LOCEmuScanIncludeGlobalUpdate">Include in bulk scan auto-scan</sys:String>
+    <sys:String x:Key="LOCScanConfigError">Scan configuration is not set properly.</sys:String>    
+    <sys:String x:Key="LOCEmuScanIncludeGlobalUpdate">Include in bulk scan auto-scan</sys:String>    
     <sys:String x:Key="LOCEmulatorScanFailed">Failed to scan folder for emulators.</sys:String>
     <sys:String x:Key="LOCEmulatedGameScanFailed">Failed to scan folder(s) for emulated games.</sys:String>
     <sys:String x:Key="LOCEmuScanHideImported">Hide imported</sys:String>
