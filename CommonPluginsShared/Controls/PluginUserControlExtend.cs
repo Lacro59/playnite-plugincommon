@@ -1,5 +1,6 @@
 ﻿using CommonPluginsShared.Collections;
 using CommonPluginsShared.Interfaces;
+using Playnite.SDK;
 using Playnite.SDK.Models;
 using System;
 using System.Text;
@@ -22,6 +23,11 @@ namespace CommonPluginsShared.Controls
             }
 
             if (newContext == null || (oldContext != null && oldContext.Id == newContext.Id))
+            {
+                return;
+            }
+
+            if (API.Instance.ApplicationInfo.Mode == ApplicationMode.Desktop && ActiveViewAtCreation != API.Instance.MainView.ActiveDesktopView)
             {
                 return;
             }

@@ -4,8 +4,6 @@ using Playnite.SDK.Controls;
 using Playnite.SDK.Models;
 using System;
 using System.ComponentModel;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -23,6 +21,8 @@ namespace CommonPluginsShared.Controls
         #region Properties
         public static readonly DependencyProperty AlwaysShowProperty;
         public bool AlwaysShow { get; set; }
+
+        public DesktopView ActiveViewAtCreation { get; }
 
 
         public bool MustDisplay
@@ -74,6 +74,16 @@ namespace CommonPluginsShared.Controls
             typeof(bool),
             typeof(PluginUserControlExtendBase),
             new FrameworkPropertyMetadata(false, SettingsPropertyChangedCallback));
+
+
+        public PluginUserControlExtendBase()
+        {
+            if (API.Instance.ApplicationInfo.Mode == ApplicationMode.Desktop)
+            {
+                ActiveViewAtCreation = API.Instance.MainView.ActiveDesktopView;
+            }
+        }
+
 
         private static void SettingsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
