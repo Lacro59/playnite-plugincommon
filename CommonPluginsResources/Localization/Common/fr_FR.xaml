@@ -82,7 +82,7 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 
     <!-- CommonMenus -->
 
-    <sys:String x:Key="LOCCommonTotalFound">Total trouv</sys:String>
+    <sys:String x:Key="LOCCommonTotalFound">Total trouvé</sys:String>
 
     <!-- CommonSettingsView -->
 
