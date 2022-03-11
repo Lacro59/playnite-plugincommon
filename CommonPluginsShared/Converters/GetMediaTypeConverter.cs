@@ -17,6 +17,10 @@ namespace CommonPluginsShared.Converters
             {
                 if (value is string)
                 {
+                    if (System.IO.Path.GetExtension((string)value).ToLower().Contains("mkv"))
+                    {
+                        return "\ueb13";
+                    }
                     if (System.IO.Path.GetExtension((string)value).ToLower().Contains("mp4"))
                     {
                         return "\ueb13";

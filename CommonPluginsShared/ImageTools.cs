@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -353,6 +354,46 @@ namespace CommonPluginsShared
                 Common.LogError(ex, false);
                 return null;
             }
+        }
+
+
+        public static string ConvertToJpg(string srcPath, Int64 quality = 98L)
+        {
+            try
+            {
+                if (File.Exists(srcPath) && Path.GetExtension(srcPath).ToLower() != ".jpg" && Path.GetExtension(srcPath).ToLower() != ".jpeg")
+                {
+                    using (Image image = Image.FromFile(srcPath))
+                    {
+                        ImageCodecInfo codecInfo = GetEncoderInfo(ImageFormat.Jpeg);
+
+                        //  Set the quality
+                        EncoderParameters parameters = new EncoderParameters(1);
+                        parameters.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, quality);
+
+                        string destPath = srcPath.Replace(Path.GetExtension(srcPath), ".jpg");
+                        if (!File.Exists(destPath))
+                        {
+                            image.Save(destPath, codecInfo, parameters);
+                            return destPath;
+                        }
+                        return null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+            }
+
+            return null;
+        }
+        public static ImageCodecInfo GetEncoderInfo(ImageFormat format)
+        {
+            return ImageCodecInfo.GetImageEncoders().ToList().Find(delegate (ImageCodecInfo codec)
+            {
+                return codec.FormatID == format.Guid;
+            });
         }
         #endregion
     }
