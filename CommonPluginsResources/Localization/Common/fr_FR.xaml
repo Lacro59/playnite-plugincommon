@@ -51,9 +51,9 @@
     <sys:String x:Key="LOCCommonCut">Tronquer</sys:String>
 
 
-    <sys:String x:Key="LOCCommon0to1">0 à 1 heure</sys:String>
-    <sys:String x:Key="LOCCommon1to5">1 à 5 heures</sys:String>
-    <sys:String x:Key="LOCCommon5to10">5 à 10 heures</sys:String>
+    <sys:String x:Key="LOCCommon0to1">00 à 01 heures</sys:String>
+    <sys:String x:Key="LOCCommon1to5">01 à 05 heures</sys:String>
+    <sys:String x:Key="LOCCommon5to10">05 à 10 heures</sys:String>
     <sys:String x:Key="LOCCommon10to20">10 à 20 heures</sys:String>
     <sys:String x:Key="LOCCommon20to30">20 à 30 heures</sys:String>
     <sys:String x:Key="LOCCommon30to40">30 à 40 heures</sys:String>

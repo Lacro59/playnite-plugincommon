@@ -51,9 +51,9 @@
     <sys:String x:Key="LOCCommonCut">裁剪</sys:String>
 
 
-    <sys:String x:Key="LOCCommon0to1">0 至 1 小时</sys:String>
-    <sys:String x:Key="LOCCommon1to5">1 至 5 小时</sys:String>
-    <sys:String x:Key="LOCCommon5to10">5 至 10 小时</sys:String>
+    <sys:String x:Key="LOCCommon0to1">00 至 01 时</sys:String>
+    <sys:String x:Key="LOCCommon1to5">01 至 05 时</sys:String>
+    <sys:String x:Key="LOCCommon5to10">05 至 10 时</sys:String>
     <sys:String x:Key="LOCCommon10to20">10 至 20 小时</sys:String>
     <sys:String x:Key="LOCCommon20to30">20 至 30 小时</sys:String>
     <sys:String x:Key="LOCCommon30to40">30 至 40 小时</sys:String>
