@@ -51,9 +51,9 @@
     <sys:String x:Key="LOCCommonCut">Taglia</sys:String>
 
 
-    <sys:String x:Key="LOCCommon0to1">da 0 a 1 ora</sys:String>
-    <sys:String x:Key="LOCCommon1to5">da 1 a 5 ore</sys:String>
-    <sys:String x:Key="LOCCommon5to10">da 5 a 10 ore</sys:String>
+    <sys:String x:Key="LOCCommon0to1">00 o 01 ore</sys:String>
+    <sys:String x:Key="LOCCommon1to5">01 o 05 ore</sys:String>
+    <sys:String x:Key="LOCCommon5to10">05 o 10 ore</sys:String>
     <sys:String x:Key="LOCCommon10to20">da 10 a 20 ore</sys:String>
     <sys:String x:Key="LOCCommon20to30">da 20 a 30 ore</sys:String>
     <sys:String x:Key="LOCCommon30to40">da 30 a 40 ore</sys:String>
