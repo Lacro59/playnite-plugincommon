@@ -51,9 +51,9 @@
     <sys:String x:Key="LOCCommonCut">Cut</sys:String>
 
 
-    <sys:String x:Key="LOCCommon0to1">00 to 01 hours</sys:String>
-    <sys:String x:Key="LOCCommon1to5">01 to 05 hours</sys:String>
-    <sys:String x:Key="LOCCommon5to10">05 to 10 hours</sys:String>
+    <sys:String x:Key="LOCCommon0to1">00 bis 01 Stunden</sys:String>
+    <sys:String x:Key="LOCCommon1to5">01 bis 05 Stunden</sys:String>
+    <sys:String x:Key="LOCCommon5to10">05 bis 10 Stunden</sys:String>
     <sys:String x:Key="LOCCommon10to20">10 bis 20 Stunden</sys:String>
     <sys:String x:Key="LOCCommon20to30">20 bis 30 Stunden</sys:String>
     <sys:String x:Key="LOCCommon30to40">30 bis 40 Stunden</sys:String>
