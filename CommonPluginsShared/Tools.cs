@@ -132,5 +132,34 @@ namespace CommonPluginsShared
 
             return buffer;
         }
+
+
+        public static string GetJsonInString(string str, string strStart, string strEnd, string strPurge = "")
+        {
+            try
+            {
+                int indexStart = str.IndexOf(strStart);
+                int indexEnd = str.IndexOf(strEnd);
+
+                string stringStart = str.Substring(0, indexStart + strStart.Length);
+                string stringEnd = str.Substring(indexEnd);
+
+                int length = str.Length - stringStart.Length - stringEnd.Length;
+
+                string JsonDataString = str.Substring(indexStart + strStart.Length, length);
+
+                indexEnd = JsonDataString.IndexOf(strPurge);
+                length = JsonDataString.Length - (JsonDataString.Length - indexEnd - strPurge.Length + 1);
+                JsonDataString = JsonDataString.Substring(0, length);
+
+                return JsonDataString;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+            }
+
+            return string.Empty;
+        }
     }
 }
