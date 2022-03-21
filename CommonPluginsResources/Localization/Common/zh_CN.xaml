@@ -157,6 +157,10 @@
     <sys:String x:Key="LOCCommonProcessing">正在处理，请稍候...</sys:String>
     <sys:String x:Key="LOCCommonConverting">正在转换，请稍候...</sys:String>
 
+    <!-- CommonNotificationsErrors -->
+
+    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0} user is not authenticated</sys:String>
+    
     <!-- CommonNotifications -->
 
     <sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">从 {0} 检索数据时出错。
