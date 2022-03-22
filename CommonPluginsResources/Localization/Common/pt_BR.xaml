@@ -51,9 +51,9 @@
     <sys:String x:Key="LOCCommonCut">Recortar</sys:String>
 
 
-    <sys:String x:Key="LOCCommon0to1">00 to 01 hours</sys:String>
-    <sys:String x:Key="LOCCommon1to5">01 to 05 hours</sys:String>
-    <sys:String x:Key="LOCCommon5to10">05 to 10 hours</sys:String>
+    <sys:String x:Key="LOCCommon0to1">00 a 01 horas</sys:String>
+    <sys:String x:Key="LOCCommon1to5">01 a 05 horas</sys:String>
+    <sys:String x:Key="LOCCommon5to10">05 a 10 horas</sys:String>
     <sys:String x:Key="LOCCommon10to20">10 a 20 horas</sys:String>
     <sys:String x:Key="LOCCommon20to30">20 a 30 horas</sys:String>
     <sys:String x:Key="LOCCommon30to40">30 a 40 horas</sys:String>
@@ -159,7 +159,7 @@ Você quer abrir o diretório?</sys:String>
 
     <!-- CommonNotificationsErrors -->
 
-    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0} user is not authenticated</sys:String>
+    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0} usuário não autenticado</sys:String>
     
     <!-- CommonNotifications -->
 
