@@ -21,6 +21,7 @@
         private static string android = "\uea5b";        
         private static string psn = "\uea5c";        
         private static string riot = "\uea6c";        
+		private static string goggames = "\ue9f1";
 
         private static string retroachievements = "\ue910";      
         private static string rpcs3 = "\uea37";                  
@@ -93,6 +94,7 @@
 
                 #region sources
                 case "hacked":
+				case "pc - local":
                     stringReturn = gameHacked;
                     break;
                 case "manual achievements":
@@ -125,8 +127,11 @@
                     stringReturn = steam;
                     break;
                 case "gog":
-                    stringReturn = gog;
+				    stringReturn = gog;
                     break;
+				case "gog-games":
+					stringReturn = goggames;
+					break;
                 case "goggalaxy":
                     stringReturn = gogGalaxy;
                     break;
@@ -137,10 +142,9 @@
                     stringReturn = origin;
                     break;
                 case "microsoft store":
-                    stringReturn = xbox;
-                    break;
-                case "xbox":
-                    stringReturn = xbox;
+				case "xbox":
+				case "xbox game pass":
+				stringReturn = xbox;
                     break;
                 case "uplay":
                 case "ubisoft connect":
@@ -153,7 +157,7 @@
                 case "pc (windows)":
                     stringReturn = playnite;
                     break;
-                case "bethesda":
+				case "bethesda":
                     stringReturn = bethesda;
                     break;
                 case "humble":
