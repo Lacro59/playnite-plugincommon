@@ -157,6 +157,10 @@ Do you want to open the directory?</sys:String>
     <sys:String x:Key="LOCCommonProcessing">جارٍ، الرجاء الانتظار...</sys:String>
     <sys:String x:Key="LOCCommonConverting">جاري التحويل، الرجاء الانتظار...</sys:String>
 
+    <!-- CommonNotificationsErrors -->
+
+    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0} user is not authenticated</sys:String>
+    
     <!-- CommonNotifications -->
 
     <sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">Error retrieving data from {0}.

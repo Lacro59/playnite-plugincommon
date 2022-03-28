@@ -157,6 +157,10 @@ Soll das Verzeichnis geöffnet werden?</sys:String>
     <sys:String x:Key="LOCCommonProcessing">Bearbeitung, bitte warten...</sys:String>
     <sys:String x:Key="LOCCommonConverting">Konvertierung, bitte warten...</sys:String>
 
+    <!-- CommonNotificationsErrors -->
+
+    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0} Benutzer ist nicht authentifiziert</sys:String>
+    
     <!-- CommonNotifications -->
 
     <sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">Fehler beim Abrufen der Daten von {0}.

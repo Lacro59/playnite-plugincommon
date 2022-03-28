@@ -5,12 +5,12 @@
     <sys:String x:Key="LOCCommonDateData">Fecha de los datos</sys:String>
     
     
-    <sys:String x:Key="LOCCommonLastUpdate">Last update</sys:String>
+    <sys:String x:Key="LOCCommonLastUpdate">Última actualización</sys:String>
 
 
-    <sys:String x:Key="LOCCommonAddFolder">Add folder</sys:String>
-    <sys:String x:Key="LOCCommonRemoveFolder">Remove folder</sys:String>
-    <sys:String x:Key="LOCCommonAddFilePattern">Add file pattern</sys:String>
+    <sys:String x:Key="LOCCommonAddFolder">Agregar carpeta</sys:String>
+    <sys:String x:Key="LOCCommonRemoveFolder">Remover carpeta</sys:String>
+    <sys:String x:Key="LOCCommonAddFilePattern">Añadir patrón de archivo</sys:String>
     
     <!-- Transfer plugin data -->
 
@@ -51,9 +51,9 @@
     <sys:String x:Key="LOCCommonCut">Cortar</sys:String>
 
 
-    <sys:String x:Key="LOCCommon0to1">00 to 01 hours</sys:String>
-    <sys:String x:Key="LOCCommon1to5">01 to 05 hours</sys:String>
-    <sys:String x:Key="LOCCommon5to10">05 to 10 hours</sys:String>
+    <sys:String x:Key="LOCCommon0to1">00 a 01 horas</sys:String>
+    <sys:String x:Key="LOCCommon1to5">01 a 05 horas</sys:String>
+    <sys:String x:Key="LOCCommon5to10">05 a 10 horas</sys:String>
     <sys:String x:Key="LOCCommon10to20">10 a 20 horas</sys:String>
     <sys:String x:Key="LOCCommon20to30">20 a 30 horas</sys:String>
     <sys:String x:Key="LOCCommon30to40">30 a 40 horas</sys:String>
@@ -157,6 +157,10 @@
     <sys:String x:Key="LOCCommonProcessing">Procesando, por favor espere...</sys:String>
     <sys:String x:Key="LOCCommonConverting">Convirtiendo, por favor espere...</sys:String>
 
+    <!-- CommonNotificationsErrors -->
+
+    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0} usuario no está autenticado</sys:String>
+    
     <!-- CommonNotifications -->
 
     <sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">Error al recuperar los datos de {0}.

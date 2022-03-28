@@ -157,6 +157,10 @@ Vuoi aprire la cartella?</sys:String>
     <sys:String x:Key="LOCCommonProcessing">Elaborazione, attendere prego...</sys:String>
     <sys:String x:Key="LOCCommonConverting">Conversione, sei pregato di attendere...</sys:String>
 
+    <!-- CommonNotificationsErrors -->
+
+    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0} utente non autenticato</sys:String>
+    
     <!-- CommonNotifications -->
 
     <sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">Errore nel recupero dei dati da {0}.
