@@ -29,7 +29,7 @@
     <sys:String x:Key="LOCCommonAuthenticateLabel">Authenticate</sys:String>
     <sys:String x:Key="LOCCommonNotLoggedIn">Requires authentication</sys:String>
     <sys:String x:Key="LOCCommonLoggedIn">User is authenticated</sys:String>
-    <sys:String x:Key="LOCCommonAccountName">Account Name</sys:String>
+    <sys:String x:Key="LOCCommonAccountName">اسم الحساب</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Checking authentication status…</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticate</sys:String>
@@ -43,7 +43,7 @@
 
     <sys:String x:Key="LOCCommonGameTime">Game time</sys:String>
     
-    <sys:String x:Key="LOCCommonSelectFilters">Select filters</sys:String>
+    <sys:String x:Key="LOCCommonSelectFilters">اختيار التصفية</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Recently Added</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Only download missing</sys:String>
     
@@ -91,7 +91,7 @@ Do you want to open the directory?</sys:String>
     
     <sys:String x:Key="LOCCommonSaveColumOrder">حفظ ترتيب الأعمد</sys:String>
 
-    <sys:String x:Key="LOCCommonIntegrationFullScreen">Fullscreen</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationFullScreen">ملء الشاشة</sys:String>
     <sys:String x:Key="LOCCommonIntegrationFullScreenEnable">تمكين تكامل ملء الشاش</sys:String>
 
     <sys:String x:Key="LOCCommonIntegration">إعدادات المظهر</sys:String>
