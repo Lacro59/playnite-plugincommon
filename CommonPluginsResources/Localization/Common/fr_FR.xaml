@@ -159,7 +159,7 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 
     <!-- CommonNotificationsErrors -->
 
-    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0} user is not authenticated</sys:String>
+    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: utilisateur non authentifié</sys:String>
     
     <!-- CommonNotifications -->
 
