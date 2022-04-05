@@ -18,6 +18,14 @@ namespace CommonPluginsShared
         Request
     }
 
+
+    public class HttpHeader
+    {
+        public string Key { get; set; }
+        public string Value { get; set; }
+    }
+
+
     public class Web
     {
         private static ILogger logger = LogManager.GetLogger();
@@ -507,6 +515,73 @@ namespace CommonPluginsShared
                 else
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+                }
+
+                HttpResponseMessage result;
+                try
+                {
+                    result = await client.GetAsync(url).ConfigureAwait(false);
+                    if (result.IsSuccessStatusCode)
+                    {
+                        response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        logger.Error($"Web error with status code {result.StatusCode.ToString()}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Error on Get {url}");
+                }
+            }
+
+            return response;
+        }
+
+        public static async Task<string> DownloadStringData(string url, List<HttpHeader> HttpHeaders = null, List<HttpCookie> Cookies = null)
+        {
+            HttpClientHandler handler = new HttpClientHandler();
+            if (Cookies != null)
+            {
+                CookieContainer cookieContainer = new CookieContainer();
+
+                foreach (var cookie in Cookies)
+                {
+                    Cookie c = new Cookie();
+                    c.Name = cookie.Name;
+                    c.Value = cookie.Value;
+                    c.Domain = cookie.Domain;
+                    c.Path = cookie.Path;
+
+                    try
+                    {
+                        cookieContainer.Add(c);
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, true);
+                    }
+                }
+
+                handler.CookieContainer = cookieContainer;
+            }
+
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri(url),
+                Method = HttpMethod.Get
+            };
+
+            string response = string.Empty;
+            using (var client = new HttpClient(handler))
+            {
+                if (HttpHeaders != null)
+                {
+                    HttpHeaders.ForEach(x => 
+                    {
+                        client.DefaultRequestHeaders.Add(x.Key, x.Value);
+                    });
                 }
 
                 HttpResponseMessage result;

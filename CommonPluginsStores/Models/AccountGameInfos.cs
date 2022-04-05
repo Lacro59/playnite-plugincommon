@@ -1,0 +1,22 @@
+﻿using Playnite.SDK.Data;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+
+namespace CommonPluginsStores.Models
+{
+    public class AccountGameInfos
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string Link { get; set; }
+        public bool IsCommun { get; set; }
+        public double HoursPlayed { get; set; }
+
+        [DontSerialize]
+        public int AchievementsUnlocked { get => Achievements?.Where(y => y.DateUnlocked != default)?.Count() ?? 0; }
+        public ObservableCollection<GameAchievement> Achievements { get; set; }
+    }
+}
