@@ -27,9 +27,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\UsersInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PsnApi.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SteamApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\FriendsApps.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\FriendsList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamAchievementData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamApps.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\SteamApi.cs" />

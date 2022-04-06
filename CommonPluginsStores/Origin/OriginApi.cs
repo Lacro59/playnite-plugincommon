@@ -72,10 +72,10 @@ namespace CommonPluginsStores.Origin
                 if (_AppsList == null)
                 {
                     // From cache if exists & not expired
-                    if (File.Exists(PathAppsList) && File.GetLastWriteTime(PathAppsList).AddDays(3) > DateTime.Now)
+                    if (File.Exists(AppsListPath) && File.GetLastWriteTime(AppsListPath).AddDays(3) > DateTime.Now)
                     {
                         Common.LogDebug(true, "GetOriginAppListFromCache");
-                        AppsList = Serialization.FromJsonFile<List<GameStoreDataResponse>>(PathAppsList);
+                        AppsList = Serialization.FromJsonFile<List<GameStoreDataResponse>>(AppsListPath);
                     }
                     // From web
                     else
@@ -94,12 +94,14 @@ namespace CommonPluginsStores.Origin
         }
 
 
-        private string PathAppsList;
+        #region Paths
+        private string AppsListPath;
+        #endregion
 
 
         public OriginApi() : base("Origin")
         {
-            PathAppsList = Path.Combine(PathStoresData, "OriginAppsList.json");
+            AppsListPath = Path.Combine(PathStoresData, "OriginAppsList.json");
         }
 
 
@@ -112,7 +114,7 @@ namespace CommonPluginsStores.Origin
 
 
         #region Configuration
-        internal override bool GetIsUserLoggedIn()
+        protected override bool GetIsUserLoggedIn()
         {
             bool isLogged = OriginAPI.GetIsUserLoggedIn();
 
@@ -136,7 +138,7 @@ namespace CommonPluginsStores.Origin
 
 
         #region Current user
-        internal override AccountInfos GetCurrentAccountInfos()
+        protected override AccountInfos GetCurrentAccountInfos()
         {
             try
             {
@@ -176,8 +178,8 @@ namespace CommonPluginsStores.Origin
 
             return null;
         }
-        
-        internal override ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
+
+        protected override ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
         {
             try
             {
@@ -267,7 +269,7 @@ namespace CommonPluginsStores.Origin
                         Link = Link,
                         IsCommun = IsCommun,
                         Achievements = Achievements,
-                        HoursPlayed = 0
+                        Playtime = 0
                     };
                     accountGamesInfos.Add(accountGameInfos);
                 });
@@ -467,7 +469,7 @@ namespace CommonPluginsStores.Origin
                 if (appsListResponse != null)
                 {
                     AppsList = appsListResponse.offers.Where(x => x.offerType.IsEqual("Base Game")).ToList(); 
-                    File.WriteAllText(PathAppsList, Serialization.ToJson(AppsList), Encoding.UTF8);
+                    File.WriteAllText(AppsListPath, Serialization.ToJson(AppsList), Encoding.UTF8);
                 }
                 else
                 {

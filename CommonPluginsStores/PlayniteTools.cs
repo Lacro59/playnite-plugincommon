@@ -3,12 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CommonPlayniteShared.Common;
+using CommonPluginsStores.Steam;
 
 namespace CommonPluginsStores
 {
     public class PlayniteTools
     {
         private static string SteamId = "null";
+        private static string SteamAccountId = "null";
         private static string SteamInstallDir = "null";
         private static string SteamScreenshotsDir = "null";
 
@@ -24,7 +26,7 @@ namespace CommonPluginsStores
 
             "{DropboxFolder}", "{OneDriveFolder}",
 
-            "{SteamId}", "{SteamInstallDir}", "{SteamScreenshotsDir}",
+            "{SteamId}", "{SteamAccountId}", "{SteamInstallDir}", "{SteamScreenshotsDir}",
             "{UbisoftInstallDir}", "{UbisoftScreenshotsDir}",
             "{RetroArchScreenshotsDir}",
 
@@ -47,21 +49,22 @@ namespace CommonPluginsStores
             // Steam
             if (result.Contains("{Steam"))
             {
-                SteamApi steamApi = null;
+                SteamApi steamApi = new SteamApi(); ;
 
                 if (SteamId =="null")
                 {
-                    steamApi = steamApi ?? new SteamApi();
-                    SteamId = steamApi.GetUserSteamId();
+                    SteamId = steamApi.CurrentUser.SteamId.ToString();
+                }
+                if (SteamAccountId == "null")
+                {
+                    SteamAccountId = steamApi.CurrentUser.AccountId.ToString();
                 }
                 if (SteamInstallDir == "null")
                 {
-                    steamApi = steamApi ?? new SteamApi();
                     SteamInstallDir = steamApi.GetInstallationPath();
                 }
                 if (SteamScreenshotsDir == "null")
                 {
-                    steamApi = steamApi ?? new SteamApi();
                     SteamScreenshotsDir = steamApi.GetScreeshotsPath();
                 }
 

@@ -13,7 +13,7 @@ namespace CommonPluginsStores.Models
         public string Name { get; set; }
         public string Link { get; set; }
         public bool IsCommun { get; set; }
-        public double HoursPlayed { get; set; }
+        public long Playtime { get; set; }
 
         [DontSerialize]
         public int AchievementsUnlocked { get => Achievements?.Where(y => y.DateUnlocked != default)?.Count() ?? 0; }

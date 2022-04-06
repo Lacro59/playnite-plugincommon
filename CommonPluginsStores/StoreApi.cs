@@ -192,7 +192,7 @@ namespace CommonPluginsStores
 
 
         #region Configuration
-        internal abstract bool GetIsUserLoggedIn();
+        protected abstract bool GetIsUserLoggedIn();
 
         /// <summary>
         /// Set data language.
@@ -210,13 +210,13 @@ namespace CommonPluginsStores
         /// Get current user info.
         /// </summary>
         /// <returns></returns>
-        internal abstract AccountInfos GetCurrentAccountInfos();
+        protected abstract AccountInfos GetCurrentAccountInfos();
 
         /// <summary>
         /// Get current user's friends info.
         /// </summary>
         /// <returns></returns>
-        internal abstract ObservableCollection<AccountInfos> GetCurrentFriendsInfos();
+        protected abstract ObservableCollection<AccountInfos> GetCurrentFriendsInfos();
         #endregion
 
 

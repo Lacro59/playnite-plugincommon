@@ -2,21 +2,32 @@
 using CommonPluginsShared.Extensions;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Steam.Models;
+using Microsoft.Win32;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using SteamKit2;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
+using CommonPlayniteShared;
+using static CommonPluginsShared.PlayniteTools;
+using AngleSharp.Dom.Html;
+using AngleSharp.Parser.Html;
+using AngleSharp.Dom;
+using System.Net;
 
 namespace CommonPluginsStores.Steam
 {
     public class SteamApi : StoreApi
     {
         #region Url
+        private const string UrlSteamCommunity = @"https://steamcommunity.com";
 
+        private const string UrlProfileById = UrlSteamCommunity + @"/profiles/{0}";
+        private const string UrlProfileByName = UrlSteamCommunity + @"/id/{0}";
         #endregion
 
 
@@ -36,10 +47,10 @@ namespace CommonPluginsStores.Steam
                 if (_AppsList == null)
                 {
                     // From cache if exists & not expired
-                    if (File.Exists(PathAppsList) && File.GetLastWriteTime(PathAppsList).AddDays(3) > DateTime.Now)
+                    if (File.Exists(AppsListPath) && File.GetLastWriteTime(AppsListPath).AddDays(3) > DateTime.Now)
                     {
                         Common.LogDebug(true, "GetSteamAppListFromCache");
-                        AppsList = Serialization.FromJsonFile<List<App>>(PathAppsList);
+                        AppsList = Serialization.FromJsonFile<List<App>>(AppsListPath);
                     }
                     // From web
                     else
@@ -65,7 +76,7 @@ namespace CommonPluginsStores.Steam
             {
                 if (_IsPrivate == null)
                 {
-                    _IsPrivate = GetIsPrivate();
+                    //_IsPrivate = GetIsPrivate();
                 }
                 return (bool)_IsPrivate;
             }
@@ -74,15 +85,48 @@ namespace CommonPluginsStores.Steam
         }
 
 
-        private string ApiKey;
-        private int SteamId;
+        private Models.SteamUser _CurrentUser;
+        public Models.SteamUser CurrentUser
+        {
+            get
+            {
+                if (_CurrentUser == null)
+                {
+                    _CurrentUser = GetCurrentUser();
+                }
+                return _CurrentUser;
+            }
 
-        private string PathAppsList;
+            set => SetValue(ref _CurrentUser, value);
+        }
+
+
+        #region Paths
+        private string AppsListPath { get; set; }
+
+        private string _InstallationPath;
+        public string InstallationPath
+        {
+            get
+            {
+                if (_InstallationPath == null)
+                {
+                    _InstallationPath = GetInstallationPath();
+                }
+                return _InstallationPath;
+            }
+
+            set => SetValue(ref _InstallationPath, value);
+        }
+
+        public string LoginUsersPath => Path.Combine(InstallationPath, "config", "loginusers.vdf");
+        public string SteamLibraryConfigFile => Path.Combine(PlaynitePaths.ExtensionsDataPath, CommonPluginsShared.PlayniteTools.GetPluginId(ExternalPlugin.SteamLibrary).ToString(), "config.json");
+        #endregion
 
 
         public SteamApi() : base("Steam")
         {
-            PathAppsList = Path.Combine(PathStoresData, "SteamAppsList.json");
+            AppsListPath = Path.Combine(PathStoresData, "SteamAppsList.json");
         }
 
 
@@ -95,7 +139,7 @@ namespace CommonPluginsStores.Steam
 
 
         #region Configuration
-        internal override bool GetIsUserLoggedIn()
+        protected override bool GetIsUserLoggedIn()
         {
             //bool isLogged = OriginAPI.GetIsUserLoggedIn();
             //
@@ -120,7 +164,7 @@ namespace CommonPluginsStores.Steam
 
 
         #region Current user
-        internal override AccountInfos GetCurrentAccountInfos()
+        protected override AccountInfos GetCurrentAccountInfos()
         {
             try
             {
@@ -161,7 +205,7 @@ namespace CommonPluginsStores.Steam
             return null;
         }
 
-        internal override ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
+        protected override ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
         {
             try
             {
@@ -338,7 +382,7 @@ namespace CommonPluginsStores.Steam
 
         #region Steam
         /// <summary>
-        /// Get the list of all games from the Origin store.
+        /// Get the list of all games from the Steam store.
         /// </summary>
         /// <returns></returns>
         private List<App> GetSteamAppsListFromWeb()
@@ -353,13 +397,13 @@ namespace CommonPluginsStores.Steam
                 {
                     WebData = "{}";
                 }
-                Serialization.TryFromJson(WebData, out SteamApps appsListResponse);
+                Serialization.TryFromJson(WebData, out Models.SteamApps appsListResponse);
 
                 // Write file for cache
                 if (appsListResponse != null)
                 {
                     AppsList = appsListResponse.applist.apps;
-                    File.WriteAllText(PathAppsList, Serialization.ToJson(AppsList), Encoding.UTF8);
+                    File.WriteAllText(AppsListPath, Serialization.ToJson(AppsList), Encoding.UTF8);
                 }
                 else
                 {
@@ -374,12 +418,13 @@ namespace CommonPluginsStores.Steam
             return AppsList;
         }
 
+
         /// <summary>
-        /// Get Id from Steam store with a game name.
+        /// Get AppId from Steam store with a game name.
         /// </summary>
         /// <param name="Name"></param>
         /// <returns></returns>
-        public int GetSteamId(string Name)
+        public int GetAppId(string Name)
         {
             AppsList.Sort((x, y) => x.appid.CompareTo(y.appid));
             App finded = AppsList.Find(x => x.name.IsEqual(Name)); ;
@@ -394,29 +439,51 @@ namespace CommonPluginsStores.Steam
         }
 
         /// <summary>
-        /// Get name from Steam store with a game Id.
+        /// Get name from Steam store with a AppId.
         /// </summary>
-        /// <param name="Id"></param>
+        /// <param name="AppId"></param>
         /// <returns></returns>
-        public string GetGameName(int Id)
+        public string GetGameName(int AppId)
         {
             AppsList.Sort((x, y) => x.appid.CompareTo(y.appid));
-            App finded = AppsList.Find(x => x.appid == Id); ;
+            App finded = AppsList.Find(x => x.appid == AppId); ;
 
             if (finded != null)
             {
-                Common.LogDebug(true, $"Find Steam data for {Id} - {Serialization.ToJson(finded)}");
+                Common.LogDebug(true, $"Find Steam data for {AppId} - {Serialization.ToJson(finded)}");
                 return finded.name;
             }
 
             return string.Empty;
         }
 
+        /// <summary>
+        /// Get AccountID for a SteamId
+        /// </summary>
+        /// <returns></returns>
+        public static uint GetAccountId(ulong SteamId)
+        {
+            try
+            {
+                SteamID steamID = new SteamID();
+                steamID.SetFromUInt64(SteamId);
+
+                return steamID.AccountID;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+            }
+
+            return 0;
+        }
+
+
         private ObservableCollection<AccountInfos> GetCurrentFriendsInfos_Api()
         {
             try
             {
-                string Url = string.Format(UrlApiFriendList, ApiKey, SteamId);
+                string Url = string.Format(UrlApiFriendList, CurrentUser.ApiKey, CurrentUser.SteamId);
                 string WebData = Web.DownloadStringData(Url).GetAwaiter().GetResult();
                 Serialization.TryFromJson(WebData, out FriendsList friendsList);
 
@@ -424,9 +491,9 @@ namespace CommonPluginsStores.Steam
                 friendsList?.friendslist?.friends?.ForEach(x =>
                 {
                     long.TryParse(x.steamid, out long UserId);
-                    string Avatar = "";
-                    string Pseudo = "";
-                    string Link = "";
+                    string Avatar = string.Empty;
+                    string Pseudo = string.Empty;
+                    string Link = string.Empty;
                     DateTime? DateAdded = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(x.friend_since);
 
                     AccountInfos userInfos = new AccountInfos
@@ -449,22 +516,142 @@ namespace CommonPluginsStores.Steam
             return null;
         }
 
-        private bool IsProfilePublic(string profilePageUrl)
+
+        /// <summary>
+        /// Get the Steam installation path.
+        /// </summary>
+        /// <returns></returns>
+        public string GetInstallationPath()
         {
             try
             {
-                string ResultWeb = HttpDownloader.DownloadString(profilePageUrl);
-                IHtmlDocument HtmlDoc = new HtmlParser().Parse(ResultWeb);
-
-                //this finds the Games link on the right side of the profile page. If that's public then so are achievements.
-                var gamesPageLink = HtmlDoc.QuerySelector(@".profile_item_links a[href$=""/games/?tab=all""]");
-                return gamesPageLink != null;
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Valve\Steam"))
+                {
+                    if (key?.GetValueNames().Contains("SteamPath") == true)
+                    {
+                        return key.GetValue("SteamPath")?.ToString().Replace('/', '\\') ?? string.Empty;
+                    }
+                }
             }
-            catch (WebException ex)
+            catch (Exception ex)
             {
-                Common.LogError(ex, false, true, PluginDatabase.PluginName);
-                return false;
+                Common.LogError(ex, false);
             }
+
+            logger.Warn("No find Steam installation");
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Get the Steam screanshots folder.
+        /// </summary>
+        /// <returns></returns>
+        public string GetScreeshotsPath()
+        {
+            string PathScreeshotsFolder = Path.Combine(InstallationPath, "userdata", CurrentUser.AccountId.ToString(), "760", "remote");
+
+            if (Directory.Exists(PathScreeshotsFolder))
+            {
+                return PathScreeshotsFolder;
+            }
+
+            logger.Warn("No find Steam screenshots folder");
+            return string.Empty;
+        }
+
+
+        /// <summary>
+        /// Get the list of all users defined in local.
+        /// </summary>
+        /// <returns></returns>
+        public List<Models.SteamUser> GetSteamUsers()
+        {
+            List<Models.SteamUser> users = new List<Models.SteamUser>();
+            if (File.Exists(LoginUsersPath))
+            {
+                KeyValue config = new KeyValue();
+                try
+                {
+                    config.ReadFileAsText(LoginUsersPath);
+                    foreach (KeyValue user in config.Children)
+                    {
+                        users.Add(new Models.SteamUser()
+                        {
+                            SteamId = ulong.Parse(user.Name),
+                            AccountName = user["AccountName"].Value,
+                            PersonaName = user["PersonaName"].Value,
+                        });
+                    }
+                    return users;
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false);
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Get Playnite configured user.
+        /// </summary>
+        /// <returns></returns>
+        private Models.SteamUser GetCurrentUser()
+        {
+            try
+            {
+                if (File.Exists(SteamLibraryConfigFile))
+                {
+                    dynamic SteamConfig = Serialization.FromJsonFile<dynamic>(SteamLibraryConfigFile);
+                    ulong.TryParse(SteamConfig["UserId"].ToString(), out ulong SteamId);
+                    string ApiKey = SteamConfig["ApiKey"];
+
+                    List<Models.SteamUser> SteamUsers = GetSteamUsers();
+                    Models.SteamUser steamUser = SteamUsers.Find(x => x.SteamId == SteamId);
+                    if (steamUser != null)
+                    {
+                        steamUser.IsPrivateAccount = !CheckIsPublic(steamUser);
+                        steamUser.ApiKey = ApiKey;
+                    }
+                    return steamUser;
+                }
+                else
+                {
+                    logger.Warn("No find SteamLibrary configuration");
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+            }
+
+            return null;
+        }
+
+
+        public static bool CheckIsPublic(Models.SteamUser steamUser)
+        {
+            return IsProfilePublic(string.Format(UrlProfileById, steamUser.SteamId)) || IsProfilePublic(string.Format(UrlProfileById, steamUser.PersonaName));
+        }
+
+        private static bool IsProfilePublic(string profilePageUrl)
+        {
+            try
+            {
+                string ResultWeb = Web.DownloadStringData(profilePageUrl).GetAwaiter().GetResult();
+                IHtmlDocument HtmlDoc = new HtmlParser().Parse(ResultWeb);
+                IElement profile_private_info = HtmlDoc.QuerySelector("div.profile_private_info");
+                IElement error_ctn = HtmlDoc.QuerySelector("div.error_ctn");
+
+                return profile_private_info == null && error_ctn == null;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+            }
+
+            return false;
         }
         #endregion
     }

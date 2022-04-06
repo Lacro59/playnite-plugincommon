@@ -77,7 +77,7 @@ namespace CommonPluginsStores.Gog
 
 
         #region Configuration
-        internal override bool GetIsUserLoggedIn()
+        protected override bool GetIsUserLoggedIn()
         {
             bool isLogged = GogAPI.GetIsUserLoggedIn();
 
@@ -103,7 +103,7 @@ namespace CommonPluginsStores.Gog
 
 
         #region Current user
-        internal override AccountInfos GetCurrentAccountInfos()
+        protected override AccountInfos GetCurrentAccountInfos()
         {
             try
             {
@@ -137,7 +137,7 @@ namespace CommonPluginsStores.Gog
             return null;
         }
 
-        internal override ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
+        protected override ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
         {
             try
             {
@@ -206,11 +206,16 @@ namespace CommonPluginsStores.Gog
                                 IsCommun = CurrentGamesInfos?.Where(y => y.Id.IsEqual(Id))?.Count() != 0;
                             }
 
-                            double HoursPlayed = 0;
-                            foreach (var data in (dynamic)x.stats)
+                            long Playtime = 0;
+                            foreach (dynamic data in (dynamic)x.stats)
                             {
-                                double.TryParse(((dynamic)x.stats)[data.Path]["playtime"].ToString(), out HoursPlayed);
-                                HoursPlayed *= 60;
+                                long.TryParse(((dynamic)x.stats)[data.Path]["playtime"].ToString(), out Playtime);
+                                Playtime *= 60;
+
+                                if (Playtime != 0)
+                                {
+                                    break;
+                                }
                             }
 
                             string Link = UrlBase + x.game.url.Replace("\\", string.Empty);
@@ -223,7 +228,7 @@ namespace CommonPluginsStores.Gog
                                 Link = Link,
                                 IsCommun = IsCommun,
                                 Achievements = Achievements,
-                                HoursPlayed = 0
+                                Playtime = Playtime
                             };
                             accountGamesInfos.Add(accountGameInfos);
                         });
