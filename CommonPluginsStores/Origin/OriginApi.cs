@@ -209,7 +209,8 @@ namespace CommonPluginsStores.Origin
                         UserId = UserId,
                         Avatar = Avatar,
                         Pseudo = Pseudo,
-                        Link = Link
+                        Link = Link,
+                        DateAdded = DateAdded
                     };
                     accountsInfos.Add(userInfos);
                 });
