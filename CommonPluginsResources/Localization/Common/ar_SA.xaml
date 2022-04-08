@@ -27,13 +27,13 @@
     <!-- Common Stores -->
 
     <sys:String x:Key="LOCCommonAuthenticateLabel">Authenticate</sys:String>
-    <sys:String x:Key="LOCCommonNotLoggedIn">Requires authentication</sys:String>
-    <sys:String x:Key="LOCCommonLoggedIn">User is authenticated</sys:String>
-    <sys:String x:Key="LOCCommonAccountName">Account Name</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedIn">يتطلب المصادقة</sys:String>
+    <sys:String x:Key="LOCCommonLoggedIn">تم مصادقة المستخدم</sys:String>
+    <sys:String x:Key="LOCCommonAccountName">اسم الحساب</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Checking authentication status…</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticate</sys:String>
-    <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: No API key</sys:String>
+    <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: لا يوجد مفتاح API</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">العناصر المهمل</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">Input the item to ignore</sys:String>
@@ -43,17 +43,17 @@
 
     <sys:String x:Key="LOCCommonGameTime">Game time</sys:String>
     
-    <sys:String x:Key="LOCCommonSelectFilters">Select filters</sys:String>
+    <sys:String x:Key="LOCCommonSelectFilters">اختيار التصفية</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Recently Added</sys:String>
-    <sys:String x:Key="LOCCommonOnlyMissing">Only download missing</sys:String>
+    <sys:String x:Key="LOCCommonOnlyMissing">تنزيل المفقود فقط</sys:String>
     
     <sys:String x:Key="LOCCommonTotal">الإجمال</sys:String>
     <sys:String x:Key="LOCCommonCut">Cut</sys:String>
 
 
-    <sys:String x:Key="LOCCommon0to1">00 to 01 hours</sys:String>
-    <sys:String x:Key="LOCCommon1to5">01 to 05 hours</sys:String>
-    <sys:String x:Key="LOCCommon5to10">05 to 10 hours</sys:String>
+    <sys:String x:Key="LOCCommon0to1">00 إلى 01 ساعة</sys:String>
+    <sys:String x:Key="LOCCommon1to5">01 إلى 05 ساعات</sys:String>
+    <sys:String x:Key="LOCCommon5to10">05 إلى 10 ساعات</sys:String>
     <sys:String x:Key="LOCCommon10to20">10 إلى 20 ساع</sys:String>
     <sys:String x:Key="LOCCommon20to30">20 إلى 30 ساع</sys:String>
     <sys:String x:Key="LOCCommon30to40">30 إلى 40 ساع</sys:String>
@@ -91,7 +91,7 @@ Do you want to open the directory?</sys:String>
     
     <sys:String x:Key="LOCCommonSaveColumOrder">حفظ ترتيب الأعمد</sys:String>
 
-    <sys:String x:Key="LOCCommonIntegrationFullScreen">Fullscreen</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationFullScreen">ملء الشاشة</sys:String>
     <sys:String x:Key="LOCCommonIntegrationFullScreenEnable">تمكين تكامل ملء الشاش</sys:String>
 
     <sys:String x:Key="LOCCommonIntegration">إعدادات المظهر</sys:String>
@@ -138,7 +138,7 @@ Do you want to open the directory?</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">حذف البيانات</sys:String>
 
     <sys:String x:Key="LOCCommonSelectGames">حدد الألعا</sys:String>
-    <sys:String x:Key="LOCCommonAddAllTags">Add tag for all games</sys:String>
+    <sys:String x:Key="LOCCommonAddAllTags">إضافة علامة لجميع الألعاب</sys:String>
     <sys:String x:Key="LOCCommonAddTPlugin">Add plugin tag...</sys:String>
     <sys:String x:Key="LOCCommonSelectData">Download data for selected games</sys:String>
     <sys:String x:Key="LOCCommonDownloadPluginData">تحميل بيانات الإضافة...</sys:String>
