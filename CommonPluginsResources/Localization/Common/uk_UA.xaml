@@ -32,7 +32,7 @@
     <sys:String x:Key="LOCCommonAccountName">Ім'я облікового запису</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Перевірка стану автентифікації…</sys:String>
 
-    <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: користувач не авторизований</sys:String>
+    <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: користувач не автентифікований</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: немає API ключа</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Ігноровані елементи</sys:String>
@@ -159,7 +159,7 @@
 
     <!-- CommonNotificationsErrors -->
 
-    <sys:String x:Key="LOCCommonPluginNoAuthenticate">Користувач {0} не авторизований</sys:String>
+    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0} користувач не автентифікований</sys:String>
     
     <!-- CommonNotifications -->
 

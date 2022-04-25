@@ -159,7 +159,7 @@
 
     <!-- CommonNotificationsErrors -->
 
-    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0} user is not authenticated</sys:String>
+    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0} 用户未身份验证</sys:String>
     
     <!-- CommonNotifications -->
 
