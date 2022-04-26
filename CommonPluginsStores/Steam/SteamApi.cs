@@ -353,7 +353,7 @@ namespace CommonPluginsStores.Steam
 
 
         #region Game
-        public static new GameInfos GetGameInfos(string Id, string Local)
+        public override GameInfos GetGameInfos(string Id, AccountInfos accountInfos)
         {
             try
             {

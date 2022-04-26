@@ -253,7 +253,7 @@ namespace CommonPluginsStores.Origin
                         IsCommun = CurrentGamesInfos?.Where(y => y.Id.IsEqual(Id))?.Count() != 0;
                     }
 
-                    GameInfos gameInfos = GetGameInfos(Id, Local);
+                    GameInfos gameInfos = GetGameInfos(Id, accountInfos);
                     string Link = gameInfos?.Link;
 
                     string achId = x?.softwares?.softwareList?.First().achievementSetOverride;
@@ -328,7 +328,7 @@ namespace CommonPluginsStores.Origin
 
 
         #region Game
-        public static new GameInfos GetGameInfos(string Id, string Local)
+        public override GameInfos GetGameInfos(string Id, AccountInfos accountInfos)
         {
             try
             {

@@ -7,11 +7,15 @@ using System.Text;
 
 namespace CommonPluginsStores.Models
 {
-    public class AccountGameInfos
+    public class BasicAccountGameInfos
     {
         public string Id { get; set; }
         public string Name { get; set; }
         public string Link { get; set; }
+    }
+
+    public class AccountGameInfos : BasicAccountGameInfos
+    {
         public bool IsCommun { get; set; }
         public long Playtime { get; set; }
 

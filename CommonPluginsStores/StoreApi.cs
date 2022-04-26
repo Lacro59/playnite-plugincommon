@@ -192,6 +192,11 @@ namespace CommonPluginsStores
 
 
         #region Configuration
+        public void ResetIsUserLoggedIn()
+        {
+            _IsUserLoggedIn = null;
+        }
+
         protected abstract bool GetIsUserLoggedIn();
 
         /// <summary>
@@ -234,7 +239,10 @@ namespace CommonPluginsStores
         /// <param name="Id"></param>
         /// <param name="accountInfos"></param>
         /// <returns></returns>
-        public abstract ObservableCollection<GameAchievement> GetAchievements(string Id, AccountInfos accountInfos);
+        public virtual ObservableCollection<GameAchievement> GetAchievements(string Id, AccountInfos accountInfos)
+        {
+            return null;
+        }
         #endregion
 
 
@@ -245,7 +253,14 @@ namespace CommonPluginsStores
         /// <param name="Id"></param>
         /// <param name="Local"></param>
         /// <returns></returns>
-        public static GameInfos GetGameInfos(string Id, string Local) { return null; }
+        public virtual GameInfos GetGameInfos(string Id, AccountInfos accountInfos) { return null; }
+
+        /// <summary>
+        /// Get dlc informations for a game.
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
+        public virtual ObservableCollection<DlcInfos> GetDlcInfos(string Id, AccountInfos accountInfos) { return null; }
         #endregion
     }
 }

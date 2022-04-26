@@ -10,9 +10,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Gog\GogApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\UserDataOwned.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\PriceData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\PriceResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\ProductApiDetail.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\ProfileGames.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\ProfileUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\ProfileUserFriends.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\UserData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\AccountGameInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\GameAchievement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\GameInfos.cs" />
