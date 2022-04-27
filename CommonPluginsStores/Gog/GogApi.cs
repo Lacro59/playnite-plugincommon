@@ -88,7 +88,7 @@ namespace CommonPluginsStores.Gog
         private string UserId;
         private string UserName;
 
-        private static Currency LocalCurrency { get; set; } = new Currency { code = "USD", symbol = "$" };
+        private static StoreCurrency LocalCurrency { get; set; } = new StoreCurrency { currency = "USD", symbol = "$" };
 
 
         public GogApi() : base("GOG")
@@ -131,10 +131,10 @@ namespace CommonPluginsStores.Gog
         }
 
         /// <summary>
-        /// Set GOG currency.
+        /// Set currency.
         /// </summary>
         /// <param name="currency"></param>
-        public void SetCurrency(Currency currency)
+        public void SetCurrency(StoreCurrency currency)
         {
             LocalCurrency = currency;
         }
@@ -406,7 +406,7 @@ namespace CommonPluginsStores.Gog
         {
             ObservableCollection<DlcInfos> Dlcs = new ObservableCollection<DlcInfos>();
 
-            foreach (var el in DlcsData?.products)
+            foreach (Product el in DlcsData?.products)
             {
                 try
                 {
@@ -477,23 +477,21 @@ namespace CommonPluginsStores.Gog
 
 
         #region GOG
-        private static PriceData GetPrice(List<string> ids, string Local, Currency LocalCurrency)
+        private PriceData GetPrice(List<string> ids, string Local, StoreCurrency LocalCurrency)
         {
             string priceCountry = CodeLang.GetOriginLangCountry(Local);
             string joined = string.Join(",", ids);
-            string UrlPrice = string.Format(UrlApiPrice, joined, (priceCountry.IsEqual("en") ? "us" : priceCountry), LocalCurrency.code.ToUpper());
+            string UrlPrice = string.Format(UrlApiPrice, joined, (priceCountry.IsEqual("en") ? "us" : priceCountry), LocalCurrency.currency.ToUpper());
             string DataPrice = Web.DownloadStringData(UrlPrice).GetAwaiter().GetResult();
 
             Serialization.TryFromJson<dynamic>(DataPrice, out dynamic dataObj);
 
-            string CodeCurrency = LocalCurrency.code;
+            string CodeCurrency = LocalCurrency.currency;
             string SymbolCurrency = LocalCurrency.symbol;
 
             if (dataObj["message"] != null && ((string)dataObj["message"]).Contains("is not supported in", StringComparison.InvariantCultureIgnoreCase))
             {
-                dataObj = GetPrice(ids, Local, new Currency { code = "USD", symbol = "$" });
-                CodeCurrency = "USD";
-                SymbolCurrency = "$";
+                return GetPrice(ids, Local, new StoreCurrency { currency = "USD", symbol = "$" });
             }
 
             if (dataObj["message"] != null)
@@ -510,7 +508,7 @@ namespace CommonPluginsStores.Gog
             };
         }
 
-        public List<Currency> GetGogCurrencies()
+        public List<StoreCurrency> GetCurrencies()
         {
             try
             {
@@ -521,7 +519,7 @@ namespace CommonPluginsStores.Gog
 
                     if (userData?.currencies != null)
                     {
-                        return userData.currencies;
+                        return userData.currencies.Select(x => new StoreCurrency { currency = x.code.ToUpper(), symbol = x.symbol }).ToList();
                     }                    
                 }
             }
@@ -530,9 +528,9 @@ namespace CommonPluginsStores.Gog
                 Common.LogError(ex, false, true, ClientName);
             }
 
-            return new List<Currency>
+            return new List<StoreCurrency>
             {
-                new Currency { code = "USD", symbol = "$" }
+                new StoreCurrency { currency = "USD", symbol = "$" }
             };
         }
 

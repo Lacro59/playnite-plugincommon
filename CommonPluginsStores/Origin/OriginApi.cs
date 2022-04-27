@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
 
 namespace CommonPluginsStores.Origin
@@ -26,6 +25,8 @@ namespace CommonPluginsStores.Origin
         private const string UrlUserFriends = @"https://friends.gs.ea.com/friends/2/users/{0}/friends?names=true";
         private const string UrlAchievements = @"https://achievements.gameservices.ea.com/achievements/personas/{0}/{1}/all?lang={2}&metadata=true&fullset=true";
         private const string UrlStoreGame = UrlBase + @"/store{0}";
+
+        private const string UrlDataCurrency = @"https://data3.origin.com/defaults/web-defaults/localization/currency.json";
         #endregion
 
 
@@ -36,6 +37,7 @@ namespace CommonPluginsStores.Origin
 
         private const string UrlApi1EncodePair = UrlApi1 + @"/gifting/idobfuscate/users/{0}/encodePair";
         private const string UrlApi1Avatar = UrlApi1 + @"/avatar/user/{0}/avatars?size=2";
+        private const string UrlApi1Price = UrlApi1 + @"/supercarp/rating/offers?country={0}&locale={1}&pid={2}&currency={3}&offerIds={4}";
 
         private const string UrlApi2UserInfos = UrlApi2 + @"/atom/users?userIds={0}"; 
         private const string UrlApi2GameInfo = UrlApi2 + @"/ecommerce2/public/supercat/{0}/{1}?country={2}";
@@ -57,15 +59,38 @@ namespace CommonPluginsStores.Origin
                 return _OriginAPI;
             }
 
-            set
+            set => _OriginAPI = value;
+        }
+
+        private List<AccountEntitlementsResponse.Entitlement> _UserDataOwned = null;
+        private List<AccountEntitlementsResponse.Entitlement> UserDataOwned
+        {
+            get
             {
-                _OriginAPI = value;
+                if (_UserDataOwned == null)
+                {
+                    try
+                    {
+                        long UserId = accountInfoResponse.pid.pidId;
+                        _UserDataOwned = OriginAPI.GetOwnedGames(UserId, OriginAPI.GetAccessToken());
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false);
+                    }
+                }
+                return _UserDataOwned;
             }
         }
 
 
-        protected List<GameStoreDataResponse> _AppsList;
-        internal List<GameStoreDataResponse> AppsList
+        private Models.AccountInfoResponse accountInfoResponse;
+
+        private static StoreCurrency LocalCurrency { get; set; } = new StoreCurrency { country = "US", currency = "USD", symbol = "$" };
+
+
+        protected List<CommonPlayniteShared.PluginLibrary.OriginLibrary.Models.GameStoreDataResponse> _AppsList;
+        internal List<CommonPlayniteShared.PluginLibrary.OriginLibrary.Models.GameStoreDataResponse> AppsList
         {
             get
             {
@@ -75,7 +100,7 @@ namespace CommonPluginsStores.Origin
                     if (File.Exists(AppsListPath) && File.GetLastWriteTime(AppsListPath).AddDays(3) > DateTime.Now)
                     {
                         Common.LogDebug(true, "GetOriginAppListFromCache");
-                        AppsList = Serialization.FromJsonFile<List<GameStoreDataResponse>>(AppsListPath);
+                        AppsList = Serialization.FromJsonFile<List<CommonPlayniteShared.PluginLibrary.OriginLibrary.Models.GameStoreDataResponse>>(AppsListPath);
                     }
                     // From web
                     else
@@ -87,15 +112,12 @@ namespace CommonPluginsStores.Origin
                 return _AppsList;
             }
 
-            set
-            {
-                _AppsList = value;
-            }
+            set => _AppsList = value;
         }
 
 
         #region Paths
-        private string AppsListPath;
+        private readonly string AppsListPath;
         #endregion
 
 
@@ -126,6 +148,13 @@ namespace CommonPluginsStores.Origin
                     Token = AccessToken.access_token,
                     Type = AccessToken.token_type
                 };
+
+                List<HttpHeader> httpHeaders = new List<HttpHeader>
+                {
+                    new HttpHeader { Key = "Authorization", Value = AuthToken.Type + " " + AuthToken.Token }
+                };
+                string WebData = Web.DownloadStringData(UrlAccountIdentity, httpHeaders).GetAwaiter().GetResult();
+                Serialization.TryFromJson(WebData, out accountInfoResponse);
             }
             else
             {
@@ -133,6 +162,15 @@ namespace CommonPluginsStores.Origin
             }
 
             return isLogged;
+        }
+
+        /// <summary>
+        /// Set currency.
+        /// </summary>
+        /// <param name="currency"></param>
+        public void SetCurrency(StoreCurrency currency)
+        {
+            LocalCurrency = currency;
         }
         #endregion
 
@@ -142,13 +180,6 @@ namespace CommonPluginsStores.Origin
         {
             try
             {
-                List<HttpHeader> httpHeaders = new List<HttpHeader> 
-                { 
-                    new HttpHeader { Key = "Authorization", Value = AuthToken.Type + " " + AuthToken.Token }
-                };
-                string WebData = Web.DownloadStringData(UrlAccountIdentity, httpHeaders).GetAwaiter().GetResult();
-                Serialization.TryFromJson(WebData, out Models.AccountInfoResponse accountInfoResponse);
-
                 if (accountInfoResponse != null)
                 {
                     long UserId = accountInfoResponse.pid.pidId;
@@ -334,15 +365,24 @@ namespace CommonPluginsStores.Origin
             {
                 string Url = string.Format(UrlApi2GameInfo, Id, CodeLang.GetOriginLang(Local), CodeLang.GetOriginLangCountry(Local));
                 string WebData = Web.DownloadStringData(Url).GetAwaiter().GetResult();
-                Serialization.TryFromJson(WebData, out GameStoreDataResponse gameStoreDataResponse);
+                Serialization.TryFromJson(WebData, out Models.GameStoreDataResponse gameStoreDataResponse);
 
                 GameInfos gameInfos = new GameInfos
                 {
                     Id = gameStoreDataResponse.offerId,
                     Name = gameStoreDataResponse.i18n.displayName,
                     Link = gameStoreDataResponse?.offerPath != null ? string.Format(UrlStoreGame, gameStoreDataResponse.offerPath) : string.Empty,
+                    Image = gameStoreDataResponse.imageServer + gameStoreDataResponse.i18n.packArtLarge,
                     Description = gameStoreDataResponse.i18n.longDescription
                 };
+
+                // DLC
+                if (gameStoreDataResponse?.extraContent?.Count > 0)
+                {
+                    ObservableCollection<DlcInfos> Dlcs = GetDlcInfos(gameStoreDataResponse.extraContent, accountInfos);
+                    gameInfos.Dlcs = Dlcs;
+                }
+
                 return gameInfos;
             }
             catch (Exception ex)
@@ -351,6 +391,95 @@ namespace CommonPluginsStores.Origin
             }
 
             return null;
+        }
+
+        public override ObservableCollection<DlcInfos> GetDlcInfos(string Id, AccountInfos accountInfos)
+        {
+            string Url = string.Format(UrlApi2GameInfo, Id, CodeLang.GetOriginLang(Local), CodeLang.GetOriginLangCountry(Local));
+            string WebData = Web.DownloadStringData(Url).GetAwaiter().GetResult();
+            Serialization.TryFromJson(WebData, out Models.GameStoreDataResponse gameStoreDataResponse);
+
+            if (gameStoreDataResponse?.extraContent?.Count > 0)
+            {
+                return GetDlcInfos(gameStoreDataResponse.extraContent, accountInfos);
+            }
+
+            return null;
+        }
+
+        private ObservableCollection<DlcInfos> GetDlcInfos(List<string> Ids, AccountInfos accountInfos)
+        {
+            ObservableCollection<DlcInfos> Dlcs = new ObservableCollection<DlcInfos>();
+
+            foreach (string Id in Ids)
+            {
+                try
+                {
+                    string Url = string.Format(UrlApi2GameInfo, Id, CodeLang.GetOriginLang(Local), CodeLang.GetOriginLangCountry(Local));
+                    string WebData = Web.DownloadStringData(Url).GetAwaiter().GetResult();
+                    Serialization.TryFromJson(WebData, out Models.GameStoreDataResponse gameStoreDataResponse);
+
+                    if (gameStoreDataResponse?.offerId == null)
+                    {
+                        continue;
+                    }
+
+                    bool IsOwned = false;
+                    if (accountInfos != null && accountInfos.IsCurrent)
+                    {
+                        IsOwned = DlcIsOwned(Id);
+                    }
+                    
+                    DlcInfos dlc = new DlcInfos
+                    {
+                        Id = gameStoreDataResponse.offerId,
+                        Name = gameStoreDataResponse.i18n.displayName,
+                        Link = gameStoreDataResponse?.offerPath != null ? string.Format(UrlStoreGame, gameStoreDataResponse.offerPath) : string.Empty,
+                        Image = gameStoreDataResponse.imageServer + gameStoreDataResponse.i18n.packArtLarge,
+                        Description = gameStoreDataResponse.i18n.longDescription,
+                        IsOwned = IsOwned
+                    };
+                    
+                    Dlcs.Add(dlc);
+                }
+                catch (Exception ex)
+                {
+                    if (!ex.Message.Contains("404"))
+                    {
+                        Common.LogError(ex, false);
+                    }
+                }
+            }
+
+            // Price
+            if (Dlcs?.Count > 0)
+            {
+                try
+                {
+                    PriceData priceData = GetPrice(Dlcs.Select(x => x.Id).ToList(), Local, LocalCurrency);
+                    if (priceData?.Price?.offer != null)
+                    {
+                        foreach (Offer offer in priceData.Price.offer)
+                        {
+                            int idx = Dlcs.ToList().FindIndex(x => x.Id.IsEqual(offer.offerId));
+                            if (idx > -1 && offer.rating?.Count > 0)
+                            {
+                                double Price = offer.rating[0].finalTotalAmount;
+                                double PriceBase = offer.rating[0].originalTotalPrice;
+
+                                Dlcs[idx].Price = Price + " " + priceData.SymbolCurrency;
+                                Dlcs[idx].PriceBase = PriceBase + " " + priceData.SymbolCurrency;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false);
+                }
+            }
+
+            return Dlcs;
         }
         #endregion
 
@@ -448,10 +577,10 @@ namespace CommonPluginsStores.Origin
         /// Get the list of all games from the Origin store.
         /// </summary>
         /// <returns></returns>
-        private List<GameStoreDataResponse> GetOriginAppsListFromWeb(bool forceEnglish = false)
+        private List<CommonPlayniteShared.PluginLibrary.OriginLibrary.Models.GameStoreDataResponse> GetOriginAppsListFromWeb(bool forceEnglish = false)
         {
             string Url = string.Empty;
-            List<GameStoreDataResponse> AppsList = null;
+            List<CommonPlayniteShared.PluginLibrary.OriginLibrary.Models.GameStoreDataResponse> AppsList = null;
             try
             {
                 if (forceEnglish)
@@ -498,7 +627,7 @@ namespace CommonPluginsStores.Origin
         /// <returns></returns>
         public string GetOriginId(string Name, bool byItemName = false)
         {
-            GameStoreDataResponse finded = null;
+            CommonPlayniteShared.PluginLibrary.OriginLibrary.Models.GameStoreDataResponse finded = null;
             if (!byItemName)
             {
                 finded = AppsList.Find(x => x.masterTitle.IsEqual(Name));
@@ -519,6 +648,91 @@ namespace CommonPluginsStores.Origin
             }
 
             return string.Empty;
+        }
+
+        private bool DlcIsOwned(string Id)
+        {
+            if (UserDataOwned?.Count > 0)
+            {
+                AccountEntitlementsResponse.Entitlement finded = UserDataOwned?.Find(x => x.offerId.IsEqual(Id));
+                return finded != null;
+            }
+            return false;
+        }
+
+        private PriceData GetPrice(List<string> ids, string Local, StoreCurrency LocalCurrency)
+        {
+            long UserId = accountInfoResponse.pid.pidId;
+            string joined = string.Join(",", ids);
+            string UrlPrice = string.Format(UrlApi1Price, LocalCurrency.country, Local, UserId, LocalCurrency.currency, joined);
+
+            List<HttpHeader> httpHeaders = new List<HttpHeader>
+            {
+                new HttpHeader { Key = "authtoken", Value = AuthToken.Token },
+                new HttpHeader { Key = "accept", Value = "application/json" },
+            };
+            string DataPrice = Web.DownloadStringData(UrlPrice, httpHeaders).GetAwaiter().GetResult();
+
+            Serialization.TryFromJson<PriceResult>(DataPrice, out PriceResult priceResult);
+
+            string CodeCurrency = LocalCurrency.currency;
+            string SymbolCurrency = LocalCurrency.symbol;
+
+            if (priceResult != null)
+            {
+                return new PriceData
+                {
+                    Price = priceResult,
+                    CodeCurrency = CodeCurrency,
+                    SymbolCurrency = SymbolCurrency
+                };
+            }
+
+            return null;
+        }
+
+        public List<StoreCurrency> GetCurrencies()
+        {
+            return new List<StoreCurrency>
+            {
+                new StoreCurrency { country = "AU", currency = "AUD", symbol = "$" },
+                new StoreCurrency { country = "BE", currency = "EUR", symbol = "€" },
+                new StoreCurrency { country = "CA", currency = "CAD", symbol = "$" },
+                new StoreCurrency { country = "DE", currency = "EUR", symbol = "€" },
+                new StoreCurrency { country = "DK", currency = "DKK", symbol = "kr." },
+                new StoreCurrency { country = "ES", currency = "EUR", symbol = "€" },
+                new StoreCurrency { country = "FI", currency = "EUR", symbol = "€" },
+                new StoreCurrency { country = "FR", currency = "EUR", symbol = "€" },
+                new StoreCurrency { country = "GB", currency = "GBP", symbol = "£" },
+                new StoreCurrency { country = "HK", currency = "HKD", symbol = "HK$" },
+                new StoreCurrency { country = "IE", currency = "EUR", symbol = "€" },
+                new StoreCurrency { country = "IN", currency = "INR", symbol = "Rs." },
+                new StoreCurrency { country = "IT", currency = "EUR", symbol = "€" },
+                new StoreCurrency { country = "JP", currency = "JPY", symbol = "¥" },
+                new StoreCurrency { country = "KR", currency = "KRW", symbol = "₩" },
+                new StoreCurrency { country = "MX", currency = "USD", symbol = "$" },
+                new StoreCurrency { country = "NL", currency = "EUR", symbol = "€" },
+                new StoreCurrency { country = "NO", currency = "NOK", symbol = "kr." },
+                new StoreCurrency { country = "NZ", currency = "NZD", symbol = "$" },
+                new StoreCurrency { country = "PL", currency = "PLN", symbol = "zł" },
+                new StoreCurrency { country = "RU", currency = "RUB", symbol = "руб" },
+                new StoreCurrency { country = "SE", currency = "SEK", symbol = "" },
+                new StoreCurrency { country = "SG", currency = "SGD", symbol = "$" },
+                new StoreCurrency { country = "TH", currency = "THB", symbol = "฿" },
+                new StoreCurrency { country = "TW", currency = "TWD", symbol = "NT$" },
+                new StoreCurrency { country = "US", currency = "USD", symbol = "$" },
+                new StoreCurrency { country = "ZA", currency = "ZAR", symbol = "R" },
+                new StoreCurrency { country = "MY", currency = "MYR", symbol = "RM" },
+                new StoreCurrency { country = "AR", currency = "ARS", symbol = "$" },
+                new StoreCurrency { country = "CL", currency = "CLP", symbol = "" },
+                new StoreCurrency { country = "CO", currency = "COP", symbol = "$" },
+                new StoreCurrency { country = "EG", currency = "EGP", symbol = "ج.م" },
+                new StoreCurrency { country = "ID", currency = "IDR", symbol = "Rp" },
+                new StoreCurrency { country = "PH", currency = "PHP", symbol = "₱" },
+                new StoreCurrency { country = "SA", currency = "USD", symbol = "$" },
+                new StoreCurrency { country = "TR", currency = "TRY", symbol = "" },
+                new StoreCurrency { country = "VN", currency = "VND", symbol = "₫" }
+            };
         }
         #endregion
     }

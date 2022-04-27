@@ -576,6 +576,8 @@ namespace CommonPluginsShared
             string response = string.Empty;
             using (var client = new HttpClient(handler))
             {
+                client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
+
                 if (HttpHeaders != null)
                 {
                     HttpHeaders.ForEach(x => 
