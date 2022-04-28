@@ -48,7 +48,7 @@
     <sys:String x:Key="LOCCommonOnlyMissing">Завантажувати лише відсутні</sys:String>
     
     <sys:String x:Key="LOCCommonTotal">Усього</sys:String>
-    <sys:String x:Key="LOCCommonCut">Вирізати</sys:String>
+    <sys:String x:Key="LOCCommonCut">Обрізати</sys:String>
 
 
     <sys:String x:Key="LOCCommon0to1">Від 00 до 01 годин</sys:String>
