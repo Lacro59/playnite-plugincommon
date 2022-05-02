@@ -650,6 +650,11 @@ namespace CommonPluginsStores.Origin
             return string.Empty;
         }
 
+        /// <summary>
+        /// Check that dlc is owned.
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns></returns>
         private bool DlcIsOwned(string Id)
         {
             if (UserDataOwned?.Count > 0)
@@ -691,6 +696,10 @@ namespace CommonPluginsStores.Origin
             return null;
         }
 
+        /// <summary>
+        /// Get list of actual currencies used.
+        /// </summary>
+        /// <returns></returns>
         public List<StoreCurrency> GetCurrencies()
         {
             return new List<StoreCurrency>

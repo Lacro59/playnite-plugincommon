@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Playnite.SDK.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,6 +31,8 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary.Models
             {
                 public string url;
                 public string title;
+                [SerializationPropertyName("namespace")]
+                public string epicNamespace;
                 public string id;
                 public string productSlug;
             }

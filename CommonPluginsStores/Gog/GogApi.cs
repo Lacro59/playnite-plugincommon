@@ -57,10 +57,7 @@ namespace CommonPluginsStores.Gog
                 return _GogAPI;
             }
 
-            set
-            {
-                _GogAPI = value;
-            }
+            set => _GogAPI = value;
         }
 
         private UserDataOwned _UserDataOwned = null;
@@ -411,31 +408,42 @@ namespace CommonPluginsStores.Gog
                 try
                 {
                     string dataDlc = Web.DownloadStringData(string.Format(UrlApiGameInfo, el.id, CodeLang.GetGogLang(Local).ToLower())).GetAwaiter().GetResult();
-                    Models.ProductApiDetail productApiDetailDlc = Serialization.FromJson<Models.ProductApiDetail>(dataDlc);
-
-                    bool IsOwned = false;
-                    if (accountInfos != null && accountInfos.IsCurrent)
+                    if (!dataDlc.Contains("<!DOCTYPE html>", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        IsOwned = DlcIsOwned(el.id);
+                        Models.ProductApiDetail productApiDetailDlc = Serialization.FromJson<Models.ProductApiDetail>(dataDlc);
+
+                        bool IsOwned = false;
+                        if (accountInfos != null && accountInfos.IsCurrent)
+                        {
+                            IsOwned = DlcIsOwned(el.id);
+                        }
+
+                        DlcInfos dlc = new DlcInfos
+                        {
+                            Id = el.id.ToString(),
+                            Name = productApiDetailDlc?.title,
+                            Description = productApiDetailDlc?.description?.full,
+                            Image = "https:" + productApiDetailDlc?.images?.logo2x,
+                            Link = string.Format(UrlGogGame, productApiDetailDlc?.slug),
+                            IsOwned = IsOwned
+                        };
+
+                        Dlcs.Add(dlc);
                     }
-
-                    DlcInfos dlc = new DlcInfos
+                    else
                     {
-                        Id = el.id.ToString(),
-                        Name = productApiDetailDlc?.title,
-                        Description = productApiDetailDlc?.description?.full,
-                        Image = "https:" + productApiDetailDlc?.images?.logo2x,
-                        Link = string.Format(UrlGogGame, productApiDetailDlc?.slug),
-                        IsOwned = IsOwned
-                    };
-
-                    Dlcs.Add(dlc);
+                        logger.Warn($"No dlc data for {el.id}");
+                    }
                 }
                 catch (Exception ex)
                 {
                     if (!ex.Message.Contains("404"))
                     {
                         Common.LogError(ex, false);
+                    }
+                    else
+                    {
+                        logger.Warn($"No dlc data for {el.id}");
                     }
                 }
             }
