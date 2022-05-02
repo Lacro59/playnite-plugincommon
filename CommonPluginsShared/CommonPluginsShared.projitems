@@ -49,6 +49,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\DateTimeExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\ListExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)HttpFileCachePlugin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ImageSourceManagerPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\DataGame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Folder.cs" />

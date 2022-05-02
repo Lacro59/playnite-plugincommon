@@ -21,7 +21,7 @@ namespace CommonPluginsStores.Models
 
         public string Image { get; set; }
         [DontSerialize]
-        public string ImagePath => ImageSourceManager.GetImagePath(Image);
+        public string ImagePath => ImageSourceManagerPlugin.GetImagePath(Image);
     }
 
     public class GameInfos : BasicGameInfos

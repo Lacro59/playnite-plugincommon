@@ -75,6 +75,7 @@ namespace CommonPluginsShared.Collections
                 PluginDatabasePath = Path.Combine(PluginUserDataPath, PluginName),
                 PluginCachePath = Path.Combine(PlaynitePaths.DataCachePath, PluginName),
             };
+            HttpFileCachePlugin.CacheDirectory = Paths.PluginCachePath;
 
             FileSystem.CreateDirectory(Paths.PluginDatabasePath);
             FileSystem.CreateDirectory(Paths.PluginCachePath);

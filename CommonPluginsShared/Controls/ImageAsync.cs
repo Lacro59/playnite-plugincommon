@@ -94,7 +94,7 @@ namespace CommonPluginsShared.Controls
                         }
                         else
                         {
-                            tmpImage = ImageSourceManager.GetImage(str, false);
+                            tmpImage = ImageSourceManagerPlugin.GetImage(str, false);
                         }
 
                         return tmpImage;

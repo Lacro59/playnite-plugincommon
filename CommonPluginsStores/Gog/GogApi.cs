@@ -88,7 +88,7 @@ namespace CommonPluginsStores.Gog
         private string UserId;
         private string UserName;
 
-        private static StoreCurrency LocalCurrency { get; set; } = new StoreCurrency { currency = "USD", symbol = "$" };
+        private static StoreCurrency LocalCurrency { get; set; } = new StoreCurrency { country = "US", currency = "USD", symbol = "$" };
 
 
         public GogApi() : base("GOG")
@@ -449,7 +449,7 @@ namespace CommonPluginsStores.Gog
                     string dataObjString = Serialization.ToJson(priceData?.dataObj["_embedded"]);
                     PriceResult priceResult = Serialization.FromJson<PriceResult>(dataObjString);
 
-                    foreach (var el in priceResult?.items)
+                    foreach (PriceItem el in priceResult?.items)
                     {
                         int idx = Dlcs.ToList().FindIndex(x => x.Id.IsEqual(el._embedded.product.id.ToString()));
                         if (idx > -1)
@@ -481,7 +481,7 @@ namespace CommonPluginsStores.Gog
         {
             string priceCountry = CodeLang.GetOriginLangCountry(Local);
             string joined = string.Join(",", ids);
-            string UrlPrice = string.Format(UrlApiPrice, joined, (priceCountry.IsEqual("en") ? "us" : priceCountry), LocalCurrency.currency.ToUpper());
+            string UrlPrice = string.Format(UrlApiPrice, joined, LocalCurrency.country.ToUpper(), LocalCurrency.currency.ToUpper());
             string DataPrice = Web.DownloadStringData(UrlPrice).GetAwaiter().GetResult();
 
             Serialization.TryFromJson<dynamic>(DataPrice, out dynamic dataObj);
@@ -491,7 +491,7 @@ namespace CommonPluginsStores.Gog
 
             if (dataObj["message"] != null && ((string)dataObj["message"]).Contains("is not supported in", StringComparison.InvariantCultureIgnoreCase))
             {
-                return GetPrice(ids, Local, new StoreCurrency { currency = "USD", symbol = "$" });
+                return GetPrice(ids, Local, new StoreCurrency { country = "US", currency = "USD", symbol = "$" });
             }
 
             if (dataObj["message"] != null)
@@ -519,7 +519,7 @@ namespace CommonPluginsStores.Gog
 
                     if (userData?.currencies != null)
                     {
-                        return userData.currencies.Select(x => new StoreCurrency { currency = x.code.ToUpper(), symbol = x.symbol }).ToList();
+                        return userData.currencies.Select(x => new StoreCurrency { country = userData.country, currency = x.code.ToUpper(), symbol = x.symbol }).ToList();
                     }                    
                 }
             }
@@ -530,7 +530,7 @@ namespace CommonPluginsStores.Gog
 
             return new List<StoreCurrency>
             {
-                new StoreCurrency { currency = "USD", symbol = "$" }
+                new StoreCurrency { country = "US", currency = "USD", symbol = "$" }
             };
         }
 
