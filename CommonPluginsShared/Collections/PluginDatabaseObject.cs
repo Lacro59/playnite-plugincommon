@@ -44,10 +44,7 @@ namespace CommonPluginsShared.Collections
         private bool _isLoaded = false;
         public bool IsLoaded
         {
-            get
-            {
-                return _isLoaded;
-            }
+            get => _isLoaded;
 
             set
             {
@@ -334,7 +331,7 @@ namespace CommonPluginsShared.Collections
 
         public virtual TItem GetDefault(Game game)
         {
-            var newItem = typeof(TItem).CrateInstance<TItem>();
+            TItem newItem = typeof(TItem).CrateInstance<TItem>();
 
             newItem.Id = game.Id;
             newItem.Name = game.Name;
@@ -359,7 +356,7 @@ namespace CommonPluginsShared.Collections
                 Application.Current.Dispatcher?.Invoke(() => Database.Add(itemToAdd), DispatcherPriority.Send);
 
                 // If tag system
-                var Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
+                object Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
                 PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
 
                 if (propertyInfo != null)
@@ -400,7 +397,7 @@ namespace CommonPluginsShared.Collections
                 Application.Current.Dispatcher?.Invoke(() => Database.Update(itemToUpdate), DispatcherPriority.Send);
 
                 // If tag system
-                var Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
+                object Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
                 PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
 
                 if (propertyInfo != null)
@@ -499,11 +496,11 @@ namespace CommonPluginsShared.Collections
 
         public virtual void RefreshNoLoader(Guid Id)
         {
-            var game = PlayniteApi.Database.Games.Get(Id);
+            Game game = PlayniteApi.Database.Games.Get(Id);
             logger.Info($"RefreshNoLoader({game?.Name} - {game?.Id})");
 
-            var loadedItem = Get(Id, true);
-            var webItem = GetWeb(Id);
+            TItem loadedItem = Get(Id, true);
+            TItem webItem = GetWeb(Id);
 
             if (webItem != null && !ReferenceEquals(loadedItem, webItem))
             {
