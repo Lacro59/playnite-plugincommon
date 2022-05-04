@@ -62,10 +62,7 @@ namespace CommonPluginsStores.Steam
                 return _AppsList;
             }
 
-            set
-            {
-                _AppsList = value;
-            }
+            set => _AppsList = value;
         }
 
 
@@ -133,7 +130,8 @@ namespace CommonPluginsStores.Steam
         #region Cookies
         internal override List<HttpCookie> GetWebCookies()
         {
-            throw new NotImplementedException();
+            List<HttpCookie> httpCookies = WebViewOffscreen.GetCookies()?.Where(x => x?.Domain?.Contains("steam") ?? false)?.ToList() ?? new List<HttpCookie>();
+            return httpCookies;
         }
         #endregion
 
