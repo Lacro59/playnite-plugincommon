@@ -31,11 +31,6 @@ namespace CommonPluginsStores.Epic
         #endregion
 
 
-        #region Url API
-
-        #endregion
-
-
         protected EpicAccountClient _EpicAPI;
         internal EpicAccountClient EpicAPI
         {

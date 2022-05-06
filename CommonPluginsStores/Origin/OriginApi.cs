@@ -102,7 +102,7 @@ namespace CommonPluginsStores.Origin
 
         public OriginApi(string PluginName) : base(PluginName, ExternalPlugin.OriginLibrary, "Origin")
         {
-            AppsListPath = Path.Combine(PathStoresData, "OriginAppsList.json");
+            AppsListPath = Path.Combine(PathStoresData, "Origin_AppsList.json");
         }
 
 

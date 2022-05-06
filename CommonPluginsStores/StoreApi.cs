@@ -168,29 +168,40 @@ namespace CommonPluginsStores
         /// <returns></returns>
         internal List<HttpCookie> GetStoredCookies()
         {
+            string InfoMessage = "No stored cookies";
+
             if (File.Exists(FileCookies))
             {
                 try
                 {
-                    return Serialization.FromJson<List<HttpCookie>>(
+                    List<HttpCookie> StoredCookies = Serialization.FromJson<List<HttpCookie>>(
                         Encryption.DecryptFromFile(
                             FileCookies,
                             Encoding.UTF8,
                             WindowsIdentity.GetCurrent().User.Value));
+
+                    var findExpired = StoredCookies.FindAll(x => x.Expires != null && (DateTime)x.Expires <= DateTime.Now);
+                    if (findExpired?.Count > 0)
+                    {
+                        InfoMessage = "Expired cookies";
+                    }
+                    else
+                    {
+                        return StoredCookies;
+                    }
                 }
                 catch (Exception ex)
                 {
                     Common.LogError(ex, false, "Failed to load saved cookies");
                 }
             }
-            else
+
+            logger.Info(InfoMessage);
+            List<HttpCookie> httpCookies = GetWebCookies();
+            if (httpCookies?.Count > 0)
             {
-                logger.Info("No stored cookies");
-                List<HttpCookie> httpCookies = GetWebCookies();
-                if (httpCookies?.Count > 0)
-                {
-                    SetStoredCookies(httpCookies);
-                }
+                SetStoredCookies(httpCookies);
+                return httpCookies;
             }
 
             return null;

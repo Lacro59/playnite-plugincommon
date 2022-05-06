@@ -123,7 +123,7 @@ namespace CommonPluginsStores.Steam
 
         public SteamApi(string PluginName) : base(PluginName, ExternalPlugin.SteamLibrary, "Steam")
         {
-            AppsListPath = Path.Combine(PathStoresData, "SteamAppsList.json");
+            AppsListPath = Path.Combine(PathStoresData, "Steam_AppsList.json");
         }
 
 

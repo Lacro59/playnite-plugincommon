@@ -62,8 +62,8 @@ namespace CommonPluginsStores.Gog
         }
 
 
-        private string UserId;
-        private string UserName;
+        private string UserId { get; set; }
+        private string UserName { get; set; }
 
         private static StoreCurrency LocalCurrency { get; set; } = new StoreCurrency { country = "US", currency = "USD", symbol = "$" };
 
@@ -507,7 +507,6 @@ namespace CommonPluginsStores.Gog
         #region GOG
         private PriceData GetPrice(List<string> ids, string Local, StoreCurrency LocalCurrency)
         {
-            string priceCountry = CodeLang.GetOriginLangCountry(Local);
             string joined = string.Join(",", ids);
             string UrlPrice = string.Format(UrlApiPrice, joined, LocalCurrency.country.ToUpper(), LocalCurrency.currency.ToUpper());
             string DataPrice = Web.DownloadStringData(UrlPrice).GetAwaiter().GetResult();
@@ -517,6 +516,7 @@ namespace CommonPluginsStores.Gog
             string CodeCurrency = LocalCurrency.currency;
             string SymbolCurrency = LocalCurrency.symbol;
 
+            // When no data or error, try with USD
             if (dataObj["message"] != null && ((string)dataObj["message"]).Contains("is not supported in", StringComparison.InvariantCultureIgnoreCase))
             {
                 return GetPrice(ids, Local, new StoreCurrency { country = "US", currency = "USD", symbol = "$" });
@@ -556,6 +556,7 @@ namespace CommonPluginsStores.Gog
                 Common.LogError(ex, false, true, ClientName);
             }
 
+            logger.Warn("Used USD only");
             return new List<StoreCurrency>
             {
                 new StoreCurrency { country = "US", currency = "USD", symbol = "$" }
