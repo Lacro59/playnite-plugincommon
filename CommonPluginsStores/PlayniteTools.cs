@@ -49,7 +49,7 @@ namespace CommonPluginsStores
             // Steam
             if (result.Contains("{Steam"))
             {
-                SteamApi steamApi = new SteamApi(); ;
+                SteamApi steamApi = new SteamApi("PlayniteTools");
 
                 if (SteamId =="null")
                 {

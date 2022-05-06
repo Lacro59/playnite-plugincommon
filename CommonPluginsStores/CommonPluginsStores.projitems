@@ -29,6 +29,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\AccountGameInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\GameAchievement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\GameInfos.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\GameDlcOwned.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\StoreCurrency.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\AccountInfoResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\AvatarResponse.cs" />

@@ -1,15 +1,20 @@
 ﻿using CommonPlayniteShared;
 using CommonPlayniteShared.Common;
 using CommonPluginsShared;
+using CommonPluginsShared.Converters;
+using CommonPluginsShared.Extensions;
 using CommonPluginsStores.Models;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Security.Principal;
 using System.Text;
+using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores
 {
@@ -31,10 +36,7 @@ namespace CommonPluginsStores
                 return _WebViewOffscreen;
             }
 
-            set
-            {
-                _WebViewOffscreen = value;
-            }
+            set => _WebViewOffscreen = value;
         }
 
 
@@ -83,6 +85,35 @@ namespace CommonPluginsStores
 
             set => SetValue(ref _CurrentGamesInfos, value);
         }
+
+
+        protected ObservableCollection<GameDlcOwned> _CurrentGamesDlcsOwned;
+        public ObservableCollection<GameDlcOwned> CurrentGamesDlcsOwned
+        {
+            get
+            {
+                if (_CurrentGamesDlcsOwned == null)
+                {
+                    _CurrentGamesDlcsOwned = LoadGamesDlcsOwned();
+                    if (_CurrentGamesDlcsOwned == null)
+                    {
+                        _CurrentGamesDlcsOwned = GetGamesDlcsOwned();
+                        if (_CurrentGamesDlcsOwned?.Count > 0)
+                        {
+                            SaveGamesDlcsOwned(_CurrentGamesDlcsOwned);
+                        }
+                        else
+                        {
+                            _CurrentGamesDlcsOwned = LoadGamesDlcsOwned(false);
+                        }
+                    }
+                }
+
+                return _CurrentGamesDlcsOwned;
+            }
+
+            set => SetValue(ref _CurrentGamesDlcsOwned, value);
+        }
         #endregion
 
 
@@ -102,20 +133,26 @@ namespace CommonPluginsStores
         }
 
 
+        internal string PluginName { get; }
         internal string ClientName { get; }
         internal string Local = "en_US";
 
-        internal readonly string PathStoresData;
-        internal readonly string PathCookies;
+        internal string PathStoresData { get; }
+        internal string FileCookies { get; }
+        internal string FileGamesDlcsOwned { get; }
 
         internal StoreToken AuthToken;
+        internal ExternalPlugin PluginLibrary { get; }
 
 
-        public StoreApi(string ClientName)
+        public StoreApi(string PluginName, ExternalPlugin PluginLibrary, string ClientName)
         {
+            this.PluginName = PluginName;
+            this.PluginLibrary = PluginLibrary;
             this.ClientName = ClientName;
             PathStoresData = Path.Combine(PlaynitePaths.ExtensionsDataPath, "StoresData");
-            PathCookies = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientName}.json"));
+            FileCookies = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientName}.json"));
+            FileGamesDlcsOwned = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientName}_GamesDlcsOwned.json"));
 
             if (!Directory.Exists(PathStoresData))
             {
@@ -131,13 +168,13 @@ namespace CommonPluginsStores
         /// <returns></returns>
         internal List<HttpCookie> GetStoredCookies()
         {
-            if (File.Exists(PathCookies))
+            if (File.Exists(FileCookies))
             {
                 try
                 {
                     return Serialization.FromJson<List<HttpCookie>>(
                         Encryption.DecryptFromFile(
-                            PathCookies,
+                            FileCookies,
                             Encoding.UTF8,
                             WindowsIdentity.GetCurrent().User.Value));
                 }
@@ -167,9 +204,9 @@ namespace CommonPluginsStores
         {
             try 
             { 
-                FileSystem.CreateDirectory(Path.GetDirectoryName(PathCookies));
+                FileSystem.CreateDirectory(Path.GetDirectoryName(FileCookies));
                 Encryption.EncryptToFile(
-                    PathCookies,
+                    FileCookies,
                     Serialization.ToJson(httpCookies),
                     Encoding.UTF8,
                     WindowsIdentity.GetCurrent().User.Value);
@@ -187,7 +224,11 @@ namespace CommonPluginsStores
         /// Get cookies in WebView or another method.
         /// </summary>
         /// <returns></returns>
-        internal abstract List<HttpCookie> GetWebCookies();
+        internal virtual List<HttpCookie> GetWebCookies()
+        {
+            List<HttpCookie> httpCookies = WebViewOffscreen.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName.ToLower()) ?? false)?.ToList() ?? new List<HttpCookie>();
+            return httpCookies;
+        }
         #endregion
 
 
@@ -221,7 +262,19 @@ namespace CommonPluginsStores
         /// Get current user's friends info.
         /// </summary>
         /// <returns></returns>
-        protected abstract ObservableCollection<AccountInfos> GetCurrentFriendsInfos();
+        protected virtual ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Get all game's owned for current user.
+        /// </summary>
+        /// <returns></returns>
+        protected virtual ObservableCollection<GameDlcOwned> GetGamesOwned()
+        {
+            return null;
+        }
         #endregion
 
 
@@ -261,6 +314,86 @@ namespace CommonPluginsStores
         /// <param name="Id"></param>
         /// <returns></returns>
         public virtual ObservableCollection<DlcInfos> GetDlcInfos(string Id, AccountInfos accountInfos) { return null; }
+        #endregion
+
+
+        #region Games owned
+        private ObservableCollection<GameDlcOwned> LoadGamesDlcsOwned(bool OnlyNow = true)
+        {
+            if (File.Exists(FileGamesDlcsOwned))
+            {
+                try
+                {
+                    DateTime DateLastWrite = File.GetLastWriteTime(FileGamesDlcsOwned);
+                    if (OnlyNow && !DateLastWrite.ToString("yyyy-MM-dd").IsEqual(DateTime.Now.ToString("yyyy-MM-dd")))
+                    {
+                        return null;
+                    }
+
+                    if (!OnlyNow)
+                    {
+                        LocalDateTimeConverter localDateTimeConverter = new LocalDateTimeConverter();
+                        string formatedDateLastWrite = localDateTimeConverter.Convert(DateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
+                        logger.Warn($"Use saved UserData - {formatedDateLastWrite}");
+                        API.Instance.Notifications.Add(new NotificationMessage(
+                            $"{PluginName}-{ClientName}-LoadGamesDlcsOwned",
+                            $"{PluginName}" + Environment.NewLine
+                                + string.Format(resources.GetString("LOCCommonNotificationOldData"), ClientName, formatedDateLastWrite),
+                            NotificationType.Info,
+                            () =>
+                            {
+                                ResetIsUserLoggedIn();
+                                CommonPluginsShared.PlayniteTools.ShowPluginSettings(PluginLibrary);
+                            }
+                        ));
+                    }
+
+                    return Serialization.FromJsonFile<ObservableCollection<GameDlcOwned>>(FileGamesDlcsOwned);
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, true, PluginName);
+                }
+            }
+
+            return null;
+        }
+
+        private bool SaveGamesDlcsOwned(ObservableCollection<GameDlcOwned> CurrentGamesDlcsOwned)
+        {
+            try
+            {
+                FileSystem.PrepareSaveFile(FileGamesDlcsOwned);
+                File.WriteAllText(FileGamesDlcsOwned, Serialization.ToJson(CurrentGamesDlcsOwned));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return false;
+            }
+        }
+
+
+        internal virtual ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
+        {
+            return null;
+        }
+
+
+        internal virtual bool DlcIsOwned(string Id)
+        {
+            try
+            {
+                bool IsOwned = CurrentGamesDlcsOwned.Where(x => x.Id.IsEqual(Id)).Count() != 0;
+                return IsOwned;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return false;
+            }
+        }
         #endregion
     }
 }

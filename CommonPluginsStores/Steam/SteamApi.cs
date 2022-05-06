@@ -121,19 +121,10 @@ namespace CommonPluginsStores.Steam
         #endregion
 
 
-        public SteamApi() : base("Steam")
+        public SteamApi(string PluginName) : base(PluginName, ExternalPlugin.SteamLibrary, "Steam")
         {
             AppsListPath = Path.Combine(PathStoresData, "SteamAppsList.json");
         }
-
-
-        #region Cookies
-        internal override List<HttpCookie> GetWebCookies()
-        {
-            List<HttpCookie> httpCookies = WebViewOffscreen.GetCookies()?.Where(x => x?.Domain?.Contains("steam") ?? false)?.ToList() ?? new List<HttpCookie>();
-            return httpCookies;
-        }
-        #endregion
 
 
         #region Configuration
@@ -197,7 +188,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -242,7 +233,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -303,7 +294,7 @@ namespace CommonPluginsStores.Steam
             catch (Exception ex)
             {
                 // Error 403 when no data
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -342,7 +333,7 @@ namespace CommonPluginsStores.Steam
             catch (Exception ex)
             {
                 // Error 403 when no data
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -370,7 +361,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -508,7 +499,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -533,7 +524,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             logger.Warn("No find Steam installation");
@@ -584,7 +575,7 @@ namespace CommonPluginsStores.Steam
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false);
+                    Common.LogError(ex, false, true, PluginName);
                 }
             }
 
@@ -621,7 +612,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;

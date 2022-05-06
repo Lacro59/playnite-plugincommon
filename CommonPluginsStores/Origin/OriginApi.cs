@@ -4,7 +4,6 @@ using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Origin.Models;
-using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
@@ -12,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.Origin
 {
@@ -62,27 +62,6 @@ namespace CommonPluginsStores.Origin
             set => _OriginAPI = value;
         }
 
-        private List<AccountEntitlementsResponse.Entitlement> _UserDataOwned = null;
-        private List<AccountEntitlementsResponse.Entitlement> UserDataOwned
-        {
-            get
-            {
-                if (_UserDataOwned == null)
-                {
-                    try
-                    {
-                        long UserId = accountInfoResponse.pid.pidId;
-                        _UserDataOwned = OriginAPI.GetOwnedGames(UserId, OriginAPI.GetAccessToken());
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, false);
-                    }
-                }
-                return _UserDataOwned;
-            }
-        }
-
 
         private Models.AccountInfoResponse accountInfoResponse;
 
@@ -121,18 +100,10 @@ namespace CommonPluginsStores.Origin
         #endregion
 
 
-        public OriginApi() : base("Origin")
+        public OriginApi(string PluginName) : base(PluginName, ExternalPlugin.OriginLibrary, "Origin")
         {
             AppsListPath = Path.Combine(PathStoresData, "OriginAppsList.json");
         }
-
-
-        #region Cookies
-        internal override List<HttpCookie> GetWebCookies()
-        {
-            throw new NotImplementedException();
-        }
-        #endregion
 
 
         #region Configuration
@@ -178,6 +149,11 @@ namespace CommonPluginsStores.Origin
         #region Current user
         protected override AccountInfos GetCurrentAccountInfos()
         {
+            if (!IsUserLoggedIn)
+            {
+                return null;
+            }
+
             try
             {
                 if (accountInfoResponse != null)
@@ -204,7 +180,7 @@ namespace CommonPluginsStores.Origin
             }
             catch (Exception ex) 
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -212,6 +188,11 @@ namespace CommonPluginsStores.Origin
 
         protected override ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
         {
+            if (!IsUserLoggedIn)
+            {
+                return null;
+            }
+
             try
             {
                 List<HttpHeader> httpHeaders = new List<HttpHeader> 
@@ -250,7 +231,7 @@ namespace CommonPluginsStores.Origin
             }
             catch (Exception ex) 
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -261,6 +242,11 @@ namespace CommonPluginsStores.Origin
         #region User details
         public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
         {
+            if (!IsUserLoggedIn)
+            {
+                return null;
+            }
+
             try
             {
                 List<HttpHeader> httpHeaders = new List<HttpHeader>
@@ -311,7 +297,7 @@ namespace CommonPluginsStores.Origin
             catch (Exception ex)
             {
                 // Error 403 when no data
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -319,6 +305,11 @@ namespace CommonPluginsStores.Origin
 
         public override ObservableCollection<GameAchievement> GetAchievements(string Id, AccountInfos accountInfos)
         {
+            if (!IsUserLoggedIn)
+            {
+                return null;
+            }
+
             try
             {
                 List<HttpHeader> httpHeaders = new List<HttpHeader>
@@ -350,7 +341,7 @@ namespace CommonPluginsStores.Origin
             catch (Exception ex)
             {
                 // Error 403 when no data
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -361,6 +352,11 @@ namespace CommonPluginsStores.Origin
         #region Game
         public override GameInfos GetGameInfos(string Id, AccountInfos accountInfos)
         {
+            if (!IsUserLoggedIn)
+            {
+                return null;
+            }
+
             try
             {
                 string Url = string.Format(UrlApi2GameInfo, Id, CodeLang.GetOriginLang(Local), CodeLang.GetOriginLangCountry(Local));
@@ -387,7 +383,7 @@ namespace CommonPluginsStores.Origin
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -446,7 +442,7 @@ namespace CommonPluginsStores.Origin
                 {
                     if (!ex.Message.Contains("404"))
                     {
-                        Common.LogError(ex, false);
+                        Common.LogError(ex, false, true, PluginName);
                     }
                 }
             }
@@ -475,11 +471,40 @@ namespace CommonPluginsStores.Origin
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false);
+                    Common.LogError(ex, false, true, PluginName);
                 }
             }
 
             return Dlcs;
+        }
+        #endregion
+
+
+        #region Games owned
+        internal override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
+        {
+            if (!IsUserLoggedIn)
+            {
+                return null;
+            }
+
+            try
+            {
+                ObservableCollection<GameDlcOwned> GamesDlcsOwned = new ObservableCollection<GameDlcOwned>();
+                long UserId = accountInfoResponse.pid.pidId;
+                List<AccountEntitlementsResponse.Entitlement> UserDataOwned = OriginAPI.GetOwnedGames(UserId, OriginAPI.GetAccessToken());
+
+                UserDataOwned?.ForEach(x =>
+                {
+                    GamesDlcsOwned.Add(new GameDlcOwned { Id = x.offerId });
+                });
+                return GamesDlcsOwned;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return null;
+            }
         }
         #endregion
 
@@ -492,6 +517,11 @@ namespace CommonPluginsStores.Origin
         /// <returns></returns>
         private string GetEncoded(long UserId)
         {
+            if (!IsUserLoggedIn)
+            {
+                return null;
+            }
+
             try
             {
                 List<HttpHeader> httpHeaders = new List<HttpHeader>
@@ -507,7 +537,7 @@ namespace CommonPluginsStores.Origin
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -521,6 +551,11 @@ namespace CommonPluginsStores.Origin
         /// <returns></returns>
         private string GetAvatar(long UserId)
         {
+            if (!IsUserLoggedIn)
+            {
+                return null;
+            }
+
             try
             {
                 List<HttpHeader> httpHeaders = new List<HttpHeader>
@@ -539,7 +574,7 @@ namespace CommonPluginsStores.Origin
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -552,6 +587,11 @@ namespace CommonPluginsStores.Origin
         /// <returns></returns>
         private UsersInfos GetUsersInfos(List<long> UserIds)
         {
+            if (!IsUserLoggedIn)
+            {
+                return null;
+            }
+
             try
             {
                 List<HttpHeader> httpHeaders = new List<HttpHeader>
@@ -567,7 +607,7 @@ namespace CommonPluginsStores.Origin
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -650,47 +690,44 @@ namespace CommonPluginsStores.Origin
             return string.Empty;
         }
 
-        /// <summary>
-        /// Check that dlc is owned.
-        /// </summary>
-        /// <param name="Id"></param>
-        /// <returns></returns>
-        private bool DlcIsOwned(string Id)
-        {
-            if (UserDataOwned?.Count > 0)
-            {
-                AccountEntitlementsResponse.Entitlement finded = UserDataOwned?.Find(x => x.offerId.IsEqual(Id));
-                return finded != null;
-            }
-            return false;
-        }
-
         private PriceData GetPrice(List<string> ids, string Local, StoreCurrency LocalCurrency)
         {
-            long UserId = accountInfoResponse.pid.pidId;
-            string joined = string.Join(",", ids);
-            string UrlPrice = string.Format(UrlApi1Price, LocalCurrency.country, Local, UserId, LocalCurrency.currency, joined);
-
-            List<HttpHeader> httpHeaders = new List<HttpHeader>
+            if (!IsUserLoggedIn)
             {
-                new HttpHeader { Key = "authtoken", Value = AuthToken.Token },
-                new HttpHeader { Key = "accept", Value = "application/json" },
-            };
-            string DataPrice = Web.DownloadStringData(UrlPrice, httpHeaders).GetAwaiter().GetResult();
+                return null;
+            }
 
-            Serialization.TryFromJson<PriceResult>(DataPrice, out PriceResult priceResult);
-
-            string CodeCurrency = LocalCurrency.currency;
-            string SymbolCurrency = LocalCurrency.symbol;
-
-            if (priceResult != null)
+            try
             {
-                return new PriceData
+                long UserId = accountInfoResponse.pid.pidId;
+                string joined = string.Join(",", ids);
+                string UrlPrice = string.Format(UrlApi1Price, LocalCurrency.country, Local, UserId, LocalCurrency.currency, joined);
+
+                List<HttpHeader> httpHeaders = new List<HttpHeader>
                 {
-                    Price = priceResult,
-                    CodeCurrency = CodeCurrency,
-                    SymbolCurrency = SymbolCurrency
+                    new HttpHeader { Key = "authtoken", Value = AuthToken.Token },
+                    new HttpHeader { Key = "accept", Value = "application/json" },
                 };
+                string DataPrice = Web.DownloadStringData(UrlPrice, httpHeaders).GetAwaiter().GetResult();
+
+                Serialization.TryFromJson<PriceResult>(DataPrice, out PriceResult priceResult);
+
+                string CodeCurrency = LocalCurrency.currency;
+                string SymbolCurrency = LocalCurrency.symbol;
+
+                if (priceResult != null)
+                {
+                    return new PriceData
+                    {
+                        Price = priceResult,
+                        CodeCurrency = CodeCurrency,
+                        SymbolCurrency = SymbolCurrency
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;

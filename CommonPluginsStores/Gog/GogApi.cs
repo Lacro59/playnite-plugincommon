@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.Gog
 {
@@ -60,27 +61,6 @@ namespace CommonPluginsStores.Gog
             set => _GogAPI = value;
         }
 
-        private UserDataOwned _UserDataOwned = null;
-        private UserDataOwned UserDataOwned
-        {
-            get
-            {
-                if (_UserDataOwned == null)
-                {
-                    try
-                    {
-                        string data = Web.DownloadStringData(UrlUserOwned, AuthToken.Token).GetAwaiter().GetResult();
-                        _UserDataOwned = Serialization.FromJson<UserDataOwned>(data);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, false);
-                    }
-                }
-                return _UserDataOwned;
-            }
-        }
-
 
         private string UserId;
         private string UserName;
@@ -88,19 +68,10 @@ namespace CommonPluginsStores.Gog
         private static StoreCurrency LocalCurrency { get; set; } = new StoreCurrency { country = "US", currency = "USD", symbol = "$" };
 
 
-        public GogApi() : base("GOG")
+        public GogApi(string PluginName) : base(PluginName, ExternalPlugin.GogLibrary, "GOG")
         {
 
         }
-
-
-        #region Cookies
-        internal override List<HttpCookie> GetWebCookies()
-        {
-            List<HttpCookie> httpCookies = WebViewOffscreen.GetCookies()?.Where(x => x?.Domain?.Contains("gog") ?? false)?.ToList() ?? new List<HttpCookie>();
-            return httpCookies;
-        }
-        #endregion
 
 
         #region Configuration
@@ -141,6 +112,11 @@ namespace CommonPluginsStores.Gog
         #region Current user
         protected override AccountInfos GetCurrentAccountInfos()
         {
+            if (!IsUserLoggedIn)
+            {
+                return null;
+            }
+
             try
             {
                 string WebData = Web.DownloadStringData(string.Format(UrlUserFriends, UserName), GetStoredCookies()).GetAwaiter().GetResult();
@@ -167,7 +143,7 @@ namespace CommonPluginsStores.Gog
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -175,6 +151,11 @@ namespace CommonPluginsStores.Gog
 
         protected override ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
         {
+            if (!IsUserLoggedIn)
+            {
+                return null;
+            }
+
             try
             {
                 string WebData = Web.DownloadStringData(string.Format(UrlUserFriends, UserName), GetStoredCookies()).GetAwaiter().GetResult();
@@ -205,7 +186,7 @@ namespace CommonPluginsStores.Gog
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -216,6 +197,11 @@ namespace CommonPluginsStores.Gog
         #region User details
         public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
         {
+            if (!IsUserLoggedIn)
+            {
+                return null;
+            }
+
             try
             {
                 ObservableCollection<AccountGameInfos> accountGamesInfos = new ObservableCollection<AccountGameInfos>();
@@ -271,7 +257,7 @@ namespace CommonPluginsStores.Gog
                     }
                     catch (Exception ex)
                     {
-                        Common.LogError(ex, false);
+                        Common.LogError(ex, false, true, PluginName);
                     }
                 }
 
@@ -279,7 +265,7 @@ namespace CommonPluginsStores.Gog
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -287,6 +273,11 @@ namespace CommonPluginsStores.Gog
 
         public override ObservableCollection<GameAchievement> GetAchievements(string Id, AccountInfos accountInfos)
         {
+            if (!IsUserLoggedIn)
+            {
+                return null;
+            }
+
             try
             {
                 string Url = string.Empty;
@@ -330,7 +321,7 @@ namespace CommonPluginsStores.Gog
                     }
                     catch (Exception ex)
                     {
-                        Common.LogError(ex, false);
+                        Common.LogError(ex, false, true, PluginName);
                     }
                 }
 
@@ -338,7 +329,7 @@ namespace CommonPluginsStores.Gog
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -377,7 +368,7 @@ namespace CommonPluginsStores.Gog
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
@@ -415,7 +406,7 @@ namespace CommonPluginsStores.Gog
                         bool IsOwned = false;
                         if (accountInfos != null && accountInfos.IsCurrent)
                         {
-                            IsOwned = DlcIsOwned(el.id);
+                            IsOwned = DlcIsOwned(el.id.ToString());
                         }
 
                         DlcInfos dlc = new DlcInfos
@@ -439,7 +430,7 @@ namespace CommonPluginsStores.Gog
                 {
                     if (!ex.Message.Contains("404"))
                     {
-                        Common.LogError(ex, false);
+                        Common.LogError(ex, false, true, PluginName);
                     }
                     else
                     {
@@ -475,11 +466,40 @@ namespace CommonPluginsStores.Gog
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false);
+                    Common.LogError(ex, false, true, PluginName);
                 }
             }
 
             return Dlcs;
+        }
+        #endregion
+
+
+        #region Games owned
+        internal override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
+        {
+            if (!IsUserLoggedIn)
+            {
+                return null;
+            }
+            
+            try
+            {
+                ObservableCollection<GameDlcOwned> GamesDlcsOwned = new ObservableCollection<GameDlcOwned>();
+                string data = Web.DownloadStringData(UrlUserOwned, AuthToken.Token).GetAwaiter().GetResult();
+                UserDataOwned UserDataOwned = Serialization.FromJson<UserDataOwned>(data);
+
+                UserDataOwned?.owned?.ForEach(x =>
+                {
+                    GamesDlcsOwned.Add(new GameDlcOwned { Id = x.ToString() });
+                });
+                return GamesDlcsOwned;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return null;
+            }
         }
         #endregion
 
@@ -540,16 +560,6 @@ namespace CommonPluginsStores.Gog
             {
                 new StoreCurrency { country = "US", currency = "USD", symbol = "$" }
             };
-        }
-
-        private bool DlcIsOwned(int Id)
-        {
-            if (UserDataOwned?.owned?.Count > 0)
-            {
-                int? finded = UserDataOwned?.owned?.Find(x => x == Id);
-                return (finded != null && finded != 0);
-            }
-            return false;
         }
         #endregion
     }
