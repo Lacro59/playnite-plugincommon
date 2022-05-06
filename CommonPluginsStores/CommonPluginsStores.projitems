@@ -9,10 +9,49 @@
     <Import_RootNamespace>CommonPluginsStores</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)OriginApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Epic\EpicApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicAddonsByNamespace.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicCatalogOffer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicDlcData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicEntitledOfferItems.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\QueryAddonsByNamespace.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\QueryEntitledOfferItems.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Gog\GogApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\UserDataOwned.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\PriceData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\PriceResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\ProductApiDetail.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\ProfileGames.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\ProfileUser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\ProfileUserFriends.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\UserData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\AccountGameInfos.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\GameAchievement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\GameInfos.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\GameDlcOwned.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\StoreCurrency.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\AccountInfoResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\AvatarResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\Encoded.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\FriendsResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\GameStoreDataResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\PriceData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\PriceResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\ProductInfosResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\StoreToken.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\AccountInfos.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Origin\OriginApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\UsersInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PsnApi.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SteamApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\FriendsApps.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\FriendsList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamUser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamAchievementData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamApps.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Steam\SteamApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StoreApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UbisoftAPI.cs" />
   </ItemGroup>
 </Project>

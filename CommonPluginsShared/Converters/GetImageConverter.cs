@@ -22,7 +22,7 @@ namespace CommonPluginsShared.Converters
             {
                 if (value is string)
                 {
-                    return ImageSourceManager.GetImagePath((string)value);
+                    return ImageSourceManagerPlugin.GetImagePath((string)value);
                 }
             }
             catch (Exception ex)

@@ -10,38 +10,38 @@ namespace CommonPluginsShared.Collections
     public class PluginDataBaseGameBase : DatabaseObject
     {
         [DontSerialize]
-        internal Game Game { get; set; }
+        internal Game Game { get; set; }        
 
 
         [DontSerialize]
-        public Guid SourceId { get { return Game == null ? default(Guid) : Game.SourceId; } }
+        public Guid SourceId => Game == null ? default(Guid) : Game.SourceId; 
 
         [DontSerialize]
-        public DateTime? LastActivity { get { return Game?.LastActivity; } }
+        public DateTime? LastActivity => Game?.LastActivity; 
 
         [DontSerialize]
-        public bool Hidden { get { return Game == null ? default(bool) : Game.Hidden; } }
+        public bool Hidden => Game == null ? default(bool) : Game.Hidden; 
 
         [DontSerialize]
-        public string Icon { get { return Game?.Icon ?? string.Empty; } }
+        public string Icon => Game?.Icon ?? string.Empty; 
 
         [DontSerialize]
-        public string CoverImage { get { return Game?.CoverImage ?? string.Empty; } }
+        public string CoverImage => Game?.CoverImage ?? string.Empty; 
 
         [DontSerialize]
-        public string BackgroundImage { get { return Game?.BackgroundImage ?? string.Empty; } }
+        public string BackgroundImage => Game?.BackgroundImage ?? string.Empty; 
 
         [DontSerialize]
-        public List<Genre> Genres { get { return Game?.Genres; } }
+        public List<Genre> Genres => Game?.Genres;
 
         [DontSerialize]
-        public List<Guid> GenreIds { get { return Game?.GenreIds; } }
+        public List<Guid> GenreIds => Game?.GenreIds;
 
         [DontSerialize]
-        public List<Platform> Platforms { get { return Game?.Platforms; } }
+        public List<Platform> Platforms => Game?.Platforms;
 
         [DontSerialize]
-        public ulong Playtime { get { return Game == null ? default(ulong) : Game.Playtime; } }
+        public ulong Playtime => Game == null ? default(ulong) : Game.Playtime; 
 
 
         [DontSerialize]
@@ -52,22 +52,10 @@ namespace CommonPluginsShared.Collections
 
 
         [DontSerialize]
-        public virtual bool HasData
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool HasData => false;
 
 
         [DontSerialize]
-        public virtual int Count
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public virtual int Count => 0;
     }
 }
