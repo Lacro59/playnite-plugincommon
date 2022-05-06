@@ -4,9 +4,7 @@
     <sys:String x:Key="LOCCommonYear">Año</sys:String>
     <sys:String x:Key="LOCCommonDateData">Fecha de los datos</sys:String>
     
-    
     <sys:String x:Key="LOCCommonLastUpdate">Última actualización</sys:String>
-
 
     <sys:String x:Key="LOCCommonAddFolder">Agregar carpeta</sys:String>
     <sys:String x:Key="LOCCommonRemoveFolder">Remover carpeta</sys:String>
@@ -49,7 +47,6 @@
     
     <sys:String x:Key="LOCCommonTotal">Total</sys:String>
     <sys:String x:Key="LOCCommonCut">Cortar</sys:String>
-
 
     <sys:String x:Key="LOCCommon0to1">00 a 01 horas</sys:String>
     <sys:String x:Key="LOCCommon1to5">01 a 05 horas</sys:String>
@@ -174,6 +171,8 @@ Por favor, inténtalo de nuevo.</sys:String>
     <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Error al añadir etiqueta {0}.
 Por favor, borre todas las etiquetas en el menú del plugin.</sys:String>
 
+    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Use old saved data for {0} [{1}]
+You must authenticate.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Dimensiones</sys:String>
@@ -187,31 +186,32 @@ Por favor, borre todas las etiquetas en el menú del plugin.</sys:String>
     <sys:String x:Key="LOCCommonSelectVariable">Seleccionar variable</sys:String>
 
 
-    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Se pueden usar variables especiales para agregar una cadena dinámica:
-{InstallDir} - Directorio de instalación del juego
-{InstallDirName} - Nombre del directorio de instalación
-{ImagePath} - Ruta del ISO/ROM del juego si se establece
-{ImageName} - Nombre del ISO/ROM del juego
-{ImageNameNoExt} - Nombre de ISO/ROM del juego sin extensión
-{PlayniteDir} - Directorio de instalacion de Playnite
-{Name} - Nombre del juego
+    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
+{InstallDir} - Game installation directory
+{InstallDirName} - Installation folder name
+{ImagePath} - Game ISO/ROM path if set
+{ImageName} - Game ISO/ROM file name
+{ImageNameNoExt} - Game ISO/ROM file name without extension
+{PlayniteDir} - Playnite installation directory
+{Name} - Game name
        
-Las variables de la nube se pueden usar para agregar una cadena dinámica: 
+Cloud variables can be used to add a dynamic string:        
 {DropboxFolder}
 {OneDriveFolder}
        
-Las variables de vapor se pueden usar para agregar una cadena dinámica:    
-{SteamId} - Id de usuario de Steam
-{SteamInstallDir} - Directorio de instalación de Steam
-{SteamScreenshotsDir} - Directorio de capturas de pantalla de Steam
+Steam variables can be used to add a dynamic string:        
+{SteamId} - Steam user Id
+{SteamAccountId} - Steam account Id
+{SteamInstallDir} - Steam installation directory
+{SteamScreenshotsDir} - Steam screenshots directory
        
-Se pueden usar variables de Ubisoft Connect para agregar una cadena dinámica:   
+Ubisoft Connect variables can be used to add a dynamic string:        
 {UbisoftInstallDir} - Ubisoft installation directory
 {UbisoftScreenshotsDir} - Ubisoft screenshots directory
         
 {RetroArchScreenshotsDir}
             
-Las variables de Windows se pueden usar para agregar una cadena dinámica:
+Windows variables can be used to add a dynamic string:        
 {WinDir}
 {AllUsersProfile}
 {AppData}

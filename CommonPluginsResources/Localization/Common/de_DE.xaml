@@ -4,9 +4,7 @@
     <sys:String x:Key="LOCCommonYear">Jahr</sys:String>
     <sys:String x:Key="LOCCommonDateData">Datum der Daten</sys:String>
     
-    
     <sys:String x:Key="LOCCommonLastUpdate">Letzte Aktualisierung</sys:String>
-
 
     <sys:String x:Key="LOCCommonAddFolder">Verzeichnis hinzufügen</sys:String>
     <sys:String x:Key="LOCCommonRemoveFolder">Verzeichnis löschen</sys:String>
@@ -49,7 +47,6 @@
     
     <sys:String x:Key="LOCCommonTotal">Gesamt</sys:String>
     <sys:String x:Key="LOCCommonCut">Schnitt</sys:String>
-
 
     <sys:String x:Key="LOCCommon0to1">00 bis 01 Stunden</sys:String>
     <sys:String x:Key="LOCCommon1to5">01 bis 05 Stunden</sys:String>
@@ -174,6 +171,8 @@ Bitte erneut versuchen.</sys:String>
     <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Fehler beim Hinzufügen des Tags mit {0}.
 Bitte alle Tags im Plugin Menü löschen.</sys:String>
 
+    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Gespeicherte Daten für {0} [{1}]
+Sie müssen sich authentifizieren.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Abmessungen</sys:String>
@@ -193,25 +192,25 @@ Bitte alle Tags im Plugin Menü löschen.</sys:String>
 {ImagePath} - Spiel ISO/ROM Pfad, falls gesetzt
 {ImageName} - Spiel ISO/ROM Datei Name
 {ImageNameNoExt} - Spiel ISO/ROM Datei Name ohne Erweiterung
-{PlayniteDir} - Playnite Installation Verzeichnis
+{PlayniteDir} - Playnite Installationsverzeichnis
 {Name} - Spiel Name
 
-Cloud Variablen können verwendet werden, um einen dynamischen String hinzuzufügen:
+Folgende Variablen der u. a. Cloudanwender können verwendet werden, um einen dynamischen String hinzuzufügen:
 {DropboxFolder}
 {OneDriveFolder}
        
-Steam Variablen können verwendet werden, um einen dynamischen String hinzuzufügen:
+Folgende Variablen von Steam können verwendet werden, um einen dynamischen String hinzuzufügen:
 {SteamId} - Steam User ID
 {SteamInstallDir} - Steam Installation Verzeichnis
 {SteamScreenshotsDir} - Steam Screenshots Verzeichnis
 
-Ubisoft Connect Variablen können verwendet werden, um einen dynamischen String hinzuzufügen:   
+Folgende Variablen von UbiSoft Connect können verwendet werden, um einen dynamischen String hinzuzufügen:   
 {UbisoftInstallDir} - Ubisoft Installation Verzeichnis
 {UbisoftScreenshotsDir} - Ubisoft Screenshots Verzeichnis
 
 {RetroArchScreenshotsDir}
 
-Windows Variablen können verwendet werden, um einen dynamischen String hinzuzufügen:    
+Folgende Variablen aus Windows können verwendet werden, um einen dynamischen String hinzuzufügen:    
 {WinDir}
 {AllUsersProfile}
 {AppData}

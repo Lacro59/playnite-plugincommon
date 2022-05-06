@@ -4,9 +4,7 @@
     <sys:String x:Key="LOCCommonYear">Рік</sys:String>
     <sys:String x:Key="LOCCommonDateData">Дата даних</sys:String>
     
-    
     <sys:String x:Key="LOCCommonLastUpdate">Останнє оновлення</sys:String>
-
 
     <sys:String x:Key="LOCCommonAddFolder">Додати теку</sys:String>
     <sys:String x:Key="LOCCommonRemoveFolder">Прибрати теку</sys:String>
@@ -49,7 +47,6 @@
     
     <sys:String x:Key="LOCCommonTotal">Усього</sys:String>
     <sys:String x:Key="LOCCommonCut">Обрізати</sys:String>
-
 
     <sys:String x:Key="LOCCommon0to1">Від 00 до 01 годин</sys:String>
     <sys:String x:Key="LOCCommon1to5">Від 01 до 05 годин</sys:String>
@@ -174,6 +171,8 @@
     <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Помилка при додаванні тегу з {0}.
 Будь ласка, приберіть усі теги в меню плагіну.</sys:String>
 
+    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Використовувати старі збережені дані для {0} [{1}]
+Ви повинні автентифікуватися.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Розміри</sys:String>
@@ -202,6 +201,7 @@
        
 Змінні Steam, що можна використовувати для додавання до динамічного рядка:
 {SteamId} - ідентифікатор користувача Steam
+{SteamAccountId} -  ідентифікатор облікового запису Steam
 {SteamInstallDir} - каталог встановлення Steam
 {SteamScreenshotsDir} - каталог знімків екрану Steam
         

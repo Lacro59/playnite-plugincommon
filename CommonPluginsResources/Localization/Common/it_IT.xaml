@@ -4,9 +4,7 @@
     <sys:String x:Key="LOCCommonYear">Anno</sys:String>
     <sys:String x:Key="LOCCommonDateData">Data dei dati</sys:String>
     
-    
     <sys:String x:Key="LOCCommonLastUpdate">Ultimo aggiornamento</sys:String>
-
 
     <sys:String x:Key="LOCCommonAddFolder">Aggiungi cartella</sys:String>
     <sys:String x:Key="LOCCommonRemoveFolder">Rimuovi cartella</sys:String>
@@ -49,7 +47,6 @@
     
     <sys:String x:Key="LOCCommonTotal">Totale</sys:String>
     <sys:String x:Key="LOCCommonCut">Taglia</sys:String>
-
 
     <sys:String x:Key="LOCCommon0to1">00 o 01 ore</sys:String>
     <sys:String x:Key="LOCCommon1to5">01 o 05 ore</sys:String>
@@ -174,6 +171,8 @@ Riprova.</sys:String>
     <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Errore nell'aggiunta dell' etichetta con {0}.
 Si prega di cancellare tutti le etichette nel menu del plugin.</sys:String>
 
+    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Utilizzare i vecchi dati salvati per {0} [{1}]
+È necessario autenticarsi.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Dimensioni</sys:String>

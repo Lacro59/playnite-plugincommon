@@ -4,9 +4,7 @@
     <sys:String x:Key="LOCCommonYear">Année</sys:String>
     <sys:String x:Key="LOCCommonDateData">Date des données</sys:String>
     
-    
     <sys:String x:Key="LOCCommonLastUpdate">Dernière mise à jour</sys:String>
-
 
     <sys:String x:Key="LOCCommonAddFolder">Ajouter un dossier</sys:String>
     <sys:String x:Key="LOCCommonRemoveFolder">Supprimer le dossier</sys:String>
@@ -49,7 +47,6 @@
     
     <sys:String x:Key="LOCCommonTotal">Total</sys:String>
     <sys:String x:Key="LOCCommonCut">Tronquer</sys:String>
-
 
     <sys:String x:Key="LOCCommon0to1">00 à 01 heures</sys:String>
     <sys:String x:Key="LOCCommon1to5">01 à 05 heures</sys:String>
@@ -174,6 +171,8 @@ Veuillez réessayer.</sys:String>
     <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Erreur lors de l'ajout de l'étiquette avec {0}.
 Veuillez effacer toutes les étiquettes dans le menu du plugin.</sys:String>
 
+    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Utilisation des données sauvegardées pour {0} [{1}]
+Vous devez vous authentifier.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Dimensions</sys:String>
@@ -201,9 +200,10 @@ Des variables de Cloud peuvent être utilisées pour ajouter une chaîne de cara
 {OneDriveFolder}
        
 Des variables Steam peuvent être utilisées pour ajouter une chaîne de caractères dynamique :        
-{SteamId} - ID d'utilisateur Steam
+{SteamId} - Id utilisateur Steam
+{SteamAccountId} - Id du compte Steam
 {SteamInstallDir} - Dossier d'installation de Steam
-{SteamScreenshotsDir} - Dossier de captures d'écran de Steam
+{SteamScreenshotsDir} - Dossier des captures d'écran de Steam
        
 Des variables Ubisoft Connect peuvent être utilisées pour ajouter une chaîne de caractères dynamique :        
 {UbisoftInstallDir} - Dossier d'installation d'Ubisoft Connect
