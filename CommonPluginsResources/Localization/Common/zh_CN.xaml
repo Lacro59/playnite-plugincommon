@@ -4,9 +4,7 @@
     <sys:String x:Key="LOCCommonYear">年</sys:String>
     <sys:String x:Key="LOCCommonDateData">数据日期</sys:String>
     
-    
     <sys:String x:Key="LOCCommonLastUpdate">最近更新</sys:String>
-
 
     <sys:String x:Key="LOCCommonAddFolder">添加文件夹</sys:String>
     <sys:String x:Key="LOCCommonRemoveFolder">移除文件夹</sys:String>
@@ -49,7 +47,6 @@
     
     <sys:String x:Key="LOCCommonTotal">总计</sys:String>
     <sys:String x:Key="LOCCommonCut">裁剪</sys:String>
-
 
     <sys:String x:Key="LOCCommon0to1">00 至 01 时</sys:String>
     <sys:String x:Key="LOCCommon1to5">01 至 05 时</sys:String>
@@ -174,6 +171,8 @@
     <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">以 {0} 添加标签时出错。
 请清除插件菜单中的所有标签。</sys:String>
 
+    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">为 {0} 使用旧的存档数据 [{1}]
+您必须进行身份验证。</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">尺寸</sys:String>
@@ -187,31 +186,32 @@
     <sys:String x:Key="LOCCommonSelectVariable">选择变量</sys:String>
 
 
-    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">可以用特殊的变量添加一个动态字符串：
+    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">可用于动态字符串的特殊变量：
 {InstallDir} - 游戏安装目录
 {InstallDirName} - 安装文件夹名称
-{ImagePath} - 游戏的 ISO/ROM（若已设置）
-{ImageName} - 游戏的 ISO/ROM 文件名
-{ImageNameNoExt} - 游戏的 ISO/ROM 文件名（无扩展名）
+{ImagePath} - 游戏 ISO/ROM 路径（若已设置）
+{ImageName} -  游戏 ISO/ROM 文件名
+{ImageNameNoExt} - 游戏 ISO/ROM 文件名（无扩展名）
 {PlayniteDir} - Playnite 安装目录
-{Name} - 游戏名
-       
-可以用云变量添加一个动态字符串： 
+{Name} - 游戏名称
+
+可用于动态字符串的云服务变量：
 {DropboxFolder}
 {OneDriveFolder}
-       
-可以用 Steam 变量添加一个动态字符串：
+
+可用于动态字符串的 Steam 变量：
 {SteamId} - Steam 用户 ID
+{SteamAccountId} - Steam 账户 ID
 {SteamInstallDir} - Steam 安装目录
 {SteamScreenshotsDir} - Steam 截图目录
-       
-可以用 Ubisoft Connect 变量添加一个动态字符串：  
+
+可用于动态字符串的 Ubisoft Connect 变量：
 {UbisoftInstallDir} - Ubisoft 安装目录
 {UbisoftScreenshotsDir} - Ubisoft 截图目录
-        
+
 {RetroArchScreenshotsDir}
-            
-可以用 Windows 变量添加一个动态字符串：     
+
+可用于动态字符串的 Windows 变量：
 {WinDir}
 {AllUsersProfile}
 {AppData}
@@ -227,6 +227,6 @@
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)</sys:String>
+{ProgramFiles(x86)}</sys:String>
 
 </ResourceDictionary>
