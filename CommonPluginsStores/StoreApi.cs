@@ -3,6 +3,7 @@ using CommonPlayniteShared.Common;
 using CommonPluginsShared;
 using CommonPluginsShared.Converters;
 using CommonPluginsShared.Extensions;
+using CommonPluginsShared.Models;
 using CommonPluginsStores.Models;
 using Playnite.SDK;
 using Playnite.SDK.Data;
@@ -304,6 +305,17 @@ namespace CommonPluginsStores
         /// <param name="accountInfos"></param>
         /// <returns></returns>
         public virtual ObservableCollection<GameAchievement> GetAchievements(string Id, AccountInfos accountInfos)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Get achievements SourceLink.
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <param name="accountInfos"></param>
+        /// <returns></returns>
+        public virtual SourceLink GetAchievementsSourceLink(string Id, AccountInfos accountInfos)
         {
             return null;
         }

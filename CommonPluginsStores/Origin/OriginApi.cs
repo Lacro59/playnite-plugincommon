@@ -47,8 +47,8 @@ namespace CommonPluginsStores.Origin
         #endregion
 
 
-        protected OriginAccountClient _OriginAPI;
-        internal OriginAccountClient OriginAPI
+        protected static OriginAccountClient _OriginAPI;
+        internal static OriginAccountClient OriginAPI
         {
             get
             {

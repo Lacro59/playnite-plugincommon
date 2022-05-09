@@ -2,9 +2,9 @@
 using CommonPlayniteShared.PluginLibrary.Services.GogLibrary;
 using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
+using CommonPluginsShared.Models;
 using CommonPluginsStores.Gog.Models;
 using CommonPluginsStores.Models;
-using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
@@ -15,6 +15,7 @@ using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.Gog
 {
+    // https://gogapidocs.readthedocs.io/en/latest/
     public class GogApi : StoreApi
     {
         #region Url
@@ -46,8 +47,8 @@ namespace CommonPluginsStores.Gog
         #endregion
 
 
-        protected GogAccountClient _GogAPI;
-        internal GogAccountClient GogAPI
+        protected static GogAccountClient _GogAPI;
+        internal static GogAccountClient GogAPI
         {
             get
             {
@@ -333,6 +334,16 @@ namespace CommonPluginsStores.Gog
             }
 
             return null;
+        }
+
+        public virtual SourceLink GetAchievementsSourceLink(string Name, string Id, AccountInfos accountInfos)
+        {
+            return new SourceLink
+            {
+                GameName = Name,
+                Name = ClientName,
+                Url = $"https://www.gog.com/u/{UserName}/game/{Id}?sort=user_unlock_date&sort_user_id={accountInfos.UserId}"
+            };
         }
         #endregion
 
