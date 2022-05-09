@@ -171,7 +171,7 @@ Bitte erneut versuchen.</sys:String>
     <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Fehler beim Hinzufügen des Tags mit {0}.
 Bitte alle Tags im Plugin Menü löschen.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Gespeicherte Daten für {0} [{1}]
+    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Alte gespeicherte Daten für {0} [{1}] verwenden
 Sie müssen sich authentifizieren.</sys:String>
 
 
@@ -186,31 +186,32 @@ Sie müssen sich authentifizieren.</sys:String>
     <sys:String x:Key="LOCCommonSelectVariable">Variable wählen</sys:String>
 
 
-    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Spezielle Variablen können verwendet werden, um einen dynamischen String hinzuzufügen:
+    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Spezielle Variablen können verwendet werden, um eine dynamische Zeichenfolge hinzuzufügen:
 {InstallDir} - Installationsverzeichnis des Spiels
 {InstallDirName} - Name des Installationsordners
-{ImagePath} - Spiel ISO/ROM Pfad, falls gesetzt
+{ImagePath} - Spiel ISO/ROM Pfad, falls festgelegt
 {ImageName} - Spiel ISO/ROM Datei Name
 {ImageNameNoExt} - Spiel ISO/ROM Datei Name ohne Erweiterung
 {PlayniteDir} - Playnite Installationsverzeichnis
 {Name} - Spiel Name
 
-Folgende Variablen der u. a. Cloudanwender können verwendet werden, um einen dynamischen String hinzuzufügen:
+Cloud Variablen können verwendet werden, um eine dynamische Zeichenfolge hinzuzufügen:
 {DropboxFolder}
 {OneDriveFolder}
        
-Folgende Variablen von Steam können verwendet werden, um einen dynamischen String hinzuzufügen:
+Steam Variablen können verwendet werden, um eine dynamische Zeichenfolge hinzuzufügen:
 {SteamId} - Steam User ID
+{SteamAccountId} - Steam Konto ID
 {SteamInstallDir} - Steam Installation Verzeichnis
 {SteamScreenshotsDir} - Steam Screenshots Verzeichnis
 
-Folgende Variablen von UbiSoft Connect können verwendet werden, um einen dynamischen String hinzuzufügen:   
+Ubisoft Connect Variablen können verwendet werden, um eine dynamische Zeichenfolge hinzuzufügen:
 {UbisoftInstallDir} - Ubisoft Installation Verzeichnis
 {UbisoftScreenshotsDir} - Ubisoft Screenshots Verzeichnis
 
 {RetroArchScreenshotsDir}
 
-Folgende Variablen aus Windows können verwendet werden, um einen dynamischen String hinzuzufügen:    
+Windows Variablen können verwendet werden, um eine dynamische Zeichenfolge hinzuzufügen:
 {WinDir}
 {AllUsersProfile}
 {AppData}
