@@ -186,32 +186,28 @@ You must authenticate.</sys:String>
     <sys:String x:Key="LOCCommonSelectVariable">Selecionar variável</sys:String>
 
 
-    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
-{InstallDir} - Game installation directory
-{InstallDirName} - Installation folder name
-{ImagePath} - Game ISO/ROM path if set
-{ImageName} - Game ISO/ROM file name
-{ImageNameNoExt} - Game ISO/ROM file name without extension
-{PlayniteDir} - Playnite installation directory
-{Name} - Game name
+    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Variáveis especiais podem ser usadas para adicionar uma expressão dinâmica:
+{InstallDir} - Diretório de instalação do jogo
+{InstallDirName} - Nome da pasta de instalação
+{ImagePath} - Caminho da ISO/ROM do jogo, se configurada
+{ImageName} - Nome do arquivo ISO/ROM do jogo
+{ImageNameNoExt} - Nome do arquivo ISO/ROM do jogo sem extensão
+{PlayniteDir} - Diretório de Instalação do Playnite
+{Name} - Nome do Jogo
        
-Cloud variables can be used to add a dynamic string:        
+Variáveis de nuvem podem ser usadas para adicionar uma expressão dinâmica:        
 {DropboxFolder}
-{OneDriveFolder}
        
-Steam variables can be used to add a dynamic string:        
-{SteamId} - Steam user Id
-{SteamAccountId} - Steam account Id
-{SteamInstallDir} - Steam installation directory
-{SteamScreenshotsDir} - Steam screenshots directory
+Variáveis do Steam podem ser usadas para adicionar uma expressão dinâmica:        
+{SteamId} - Id de usuário do Steam
+{SteamInstallDir} - Diretório de instalação do Steam
+{SteamScreenshotsDir} - Diretório de capturas de tela do Steam
        
-Ubisoft Connect variables can be used to add a dynamic string:        
-{UbisoftInstallDir} - Ubisoft installation directory
-{UbisoftScreenshotsDir} - Ubisoft screenshots directory
-        
-{RetroArchScreenshotsDir}
+Variáveis da Ubisoft Connect podem ser usadas para adicionar uma expressão dinâmica:        
+{UbisoftInstallDir} - Diretório de instalação da Ubisoft
+{UbisoftScreenshotsDir} - Diretório de capturas de tela da Ubisoft
             
-Windows variables can be used to add a dynamic string:        
+Variáveis do Windows podem ser usadas para adicionar uma expressão dinâmica:        
 {WinDir}
 {AllUsersProfile}
 {AppData}
