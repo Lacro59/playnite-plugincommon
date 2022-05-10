@@ -2,6 +2,7 @@
 using CommonPlayniteShared.PluginLibrary.OriginLibrary.Services;
 using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
+using CommonPluginsShared.Models;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Origin.Models;
 using Playnite.SDK.Data;
@@ -321,6 +322,12 @@ namespace CommonPluginsStores.Origin
                 string WebData = Web.DownloadStringData(Url, httpHeaders).GetAwaiter().GetResult();
                 Serialization.TryFromJson(WebData, out dynamic originAchievements);
 
+                if (originAchievements?["achievements"] == null)
+                {
+                    logger.Warn($"No achievements data for {Id}");
+                    return null;
+                }
+
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
                 foreach (var item in originAchievements?["achievements"])
                 {
@@ -346,6 +353,17 @@ namespace CommonPluginsStores.Origin
 
             return null;
         }
+
+        public virtual SourceLink GetAchievementsSourceLink(string Name, string Id, AccountInfos accountInfos)
+        {
+            string LangUrl = CodeLang.GetEpicLang(Local);
+            return new SourceLink
+            {
+                GameName = Name,
+                Name = ClientName,
+                Url = $"https://www.origin.com/{LangUrl}/game-library/ogd/{Id}/achievements"
+            };
+        }
         #endregion
 
 
@@ -366,6 +384,7 @@ namespace CommonPluginsStores.Origin
                 GameInfos gameInfos = new GameInfos
                 {
                     Id = gameStoreDataResponse.offerId,
+                    Id2 = gameStoreDataResponse?.platforms[0]?.achievementSetOverride?.ToString(),
                     Name = gameStoreDataResponse.i18n.displayName,
                     Link = gameStoreDataResponse?.offerPath != null ? string.Format(UrlStoreGame, gameStoreDataResponse.offerPath) : string.Empty,
                     Image = gameStoreDataResponse.imageServer + gameStoreDataResponse.i18n.packArtLarge,

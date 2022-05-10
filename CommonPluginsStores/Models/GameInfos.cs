@@ -15,6 +15,7 @@ namespace CommonPluginsStores.Models
     public class BasicGameInfos
     {
         public string Id { get; set; }
+        public string Id2 { get; set; }
         public string Name { get; set; }
         public string Link { get; set; }
         public string Description { get; set; }
