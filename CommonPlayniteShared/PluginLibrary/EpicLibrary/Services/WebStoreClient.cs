@@ -26,7 +26,7 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary.Services
             httpClient.Dispose();
         }
 
-        public async Task<List<WebStoreModels.QuerySearchResponse.SearchStoreElement>> QuerySearch(string searchTerm)
+        public async Task<List<WebStoreModels.QuerySearchResponse.Data.CatalogItem.SearchStore.SearchStoreElement>> QuerySearch(string searchTerm)//public async Task<List<WebStoreModels.QuerySearchResponse.SearchStoreElement>> QuerySearch(string searchTerm)
         {
             var query = new WebStoreModels.QuerySearch();
             query.variables.keywords = HttpUtility.UrlPathEncode(searchTerm);

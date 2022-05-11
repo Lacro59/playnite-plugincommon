@@ -15,6 +15,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static CommonPluginsShared.PlayniteTools;
 
@@ -410,14 +411,20 @@ namespace CommonPluginsStores.Epic
             {
                 using (WebStoreClient client = new WebStoreClient())
                 {
-                    List<WebStoreModels.QuerySearchResponse.SearchStoreElement> catalogs = client.QuerySearch(Name).GetAwaiter().GetResult();
+                    var catalogs = client.QuerySearch(Name).GetAwaiter().GetResult();
                     if (catalogs.HasItems())
                     {
                         catalogs = catalogs.OrderBy(x => x.title.Length).ToList();
-                        WebStoreModels.QuerySearchResponse.SearchStoreElement catalog = catalogs.FirstOrDefault(a => a.title.IsEqual(Name, true));
+                        var catalog = catalogs.FirstOrDefault(a => a.title.IsEqual(Name, true));
                         if (catalog == null)
                         {
                             catalog = catalogs[0];
+                        }
+
+                        if (catalog.productSlug.IsNullOrEmpty())
+                        {
+                            var mapping = catalog.catalogNs.mappings.FirstOrDefault(b => b.pageType.Equals("productHome", StringComparison.InvariantCultureIgnoreCase));
+                            catalog.productSlug = mapping.pageSlug;
                         }
 
                         ProductSlug = catalog?.productSlug?.Replace("/home", string.Empty);
@@ -439,17 +446,17 @@ namespace CommonPluginsStores.Epic
             try {
                 using (WebStoreClient client = new WebStoreClient())
                 {
-                    List<WebStoreModels.QuerySearchResponse.SearchStoreElement> catalogs = client.QuerySearch(Name).GetAwaiter().GetResult();
+                    var catalogs = client.QuerySearch(Name).GetAwaiter().GetResult();
                     if (catalogs.HasItems())
                     {
                         catalogs = catalogs.OrderBy(x => x.title.Length).ToList();
-                        WebStoreModels.QuerySearchResponse.SearchStoreElement catalog = catalogs.FirstOrDefault(a => a.title.IsEqual(Name, true));
+                        var catalog = catalogs.FirstOrDefault(a => a.title.IsEqual(Name, true));
                         if (catalog == null)
                         {
                             catalog = catalogs[0];
                         }
 
-                        NameSpace = catalog?.epicNamespace;
+                        NameSpace = catalog?.nameSpace;
                     }
                 }
             }
