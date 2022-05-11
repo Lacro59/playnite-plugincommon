@@ -354,7 +354,7 @@ namespace CommonPluginsStores.Origin
             return null;
         }
 
-        public virtual SourceLink GetAchievementsSourceLink(string Name, string Id, AccountInfos accountInfos)
+        public override SourceLink GetAchievementsSourceLink(string Name, string Id, AccountInfos accountInfos)
         {
             string LangUrl = CodeLang.GetEpicLang(Local);
             return new SourceLink

@@ -315,7 +315,7 @@ namespace CommonPluginsStores
         /// <param name="Id"></param>
         /// <param name="accountInfos"></param>
         /// <returns></returns>
-        public virtual SourceLink GetAchievementsSourceLink(string Id, AccountInfos accountInfos)
+        public virtual SourceLink GetAchievementsSourceLink(string Name, string Id, AccountInfos accountInfos)
         {
             return null;
         }

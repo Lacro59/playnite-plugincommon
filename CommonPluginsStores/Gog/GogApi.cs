@@ -336,7 +336,7 @@ namespace CommonPluginsStores.Gog
             return null;
         }
 
-        public virtual SourceLink GetAchievementsSourceLink(string Name, string Id, AccountInfos accountInfos)
+        public override SourceLink GetAchievementsSourceLink(string Name, string Id, AccountInfos accountInfos)
         {
             return new SourceLink
             {
