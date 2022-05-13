@@ -10,6 +10,10 @@
     <sys:String x:Key="LOCCommonRemoveFolder">Remove folder</sys:String>
     <sys:String x:Key="LOCCommonAddFilePattern">Add file pattern</sys:String>
     
+    <!-- Filters -->
+
+    <sys:String x:Key="LOCCommonUsedFilteredGames">Currently filtered games used</sys:String>
+
     <!-- Transfer plugin data -->
 
     <sys:String x:Key="LOCCommonTransfer">Transfer</sys:String>
