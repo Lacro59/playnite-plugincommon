@@ -171,8 +171,8 @@ Por favor, inténtalo de nuevo.</sys:String>
     <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Error al añadir etiqueta {0}.
 Por favor, borre todas las etiquetas en el menú del plugin.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Use old saved data for {0} [{1}]
-You must authenticate.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Usar datos guardados para {0} [{1}]
+Debe autenticarse.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Dimensiones</sys:String>
@@ -186,32 +186,32 @@ You must authenticate.</sys:String>
     <sys:String x:Key="LOCCommonSelectVariable">Seleccionar variable</sys:String>
 
 
-    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
-{InstallDir} - Game installation directory
-{InstallDirName} - Installation folder name
-{ImagePath} - Game ISO/ROM path if set
-{ImageName} - Game ISO/ROM file name
-{ImageNameNoExt} - Game ISO/ROM file name without extension
-{PlayniteDir} - Playnite installation directory
-{Name} - Game name
+    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Se pueden utilizar variables especiales para añadir una cadena dinámica:
+{InstallDir} - Directorio de instalación del juego
+{InstallDirName} - Nombre de la carpeta de instalación
+{ImagePath} - Ruta de acceso al juego ISO/ROM si se ha establecido
+{ImageName} - Nombre del archivo ISO/ROM del juego
+{ImageNameNoExt} - Nombre del archivo ISO/ROM del juego sin extensión
+{PlayniteDir} - Directorio de instalación de Playnite
+{Name} - Nombre del juego
        
-Cloud variables can be used to add a dynamic string:        
+Las variables de la nube se pueden utilizar para añadir una cadena dinámica:        
 {DropboxFolder}
 {OneDriveFolder}
        
-Steam variables can be used to add a dynamic string:        
-{SteamId} - Steam user Id
-{SteamAccountId} - Steam account Id
-{SteamInstallDir} - Steam installation directory
-{SteamScreenshotsDir} - Steam screenshots directory
+Las variables de Steam se pueden utilizar para añadir una cadena dinámica:        
+{SteamId} - Id de usuario de Steam
+{SteamAccountId} - Id de cuenta de Steam
+{SteamInstallDir} - Directorio de instalación de Steam
+{SteamScreenshotsDir} - Directorio de capturas de pantalla de Steam
        
-Ubisoft Connect variables can be used to add a dynamic string:        
-{UbisoftInstallDir} - Ubisoft installation directory
-{UbisoftScreenshotsDir} - Ubisoft screenshots directory
+Las variables de Ubisoft Connect pueden utilizarse para añadir una cadena dinámica:        
+{UbisoftInstallDir} - Directorio de instalación de Ubisoft
+{UbisoftScreenshotsDir} - Directorio de capturas de pantalla de Ubisoft
         
 {RetroArchScreenshotsDir}
             
-Windows variables can be used to add a dynamic string:        
+Las variables de Windows se pueden utilizar para añadir una cadena dinámica:        
 {WinDir}
 {AllUsersProfile}
 {AppData}
@@ -227,6 +227,6 @@ Windows variables can be used to add a dynamic string:
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)</sys:String>
+{ProgramFiles(x86)}</sys:String>
 
 </ResourceDictionary>
