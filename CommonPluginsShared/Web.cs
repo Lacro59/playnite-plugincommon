@@ -794,7 +794,12 @@ namespace CommonPluginsShared
 
             using (var client = new HttpClient(handler))
             {
+                var els = url.Split('/');
+                string baseUrl = els[0] + "//" + els[2];
+
                 client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
+                client.DefaultRequestHeaders.Add("origin", baseUrl);
+                client.DefaultRequestHeaders.Add("referer", baseUrl);
 
                 HttpResponseMessage result;
                 try
