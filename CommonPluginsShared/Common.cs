@@ -17,8 +17,6 @@ namespace CommonPluginsShared
         private static ILogger logger = LogManager.GetLogger();
         private static IResourceProvider resources = new ResourceProvider();
 
-        private static DateTime LastDate = default;
-
 
         /// <summary>
         /// Load the common ressources
@@ -41,11 +39,20 @@ namespace CommonPluginsShared
             {
                 if (File.Exists(CommonFile))
                 {
+                    DateTime LastDate = default;
+                    string FileName = Path.GetFileName(CommonFile);
+                    if (resources.GetResource(FileName) != null)
+                    {
+                        LastDate = (DateTime)resources.GetResource(FileName);
+                    }
+
                     DateTime lastModified = File.GetLastWriteTime(CommonFile);
                     if (lastModified > LastDate)
                     {
-                        LastDate = lastModified;
-                        Common.LogDebug(true, $"Load {CommonFile} - {LastDate.ToString("yyyy-MM-dd HH:mm:ss")}");
+                        Application.Current.Resources.Remove(FileName);
+                        Application.Current.Resources.Add(FileName, lastModified);
+
+                        Common.LogDebug(true, $"Load {CommonFile} - {lastModified.ToString("yyyy-MM-dd HH:mm:ss")}");
 
                         ResourceDictionary res = null;
                         try
