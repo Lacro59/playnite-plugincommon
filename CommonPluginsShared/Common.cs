@@ -17,6 +17,8 @@ namespace CommonPluginsShared
         private static ILogger logger = LogManager.GetLogger();
         private static IResourceProvider resources = new ResourceProvider();
 
+        private static DateTime LastDate = default;
+
 
         /// <summary>
         /// Load the common ressources
@@ -39,31 +41,36 @@ namespace CommonPluginsShared
             {
                 if (File.Exists(CommonFile))
                 {
-                    Common.LogDebug(true, $"Load {CommonFile}");
-
-                    ResourceDictionary res = null;
-                    try
+                    DateTime lastModified = File.GetLastWriteTime(CommonFile);
+                    if (lastModified > LastDate)
                     {
-                        res = Xaml.FromFile<ResourceDictionary>(CommonFile);
-                        res.Source = new Uri(CommonFile, UriKind.Absolute);
+                        LastDate = lastModified;
+                        Common.LogDebug(true, $"Load {CommonFile} - {LastDate.ToString("yyyy-MM-dd HH:mm:ss")}");
 
-                        foreach (var key in res.Keys)
+                        ResourceDictionary res = null;
+                        try
                         {
-                            if (res[key] is string locString && locString.IsNullOrEmpty())
+                            res = Xaml.FromFile<ResourceDictionary>(CommonFile);
+                            res.Source = new Uri(CommonFile, UriKind.Absolute);
+
+                            foreach (var key in res.Keys)
                             {
-                                res.Remove(key);
+                                if (res[key] is string locString && locString.IsNullOrEmpty())
+                                {
+                                    res.Remove(key);
+                                }
                             }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogError(ex, false, $"Failed to integrate file {CommonFile}");
-                        return;
-                    }
+                        catch (Exception ex)
+                        {
+                            LogError(ex, false, $"Failed to integrate file {CommonFile}");
+                            return;
+                        }
 
-                    Common.LogDebug(true, $"res: {Serialization.ToJson(res)}");
+                        Common.LogDebug(true, $"res: {Serialization.ToJson(res)}");
 
-                    Application.Current.Resources.MergedDictionaries.Add(res);
+                        Application.Current.Resources.MergedDictionaries.Add(res);
+                    }
                 }
                 else
                 {
