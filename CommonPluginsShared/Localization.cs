@@ -11,6 +11,7 @@ namespace CommonPluginsShared
     public class PluginLocalization
     {
         private static ILogger logger = LogManager.GetLogger();
+        private static IResourceProvider resources = new ResourceProvider();
 
 
         /// <summary>
@@ -78,27 +79,41 @@ namespace CommonPluginsShared
 
             if (File.Exists(langFileCommon))
             {
-                ResourceDictionary res = null;
-                try
+                DateTime LastDate = default;
+                string FileName = Path.GetFileName("Common_" + langFileCommon);
+                if (resources.GetResource(FileName) != null)
                 {
-                    res = Xaml.FromFile<ResourceDictionary>(langFileCommon);
-                    res.Source = new Uri(langFileCommon, UriKind.Absolute);
+                    LastDate = (DateTime)resources.GetResource(FileName);
+                }
 
-                    foreach (var key in res.Keys)
+                DateTime lastModified = File.GetLastWriteTime(langFileCommon);
+                if (lastModified > LastDate)
+                {
+                    Application.Current.Resources.Remove(FileName);
+                    Application.Current.Resources.Add(FileName, lastModified);
+
+                    ResourceDictionary res = null;
+                    try
                     {
-                        if (res[key] is string locString && locString.IsNullOrEmpty())
+                        res = Xaml.FromFile<ResourceDictionary>(langFileCommon);
+                        res.Source = new Uri(langFileCommon, UriKind.Absolute);
+
+                        foreach (var key in res.Keys)
                         {
-                            res.Remove(key);
+                            if (res[key] is string locString && locString.IsNullOrEmpty())
+                            {
+                                res.Remove(key);
+                            }
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, $"Failed to integrate localization file {langFileCommon}");
-                    return;
-                }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, $"Failed to integrate localization file {langFileCommon}");
+                        return;
+                    }
 
-                dictionaries.Add(res);
+                    dictionaries.Add(res);
+                }
             }
             else
             {
