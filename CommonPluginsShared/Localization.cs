@@ -80,7 +80,7 @@ namespace CommonPluginsShared
             if (File.Exists(langFileCommon))
             {
                 DateTime LastDate = default;
-                string FileName = Path.GetFileName("Common_" + langFileCommon);
+                string FileName = "Common_" + Path.GetFileName(langFileCommon);
                 if (resources.GetResource(FileName) != null)
                 {
                     LastDate = (DateTime)resources.GetResource(FileName);
