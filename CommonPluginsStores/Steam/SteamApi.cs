@@ -416,12 +416,18 @@ namespace CommonPluginsStores.Steam
         public int GetAppId(string Name)
         {
             AppsList.Sort((x, y) => x.appid.CompareTo(y.appid));
-            App finded = AppsList.Find(x => x.name.IsEqual(Name)); ;
+            var finded = AppsList.FindAll(x => x.name.IsEqual(Name));
 
-            if (finded != null)
+            if (finded != null && finded.Count > 0)
             {
-                Common.LogDebug(true, $"Find Steam data for {Name} - {Serialization.ToJson(finded)}");
-                return finded.appid;
+                if (finded.Count > 1)
+                {
+                    logger.Warn($"Find {finded.Count} SteamAppId data for {Name}: " + string.Join(", ", finded.Select(x => x.appid)));
+                    return 0;
+                }
+
+                Common.LogDebug(true, $"Find SteamAppId data for {Name} - {Serialization.ToJson(finded)}");
+                return finded.First().appid;
             }
 
             return 0;

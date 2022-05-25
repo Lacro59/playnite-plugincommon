@@ -45,6 +45,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\AccountInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Origin\OriginApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\UsersInfos.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCGamingWiki\PCGamingWikiApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PsnApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\FriendsApps.cs" />
