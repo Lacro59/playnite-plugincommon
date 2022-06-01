@@ -26,10 +26,7 @@ namespace CommonPluginsShared
         private static List<Emulator> ListEmulators = null;
 
         private static HashSet<string> _disabledPlugins;
-        private static HashSet<string> DisabledPlugins
-        {
-            get { return _disabledPlugins ?? (_disabledPlugins = GetDisabledPlugins()); }
-        }
+        private static HashSet<string> DisabledPlugins => _disabledPlugins ?? (_disabledPlugins = GetDisabledPlugins());
 
 
         #region External plugin
@@ -330,15 +327,20 @@ namespace CommonPluginsShared
         /// <returns></returns>
         public static string GetSourceName(Game game)
         {
-            string SourceName = GetSourceByPluginId(game.PluginId);
-            if (!SourceName.IsNullOrEmpty())
-            {
-                return SourceName;
-            }
-
+            string SourceName = string.Empty;
             try
             {
-                if (IsGameEmulated( game))
+                if (game?.PluginId != null)
+                {
+                    SourceName = GetSourceByPluginId(game.PluginId);
+                }
+
+                if (!SourceName.IsNullOrEmpty())
+                {
+                    return SourceName;
+                }
+
+                if (IsGameEmulated(game))
                 {
                     SourceName = "RetroAchievements";
                     if (GameUseRpcs3(game))
