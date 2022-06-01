@@ -206,6 +206,11 @@ namespace CommonPluginsStores.Origin
                 string WebData = Web.DownloadStringData(Url, httpHeaders).GetAwaiter().GetResult();
                 Serialization.TryFromJson(WebData, out FriendsResponse friendsResponse);
 
+                if (friendsResponse?.entries != null)
+                {
+                    return null;
+                }
+
                 ObservableCollection<AccountInfos> accountsInfos = new ObservableCollection<AccountInfos>();
                 friendsResponse?.entries.ForEach(x => 
                 {
