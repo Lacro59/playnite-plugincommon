@@ -163,7 +163,7 @@ namespace CommonPluginsStores.Gog
                 string JsonDataString = Tools.GetJsonInString(WebData, "window.profilesData.profileUserFriends = ", "window.profilesData.currentUserFriends = ", "}}];");
                 Serialization.TryFromJson(JsonDataString, out List<ProfileUserFriends> profileUserFriends);
 
-                if (profileUserFriends != null)
+                if (profileUserFriends == null)
                 {
                     return null;
                 }

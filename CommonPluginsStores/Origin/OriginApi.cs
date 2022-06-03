@@ -206,7 +206,7 @@ namespace CommonPluginsStores.Origin
                 string WebData = Web.DownloadStringData(Url, httpHeaders).GetAwaiter().GetResult();
                 Serialization.TryFromJson(WebData, out FriendsResponse friendsResponse);
 
-                if (friendsResponse?.entries != null)
+                if (friendsResponse?.entries == null)
                 {
                     return null;
                 }
@@ -385,6 +385,11 @@ namespace CommonPluginsStores.Origin
                 string Url = string.Format(UrlApi2GameInfo, Id, CodeLang.GetOriginLang(Local), CodeLang.GetOriginLangCountry(Local));
                 string WebData = Web.DownloadStringData(Url).GetAwaiter().GetResult();
                 Serialization.TryFromJson(WebData, out Models.GameStoreDataResponse gameStoreDataResponse);
+
+                if (gameStoreDataResponse == null)
+                {
+                    return null;
+                }
 
                 GameInfos gameInfos = new GameInfos
                 {
