@@ -27,6 +27,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Controls\SidebarItemControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\CompareValueConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\DefaultIconConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\DockToStringConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\EnumToBooleanConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\GetImageConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\GetMediaTypeConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\HeightToFontSizeConverter.cs" />
@@ -58,6 +60,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\SourceLink.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Paths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteUiHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Plugins\GameMenu.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IDataContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginDatabase.cs" />
