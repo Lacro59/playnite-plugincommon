@@ -17,6 +17,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
 using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.Epic
@@ -50,6 +51,9 @@ namespace CommonPluginsStores.Epic
 
             set => _EpicAPI = value;
         }
+
+
+        public bool forced { get; set; } = false;
 
 
         public EpicApi(string PluginName) : base(PluginName, ExternalPlugin.EpicLibrary, "Epic")
@@ -191,7 +195,14 @@ namespace CommonPluginsStores.Epic
 
                     List<HttpCookie> Cookies = GetStoredCookies();
                     Url = string.Format(UrlAchievements, LocalLang, ProductSlug);
-                    ResultWeb = Web.DownloadStringData(Url, Cookies).GetAwaiter().GetResult();
+                    //ResultWeb = Web.DownloadStringData(Url, Cookies).GetAwaiter().GetResult();
+
+                    using (var WebViews = API.Instance.WebViews.CreateOffscreenView())
+                    {
+                        Cookies.ForEach(x => { WebViews.SetCookies(Url, x); });
+                        WebViews.NavigateAndWait(Url);
+                        ResultWeb = WebViews.GetPageSource();
+                    }
 
                     if (!ResultWeb.Contains("lang=\"" + LocalLang + "\"", StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -215,6 +226,14 @@ namespace CommonPluginsStores.Epic
 
                 if (!ResultWeb.Contains("\"achievements\":[{\"achievement\""))
                 {
+                    if (!forced)
+                    {
+                        forced = true;
+                        ObservableCollection<GameAchievement> data = GetAchievements(Id, accountInfos);
+                        forced = false;
+                        return data;
+                    }
+
                     logger.Warn($"Error 404 for {Id}");
                     return null;
                 }

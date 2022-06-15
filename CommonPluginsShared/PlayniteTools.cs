@@ -330,14 +330,20 @@ namespace CommonPluginsShared
         /// <returns></returns>
         public static string GetSourceName(Game game)
         {
-            string SourceName = GetSourceByPluginId(game.PluginId);
-            if (!SourceName.IsNullOrEmpty())
-            {
-                return SourceName;
-            }
-
+            string SourceName = "Playnite";
             try
             {
+                if (game == null)
+                {
+                    return SourceName;
+                }
+
+                SourceName = GetSourceByPluginId(game.PluginId);
+                if (!SourceName.IsNullOrEmpty())
+                {
+                    return SourceName;
+                }
+
                 if (IsGameEmulated( game))
                 {
                     SourceName = "RetroAchievements";
@@ -350,19 +356,14 @@ namespace CommonPluginsShared
                 {
                     SourceName = "Xbox";
                 }
-                else if (game.SourceId != null && game.SourceId != default(Guid))
+                else if (game.SourceId != null && game.SourceId != default)
                 {
                     SourceName = API.Instance.Database.Sources.Get(game.SourceId)?.Name;
-                }
-                else
-                {
-                    SourceName = "Playnite";
                 }
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, false, $"Error on GetSourceName({game.Name})");
-                SourceName = "Playnite";
             }
 
             return SourceName;
