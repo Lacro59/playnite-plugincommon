@@ -14,13 +14,13 @@ namespace CommonPluginsShared.Collections
 
 
         [DontSerialize]
-        public Guid SourceId => Game == null ? default(Guid) : Game.SourceId; 
+        public Guid SourceId => Game?.SourceId ?? default; 
 
         [DontSerialize]
-        public DateTime? LastActivity => Game?.LastActivity; 
+        public DateTime? LastActivity => Game?.LastActivity ?? null; 
 
         [DontSerialize]
-        public bool Hidden => Game == null ? default(bool) : Game.Hidden; 
+        public bool Hidden => Game?.Hidden ?? default;
 
         [DontSerialize]
         public string Icon => Game?.Icon ?? string.Empty; 
@@ -32,16 +32,16 @@ namespace CommonPluginsShared.Collections
         public string BackgroundImage => Game?.BackgroundImage ?? string.Empty; 
 
         [DontSerialize]
-        public List<Genre> Genres => Game?.Genres;
+        public List<Genre> Genres => Game?.Genres ?? default;
 
         [DontSerialize]
-        public List<Guid> GenreIds => Game?.GenreIds;
+        public List<Guid> GenreIds => Game?.GenreIds ?? default;
 
         [DontSerialize]
-        public List<Platform> Platforms => Game?.Platforms;
+        public List<Platform> Platforms => Game?.Platforms ?? default;
 
         [DontSerialize]
-        public ulong Playtime => Game == null ? default(ulong) : Game.Playtime; 
+        public ulong Playtime => Game?.Playtime ?? default;
 
 
         [DontSerialize]
