@@ -331,10 +331,15 @@ namespace CommonPluginsShared
         /// <returns></returns>
         public static string GetSourceName(Game game)
         {
-            string SourceName = string.Empty;
+            string SourceName = "Playnite";
             try
             {
-                if (game?.PluginId != null)
+                if (game != null)
+                {
+                    return SourceName;
+                }
+
+                if (game.PluginId != null)
                 {
                     SourceName = GetSourceByPluginId(game.PluginId);
                 }
@@ -360,15 +365,10 @@ namespace CommonPluginsShared
                 {
                     SourceName = API.Instance.Database.Sources.Get(game.SourceId)?.Name;
                 }
-                else
-                {
-                    SourceName = "Playnite";
-                }
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, false, $"Error on GetSourceName({game.Name})");
-                SourceName = "Playnite";
             }
 
             return SourceName;
