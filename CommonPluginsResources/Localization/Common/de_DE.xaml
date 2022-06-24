@@ -12,7 +12,7 @@
     
     <!-- Filters -->
 
-    <sys:String x:Key="LOCCommonUsedFilteredGames">Currently filtered games used</sys:String>
+    <sys:String x:Key="LOCCommonUsedFilteredGames">Derzeit gefilterte Spiele verwendet</sys:String>
 
     <!-- Transfer plugin data -->
 
