@@ -195,19 +195,36 @@ namespace CommonPluginsStores.Epic
 
                     List<HttpCookie> Cookies = GetStoredCookies();
                     Url = string.Format(UrlAchievements, LocalLang, ProductSlug);
-                    //ResultWeb = Web.DownloadStringData(Url, Cookies).GetAwaiter().GetResult();
-
                     using (var WebViews = API.Instance.WebViews.CreateOffscreenView())
                     {
                         Cookies.ForEach(x => { WebViews.SetCookies(Url, x); });
                         WebViews.NavigateAndWait(Url);
                         ResultWeb = WebViews.GetPageSource();
+
+                        if (ResultWeb.Contains("data-translate=\"please_wait\"", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            Common.LogDebug(true, "Checking browser...");
+                            ResetIsUserLoggedIn();
+                            return null;
+                        }
                     }
 
                     if (!ResultWeb.Contains("lang=\"" + LocalLang + "\"", StringComparison.InvariantCultureIgnoreCase))
                     {
                         Url = string.Format(UrlAchievements, LocalLangShort, ProductSlug);
-                        ResultWeb = Web.DownloadStringData(Url, Cookies).GetAwaiter().GetResult();
+                        using (var WebViews = API.Instance.WebViews.CreateOffscreenView())
+                        {
+                            Cookies.ForEach(x => { WebViews.SetCookies(Url, x); });
+                            WebViews.NavigateAndWait(Url);
+                            ResultWeb = WebViews.GetPageSource();
+
+                            if (ResultWeb.Contains("data-translate=\"please_wait\"", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                Common.LogDebug(true, "Checking browser...");
+                                ResetIsUserLoggedIn();
+                                return null;
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
