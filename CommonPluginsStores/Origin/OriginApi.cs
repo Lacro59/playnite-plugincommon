@@ -1,4 +1,5 @@
-﻿using CommonPlayniteShared.PluginLibrary.OriginLibrary.Models;
+﻿using CommonPlayniteShared.Common.Web;
+using CommonPlayniteShared.PluginLibrary.OriginLibrary.Models;
 using CommonPlayniteShared.PluginLibrary.OriginLibrary.Services;
 using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
@@ -383,7 +384,7 @@ namespace CommonPluginsStores.Origin
             try
             {
                 string Url = string.Format(UrlApi2GameInfo, Id, CodeLang.GetOriginLang(Local), CodeLang.GetOriginLangCountry(Local));
-                string WebData = Web.DownloadStringData(Url).GetAwaiter().GetResult();
+                string WebData = Encoding.UTF8.GetString(HttpDownloader.DownloadData(Url));
                 Serialization.TryFromJson(WebData, out Models.GameStoreDataResponse gameStoreDataResponse);
 
                 if (gameStoreDataResponse == null)
