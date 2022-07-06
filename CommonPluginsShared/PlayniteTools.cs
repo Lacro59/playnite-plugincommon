@@ -334,7 +334,7 @@ namespace CommonPluginsShared
             string SourceName = "Playnite";
             try
             {
-                if (game != null)
+                if (game == null)
                 {
                     return SourceName;
                 }
