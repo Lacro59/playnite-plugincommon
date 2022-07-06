@@ -335,6 +335,12 @@ namespace CommonPluginsStores.Gog
             }
             catch (Exception ex)
             {
+                // Reset login status when 401 error
+                if (ex.Message.Contains("401"))
+                {
+                    ResetIsUserLoggedIn();
+                }
+
                 Common.LogError(ex, false, true, PluginName);
             }
 
