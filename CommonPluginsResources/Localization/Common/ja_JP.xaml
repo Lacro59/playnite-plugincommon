@@ -87,7 +87,7 @@ Do you want to open the directory?</sys:String>
 
     <!-- CommonSettingsView -->
 
-    <sys:String x:Key="LOCCommonMenuInExtensions">Show plugin menu in extensions submenu *</sys:String>
+    <sys:String x:Key="LOCCommonMenuInExtensions">拡張機能のサブメニューにプラグインメニューを表示する</sys:String>
     <sys:String x:Key="LOCCommonIconStore">Show store icon</sys:String>
     
     <sys:String x:Key="LOCCommonSaveColumOrder">Save column order</sys:String>
