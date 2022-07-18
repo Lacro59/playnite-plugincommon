@@ -22,11 +22,20 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary.Models
             }
 
             public Variables variables = new Variables();
-            public string query = @"query searchStoreQuery($allowCountries: String, $category: String, $count: Int, $country: String!, $keywords: String, $locale: String, $namespace: String, $itemNs: String, $sortBy: String, $sortDir: String, $start: Int, $tag: String, $releaseDate: String, $withPrice: Boolean = false, $withPromotions: Boolean = false) {  Catalog {    searchStore(allowCountries: $allowCountries, category: $category, count: $count, country: $country, keywords: $keywords, locale: $locale, namespace: $namespace, itemNs: $itemNs, sortBy: $sortBy, sortDir: $sortDir, releaseDate: $releaseDate, start: $start, tag: $tag) {      elements {        title        id        namespace        description        effectiveDate        keyImages {          type          url        }        seller {          id          name        }        productSlug        urlSlug        url        tags {          id        }        items {          id          namespace        }        customAttributes {          key          value        }        categories {          path        }        catalogNs {   mappings  {     pageSlug    pageType    }   }  price(country: $country) @include(if: $withPrice) {          totalPrice {            discountPrice            originalPrice            voucherDiscount            discount            currencyCode            currencyInfo {              decimals            }            fmtPrice(locale: $locale) {              originalPrice              discountPrice              intermediatePrice            }          }          lineOffers {            appliedRules {              id              endDate              discountSetting {                discountType              }            }          }        }        promotions(category: $category) @include(if: $withPromotions) {          promotionalOffers {            promotionalOffers {              startDate              endDate              discountSetting {                discountType                discountPercentage              }            }          }          upcomingPromotionalOffers {            promotionalOffers {              startDate              endDate              discountSetting {                discountType                discountPercentage              }            }          }        }      }      paging {        count        total      }    }  }}";
+            public string query = @"query searchStoreQuery($allowCountries: String, $category: String, $count: Int, $country: String!, $keywords: String, $locale: String, $namespace: String, $itemNs: String, $sortBy: String, $sortDir: String, $start: Int, $tag: String, $releaseDate: String, $withPrice: Boolean = false, $withPromotions: Boolean = false) {  Catalog {    searchStore(allowCountries: $allowCountries, category: $category, count: $count, country: $country, keywords: $keywords, locale: $locale, namespace: $namespace, itemNs: $itemNs, sortBy: $sortBy, sortDir: $sortDir, releaseDate: $releaseDate, start: $start, tag: $tag) {      elements {        title        id        namespace        description        effectiveDate        keyImages {          type          url        }        seller {          id          name        }        productSlug        urlSlug        url        tags {          id        }        items {          id          namespace        }        customAttributes {          key          value        }        categories {          path        }        price(country: $country) @include(if: $withPrice) {          totalPrice {            discountPrice            originalPrice            voucherDiscount            discount            currencyCode            currencyInfo {              decimals            }            fmtPrice(locale: $locale) {              originalPrice              discountPrice              intermediatePrice            }          }          lineOffers {            appliedRules {              id              endDate              discountSetting {                discountType              }            }          }        }        promotions(category: $category) @include(if: $withPromotions) {          promotionalOffers {            promotionalOffers {              startDate              endDate              discountSetting {                discountType                discountPercentage              }            }          }          upcomingPromotionalOffers {            promotionalOffers {              startDate              endDate              discountSetting {                discountType                discountPercentage              }            }          }        }      }      paging {        count        total      }    }  }}";
         }
 
         public class QuerySearchResponse
         {
+            public class SearchStoreElement
+            {
+                public string url;
+                public string title;
+                [SerializationPropertyName("namespace")]
+                public string epicNamespace;
+                public string id;
+                public string productSlug;
+            }
 
             public class Data
             {
@@ -34,31 +43,10 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary.Models
                 {
                     public class SearchStore
                     {
-                        public class SearchStoreElement
-                        {
-                            public string url;
-                            public string title;
-                            public string id;
-                            public string productSlug;
-                            public string nameSpace;
-
-                            public class CatalogNs
-                            {
-                                public class Mappings
-                                {
-                                    public string pageSlug;
-                                    public string pageType;
-                                }
-
-                                public List<Mappings> mappings;
-                            }
-
-                            public CatalogNs catalogNs;
-                        }
-
                         public List<SearchStoreElement> elements;
-
                     }
+
+                    public SearchStore searchStore;
                 }
 
                 public CatalogItem Catalog;
