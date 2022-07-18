@@ -1,7 +1,9 @@
-﻿using CommonPlayniteShared.PluginLibrary.OriginLibrary.Models;
+﻿using CommonPlayniteShared.Common.Web;
+using CommonPlayniteShared.PluginLibrary.OriginLibrary.Models;
 using CommonPlayniteShared.PluginLibrary.OriginLibrary.Services;
 using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
+using CommonPluginsShared.Models;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Origin.Models;
 using Playnite.SDK.Data;
@@ -47,8 +49,8 @@ namespace CommonPluginsStores.Origin
         #endregion
 
 
-        protected OriginAccountClient _OriginAPI;
-        internal OriginAccountClient OriginAPI
+        protected static OriginAccountClient _OriginAPI;
+        internal static OriginAccountClient OriginAPI
         {
             get
             {
@@ -205,6 +207,11 @@ namespace CommonPluginsStores.Origin
                 string WebData = Web.DownloadStringData(Url, httpHeaders).GetAwaiter().GetResult();
                 Serialization.TryFromJson(WebData, out FriendsResponse friendsResponse);
 
+                if (friendsResponse?.entries == null)
+                {
+                    return null;
+                }
+
                 ObservableCollection<AccountInfos> accountsInfos = new ObservableCollection<AccountInfos>();
                 friendsResponse?.entries.ForEach(x => 
                 {
@@ -321,6 +328,12 @@ namespace CommonPluginsStores.Origin
                 string WebData = Web.DownloadStringData(Url, httpHeaders).GetAwaiter().GetResult();
                 Serialization.TryFromJson(WebData, out dynamic originAchievements);
 
+                if (originAchievements?["achievements"] == null)
+                {
+                    logger.Warn($"No achievements data for {Id}");
+                    return null;
+                }
+
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
                 foreach (var item in originAchievements?["achievements"])
                 {
@@ -346,6 +359,17 @@ namespace CommonPluginsStores.Origin
 
             return null;
         }
+
+        public override SourceLink GetAchievementsSourceLink(string Name, string Id, AccountInfos accountInfos)
+        {
+            string LangUrl = CodeLang.GetEpicLang(Local);
+            return new SourceLink
+            {
+                GameName = Name,
+                Name = ClientName,
+                Url = $"https://www.origin.com/{LangUrl}/game-library/ogd/{Id}/achievements"
+            };
+        }
         #endregion
 
 
@@ -360,12 +384,18 @@ namespace CommonPluginsStores.Origin
             try
             {
                 string Url = string.Format(UrlApi2GameInfo, Id, CodeLang.GetOriginLang(Local), CodeLang.GetOriginLangCountry(Local));
-                string WebData = Web.DownloadStringData(Url).GetAwaiter().GetResult();
+                string WebData = Encoding.UTF8.GetString(HttpDownloader.DownloadData(Url));
                 Serialization.TryFromJson(WebData, out Models.GameStoreDataResponse gameStoreDataResponse);
+
+                if (gameStoreDataResponse == null)
+                {
+                    return null;
+                }
 
                 GameInfos gameInfos = new GameInfos
                 {
                     Id = gameStoreDataResponse.offerId,
+                    Id2 = gameStoreDataResponse?.platforms[0]?.achievementSetOverride?.ToString(),
                     Name = gameStoreDataResponse.i18n.displayName,
                     Link = gameStoreDataResponse?.offerPath != null ? string.Format(UrlStoreGame, gameStoreDataResponse.offerPath) : string.Empty,
                     Image = gameStoreDataResponse.imageServer + gameStoreDataResponse.i18n.packArtLarge,

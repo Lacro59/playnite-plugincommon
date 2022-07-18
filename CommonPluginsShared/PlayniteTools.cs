@@ -26,10 +26,7 @@ namespace CommonPluginsShared
         private static List<Emulator> ListEmulators = null;
 
         private static HashSet<string> _disabledPlugins;
-        private static HashSet<string> DisabledPlugins
-        {
-            get { return _disabledPlugins ?? (_disabledPlugins = GetDisabledPlugins()); }
-        }
+        private static HashSet<string> DisabledPlugins => _disabledPlugins ?? (_disabledPlugins = GetDisabledPlugins());
 
 
         #region External plugin
@@ -52,7 +49,9 @@ namespace CommonPluginsShared
             TwitchLibrary,
             OculusLibrary,
             RiotLibrary,
-            UplayLibrary
+            UplayLibrary,
+
+            SuccessStory
         }
 
         private static readonly Dictionary<Guid, ExternalPlugin> PluginsById = new Dictionary<Guid, ExternalPlugin>
@@ -73,7 +72,9 @@ namespace CommonPluginsShared
             { new Guid("E2A7D494-C138-489D-BB3F-1D786BEEB675"), ExternalPlugin.TwitchLibrary },
             { new Guid("C2F038E5-8B92-4877-91F1-DA9094155FC5"), ExternalPlugin.UplayLibrary },
             { new Guid("77346DD6-B0CC-4F7D-80F0-C1D138CCAE58"), ExternalPlugin.OculusLibrary },
-            { new Guid("317a5e2e-eac1-48bc-adb3-fb9e321afd3f"), ExternalPlugin.RiotLibrary }
+            { new Guid("317a5e2e-eac1-48bc-adb3-fb9e321afd3f"), ExternalPlugin.RiotLibrary },
+
+            { new Guid("cebe6d32-8c46-4459-b993-5a5189d60788"), ExternalPlugin.SuccessStory }
         };
 
         public static ExternalPlugin GetPluginType(Guid PluginId)
@@ -330,15 +331,25 @@ namespace CommonPluginsShared
         /// <returns></returns>
         public static string GetSourceName(Game game)
         {
-            string SourceName = GetSourceByPluginId(game.PluginId);
-            if (!SourceName.IsNullOrEmpty())
-            {
-                return SourceName;
-            }
-
+            string SourceName = "Playnite";
             try
             {
-                if (IsGameEmulated( game))
+                if (game == null)
+                {
+                    return SourceName;
+                }
+
+                if (game.PluginId != null)
+                {
+                    SourceName = GetSourceByPluginId(game.PluginId);
+                }
+
+                if (!SourceName.IsNullOrEmpty())
+                {
+                    return SourceName;
+                }
+
+                if (IsGameEmulated(game))
                 {
                     SourceName = "RetroAchievements";
                     if (GameUseRpcs3(game))
@@ -354,15 +365,10 @@ namespace CommonPluginsShared
                 {
                     SourceName = API.Instance.Database.Sources.Get(game.SourceId)?.Name;
                 }
-                else
-                {
-                    SourceName = "Playnite";
-                }
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, false, $"Error on GetSourceName({game.Name})");
-                SourceName = "Playnite";
             }
 
             return SourceName;

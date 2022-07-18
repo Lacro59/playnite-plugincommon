@@ -10,6 +10,10 @@
     <sys:String x:Key="LOCCommonRemoveFolder">Supprimer le dossier</sys:String>
     <sys:String x:Key="LOCCommonAddFilePattern">Utiliser un modèle de fichier</sys:String>
     
+    <!-- Filters -->
+
+    <sys:String x:Key="LOCCommonUsedFilteredGames">Jeux actuellement filtrés utilisés</sys:String>
+
     <!-- Transfer plugin data -->
 
     <sys:String x:Key="LOCCommonTransfer">Transférer</sys:String>

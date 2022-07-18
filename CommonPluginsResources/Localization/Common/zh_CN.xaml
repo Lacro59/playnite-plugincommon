@@ -10,6 +10,10 @@
     <sys:String x:Key="LOCCommonRemoveFolder">移除文件夹</sys:String>
     <sys:String x:Key="LOCCommonAddFilePattern">添加文件模式</sys:String>
     
+    <!-- Filters -->
+
+    <sys:String x:Key="LOCCommonUsedFilteredGames">当前已使用筛选游戏</sys:String>
+
     <!-- Transfer plugin data -->
 
     <sys:String x:Key="LOCCommonTransfer">转移</sys:String>

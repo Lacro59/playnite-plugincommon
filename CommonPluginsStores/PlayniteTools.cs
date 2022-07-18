@@ -141,5 +141,10 @@ namespace CommonPluginsStores
             result = CommonPluginsShared.PlayniteTools.PathToRelativeWithoutStores(game, result);
             return result;
         }
+
+        public static string NormalizeGameName(string name, bool removeEditions = false)
+        {
+            return CommonPluginsShared.PlayniteTools.NormalizeGameName(name, removeEditions);
+        }
     }
 }

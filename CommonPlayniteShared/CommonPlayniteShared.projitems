@@ -37,6 +37,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\Web\Downloader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Web\HttpDownloader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Xaml.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\MenuHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\VirtualizingGridPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\VirtualizingTilePanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\VirtualizingUniformPanel.cs" />

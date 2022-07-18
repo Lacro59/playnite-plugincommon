@@ -10,6 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Epic\EpicApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicAchievementsData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicAchievementsOwnedData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicAddonsByNamespace.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicCatalogOffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicData.cs" />
@@ -43,6 +45,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\AccountInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Origin\OriginApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\UsersInfos.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PCGamingWiki\PCGamingWikiApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PsnApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\FriendsApps.cs" />

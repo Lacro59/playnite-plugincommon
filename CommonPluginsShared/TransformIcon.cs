@@ -42,7 +42,7 @@
         private static string dreamcast = "\uea3c";              
         private static string dos = "\uea3b";                    
         private static string commodore64 = "\uea3a";            
-        private static string ds = "\ue904";                     
+        private static string ds = "\uea39";                     
         private static string gameboy = "\uea3d";                
         private static string gameboyadvance = "\uea3f";         
         private static string gamecube = "\uea40";               

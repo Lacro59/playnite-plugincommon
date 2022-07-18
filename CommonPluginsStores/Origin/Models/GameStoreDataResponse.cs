@@ -100,7 +100,7 @@ namespace CommonPluginsStores.Origin.Models
     {
         public string isPurchasable { get; set; }
         public object inStock { get; set; }
-        public double catalogPrice { get; set; }
+        public double? catalogPrice { get; set; }
         public string countryCurrency { get; set; }
         public List<double> catalogPriceA { get; set; }
         public List<string> countryCurrencyA { get; set; }

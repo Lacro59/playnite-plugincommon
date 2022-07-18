@@ -2,9 +2,9 @@
 using CommonPlayniteShared.PluginLibrary.Services.GogLibrary;
 using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
+using CommonPluginsShared.Models;
 using CommonPluginsStores.Gog.Models;
 using CommonPluginsStores.Models;
-using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
@@ -15,6 +15,7 @@ using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.Gog
 {
+    // https://gogapidocs.readthedocs.io/en/latest/
     public class GogApi : StoreApi
     {
         #region Url
@@ -46,8 +47,8 @@ namespace CommonPluginsStores.Gog
         #endregion
 
 
-        protected GogAccountClient _GogAPI;
-        internal GogAccountClient GogAPI
+        protected static GogAccountClient _GogAPI;
+        internal static GogAccountClient GogAPI
         {
             get
             {
@@ -161,6 +162,11 @@ namespace CommonPluginsStores.Gog
                 string WebData = Web.DownloadStringData(string.Format(UrlUserFriends, UserName), GetStoredCookies()).GetAwaiter().GetResult();
                 string JsonDataString = Tools.GetJsonInString(WebData, "window.profilesData.profileUserFriends = ", "window.profilesData.currentUserFriends = ", "}}];");
                 Serialization.TryFromJson(JsonDataString, out List<ProfileUserFriends> profileUserFriends);
+
+                if (profileUserFriends == null)
+                {
+                    return null;
+                }
 
                 ObservableCollection<AccountInfos> accountsInfos = new ObservableCollection<AccountInfos>();
                 profileUserFriends.ForEach(x =>
@@ -329,10 +335,26 @@ namespace CommonPluginsStores.Gog
             }
             catch (Exception ex)
             {
+                // Reset login status when 401 error
+                if (ex.Message.Contains("401"))
+                {
+                    ResetIsUserLoggedIn();
+                }
+
                 Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
+        }
+
+        public override SourceLink GetAchievementsSourceLink(string Name, string Id, AccountInfos accountInfos)
+        {
+            return new SourceLink
+            {
+                GameName = Name,
+                Name = ClientName,
+                Url = $"https://www.gog.com/u/{UserName}/game/{Id}?sort=user_unlock_date&sort_user_id={accountInfos.UserId}"
+            };
         }
         #endregion
 
