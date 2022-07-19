@@ -371,7 +371,15 @@ namespace CommonPluginsShared
                 Common.LogError(ex, false, $"Error on GetSourceName({game.Name})");
             }
 
-            return SourceName;
+            if (!SourceName.IsNullOrEmpty())
+            {
+                return SourceName;
+            }
+            else
+            {
+                return "Playnite";
+            }
+               
         }
 
         public static string GetSourceByPluginId(Guid PluginId)
