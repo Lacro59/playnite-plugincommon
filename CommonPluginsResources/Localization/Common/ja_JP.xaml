@@ -87,7 +87,7 @@ Do you want to open the directory?</sys:String>
 
     <!-- CommonSettingsView -->
 
-    <sys:String x:Key="LOCCommonMenuInExtensions">Show plugin menu in extensions submenu *</sys:String>
+    <sys:String x:Key="LOCCommonMenuInExtensions">拡張機能のサブメニューにプラグインメニューを表示する</sys:String>
     <sys:String x:Key="LOCCommonIconStore">Show store icon</sys:String>
     
     <sys:String x:Key="LOCCommonSaveColumOrder">Save column order</sys:String>
@@ -95,10 +95,10 @@ Do you want to open the directory?</sys:String>
     <sys:String x:Key="LOCCommonIntegrationFullScreen">Fullscreen</sys:String>
     <sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Enable fullscreen integration</sys:String>
 
-    <sys:String x:Key="LOCCommonIntegration">Appearance</sys:String>
+    <sys:String x:Key="LOCCommonIntegration">外観</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInCustomTheme">Enable custom theme integration (Only if integrated in custom theme)</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonHeader">Display the plugin button in window title bar</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonSide">Display the plugin button in the side bar</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonHeader">ウィンドウタイトルバーにプラグインボタンを表示する</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonSide">サイドバーにプラグインボタンを表示</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButton">Show plugin button in game details</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInDescription">Show plugin information in game details</sys:String>
 

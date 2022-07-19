@@ -12,7 +12,7 @@
     
     <!-- Filters -->
 
-    <sys:String x:Key="LOCCommonUsedFilteredGames">Currently filtered games used</sys:String>
+    <sys:String x:Key="LOCCommonUsedFilteredGames">Jogos filtrados atualmente em uso</sys:String>
 
     <!-- Transfer plugin data -->
 
@@ -175,8 +175,8 @@ Por favor, tente novamente.</sys:String>
     <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Erro adicionando a tag com {0}.
 Por favor, limpe todas as tags no menu de plugins.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Use old saved data for {0} [{1}]
-You must authenticate.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Use dados salvos antigos para {0} [{1}]
+Você deve autenticar.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Dimensões</sys:String>
