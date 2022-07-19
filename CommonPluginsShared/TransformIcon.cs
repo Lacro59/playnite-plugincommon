@@ -22,6 +22,7 @@
         private static string psn = "\uea5c";        
         private static string riot = "\uea6c";        
 		private static string goggames = "\ue9f1";
+		private static string legacygames = "\uea70";
 
         private static string retroachievements = "\ue910";      
         private static string rpcs3 = "\uea37";                  
@@ -56,6 +57,8 @@
         private static string wii = "\uea49";                    
         private static string mame = "\uea4a";
         private static string wiiu = "\uea5e";
+        private static string famicomdisksystem = "\uea6e";
+        private static string wonderswan = "\uea6f";
         #endregion
 
 
@@ -175,6 +178,9 @@
                 case "playstation":
                     stringReturn = psn;
                     break;
+                case "legacy games":
+                    stringReturn = legacygames;
+                    break;
                 #endregion
 
                 #region retrogaming
@@ -236,12 +242,20 @@
                 case "mame 2003 plus":
                     stringReturn = mame;
                     break;
+                case "famicon disk system":
+                    stringReturn = famicomdisksystem;
+                    break;
                 #endregion
 
                 default:
                     if (!ReturnEmpy)
                     {
                         stringReturn = Name;
+                    }
+
+                    if (Name.ToLower().Contains("wonderswan"))
+                    {
+                        stringReturn = wonderswan;
                     }
                     break;
             }
