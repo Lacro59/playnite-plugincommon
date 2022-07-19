@@ -9,7 +9,7 @@ namespace CommonPluginsStores.Epic.Models
 
     public class PlatinumRarity
     {
-        public int percent { get; set; }
+        public float percent { get; set; }
     }
 
     public class Tier
@@ -22,7 +22,7 @@ namespace CommonPluginsStores.Epic.Models
 
     public class Rarity
     {
-        public int percent { get; set; }
+        public float percent { get; set; }
     }
 
     public class Achievement3
