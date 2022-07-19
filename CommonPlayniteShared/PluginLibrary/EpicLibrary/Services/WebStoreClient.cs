@@ -29,7 +29,7 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary.Services
         public async Task<List<WebStoreModels.QuerySearchResponse.Data.CatalogItem.SearchStore.SearchStoreElement>> QuerySearch(string searchTerm)//public async Task<List<WebStoreModels.QuerySearchResponse.SearchStoreElement>> QuerySearch(string searchTerm)
         {
             var query = new WebStoreModels.QuerySearch();
-            query.variables.keywords = HttpUtility.UrlPathEncode(searchTerm);
+            query.variables.keywords = HttpUtility.UrlEncode(searchTerm);
             var content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
             var response = await httpClient.PostAsync(GraphQLEndpoint, content);
             var str = await response.Content.ReadAsStringAsync();
