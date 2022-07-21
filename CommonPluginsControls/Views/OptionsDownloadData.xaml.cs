@@ -43,6 +43,11 @@ namespace CommonPluginsControls.Controls
 
             if ((bool)PART_AllGames.IsChecked)
             {
+                
+            }
+
+            if((bool)PART_GamesMissing.IsChecked)
+            {
 
             }
 
@@ -79,7 +84,12 @@ namespace CommonPluginsControls.Controls
         {
             return _FilteredGames;
         }
-
+        
+        public bool GetMissingTags()
+        {
+            return (bool)PART_GamesMissing.IsChecked;
+        }
+        
         public bool GetOnlyMissing()
         {
             return (bool)PART_OnlyMissing.IsChecked;

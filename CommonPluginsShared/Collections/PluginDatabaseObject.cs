@@ -706,6 +706,27 @@ namespace CommonPluginsShared.Collections
                     Common.LogError(ex, false, $"Tag insert error with {game.Name}", true, PluginName, string.Format(resources.GetString("LOCCommonNotificationTagError"), game.Name));
                 }
             }
+            else
+            {
+                if (game.TagIds != null)
+                {
+                    game.TagIds.Add((Guid)AddNoHltbDataTag());
+                }
+                else
+                {
+                    game.TagIds = new List<Guid> { (Guid)AddNoHltbDataTag() };
+                }
+
+                if (!noUpdate)
+                {
+                    Application.Current.Dispatcher?.Invoke(() =>
+                    {
+                        PlayniteApi.Database.Games.Update(game);
+                        game.OnPropertyChanged();
+                    }, DispatcherPriority.Send);
+                }
+
+            }
         }
 
         public void AddTag(Guid Id, bool noUpdate = false)
@@ -783,7 +804,14 @@ namespace CommonPluginsShared.Collections
             {
                 return;
             }
-            PlayniteDb = PlayniteDb.FindAll(x => Get(x.Id, true).HasData);
+
+            if (View.GetMissingTags())
+            {
+                PlayniteDb = PlayniteDb.FindAll(x => !Get(x.Id, true).HasData);
+            } else
+            {
+                PlayniteDb = PlayniteDb.FindAll(x => Get(x.Id, true).HasData);
+            }
 
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
                 $"{PluginName} - {resources.GetString("LOCCommonAddingAllTag")}",
@@ -993,6 +1021,10 @@ namespace CommonPluginsShared.Collections
             }
         }
 
+        private Guid? AddNoHltbDataTag()
+        {
+            return CheckTagExist($"{resources.GetString("LOCNoData")}");
+        }
 
         public virtual void SetThemesResources(Game game)
         {
