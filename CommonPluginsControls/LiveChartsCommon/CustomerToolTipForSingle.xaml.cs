@@ -1,6 +1,8 @@
 ﻿using LiveCharts.Wpf;
 using System.ComponentModel;
 using LiveCharts;
+using System.Windows.Media;
+using System.Windows;
 
 namespace CommonPluginsControls.LiveChartsCommon
 {
@@ -27,6 +29,19 @@ namespace CommonPluginsControls.LiveChartsCommon
                 OnPropertyChanged("Data");
             }
         }
+
+
+        public FontFamily TextFontFamily
+        {
+            get { return (FontFamily)GetValue(ModeProperty); }
+            set { SetValue(ModeProperty, value); }
+        }
+
+        public static readonly DependencyProperty ModeProperty = DependencyProperty.Register(
+            nameof(TextFontFamily),
+            typeof(FontFamily),
+            typeof(CustomerToolTipForSingle),
+            new FrameworkPropertyMetadata(null));
         #endregion
 
 

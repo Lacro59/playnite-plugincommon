@@ -24,7 +24,7 @@
                                         <ColumnDefinition Width="Auto" SharedSizeGroup="Value" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Column="0" FontFamily="{DynamicResource CommonFont}"
+                                    <TextBlock Grid.Column="0" FontFamily="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.TextFontFamily}"
                                                Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForSingle.Name), FallbackValue='test'}"
                                                FontSize="16" VerticalAlignment="Center" Style="{DynamicResource BaseTextBlockStyle}" />
 
