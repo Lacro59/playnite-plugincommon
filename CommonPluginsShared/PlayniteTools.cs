@@ -581,7 +581,6 @@ namespace CommonPluginsShared
             result = API.Instance.ExpandGameVariables(game, inputString);
             
 
-
             // Dropbox
             if (result.Contains("{Dropbox"))
             {
@@ -603,7 +602,7 @@ namespace CommonPluginsShared
             if (result.Contains("{RetroArchScreenshotsDir"))
             {
                 string RetroarchScreenshots = string.Empty;
-                var emulator = API.Instance.Database.Emulators.Where(x => x.Name.Contains("RetroArch", StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+                Emulator emulator = API.Instance.Database.Emulators.Where(x => x.Name.Contains("RetroArch", StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
                 if (emulator != null)
                 {
                     string cfg = Path.Combine(emulator.InstallDir, "retroarch.cfg");
@@ -618,8 +617,12 @@ namespace CommonPluginsShared
                             {
                                 RetroarchScreenshots = line.Replace("screenshot_directory = ", string.Empty)
                                                             .Replace("\"", string.Empty)
-                                                            .Trim()
-                                                            .Replace(":", emulator.InstallDir);
+                                                            .Trim();
+
+                                if (!File.Exists(RetroarchScreenshots))
+                                {
+                                    RetroarchScreenshots = RetroarchScreenshots.Replace(":", emulator.InstallDir);
+                                }                          
                             }
                         }
                         file.Close();
