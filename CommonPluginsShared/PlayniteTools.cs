@@ -149,9 +149,9 @@ namespace CommonPluginsShared
                 return false;
             }
 
-            foreach (var action in game.GameActions)
+            foreach (GameAction action in game.GameActions)
             {
-                var emulator = API.Instance.Database.Emulators?.FirstOrDefault(e => e.Id == action?.EmulatorId);
+                Emulator emulator = API.Instance.Database.Emulators?.FirstOrDefault(e => e.Id == action?.EmulatorId);
 
                 if (emulator == null)
                 {
@@ -180,6 +180,44 @@ namespace CommonPluginsShared
             return false;
         }
 
+        public static bool GameUseScummVM(Game game)
+        {
+            if (game?.GameActions == null)
+            {
+                return false;
+            }
+
+            foreach (GameAction action in game.GameActions)
+            {
+                Emulator emulator = API.Instance.Database.Emulators?.FirstOrDefault(e => e.Id == action?.EmulatorId);
+
+                if (emulator == null)
+                {
+                    logger.Warn($"No emulator find for {game.Name}");
+                    return false;
+                }
+
+                string BuiltInConfigId = string.Empty;
+                if (emulator.BuiltInConfigId == null)
+                {
+                    logger.Warn($"No BuiltInConfigId find for {emulator.Name}");
+                }
+                else
+                {
+                    BuiltInConfigId = emulator.BuiltInConfigId;
+                }
+
+                if (BuiltInConfigId.Contains("ScummVM", StringComparison.OrdinalIgnoreCase)
+                    || emulator.Name.Contains("ScummVM", StringComparison.OrdinalIgnoreCase)
+                    || emulator.InstallDir.Contains("ScummVM", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public static bool GameUseRetroArch(Game game)
         {
             if (game?.GameActions == null)
@@ -187,9 +225,9 @@ namespace CommonPluginsShared
                 return false;
             }
 
-            foreach (var action in game.GameActions)
+            foreach (GameAction action in game.GameActions)
             {
-                var emulator = API.Instance.Database.Emulators?.FirstOrDefault(e => e.Id == action?.EmulatorId);
+                Emulator emulator = API.Instance.Database.Emulators?.FirstOrDefault(e => e.Id == action?.EmulatorId);
 
                 if (emulator == null)
                 {
