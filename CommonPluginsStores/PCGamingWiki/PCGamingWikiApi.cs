@@ -3,6 +3,7 @@ using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using CommonPluginsShared;
 using Playnite.SDK;
+using Playnite.SDK.Data;
 using Playnite.SDK.Models;
 using System;
 using System.Linq;
@@ -23,9 +24,10 @@ namespace CommonPluginsStores.PCGamingWiki
 
 
         #region Url
-        private const string UrlBase = @"https://pcgamingwiki.com";
-        private const string UrlWithSteamId = UrlBase + @"/api/appid.php?appid={0}";
-        private const string UrlPCGamingWikiSearch = UrlBase + @"/w/index.php?search=";
+        private string UrlBase => @"https://pcgamingwiki.com";
+        private string UrlWithSteamId => UrlBase + @"/api/appid.php?appid={0}";
+        private string UrlPCGamingWikiSearch => UrlBase + @"/w/index.php?search=";
+        private string UrlPCGamingWikiSearchWithApi => UrlBase + @"/w/api.php?action=opensearch&format=json&formatversion=2&search={0}&namespace=0&limit=10";
         #endregion
 
 
@@ -99,43 +101,100 @@ namespace CommonPluginsStores.PCGamingWiki
             Name = Regex.Replace(Name, @"(demo[ ])", string.Empty, RegexOptions.IgnoreCase);
             Name = CommonPluginsShared.PlayniteTools.NormalizeGameName(Name);
 
-            url = UrlPCGamingWikiSearch + WebUtility.UrlEncode(Name);
 
-            Thread.Sleep(1000);
-            WebResponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
-            if (!WebResponse.ToLower().Contains("search results"))
+            // Search with release date
+            if (game.ReleaseDate != null) 
             {
-                return url;
-            }
-            else
-            {
-                urlMatch = GetUrlIsOneResult(WebResponse);
+                url = string.Format(UrlPCGamingWikiSearchWithApi, WebUtility.UrlEncode(Name + $" ({((ReleaseDate)game.ReleaseDate).Year})"));
+                urlMatch = GetWithSearchApi(url);
                 if (!urlMatch.IsNullOrEmpty())
                 {
                     return urlMatch;
+                }
+            }
+
+            // Normal search
+            url = string.Format(UrlPCGamingWikiSearchWithApi, WebUtility.UrlEncode(Name));
+            urlMatch = GetWithSearchApi(url);
+            if (!urlMatch.IsNullOrEmpty())
+            {
+                return urlMatch;
+            }
+
+
+            // old method
+            url = UrlPCGamingWikiSearch + WebUtility.UrlEncode(Name);
+            Thread.Sleep(1000);
+            WebResponse = Web.DownloadStringData(url).GetAwaiter().GetResult(); 
+            if (WebResponse.ToLower().Contains("database query error has occurred"))
+            {
+                logger.Warn($"Error on PCGamingWiki search with {Name}");
+            }
+            else
+            {
+                if (!WebResponse.ToLower().Contains("search results"))
+                {
+                    return url;
+                }
+                else
+                {
+                    urlMatch = GetUrlIsOneResult(WebResponse);
+                    if (!urlMatch.IsNullOrEmpty())
+                    {
+                        return urlMatch;
+                    }
                 }
             }
 
 
             url = UrlPCGamingWikiSearch + WebUtility.UrlEncode(game.Name);
-
             Thread.Sleep(1000);
             WebResponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
-            if (!WebResponse.ToLower().Contains("search results"))
+            if (WebResponse.ToLower().Contains("database query error has occurred"))
             {
-                return url;
+                logger.Warn($"Error on PCGamingWiki search with {game.Name}");
             }
             else
             {
-                urlMatch = GetUrlIsOneResult(WebResponse);
-                if (!urlMatch.IsNullOrEmpty())
+                if (!WebResponse.ToLower().Contains("search results"))
                 {
-                    return urlMatch;
+                    return url;
+                }
+                else
+                {
+                    urlMatch = GetUrlIsOneResult(WebResponse);
+                    if (!urlMatch.IsNullOrEmpty())
+                    {
+                        return urlMatch;
+                    }
                 }
             }
 
 
             return string.Empty;
+        }
+
+
+        private string GetWithSearchApi(string url)
+        {
+            string urlFinded = string.Empty;
+
+            try
+            {
+                string WebResponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
+                Serialization.TryFromJson(WebResponse, out dynamic data);
+
+                if (data != null && data[3]?.Count > 0)
+                {
+                    urlFinded = data[3][0];
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+            }
+
+            return urlFinded;
         }
 
 
@@ -167,8 +226,5 @@ namespace CommonPluginsStores.PCGamingWiki
 
             return url;
         }
-
-
-
     }
 }
