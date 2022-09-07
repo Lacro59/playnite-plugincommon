@@ -45,6 +45,9 @@ namespace CommonPluginsShared.Collections
 
 
         [DontSerialize]
+        public bool IsInstalled => Game?.IsInstalled ?? default;
+
+        [DontSerialize]
         public bool IsDeleted { get; set; }
 
         [DontSerialize]
