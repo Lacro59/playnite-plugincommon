@@ -42,16 +42,7 @@ namespace CommonPluginsShared.Collections
 
 
         private bool _isLoaded = false;
-        public bool IsLoaded
-        {
-            get => _isLoaded;
-
-            set
-            {
-                _isLoaded = value;
-                OnPropertyChanged();
-            }
-        }
+        public bool IsLoaded { get => _isLoaded; set => SetValue(ref _isLoaded, value); }
 
         public bool IsViewOpen = false;
 

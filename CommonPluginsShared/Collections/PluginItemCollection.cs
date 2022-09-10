@@ -9,9 +9,6 @@ namespace CommonPluginsShared.Collections
 {
     public class PluginItemCollection<TItem> : ItemCollection<TItem> where TItem : PluginDataBaseGameBase
     {
-        private ILogger logger = LogManager.GetLogger();
-
-
         public PluginItemCollection(string path, GameDatabaseCollection type = GameDatabaseCollection.Uknown) : base(path, type)
         {
         }

@@ -43,6 +43,15 @@ namespace CommonPluginsShared.Collections
         [DontSerialize]
         public ulong Playtime => Game?.Playtime ?? default;
 
+        [DontSerialize]
+        public bool Favorite => Game?.Favorite ?? default;
+
+        [DontSerialize]
+        public GameSource Source => Game?.Source ?? default;
+
+
+        [DontSerialize]
+        public bool IsInstalled => Game?.IsInstalled ?? default;
 
         [DontSerialize]
         public bool IsDeleted { get; set; }
