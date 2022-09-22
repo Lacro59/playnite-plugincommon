@@ -560,5 +560,10 @@ namespace CommonPlayniteShared.Database
         {
             throw new NotImplementedException();
         }
+
+        public IDisposable BufferedUpdate()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
