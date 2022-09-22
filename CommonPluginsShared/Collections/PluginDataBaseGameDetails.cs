@@ -14,21 +14,9 @@ namespace CommonPluginsShared.Collections
 
 
         [DontSerialize]
-        public override bool HasData
-        {
-            get
-            {
-                return Items.Count > 0;
-            }
-        }
+        public override bool HasData => Items.Count > 0;
 
         [DontSerialize]
-        public override int Count
-        {
-            get
-            {
-                return Items?.Count ?? 0;
-            }
-        }
+        public override int Count => Items?.Count ?? 0;
     }
 }

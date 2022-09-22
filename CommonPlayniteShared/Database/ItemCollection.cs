@@ -13,9 +13,9 @@ using System.Threading.Tasks;
 
 namespace CommonPlayniteShared.Database
 {
-    public class ItemCollection<TItem> : IItemCollection<TItem> where TItem : DatabaseObject
+    public class ItemCollection<TItem> : IDisposable, ICollection<TItem>, IEnumerable<TItem>, IEnumerable where TItem : DatabaseObject
     {
-        private ILogger logger = LogManager.GetLogger();
+        internal ILogger logger = LogManager.GetLogger();
         private readonly object collectionLock = new object();
         private string storagePath;
         private readonly Action<TItem> initMethod;
@@ -548,17 +548,6 @@ namespace CommonPlayniteShared.Database
         public void Dispose()
         {
             this.Dispose();
-        }
-
-
-        public TItem Add(MetadataProperty property)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<TItem> Add(IEnumerable<MetadataProperty> properties)
-        {
-            throw new NotImplementedException();
         }
 
         public IDisposable BufferedUpdate()

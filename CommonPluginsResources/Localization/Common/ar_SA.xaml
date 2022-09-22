@@ -144,8 +144,8 @@ Do you want to open the directory?</sys:String>
     <sys:String x:Key="LOCCommonSelectData">Download data for selected games</sys:String>
     <sys:String x:Key="LOCCommonDownloadPluginData">تحميل بيانات الإضافة...</sys:String>
     <sys:String x:Key="LOCCommonGetAllDatas">تحميل بيانات جميع الألعا</sys:String>
-    <sys:String x:Key="LOCCommonDeletePluginData">حذف بيانات الإضاف</sys:String>
-    <sys:String x:Key="LOCCommonClearAllDatas">حذف بيانات جميع الألعا</sys:String>
+    <sys:String x:Key="LOCCommonDeletePluginData">حذف بيانات الإضافة</sys:String>
+    <sys:String x:Key="LOCCommonClearAllDatas">حذف بيانات جميع الألعاب</sys:String>
     <sys:String x:Key="LOCCommonRemoveAllTags">Remove plugin tag</sys:String>
 
     <!-- CommonGlobalProgress -->
@@ -179,11 +179,11 @@ Please clear all the tags in the plugin menu.</sys:String>
 You must authenticate.</sys:String>
 
 
-    <sys:String x:Key="LOCCommonDimensions">الأبعا</sys:String>
+    <sys:String x:Key="LOCCommonDimensions">الأبعاد</sys:String>
     <sys:String x:Key="LOCCommonStyles">الأنماط</sys:String>
     <sys:String x:Key="LOCCommonTypes">الأنواع</sys:String>
     <sys:String x:Key="LOCCommonSortByDate">فرز حسب التاريخ</sys:String>
-    <sys:String x:Key="LOCCommonSortByScore">فرز حسب النتيج</sys:String>
+    <sys:String x:Key="LOCCommonSortByScore">فرز حسب النتيجة</sys:String>
 
 
     <sys:String x:Key="LOCCommonMisc">Misc</sys:String>

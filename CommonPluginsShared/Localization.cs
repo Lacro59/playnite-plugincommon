@@ -29,11 +29,7 @@ namespace CommonPluginsShared
             {
 #if DEBUG
                 // Force development localization
-                Task.Run(() =>
-                {
-                    Thread.Sleep(2000);
-                    SetPluginLanguage(pluginFolder, "LocSource", true);
-                });
+                SetPluginLanguage(pluginFolder, "LocSource", true);
 #endif
             }
 

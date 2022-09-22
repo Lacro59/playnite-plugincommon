@@ -231,6 +231,7 @@
                     stringReturn = supernintendo;
                     break;
                 case "nintendo switch":
+                case "switch":
                     stringReturn = nintendoswitch;
                     break;
                 case "nintendo wii":
