@@ -53,6 +53,11 @@
             </RadioButton>
 
             <CheckBox Grid.Row="4" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                      IsChecked="False" VerticalAlignment="Bottom"
+                      Name="PART_TagMissing"
+                      Content="{DynamicResource LOCCommonMissingData}" />
+
+            <CheckBox Grid.Row="4" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                       IsChecked="True" VerticalAlignment="Bottom"
                       Name="PART_OnlyMissing"
                       Content="{DynamicResource LOCCommonOnlyMissing}" />
