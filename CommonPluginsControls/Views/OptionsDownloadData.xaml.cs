@@ -15,6 +15,8 @@ namespace CommonPluginsControls.Controls
     /// </summary>
     public partial class OptionsDownloadData : UserControl
     {
+        private static IResourceProvider resources = new ResourceProvider();
+
         private IPlayniteAPI _PlayniteApi { get; set; }
         private List<Game> _FilteredGames { get; set; }
 
@@ -28,6 +30,7 @@ namespace CommonPluginsControls.Controls
             if (WithoutMissing)
             {
                 PART_OnlyMissing.Visibility = Visibility.Collapsed;
+                PART_BtDownload.Content = resources.GetString("LOCGameTagsTitle");
             }
             else
             {
