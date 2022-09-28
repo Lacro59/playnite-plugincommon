@@ -46,6 +46,9 @@ namespace CommonPluginsShared.Collections
 
         public bool IsViewOpen = false;
 
+        public bool TagMissing { get; set; } = false;
+
+
         public RelayCommand<Guid> GoToGame { get; }
 
 
@@ -697,7 +700,7 @@ namespace CommonPluginsShared.Collections
                     Common.LogError(ex, false, $"Tag insert error with {game.Name}", true, PluginName, string.Format(resources.GetString("LOCCommonNotificationTagError"), game.Name));
                 }
             }
-            else
+            else if (TagMissing)
             {
                 if (game.TagIds != null)
                 {
@@ -791,17 +794,11 @@ namespace CommonPluginsShared.Collections
             windowExtension.ShowDialog();
 
             var PlayniteDb = View.GetFilteredGames();
+            TagMissing = View.GetTagMissing();
+
             if (PlayniteDb == null)
             {
                 return;
-            }
-
-            if (View.GetMissingTags())
-            {
-                PlayniteDb = PlayniteDb.FindAll(x => !Get(x.Id, true).HasData);
-            } else
-            {
-                PlayniteDb = PlayniteDb.FindAll(x => Get(x.Id, true).HasData);
             }
 
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
@@ -843,6 +840,8 @@ namespace CommonPluginsShared.Collections
 
                         activateGlobalProgress.CurrentProgressValue++;
                     }
+
+                    TagMissing = false;
 
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
@@ -1012,7 +1011,7 @@ namespace CommonPluginsShared.Collections
             }
         }
 
-        private Guid? AddNoDataTag()
+        public Guid? AddNoDataTag()
         {
             return CheckTagExist($"{resources.GetString("LOCNoData")}");
         }

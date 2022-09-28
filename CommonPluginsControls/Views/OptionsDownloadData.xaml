@@ -51,9 +51,11 @@
             <RadioButton Name="PART_GamesFavorite" Grid.Column="2" Grid.Row="2" GroupName="RadioFilters">
                 <Label Content="{DynamicResource LOCQuickFilterFavorites}" />
             </RadioButton>
-            <RadioButton Name="PART_GamesMissing" Grid.Column="0" Grid.Row="4" GroupName="RadioFilters">
-                <Label Content="{DynamicResource LOCCommonMissingData}" />
-            </RadioButton>
+
+            <CheckBox Grid.Row="4" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                      IsChecked="False" VerticalAlignment="Bottom"
+                      Name="PART_TagMissing"
+                      Content="{DynamicResource LOCCommonMissingData}" />
 
             <CheckBox Grid.Row="4" Grid.ColumnSpan="3" HorizontalAlignment="Right"
                       IsChecked="True" VerticalAlignment="Bottom"

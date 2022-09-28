@@ -29,6 +29,10 @@ namespace CommonPluginsControls.Controls
             {
                 PART_OnlyMissing.Visibility = Visibility.Collapsed;
             }
+            else
+            {
+                PART_TagMissing.Visibility = Visibility.Collapsed;
+            }
         }
 
 
@@ -44,11 +48,6 @@ namespace CommonPluginsControls.Controls
             if ((bool)PART_AllGames.IsChecked)
             {
                 
-            }
-
-            if((bool)PART_GamesMissing.IsChecked)
-            {
-
             }
 
             if ((bool)PART_GamesRecentlyPlayed.IsChecked)
@@ -84,12 +83,11 @@ namespace CommonPluginsControls.Controls
         {
             return _FilteredGames;
         }
-        
-        public bool GetMissingTags()
+        public bool GetTagMissing()
         {
-            return (bool)PART_GamesMissing.IsChecked;
+            return (bool)PART_TagMissing.IsChecked;
         }
-        
+
         public bool GetOnlyMissing()
         {
             return (bool)PART_OnlyMissing.IsChecked;
