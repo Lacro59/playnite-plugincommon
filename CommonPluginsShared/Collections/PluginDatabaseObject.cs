@@ -701,11 +701,11 @@ namespace CommonPluginsShared.Collections
             {
                 if (game.TagIds != null)
                 {
-                    game.TagIds.Add((Guid)AddNoHltbDataTag());
+                    game.TagIds.Add((Guid)AddNoDataTag());
                 }
                 else
                 {
-                    game.TagIds = new List<Guid> { (Guid)AddNoHltbDataTag() };
+                    game.TagIds = new List<Guid> { (Guid)AddNoDataTag() };
                 }
 
                 if (!noUpdate)
@@ -1012,7 +1012,7 @@ namespace CommonPluginsShared.Collections
             }
         }
 
-        private Guid? AddNoHltbDataTag()
+        private Guid? AddNoDataTag()
         {
             return CheckTagExist($"{resources.GetString("LOCNoData")}");
         }
