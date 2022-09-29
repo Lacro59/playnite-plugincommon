@@ -47,8 +47,9 @@
     
     <sys:String x:Key="LOCCommonSelectFilters">Seleziona filtri</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Aggiunti Di Recente</sys:String>
-    <sys:String x:Key="LOCCommonOnlyMissing">Scarica solo i dati mancanti</sys:String>
-    
+    <sys:String x:Key="LOCCommonOnlyMissing">Mancano solo</sys:String>
+    <sys:String x:Key="LOCCommonMissingData">Dati mancanti delle etichette dei giochi</sys:String>
+
     <sys:String x:Key="LOCCommonTotal">Totale</sys:String>
     <sys:String x:Key="LOCCommonCut">Taglia</sys:String>
 
@@ -65,6 +66,7 @@
     <sys:String x:Key="LOCCommon80to90">da 80 a 90 ore</sys:String>
     <sys:String x:Key="LOCCommon90to100">da 90 a 100 ore</sys:String>
     <sys:String x:Key="LOCCommon100plus">100 ore e più</sys:String>
+    <sys:String x:Key="LOCCommonNoData">Nessuna informazione</sys:String>
 
     <sys:String x:Key="LOCCommonDefaultSorting">Ordinamento predefinito della lista giochi</sys:String>
 
