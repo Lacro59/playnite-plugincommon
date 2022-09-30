@@ -47,8 +47,9 @@
     
     <sys:String x:Key="LOCCommonSelectFilters">Обрати фільтри</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Нещодавно додано</sys:String>
-    <sys:String x:Key="LOCCommonOnlyMissing">Завантажувати лише відсутні</sys:String>
-    
+    <sys:String x:Key="LOCCommonOnlyMissing">Лише відсутні</sys:String>
+    <sys:String x:Key="LOCCommonMissingData">Поставити теги іграм з відсутніми даними</sys:String>
+
     <sys:String x:Key="LOCCommonTotal">Усього</sys:String>
     <sys:String x:Key="LOCCommonCut">Обрізати</sys:String>
 
@@ -65,6 +66,7 @@
     <sys:String x:Key="LOCCommon80to90">Від 80 до 90 годин</sys:String>
     <sys:String x:Key="LOCCommon90to100">Від 90 до 100 годин</sys:String>
     <sys:String x:Key="LOCCommon100plus">100 годин і більше</sys:String>
+    <sys:String x:Key="LOCCommonNoData">Дані відсутні</sys:String>
 
     <sys:String x:Key="LOCCommonDefaultSorting">Типове сортування списку ігор</sys:String>
 

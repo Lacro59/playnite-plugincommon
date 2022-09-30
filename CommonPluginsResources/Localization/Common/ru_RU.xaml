@@ -48,8 +48,9 @@
     
     <sys:String x:Key="LOCCommonSelectFilters">Введите фильтры</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Недавно добавленные</sys:String>
-    <sys:String x:Key="LOCCommonOnlyMissing">Докачать только недостающие метаданные</sys:String>
-    
+    <sys:String x:Key="LOCCommonOnlyMissing">Only missing</sys:String>
+    <sys:String x:Key="LOCCommonMissingData">Tag games missing data</sys:String>
+
     <sys:String x:Key="LOCCommonTotal">Всего</sys:String>
     <sys:String x:Key="LOCCommonCut">Вырезать</sys:String>
 
@@ -66,6 +67,7 @@
     <sys:String x:Key="LOCCommon80to90">От 80 до 90 часов</sys:String>
     <sys:String x:Key="LOCCommon90to100">От 90 до 100 часов</sys:String>
     <sys:String x:Key="LOCCommon100plus">100 часов и больше</sys:String>
+    <sys:String x:Key="LOCCommonNoData">No data</sys:String>
 
     <sys:String x:Key="LOCCommonDefaultSorting">Сортировка списка игр по умолчанию</sys:String>
 
