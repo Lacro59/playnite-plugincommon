@@ -41,16 +41,19 @@ namespace CommonPluginsShared
                 {
                     DateTime LastDate = default;
                     string FileName = Path.GetFileName(CommonFile);
-                    if (resources.GetResource(FileName) != null)
+                    string LastFolderName = Path.GetFileName(Path.GetDirectoryName(CommonFile));
+                    string RessourceName = LastFolderName + "_" + FileName;
+
+                    if (resources.GetResource(RessourceName) != null)
                     {
-                        LastDate = (DateTime)resources.GetResource(FileName);
+                        LastDate = (DateTime)resources.GetResource(RessourceName);
                     }
 
                     DateTime lastModified = File.GetLastWriteTime(CommonFile);
                     if (lastModified > LastDate)
                     {
-                        Application.Current.Resources.Remove(FileName);
-                        Application.Current.Resources.Add(FileName, lastModified);
+                        Application.Current.Resources.Remove(RessourceName);
+                        Application.Current.Resources.Add(RessourceName, lastModified);
 
                         Common.LogDebug(true, $"Load {CommonFile} - {lastModified.ToString("yyyy-MM-dd HH:mm:ss")}");
 
