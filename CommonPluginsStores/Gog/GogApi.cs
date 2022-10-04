@@ -416,6 +416,11 @@ namespace CommonPluginsStores.Gog
         {
             ObservableCollection<DlcInfos> Dlcs = new ObservableCollection<DlcInfos>();
 
+            if (DlcsData?.products == null)
+            {
+                return Dlcs;
+            }
+
             foreach (Product el in DlcsData?.products)
             {
                 try

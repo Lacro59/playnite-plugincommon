@@ -46,6 +46,9 @@ namespace CommonPluginsShared.Collections
 
         public bool IsViewOpen = false;
 
+        public bool TagMissing { get; set; } = false;
+
+
         public RelayCommand<Guid> GoToGame { get; }
 
 
@@ -697,6 +700,27 @@ namespace CommonPluginsShared.Collections
                     Common.LogError(ex, false, $"Tag insert error with {game.Name}", true, PluginName, string.Format(resources.GetString("LOCCommonNotificationTagError"), game.Name));
                 }
             }
+            else if (TagMissing)
+            {
+                if (game.TagIds != null)
+                {
+                    game.TagIds.Add((Guid)AddNoDataTag());
+                }
+                else
+                {
+                    game.TagIds = new List<Guid> { (Guid)AddNoDataTag() };
+                }
+
+                if (!noUpdate)
+                {
+                    Application.Current.Dispatcher?.Invoke(() =>
+                    {
+                        PlayniteApi.Database.Games.Update(game);
+                        game.OnPropertyChanged();
+                    }, DispatcherPriority.Send);
+                }
+
+            }
         }
 
         public void AddTag(Guid Id, bool noUpdate = false)
@@ -770,11 +794,12 @@ namespace CommonPluginsShared.Collections
             windowExtension.ShowDialog();
 
             var PlayniteDb = View.GetFilteredGames();
+            TagMissing = View.GetTagMissing();
+
             if (PlayniteDb == null)
             {
                 return;
             }
-            PlayniteDb = PlayniteDb.FindAll(x => Get(x.Id, true).HasData);
 
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
                 $"{PluginName} - {resources.GetString("LOCCommonAddingAllTag")}",
@@ -815,6 +840,8 @@ namespace CommonPluginsShared.Collections
 
                         activateGlobalProgress.CurrentProgressValue++;
                     }
+
+                    TagMissing = false;
 
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
@@ -984,6 +1011,10 @@ namespace CommonPluginsShared.Collections
             }
         }
 
+        public Guid? AddNoDataTag()
+        {
+            return CheckTagExist($"{resources.GetString("LOCNoData")}");
+        }
 
         public virtual void SetThemesResources(Game game)
         {

@@ -47,8 +47,9 @@
     
     <sys:String x:Key="LOCCommonSelectFilters">اختيار التصفية</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Recently Added</sys:String>
-    <sys:String x:Key="LOCCommonOnlyMissing">تنزيل المفقود فقط</sys:String>
-    
+    <sys:String x:Key="LOCCommonOnlyMissing">Only missing</sys:String>
+    <sys:String x:Key="LOCCommonMissingData">Tag games missing data</sys:String>
+
     <sys:String x:Key="LOCCommonTotal">الإجمال</sys:String>
     <sys:String x:Key="LOCCommonCut">Cut</sys:String>
 
@@ -65,6 +66,7 @@
     <sys:String x:Key="LOCCommon80to90">80 إلى 90 ساع</sys:String>
     <sys:String x:Key="LOCCommon90to100">90 إلى 100 ساع</sys:String>
     <sys:String x:Key="LOCCommon100plus">100 ساعة و أكثر</sys:String>
+    <sys:String x:Key="LOCCommonNoData">No data</sys:String>
 
     <sys:String x:Key="LOCCommonDefaultSorting">Default game list sorting</sys:String>
 
