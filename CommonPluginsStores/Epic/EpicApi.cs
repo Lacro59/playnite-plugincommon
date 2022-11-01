@@ -133,7 +133,7 @@ namespace CommonPluginsStores.Epic
 
             try
             {
-                AccountInfos accountInfos = new AccountInfos{ IsCurrent = true };
+                AccountInfos accountInfos = new AccountInfos { IsCurrent = true };
                 return accountInfos;
             }
             catch (Exception ex)
@@ -176,7 +176,7 @@ namespace CommonPluginsStores.Epic
             }
 
             try
-            { 
+            {
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
 
                 string Url = string.Empty;
@@ -410,7 +410,7 @@ namespace CommonPluginsStores.Epic
                     {
                         IsOwned = DlcIsOwned(Id, el.id);
                     }
-                    
+
                     DlcInfos dlc = new DlcInfos
                     {
                         Id = el.id,
@@ -441,6 +441,11 @@ namespace CommonPluginsStores.Epic
         #region Epic
         public string GetProductSlug(string Name)
         {
+            if (Name.IsEqual("warhammer 40 000 mechanicus"))
+            {
+                Name = "warhammer mechanicus";
+            }
+
             string ProductSlug = string.Empty;
 
             try
@@ -479,7 +484,8 @@ namespace CommonPluginsStores.Epic
         {
             string NameSpace = string.Empty;
 
-            try {
+            try
+            {
                 using (WebStoreClient client = new WebStoreClient())
                 {
                     var catalogs = client.QuerySearch(Name).GetAwaiter().GetResult();
