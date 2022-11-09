@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,6 +24,7 @@ namespace CommonPluginsControls.Controls
     {
         private DispatcherTimer timer;
         private bool isSeekingMedia = false;
+        private bool isLeave = false;
 
 
         #region Properties
@@ -56,6 +58,8 @@ namespace CommonPluginsControls.Controls
         public MediaElementExtend()
         {
             InitializeComponent();
+
+            PART_Controls.Visibility = Visibility.Collapsed;
 
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(1);
@@ -153,6 +157,28 @@ namespace CommonPluginsControls.Controls
             PART_Video.Position = ts;
 
             isSeekingMedia = false;
+        }
+
+        private void Grid_MouseEnter(object sender, MouseEventArgs e)
+        {
+            isLeave = false;
+            PART_Controls.Visibility = Visibility.Visible;
+        }
+
+        private void Grid_MouseLeave(object sender, MouseEventArgs e)
+        {
+            isLeave = true;
+            Task.Run(() => 
+            {
+                Thread.Sleep(1000);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (isLeave)
+                    {
+                        PART_Controls.Visibility = Visibility.Collapsed;
+                    }
+                });
+            });
         }
     }
 }
