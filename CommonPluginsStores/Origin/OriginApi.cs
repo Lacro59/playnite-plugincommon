@@ -20,15 +20,15 @@ namespace CommonPluginsStores.Origin
     public class OriginApi : StoreApi
     {
         #region Url
-        private const string UrlBase = @"https://www.origin.com";
-        private const string UrlAccountIdentity = @"https://gateway.ea.com/proxy/identity/pids/me";
-        private const string UrlUserProfile = UrlBase + @"/profile/user/{0}";
+        private static string UrlBase               => @"https://www.ea.com";
+        private static string UrlAccountIdentity    => @"https://gateway.ea.com/proxy/identity/pids/me";
+        private static string UrlUserProfile        => UrlBase + @"/profile/user/{0}";
 
-        private const string UrlUserFriends = @"https://friends.gs.ea.com/friends/2/users/{0}/friends?names=true";
-        private const string UrlAchievements = @"https://achievements.gameservices.ea.com/achievements/personas/{0}/{1}/all?lang={2}&metadata=true&fullset=true";
-        private const string UrlStoreGame = UrlBase + @"/store{0}";
+        private static string UrlUserFriends        => @"https://friends.gs.ea.com/friends/2/users/{0}/friends?names=true";
+        private static string UrlAchievements       => @"https://achievements.gameservices.ea.com/achievements/personas/{0}/{1}/all?lang={2}&metadata=true&fullset=true";
+        private static string UrlStoreGame          => UrlBase + @"/games{0}";
 
-        private const string UrlDataCurrency = @"https://data3.origin.com/defaults/web-defaults/localization/currency.json";
+        private static string UrlDataCurrency       => @"https://data3.origin.com/defaults/web-defaults/localization/currency.json";
         #endregion
 
 
@@ -102,7 +102,7 @@ namespace CommonPluginsStores.Origin
         #endregion
 
 
-        public OriginApi(string PluginName) : base(PluginName, ExternalPlugin.OriginLibrary, "Origin")
+        public OriginApi(string PluginName) : base(PluginName, ExternalPlugin.OriginLibrary, "EA")
         {
             AppsListPath = Path.Combine(PathStoresData, "Origin_AppsList.json");
         }
@@ -367,7 +367,7 @@ namespace CommonPluginsStores.Origin
             {
                 GameName = Name,
                 Name = ClientName,
-                Url = $"https://www.origin.com/{LangUrl}/game-library/ogd/{Id}/achievements"
+                Url = $"{UrlBase}/{LangUrl}/game-library/ogd/{Id}/achievements"
             };
         }
         #endregion
@@ -397,7 +397,7 @@ namespace CommonPluginsStores.Origin
                     Id = gameStoreDataResponse.offerId,
                     Id2 = gameStoreDataResponse?.platforms[0]?.achievementSetOverride?.ToString(),
                     Name = gameStoreDataResponse.i18n.displayName,
-                    Link = gameStoreDataResponse?.offerPath != null ? string.Format(UrlStoreGame, gameStoreDataResponse.offerPath) : string.Empty,
+                    Link = gameStoreDataResponse?.offerPath != null ? string.Format(UrlStoreGame, gameStoreDataResponse.gdpPath) : string.Empty,
                     Image = gameStoreDataResponse.imageServer + gameStoreDataResponse.i18n.packArtLarge,
                     Description = gameStoreDataResponse.i18n.longDescription
                 };
