@@ -8,6 +8,7 @@
         private static string gog = "\uea35";                    
         private static string battleNET = "\ue900";              
         private static string origin = "\ue904";                 
+        private static string ea = "\uea72";                 
         private static string xbox = "\ue908";                   
         private static string uplay = "\ue907";                  
         private static string epic = "\ue902";                   
@@ -104,7 +105,6 @@
                     stringReturn = manualAchievements;
                     break;
 
-                    
                 case "google play store":
                 case "play store":
                 case "android":
@@ -143,6 +143,10 @@
                     break;
                 case "origin":
                     stringReturn = origin;
+                    break;
+                case "ea app":
+                case "ea":
+                    stringReturn = ea;
                     break;
                 case "microsoft store":
 				case "xbox":
