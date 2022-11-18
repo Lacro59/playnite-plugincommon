@@ -27,7 +27,22 @@ namespace CommonPluginsShared
             return md5 + extension;
         }
 
-        public static string GetWebFile(string url)
+        public static bool FileWebIsCached(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+            {
+                return false;
+            }
+            if (!StringExtensions.IsHttpUrl(url)) 
+            {
+                return true;
+            }
+
+            string cacheFile = Path.Combine(CacheDirectory, GetFileNameFromUrl(url));
+            return File.Exists(cacheFile) && new FileInfo(cacheFile).Length != 0;
+        }
+
+        public static string GetWebFile(string url, int resize = 0)
         {
             if (string.IsNullOrEmpty(url))
             {
@@ -37,7 +52,7 @@ namespace CommonPluginsShared
             var cacheFile = Path.Combine(CacheDirectory, GetFileNameFromUrl(url));
             lock (cacheLock)
             {
-                if (File.Exists(cacheFile) && (new FileInfo(cacheFile)).Length != 0)
+                if (File.Exists(cacheFile) && new FileInfo(cacheFile).Length != 0)
                 {
                     //logger.Debug($"Returning {url} from file cache {cacheFile}.");
                     return cacheFile;
@@ -48,7 +63,18 @@ namespace CommonPluginsShared
 
                     try
                     {
-                        HttpDownloader.DownloadFile(url, cacheFile);
+                        if (resize > 0)
+                        {
+                            string tmpPath = Path.Combine(PlaynitePaths.ImagesCachePath, Path.GetFileName(cacheFile));
+                            HttpDownloader.DownloadFile(url, tmpPath);
+                            ImageTools.Resize(tmpPath, resize, resize, cacheFile);
+                            FileSystem.DeleteFileSafe(tmpPath);
+                        }
+                        else
+                        {
+                            HttpDownloader.DownloadFile(url, cacheFile);
+                        }
+
                         return cacheFile;
                     }
                     catch (WebException e)

@@ -19,7 +19,7 @@ namespace CommonPluginsShared
         public static MemoryCache Cache = new MemoryCache(Units.MegaBytesToBytes(100));
         private const string btmpPropsFld = "bitmappros";
 
-        public static string GetImagePath(string source)
+        public static string GetImagePath(string source, int resize = 0)
         {
             if (source.IsNullOrEmpty())
             {
@@ -49,7 +49,7 @@ namespace CommonPluginsShared
             {
                 try
                 {
-                    var cachedFile = HttpFileCachePlugin.GetWebFile(source);
+                    var cachedFile = HttpFileCachePlugin.GetWebFile(source, resize);
                     if (string.IsNullOrEmpty(cachedFile))
                     {
                         return HttpFileCache.GetWebFile(source);
@@ -59,7 +59,7 @@ namespace CommonPluginsShared
                 }
                 catch (Exception exc) 
                 {
-                    logger.Error(exc, $"Failed to create bitmap from {source} file.");
+                    Common.LogError(exc, true, $"Failed to create bitmap from {source} file.");
                     return null;
                 }
             }
