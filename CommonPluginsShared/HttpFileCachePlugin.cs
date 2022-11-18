@@ -31,7 +31,7 @@ namespace CommonPluginsShared
         {
             if (string.IsNullOrEmpty(url))
             {
-                return false;
+                return true;
             }
             if (!StringExtensions.IsHttpUrl(url)) 
             {
