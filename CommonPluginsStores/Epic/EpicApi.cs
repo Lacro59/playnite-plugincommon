@@ -259,23 +259,7 @@ namespace CommonPluginsStores.Epic
                 {
                     try
                     {
-                        int indexStart = ResultWeb.IndexOf("window.__REACT_QUERY_INITIAL_QUERIES__ =");
-                        int indexEnd = ResultWeb.IndexOf("window.server_rendered");
-
-                        string stringStart = ResultWeb.Substring(0, indexStart + "window.__REACT_QUERY_INITIAL_QUERIES__ =".Length);
-                        string stringEnd = ResultWeb.Substring(indexEnd);
-
-                        int length = ResultWeb.Length - stringStart.Length - stringEnd.Length;
-
-                        string JsonDataString = ResultWeb.Substring(
-                            indexStart + "window.__REACT_QUERY_INITIAL_QUERIES__ =".Length,
-                            length
-                        );
-
-                        indexEnd = JsonDataString.IndexOf("}]};");
-                        length = JsonDataString.Length - (JsonDataString.Length - indexEnd - 3);
-                        JsonDataString = JsonDataString.Substring(0, length);
-
+                        string JsonDataString = Tools.GetJsonInString(ResultWeb, "window.__REACT_QUERY_INITIAL_QUERIES__ =", "window.server_rendered", "}]};");
                         EpicData epicData = Serialization.FromJson<EpicData>(JsonDataString);
 
                         // Achievements data

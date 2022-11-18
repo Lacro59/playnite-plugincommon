@@ -182,7 +182,11 @@ namespace CommonPluginsStores
                             WindowsIdentity.GetCurrent().User.Value));
 
                     var findExpired = StoredCookies.FindAll(x => x.Expires != null && (DateTime)x.Expires <= DateTime.Now);
-                    if (findExpired?.Count > 0)
+
+                    FileInfo fileInfo = new FileInfo(FileCookies);
+                    bool isExpired = (fileInfo.LastWriteTime.AddDays(1) < DateTime.Now);
+
+                    if (findExpired?.Count > 0 || isExpired)
                     {
                         InfoMessage = "Expired cookies";
                     }
