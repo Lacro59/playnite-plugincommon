@@ -21,8 +21,8 @@ namespace CommonPluginsStores
 {
     public abstract class StoreApi : ObservableObject
     {
-        internal static readonly ILogger logger = LogManager.GetLogger();
-        internal static readonly IResourceProvider resources = new ResourceProvider();
+        internal static ILogger logger => LogManager.GetLogger();
+        internal static IResourceProvider resources => new ResourceProvider();
 
 
         protected static IWebView _WebViewOffscreen;
@@ -136,7 +136,7 @@ namespace CommonPluginsStores
 
         internal string PluginName { get; }
         internal string ClientName { get; }
-        internal string Local = "en_US";
+        internal string Local { get; set; } = "en_US";
 
         internal string PathStoresData { get; }
         internal string FileCookies { get; }
