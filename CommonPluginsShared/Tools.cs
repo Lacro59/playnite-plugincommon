@@ -134,6 +134,49 @@ namespace CommonPluginsShared
         }
 
 
+        public static double GetElapsedSeconde(string value, string type)
+        {
+            if (double.TryParse(value, out double time))
+            {
+                return GetElapsedSeconde(time, type);
+            }
+            return -1;
+        }
+        public static double GetElapsedSeconde(double value, string type)
+        {
+            switch (type.ToLower())
+            {
+                case "h":
+                    double h = value;
+                    return h * 3600;
+
+                case "min":
+                    double m = value;
+                    return m * 60;
+
+                case "s":
+                    return value;
+            }
+            return -1;
+        }
+        public static double GetElapsedSeconde(string value)
+        {
+            if (value.Contains("h", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return GetElapsedSeconde(value.ToLower().Replace("h", string.Empty), "h");
+            }
+            if (value.Contains("min", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return GetElapsedSeconde(value.ToLower().Replace("min", string.Empty), "min");
+            }
+            if (value.Contains("s", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return GetElapsedSeconde(value.ToLower().Replace("s", string.Empty), "s");
+            }
+            return -1;
+        }
+
+
         public static string GetJsonInString(string str, string strStart, string strEnd, string strPurge = "")
         {
             try
