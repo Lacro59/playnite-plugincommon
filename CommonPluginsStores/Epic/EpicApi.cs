@@ -133,7 +133,7 @@ namespace CommonPluginsStores.Epic
 
             try
             {
-                AccountInfos accountInfos = new AccountInfos{ IsCurrent = true };
+                AccountInfos accountInfos = new AccountInfos { IsCurrent = true };
                 return accountInfos;
             }
             catch (Exception ex)
@@ -176,7 +176,7 @@ namespace CommonPluginsStores.Epic
             }
 
             try
-            { 
+            {
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
 
                 string Url = string.Empty;
@@ -259,23 +259,7 @@ namespace CommonPluginsStores.Epic
                 {
                     try
                     {
-                        int indexStart = ResultWeb.IndexOf("window.__REACT_QUERY_INITIAL_QUERIES__ =");
-                        int indexEnd = ResultWeb.IndexOf("window.server_rendered");
-
-                        string stringStart = ResultWeb.Substring(0, indexStart + "window.__REACT_QUERY_INITIAL_QUERIES__ =".Length);
-                        string stringEnd = ResultWeb.Substring(indexEnd);
-
-                        int length = ResultWeb.Length - stringStart.Length - stringEnd.Length;
-
-                        string JsonDataString = ResultWeb.Substring(
-                            indexStart + "window.__REACT_QUERY_INITIAL_QUERIES__ =".Length,
-                            length
-                        );
-
-                        indexEnd = JsonDataString.IndexOf("}]};");
-                        length = JsonDataString.Length - (JsonDataString.Length - indexEnd - 3);
-                        JsonDataString = JsonDataString.Substring(0, length);
-
+                        string JsonDataString = Tools.GetJsonInString(ResultWeb, "window.__REACT_QUERY_INITIAL_QUERIES__ =", "window.server_rendered", "}]};");
                         EpicData epicData = Serialization.FromJson<EpicData>(JsonDataString);
 
                         // Achievements data
@@ -410,7 +394,7 @@ namespace CommonPluginsStores.Epic
                     {
                         IsOwned = DlcIsOwned(Id, el.id);
                     }
-                    
+
                     DlcInfos dlc = new DlcInfos
                     {
                         Id = el.id,
@@ -441,6 +425,11 @@ namespace CommonPluginsStores.Epic
         #region Epic
         public string GetProductSlug(string Name)
         {
+            if (Name.IsEqual("warhammer 40 000 mechanicus"))
+            {
+                Name = "warhammer mechanicus";
+            }
+
             string ProductSlug = string.Empty;
 
             try
@@ -479,7 +468,8 @@ namespace CommonPluginsStores.Epic
         {
             string NameSpace = string.Empty;
 
-            try {
+            try
+            {
                 using (WebStoreClient client = new WebStoreClient())
                 {
                     var catalogs = client.QuerySearch(Name).GetAwaiter().GetResult();

@@ -2,13 +2,12 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <sys:String x:Key="LOCCommonYear">Год</sys:String>
-    <sys:String x:Key="LOCCommonDateData">Дата внесения данных </sys:String>
+    <sys:String x:Key="LOCCommonDateData">Дата внесения данны</sys:String>
     
     <sys:String x:Key="LOCCommonLastUpdate">Последнее обновление</sys:String>
 
-    <sys:String x:Key="LOCCommonAddFolder">Добавить папку</sys:String>
-    <sys:String x:Key="LOCCommonRemoveFolder">Удалить папку
-</sys:String>
+    <sys:String x:Key="LOCCommonAddFolder">Добавить папк</sys:String>
+    <sys:String x:Key="LOCCommonRemoveFolder">Удалить папк</sys:String>
     <sys:String x:Key="LOCCommonAddFilePattern">Добавить шаблон файла</sys:String>
     
     <!-- Filters -->
@@ -17,7 +16,7 @@
 
     <!-- Transfer plugin data -->
 
-    <sys:String x:Key="LOCCommonTransfer">Перенос</sys:String>
+    <sys:String x:Key="LOCCommonTransfer">Перено</sys:String>
     <sys:String x:Key="LOCCommonTransferPluginData">Перенести данные плагина</sys:String>
     <sys:String x:Key="LOCCommonSelectTransferData">Выбор данных для передачи</sys:String>
 
@@ -41,7 +40,7 @@
     <sys:String x:Key="LOCCommonIgnoredItems">Игнорируемые элементы</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">Введите элемент для игнорирования</sys:String>
     
-    <sys:String x:Key="LOCCommonProgression">Прогресс</sys:String>
+    <sys:String x:Key="LOCCommonProgression">Прогрес</sys:String>
     <sys:String x:Key="LOCCommonCompleted">Завершена</sys:String>
 
     <sys:String x:Key="LOCCommonGameTime">Время игры</sys:String>
@@ -108,7 +107,7 @@
     <sys:String x:Key="LOCCommonIntegrationSelectElements">Детальный просмотр компонентов</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationButtonOptions">Параметры кнопки</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">Показывать только иконку</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">Показывать только иконк</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonDetails">Кнопка с деталями</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonIsToggle">С кнопкой переключения</sys:String>
 
@@ -122,16 +121,16 @@
     <sys:String x:Key="LOCCommonIntegrationShowTitle">Показывать заголовок</sys:String>
     <sys:String x:Key="LOCCommonIntegrationTopGameDetails">Показать над описанием игры</sys:String>
 
-    <sys:String x:Key="LOCCommonAddTagAuto">Автоматическое добавление тегов с добавлением данных</sys:String>
+    <sys:String x:Key="LOCCommonAddTagAuto">Автоматическое добавление тегов с добавлением данны</sys:String>
     
     <sys:String x:Key="LOCCommonDatabase">База данны</sys:String>
 
     <sys:String x:Key="LOCCommonControlsAvailable">Элементы, доступные для поддерживаемых тем</sys:String>
     <sys:String x:Key="LOCCommonControlsPluginButtonShow">Отображать кнопку плагина</sys:String>
     <sys:String x:Key="LOCCommonControlsPluginButtonShowInContextMenu">Отображение данных в контекстном меню</sys:String>
-    <sys:String x:Key="LOCCommonControlsPluginViewItemShow">Отображать данные в списке игр</sys:String>
+    <sys:String x:Key="LOCCommonControlsPluginViewItemShow">Отображать данные в списке иг</sys:String>
 
-    <sys:String x:Key="LOCCommonControlsVisibleNoData">Отображать текст, когда нет данных</sys:String>
+    <sys:String x:Key="LOCCommonControlsVisibleNoData">Отображать текст, когда нет данны</sys:String>
 
     <!-- CommonMenus -->
 
@@ -141,14 +140,14 @@
     <sys:String x:Key="LOCCommonRefreshAllData">Обновить данные</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">Удалить данные</sys:String>
 
-    <sys:String x:Key="LOCCommonSelectGames">Выберите игру</sys:String>
-    <sys:String x:Key="LOCCommonAddAllTags">Добавить тег для всех игр</sys:String>
+    <sys:String x:Key="LOCCommonSelectGames">Выберите игр</sys:String>
+    <sys:String x:Key="LOCCommonAddAllTags">Добавить тег для всех иг</sys:String>
     <sys:String x:Key="LOCCommonAddTPlugin">Добавить тег плагина...</sys:String>
-    <sys:String x:Key="LOCCommonSelectData">Скачать данные для выбранных игр</sys:String>
+    <sys:String x:Key="LOCCommonSelectData">Скачать данные для выбранных иг</sys:String>
     <sys:String x:Key="LOCCommonDownloadPluginData">Загрузка данных плагина...</sys:String>
     <sys:String x:Key="LOCCommonGetAllDatas">Скачать данные для всех иг</sys:String>
     <sys:String x:Key="LOCCommonDeletePluginData">Удалить данные плагина</sys:String>
-    <sys:String x:Key="LOCCommonClearAllDatas">Удалить данные для всех игр</sys:String>
+    <sys:String x:Key="LOCCommonClearAllDatas">Удалить данные для всех иг</sys:String>
     <sys:String x:Key="LOCCommonRemoveAllTags">Удалить тег плагина</sys:String>
 
     <!-- CommonGlobalProgress -->
@@ -186,7 +185,7 @@
     <sys:String x:Key="LOCCommonStyles">Стили</sys:String>
     <sys:String x:Key="LOCCommonTypes">Типы</sys:String>
     <sys:String x:Key="LOCCommonSortByDate">Сортировать по дате</sys:String>
-    <sys:String x:Key="LOCCommonSortByScore">Сортировать по баллу</sys:String>
+    <sys:String x:Key="LOCCommonSortByScore">Сортировать по балл</sys:String>
 
 
     <sys:String x:Key="LOCCommonMisc">Прочее</sys:String>

@@ -440,7 +440,7 @@ namespace CommonPluginsShared
                 case ExternalPlugin.ItchioLibrary:
                     return "itch.io";
                 case ExternalPlugin.OriginLibrary:
-                    return "Origin";
+                    return "EA app";
                 case ExternalPlugin.SteamLibrary:
                     return "Steam";
                 case ExternalPlugin.TwitchLibrary:

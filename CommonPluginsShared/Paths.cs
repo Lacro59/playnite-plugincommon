@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace CommonPluginsShared
@@ -18,11 +19,23 @@ namespace CommonPluginsShared
                 }
                 else
                 {
-                    pathReturn += "\\" + CommonPlayniteShared.Common.Paths.GetSafePathName(folder);
+                    pathReturn += "\\" + Paths.GetSafePathName(folder, true);
                 }
             }
 
             return pathReturn;
+        }
+
+        public static string GetSafePathName(string filename, bool keepNameSpace = false)
+        {
+            if (keepNameSpace)
+            {
+                return string.Join(" ", filename.Split(Path.GetInvalidFileNameChars())).Trim();
+            }
+            else
+            {
+                return CommonPlayniteShared.Common.Paths.GetSafePathName(filename);
+            }
         }
     }
 }

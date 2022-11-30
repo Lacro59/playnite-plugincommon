@@ -1,4 +1,5 @@
-﻿using Playnite.SDK;
+﻿using CommonPlayniteShared.Common;
+using Playnite.SDK;
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -172,12 +173,19 @@ namespace CommonPluginsShared
             try
             {
                 Image image = Image.FromFile(srcPath);
-                Bitmap resultImage = Resize(image, width, height);
-                resultImage.Save(path);
+                Bitmap resultImage = null;
+                if (image.Width > width || image.Height > height)
+                {
+                    resultImage = Resize(image, width, height);
+                    resultImage.Save(path);
+                    resultImage.Dispose();
+                }
+                else
+                {
+                    FileSystem.CopyFile(srcPath, path);
+                }
 
                 image.Dispose();
-                resultImage.Dispose();
-
                 return true;
             }
             catch (Exception ex)

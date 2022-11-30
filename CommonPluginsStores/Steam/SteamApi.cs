@@ -416,7 +416,7 @@ namespace CommonPluginsStores.Steam
         public int GetAppId(string Name)
         {
             AppsList.Sort((x, y) => x.appid.CompareTo(y.appid));
-            var finded = AppsList.FindAll(x => x.name.IsEqual(Name)).Select(x => x.appid).Distinct().ToList();
+            List<int> finded = AppsList.FindAll(x => x.name.IsEqual(Name)).Select(x => x.appid).Distinct().ToList();
 
             if (finded != null && finded.Count > 0)
             {

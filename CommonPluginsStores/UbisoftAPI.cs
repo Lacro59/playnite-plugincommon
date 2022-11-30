@@ -11,7 +11,7 @@ namespace CommonPluginsStores
 {
     public class UbisoftAPI
     {
-        private static readonly ILogger logger = LogManager.GetLogger();
+        private static ILogger logger => LogManager.GetLogger();
 
 
         public UbisoftAPI()
