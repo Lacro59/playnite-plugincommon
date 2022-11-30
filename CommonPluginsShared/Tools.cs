@@ -148,9 +148,12 @@ namespace CommonPluginsShared
 
                 string JsonDataString = str.Substring(indexStart + strStart.Length, length);
 
-                indexEnd = JsonDataString.IndexOf(strPurge);
-                length = JsonDataString.Length - (JsonDataString.Length - indexEnd - strPurge.Length + 1);
-                JsonDataString = JsonDataString.Substring(0, length);
+                if (!strPurge.IsNullOrEmpty())
+                {
+                    indexEnd = JsonDataString.IndexOf(strPurge);
+                    length = JsonDataString.Length - (JsonDataString.Length - indexEnd - strPurge.Length + 1);
+                    JsonDataString = JsonDataString.Substring(0, length);
+                }
 
                 return JsonDataString;
             }
