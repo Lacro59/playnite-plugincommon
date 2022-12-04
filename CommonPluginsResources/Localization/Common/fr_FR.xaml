@@ -30,7 +30,7 @@
 
     <sys:String x:Key="LOCCommonAuthenticateLabel">Connexion</sys:String>
     <sys:String x:Key="LOCCommonNotLoggedIn">Authentification requise</sys:String>
-    <sys:String x:Key="LOCCommonLoggedIn">Utilisateur connect</sys:String>
+    <sys:String x:Key="LOCCommonLoggedIn">Utilisateur connecté</sys:String>
     <sys:String x:Key="LOCCommonAccountName">Nom du compte</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Vérification du statut d'authentification…</sys:String>
 
@@ -162,7 +162,7 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 
     <!-- CommonNotificationsErrors -->
 
-    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: utilisateur non authentifi</sys:String>
+    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: utilisateur non authentifié</sys:String>
     
     <!-- CommonNotifications -->
 
