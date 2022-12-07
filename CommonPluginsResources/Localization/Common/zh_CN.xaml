@@ -2,6 +2,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <sys:String x:Key="LOCCommonYear">年</sys:String>
+    <sys:String x:Key="LOCCommonMonth">Month</sys:String>
     <sys:String x:Key="LOCCommonDateData">数据日</sys:String>
     
     <sys:String x:Key="LOCCommonLastUpdate">最近更新</sys:String>
@@ -9,6 +10,8 @@
     <sys:String x:Key="LOCCommonAddFolder">添加文件夹</sys:String>
     <sys:String x:Key="LOCCommonRemoveFolder">移除文件夹</sys:String>
     <sys:String x:Key="LOCCommonAddFilePattern">添加文件模式</sys:String>
+
+    <sys:String x:Key="LOCCommonMargin">Margin</sys:String>
     
     <!-- Filters -->
 
