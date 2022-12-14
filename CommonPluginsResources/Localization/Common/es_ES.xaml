@@ -2,7 +2,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <sys:String x:Key="LOCCommonYear">Año</sys:String>
-    <sys:String x:Key="LOCCommonMonth">Month</sys:String>
+    <sys:String x:Key="LOCCommonMonth">Mes</sys:String>
     <sys:String x:Key="LOCCommonDateData">Fecha de los datos</sys:String>
     
     <sys:String x:Key="LOCCommonLastUpdate">Última actualización</sys:String>
@@ -11,7 +11,7 @@
     <sys:String x:Key="LOCCommonRemoveFolder">Remover carpeta</sys:String>
     <sys:String x:Key="LOCCommonAddFilePattern">Añadir patrón de archivo</sys:String>
 
-    <sys:String x:Key="LOCCommonMargin">Margin</sys:String>
+    <sys:String x:Key="LOCCommonMargin">Margen</sys:String>
     
     <!-- Filters -->
 
