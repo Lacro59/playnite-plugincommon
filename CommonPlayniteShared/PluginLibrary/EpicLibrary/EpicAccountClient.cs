@@ -29,6 +29,7 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary
     {
         public string redirectUrl { get; set; }
         public string sid { get; set; }
+        public string authorizationCode { get; set; }
     }
 
     public class EpicAccountClient
@@ -36,13 +37,14 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary
         private ILogger logger = LogManager.GetLogger();
         private IPlayniteAPI api;
         private string tokensPath;
-        private readonly string loginUrl = "https://www.epicgames.com/id/login?redirectUrl=https://www.epicgames.com/id/api/redirect";
+        private readonly string loginUrl = "https://www.epicgames.com/id/login?redirectUrl=https%3A//www.epicgames.com/id/api/redirect%3FclientId%3D34a02cf8f4414e29b15921876da36f9a%26responseType%3Dcode";
         private readonly string oauthUrl = @"";
         private readonly string accountUrl = @"";
         private readonly string assetsUrl = @"";
         private readonly string catalogUrl = @"";
         private readonly string playtimeUrl = @"";
-        private const string authEcodedString = "MzRhMDJjZjhmNDQxNGUyOWIxNTkyMTg3NmRhMzZmOWE6ZGFhZmJjY2M3Mzc3NDUwMzlkZmZlNTNkOTRmYzc2Y2Y=";
+        private const string authEncodedString = "MzRhMDJjZjhmNDQxNGUyOWIxNTkyMTg3NmRhMzZmOWE6ZGFhZmJjY2M3Mzc3NDUwMzlkZmZlNTNkOTRmYzc2Y2Y=";
+        private const string userAgent = @"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Vivaldi/5.5.2805.50";
 
         public EpicAccountClient(IPlayniteAPI api, string tokensPath)
         {
@@ -87,7 +89,14 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary
         {
             var loggedIn = false;
             var apiRedirectContent = string.Empty;
-            using (var view = api.WebViews.CreateView(580, 700))
+
+            using (var view = api.WebViews.CreateView(new WebViewSettings
+            {
+                WindowWidth = 580,
+                WindowHeight = 700,
+                // This is needed otherwise captcha won't pass
+                UserAgent = userAgent
+            }))
             {
                 view.LoadingChanged += async (s, e) =>
                 {
@@ -115,10 +124,9 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary
                 return;
             }
 
-            var sid = Serialization.FromJson<ApiRedirectResponse>(apiRedirectContent).sid;
+            var authorizationCode = Serialization.FromJson<ApiRedirectResponse>(apiRedirectContent).authorizationCode;
             FileSystem.DeleteFile(tokensPath);
-            var exchangeKey = getExcahngeToken(sid);
-            if (string.IsNullOrEmpty(exchangeKey))
+            if (string.IsNullOrEmpty(authorizationCode))
             {
                 logger.Error("Failed to get login exchange key for Epic account.");
                 return;
@@ -127,8 +135,8 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Clear();
-                httpClient.DefaultRequestHeaders.Add("Authorization", "basic " + authEcodedString);
-                using (var content = new StringContent($"grant_type=exchange_code&exchange_code={exchangeKey}&token_type=eg1"))
+                httpClient.DefaultRequestHeaders.Add("Authorization", "basic " + authEncodedString);
+                using (var content = new StringContent($"grant_type=authorization_code&code={authorizationCode}&token_type=eg1"))
                 {
                     content.Headers.Clear();
                     content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
@@ -161,7 +169,7 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary
             {
                 if (e is TokenException)
                 {
-                    renewToknes(tokens.refresh_token);
+                    renewTokens(tokens.refresh_token);
                     tokens = loadTokens();
                     if (tokens.account_id.IsNullOrEmpty() || tokens.access_token.IsNullOrEmpty())
                     {
@@ -179,72 +187,67 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary
             }
         }
 
-        //public List<Asset> GetAssets()
-        //{
-        //    if (!GetIsUserLoggedIn())
-        //    {
-        //        throw new Exception("User is not authenticated.");
-        //    }
-        //
-        //    return InvokeRequest<List<Asset>>(assetsUrl, loadTokens()).GetAwaiter().GetResult().Item2;
-        //}
+        public List<Asset> GetAssets()
+        {
+            if (!GetIsUserLoggedIn())
+            {
+                throw new Exception("User is not authenticated.");
+            }
 
-        //public List<PlaytimeItem> GetPlaytimeItems()
-        //{
-        //    if (!GetIsUserLoggedIn())
-        //    {
-        //        throw new Exception("User is not authenticated.");
-        //    }
-        //
-        //    var tokens = loadTokens();
-        //    var formattedPlaytimeUrl = string.Format(playtimeUrl, tokens.account_id);
-        //    return InvokeRequest<List<PlaytimeItem>>(formattedPlaytimeUrl, tokens).GetAwaiter().GetResult().Item2;
-        //}
+            return InvokeRequest<List<Asset>>(assetsUrl, loadTokens()).GetAwaiter().GetResult().Item2;
+        }
 
-        //public CatalogItem GetCatalogItem(string nameSpace, string id, string cachePath)
-        //{
-        //    Dictionary<string, CatalogItem> result = null;
-        //    if (!cachePath.IsNullOrEmpty() && File.Exists(cachePath))
-        //    {
-        //        try
-        //        {
-        //            result = Serialization.FromJsonFile<Dictionary<string, CatalogItem>>(cachePath);
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            logger.Error(e, "Failed to load Epic catalog cache.");
-        //        }
-        //    }
-        //
-        //    if (result == null)
-        //    {
-        //        if (!GetIsUserLoggedIn())
-        //        {
-        //            throw new Exception("User is not authenticated.");
-        //        }
-        //
-        //        var url = string.Format("{0}/bulk/items?id={1}&country=US&locale=en-US", nameSpace, id);
-        //        var catalogResponse = InvokeRequest<Dictionary<string, CatalogItem>>(catalogUrl + url, loadTokens()).GetAwaiter().GetResult();
-        //        result = catalogResponse.Item2;
-        //        FileSystem.WriteStringToFile(cachePath, catalogResponse.Item1);
-        //    }
-        //
-        //    if (result.TryGetValue(id, out var catalogItem))
-        //    {
-        //        return catalogItem;
-        //    }
-        //    else
-        //    {
-        //        throw new Exception($"Epic catalog item for {id} {nameSpace} not found.");
-        //    }
-        //}
+        public List<PlaytimeItem> GetPlaytimeItems()
+        {
+            if (!GetIsUserLoggedIn())
+            {
+                throw new Exception("User is not authenticated.");
+            }
 
-        private void renewToknes(string refreshToken)
+            var tokens = loadTokens();
+            var formattedPlaytimeUrl = string.Format(playtimeUrl, tokens.account_id);
+            return InvokeRequest<List<PlaytimeItem>>(formattedPlaytimeUrl, tokens).GetAwaiter().GetResult().Item2;
+        }
+
+        public CatalogItem GetCatalogItem(string nameSpace, string id, string cachePath)
+        {
+            Dictionary<string, CatalogItem> result = null;
+            if (!cachePath.IsNullOrEmpty() && FileSystem.FileExists(cachePath))
+            {
+                try
+                {
+                    result = Serialization.FromJson<Dictionary<string, CatalogItem>>(FileSystem.ReadStringFromFile(cachePath));
+                }
+                catch (Exception e)
+                {
+                    logger.Error(e, "Failed to load Epic catalog cache.");
+                }
+            }
+
+            if (result == null)
+            {
+                var url = string.Format("{0}/bulk/items?id={1}&country=US&locale=en-US", nameSpace, id);
+                var catalogResponse = InvokeRequest<Dictionary<string, CatalogItem>>(catalogUrl + url, loadTokens()).GetAwaiter().GetResult();
+                result = catalogResponse.Item2;
+                FileSystem.WriteStringToFile(cachePath, catalogResponse.Item1);
+            }
+
+            if (result.TryGetValue(id, out var catalogItem))
+            {
+                return catalogItem;
+            }
+            else
+            {
+                throw new Exception($"Epic catalog item for {id} {nameSpace} not found.");
+            }
+        }
+
+        private void renewTokens(string refreshToken)
         {
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Clear();
-                httpClient.DefaultRequestHeaders.Add("Authorization", "basic " + authEcodedString);
+                httpClient.DefaultRequestHeaders.Add("Authorization", "basic " + authEncodedString);
                 using (var content = new StringContent($"grant_type=refresh_token&refresh_token={refreshToken}&token_type=eg1"))
                 {
                     content.Headers.Clear();
@@ -276,7 +279,16 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary
                 }
                 else
                 {
-                    return new Tuple<string, T>(str, Serialization.FromJson<T>(str));
+                    try
+                    {
+                        return new Tuple<string, T>(str, Serialization.FromJson<T>(str));
+                    }
+                    catch
+                    {
+                        // For cases like #134, where the entire service is down and doesn't even return valid error messages.
+                        logger.Error(str);
+                        throw new Exception("Failed to get data from Epic service.");
+                    }
                 }
             }
         }
@@ -302,7 +314,7 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary
             return null;
         }
 
-        private string getExcahngeToken(string sid)
+        private string getExchangeToken(string sid)
         {
             var cookieContainer = new CookieContainer();
             using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
@@ -313,7 +325,7 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary
                 httpClient.DefaultRequestHeaders.Add("X-Epic-Event-Category", "login");
                 httpClient.DefaultRequestHeaders.Add("X-Epic-Strategy-Flags", "");
                 httpClient.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
-                httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0");
+                httpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
 
                 httpClient.GetAsync(@"https://www.epicgames.com/id/api/set-sid?sid=" + sid).GetAwaiter().GetResult();
                 var resp = httpClient.GetAsync(@"https://www.epicgames.com/id/api/csrf").GetAwaiter().GetResult();

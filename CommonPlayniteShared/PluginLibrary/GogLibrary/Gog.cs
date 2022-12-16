@@ -1,7 +1,8 @@
 ﻿using Microsoft.Win32;
-using CommonPlayniteShared.Common.Web;
+using CommonPlayniteShared.Common.Web;//using Playnite.Common.Web;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -43,22 +44,40 @@ namespace CommonPlayniteShared.PluginLibrary.GogLibrary
         {
             get
             {
-                RegistryKey key;
-                key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\GOG.com\GalaxyClient\paths");
-                if (key == null)
+                RegistryKey key = null;
+                try
                 {
-                    Registry.LocalMachine.OpenSubKey(@"SOFTWARE\GOG.com\GalaxyClient\paths");
-                }
+                    key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\GOG.com\GalaxyClient\paths");
+                    if (key == null)
+                    {
+                        key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\GOG.com\GalaxyClient\paths");
+                    }
 
-                if (key?.GetValueNames().Contains("client") == true)
+                    if (key?.GetValueNames().Contains("client") == true)
+                    {
+                        return key.GetValue("client").ToString();
+                    }
+
+                    return string.Empty;
+                }
+                finally
                 {
-                    return key.GetValue("client").ToString();
+                    key?.Dispose();
                 }
-
-                return string.Empty;
             }
         }
 
+        public static bool IsRunning
+        {
+            get
+            {
+                // The Notifications Renderer process is used because other Galaxy related process can
+                // be running in the background without the client itself being open for the user
+                return Process.GetProcessesByName("GOG Galaxy Notifications Renderer")?.Any() == true;
+            }
+        }
+
+        public static string ClientInstallationPath => Path.Combine(InstallationPath, "GalaxyClient.exe");
         public static string Icon => Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Resources\gogicon.png");
 
         public static string GetLoginUrl()

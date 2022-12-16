@@ -11,9 +11,17 @@ using System.Diagnostics;
 
 namespace CommonPlayniteShared.Common
 {
-    public static class FileSystem
+    public enum FileSystemItem
+    {
+        File,
+        Directory
+    }
+
+    public static partial class FileSystem
     {
         private static ILogger logger = LogManager.GetLogger();
+        private const string longPathPrefix = @"\\?\";
+        private const string longPathUncPrefix = @"\\?\UNC\";
 
         public static void CreateDirectory(string path)
         {
@@ -22,7 +30,7 @@ namespace CommonPlayniteShared.Common
 
         public static void CreateDirectory(string path, bool clean)
         {
-            var directory = path;
+            var directory = FixPathLength(path);
             if (string.IsNullOrEmpty(directory))
             {
                 return;
@@ -45,6 +53,7 @@ namespace CommonPlayniteShared.Common
 
         public static void PrepareSaveFile(string path)
         {
+            path = FixPathLength(path);
             CreateDirectory(Path.GetDirectoryName(path));
             if (File.Exists(path))
             {
@@ -54,6 +63,7 @@ namespace CommonPlayniteShared.Common
 
         public static bool IsDirectoryEmpty(string path)
         {
+            path = FixPathLength(path);
             if (Directory.Exists(path))
             {
                 return !Directory.EnumerateFileSystemEntries(path).Any();
@@ -66,90 +76,74 @@ namespace CommonPlayniteShared.Common
 
         public static void DeleteFile(string path)
         {
+            path = FixPathLength(path);
             if (File.Exists(path))
             {
                 File.Delete(path);
             }
         }
 
+        public static void CreateFile(string path)
+        {
+            path = FixPathLength(path);
+            File.Create(path).Dispose();
+        }
+
         public static void CopyFile(string sourcePath, string targetPath, bool overwrite = true)
         {
-            //logger.Debug($"Copying file {sourcePath} to {targetPath}");
+            sourcePath = FixPathLength(sourcePath);
+            targetPath = FixPathLength(targetPath);
+            logger.Debug($"Copying file {sourcePath} to {targetPath}");
             PrepareSaveFile(targetPath);
             File.Copy(sourcePath, targetPath, overwrite);
         }
 
         public static void DeleteDirectory(string path)
         {
+            path = FixPathLength(path);
             if (Directory.Exists(path))
             {
                 Directory.Delete(path, true);
             }
         }
 
-        public static string GetMD5(Stream stream)
+        public static void DeleteDirectory(string path, bool includeReadonly)
         {
-            using (var md5 = MD5.Create())
+            path = FixPathLength(path);
+            if (!Directory.Exists(path))
             {
-                return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", "");
+                return;
             }
-        }
 
-        public static string GetMD5(string filePath)
-        {
-            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            if (includeReadonly)
             {
-                return GetMD5(stream);
-            }
-        }
+                foreach (var s in Directory.GetDirectories(path))
+                {
+                    DeleteDirectory(s, true);
+                }
 
-        public static bool AreFileContentsEqual(string path1, string path2)
-        {
-            var info1 = new FileInfo(path1);
-            var info2 = new FileInfo(path2);
-            if (info1.Length != info2.Length)
-            {
-                return false;
+                foreach (var f in Directory.GetFiles(path))
+                {
+                    var attr = File.GetAttributes(f);
+                    if ((attr & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+                    {
+                        File.SetAttributes(f, attr ^ FileAttributes.ReadOnly);
+                    }
+
+                    File.Delete(f);
+                }
+
+                Directory.Delete(path, false);
             }
             else
             {
-                if (GetMD5(path1) == GetMD5(path2))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                DeleteDirectory(path);
             }
         }
 
-        //public static void AddFolderToZip(ZipArchive archive, string zipRoot, string path, string filter, SearchOption searchOption)
-        //{
-        //    IEnumerable<string> files;
-        //
-        //    if (filter.Contains('|'))
-        //    {
-        //        var filters = filter.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-        //        files = Directory.EnumerateFiles(path, "*.*", searchOption).Where(a =>
-        //        {
-        //            return filters.Contains(Path.GetExtension(a));
-        //        });
-        //    }
-        //    else
-        //    {
-        //        files = Directory.EnumerateFiles(path, filter, searchOption);
-        //    }
-        //
-        //    foreach (var file in files)
-        //    {
-        //        var archiveName = zipRoot + file.Replace(path, "").Replace(@"\", @"/");
-        //        archive.CreateEntryFromFile(file, archiveName);
-        //    }
-        //}
-
         public static bool CanWriteToFolder(string folder)
         {
+            folder = FixPathLength(folder);
             try
             {
                 if (!Directory.Exists(folder))
@@ -171,6 +165,7 @@ namespace CommonPlayniteShared.Common
 
         public static string ReadFileAsStringSafe(string path, int retryAttempts = 5)
         {
+            path = FixPathLength(path);
             IOException ioException = null;
             for (int i = 0; i < retryAttempts; i++)
             {
@@ -180,7 +175,7 @@ namespace CommonPlayniteShared.Common
                 }
                 catch (IOException exc)
                 {
-                    //logger.Debug($"Can't read from file, trying again. {path}");
+                    logger.Debug($"Can't read from file, trying again. {path}");
                     ioException = exc;
                     Task.Delay(500).Wait();
                 }
@@ -191,6 +186,7 @@ namespace CommonPlayniteShared.Common
 
         public static byte[] ReadFileAsBytesSafe(string path, int retryAttempts = 5)
         {
+            path = FixPathLength(path);
             IOException ioException = null;
             for (int i = 0; i < retryAttempts; i++)
             {
@@ -200,7 +196,7 @@ namespace CommonPlayniteShared.Common
                 }
                 catch (IOException exc)
                 {
-                    //logger.Debug($"Can't read from file, trying again. {path}");
+                    logger.Debug($"Can't read from file, trying again. {path}");
                     ioException = exc;
                     Task.Delay(500).Wait();
                 }
@@ -211,6 +207,7 @@ namespace CommonPlayniteShared.Common
 
         public static Stream CreateWriteFileStreamSafe(string path, int retryAttempts = 5)
         {
+            path = FixPathLength(path);
             IOException ioException = null;
             for (int i = 0; i < retryAttempts; i++)
             {
@@ -220,7 +217,7 @@ namespace CommonPlayniteShared.Common
                 }
                 catch (IOException exc)
                 {
-                    //logger.Debug($"Can't open write file stream, trying again. {path}");
+                    logger.Debug($"Can't open write file stream, trying again. {path}");
                     ioException = exc;
                     Task.Delay(500).Wait();
                 }
@@ -231,6 +228,7 @@ namespace CommonPlayniteShared.Common
 
         public static Stream OpenReadFileStreamSafe(string path, int retryAttempts = 5)
         {
+            path = FixPathLength(path);
             IOException ioException = null;
             for (int i = 0; i < retryAttempts; i++)
             {
@@ -240,7 +238,7 @@ namespace CommonPlayniteShared.Common
                 }
                 catch (IOException exc)
                 {
-                    //logger.Debug($"Can't open read file stream, trying again. {path}");
+                    logger.Debug($"Can't open read file stream, trying again. {path}");
                     ioException = exc;
                     Task.Delay(500).Wait();
                 }
@@ -251,12 +249,20 @@ namespace CommonPlayniteShared.Common
 
         public static void WriteStringToFile(string path, string content)
         {
+            path = FixPathLength(path);
             PrepareSaveFile(path);
             File.WriteAllText(path, content);
         }
 
+        public static string ReadStringFromFile(string path)
+        {
+            path = FixPathLength(path);
+            return File.ReadAllText(path);
+        }
+
         public static void WriteStringToFileSafe(string path, string content, int retryAttempts = 5)
         {
+            path = FixPathLength(path);
             IOException ioException = null;
             for (int i = 0; i < retryAttempts; i++)
             {
@@ -268,7 +274,7 @@ namespace CommonPlayniteShared.Common
                 }
                 catch (IOException exc)
                 {
-                    //logger.Debug($"Can't write to a file, trying again. {path}");
+                    logger.Debug($"Can't write to a file, trying again. {path}");
                     ioException = exc;
                     Task.Delay(500).Wait();
                 }
@@ -294,7 +300,7 @@ namespace CommonPlayniteShared.Common
                 }
                 catch (IOException exc)
                 {
-                    //logger.Debug($"Can't detele file, trying again. {path}");
+                    logger.Debug($"Can't detele file, trying again. {path}");
                     ioException = exc;
                     Task.Delay(500).Wait();
                 }
@@ -324,11 +330,14 @@ namespace CommonPlayniteShared.Common
 
         public static long GetFileSize(string path)
         {
+            path = FixPathLength(path);
             return new FileInfo(path).Length;
         }
 
         public static void CopyDirectory(string sourceDirName, string destDirName, bool copySubDirs = true, bool overwrite = true)
         {
+            sourceDirName = FixPathLength(sourceDirName);
+            destDirName = FixPathLength(destDirName);
             var dir = new DirectoryInfo(sourceDirName);
             if (!dir.Exists)
             {
@@ -360,47 +369,86 @@ namespace CommonPlayniteShared.Common
             }
         }
 
-        public static string LookupAlternativeFilePath(string filePath)
+        public static bool FileExistsOnAnyDrive(string filePath, out string existringPath)
         {
-            return CheckDrivesForPath(filePath, path => File.Exists(path));
+            return PathExistsOnAnyDrive(filePath, path => File.Exists(path), out existringPath);
         }
 
-        public static string LookupAlternativeDirectoryPath(string directoryPath)
+        public static bool DirectoryExistsOnAnyDrive(string directoryPath, out string existringPath)
         {
-            return CheckDrivesForPath(directoryPath, path => Directory.Exists(path));
+            return PathExistsOnAnyDrive(directoryPath, path => Directory.Exists(path), out existringPath);
         }
 
-        private static string CheckDrivesForPath(string originalPath, Predicate<string> predicate)
+        private static bool PathExistsOnAnyDrive(string originalPath, Predicate<string> predicate, out string existringPath)
         {
+            originalPath = FixPathLength(originalPath);
+            existringPath = null;
             try
             {
+                if (predicate(originalPath))
+                {
+                    existringPath = originalPath;
+                    return true;
+                }
+
                 if (!Paths.IsFullPath(originalPath))
                 {
-                    return string.Empty;
+                    return false;
                 }
 
                 var rootPath = Path.GetPathRoot(originalPath);
-                var availableDrives = DriveInfo.GetDrives()
-                    .Where(d => d.IsReady && !d.Name.Equals(rootPath, StringComparison.OrdinalIgnoreCase));
-
+                var availableDrives = DriveInfo.GetDrives().Where(d => d.IsReady);
                 foreach (var drive in availableDrives)
                 {
                     var pathWithoutDrive = originalPath.Substring(drive.Name.Length);
-                    var newDirectoryPath = Path.Combine(drive.Name, pathWithoutDrive);
-                    if (predicate(newDirectoryPath))
+                    var newPath = Path.Combine(drive.Name, pathWithoutDrive);
+                    if (predicate(newPath))
                     {
-                        return newDirectoryPath;
+                        existringPath = newPath;
+                        return true;
                     }
                 }
-
-                return string.Empty;
             }
             catch (Exception ex) when (!Debugger.IsAttached)
             {
-                logger.Error(ex, $"Error looking for alternative path for original path \"{originalPath}\"");
+                logger.Error(ex, $"Error checking if path exists on different drive \"{originalPath}\"");
             }
 
-            return string.Empty;
+            return false;
+        }
+
+        public static bool DirectoryExists(string path)
+        {
+            return Directory.Exists(FixPathLength(path));
+        }
+
+        public static bool FileExists(string path)
+        {
+            return File.Exists(FixPathLength(path));
+        }
+
+        public static string FixPathLength(string path)
+        {
+            // Relative paths don't support long paths
+            // https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation?tabs=cmd
+            if (!Paths.IsFullPath(path))
+            {
+                return path;
+            }
+
+            if (path.Length >= 260 && !path.StartsWith(longPathPrefix))
+            {
+                if (path.StartsWith(@"\\"))
+                {
+                    return longPathUncPrefix + path.Substring(2);
+                }
+                else
+                {
+                    return longPathPrefix + path;
+                }
+            }
+
+            return path;
         }
     }
 }

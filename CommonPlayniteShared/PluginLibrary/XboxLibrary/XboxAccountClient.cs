@@ -35,7 +35,7 @@ namespace CommonPlayniteShared.PluginLibrary.XboxLibrary
         public async Task Login()
         {
             var callbackUrl = string.Empty;
-            using (var webView = PlayniteApi.WebViews.CreateView(490, 560))
+            using (var webView = PlayniteApi.WebViews.CreateView(490, 560)) //using (var webView = library.PlayniteApi.WebViews.CreateView(490, 560))
             {
                 webView.LoadingChanged += (s, e) =>
                 {
@@ -255,6 +255,42 @@ namespace CommonPlayniteShared.PluginLibrary.XboxLibrary
                 var cont = await response.Content.ReadAsStringAsync();
                 var titleHistory = Serialization.FromJson<TitleHistoryResponse>(cont);
                 return titleHistory.titles;
+            }
+        }
+
+        public async Task<List<UserStatsResponse.Stats>> GetUserStatsMinutesPlayed(IEnumerable<string> titleIds)
+        {
+            var tokens = GetSavedXstsTokens();
+            if (tokens == null)
+            {
+                throw new Exception("User is not authenticated.");
+            }
+
+            using (var client = new HttpClient())
+            {
+                SetAuthenticationHeaders(client.DefaultRequestHeaders, tokens);
+                var requestData = new UserStatsRequest
+                {
+                    arrangebyfield = "xuid",
+                    stats = titleIds.Select(titleId => new UserStatsRequest.Stats
+                    {
+                        name = "MinutesPlayed",
+                        titleid = titleId
+                    }
+                    ).ToList(),
+                    xuids = new List<string> { tokens.DisplayClaims.xui[0].xid }
+                };
+                var response = await client.PostAsync(@"https://userstats.xboxlive.com/batch",
+                    new StringContent(Serialization.ToJson(requestData), Encoding.UTF8, "application/json"));
+                if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    throw new Exception("User is not authenticated.");
+                }
+
+                var cont = await response.Content.ReadAsStringAsync();
+                var userStats = Serialization.FromJson<UserStatsResponse>(cont);
+                // No idea why but this seems to be empty for some people...
+                return userStats?.statlistscollection?.FirstOrDefault()?.stats ?? new List<UserStatsResponse.Stats>();
             }
         }
 
