@@ -25,7 +25,7 @@ namespace CommonPluginsStores.Gog.Models
     public class Stats
     {
         public int games_owned { get; set; }
-        public int achievements { get; set; }
+        public int? achievements { get; set; }
         public int hours_played { get; set; }
     }
 
