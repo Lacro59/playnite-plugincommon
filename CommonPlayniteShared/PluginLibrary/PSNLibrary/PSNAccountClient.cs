@@ -39,7 +39,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
         private const string playedListUrl = "https://web.np.playstation.com/api/graphql/v1/op?operationName=getUserGameList&variables=%7B%22limit%22%3A100%2C%22categories%22%3A%22ps4_game%2Cps5_native_game%22%7D&extensions=%7B%22persistedQuery%22%3A%7B%22version%22%3A1%2C%22sha256Hash%22%3A%22e780a6d8b921ef0c59ec01ea5c5255671272ca0d819edb61320914cf7a78b3ae%22%7D%7D";
         private const string mobileCodeUrl = "https://ca.account.sony.com/api/authz/v3/oauth/authorize?access_type=offline&client_id=09515159-7237-4370-9b40-3806e67c0891&redirect_uri=com.scee.psxandroid.scecompcall%3A%2F%2Fredirect&response_type=code&scope=psn%3Amobile.v2.core%20psn%3Aclientapp";
         private const string mobileTokenUrl = "https://ca.account.sony.com/api/authz/v3/oauth/token";
-        private const string mobileTokenAuth = "YWM4ZDE2MWEtZDk2Ni00NzI4LWIwZWEtZmZlYzIyZjY5ZWRjOkRFaXhFcVhYQ2RYZHdqMHY=";
+        private const string mobileTokenAuth = "MDk1MTUxNTktNzIzNy00MzcwLTliNDAtMzgwNmU2N2MwODkxOnVjUGprYTV0bnRCMktxc1A=";
         private const string playedMobileListUrl = "https://m.np.playstation.com/api/gamelist/v2/users/me/titles?categories=ps4_game,ps5_native_game&limit=250&offset={0}";
         private const string trophiesMobileUrl = @"https://m.np.playstation.com/api/trophy/v1/users/me/trophyTitles?limit=250&offset={0}";
         public const string trophiesWithIdsMobileUrl = @"https://m.np.playstation.com/api/trophy/v1/users/me/titles/trophyTitles?npTitleIds={0}";//private const string trophiesWithIdsMobileUrl = @"https://m.np.playstation.com/api/trophy/v1/users/me/titles/trophyTitles?npTitleIds={0}";
@@ -57,6 +57,10 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
         {
             var loggedIn = false;
 
+            if (File.Exists(tokenPath))
+            {
+                File.Delete(tokenPath);
+            }
 
             var webViewSettings = new WebViewSettings();
             webViewSettings.WindowHeight = 700;
@@ -194,7 +198,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
                 HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("post"), mobileTokenUrl);
                 var requestMessageForm = new List<KeyValuePair<string, string>>();
                 requestMessageForm.Add(new KeyValuePair<string, string>("code", mobileCode));
-                requestMessageForm.Add(new KeyValuePair<string, string>("redirect_uri", "com.playstation.PlayStationApp://redirect"));
+                requestMessageForm.Add(new KeyValuePair<string, string>("redirect_uri", "com.scee.psxandroid.scecompcall://redirect"));
                 requestMessageForm.Add(new KeyValuePair<string, string>("grant_type", "authorization_code"));
                 requestMessageForm.Add(new KeyValuePair<string, string>("token_format", "jwt"));
                 requestMessage.Content = new FormUrlEncodedContent(requestMessageForm);
@@ -204,6 +208,25 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
                 var strResponse = await mobileTokenResponse.Content.ReadAsStringAsync();
                 mobileToken = Serialization.FromJson<MobileTokens>(strResponse);
                 return true;
+            }
+        }
+
+
+        public void ClearAuthentication()
+        {
+            if (File.Exists(tokenPath))
+            {
+                File.Delete(tokenPath);
+            }
+
+            using (var view = api.WebViews.CreateOffscreenView())
+            {
+                view.DeleteDomainCookies(".sony.com");
+                view.DeleteDomainCookies(".ca.account.sony.com");
+                view.DeleteDomainCookies("ca.account.sony.com");
+                view.DeleteDomainCookies(".playstation.com");
+                view.DeleteDomainCookies("io.playstation.com");
+                view.Close();
             }
         }
 
