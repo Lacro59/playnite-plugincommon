@@ -10,13 +10,12 @@
              VerticalAlignment="Stretch">
 
     <Grid>
-        <TextBlock Name="PART_SeachIcon" Text="&#xed11;" FontFamily="{DynamicResource FontIcoFont}"
-                   VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,0,0,0"
-                   Foreground="{DynamicResource TextBrushDarker}" />
-        <TextBox x:Name="PART_TextInpuText"
-                 VerticalContentAlignment="Center" Padding="5,0,25,0"/>
+        <TextBox x:Name="PART_TextInpuText" VerticalContentAlignment="Center" Padding="5,0,25,0" />
         <TextBlock Name="PART_ClearTextIcon" Text="&#xef00;" FontFamily="{DynamicResource FontIcoFont}"
                    FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,5,0" 
+                   Foreground="{DynamicResource TextBrushDarker}" />
+        <TextBlock Name="PART_SeachIcon" Text="&#xed11;" FontFamily="{DynamicResource FontIcoFont}"
+                   VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5,0,0,0"
                    Foreground="{DynamicResource TextBrushDarker}" />
     </Grid>
 </UserControl>
