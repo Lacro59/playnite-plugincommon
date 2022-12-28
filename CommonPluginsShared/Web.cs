@@ -30,7 +30,7 @@ namespace CommonPluginsShared
     {
         private static ILogger logger = LogManager.GetLogger();
 
-        public static string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:93.0) Gecko/20100101 Firefox/93.0";
+        public static string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0";
 
 
         private static string StrWebUserAgentType(WebUserAgentType UserAgentType)
