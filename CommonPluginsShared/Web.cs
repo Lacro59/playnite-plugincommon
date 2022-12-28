@@ -52,13 +52,13 @@ namespace CommonPluginsShared
         /// <param name="ImagesCachePath"></param>
         /// <param name="PluginName"></param>
         /// <returns></returns>
-        public static async Task<bool> DownloadFileImage(string ImageFileName, string url, string ImagesCachePath, string PluginName)
+        public static Task<bool> DownloadFileImage(string ImageFileName, string url, string ImagesCachePath, string PluginName)
         {
             string PathImageFileName = Path.Combine(ImagesCachePath, PluginName.ToLower(), ImageFileName);
 
             if (!StringExtensions.IsHttpUrl(url))
             {
-                return false;
+                return Task.FromResult(false);
             }
 
             using (var client = new HttpClient())
@@ -69,7 +69,7 @@ namespace CommonPluginsShared
                     if (string.IsNullOrEmpty(cachedFile))
                     {
                         //logger.Warn("Web file not found: " + url);
-                        return false;
+                        return Task.FromResult(false);
                     }
 
                     ImageTools.Resize(cachedFile, 64, 64, PathImageFileName);
@@ -80,7 +80,7 @@ namespace CommonPluginsShared
                     {
                         Common.LogError(ex, false, $"Error on download {url}");
                     }
-                    return false;
+                    return Task.FromResult(false);
                 }
             }
 
@@ -99,10 +99,10 @@ namespace CommonPluginsShared
             catch (Exception ex)
             {
                 Common.LogError(ex, false, $"Error on delete file image");
-                return false;
+                return Task.FromResult(false);
             }
 
-            return true;
+            return Task.FromResult(true);
         }
 
         public static async Task<bool> DownloadFileImageTest(string url)

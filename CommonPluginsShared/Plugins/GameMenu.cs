@@ -16,6 +16,7 @@ namespace CommonPluginsShared.Plugins
         public Game Game { get; set; }
 
 
+        // TODO Used?
         public GameMenu()
         {
             Opened += GameMenu_Opened;
@@ -94,7 +95,7 @@ namespace CommonPluginsShared.Plugins
                                     }
                                     catch (Exception ex) 
                                     {
-    
+                                        Common.LogError(ex, false);
                                     }
                                 };
                             }
