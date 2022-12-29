@@ -429,7 +429,11 @@ namespace CommonPluginsStores.Steam
                 Common.LogDebug(true, $"Find SteamAppId data for {Name} - {Serialization.ToJson(finded)}");
                 return finded.First();
             }
-
+            if (Name.Contains(": "))
+            {
+                Name = Name.Replace(": ", " - ");
+                return GetAppId(Name);
+            }
             return 0;
         }
 
