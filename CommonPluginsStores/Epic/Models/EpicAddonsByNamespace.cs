@@ -18,16 +18,16 @@ namespace CommonPluginsStores.Epic.Models
         public List<CustomAttribute> customAttributes { get; set; }
         public string description { get; set; }
         public object developer { get; set; }
-        public DateTime effectiveDate { get; set; }
+        public DateTime? effectiveDate { get; set; }
         public string id { get; set; }
         public bool isFeatured { get; set; }
         public List<KeyImage> keyImages { get; set; }
-        public DateTime lastModifiedDate { get; set; }
+        public DateTime? lastModifiedDate { get; set; }
         public string longDescription { get; set; }
         public string @namespace { get; set; }
         public string offerType { get; set; }
         public object productSlug { get; set; }
-        public DateTime releaseDate { get; set; }
+        public DateTime? releaseDate { get; set; }
         public string status { get; set; }
         public object technicalDetails { get; set; }
         public string title { get; set; }

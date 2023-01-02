@@ -516,7 +516,7 @@ namespace CommonPluginsStores.Epic
             {
                 var query = new QueryAddonsByNamespace();
                 query.variables.epic_namespace = epic_namespace;
-                query.variables.locale = CodeLang.GetEpicLang(Local); ;
+                query.variables.locale = CodeLang.GetEpicLang(Local);
                 query.variables.country = CodeLang.GetOriginLangCountry(Local);
                 var content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
                 HttpClient httpClient = new HttpClient();
