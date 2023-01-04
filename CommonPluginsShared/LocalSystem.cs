@@ -36,18 +36,6 @@ namespace CommonPluginsShared
             }
 
 
-            // TODO Temp
-            for (int i = 0; i < Configurations.Count; i++)
-            {
-                try
-                {
-                    Configurations[i].Os = Configurations[i].Os.Split('|')[0].Trim();
-                }
-                catch { }
-                FileSystem.WriteStringToFileSafe(ConfigurationsPath, Serialization.ToJson(Configurations));
-            }
-
-
             IdConfiguration = Configurations.FindIndex(x => x.Cpu == systemConfiguration.Cpu && x.Name == systemConfiguration.Name
                 && x.GpuName == systemConfiguration.GpuName && x.RamUsage == systemConfiguration.RamUsage);
 
@@ -57,6 +45,13 @@ namespace CommonPluginsShared
                 FileSystem.WriteStringToFileSafe(ConfigurationsPath, Serialization.ToJson(Configurations));
 
                 IdConfiguration = Configurations.Count - 1;
+            }
+            // TODO Temp
+            else
+            {
+                Configurations[IdConfiguration].CurrentHorizontalResolution = systemConfiguration.CurrentHorizontalResolution;
+                Configurations[IdConfiguration].CurrentVerticalResolution = systemConfiguration.CurrentVerticalResolution;
+                FileSystem.WriteStringToFileSafe(ConfigurationsPath, Serialization.ToJson(Configurations));
             }
         }
 
@@ -200,7 +195,7 @@ namespace CommonPluginsShared
 
                         if (obj["CurrentVerticalResolution"] != null)
                         {
-                            uint.TryParse(obj["CurrentVerticalResolution"].ToString(), out CurrentHorizontalResolution);
+                            uint.TryParse(obj["CurrentVerticalResolution"].ToString(), out CurrentVerticalResolution);
                         }
 
                         break;
