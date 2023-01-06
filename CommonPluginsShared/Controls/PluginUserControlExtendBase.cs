@@ -12,28 +12,28 @@ namespace CommonPluginsShared.Controls
 {
     public class PluginUserControlExtendBase : PluginUserControl
     {
-        internal static readonly ILogger logger = LogManager.GetLogger();
-        internal static IResourceProvider resources = new ResourceProvider();
+        internal static ILogger logger => LogManager.GetLogger();
+        internal static IResourceProvider resources => new ResourceProvider();
 
         internal virtual IDataContext _ControlDataContext { get; set; }
 
 
         #region Properties
         public static readonly DependencyProperty AlwaysShowProperty;
-        public bool AlwaysShow { get; set; }
+        public bool AlwaysShow { get; set; } = false;
 
-        public DesktopView ActiveViewAtCreation { get; }
+        public DesktopView ActiveViewAtCreation { get; set; }
 
 
         public bool MustDisplay
         {
-            get { return (bool)GetValue(MustDisplayProperty); }
-            set { SetValue(MustDisplayProperty, value); }
+            get => (bool)GetValue(MustDisplayProperty);
+            set => SetValue(MustDisplayProperty, value);
         }
 
         public static readonly DependencyProperty MustDisplayProperty = DependencyProperty.Register(
-            nameof(MustDisplay), 
-            typeof(bool), 
+            nameof(MustDisplay),
+            typeof(bool),
             typeof(PluginUserControlExtendBase),
             new FrameworkPropertyMetadata(true, MustDisplayPropertyChangedCallback));
 
@@ -65,8 +65,8 @@ namespace CommonPluginsShared.Controls
 
         public bool IgnoreSettings
         {
-            get { return (bool)GetValue(IgnoreSettingsProperty); }
-            set { SetValue(IgnoreSettingsProperty, value); }
+            get => (bool)GetValue(IgnoreSettingsProperty);
+            set => SetValue(IgnoreSettingsProperty, value);
         }
 
         public static readonly DependencyProperty IgnoreSettingsProperty = DependencyProperty.Register(
@@ -78,7 +78,7 @@ namespace CommonPluginsShared.Controls
 
         public PluginUserControlExtendBase()
         {
-            if (API.Instance.ApplicationInfo.Mode == ApplicationMode.Desktop)
+            if (API.Instance?.ApplicationInfo?.Mode == ApplicationMode.Desktop)
             {
                 ActiveViewAtCreation = API.Instance.MainView.ActiveDesktopView;
             }
@@ -115,7 +115,7 @@ namespace CommonPluginsShared.Controls
         // When game selection is changed
         public override void GameContextChanged(Game oldContext, Game newContext)
         {
-            if (newContext == null || (oldContext != null && oldContext.Id == newContext.Id))
+            if (newContext == null || oldContext?.Id == newContext?.Id)
             {
                 return;
             }

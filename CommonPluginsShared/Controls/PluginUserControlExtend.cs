@@ -17,12 +17,12 @@ namespace CommonPluginsShared.Controls
         // When game selection is changed
         public override void GameContextChanged(Game oldContext, Game newContext)
         {
-            if (_PluginDatabase == null || !_PluginDatabase.IsLoaded)
+            if (!_PluginDatabase?.IsLoaded ?? true)
             {
                 return;
             }
 
-            if (newContext == null || (oldContext != null && oldContext.Id == newContext.Id))
+            if (newContext == null || oldContext?.Id == newContext?.Id)
             {
                 return;
             }
@@ -66,7 +66,6 @@ namespace CommonPluginsShared.Controls
             }
         }
         #endregion
-
 
         public virtual void SetData(Game newContext, PluginDataBaseGameBase PluginGameData)
         {
