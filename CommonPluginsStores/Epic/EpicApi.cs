@@ -429,6 +429,10 @@ namespace CommonPluginsStores.Epic
             {
                 Name = "warhammer mechanicus";
             }
+            else if (Name.IsEqual("death stranding"))
+            {
+                return "death-stranding";
+            }
 
             string ProductSlug = string.Empty;
 
