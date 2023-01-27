@@ -2,7 +2,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <sys:String x:Key="LOCCommonYear">Ano</sys:String>
-    <sys:String x:Key="LOCCommonMonth">Month</sys:String>
+    <sys:String x:Key="LOCCommonMonth">Mês</sys:String>
     <sys:String x:Key="LOCCommonDateData">Data dos dados</sys:String>
     
     <sys:String x:Key="LOCCommonLastUpdate">Última atualização</sys:String>
@@ -11,7 +11,7 @@
     <sys:String x:Key="LOCCommonRemoveFolder">Remover pasta</sys:String>
     <sys:String x:Key="LOCCommonAddFilePattern">Adicionar padrão de arquivo</sys:String>
 
-    <sys:String x:Key="LOCCommonMargin">Margin</sys:String>
+    <sys:String x:Key="LOCCommonMargin">Margem</sys:String>
     
     <!-- Filters -->
 
@@ -50,8 +50,8 @@
     
     <sys:String x:Key="LOCCommonSelectFilters">Selecionar filtros</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Adicionado Recentemente</sys:String>
-    <sys:String x:Key="LOCCommonOnlyMissing">Only missing</sys:String>
-    <sys:String x:Key="LOCCommonMissingData">Tag games missing data</sys:String>
+    <sys:String x:Key="LOCCommonOnlyMissing">Apenas faltando</sys:String>
+    <sys:String x:Key="LOCCommonMissingData">Etiquetar jogos faltando dados</sys:String>
 
     <sys:String x:Key="LOCCommonTotal">Total</sys:String>
     <sys:String x:Key="LOCCommonCut">Recortar</sys:String>
@@ -69,7 +69,7 @@
     <sys:String x:Key="LOCCommon80to90">80 a 90 horas</sys:String>
     <sys:String x:Key="LOCCommon90to100">90 a 100 horas</sys:String>
     <sys:String x:Key="LOCCommon100plus">100 horas ou mais</sys:String>
-    <sys:String x:Key="LOCCommonNoData">No data</sys:String>
+    <sys:String x:Key="LOCCommonNoData">Sem dados</sys:String>
 
     <sys:String x:Key="LOCCommonDefaultSorting">Classificação padrão da lista de jogos</sys:String>
 
