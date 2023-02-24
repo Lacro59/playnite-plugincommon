@@ -22,8 +22,8 @@ namespace CommonPluginsShared.Models
             StackFrame Frame = Trace.GetFrames()?.LastOrDefault();
             InitialCaller = Frame?.GetMethod()?.Name;
             CallerParams = Frame?.GetMethod()?.GetParameters();
-            FileName = Frame.GetFileName().IsNullOrEmpty() ? "???" : Frame.GetFileName();
-            LineNumber = Frame.GetFileLineNumber();
+            FileName = (Frame?.GetFileName()?.IsNullOrEmpty() ?? true) ? "???" : Frame.GetFileName();
+            LineNumber = Frame?.GetFileLineNumber() ?? 0;
         }
     }
 }
