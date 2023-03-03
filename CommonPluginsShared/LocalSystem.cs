@@ -35,9 +35,12 @@ namespace CommonPluginsShared
                 }
             }
 
-
-            IdConfiguration = Configurations.FindIndex(x => x.Cpu == systemConfiguration.Cpu && x.Name == systemConfiguration.Name
-                && x.GpuName == systemConfiguration.GpuName && x.RamUsage == systemConfiguration.RamUsage);
+            IdConfiguration = Configurations?.FindIndex(x => 
+                    x.Cpu == systemConfiguration.Cpu && 
+                    x.Name == systemConfiguration.Name && 
+                    x.GpuName == systemConfiguration.GpuName && 
+                    x.RamUsage == systemConfiguration.RamUsage
+            ) ?? -1;
 
             if (IdConfiguration == -1)
             {
