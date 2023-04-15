@@ -211,7 +211,7 @@ namespace CommonPluginsStores.Gog
             try
             {
                 ObservableCollection<AccountGameInfos> accountGamesInfos = new ObservableCollection<AccountGameInfos>();
-                for (int idx = 1; idx < 10; idx++)
+                for (int idx = 1; idx < 50; idx++)
                 {
                     try
                     {
