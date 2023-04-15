@@ -2,7 +2,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <sys:String x:Key="LOCCommonYear">Год</sys:String>
-    <sys:String x:Key="LOCCommonMonth">Month</sys:String>
+    <sys:String x:Key="LOCCommonMonth">Месяц</sys:String>
     <sys:String x:Key="LOCCommonDateData">Дата внесения данны</sys:String>
     
     <sys:String x:Key="LOCCommonLastUpdate">Последнее обновление</sys:String>
@@ -11,7 +11,7 @@
     <sys:String x:Key="LOCCommonRemoveFolder">Удалить папк</sys:String>
     <sys:String x:Key="LOCCommonAddFilePattern">Добавить шаблон файла</sys:String>
 
-    <sys:String x:Key="LOCCommonMargin">Margin</sys:String>
+    <sys:String x:Key="LOCCommonMargin">Отступ</sys:String>
     
     <!-- Filters -->
 
@@ -50,8 +50,8 @@
     
     <sys:String x:Key="LOCCommonSelectFilters">Введите фильтры</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Недавно добавленные</sys:String>
-    <sys:String x:Key="LOCCommonOnlyMissing">Only missing</sys:String>
-    <sys:String x:Key="LOCCommonMissingData">Tag games missing data</sys:String>
+    <sys:String x:Key="LOCCommonOnlyMissing">Только недостающие</sys:String>
+    <sys:String x:Key="LOCCommonMissingData">Метка для игр с отсутствующими данными</sys:String>
 
     <sys:String x:Key="LOCCommonTotal">Всего</sys:String>
     <sys:String x:Key="LOCCommonCut">Вырезать</sys:String>
@@ -69,7 +69,7 @@
     <sys:String x:Key="LOCCommon80to90">От 80 до 90 часов</sys:String>
     <sys:String x:Key="LOCCommon90to100">От 90 до 100 часов</sys:String>
     <sys:String x:Key="LOCCommon100plus">100 часов и больше</sys:String>
-    <sys:String x:Key="LOCCommonNoData">No data</sys:String>
+    <sys:String x:Key="LOCCommonNoData">Нет данных</sys:String>
 
     <sys:String x:Key="LOCCommonDefaultSorting">Сортировка списка игр по умолчанию</sys:String>
 
