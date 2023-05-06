@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -7,10 +8,10 @@ namespace CommonPluginsShared
 {
     public class Paths
     {
-        public static string GetSafePath(string path)
+        public static string GetSafePath(string path, bool lastIsName = false)
         {
             string pathReturn = string.Empty;
-            string[] PathFolders = path.Split('\\');
+            List<string> PathFolders = path.Split('\\').ToList();
             foreach (string folder in PathFolders)
             {
                 if (pathReturn.IsNullOrEmpty())
@@ -19,7 +20,14 @@ namespace CommonPluginsShared
                 }
                 else
                 {
-                    pathReturn += "\\" + Paths.GetSafePathName(folder, true);
+                    if (PathFolders.IndexOf(folder) == PathFolders.Count - 1 && lastIsName)
+                    {
+                        pathReturn += "\\" + Paths.GetSafePathName(folder, false);
+                    }
+                    else
+                    {
+                        pathReturn += "\\" + Paths.GetSafePathName(folder, true);
+                    }
                 }
             }
 
@@ -28,14 +36,9 @@ namespace CommonPluginsShared
 
         public static string GetSafePathName(string filename, bool keepNameSpace = false)
         {
-            if (keepNameSpace)
-            {
-                return string.Join(" ", filename.Split(Path.GetInvalidFileNameChars())).Trim();
-            }
-            else
-            {
-                return CommonPlayniteShared.Common.Paths.GetSafePathName(filename);
-            }
+            return keepNameSpace
+                ? string.Join(" ", filename.Split(Path.GetInvalidFileNameChars())).Trim()
+                : CommonPlayniteShared.Common.Paths.GetSafePathName(filename);
         }
     }
 }
