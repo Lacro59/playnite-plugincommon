@@ -36,7 +36,7 @@ namespace CommonPluginsStores.Gog
 
         #region Url API
         private const string UrlApiGamePlay = @"https://gameplay.gog.com";
-        private const string UrlApi = @"http://api.gog.com";
+        private const string UrlApi = @"https://api.gog.com";
 
         private const string UrlApiGamePlayUserAchievements = UrlApiGamePlay + @"/clients/{0}/users/{1}/achievements";
         private const string UrlApiGamePlayFriendAchievements = UrlApiGamePlay + @"/clients/{0}/users/{1}/friends_achievements_unlock_progresses";
