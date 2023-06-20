@@ -51,7 +51,7 @@
     <sys:String x:Key="LOCCommonSelectFilters">Filter wählen</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Kürzlich hinzugefügt</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Nur fehlende</sys:String>
-    <sys:String x:Key="LOCCommonMissingData">Markiere Spiele mit fehlenden Daten</sys:String>
+    <sys:String x:Key="LOCCommonMissingData">Tag Spiele fehlende Daten</sys:String>
 
     <sys:String x:Key="LOCCommonTotal">Gesamt</sys:String>
     <sys:String x:Key="LOCCommonCut">Schnitt</sys:String>
