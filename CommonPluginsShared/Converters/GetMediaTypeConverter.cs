@@ -29,6 +29,10 @@ namespace CommonPluginsShared.Converters
                     {
                         return "\ueb13";
                     }
+                    if (System.IO.Path.GetExtension((string)value).ToLower().Contains("webm"))
+                    {
+                        return "\ueb13";
+                    }
 
                     if (System.IO.Path.GetExtension((string)value).ToLower().Contains("webp"))
                     {
