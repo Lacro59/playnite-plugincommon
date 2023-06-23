@@ -7,6 +7,10 @@
               xmlns:pbeh="clr-namespace:CommonPlayniteShared.Behaviors"
               mc:Ignorable="d" d:DesignHeight="450" d:DesignWidth="800">
 
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
+
     <Grid Unloaded="Grid_Unloaded" MouseEnter="Grid_MouseEnter" MouseLeave="Grid_MouseLeave">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -18,7 +22,15 @@
                       Source="{Binding Source, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                       LoadedBehavior="{Binding LoadedBehavior, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                       ScrubbingEnabled="True" Stretch="Uniform" 
+                      SizeChanged="PART_Video_SizeChanged"
                       MediaOpened="PART_Video_MediaOpened" pbeh:MediaElementBehaviors.Repeat="True" />
+
+        <Border Name="PART_ImageBorder"
+                BorderThickness="{DynamicResource ControlBorderThickness}" 
+                BorderBrush="{DynamicResource NormalBorderBrush}" 
+                Visibility="{Binding AddBorder, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Height="{Binding ElementName=PART_Video, Path=ActualHeight}"
+                Width="{Binding ElementName=PART_Video, Path=ActualWidth}" />
 
         <Grid Name="PART_Controls" Grid.Row="2" VerticalAlignment="Bottom">
             <Grid.ColumnDefinitions>

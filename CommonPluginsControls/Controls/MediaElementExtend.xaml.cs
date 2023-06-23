@@ -52,6 +52,46 @@ namespace CommonPluginsControls.Controls
             typeof(MediaState),
             typeof(MediaElementExtend),
             new FrameworkPropertyMetadata(MediaState.Stop));
+
+
+        public static readonly DependencyProperty VideoHeightProperty = DependencyProperty.Register(
+            nameof(VideoHeight),
+            typeof(double),
+            typeof(MediaElementExtend),
+            new FrameworkPropertyMetadata(double.NaN)
+        );
+
+        public double VideoHeight
+        {
+            get { return (double)GetValue(VideoHeightProperty); }
+            set { SetValue(VideoHeightProperty, value); }
+        }
+
+        public static readonly DependencyProperty VideoWidthProperty = DependencyProperty.Register(
+            nameof(VideoWidth),
+            typeof(double),
+            typeof(MediaElementExtend),
+            new FrameworkPropertyMetadata(double.NaN)
+        );
+
+        public double VideoWidth
+        {
+            get { return (double)GetValue(VideoWidthProperty); }
+            set { SetValue(VideoWidthProperty, value); }
+        }
+
+        public static readonly DependencyProperty AddBorderProperty = DependencyProperty.Register(
+            nameof(AddBorder),
+            typeof(bool),
+            typeof(MediaElementExtend),
+            new FrameworkPropertyMetadata(false)
+        );
+
+        public double AddBorder
+        {
+            get { return (double)GetValue(AddBorderProperty); }
+            set { SetValue(AddBorderProperty, value); }
+        }
         #endregion
 
 
@@ -179,6 +219,12 @@ namespace CommonPluginsControls.Controls
                     }
                 });
             });
+        }
+
+        private void PART_Video_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            VideoHeight = PART_Video.ActualHeight;
+            VideoWidth = PART_Video.ActualWidth;
         }
     }
 }
