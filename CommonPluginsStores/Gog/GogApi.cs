@@ -121,6 +121,13 @@ namespace CommonPluginsStores.Gog
             try
             {
                 string WebData = Web.DownloadStringData(string.Format(UrlUserFriends, UserName), GetStoredCookies()).GetAwaiter().GetResult();
+                if (WebData.IndexOf("window.profilesData.currentUser") == -1)
+                {
+                    IsUserLoggedIn = false;
+                    logger.Warn($"Not find: window.profilesData.currentUser");
+                    return null;
+                }
+
                 string JsonDataString = Tools.GetJsonInString(WebData, "window.profilesData.currentUser = ", "window.profilesData.profileUser = ", "]}};");
                 Serialization.TryFromJson(JsonDataString, out ProfileUser profileUser);
 
@@ -160,6 +167,13 @@ namespace CommonPluginsStores.Gog
             try
             {
                 string WebData = Web.DownloadStringData(string.Format(UrlUserFriends, UserName), GetStoredCookies()).GetAwaiter().GetResult();
+                if (WebData.IndexOf("window.profilesData.currentUser") == -1)
+                {
+                    IsUserLoggedIn = false;
+                    logger.Warn($"Not find: window.profilesData.profileUserFriends");
+                    return null;
+                }
+
                 string JsonDataString = Tools.GetJsonInString(WebData, "window.profilesData.profileUserFriends = ", "window.profilesData.currentUserFriends = ", "}}];");
                 Serialization.TryFromJson(JsonDataString, out List<ProfileUserFriends> profileUserFriends);
 
