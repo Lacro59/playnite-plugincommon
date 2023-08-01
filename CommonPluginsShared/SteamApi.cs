@@ -110,7 +110,7 @@ namespace CommonPluginsShared
         
             if (SteamId == 0)
             {
-                logger.Warn($"SteamId not find for {Name}");
+                logger.Warn($"SteamId not found for {Name}");
             }
         
             return SteamId;

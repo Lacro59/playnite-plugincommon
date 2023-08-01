@@ -416,18 +416,18 @@ namespace CommonPluginsStores.Steam
         public int GetAppId(string Name)
         {
             AppsList.Sort((x, y) => x.appid.CompareTo(y.appid));
-            List<int> finded = AppsList.FindAll(x => x.name.IsEqual(Name)).Select(x => x.appid).Distinct().ToList();
+            List<int> found = AppsList.FindAll(x => x.name.IsEqual(Name)).Select(x => x.appid).Distinct().ToList();
 
-            if (finded != null && finded.Count > 0)
+            if (found != null && found.Count > 0)
             {
-                if (finded.Count > 1)
+                if (found.Count > 1)
                 {
-                    logger.Warn($"Find {finded.Count} SteamAppId data for {Name}: " + string.Join(", ", finded));
+                    logger.Warn($"Found {found.Count} SteamAppId data for {Name}: " + string.Join(", ", found));
                     return 0;
                 }
 
-                Common.LogDebug(true, $"Find SteamAppId data for {Name} - {Serialization.ToJson(finded)}");
-                return finded.First();
+                Common.LogDebug(true, $"Found SteamAppId data for {Name} - {Serialization.ToJson(found)}");
+                return found.First();
             }
 
             return 0;
@@ -441,12 +441,12 @@ namespace CommonPluginsStores.Steam
         public string GetGameName(int AppId)
         {
             AppsList.Sort((x, y) => x.appid.CompareTo(y.appid));
-            App finded = AppsList.Find(x => x.appid == AppId); ;
+            App found = AppsList.Find(x => x.appid == AppId); ;
 
-            if (finded != null)
+            if (found != null)
             {
-                Common.LogDebug(true, $"Find Steam data for {AppId} - {Serialization.ToJson(finded)}");
-                return finded.name;
+                Common.LogDebug(true, $"Found Steam data for {AppId} - {Serialization.ToJson(found)}");
+                return found.name;
             }
 
             return string.Empty;
@@ -533,7 +533,7 @@ namespace CommonPluginsStores.Steam
                 Common.LogError(ex, false, true, PluginName);
             }
 
-            logger.Warn("No find Steam installation");
+            logger.Warn("No Steam installation found");
             return string.Empty;
         }
 
@@ -550,7 +550,7 @@ namespace CommonPluginsStores.Steam
                 return PathScreeshotsFolder;
             }
 
-            logger.Warn("No find Steam screenshots folder");
+            logger.Warn("No Steam screenshots folder found");
             return string.Empty;
         }
 
@@ -613,7 +613,7 @@ namespace CommonPluginsStores.Steam
                 }
                 else
                 {
-                    logger.Warn("No find SteamLibrary configuration");
+                    logger.Warn("No SteamLibrary configuration found");
                 }
             }
             catch (Exception ex)

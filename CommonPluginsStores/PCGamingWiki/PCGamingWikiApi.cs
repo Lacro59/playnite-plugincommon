@@ -177,7 +177,7 @@ namespace CommonPluginsStores.PCGamingWiki
 
         private string GetWithSearchApi(string url)
         {
-            string urlFinded = string.Empty;
+            string urlFound = string.Empty;
 
             try
             {
@@ -186,7 +186,7 @@ namespace CommonPluginsStores.PCGamingWiki
 
                 if (data != null && data[3]?.Count > 0)
                 {
-                    urlFinded = data[3][0];
+                    urlFound = data[3][0];
                 }
             }
             catch (Exception ex)
@@ -194,7 +194,7 @@ namespace CommonPluginsStores.PCGamingWiki
                 Common.LogError(ex, false);
             }
 
-            return urlFinded;
+            return urlFound;
         }
 
 

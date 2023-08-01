@@ -155,14 +155,14 @@ namespace CommonPluginsShared
 
                 if (emulator == null)
                 {
-                    logger.Warn($"No emulator find for {game.Name}");
+                    logger.Warn($"No emulator found for {game.Name}");
                     return false;
                 }
 
                 string BuiltInConfigId = string.Empty;
                 if (emulator.BuiltInConfigId == null)
                 {
-                    //logger.Warn($"No BuiltInConfigId find for {emulator.Name}");
+                    //logger.Warn($"No BuiltInConfigId found for {emulator.Name}");
                 }
                 else
                 {
@@ -193,14 +193,14 @@ namespace CommonPluginsShared
 
                 if (emulator == null)
                 {
-                    logger.Warn($"No emulator find for {game.Name}");
+                    logger.Warn($"No emulator found for {game.Name}");
                     return false;
                 }
 
                 string BuiltInConfigId = string.Empty;
                 if (emulator.BuiltInConfigId == null)
                 {
-                    logger.Warn($"No BuiltInConfigId find for {emulator.Name}");
+                    logger.Warn($"No BuiltInConfigId found for {emulator.Name}");
                 }
                 else
                 {
@@ -231,14 +231,14 @@ namespace CommonPluginsShared
 
                 if (emulator == null)
                 {
-                    logger.Warn($"No emulator find for {game.Name}");
+                    logger.Warn($"No emulator found for {game.Name}");
                     return false;
                 }
 
                 string BuiltInConfigId = string.Empty;
                 if (emulator.BuiltInConfigId == null)
                 {
-                    logger.Warn($"No BuiltInConfigId find for {emulator.Name}");
+                    logger.Warn($"No BuiltInConfigId found for {emulator.Name}");
                 }
                 else
                 {
@@ -475,7 +475,7 @@ namespace CommonPluginsShared
                     var Source = API.Instance.Database.Sources.Get(SourceId);
                     if (Source == null)
                     {
-                        logger.Warn($"SourceName not find for {SourceId.ToString()}");
+                        logger.Warn($"SourceName not found for {SourceId.ToString()}");
                         return "Playnite";
                     }
                     return Source.Name;
@@ -525,10 +525,10 @@ namespace CommonPluginsShared
         /// <returns></returns>
         public static string GetPlatformIcon(string PlatformName)
         {
-            Platform PlatformFinded = API.Instance.Database.Platforms?.Where(x => x.Name.IsEqual(PlatformName)).FirstOrDefault();
-            if (!(PlatformFinded?.Icon).IsNullOrEmpty())
+            Platform PlatformFound = API.Instance.Database.Platforms?.Where(x => x.Name.IsEqual(PlatformName)).FirstOrDefault();
+            if (!(PlatformFound?.Icon).IsNullOrEmpty())
             {
-                return API.Instance.Database.GetFullFilePath(PlatformFinded.Icon);
+                return API.Instance.Database.GetFullFilePath(PlatformFound.Icon);
             }
             return string.Empty;
         }
