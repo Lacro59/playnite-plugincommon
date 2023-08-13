@@ -35,7 +35,7 @@
     <sys:String x:Key="LOCCommonNotLoggedIn">認証が必要です</sys:String>
     <sys:String x:Key="LOCCommonLoggedIn">ユーザーは認証されています</sys:String>
     <sys:String x:Key="LOCCommonAccountName">アカウント名</sys:String>
-    <sys:String x:Key="LOCCommonLoginChecking">認証ステータスを確認しています…</sys:String>
+    <sys:String x:Key="LOCCommonLoginChecking">認証ステータスを確認中…</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: ユーザーが認証されていません</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: API キーがありません</sys:String>
@@ -43,7 +43,7 @@
     <sys:String x:Key="LOCCommonIgnoredItems">無視した項目</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">無視する項目を入力</sys:String>
     
-    <sys:String x:Key="LOCCommonProgression">進捗状況</sys:String>
+    <sys:String x:Key="LOCCommonProgression">達成度</sys:String>
     <sys:String x:Key="LOCCommonCompleted">完了</sys:String>
 
     <sys:String x:Key="LOCCommonGameTime">ゲーム時間</sys:String>
@@ -157,9 +157,9 @@
 
     <sys:String x:Key="LOCCommonGettingData">データをダウンロード中...</sys:String>
     <sys:String x:Key="LOCCommonGettingAllDatas">すべてのゲームのデータをダウンロード中...</sys:String>
-    <sys:String x:Key="LOCCommonAddingAllTag">すべてのゲームにタグを追加しています...</sys:String>
-    <sys:String x:Key="LOCCommonRemovingAllTag">すべてのゲームからタグを削除しています...</sys:String>
-    <sys:String x:Key="LOCCommonClearingAllTag">データベースをクリアしています...</sys:String>
+    <sys:String x:Key="LOCCommonAddingAllTag">すべてのゲームにタグを追加中...</sys:String>
+    <sys:String x:Key="LOCCommonRemovingAllTag">すべてのゲームからタグを削除中...</sys:String>
+    <sys:String x:Key="LOCCommonClearingAllTag">データベースをクリア中...</sys:String>
     <sys:String x:Key="LOCCommonProcessing">処理中です。しばらくお待ちください…</sys:String>
     <sys:String x:Key="LOCCommonConverting">変換中です。しばらくお待ちください…</sys:String>
 
