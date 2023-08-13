@@ -697,20 +697,20 @@ namespace CommonPluginsStores.Origin
         /// <returns></returns>
         public string GetOriginId(string Name, bool byItemName = false)
         {
-            CommonPlayniteShared.PluginLibrary.OriginLibrary.Models.GameStoreDataResponse finded = null;
+            CommonPlayniteShared.PluginLibrary.OriginLibrary.Models.GameStoreDataResponse found = null;
             if (!byItemName)
             {
-                finded = AppsList.Find(x => x.masterTitle.IsEqual(Name));
+                found = AppsList.Find(x => x.masterTitle.IsEqual(Name));
             }
             else
             {
-                finded = AppsList.Find(x => x.itemName.IsEqual(Name));
+                found = AppsList.Find(x => x.itemName.IsEqual(Name));
             }
 
-            if (finded != null)
+            if (found != null)
             {
-                Common.LogDebug(true, $"Find Origin data for {Name} - {Serialization.ToJson(finded)}");
-                return finded.offerId ?? string.Empty;
+                Common.LogDebug(true, $"Found Origin data for {Name} - {Serialization.ToJson(found)}");
+                return found.offerId ?? string.Empty;
             }
             else if (!byItemName)
             {

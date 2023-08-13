@@ -191,11 +191,11 @@ namespace CommonPluginsShared
 
         public static FrameworkElement SearchElementByName(string ElementName, DependencyObject dpObj, bool MustVisible = false, bool ParentMustVisible = false, int counter = 1)
         {
-            FrameworkElement ElementFind = null;
+            FrameworkElement ElementFound = null;
 
             int count = 0;
 
-            if (ElementFind == null)
+            if (ElementFound == null)
             {
                 foreach (FrameworkElement el in UI.FindVisualChildren<FrameworkElement>(dpObj))
                 {
@@ -221,12 +221,12 @@ namespace CommonPluginsShared
                                 {
                                     if (!ParentMustVisible)
                                     {
-                                        ElementFind = tmpEl;
+                                        ElementFound = tmpEl;
                                         break;
                                     }
                                     else if (((FrameworkElement)el.Parent).IsVisible)
                                     {
-                                        ElementFind = tmpEl;
+                                        ElementFound = tmpEl;
                                         break;
                                     }
                                 }
@@ -234,12 +234,12 @@ namespace CommonPluginsShared
                                 {
                                     if (!ParentMustVisible)
                                     {
-                                        ElementFind = tmpEl;
+                                        ElementFound = tmpEl;
                                         break;
                                     }
                                     else if (((FrameworkElement)el.Parent).IsVisible)
                                     {
-                                        ElementFind = tmpEl;
+                                        ElementFound = tmpEl;
                                         break;
                                     }
                                 }
@@ -256,7 +256,7 @@ namespace CommonPluginsShared
                             {
                                 if (count == counter)
                                 {
-                                    ElementFind = el;
+                                    ElementFound = el;
                                     break;
                                 }
                             }
@@ -264,7 +264,7 @@ namespace CommonPluginsShared
                             {
                                 if (count == counter)
                                 {
-                                    ElementFind = el;
+                                    ElementFound = el;
                                     break;
                                 }
                             }
@@ -275,7 +275,7 @@ namespace CommonPluginsShared
                             {
                                 if (count == counter)
                                 {
-                                    ElementFind = el;
+                                    ElementFound = el;
                                     break;
                                 }
                             }
@@ -283,7 +283,7 @@ namespace CommonPluginsShared
                             {
                                 if (count == counter)
                                 {
-                                    ElementFind = el;
+                                    ElementFound = el;
                                     break;
                                 }
                             }

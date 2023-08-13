@@ -84,7 +84,7 @@ namespace CommonPluginsShared
                 }
                 else
                 {
-                    logger.Warn($"File {CommonFile} not find");
+                    logger.Warn($"File {CommonFile} not found");
                     return;
                 }
             }
@@ -113,7 +113,7 @@ namespace CommonPluginsShared
             }
             else
             {
-                logger.Warn($"File {FontFile} not find");
+                logger.Warn($"File {FontFile} not found");
             }
             #endregion
         }

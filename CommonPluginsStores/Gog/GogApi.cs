@@ -124,7 +124,7 @@ namespace CommonPluginsStores.Gog
                 if (WebData.IndexOf("window.profilesData.currentUser") == -1)
                 {
                     IsUserLoggedIn = false;
-                    logger.Warn($"Not find: window.profilesData.currentUser");
+                    logger.Warn($"Not found: window.profilesData.currentUser");
                     return null;
                 }
 
@@ -170,7 +170,7 @@ namespace CommonPluginsStores.Gog
                 if (WebData.IndexOf("window.profilesData.currentUser") == -1)
                 {
                     IsUserLoggedIn = false;
-                    logger.Warn($"Not find: window.profilesData.profileUserFriends");
+                    logger.Warn($"Not found: window.profilesData.profileUserFriends");
                     return null;
                 }
 
