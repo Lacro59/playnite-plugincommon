@@ -400,11 +400,11 @@ namespace CommonPluginsStores.Epic
                         Id = el.id,
                         Name = el.title,
                         Description = el.description,
-                        Image = el.keyImages.Find(x => x.type.IsEqual("OfferImageWide")).url.Replace("\u002F", "/"),
+                        Image = el.keyImages?.Find(x => x.type.IsEqual("OfferImageWide"))?.url?.Replace("\u002F", "/"),
                         Link = string.Format(UrlStore, LocalLang, el.urlSlug),
                         IsOwned = IsOwned,
-                        Price = el.price.totalPrice.fmtPrice.discountPrice,
-                        PriceBase = el.price.totalPrice.fmtPrice.originalPrice,
+                        Price = el.price?.totalPrice?.fmtPrice?.discountPrice,
+                        PriceBase = el.price?.totalPrice?.fmtPrice?.originalPrice,
                     };
 
                     Dlcs.Add(dlc);
