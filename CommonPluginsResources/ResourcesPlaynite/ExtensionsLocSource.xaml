@@ -17,12 +17,22 @@
     <sys:String x:Key="LOCStartUsingClient">Start using {0} client</sys:String>
     <sys:String x:Key="LOCImportPlaytime">Import play time</sys:String>
     <sys:String x:Key="LOCAccountID">Account ID</sys:String>
+    <sys:String x:Key="LOCMetadataLanguageLabel">Metadata language:</sys:String>
     <!--itch.io-->
     <sys:String x:Key="LOCItchioSignInNotif">itch.io will be launched. Please sign in and then close this message.</sys:String>
     <sys:String x:Key="LOCItchioSignInWaitMessage">Waiting for user to sign in, please close this when you're done…</sys:String>
     <sys:String x:Key="LOCItchioClientNotInstalledError">itch.io app version 25 or newer is not installed.</sys:String>
     <sys:String x:Key="LOCitchioSettingsImportFreeGamesFromCollectionsLabel">Import free games from collections.</sys:String>
     <sys:String x:Key="LOCitchioSettingsImportGameClassificationLabel">Items to be imported:</sys:String>
+    <sys:String x:Key="LOCitchioItemClassificationGames">Games</sys:String>
+    <sys:String x:Key="LOCitchioItemClassificationTools">Tools</sys:String>
+    <sys:String x:Key="LOCitchioItemClassificationAssets">Assets</sys:String>
+    <sys:String x:Key="LOCitchioItemClassificationMods">Mods</sys:String>
+    <sys:String x:Key="LOCitchioItemClassificationPhysicalGames">Physical games</sys:String>
+    <sys:String x:Key="LOCitchioItemClassificationSoundtracks">Soundtracks</sys:String>
+    <sys:String x:Key="LOCitchioItemClassificationOthers">Others</sys:String>
+    <sys:String x:Key="LOCitchioItemClassificationComics">Comics</sys:String>
+    <sys:String x:Key="LOCitchioItemClassificationBooks">Books</sys:String>
     <!--GOG-->
     <sys:String x:Key="LOCGOGUseLogin">Account Login</sys:String>
     <sys:String x:Key="LOCGOGUseAccountName">Account Name</sys:String>
@@ -30,6 +40,10 @@
 Note that the Account Name option only works for accounts whose game libraries have been set in GOG's privacy settings to be publicly visible.</sys:String>
     <sys:String x:Key="LOCSettingsGOGUseGalaxy">Launch games using GOG Galaxy client</sys:String>
     <sys:String x:Key="LOCSettingsGOGUseGalaxyTooltip">This will enable GOG Galaxy features like cloud saves, game time tracking, etc.</sys:String>
+    <sys:String x:Key="LOCGOGSettingsUseAutomaticGameInstalls">Automatically initiate the install process when installing games on GOG Galaxy</sys:String>
+    <sys:String x:Key="LOCGOGSettingsUseAutomaticGameInstallsTooltip" xml:space="preserve">If enabled, the install process will be automatically started without needing user interaction to the configured default install location.
+If disabled, the game page will be opened to manually start the install process.</sys:String>
+    <sys:String x:Key="LOCGOGSettingsUseVerticalCovers">Use vertical covers</sys:String>
     <!--Steam-->
     <sys:String x:Key="LOCSettingsWhatsSteamName">What's my account name?</sys:String>
     <sys:String x:Key="LOCSteamCustomUrlName">Account URL Name</sys:String>
@@ -64,10 +78,22 @@ Note that the Account Name option only works for accounts whose game libraries h
     <sys:String x:Key="LOCSteamIgnoreOtherAccountGames">Ignore installed games from other accounts</sys:String>
     <sys:String x:Key="LOCSteamAdditionalAccounts">Additional Accounts</sys:String>
     <sys:String x:Key="LOCSteamAdditionalAccountsDescription">Specify Steam account ID and API key pair of other accounts if you want to import games from them. See Steam troubleshooting wiki page for more information.</sys:String>
+    <sys:String x:Key="LOCSteamLimitTagCountLabel">Limit the amount of tags imported to the first</sys:String>
+    <sys:String x:Key="LOCSteamTagPrefixLabel">Prefix tag names with:</sys:String>
+    <sys:String x:Key="LOCSteamTagBlacklistTabLabel">Tag blacklist</sys:String>
+    <sys:String x:Key="LOCSteamTagBlacklistExplanationLabel">Excluded tags will not be added to games.</sys:String>
+    <sys:String x:Key="LOCSteamTagWhitelistHeader">Available tags</sys:String>
+    <sys:String x:Key="LOCSteamTagBlacklistHeader">Excluded tags</sys:String>
+    <sys:String x:Key="LOCSteamTagWhitelistTooltip">Remove from excluded tags</sys:String>
+    <sys:String x:Key="LOCSteamTagBlacklistTooltip">Add to excluded tags</sys:String>
+    <sys:String x:Key="LOCSteamValidationFixedTagCount">Fixed tag count must be a valid number</sys:String>
+    <sys:String x:Key="LOCSteamShowGameLaunchMenuInDesktopMode">Show Steam's game startup selection menu in desktop mode</sys:String>
+    <sys:String x:Key="LOCSteamShowGameLaunchMenuInFullscreenMode">Show Steam's game startup selection menu in fullscreen mode</sys:String>
     <!--IGDB-->
     <sys:String x:Key="LOCIgdbUseScreenshotIfNecessary">Use screenshots if artwork is not available</sys:String>
     <sys:String x:Key="LOCIgdbMultipleArtworkOptionsTitle">If multiple images are available then use:</sys:String>
     <sys:String x:Key="LOCIgdbSelectBackgroundTitle">Select background image for {0}</sys:String>
+    <sys:String x:Key="LOCIgdbCoverAsIcon">Substitute cropped cover image for icon</sys:String>
     <!--Humble-->
     <sys:String x:Key="LOCHumbleIgnoreThirdPartyStoreGames">Ignore third party store games</sys:String>
     <sys:String x:Key="LOCHumbleImportChoiceGames">Import Humble Choice games</sys:String>
