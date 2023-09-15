@@ -73,7 +73,7 @@ namespace CommonPluginsShared
             {
                 return false;
             }
-            return (GpuName.ToLower().IndexOf("amd") > -1 || GpuName.ToLower().IndexOf("radeon") > -1 || GpuName.ToLower().IndexOf("ati ") > -1);
+            return (GpuName.ToLower().IndexOf("amd") > -1 || GpuName.ToLower().IndexOf("radeon") > -1 || GpuName.ToLower().IndexOf("ati ") > -1 || GpuName.ToLower().IndexOf("rx ") > -1);
         }
         private bool CallIsIntel(string GpuName)
         {
@@ -82,6 +82,14 @@ namespace CommonPluginsShared
                 return false;
             }
             return GpuName.ToLower().IndexOf("intel") > -1;
+        }
+        private bool IsNotIntegrated(string GpuName)
+        {
+            if (GpuName.IsNullOrEmpty())
+            {
+                return false;
+            }
+            return GpuName.ToLower().IndexOf("graphics") == -1;
         }
 
 
@@ -184,23 +192,24 @@ namespace CommonPluginsShared
                     GpuName = obj["Name"]?.ToString();
                     Common.LogDebug(true, $"Gpu: {GpuName}");
 
-                    if (CallIsNvidia(GpuName) || CallIsAmd(GpuName) || CallIsIntel(GpuName))
+                    if (obj["AdapterRAM"] != null)
+                    {
+                        long.TryParse(obj["AdapterRAM"].ToString(), out GpuRam);
+                    }
+
+                    if (obj["CurrentHorizontalResolution"] != null)
+                    {
+                        uint.TryParse(obj["CurrentHorizontalResolution"].ToString(), out CurrentHorizontalResolution);
+                    }
+
+                    if (obj["CurrentVerticalResolution"] != null)
+                    {
+                        uint.TryParse(obj["CurrentVerticalResolution"].ToString(), out CurrentVerticalResolution);
+                    }
+
+                    // Keep only external graphic card
+                    if ((CallIsNvidia(GpuName) || CallIsAmd(GpuName) || CallIsIntel(GpuName)) && IsNotIntegrated(GpuName))
                     { 
-                        if (obj["AdapterRAM"] != null)
-                        {
-                            long.TryParse(obj["AdapterRAM"].ToString(), out GpuRam);
-                        }
-
-                        if (obj["CurrentHorizontalResolution"] != null)
-                        {
-                            uint.TryParse(obj["CurrentHorizontalResolution"].ToString(), out CurrentHorizontalResolution);
-                        }
-
-                        if (obj["CurrentVerticalResolution"] != null)
-                        {
-                            uint.TryParse(obj["CurrentVerticalResolution"].ToString(), out CurrentVerticalResolution);
-                        }
-
                         break;
                     }
                 }
