@@ -545,20 +545,28 @@ namespace CommonPluginsShared
         public static string NormalizeGameName(string name, bool removeEditions = false)
         {
             if (string.IsNullOrEmpty(name))
+            {
                 return string.Empty;
+            }
 
             string newName = name;
             newName = newName.Replace(" (CD)", string.Empty);
 
             if (removeEditions)
+            {
                 newName = EditionInGameName.Replace(newName, string.Empty);
+            }
 
             MatchEvaluator matchEvaluator = (Match match) =>
             {
                 if (match.Groups["middle"].Success) //if the match group is the last one in the regex (non-word characters, including whitespace, in the middle of a string)
+                {
                     return " "; //replace (multiple) non-word character(s) in the middle of the string with a space
+                }
                 else
+                {
                     return string.Empty; //remove non-word characters (including white space) at the start and end of the string
+                }
             };
             newName = NonWordCharactersAndTrimmableWhitespace.Replace(newName, matchEvaluator).RemoveDiacritics();
 
