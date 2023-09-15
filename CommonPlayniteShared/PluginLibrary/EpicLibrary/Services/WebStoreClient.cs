@@ -1,4 +1,5 @@
 ﻿using CommonPlayniteShared.PluginLibrary.EpicLibrary.Models;//using EpicLibrary.Models;
+using CommonPluginsShared;
 using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary.Services
         private HttpClient httpClient = new HttpClient();
 
         public const string GraphQLEndpoint = @"https://graphql.epicgames.com/graphql";
-        public const string ProductUrlBase = @"https://store-content.ak.epicgames.com/api/en-US/content/products/{0}";
+        public const string ProductUrlBase = @"https://store-content.ak.epicgames.com/api/{1}/content/products/{0}";//public const string ProductUrlBase = @"https://store-content.ak.epicgames.com/api/en-US/content/products/{0}";
 
         public WebStoreClient()
         {
@@ -37,10 +38,16 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary.Services
             return data.data.Catalog.searchStore.elements;
         }
 
-        public async Task<WebStoreModels.ProductResponse> GetProductInfo(string productSlug)
+        public async Task<WebStoreModels.ProductResponse> GetProductInfo(string productSlug, string PlayniteLanguage = "en-US")
         {
+            string EpicLangCountry = CodeLang.GetEpicLangCountry(PlayniteLanguage);
+            if (PlayniteLanguage == "es_ES" || PlayniteLanguage == "zh_TW")
+            {
+                EpicLangCountry = CodeLang.GetEpicLang(PlayniteLanguage);
+            }
+
             var slugUri = productSlug.Split('/').First();
-            var productUrl = string.Format(ProductUrlBase, slugUri);
+            var productUrl = string.Format(ProductUrlBase, slugUri, EpicLangCountry);
             var str = await httpClient.GetStringAsync(productUrl);
             return Serialization.FromJson<WebStoreModels.ProductResponse>(str);
         }

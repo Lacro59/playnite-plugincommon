@@ -35,6 +35,13 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary.Models
                 public string epicNamespace;
                 public string id;
                 public string productSlug;
+                public List<KeyImages> keyImages;
+            }
+
+            public class KeyImages
+            {
+                public string type;
+                public string url;
             }
 
             public class Data
@@ -50,6 +57,7 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary.Models
                             public string id;
                             public string productSlug;
                             public string nameSpace;
+                            public List<KeyImages> keyImages;
 
                             public class CatalogNs
                             {
