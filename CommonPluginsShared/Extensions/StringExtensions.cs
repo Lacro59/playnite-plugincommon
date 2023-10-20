@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -8,8 +9,8 @@ namespace CommonPluginsShared.Extensions
     {
         public static string RemoveDiacritics(this string text)
         {
-            var normalizedString = text.Normalize(NormalizationForm.FormD);
-            var stringBuilder = new StringBuilder();
+            string normalizedString = text.Normalize(NormalizationForm.FormD);
+            StringBuilder stringBuilder = new StringBuilder();
 
             foreach (var c in normalizedString)
             {
@@ -32,18 +33,18 @@ namespace CommonPluginsShared.Extensions
 
         public static bool IsEqual(this string source, string text, bool Normalize = false)
         {
-            if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(text))
+            try
             {
+                return string.IsNullOrEmpty(source) || string.IsNullOrEmpty(text)
+                    ? false
+                    : Normalize
+                    ? PlayniteTools.NormalizeGameName(source).Trim().ToLower() == PlayniteTools.NormalizeGameName(text).Trim().ToLower()
+                    : source.Trim().ToLower() == text.Trim().ToLower();
+            }
+            catch(Exception ex)
+            {
+                Common.LogError(ex, false);
                 return false;
-            }
-
-            if (Normalize)
-            {
-                return PlayniteTools.NormalizeGameName(source).Trim().ToLower() == PlayniteTools.NormalizeGameName(text).Trim().ToLower();
-            }
-            else
-            {
-                return source.Trim().ToLower() == text.Trim().ToLower();
             }
         }
     }
