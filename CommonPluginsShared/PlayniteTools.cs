@@ -51,7 +51,8 @@ namespace CommonPluginsShared
             RiotLibrary,
             UplayLibrary,
 
-            SuccessStory
+            SuccessStory,
+            CheckDlc
         }
 
         private static readonly Dictionary<Guid, ExternalPlugin> PluginsById = new Dictionary<Guid, ExternalPlugin>
@@ -74,7 +75,8 @@ namespace CommonPluginsShared
             { new Guid("77346DD6-B0CC-4F7D-80F0-C1D138CCAE58"), ExternalPlugin.OculusLibrary },
             { new Guid("317a5e2e-eac1-48bc-adb3-fb9e321afd3f"), ExternalPlugin.RiotLibrary },
 
-            { new Guid("cebe6d32-8c46-4459-b993-5a5189d60788"), ExternalPlugin.SuccessStory }
+            { new Guid("cebe6d32-8c46-4459-b993-5a5189d60788"), ExternalPlugin.SuccessStory },
+            { new Guid("bf78d9af-6e79-4c73-aca6-c23a11a485ae"), ExternalPlugin.CheckDlc }
         };
 
         public static ExternalPlugin GetPluginType(Guid PluginId)

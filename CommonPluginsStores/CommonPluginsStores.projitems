@@ -50,9 +50,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)PsnApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\FriendsApps.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\FriendsList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\PlayerSummaries.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamAchievementData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamApps.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamUserData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\SteamApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StoreApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UbisoftAPI.cs" />

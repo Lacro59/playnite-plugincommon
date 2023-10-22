@@ -113,6 +113,10 @@
       <DependentUpon>SearchBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Stores\Steam\PanelView.xaml.cs">
+      <DependentUpon>PanelView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Stores\Steam\PanelViewModel.cs" />
     <Compile Include="Views\ListDataUpdated.xaml.cs">
       <DependentUpon>ListDataUpdated.xaml</DependentUpon>
     </Compile>
@@ -191,6 +195,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="PlayniteControls\SearchBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Stores\Steam\PanelView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

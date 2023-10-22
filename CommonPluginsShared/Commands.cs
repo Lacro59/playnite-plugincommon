@@ -12,47 +12,45 @@ namespace CommonPluginsShared
         private static ILogger logger = LogManager.GetLogger();
 
 
-        public static RelayCommand<object> NavigateUrl
+        public static RelayCommand<object> NavigateUrl => new RelayCommand<object>((url) =>
         {
-            get => new RelayCommand<object>((url) =>
+            try
             {
-                try
+                if (url is string stringUrl)
                 {
-                    if (url is string stringUrl)
-                    {
-                        Process.Start(stringUrl);
-                    }
-                    else
-                    {
-                        throw new Exception("Unsupported URL format.");
-                    }
+                    Process.Start(stringUrl);
                 }
-                catch (Exception ex)
+                else if (url is Uri uriUrl)
                 {
-                    Common.LogError(ex, false, "Failed to open url.");
+                    Process.Start(uriUrl.AbsoluteUri);
                 }
-            });
-        }
+                else
+                {
+                    throw new Exception("Unsupported URL format.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, "Failed to open url.");
+            }
+        });
 
 
-        public static RelayCommand<object> RestartRequired
+        public static RelayCommand<object> RestartRequired => new RelayCommand<object>((sender) =>
         {
-            get => new RelayCommand<object>((sender) =>
+            try
             {
-                try
-                {
-                    var WinParent = UI.FindParent<Window>((FrameworkElement)sender);
+                var WinParent = UI.FindParent<Window>((FrameworkElement)sender);
 
-                    if (WinParent.DataContext?.GetType().GetProperty("IsRestartRequired") != null)
-                    {
-                        ((dynamic)WinParent.DataContext).IsRestartRequired = true;
-                    }
-                }
-                catch (Exception ex)
+                if (WinParent.DataContext?.GetType().GetProperty("IsRestartRequired") != null)
                 {
-                    Common.LogError(ex, false);
+                    ((dynamic)WinParent.DataContext).IsRestartRequired = true;
                 }
-            });
-        }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+            }
+        });
     }
 }

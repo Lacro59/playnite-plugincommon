@@ -19,6 +19,23 @@ using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores
 {
+    public enum AuthStatus
+    {
+        Ok,
+        Checking,
+        AuthRequired,
+        PrivateAccount,
+        Failed
+    }
+
+    public enum AccountStatus
+    {
+        Checking,
+        Private,
+        Public
+    }
+
+
     public abstract class StoreApi : ObservableObject
     {
         internal static ILogger logger => LogManager.GetLogger();
@@ -181,10 +198,10 @@ namespace CommonPluginsStores
                             Encoding.UTF8,
                             WindowsIdentity.GetCurrent().User.Value));
 
-                    var findExpired = StoredCookies.FindAll(x => x.Expires != null && (DateTime)x.Expires <= DateTime.Now);
+                    List<HttpCookie> findExpired = StoredCookies.FindAll(x => x.Expires != null && (DateTime)x.Expires <= DateTime.Now);
 
                     FileInfo fileInfo = new FileInfo(FileCookies);
-                    bool isExpired = (fileInfo.LastWriteTime.AddDays(1) < DateTime.Now);
+                    bool isExpired = fileInfo.LastWriteTime.AddDays(1) < DateTime.Now;
 
                     if (findExpired?.Count > 0 || isExpired)
                     {
@@ -218,8 +235,8 @@ namespace CommonPluginsStores
         /// <param name="httpCookies"></param>
         internal bool SetStoredCookies(List<HttpCookie> httpCookies)
         {
-            try 
-            { 
+            try
+            {
                 FileSystem.CreateDirectory(Path.GetDirectoryName(FileCookies));
                 Encryption.EncryptToFile(
                     FileCookies,
@@ -260,9 +277,17 @@ namespace CommonPluginsStores
         /// Set data language.
         /// </summary>
         /// <param name="local">ISO 15897</param>
-        public void SetLanguage(string local) 
+        public void SetLanguage(string local)
         {
             Local = local;
+        }
+
+        public virtual void Login()
+        {
+        }
+
+        public virtual void Save()
+        {
         }
         #endregion
 
