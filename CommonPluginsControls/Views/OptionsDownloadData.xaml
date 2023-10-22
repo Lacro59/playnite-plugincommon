@@ -52,15 +52,15 @@
                 <Label Content="{DynamicResource LOCQuickFilterFavorites}" />
             </RadioButton>
 
-            <CheckBox Grid.Row="4" Grid.ColumnSpan="3" HorizontalAlignment="Right"
-                      IsChecked="False" VerticalAlignment="Bottom"
-                      Name="PART_TagMissing"
-                      Content="{DynamicResource LOCCommonMissingData}" />
+            <StackPanel Grid.Row="4" Grid.ColumnSpan="3" HorizontalAlignment="Right" Orientation="Horizontal">
+                <CheckBox IsChecked="False" VerticalAlignment="Bottom"
+                          Name="PART_TagMissing"
+                          Content="{DynamicResource LOCCommonMissingData}" />
 
-            <CheckBox Grid.Row="4" Grid.ColumnSpan="3" HorizontalAlignment="Right"
-                      IsChecked="True" VerticalAlignment="Bottom"
-                      Name="PART_OnlyMissing"
-                      Content="{DynamicResource LOCCommonOnlyMissing}" />
+                <CheckBox IsChecked="True" VerticalAlignment="Bottom" Margin="20,0,0,0"
+                          Name="PART_OnlyMissing"
+                          Content="{DynamicResource LOCCommonOnlyMissing}" />
+            </StackPanel>
         </Grid>
 
         <Border BorderThickness="0,1,0,0" BorderBrush="{StaticResource NormalBorderBrush}"
