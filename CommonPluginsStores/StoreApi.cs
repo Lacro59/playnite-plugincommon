@@ -143,6 +143,10 @@ namespace CommonPluginsStores
                 if (_IsUserLoggedIn == null)
                 {
                     _IsUserLoggedIn = GetIsUserLoggedIn();
+                    if ((bool)_IsUserLoggedIn)
+                    {
+                        SetStoredCookies(GetWebCookies());
+                    }
                 }
                 return (bool)_IsUserLoggedIn;
             }
@@ -168,14 +172,12 @@ namespace CommonPluginsStores
             this.PluginName = PluginName;
             this.PluginLibrary = PluginLibrary;
             this.ClientName = ClientName;
+
             PathStoresData = Path.Combine(PlaynitePaths.ExtensionsDataPath, "StoresData");
             FileCookies = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientName}.json"));
             FileGamesDlcsOwned = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientName}_GamesDlcsOwned.json"));
 
-            if (!Directory.Exists(PathStoresData))
-            {
-                Directory.CreateDirectory(PathStoresData);
-            }
+            FileSystem.CreateDirectory(PathStoresData);
         }
 
 
