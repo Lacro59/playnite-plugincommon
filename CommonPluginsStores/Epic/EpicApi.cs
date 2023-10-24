@@ -34,22 +34,22 @@ namespace CommonPluginsStores.Epic
         #endregion
 
 
-        protected static EpicAccountClient _EpicAPI;
-        internal static EpicAccountClient EpicAPI
+        protected static EpicAccountClient _epicAccountClient;
+        internal static EpicAccountClient epicAccountClient
         {
             get
             {
-                if (_EpicAPI == null)
+                if (_epicAccountClient == null)
                 {
-                    _EpicAPI = new EpicAccountClient(
+                    _epicAccountClient = new EpicAccountClient(
                         API.Instance,
                         PlaynitePaths.ExtensionsDataPath + "\\00000002-DBD1-46C6-B5D0-B1BA559D10E4\\tokens.json"
                     );
                 }
-                return _EpicAPI;
+                return _epicAccountClient;
             }
 
-            set => _EpicAPI = value;
+            set => _epicAccountClient = value;
         }
 
 
@@ -101,11 +101,11 @@ namespace CommonPluginsStores.Epic
         #region Configuration
         protected override bool GetIsUserLoggedIn()
         {
-            bool isLogged = EpicAPI.GetIsUserLoggedIn();
+            bool isLogged = epicAccountClient.GetIsUserLoggedIn();
 
             if (isLogged)
             {
-                OauthResponse tokens = EpicAPI.loadTokens();
+                OauthResponse tokens = epicAccountClient.loadTokens();
                 AuthToken = new StoreToken
                 {
                     Token = tokens.access_token,

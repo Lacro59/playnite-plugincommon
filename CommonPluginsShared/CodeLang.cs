@@ -12,7 +12,7 @@ namespace CommonPluginsShared
         /// <remarks>https://partner.steamgames.com/doc/store/localization?#supported_languages</remarks>
         public static string GetSteamLang(string PlayniteLanguage)
         {
-            string SteamLang = "english";
+            string SteamLang = string.Empty;
 
             switch (PlayniteLanguage)
             {
@@ -46,6 +46,7 @@ namespace CommonPluginsShared
                     SteamLang = "hungarian";
                     break;
                 case "id_ID":
+                    SteamLang = "indonesian";
                     break;
                 case "it_IT":
                     SteamLang = "italian";
@@ -69,6 +70,7 @@ namespace CommonPluginsShared
                     SteamLang = "brazilian";
                     break;
                 case "pt_PT":
+                    SteamLang = "portuguese";
                     break;
                 case "ro_RO":
                     SteamLang = "romanian";
@@ -86,11 +88,16 @@ namespace CommonPluginsShared
                     SteamLang = "ukrainian";
                     break;
                 case "vi_VN":
+                    SteamLang = "vietnamese";
+                    break;
                 case "zh_CN":
                     SteamLang = "schinese";
                     break;
                 case "zh_TW":
                     SteamLang = "tchinese";
+                    break;
+                default:
+                    SteamLang = "english";
                     break;
             }
 

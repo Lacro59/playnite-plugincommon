@@ -58,10 +58,12 @@ namespace CommonPlayniteShared.PluginLibrary.XboxLibrary
                 }
 
                 webView.DeleteDomainCookies(".live.com");
+                webView.DeleteDomainCookies(".login.live.com");
+                webView.DeleteDomainCookies("live.com");
+                webView.DeleteDomainCookies("login.live.com");
                 webView.DeleteDomainCookies(".xboxlive.com");
                 webView.DeleteDomainCookies(".xbox.com");
                 webView.DeleteDomainCookies(".microsoft.com");
-                webView.DeleteDomainCookies(".login.live.com");
                 webView.Navigate(loginUrl);
                 webView.OpenDialog();
             }
@@ -296,22 +298,22 @@ namespace CommonPlayniteShared.PluginLibrary.XboxLibrary
 
         public async Task<TitleHistoryResponse.Title> GetTitleInfo(string pfn)
         {
-            var tokens = GetSavedXstsTokens();
+            AuthorizationData tokens = GetSavedXstsTokens();
             if (tokens == null)
             {
                 throw new Exception("User is not authenticated.");
             }
 
-            using (var client = new HttpClient())
+            using (HttpClient client = new HttpClient())
             {
                 SetAuthenticationHeaders(client.DefaultRequestHeaders, tokens);
-                var requestData = new Dictionary<string, List<string>>
+                Dictionary<string, List<string>> requestData = new Dictionary<string, List<string>>
                 {
                     { "pfns", new List<string> { pfn } },
                     { "windowsPhoneProductIds", new List<string>() },
                 };
 
-                var response = await client.PostAsync(
+                HttpResponseMessage response = await client.PostAsync(
                            @"https://titlehub.xboxlive.com/titles/batch/decoration/detail",
                            new StringContent(Serialization.ToJson(requestData), Encoding.UTF8, "application/json"));
 
