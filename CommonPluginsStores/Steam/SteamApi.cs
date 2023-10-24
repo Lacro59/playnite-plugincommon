@@ -78,22 +78,6 @@ namespace CommonPluginsStores.Steam
         }
 
 
-        protected bool? _IsPrivate;
-        public bool IsPrivate
-        {
-            get
-            {
-                if (_IsPrivate == null)
-                {
-                    //_IsPrivate = GetIsPrivate();
-                }
-                return (bool)_IsPrivate;
-            }
-
-            set => SetValue(ref _IsPrivate, value);
-        }
-
-
         private Models.SteamUser _CurrentUser;
         public Models.SteamUser CurrentUser
         {
