@@ -793,7 +793,8 @@ namespace CommonPluginsStores.Steam
                 KeyValue config = new KeyValue();
                 try
                 {
-                    config.ReadFileAsText(LoginUsersPath);
+                    Stream sFile = FileSystem.OpenReadFileStreamSafe(LoginUsersPath);
+                    config.ReadAsText(sFile);
                     foreach (KeyValue user in config.Children)
                     {
                         users.Add(new Models.SteamUser()
