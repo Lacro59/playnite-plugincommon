@@ -36,6 +36,7 @@
     <sys:String x:Key="LOCCommonLoggedIn">Usuário autenticado</sys:String>
     <sys:String x:Key="LOCCommonAccountName">Nome da conta</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Verificando status da autenticação…</sys:String>
+    <sys:String x:Key="LOCCommonPrivateChecking">Checking private status…</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: usuário não está autenticado</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: Nenhuma chave de API</sys:String>
