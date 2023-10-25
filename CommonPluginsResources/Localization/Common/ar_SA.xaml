@@ -9,7 +9,7 @@
 
     <sys:String x:Key="LOCCommonAddFolder">إضافة مج</sys:String>
     <sys:String x:Key="LOCCommonRemoveFolder">ازالة مج</sys:String>
-    <sys:String x:Key="LOCCommonAddFilePattern">إضافة نمط الم</sys:String>
+    <sys:String x:Key="LOCCommonAddFilePattern">إضافة نمط ال</sys:String>
 
     <sys:String x:Key="LOCCommonMargin">Margin</sys:String>
     
@@ -32,23 +32,24 @@
     <!-- Common Stores -->
 
     <sys:String x:Key="LOCCommonAuthenticateLabel">Authenticate</sys:String>
-    <sys:String x:Key="LOCCommonNotLoggedIn">يتطلب المصادق</sys:String>
-    <sys:String x:Key="LOCCommonLoggedIn">تم مصادقة المستخد</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedIn">يتطلب المصاد</sys:String>
+    <sys:String x:Key="LOCCommonLoggedIn">تم مصادقة المستخ</sys:String>
     <sys:String x:Key="LOCCommonAccountName">اسم الحسا</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Checking authentication status…</sys:String>
+    <sys:String x:Key="LOCCommonPrivateChecking">Checking private status…</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticate</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: لا يوجد مفتاح API</sys:String>
 
-    <sys:String x:Key="LOCCommonIgnoredItems">العناصر المهم</sys:String>
+    <sys:String x:Key="LOCCommonIgnoredItems">العناصر المه</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">Input the item to ignore</sys:String>
     
-    <sys:String x:Key="LOCCommonProgression">التق</sys:String>
+    <sys:String x:Key="LOCCommonProgression">الت</sys:String>
     <sys:String x:Key="LOCCommonCompleted">Completed</sys:String>
 
     <sys:String x:Key="LOCCommonGameTime">Game time</sys:String>
     
-    <sys:String x:Key="LOCCommonSelectFilters">اختيار التصفي</sys:String>
+    <sys:String x:Key="LOCCommonSelectFilters">اختيار التصف</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Recently Added</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Only missing</sys:String>
     <sys:String x:Key="LOCCommonMissingData">Tag games missing data</sys:String>
@@ -95,7 +96,7 @@ Do you want to open the directory?</sys:String>
     <sys:String x:Key="LOCCommonMenuInExtensions">Show plugin menu in extensions submenu *</sys:String>
     <sys:String x:Key="LOCCommonIconStore">إظهار أيقونة المتجر</sys:String>
     
-    <sys:String x:Key="LOCCommonSaveColumOrder">حفظ ترتيب الأعم</sys:String>
+    <sys:String x:Key="LOCCommonSaveColumOrder">حفظ ترتيب الأع</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationFullScreen">ملء الشاش</sys:String>
     <sys:String x:Key="LOCCommonIntegrationFullScreenEnable">تمكين تكامل ملء الشاش</sys:String>
@@ -103,7 +104,7 @@ Do you want to open the directory?</sys:String>
     <sys:String x:Key="LOCCommonIntegration">إعدادات المظهر</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInCustomTheme">تمكين تكامل السمة المخصصة (فقط إذا تم إدماجها في السمة المخصصة)</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonHeader">عرض زر الإضافة في شريط عنوان النافذ</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonSide">عرض زر الإضافة في الشريط الجان</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonSide">عرض زر الإضافة في الشريط الجا</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButton">Show plugin button in game details</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInDescription">Show plugin information in game details</sys:String>
 
@@ -112,7 +113,7 @@ Do you want to open the directory?</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonOptions">Button options</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">إظهار الأيقونة فقط</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonDetails">زر بتفاص</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonIsToggle">باستخدام زر التبد</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonIsToggle">باستخدام زر التب</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationViewItemOptions">View item options</sys:String>
     

@@ -36,6 +36,7 @@
     <sys:String x:Key="LOCCommonLoggedIn">用户已通过身份验</sys:String>
     <sys:String x:Key="LOCCommonAccountName">账户名称</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">正在检查身份验证状态…</sys:String>
+    <sys:String x:Key="LOCCommonPrivateChecking">Checking private status…</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}：用户未身份验</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}：没有 API 密钥</sys:String>
@@ -48,7 +49,7 @@
 
     <sys:String x:Key="LOCCommonGameTime">游戏时间</sys:String>
     
-    <sys:String x:Key="LOCCommonSelectFilters">选择筛选</sys:String>
+    <sys:String x:Key="LOCCommonSelectFilters">选择筛</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">最近添</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Only missing</sys:String>
     <sys:String x:Key="LOCCommonMissingData">Tag games missing data</sys:String>

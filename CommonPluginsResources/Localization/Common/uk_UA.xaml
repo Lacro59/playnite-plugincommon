@@ -36,6 +36,7 @@
     <sys:String x:Key="LOCCommonLoggedIn">Користувача автентифіковано</sys:String>
     <sys:String x:Key="LOCCommonAccountName">Ім'я облікового запису</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Перевірка стану автентифікації…</sys:String>
+    <sys:String x:Key="LOCCommonPrivateChecking">Checking private status…</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: користувач не автентифікований</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: немає API ключа</sys:String>
