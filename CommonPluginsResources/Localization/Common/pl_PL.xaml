@@ -36,6 +36,7 @@
     <sys:String x:Key="LOCCommonLoggedIn">Użytkownik jest uwierzytelniony</sys:String>
     <sys:String x:Key="LOCCommonAccountName">Nazwa konta</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Sprawdzanie statusu uwierzytelnienia…</sys:String>
+    <sys:String x:Key="LOCCommonPrivateChecking">Checking private status…</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticate</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: No API key</sys:String>
