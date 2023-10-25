@@ -376,11 +376,6 @@ namespace CommonPluginsStores.Origin
         #region Game
         public override GameInfos GetGameInfos(string Id, AccountInfos accountInfos)
         {
-            if (!IsUserLoggedIn)
-            {
-                return null;
-            }
-
             try
             {
                 string Url = string.Format(UrlApi2GameInfo, Id, CodeLang.GetOriginLang(Local), CodeLang.GetOriginLangCountry(Local));

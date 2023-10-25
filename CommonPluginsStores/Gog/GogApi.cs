@@ -393,7 +393,7 @@ namespace CommonPluginsStores.Gog
                     Link = productApiDetail?.links?.product_card,
                     Image = "https:" + productApiDetail?.images?.logo2x,
                     Description = RemoveDescriptionPromos(productApiDetail.description.full).Trim()
-            };
+                };
 
                 // DLC
                 string stringDlcs = Serialization.ToJson(productApiDetail?.dlcs);
