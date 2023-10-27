@@ -36,7 +36,7 @@
     <sys:String x:Key="LOCCommonLoggedIn">Kullanıcı kimliği doğrulandı</sys:String>
     <sys:String x:Key="LOCCommonAccountName">Hesap adı</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Kimlik doğrulama durumu denetleniyor…</sys:String>
-    <sys:String x:Key="LOCCommonPrivateChecking">Checking private status…</sys:String>
+    <sys:String x:Key="LOCCommonPrivateChecking">Özel durum kontrol ediliyor…</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: kullanıcı kimliği doğrulanmadı</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: API anahtarı yok</sys:String>
