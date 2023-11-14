@@ -197,6 +197,7 @@ namespace CommonPluginsStores.Epic
                     Url = string.Format(UrlAchievements, LocalLang, ProductSlug);
                     using (var WebViews = API.Instance.WebViews.CreateOffscreenView())
                     {
+                        _ = WebViews.CanExecuteJavascriptInMainFrame;
                         Cookies.ForEach(x => { WebViews.SetCookies(Url, x); });
                         WebViews.NavigateAndWait(Url);
                         ResultWeb = WebViews.GetPageSource();
@@ -214,6 +215,7 @@ namespace CommonPluginsStores.Epic
                         Url = string.Format(UrlAchievements, LocalLangShort, ProductSlug);
                         using (var WebViews = API.Instance.WebViews.CreateOffscreenView())
                         {
+                            _ = WebViews.CanExecuteJavascriptInMainFrame;
                             Cookies.ForEach(x => { WebViews.SetCookies(Url, x); });
                             WebViews.NavigateAndWait(Url);
                             ResultWeb = WebViews.GetPageSource();
