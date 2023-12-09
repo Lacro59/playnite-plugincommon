@@ -20,10 +20,20 @@
 
         <MediaElement Name="PART_Video" MouseLeftButtonDown="PART_Video_MouseLeftButtonDown"
                       Source="{Binding Source, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                      LoadedBehavior="{Binding LoadedBehavior, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                      LoadedBehavior="{Binding LoadedBehavior, RelativeSource={RelativeSource AncestorType=UserControl}}"
                       ScrubbingEnabled="True" Stretch="Uniform" 
                       SizeChanged="PART_Video_SizeChanged"
-                      MediaOpened="PART_Video_MediaOpened" pbeh:MediaElementBehaviors.Repeat="True" />
+                      MediaOpened="PART_Video_MediaOpened" pbeh:MediaElementBehaviors.Repeat="True">
+            <MediaElement.Style>
+                <Style TargetType="MediaElement">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding NoSound}" Value="True">
+                            <Setter Property="Volume" Value="0" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </MediaElement.Style>
+        </MediaElement>
 
         <Border Name="PART_ImageBorder"
                 BorderThickness="{DynamicResource ControlBorderThickness}" 

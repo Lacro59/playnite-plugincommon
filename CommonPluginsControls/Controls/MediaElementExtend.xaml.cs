@@ -30,8 +30,8 @@ namespace CommonPluginsControls.Controls
         #region Properties
         public Uri Source
         {
-            get { return (Uri)GetValue(SourceProperty); }
-            set { SetValue(SourceProperty, value); }
+            get => (Uri)GetValue(SourceProperty);
+            set => SetValue(SourceProperty, value);
         }
 
         public static DependencyProperty SourceProperty = DependencyProperty.Register(
@@ -43,8 +43,8 @@ namespace CommonPluginsControls.Controls
 
         public MediaState LoadedBehavior
         {
-            get { return (MediaState)GetValue(LoadedBehaviorProperty); }
-            set { SetValue(LoadedBehaviorProperty, value); }
+            get => (MediaState)GetValue(LoadedBehaviorProperty);
+            set => SetValue(LoadedBehaviorProperty, value);
         }
 
         public static DependencyProperty LoadedBehaviorProperty = DependencyProperty.Register(
@@ -63,9 +63,10 @@ namespace CommonPluginsControls.Controls
 
         public double VideoHeight
         {
-            get { return (double)GetValue(VideoHeightProperty); }
-            set { SetValue(VideoHeightProperty, value); }
+            get => (double)GetValue(VideoHeightProperty);
+            set => SetValue(VideoHeightProperty, value);
         }
+
 
         public static readonly DependencyProperty VideoWidthProperty = DependencyProperty.Register(
             nameof(VideoWidth),
@@ -76,9 +77,10 @@ namespace CommonPluginsControls.Controls
 
         public double VideoWidth
         {
-            get { return (double)GetValue(VideoWidthProperty); }
-            set { SetValue(VideoWidthProperty, value); }
+            get => (double)GetValue(VideoWidthProperty);
+            set => SetValue(VideoWidthProperty, value);
         }
+
 
         public static readonly DependencyProperty AddBorderProperty = DependencyProperty.Register(
             nameof(AddBorder),
@@ -87,10 +89,24 @@ namespace CommonPluginsControls.Controls
             new FrameworkPropertyMetadata(false)
         );
 
-        public double AddBorder
+        public bool AddBorder
         {
-            get { return (double)GetValue(AddBorderProperty); }
-            set { SetValue(AddBorderProperty, value); }
+            get => (bool)GetValue(AddBorderProperty);
+            set => SetValue(AddBorderProperty, value);
+        }
+
+
+        public static readonly DependencyProperty NoSoundProperty = DependencyProperty.Register(
+            nameof(NoSound),
+            typeof(bool),
+            typeof(MediaElementExtend),
+            new FrameworkPropertyMetadata(false)
+        );
+
+        public bool NoSound
+        {
+            get => (bool)GetValue(NoSoundProperty);
+            set => SetValue(NoSoundProperty, value);
         }
         #endregion
 
@@ -105,6 +121,12 @@ namespace CommonPluginsControls.Controls
             timer.Interval = TimeSpan.FromSeconds(1);
             timer.Tick += timer_Tick;
             timer.Start();
+
+            if (NoSound)
+            {
+                volumeSlider.Value = 0;
+                PART_Video.Volume = 0;
+            }
         }
 
 
@@ -151,20 +173,19 @@ namespace CommonPluginsControls.Controls
             {
                 timelineSlider.Maximum = PART_Video.NaturalDuration.TimeSpan.TotalSeconds;
             }
+
+            if (NoSound)
+            {
+                volumeSlider.Value = 0;
+                PART_Video.Volume = 0;
+            }
         }
 
         private void PART_Video_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount == 1)
             {
-                if (PART_Video.LoadedBehavior == MediaState.Pause)
-                {
-                    PART_Video.LoadedBehavior = MediaState.Play;
-                }
-                else
-                {
-                    PART_Video.LoadedBehavior = MediaState.Pause;
-                }
+                PART_Video.LoadedBehavior = PART_Video.LoadedBehavior == MediaState.Pause ? MediaState.Play : MediaState.Pause;
             }
         }
         #endregion
