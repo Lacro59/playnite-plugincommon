@@ -173,7 +173,7 @@ namespace CommonPluginsShared
 
                 if (BuiltInConfigId.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)
                     || emulator.Name.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)
-                    || emulator.InstallDir.Contains("rpcs3", StringComparison.OrdinalIgnoreCase))
+                    || (emulator.InstallDir == null ? false : emulator.InstallDir.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)))
                 {
                     return true;
                 }
