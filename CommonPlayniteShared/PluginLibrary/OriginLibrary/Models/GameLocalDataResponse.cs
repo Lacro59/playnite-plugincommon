@@ -4,11 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CommonPlayniteShared.PluginLibrary.OriginLibrary.Models
+namespace OriginLibrary.Models
 {
     public class GameLocalDataResponse
     {
         public class LocalizableAttributes
+        {
+            public string longDescription;
+            public string displayName;
+        }
+
+        public class I18n
         {
             public string longDescription;
             public string displayName;
@@ -42,5 +48,7 @@ namespace CommonPlayniteShared.PluginLibrary.OriginLibrary.Models
         public string offerType;
         public Publishing publishing;
         public LocalizableAttributes localizableAttributes;
+        public I18n i18n;
+        public string itemName;
     }
 }
