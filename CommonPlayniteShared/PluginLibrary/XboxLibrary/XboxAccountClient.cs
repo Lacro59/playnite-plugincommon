@@ -25,7 +25,7 @@ namespace CommonPlayniteShared.PluginLibrary.XboxLibrary
         private const string redirect_uri = "https://login.live.com/oauth20_desktop.srf";
         private const string scope = "Xboxlive.signin Xboxlive.offline_access";
 
-        private readonly string liveTokensPath;
+        public readonly string liveTokensPath; //private readonly string liveTokensPath;
         private readonly string xstsLoginTokesPath;
 
         public XboxAccountClient(IPlayniteAPI PlayniteApi, string PluginUserDataPath)//public XboxAccountClient(XboxLibrary library)
