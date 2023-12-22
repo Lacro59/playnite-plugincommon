@@ -38,9 +38,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\Web\HttpDownloader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Xaml.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\MenuHelpers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ObservableObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SelectableItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\VirtualizingGridPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\VirtualizingTilePanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\VirtualizingUniformPanel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\InvertableBooleanToVisibilityConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\InvertedBoolenConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\PlayTimeToStringConverter.cs" />
