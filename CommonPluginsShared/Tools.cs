@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Web;
 
 namespace CommonPluginsShared
 {
@@ -206,6 +207,21 @@ namespace CommonPluginsShared
             }
 
             return string.Empty;
+        }
+
+        public static string FixCookieValue(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                return str;
+            }
+
+            if (str[0] != '"' && str.IndexOf(',') >= 0)
+            {
+                return HttpUtility.UrlEncode(str);
+            }
+
+            return str;
         }
     }
 }
