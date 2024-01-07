@@ -95,7 +95,7 @@ namespace CommonPluginsControls.PlayniteControls
             if (!IgnoreChanges)
             {
                 IgnoreChanges = true;
-                BoundIds = ItemsList.GetSelectedIds();
+                BoundIds = ItemsList?.GetSelectedIds();
                 IgnoreChanges = false;
                 UpdateTextStatus();
             }

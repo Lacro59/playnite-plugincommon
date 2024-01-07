@@ -50,6 +50,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)PsnApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\FriendsApps.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\FriendsList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamAchievements.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\PlayerSummaries.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamAchievementData.cs" />
