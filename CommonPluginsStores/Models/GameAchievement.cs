@@ -13,5 +13,6 @@ namespace CommonPluginsStores.Models
         public string UrlLocked { get; set; }
         public DateTime DateUnlocked { get; set; }
         public float Percent { get; set; }
+        public bool IsHidden { get; set; }
     }
 }

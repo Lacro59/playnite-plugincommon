@@ -71,6 +71,24 @@
                     </Grid>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10" Visibility="{Binding UseAuth, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel.Tag>
+                            <PriorityBinding>
+                                <Binding Path="User.AccountStatus" IsAsync="True" FallbackValue="{x:Static stores:AccountStatus.Checking}" />
+                                <Binding Source="{x:Static stores:AccountStatus.Checking}" />
+                            </PriorityBinding>
+                        </StackPanel.Tag>
+                        
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Style.Triggers>
+                                    <Trigger Property="Tag" Value="{x:Static stores:AccountStatus.Private}">
+                                        <Setter Property="IsEnabled" Value="True" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        
                         <Button Content="{DynamicResource LOCSteamAuthenticateLabel}" Command="{Binding LoginCommand}"/>
 
                         <TextBlock VerticalAlignment="Center" Margin="10,0,0,0">
