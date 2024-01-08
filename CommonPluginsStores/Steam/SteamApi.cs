@@ -178,27 +178,10 @@ namespace CommonPluginsStores.Steam
         #region Configuration
         protected override bool GetIsUserLoggedIn()
         {
-            using (IWebView WebViewOffscreen = API.Instance.WebViews.CreateOffscreenView())
-            {
-                foreach(HttpCookie httpCookie in GetStoredCookies())
-                {
-                    WebViewOffscreen.SetCookies(UrlUserData, httpCookie);
-                }
-                WebViewOffscreen.NavigateAndWait(UrlUserData);
-                WebViewOffscreen.NavigateAndWait(UrlUserData);
+            bool withId = IsProfilePublic(string.Format(UrlProfileById, CurrentUser.SteamId), GetStoredCookies()).GetAwaiter().GetResult();
+            bool withPersona = IsProfilePublic(string.Format(UrlProfileByName, CurrentUser.PersonaName), GetStoredCookies()).GetAwaiter().GetResult();
 
-                string data = WebViewOffscreen.GetPageText();
-                Serialization.TryFromJson<SteamUserData>(data, out _UserData);
-
-                if (_UserData?.rgOwnedApps?.Count > 0)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
+            return withId || withPersona;
         }
 
         public override void Login()
@@ -407,23 +390,30 @@ namespace CommonPluginsStores.Steam
                 }
 
                 string WebData = Web.DownloadStringData(string.Format(UrlGetGameAchievements, Id, CodeLang.GetSteamLang(Local))).GetAwaiter().GetResult();
-                Serialization.TryFromJson(WebData, out SteamAchievements steamAchievements);
-                
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
-                foreach (Achievement achievements in steamAchievements.response.achievements)
+
+                if (Serialization.TryFromJson(WebData, out SteamAchievements steamAchievements))
                 {
-                    GameAchievement gameAchievement = new GameAchievement
+                    if (steamAchievements?.response?.achievements == null)
                     {
-                        Id = achievements.internal_name,
-                        Name = achievements.localized_name,
-                        Description = achievements.localized_desc,
-                        UrlUnlocked = achievements.icon.IsNullOrEmpty() ? string.Empty : string.Format(UrlAchievementImg, Id, achievements.icon),
-                        UrlLocked = achievements.icon_gray.IsNullOrEmpty() ? string.Empty : string.Format(UrlAchievementImg, Id, achievements.icon_gray),
-                        DateUnlocked = default,
-                        Percent = float.Parse(achievements.player_percent_unlocked.Replace(".", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)),
-                        IsHidden = achievements.hidden
-                    };
-                    gameAchievements.Add(gameAchievement);
+                        return gameAchievements;
+                    }
+
+                    foreach (Achievement achievements in steamAchievements.response.achievements)
+                    {
+                        GameAchievement gameAchievement = new GameAchievement
+                        {
+                            Id = achievements.internal_name,
+                            Name = achievements.localized_name,
+                            Description = achievements.localized_desc,
+                            UrlUnlocked = achievements.icon.IsNullOrEmpty() ? string.Empty : string.Format(UrlAchievementImg, Id, achievements.icon),
+                            UrlLocked = achievements.icon_gray.IsNullOrEmpty() ? string.Empty : string.Format(UrlAchievementImg, Id, achievements.icon_gray),
+                            DateUnlocked = default,
+                            Percent = float.Parse(achievements.player_percent_unlocked.Replace(".", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)),
+                            IsHidden = achievements.hidden
+                        };
+                        gameAchievements.Add(gameAchievement);
+                    }
                 }
 
                 if (gameAchievements?.Count() == 0)
@@ -515,6 +505,10 @@ namespace CommonPluginsStores.Steam
                             gameAchievement.Where(x => x.UrlUnlocked.Split('/').Last().IsEqual(UrlUnlocked.Split('/').Last())).FirstOrDefault().DateUnlocked = DateUnlocked;
                         }
                     }
+                }
+                else if (ResultWeb.IndexOf("The specified profile could not be found") > -1)
+                {
+
                 }
             }
             catch (WebException ex)
@@ -962,9 +956,14 @@ namespace CommonPluginsStores.Steam
 
         private async Task<bool> IsProfilePublic(string profilePageUrl)
         {
+            return await IsProfilePublic(profilePageUrl, null);
+        }
+
+        private async Task<bool> IsProfilePublic(string profilePageUrl, List<HttpCookie> httpCookies)
+        {
             try
             {
-                string ResultWeb = await Web.DownloadStringData(profilePageUrl);
+                string ResultWeb = await Web.DownloadStringData(profilePageUrl, httpCookies);
                 IHtmlDocument HtmlDoc = new HtmlParser().Parse(ResultWeb);
                 IElement profile_private_info = HtmlDoc.QuerySelector("div.profile_private_info");
                 IElement error_ctn = HtmlDoc.QuerySelector("div.error_ctn");

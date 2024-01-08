@@ -20,20 +20,7 @@ namespace CommonPluginsControls.Stores.Steam
         public bool UseAuth { get; set; } = true;
 
 
-        public AuthStatus AuthStatus
-        {
-            get
-            {
-                if (SteamApi.IsUserLoggedIn)
-                {
-                    return AuthStatus.Ok;
-                }
-                else
-                {
-                    return AuthStatus.AuthRequired;
-                }
-            }
-        }
+        public AuthStatus AuthStatus => SteamApi.IsUserLoggedIn ? AuthStatus.Ok : AuthStatus.AuthRequired;
 
 
         public RelayCommand<object> LoginCommand
