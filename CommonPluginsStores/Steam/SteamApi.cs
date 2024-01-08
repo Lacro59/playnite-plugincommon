@@ -507,11 +507,11 @@ namespace CommonPluginsStores.Steam
                         if (!stringDateUnlocked.IsNullOrEmpty())
                         {
                             stringDateUnlocked = stringDateUnlocked.Replace("Unlocked", string.Empty).Replace("<br>", string.Empty).Trim() + " -8";
-                            DateTime.TryParseExact(stringDateUnlocked, "dd MMM, yyyy @ h:mmtt z", new CultureInfo("en-US"), DateTimeStyles.None, out DateUnlocked);
+                            DateTime.TryParseExact(stringDateUnlocked, "d MMM, yyyy @ h:mmtt z", new CultureInfo("en-US"), DateTimeStyles.None, out DateUnlocked);
 
                             if (DateUnlocked == default)
                             {
-                                DateTime.TryParseExact(stringDateUnlocked, "dd MMM @ h:mmtt z", new CultureInfo("en-US"), DateTimeStyles.None, out DateUnlocked);
+                                DateTime.TryParseExact(stringDateUnlocked, "d MMM @ h:mmtt z", new CultureInfo("en-US"), DateTimeStyles.None, out DateUnlocked);
                             }
 
                             DateUnlocked = DateUnlocked.ToLocalTime();
