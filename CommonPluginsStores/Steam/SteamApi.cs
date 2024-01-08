@@ -507,12 +507,7 @@ namespace CommonPluginsStores.Steam
                         if (!stringDateUnlocked.IsNullOrEmpty())
                         {
                             stringDateUnlocked = stringDateUnlocked.Replace("Unlocked", string.Empty).Replace("<br>", string.Empty).Trim();
-                            DateTime.TryParseExact(stringDateUnlocked, "d MMM, yyyy @ h:mmtt", new CultureInfo("en-US"), DateTimeStyles.AssumeLocal, out DateUnlocked);
-
-                            if (DateUnlocked == default)
-                            {
-                                DateTime.TryParseExact(stringDateUnlocked, "d MMM @ h:mmtt", new CultureInfo("en-US"), DateTimeStyles.AssumeLocal, out DateUnlocked);
-                            }
+                            DateTime.TryParseExact(stringDateUnlocked, new [] { "d MMM, yyyy @ h:mmtt", "d MMM @ h:mmtt" }, new CultureInfo("en-US"), DateTimeStyles.AssumeLocal, out DateUnlocked);
                         }
 
                         if (DateUnlocked != default)
