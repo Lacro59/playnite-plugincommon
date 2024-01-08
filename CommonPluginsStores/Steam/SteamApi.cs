@@ -409,7 +409,7 @@ namespace CommonPluginsStores.Steam
                             UrlUnlocked = achievements.icon.IsNullOrEmpty() ? string.Empty : string.Format(UrlAchievementImg, Id, achievements.icon),
                             UrlLocked = achievements.icon_gray.IsNullOrEmpty() ? string.Empty : string.Format(UrlAchievementImg, Id, achievements.icon_gray),
                             DateUnlocked = default,
-                            Percent = float.Parse(achievements.player_percent_unlocked.Replace(".", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)),
+                            Percent = float.Parse(achievements.player_percent_unlocked?.Replace(".", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator) ?? "100"),
                             IsHidden = achievements.hidden
                         };
                         gameAchievements.Add(gameAchievement);
