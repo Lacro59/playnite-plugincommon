@@ -169,7 +169,7 @@ namespace CommonPluginsShared
                 {
                     Cookie c = new Cookie();
                     c.Name = cookie.Name;
-                    c.Value = cookie.Value;
+                    c.Value = Tools.FixCookieValue(cookie.Value);
                     c.Domain = cookie.Domain;
                     c.Path = cookie.Path;
 
@@ -409,7 +409,7 @@ namespace CommonPluginsShared
                 {
                     Cookie c = new Cookie();
                     c.Name = cookie.Name;
-                    c.Value = cookie.Value;
+                    c.Value = Tools.FixCookieValue(cookie.Value);
                     c.Domain = cookie.Domain;
                     c.Path = cookie.Path;
 
@@ -561,7 +561,7 @@ namespace CommonPluginsShared
                 {
                     Cookie c = new Cookie();
                     c.Name = cookie.Name;
-                    c.Value = cookie.Value;
+                    c.Value = Tools.FixCookieValue(cookie.Value);
                     c.Domain = cookie.Domain;
                     c.Path = cookie.Path;
 
@@ -723,7 +723,7 @@ namespace CommonPluginsShared
                 {
                     Cookie c = new Cookie();
                     c.Name = cookie.Name;
-                    c.Value = cookie.Value;
+                    c.Value = Tools.FixCookieValue(cookie.Value);
                     c.Domain = cookie.Domain;
                     c.Path = cookie.Path;
 
@@ -786,7 +786,7 @@ namespace CommonPluginsShared
                 {
                     Cookie c = new Cookie();
                     c.Name = cookie.Name;
-                    c.Value = cookie.Value;
+                    c.Value = Tools.FixCookieValue(cookie.Value);
                     c.Domain = cookie.Domain;
                     c.Path = cookie.Path;
 
