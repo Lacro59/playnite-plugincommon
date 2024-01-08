@@ -506,20 +506,18 @@ namespace CommonPluginsStores.Steam
                         string stringDateUnlocked = el.QuerySelector(".achieveUnlockTime")?.InnerHtml ?? string.Empty;
                         if (!stringDateUnlocked.IsNullOrEmpty())
                         {
-                            stringDateUnlocked = stringDateUnlocked.Replace("Unlocked", string.Empty).Replace("<br>", string.Empty).Trim() + " -8";
-                            DateTime.TryParseExact(stringDateUnlocked, "d MMM, yyyy @ h:mmtt z", new CultureInfo("en-US"), DateTimeStyles.None, out DateUnlocked);
+                            stringDateUnlocked = stringDateUnlocked.Replace("Unlocked", string.Empty).Replace("<br>", string.Empty).Trim();
+                            DateTime.TryParseExact(stringDateUnlocked, "d MMM, yyyy @ h:mmtt", new CultureInfo("en-US"), DateTimeStyles.AssumeLocal, out DateUnlocked);
 
                             if (DateUnlocked == default)
                             {
-                                DateTime.TryParseExact(stringDateUnlocked, "d MMM @ h:mmtt z", new CultureInfo("en-US"), DateTimeStyles.None, out DateUnlocked);
+                                DateTime.TryParseExact(stringDateUnlocked, "d MMM @ h:mmtt", new CultureInfo("en-US"), DateTimeStyles.AssumeLocal, out DateUnlocked);
                             }
-
-                            DateUnlocked = DateUnlocked.ToLocalTime();
                         }
 
                         if (DateUnlocked != default)
                         {
-                            gameAchievement.Where(x => x.UrlUnlocked.Split('/').Last().IsEqual(UrlUnlocked.Split('/').Last())).FirstOrDefault().DateUnlocked = DateUnlocked.ToUniversalTime();
+                            gameAchievement.Where(x => x.UrlUnlocked.Split('/').Last().IsEqual(UrlUnlocked.Split('/').Last())).FirstOrDefault().DateUnlocked = DateUnlocked;
                         }
                     }
                 }
