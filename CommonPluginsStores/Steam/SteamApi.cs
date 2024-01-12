@@ -502,7 +502,21 @@ namespace CommonPluginsStores.Steam
 
                         if (DateUnlocked != default)
                         {
-                            gameAchievement.Where(x => x.UrlUnlocked.Split('/').Last().IsEqual(UrlUnlocked.Split('/').Last())).FirstOrDefault().DateUnlocked = DateUnlocked;
+
+                            List<GameAchievement> achievements = gameAchievement.Where(x => x.UrlUnlocked.Split('/').Last().IsEqual(UrlUnlocked.Split('/').Last())).ToList();
+
+                            if (achievements.Count == 1)
+                            {
+                                achievements[0].DateUnlocked = DateUnlocked;
+                            }
+                            else
+                            {
+                                var achievement = achievements.FirstOrDefault(x => x.Name.IsEqual(Name));
+                                if (achievement != null)
+                                {
+                                    achievement.DateUnlocked = DateUnlocked;
+                                }
+                            }
                         }
                     }
                 }
