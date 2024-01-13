@@ -471,6 +471,7 @@ namespace CommonPluginsStores.Steam
         {
             string lang = "english";
             bool needLocalized = false;
+            DateTime[] unlockedDates = null;
 
             try
             {
@@ -492,18 +493,35 @@ namespace CommonPluginsStores.Steam
                     if (ResultWeb.IndexOf("achieveRow") > -1)
                     {
                         IHtmlDocument htmlDocument = new HtmlParser().Parse(ResultWeb);
-                        foreach (IElement el in htmlDocument.QuerySelectorAll(".achieveRow"))
+                        int i = 0;
+                        IHtmlCollection<IElement> elements = htmlDocument.QuerySelectorAll(".achieveRow");
+                        foreach (IElement el in elements)
                         {
                             string UrlUnlocked = el.QuerySelector(".achieveImgHolder img")?.GetAttribute("src") ?? string.Empty;
                             string Name = el.QuerySelector(".achieveTxtHolder h3").InnerHtml;
                             string Description = el.QuerySelector(".achieveTxtHolder h5").InnerHtml;
 
                             DateTime DateUnlocked = default;
-                            string stringDateUnlocked = el.QuerySelector(".achieveUnlockTime")?.InnerHtml ?? string.Empty;
-                            if (!stringDateUnlocked.IsNullOrEmpty())
+
+                            if (lang.Equals("english"))
                             {
-                                stringDateUnlocked = stringDateUnlocked.Replace("Unlocked", string.Empty).Replace("<br>", string.Empty).Trim();
-                                DateTime.TryParseExact(stringDateUnlocked, new[] { "d MMM, yyyy @ h:mmtt", "d MMM @ h:mmtt" }, new CultureInfo("en-US"), DateTimeStyles.AssumeLocal, out DateUnlocked);
+                                string stringDateUnlocked = el.QuerySelector(".achieveUnlockTime")?.InnerHtml ?? string.Empty;
+
+                                if (!stringDateUnlocked.IsNullOrEmpty())
+                                {
+                                    stringDateUnlocked = stringDateUnlocked.Replace("Unlocked", string.Empty).Replace("<br>", string.Empty).Trim();
+                                    DateTime.TryParseExact(stringDateUnlocked, new[] { "d MMM, yyyy @ h:mmtt", "d MMM @ h:mmtt" }, new CultureInfo("en-US"), DateTimeStyles.AssumeLocal, out DateUnlocked);
+                                }
+
+                                if (unlockedDates == null)
+                                {
+                                    unlockedDates = new DateTime[elements.Length];
+                                }
+                                unlockedDates[i] = DateUnlocked;
+                            }
+                            else if (i < unlockedDates?.Length)
+                            {
+                                DateUnlocked = unlockedDates[i];
                             }
 
                             if (DateUnlocked != default)
@@ -525,12 +543,17 @@ namespace CommonPluginsStores.Steam
                                     {
                                         if (!CodeLang.GetSteamLang(Local).IsEqual(lang))
                                         {
-                                            lang = CodeLang.GetSteamLang(Local);
                                             needLocalized = true;
                                         }
                                     }
                                 }
                             }
+                            i++;
+                        }
+
+                        if (needLocalized)
+                        {
+                            lang = CodeLang.GetSteamLang(Local);
                         }
                     }
                     else if (ResultWeb.IndexOf("The specified profile could not be found") > -1)
