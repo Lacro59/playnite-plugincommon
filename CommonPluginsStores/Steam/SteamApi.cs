@@ -469,61 +469,75 @@ namespace CommonPluginsStores.Steam
 
         private ObservableCollection<GameAchievement> GetAchievementsByWeb(string Id, ObservableCollection<GameAchievement> gameAchievement)
         {
-            string UrlById = string.Format(UrlProfileById, CurrentUser.SteamId) + $"/stats/{Id}/achievements?l=english";
-            string UrlByPersona = string.Format(UrlProfileByName, CurrentUser.PersonaName) + $"/stats/{Id}?l=english";
+            string lang = "english";
+            bool needLocalized = false;
 
             try
             {
-                List<HttpCookie> cookies = GetStoredCookies();
-                string Url = UrlById;
-                string ResultWeb = Web.DownloadStringData(Url, cookies, string.Empty, true).GetAwaiter().GetResult();
-                if (ResultWeb.IndexOf("achieveRow") == -1)
+                do
                 {
-                    Url = UrlByPersona;
-                    ResultWeb = Web.DownloadStringData(UrlByPersona, cookies, string.Empty, true).GetAwaiter().GetResult();
-                }
+                    string UrlById = string.Format(UrlProfileById, CurrentUser.SteamId) + $"/stats/{Id}/achievements?l={lang}";
+                    string UrlByPersona = string.Format(UrlProfileByName, CurrentUser.PersonaName) + $"/stats/{Id}?l={lang}";
+                    needLocalized = false;
 
-                if (ResultWeb.IndexOf("achieveRow") > -1)
-                {
-                    IHtmlDocument htmlDocument = new HtmlParser().Parse(ResultWeb);
-                    foreach (IElement el in htmlDocument.QuerySelectorAll(".achieveRow"))
+                    List<HttpCookie> cookies = GetStoredCookies();
+                    string Url = UrlById;
+                    string ResultWeb = Web.DownloadStringData(Url, cookies, string.Empty, true).GetAwaiter().GetResult();
+                    if (ResultWeb.IndexOf("achieveRow") == -1)
                     {
-                        string UrlUnlocked = el.QuerySelector(".achieveImgHolder img")?.GetAttribute("src") ?? string.Empty;
-                        string Name = el.QuerySelector(".achieveTxtHolder h3").InnerHtml;
-                        string Description = el.QuerySelector(".achieveTxtHolder h5").InnerHtml;
+                        Url = UrlByPersona;
+                        ResultWeb = Web.DownloadStringData(UrlByPersona, cookies, string.Empty, true).GetAwaiter().GetResult();
+                    }
 
-                        DateTime DateUnlocked = default;
-                        string stringDateUnlocked = el.QuerySelector(".achieveUnlockTime")?.InnerHtml ?? string.Empty;
-                        if (!stringDateUnlocked.IsNullOrEmpty())
+                    if (ResultWeb.IndexOf("achieveRow") > -1)
+                    {
+                        IHtmlDocument htmlDocument = new HtmlParser().Parse(ResultWeb);
+                        foreach (IElement el in htmlDocument.QuerySelectorAll(".achieveRow"))
                         {
-                            stringDateUnlocked = stringDateUnlocked.Replace("Unlocked", string.Empty).Replace("<br>", string.Empty).Trim();
-                            DateTime.TryParseExact(stringDateUnlocked, new [] { "d MMM, yyyy @ h:mmtt", "d MMM @ h:mmtt" }, new CultureInfo("en-US"), DateTimeStyles.AssumeLocal, out DateUnlocked);
-                        }
+                            string UrlUnlocked = el.QuerySelector(".achieveImgHolder img")?.GetAttribute("src") ?? string.Empty;
+                            string Name = el.QuerySelector(".achieveTxtHolder h3").InnerHtml;
+                            string Description = el.QuerySelector(".achieveTxtHolder h5").InnerHtml;
 
-                        if (DateUnlocked != default)
-                        {
-
-                            List<GameAchievement> achievements = gameAchievement.Where(x => x.UrlUnlocked.Split('/').Last().IsEqual(UrlUnlocked.Split('/').Last())).ToList();
-
-                            if (achievements.Count == 1)
+                            DateTime DateUnlocked = default;
+                            string stringDateUnlocked = el.QuerySelector(".achieveUnlockTime")?.InnerHtml ?? string.Empty;
+                            if (!stringDateUnlocked.IsNullOrEmpty())
                             {
-                                achievements[0].DateUnlocked = DateUnlocked;
+                                stringDateUnlocked = stringDateUnlocked.Replace("Unlocked", string.Empty).Replace("<br>", string.Empty).Trim();
+                                DateTime.TryParseExact(stringDateUnlocked, new[] { "d MMM, yyyy @ h:mmtt", "d MMM @ h:mmtt" }, new CultureInfo("en-US"), DateTimeStyles.AssumeLocal, out DateUnlocked);
                             }
-                            else
+
+                            if (DateUnlocked != default)
                             {
-                                var achievement = achievements.FirstOrDefault(x => x.Name.IsEqual(Name));
-                                if (achievement != null)
+                                List<GameAchievement> achievements = gameAchievement.Where(x => x.UrlUnlocked.Split('/').Last().IsEqual(UrlUnlocked.Split('/').Last())).ToList();
+
+                                if (achievements.Count == 1)
                                 {
-                                    achievement.DateUnlocked = DateUnlocked;
+                                    achievements[0].DateUnlocked = DateUnlocked;
+                                }
+                                else
+                                {
+                                    var achievement = achievements.Find(x => x.Name.IsEqual(Name));
+                                    if (achievement != null)
+                                    {
+                                        achievement.DateUnlocked = DateUnlocked;
+                                    }
+                                    else
+                                    {
+                                        if (!CodeLang.GetSteamLang(Local).IsEqual(lang))
+                                        {
+                                            lang = CodeLang.GetSteamLang(Local);
+                                            needLocalized = true;
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                else if (ResultWeb.IndexOf("The specified profile could not be found") > -1)
-                {
+                    else if (ResultWeb.IndexOf("The specified profile could not be found") > -1)
+                    {
 
-                }
+                    }
+                } while (needLocalized);
             }
             catch (WebException ex)
             {
