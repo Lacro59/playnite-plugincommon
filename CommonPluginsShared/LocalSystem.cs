@@ -32,6 +32,7 @@ namespace CommonPluginsShared
                 catch (Exception ex)
                 {
                     Common.LogError(ex, false, $"Failed to load {ConfigurationsPath}");
+                    Configurations = new List<SystemConfiguration>();
                 }
             }
 
@@ -61,35 +62,23 @@ namespace CommonPluginsShared
 
         private bool CallIsNvidia(string GpuName)
         {
-            if (GpuName.IsNullOrEmpty())
-            {
-                return false;
-            }
-            return (GpuName.ToLower().IndexOf("nvidia") > -1 || GpuName.ToLower().IndexOf("geforce") > -1 || GpuName.ToLower().IndexOf("gtx") > -1 || GpuName.ToLower().IndexOf("rtx") > -1);
+            return GpuName.IsNullOrEmpty()
+                ? false
+                : GpuName.ToLower().IndexOf("nvidia") > -1 || GpuName.ToLower().IndexOf("geforce") > -1 || GpuName.ToLower().IndexOf("gtx") > -1 || GpuName.ToLower().IndexOf("rtx") > -1;
         }
         private bool CallIsAmd(string GpuName)
         {
-            if (GpuName.IsNullOrEmpty())
-            {
-                return false;
-            }
-            return (GpuName.ToLower().IndexOf("amd") > -1 || GpuName.ToLower().IndexOf("radeon") > -1 || GpuName.ToLower().IndexOf("ati ") > -1 || GpuName.ToLower().IndexOf("rx ") > -1);
+            return GpuName.IsNullOrEmpty()
+                ? false
+                : GpuName.ToLower().IndexOf("amd") > -1 || GpuName.ToLower().IndexOf("radeon") > -1 || GpuName.ToLower().IndexOf("ati ") > -1 || GpuName.ToLower().IndexOf("rx ") > -1;
         }
         private bool CallIsIntel(string GpuName)
         {
-            if (GpuName.IsNullOrEmpty())
-            {
-                return false;
-            }
-            return GpuName.ToLower().IndexOf("intel") > -1;
+            return GpuName.IsNullOrEmpty() ? false : GpuName.ToLower().IndexOf("intel") > -1;
         }
         private bool IsNotIntegrated(string GpuName)
         {
-            if (GpuName.IsNullOrEmpty())
-            {
-                return false;
-            }
-            return GpuName.ToLower().IndexOf("graphics") == -1;
+            return GpuName.IsNullOrEmpty() ? false : GpuName.ToLower().IndexOf("graphics") == -1;
         }
 
 
@@ -123,137 +112,143 @@ namespace CommonPluginsShared
 
         private SystemConfiguration GetPcInfo(bool WithDiskInfos = true)
         {
-            string Name = Environment.MachineName;
-
             SystemConfiguration systemConfiguration = new SystemConfiguration();
 
-
-            #region Disks infos
-            List <SystemDisk> Disks = new List<SystemDisk>();
-            if (WithDiskInfos)
-            {
-                Disks = GetInfoDisks();
-            }
-            #endregion
-
-
-            #region System informations
-            string Os = string.Empty;
-            string Cpu = string.Empty;
-            uint CpuMaxClockSpeed = 0;
-            string GpuName = string.Empty;
-            long GpuRam = 0;
-            uint CurrentHorizontalResolution = 0;
-            uint CurrentVerticalResolution = 0;
-            long Ram = 0;
-
-
-            // OS
             try
             {
-                ManagementObjectSearcher myOperativeSystemObject = new ManagementObjectSearcher("select * from Win32_OperatingSystem");
-                foreach (ManagementObject obj in myOperativeSystemObject.Get())
+                string Name = Environment.MachineName;
+
+                #region Disks infos
+                List<SystemDisk> Disks = new List<SystemDisk>();
+                if (WithDiskInfos)
                 {
-                    Os = obj["Name"]?.ToString().Split('|')[0];
-                    Common.LogDebug(true, $"Os: {Os}");
+                    Disks = GetInfoDisks();
                 }
+                #endregion
+
+
+                #region System informations
+                string Os = string.Empty;
+                string Cpu = string.Empty;
+                uint CpuMaxClockSpeed = 0;
+                string GpuName = string.Empty;
+                long GpuRam = 0;
+                uint CurrentHorizontalResolution = 0;
+                uint CurrentVerticalResolution = 0;
+                long Ram = 0;
+
+
+                // OS
+                try
+                {
+                    ManagementObjectSearcher myOperativeSystemObject = new ManagementObjectSearcher("select * from Win32_OperatingSystem");
+                    foreach (ManagementObject obj in myOperativeSystemObject.Get())
+                    {
+                        Os = obj["Name"]?.ToString().Split('|')[0];
+                        Common.LogDebug(true, $"Os: {Os}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, "Error on Win32_OperatingSystem");
+                }
+
+                // CPU
+                try
+                {
+                    ManagementObjectSearcher myProcessorObject = new ManagementObjectSearcher("select * from Win32_Processor");
+                    foreach (ManagementObject obj in myProcessorObject.Get())
+                    {
+                        Cpu = obj["Name"]?.ToString();
+                        Common.LogDebug(true, $"Cpu: {Cpu}");
+
+                        if (obj["MaxClockSpeed"] != null)
+                        {
+                            uint.TryParse(obj["MaxClockSpeed"].ToString(), out CpuMaxClockSpeed);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, "Error on Win32_Processor");
+                }
+
+                // GPU
+                try
+                {
+                    ManagementObjectSearcher myVideoObject = new ManagementObjectSearcher("select * from Win32_VideoController");
+                    foreach (ManagementObject obj in myVideoObject.Get())
+                    {
+                        GpuName = obj["Name"]?.ToString();
+                        Common.LogDebug(true, $"Gpu: {GpuName}");
+
+                        if (obj["AdapterRAM"] != null)
+                        {
+                            long.TryParse(obj["AdapterRAM"].ToString(), out GpuRam);
+                        }
+
+                        if (obj["CurrentHorizontalResolution"] != null)
+                        {
+                            uint.TryParse(obj["CurrentHorizontalResolution"].ToString(), out CurrentHorizontalResolution);
+                        }
+
+                        if (obj["CurrentVerticalResolution"] != null)
+                        {
+                            uint.TryParse(obj["CurrentVerticalResolution"].ToString(), out CurrentVerticalResolution);
+                        }
+
+                        // Keep only external graphic card
+                        if ((CallIsNvidia(GpuName) || CallIsAmd(GpuName) || CallIsIntel(GpuName)) && IsNotIntegrated(GpuName))
+                        {
+                            break;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, "Error on Win32_VideoController");
+                }
+
+                // RAM
+                try
+                {
+                    ManagementObjectSearcher myComputerSystemObject = new ManagementObjectSearcher("select * from Win32_ComputerSystem");
+                    foreach (ManagementObject obj in myComputerSystemObject.Get())
+                    {
+                        double TempRam = 0;
+
+                        if (obj["TotalPhysicalMemory"] != null)
+                        {
+                            double.TryParse(obj["TotalPhysicalMemory"].ToString(), out TempRam);
+                        }
+
+                        TempRam = Math.Ceiling(TempRam / 1024 / 1024 / 1024);
+                        Ram = (long)(TempRam * 1024 * 1024 * 1024);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, "Error on Win32_ComputerSystem");
+                }
+                #endregion
+
+
+                systemConfiguration.Name = Name?.Trim();
+                systemConfiguration.Os = Os?.Trim();
+                systemConfiguration.Cpu = Cpu?.Trim();
+                systemConfiguration.CpuMaxClockSpeed = CpuMaxClockSpeed;
+                systemConfiguration.GpuName = GpuName?.Trim();
+                systemConfiguration.GpuRam = GpuRam;
+                systemConfiguration.CurrentHorizontalResolution = CurrentHorizontalResolution;
+                systemConfiguration.CurrentVerticalResolution = CurrentVerticalResolution;
+                systemConfiguration.Ram = Ram;
+                systemConfiguration.RamUsage = Tools.SizeSuffix(Ram, true);
+                systemConfiguration.Disks = Disks;
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, "Error on Win32_OperatingSystem");
+                Common.LogError(ex, false);
             }
-
-            // CPU
-            try
-            {
-                ManagementObjectSearcher myProcessorObject = new ManagementObjectSearcher("select * from Win32_Processor");
-                foreach (ManagementObject obj in myProcessorObject.Get())
-                {
-                    Cpu = obj["Name"]?.ToString();
-                    Common.LogDebug(true, $"Cpu: {Cpu}");
-
-                    if (obj["MaxClockSpeed"] != null)
-                    {
-                        uint.TryParse(obj["MaxClockSpeed"].ToString(), out CpuMaxClockSpeed);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, "Error on Win32_Processor");
-            }
-
-            // GPU
-            try
-            {
-                ManagementObjectSearcher myVideoObject = new ManagementObjectSearcher("select * from Win32_VideoController");
-                foreach (ManagementObject obj in myVideoObject.Get())
-                {
-                    GpuName = obj["Name"]?.ToString();
-                    Common.LogDebug(true, $"Gpu: {GpuName}");
-
-                    if (obj["AdapterRAM"] != null)
-                    {
-                        long.TryParse(obj["AdapterRAM"].ToString(), out GpuRam);
-                    }
-
-                    if (obj["CurrentHorizontalResolution"] != null)
-                    {
-                        uint.TryParse(obj["CurrentHorizontalResolution"].ToString(), out CurrentHorizontalResolution);
-                    }
-
-                    if (obj["CurrentVerticalResolution"] != null)
-                    {
-                        uint.TryParse(obj["CurrentVerticalResolution"].ToString(), out CurrentVerticalResolution);
-                    }
-
-                    // Keep only external graphic card
-                    if ((CallIsNvidia(GpuName) || CallIsAmd(GpuName) || CallIsIntel(GpuName)) && IsNotIntegrated(GpuName))
-                    { 
-                        break;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, "Error on Win32_VideoController");
-            }
-
-            // RAM
-            try
-            {
-                ManagementObjectSearcher myComputerSystemObject = new ManagementObjectSearcher("select * from Win32_ComputerSystem");
-                foreach (ManagementObject obj in myComputerSystemObject.Get())
-                {
-                    double TempRam = 0;
-
-                    if (obj["TotalPhysicalMemory"] != null)
-                    {
-                        double.TryParse(obj["TotalPhysicalMemory"].ToString(), out TempRam);
-                    }
-
-                    TempRam = Math.Ceiling(TempRam / 1024 / 1024 / 1024);
-                    Ram = (long)(TempRam * 1024 * 1024 * 1024);
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, "Error on Win32_ComputerSystem");
-            }
-            #endregion
-
-
-            systemConfiguration.Name = Name?.Trim();
-            systemConfiguration.Os = Os?.Trim();
-            systemConfiguration.Cpu = Cpu?.Trim();
-            systemConfiguration.CpuMaxClockSpeed = CpuMaxClockSpeed;
-            systemConfiguration.GpuName = GpuName?.Trim();
-            systemConfiguration.GpuRam = GpuRam;
-            systemConfiguration.CurrentHorizontalResolution = CurrentHorizontalResolution;
-            systemConfiguration.CurrentVerticalResolution = CurrentVerticalResolution;
-            systemConfiguration.Ram = Ram;
-            systemConfiguration.RamUsage = Tools.SizeSuffix(Ram, true);
-            systemConfiguration.Disks = Disks;
 
             return systemConfiguration;
         }
