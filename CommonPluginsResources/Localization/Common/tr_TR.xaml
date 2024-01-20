@@ -22,6 +22,8 @@
     <sys:String x:Key="LOCCommonTransfer">Aktar</sys:String>
     <sys:String x:Key="LOCCommonTransferPluginData">Eklenti verisini aktar</sys:String>
     <sys:String x:Key="LOCCommonSelectTransferData">Aktarılacak veri seçiliyor</sys:String>
+    <sys:String x:Key="LOCCommonMergedOrErased">Temizlemek yerine birleştirildi</sys:String>
+    <sys:String x:Key="LOCCommonErasedWarning">Dikkatli olun, hedef verilerin üzerine yazılacaktır!</sys:String>
 
 
     <!-- Remove plugin data -->
