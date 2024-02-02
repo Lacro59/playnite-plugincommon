@@ -576,12 +576,12 @@ namespace CommonPluginsShared.Collections
 
         public virtual TItem GetOnlyCache(Guid Id)
         {
-            return Database.Get(Id);
+            return Database?.Get(Id);
         }
 
         public virtual TItem GetOnlyCache(Game game)
         {
-            return Database.Get(game.Id);
+            return Database?.Get(game.Id);
         }
 
 

@@ -22,17 +22,17 @@ namespace CommonPluginsControls.Controls
     /// </summary>
     public partial class SliderWithPointer : Slider
     {
-        public SolidColorBrush ThumbFill
+        public Brush ThumbFill
         {
-            get { return (SolidColorBrush)GetValue(ThumbFillProperty); }
+            get { return (Brush)GetValue(ThumbFillProperty); }
             set { SetValue(ThumbFillProperty, value); }
         }
 
         public static readonly DependencyProperty ThumbFillProperty = DependencyProperty.Register(
             nameof(ThumbFill),
-            typeof(SolidColorBrush),
+            typeof(Brush),
             typeof(SliderWithPointer),
-            new FrameworkPropertyMetadata(default(SolidColorBrush)));
+            new FrameworkPropertyMetadata(default(Brush)));
 
 
         public SliderWithPointer()
