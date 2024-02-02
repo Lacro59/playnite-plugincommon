@@ -7,6 +7,8 @@ using System.Windows;
 using System.Windows.Controls;
 using CommonPluginsShared.Interfaces;
 using CommonPluginsShared;
+using CommonPluginsShared.Collections;
+using Playnite.SDK.Data;
 
 namespace CommonPluginsControls.Views
 {
@@ -15,6 +17,7 @@ namespace CommonPluginsControls.Views
     /// </summary>
     public partial class TransfertData : UserControl
     {
+        internal static readonly ILogger logger = LogManager.GetLogger();
         private IPluginDatabase PluginDatabase { get; set; }
 
 
@@ -37,8 +40,7 @@ namespace CommonPluginsControls.Views
         {
             InitializeComponent();
 
-
-            var DataGames = API.Instance.Database.Games.Where(x => !x.Hidden).Select(x => new DataGame
+            List<DataGame> DataGames = API.Instance.Database.Games.Where(x => !x.Hidden).Select(x => new DataGame
             {
                 Id = x.Id,
                 Icon = x.Icon.IsNullOrEmpty() ? x.Icon : API.Instance.Database.GetFullFilePath(x.Icon),
@@ -60,13 +62,28 @@ namespace CommonPluginsControls.Views
         {
             try
             {
-                var PluginData = PluginDatabase.GetClone(((DataGame)PART_CbPluginGame.SelectedItem).Id);
+                PluginDataBaseGameBase PluginData;
 
-                PluginData.Id = ((DataGame)PART_CbGame.SelectedItem).Id;
-                PluginData.Name = ((DataGame)PART_CbGame.SelectedItem).Name;
-                PluginData.Game = API.Instance.Database.Games.Get(((DataGame)PART_CbGame.SelectedItem).Id);
+                if ((bool)Part_Merged.IsChecked)
+                {
+                    PluginData = PluginDatabase.MergeData(((DataGame)PART_CbPluginGame.SelectedItem).Id, ((DataGame)PART_CbGame.SelectedItem).Id);
+                }
+                else
+                {
+                    PluginData = PluginDatabase.GetClone(((DataGame)PART_CbPluginGame.SelectedItem).Id);
+                    PluginData.Id = ((DataGame)PART_CbGame.SelectedItem).Id;
+                    PluginData.Name = ((DataGame)PART_CbGame.SelectedItem).Name;
+                    PluginData.Game = API.Instance.Database.Games.Get(((DataGame)PART_CbGame.SelectedItem).Id);
+                }
 
-                PluginDatabase.AddOrUpdate(PluginData);
+                if (PluginData != null)
+                {
+                    PluginDatabase.AddOrUpdate(PluginData);
+                }
+                else
+                {
+                    logger.Warn($"{PluginDatabase.PluginName} - No data saved from {((DataGame)PART_CbPluginGame.SelectedItem).Name} to {((DataGame)PART_CbGame.SelectedItem).Name}");
+                }
             }
             catch (Exception ex)
             {
@@ -79,21 +96,9 @@ namespace CommonPluginsControls.Views
 
         private void PART_Cb_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (PART_CbPluginGame.SelectedIndex == -1 || PART_CbGame.SelectedIndex == -1)
-            {
-                PART_BtTransfer.IsEnabled = false;
-            }
-            else
-            {
-                if (((DataGame)PART_CbPluginGame.SelectedItem).Id == ((DataGame)PART_CbGame.SelectedItem).Id)
-                {
-                    PART_BtTransfer.IsEnabled = false;
-                }
-                else
-                {
-                    PART_BtTransfer.IsEnabled = true;
-                }
-            }
+            PART_BtTransfer.IsEnabled = PART_CbPluginGame.SelectedIndex == -1 || PART_CbGame.SelectedIndex == -1
+                ? false
+                : ((DataGame)PART_CbPluginGame.SelectedItem).Id != ((DataGame)PART_CbGame.SelectedItem).Id;
         }
     }
 }

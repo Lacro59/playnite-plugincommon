@@ -519,6 +519,11 @@ namespace CommonPluginsShared.Collections
 
         }
 
+        public virtual PluginDataBaseGameBase MergeData(Guid fromId, Guid toId)
+        {
+            return null;
+        }
+
 
         public virtual bool Remove(Game game)
         {

@@ -4,20 +4,34 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CommonPluginsControls.Views"
-             xmlns:commonpluginsshared="clr-namespace:CommonPluginsShared.Converters"
-             mc:Ignorable="d" 
-             Height="120" Width="900">
+             xmlns:commonpluginsshared="clr-namespace:CommonPluginsShared.Converters" xmlns:converters="clr-namespace:CommonPlayniteShared.Converters"
+             mc:Ignorable="d" Height="120" Width="900">
 
     <UserControl.Resources>
         <commonpluginsshared:DefaultIconConverter x:Key="DefaultIconConverter" />
+        <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter" />
     </UserControl.Resources>
 
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="40" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="auto" />
-        </Grid.RowDefinitions>
+    <DockPanel Margin="10" LastChildFill="True">
+        <Border BorderThickness="0,1,0,0" BorderBrush="{StaticResource NormalBorderBrush}"
+                Margin="0,10,0,0" Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="2"
+                DockPanel.Dock="Bottom">
+            <DockPanel KeyboardNavigation.TabNavigation="Local" LastChildFill="False" Margin="0,5">
+                <Button TabIndex="1" Name="PART_BtClose" Content="{DynamicResource LOCCloseLabel}" 
+                        DockPanel.Dock="Right"
+                        Style="{StaticResource BottomButton}" Click="PART_BtClose_Click" />
+
+                <Button TabIndex="0" Name="PART_BtTransfer" Content="{DynamicResource LOCCommonTransfer}" 
+                        DockPanel.Dock="Right" IsEnabled="False"
+                        Style="{StaticResource BottomButton}" Click="PART_BtTransfer_Click" />
+
+                <CheckBox Name="Part_Merged" DockPanel.Dock="Left"
+                          Content="{DynamicResource LOCCommonMergedOrErased}" VerticalAlignment="Center" />
+
+                <Label Content="{DynamicResource LOCCommonErasedWarning}" Foreground="Red" Margin="100,0,0,0"
+                       Visibility="{Binding ElementName=Part_Merged, Path=IsChecked, Converter={StaticResource InvertedBooleanToVisibilityConverter}}"/>
+            </DockPanel>
+        </Border>
 
         <Grid>
             <Grid.ColumnDefinitions>
@@ -34,7 +48,7 @@
                         <VirtualizingStackPanel VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" />
                     </ItemsPanelTemplate>
                 </ComboBox.ItemsPanel>
-                
+
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -98,18 +112,5 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
         </Grid>
-
-        <Border BorderThickness="0,1,0,0" BorderBrush="{StaticResource NormalBorderBrush}"
-                    Margin="0,10,0,0" Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="2">
-            <DockPanel KeyboardNavigation.TabNavigation="Local" LastChildFill="False" Margin="0,5">
-                <Button TabIndex="1" Name="PART_BtClose" Content="{DynamicResource LOCCloseLabel}" 
-                        DockPanel.Dock="Right"
-                        Style="{StaticResource BottomButton}" Click="PART_BtClose_Click" />
-
-                <Button TabIndex="0" Name="PART_BtTransfer" Content="{DynamicResource LOCCommonTransfer}" 
-                        DockPanel.Dock="Right" IsEnabled="False"
-                        Style="{StaticResource BottomButton}" Click="PART_BtTransfer_Click" />
-            </DockPanel>
-        </Border>
-    </Grid>
+    </DockPanel>
 </UserControl>

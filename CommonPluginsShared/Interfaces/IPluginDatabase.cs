@@ -24,6 +24,9 @@ namespace CommonPluginsShared.Interfaces
         PluginDataBaseGameBase GetClone(Guid Id);
         PluginDataBaseGameBase GetClone(Game game);
 
+        PluginDataBaseGameBase MergeData(Guid fromId, Guid toId);
+
+
         bool Remove(Game game);
         bool Remove(Guid Id);
 
