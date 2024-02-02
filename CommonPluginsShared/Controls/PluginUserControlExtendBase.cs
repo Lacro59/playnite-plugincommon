@@ -4,6 +4,7 @@ using Playnite.SDK.Controls;
 using Playnite.SDK.Models;
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -16,11 +17,35 @@ namespace CommonPluginsShared.Controls
         internal static IResourceProvider resources => new ResourceProvider();
 
         internal virtual IDataContext _ControlDataContext { get; set; }
+        internal DispatcherTimer _updateDataTimer { get; set; }
 
 
         #region Properties
         public static readonly DependencyProperty AlwaysShowProperty;
         public bool AlwaysShow { get; set; } = false;
+
+
+        public int Delay
+        {
+            get => (int)GetValue(DelayProperty);
+            set => SetValue(DelayProperty, value);
+        }
+
+        public static readonly DependencyProperty DelayProperty = DependencyProperty.Register(
+            nameof(Delay),
+            typeof(int),
+            typeof(PluginUserControlExtendBase),
+            new FrameworkPropertyMetadata(200, DelayPropertyChangedCallback));
+
+        private static void DelayPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (sender is PluginUserControlExtendBase obj && e.NewValue != e.OldValue)
+            {
+                obj._updateDataTimer.Interval = TimeSpan.FromMilliseconds((int)e.NewValue);
+                obj.RestartTimer();                
+            }
+        }
+
 
         public DesktopView ActiveViewAtCreation { get; set; }
 
@@ -82,8 +107,13 @@ namespace CommonPluginsShared.Controls
             {
                 ActiveViewAtCreation = API.Instance.MainView.ActiveDesktopView;
             }
-        }
 
+            _updateDataTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(Delay)
+            };
+            _updateDataTimer.Tick += new EventHandler(UpdateDataEvent);
+        }
 
         private static void SettingsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
@@ -115,36 +145,51 @@ namespace CommonPluginsShared.Controls
         // When game selection is changed
         public override void GameContextChanged(Game oldContext, Game newContext)
         {
-            if (newContext == null || oldContext?.Id == newContext?.Id)
-            {
-                return;
-            }
+            //if (newContext == null || oldContext?.Id == newContext?.Id)
+            //{
+            //    return;
+            //}
+            //
+            //SetDefaultDataContext();
+            //
+            //MustDisplay = _ControlDataContext.IsActivated;
+            //
+            //// When control is not used
+            //if (!_ControlDataContext.IsActivated)
+            //{
+            //    return;
+            //}
+            //
+            //try
+            //{
+            //    if (MustDisplay)
+            //    {
+            //        SetData(newContext);
+            //        SetDataAsync(newContext);
+            //    }
+            //    else if (AlwaysShow)
+            //    {
+            //        SetData(newContext);
+            //        SetDataAsync(newContext);
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Common.LogError(ex, false);
+            //}
 
+            _updateDataTimer.Stop();
+
+            Visibility = System.Windows.Visibility.Collapsed;
             SetDefaultDataContext();
+            MustDisplay = AlwaysShow ? AlwaysShow : _ControlDataContext.IsActivated;
 
-            MustDisplay = _ControlDataContext.IsActivated;
-
-            // When control is not used
-            if (!_ControlDataContext.IsActivated)
+            if (newContext is null || !MustDisplay)
             {
                 return;
             }
 
-            try
-            {
-                if (MustDisplay)
-                {
-                    SetData(newContext);
-                }
-                else if (AlwaysShow)
-                {
-                    SetData(newContext);
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false);
-            }
+            RestartTimer();
         }
 
         // When plugin database is udpated
@@ -215,6 +260,42 @@ namespace CommonPluginsShared.Controls
 
         public virtual void SetData(Game newContext)
         {
+        }
+
+
+        private async void UpdateDataEvent(object sender, EventArgs e)
+        {
+            await UpdateDataAsync();
+        }
+
+        public virtual async Task UpdateDataAsync()
+        {
+            _updateDataTimer.Stop();
+            Visibility = MustDisplay ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
+
+            if (GameContext is null)
+            {
+                return;
+            }
+
+            Game contextGame = GameContext;
+            if (GameContext is null || GameContext.Id != contextGame.Id)
+            {
+                return;
+            }
+
+            if (GameContext is null || GameContext.Id != contextGame.Id)
+            {
+                return;
+            }
+
+            SetData(GameContext);
+        }
+
+        public void RestartTimer()
+        {
+            _updateDataTimer.Stop();
+            _updateDataTimer.Start();
         }
     }
 }
