@@ -34,10 +34,7 @@ namespace CommonPluginsControls.Controls
                 return _indicator;
             }
 
-            set
-            {
-                _indicator = value;
-            }
+            set => _indicator = value;
         }
 
 
@@ -149,15 +146,8 @@ namespace CommonPluginsControls.Controls
         #region ProgressBar property
         public double Minimum
         {
-            get
-            {
-                return (double)GetValue(MinimumProperty);
-            }
-
-            set
-            {
-                SetValue(MinimumProperty, value);
-            }
+            get => (double)GetValue(MinimumProperty);
+            set => SetValue(MinimumProperty, value);
         }
 
         public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register(
@@ -168,15 +158,8 @@ namespace CommonPluginsControls.Controls
 
         public double Maximum
         {
-            get
-            {
-                return (double)GetValue(MaximumProperty);
-            }
-
-            set
-            {
-                SetValue(MaximumProperty, value);
-            }
+            get => (double)GetValue(MaximumProperty);
+            set => SetValue(MaximumProperty, value);
         }
 
         public static readonly DependencyProperty MaximumProperty = DependencyProperty.Register(
@@ -187,15 +170,8 @@ namespace CommonPluginsControls.Controls
 
         public double Value
         {
-            get
-            {
-                return (double)GetValue(ValueProperty);
-            }
-
-            set
-            {
-                SetValue(ValueProperty, value);
-            }
+            get => (double)GetValue(ValueProperty);
+            set => SetValue(ValueProperty, value);
         }
 
         public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(
@@ -207,15 +183,8 @@ namespace CommonPluginsControls.Controls
 
         public double MarginLeft
         {
-            get
-            {
-                return (double)GetValue(MarginLeftProperty);
-            }
-
-            set
-            {
-                SetValue(MarginLeftProperty, value);
-            }
+            get => (double)GetValue(MarginLeftProperty);
+            set => SetValue(MarginLeftProperty, value);
         }
 
         public static readonly DependencyProperty MarginLeftProperty = DependencyProperty.Register(
@@ -227,15 +196,8 @@ namespace CommonPluginsControls.Controls
 
         public double MarginRight
         {
-            get
-            {
-                return (double)GetValue(MarginRightProperty);
-            }
-
-            set
-            {
-                SetValue(MarginRightProperty, value);
-            }
+            get => (double)GetValue(MarginRightProperty);
+            set => SetValue(MarginRightProperty, value);
         }
 
         public static readonly DependencyProperty MarginRightProperty = DependencyProperty.Register(
@@ -247,15 +209,8 @@ namespace CommonPluginsControls.Controls
 
         public double IndicatorHeight
         {
-            get
-            {
-                return (double)GetValue(IndicatorHeightProperty);
-            }
-
-            set
-            {
-                SetValue(IndicatorHeightProperty, value);
-            }
+            get => (double)GetValue(IndicatorHeightProperty);
+            set => SetValue(IndicatorHeightProperty, value);
         }
 
         public static readonly DependencyProperty IndicatorHeightProperty = DependencyProperty.Register(
@@ -266,15 +221,8 @@ namespace CommonPluginsControls.Controls
 
         public double IndicatorDemiHeight
         {
-            get
-            {
-                return (double)GetValue(IndicatorDemiHeightProperty);
-            }
-
-            set
-            {
-                SetValue(IndicatorDemiHeightProperty, value);
-            }
+            get => (double)GetValue(IndicatorDemiHeightProperty);
+            set => SetValue(IndicatorDemiHeightProperty, value);
         }
 
         public static readonly DependencyProperty IndicatorDemiHeightProperty = DependencyProperty.Register(
@@ -285,15 +233,8 @@ namespace CommonPluginsControls.Controls
 
         public double IndicatorWidth
         {
-            get
-            {
-                return (double)GetValue(IndicatorWidthProperty);
-            }
-
-            set
-            {
-                SetValue(IndicatorWidthProperty, value);
-            }
+            get => (double)GetValue(IndicatorWidthProperty);
+            set => SetValue(IndicatorWidthProperty, value);
         }
 
         public static readonly DependencyProperty IndicatorWidthProperty = DependencyProperty.Register(
@@ -305,15 +246,8 @@ namespace CommonPluginsControls.Controls
 
         public double TextWidth
         {
-            get
-            {
-                return (double)GetValue(TextWidthProperty);
-            }
-
-            set
-            {
-                SetValue(TextWidthProperty, value);
-            }
+            get => (double)GetValue(TextWidthProperty);
+            set => SetValue(TextWidthProperty, value);
         }
 
         public static readonly DependencyProperty TextWidthProperty = DependencyProperty.Register(
@@ -325,8 +259,7 @@ namespace CommonPluginsControls.Controls
 
         private static void ProgressBarChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var obj = sender as ProgressBarExtend;
-            if (obj != null && e.NewValue != e.OldValue)
+            if (sender is ProgressBarExtend obj && e.NewValue != e.OldValue)
             {
                 switch (e.Property.Name)
                 {
@@ -348,6 +281,8 @@ namespace CommonPluginsControls.Controls
                     case "TextWidth":
                         obj.TextWidth = (double)e.NewValue;
                         break;
+                    default:
+                        break;
                 }
             }
         }
@@ -362,24 +297,12 @@ namespace CommonPluginsControls.Controls
 
         public double GetIndicatorWidth()
         {
-            if (indicator != null)
-            {
-                return indicator.ActualWidth;
-            }
-            else
-            {
-                return 0;
-            }
+            return indicator != null ? indicator.ActualWidth : 0;
         }
 
         public double GetIndicatorHeight()
         {
-            if (PART_ProgressBar == null)
-            {
-                return 0;
-            }
-
-            return PART_ProgressBar.ActualHeight;
+            return PART_ProgressBar == null ? 0 : PART_ProgressBar.ActualHeight;
         }
 
 

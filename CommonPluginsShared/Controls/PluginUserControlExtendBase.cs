@@ -42,7 +42,7 @@ namespace CommonPluginsShared.Controls
             if (sender is PluginUserControlExtendBase obj && e.NewValue != e.OldValue)
             {
                 obj._updateDataTimer.Interval = TimeSpan.FromMilliseconds((int)e.NewValue);
-                obj.RestartTimer();                
+                obj.RestartTimer();
             }
         }
 

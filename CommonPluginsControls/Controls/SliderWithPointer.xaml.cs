@@ -24,8 +24,8 @@ namespace CommonPluginsControls.Controls
     {
         public Brush ThumbFill
         {
-            get { return (Brush)GetValue(ThumbFillProperty); }
-            set { SetValue(ThumbFillProperty, value); }
+            get => (Brush)GetValue(ThumbFillProperty);
+            set => SetValue(ThumbFillProperty, value);
         }
 
         public static readonly DependencyProperty ThumbFillProperty = DependencyProperty.Register(
