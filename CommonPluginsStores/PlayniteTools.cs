@@ -51,7 +51,7 @@ namespace CommonPluginsStores
             {
                 SteamApi steamApi = new SteamApi("PlayniteTools");
 
-                if (SteamId =="null")
+                if (SteamId == "null")
                 {
                     SteamId = steamApi.CurrentUser.SteamId.ToString();
                 }
