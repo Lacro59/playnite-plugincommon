@@ -22,6 +22,8 @@
     <sys:String x:Key="LOCCommonTransfer">Transférer</sys:String>
     <sys:String x:Key="LOCCommonTransferPluginData">Transférer les données du plugin</sys:String>
     <sys:String x:Key="LOCCommonSelectTransferData">Sélection des données à transférer</sys:String>
+    <sys:String x:Key="LOCCommonMergedOrErased">Fusionner au lieu de supprimer</sys:String>
+    <sys:String x:Key="LOCCommonErasedWarning">Attention, les données de la cible seront écrasées !</sys:String>
 
 
     <!-- Remove plugin data -->

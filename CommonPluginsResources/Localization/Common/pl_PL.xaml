@@ -22,6 +22,8 @@
     <sys:String x:Key="LOCCommonTransfer">Przenieś</sys:String>
     <sys:String x:Key="LOCCommonTransferPluginData">Przenieś dane wtyczki</sys:String>
     <sys:String x:Key="LOCCommonSelectTransferData">Wybór danych do przeniesienia</sys:String>
+    <sys:String x:Key="LOCCommonMergedOrErased">Scalono zamiast czyszczenia</sys:String>
+    <sys:String x:Key="LOCCommonErasedWarning">Bądź ostrożny, dane docelowe zostaną nadpisane!</sys:String>
 
 
     <!-- Remove plugin data -->
