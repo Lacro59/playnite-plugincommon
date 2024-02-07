@@ -24,14 +24,13 @@ namespace CommonPluginsShared
 
             if (File.Exists(ConfigurationsPath))
             {
-                try
+                if (!Serialization.TryFromJsonFile(ConfigurationsPath, out Configurations))
                 {
-                    string JsonStringData = FileSystem.ReadFileAsStringSafe(ConfigurationsPath);
-                    Configurations = Serialization.FromJson<List<SystemConfiguration>>(JsonStringData);
+                    logger.Warn($"Failed to load {ConfigurationsPath}");
+                    Configurations = new List<SystemConfiguration>();
                 }
-                catch (Exception ex)
+                if (Configurations == null)
                 {
-                    Common.LogError(ex, false, $"Failed to load {ConfigurationsPath}");
                     Configurations = new List<SystemConfiguration>();
                 }
             }
