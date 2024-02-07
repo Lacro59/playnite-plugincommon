@@ -10,29 +10,32 @@ namespace CommonPluginsShared.Collections
     public class PluginDataBaseGameBase : DatabaseObject
     {
         [DontSerialize]
-        internal Game Game { get; set; }        
+        internal Game Game { get; set; }
 
 
         [DontSerialize]
-        public Guid SourceId => Game?.SourceId ?? default; 
+        public Guid SourceId => Game?.SourceId ?? default;
 
         [DontSerialize]
-        public DateTime? LastActivity => Game?.LastActivity ?? null; 
+        public DateTime? LastActivity => Game?.LastActivity ?? null;
 
         [DontSerialize]
         public bool Hidden => Game?.Hidden ?? default;
 
         [DontSerialize]
-        public string Icon => Game?.Icon ?? string.Empty; 
+        public string Icon => Game?.Icon ?? string.Empty;
 
         [DontSerialize]
-        public string CoverImage => Game?.CoverImage ?? string.Empty; 
+        public string CoverImage => Game?.CoverImage ?? string.Empty;
 
         [DontSerialize]
-        public string BackgroundImage => Game?.BackgroundImage ?? string.Empty; 
+        public string BackgroundImage => Game?.BackgroundImage ?? string.Empty;
 
         [DontSerialize]
         public List<Genre> Genres => Game?.Genres ?? default;
+
+        [DontSerialize]
+        public List<Tag> Tags => Game?.Tags ?? default;
 
         [DontSerialize]
         public List<Guid> GenreIds => Game?.GenreIds ?? default;
