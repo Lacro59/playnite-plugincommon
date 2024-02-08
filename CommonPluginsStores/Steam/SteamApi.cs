@@ -755,7 +755,7 @@ namespace CommonPluginsStores.Steam
                 Serialization.TryFromJson(WebData, out Models.SteamApps appsListResponse);
 
                 // Write file for cache
-                if (appsListResponse != null)
+                if (appsListResponse?.applist?.apps != null)
                 {
                     AppsList = appsListResponse.applist.apps;
                     File.WriteAllText(AppsListPath, Serialization.ToJson(AppsList), Encoding.UTF8);
