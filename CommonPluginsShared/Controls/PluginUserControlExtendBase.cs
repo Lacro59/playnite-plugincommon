@@ -289,7 +289,7 @@ namespace CommonPluginsShared.Controls
                 return;
             }
 
-            SetData(GameContext);
+            await Task.Run(() => Application.Current.Dispatcher?.Invoke(() => SetData(GameContext), DispatcherPriority.Render));
         }
 
         public void RestartTimer()

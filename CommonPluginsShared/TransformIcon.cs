@@ -81,7 +81,7 @@
         private static string nec_turbografx_16 = "\uea7e";
         private static string nec_turbografx_cd = "\uea7f";
         private static string nintendo_3ds = "\uea8a";
-        private static string nintendo_new_3ds = "\uea89";
+        //private static string nintendo_new_3ds = "\uea89";
         private static string nintendo_64 = "\uea8b";
         private static string nintendo_ds = "\uea8c";
         private static string nintendo_dsi = "\uea8d";
@@ -514,7 +514,7 @@
                     stringReturn = nintendo_family_computer_disk_system;
                     break;
                 case "nintendo game boy":
-                    stringReturn = nintendo_game_boy_advance;
+                    stringReturn = nintendo_game_boy;
                     break;
                 case "nintendo game boy advance":
                     stringReturn = nintendo_game_boy_advance;
@@ -542,7 +542,7 @@
                     stringReturn = nintendo_virtual_boy;
                     break;
                 case "nintendo wii":
-                    stringReturn = nintendo_wii_u;
+                    stringReturn = nintendo_wii;
                     break;
                 case "nintendo wii u":
                     stringReturn = nintendo_wii_u;

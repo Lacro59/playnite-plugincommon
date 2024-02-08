@@ -5,6 +5,8 @@ using Playnite.SDK.Models;
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace CommonPluginsShared.Controls
 {
@@ -95,7 +97,7 @@ namespace CommonPluginsShared.Controls
                 return;
             }
 
-            SetData(GameContext, PluginGameData);
+            await Task.Run(() => Application.Current.Dispatcher?.Invoke(() => SetData(GameContext, PluginGameData), DispatcherPriority.Render));
         }
     }
 }
