@@ -14,8 +14,8 @@ namespace CommonPluginsShared
 {
     public class Common
     {
-        private static ILogger logger = LogManager.GetLogger();
-        private static IResourceProvider resources = new ResourceProvider();
+        private static readonly ILogger logger = LogManager.GetLogger();
+        private static readonly IResourceProvider resources = new ResourceProvider();
 
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace CommonPluginsShared
                         Application.Current.Resources.Remove(RessourceName);
                         Application.Current.Resources.Add(RessourceName, lastModified);
 
-                        Common.LogDebug(true, $"Load {CommonFile} - {lastModified.ToString("yyyy-MM-dd HH:mm:ss")}");
+                        Common.LogDebug(true, $"Load {CommonFile} - {lastModified:yyyy-MM-dd HH:mm:ss}");
 
                         ResourceDictionary res = null;
                         try
@@ -63,7 +63,7 @@ namespace CommonPluginsShared
                             res = Xaml.FromFile<ResourceDictionary>(CommonFile);
                             res.Source = new Uri(CommonFile, UriKind.Absolute);
 
-                            foreach (var key in res.Keys)
+                            foreach (object key in res.Keys)
                             {
                                 if (res[key] is string locString && locString.IsNullOrEmpty())
                                 {
@@ -144,19 +144,19 @@ namespace CommonPluginsShared
 
                 if (WinIdProperty == "WindowSettings")
                 {
-                    ((Window)sender).Width = 860;
+
                 }
                 else if (WinIdProperty == "WindowExtensions")
                 {
-                    ((Window)sender).Height = 700;
+
                 }
                 else if (((Window)sender).DataContext != null)
                 {
                     if (((Window)sender).DataContext.GetType().GetProperty("SettingsView") != null
-                        && (((dynamic)(Window)sender).DataContext).SettingsView.DataContext is ISettings)
+                        && ((dynamic)(Window)sender).DataContext.SettingsView.DataContext is ISettings)
                     {
-                        ((Window)sender).Width = 700;
-                        ((Window)sender).Height = 500;
+                        ((Window)sender).Height = 700;
+                        ((Window)sender).Width = 960;
                     }
                 }
             }
