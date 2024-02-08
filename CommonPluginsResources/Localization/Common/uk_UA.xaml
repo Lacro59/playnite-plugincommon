@@ -113,7 +113,7 @@
     <sys:String x:Key="LOCCommonIntegrationSelectElements">Компоненти детального перегляду</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationButtonOptions">Параметри кнопки</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">Only show a icon</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">Показати тільки іконку</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonDetails">Кнопка з подробицями</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonIsToggle">З кнопкою перемикання</sys:String>
 
