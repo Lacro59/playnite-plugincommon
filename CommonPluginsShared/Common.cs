@@ -157,6 +157,10 @@ namespace CommonPluginsShared
                     {
                         ((Window)sender).Height = 700;
                         ((Window)sender).Width = 960;
+
+                        Window owner = ((Window)sender).Owner as Window;
+                        ((Window)sender).Top = (owner.Height / 2) - (((Window)sender).Height / 2);
+                        ((Window)sender).Left = (owner.Width / 2) - (((Window)sender).Width / 2);
                     }
                 }
             }
