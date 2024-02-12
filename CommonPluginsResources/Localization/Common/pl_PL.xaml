@@ -195,7 +195,7 @@ You must authenticate.</sys:String>
 
 
     <sys:String x:Key="LOCCommonMisc">Różne</sys:String>
-    <sys:String x:Key="LOCCommonSelectVariable">Wybierz zmienną</sys:String>
+    <sys:String x:Key="LOCCommonSelectVariable">Wybierz zmienn</sys:String>
 
 
     <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
