@@ -56,7 +56,7 @@
     <sys:String x:Key="LOCCommonOnlyMissing">不足している場合のみ</sys:String>
     <sys:String x:Key="LOCCommonMissingData"></sys:String>
 
-    <sys:String x:Key="LOCCommonTotal">合</sys:String>
+    <sys:String x:Key="LOCCommonTotal"></sys:String>
     <sys:String x:Key="LOCCommonCut">切り捨て</sys:String>
 
     <sys:String x:Key="LOCCommon0to1">00 から 01 時間</sys:String>
@@ -90,7 +90,7 @@
 
     <!-- CommonMenus -->
 
-    <sys:String x:Key="LOCCommonTotalFound">合</sys:String>
+    <sys:String x:Key="LOCCommonTotalFound"></sys:String>
 
     <!-- CommonSettingsView -->
 
