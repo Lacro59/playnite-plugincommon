@@ -9,7 +9,7 @@
 
     <sys:String x:Key="LOCCommonAddFolder">إضافة مج</sys:String>
     <sys:String x:Key="LOCCommonRemoveFolder">ازالة مج</sys:String>
-    <sys:String x:Key="LOCCommonAddFilePattern">إضافة نمط ال</sys:String>
+    <sys:String x:Key="LOCCommonAddFilePattern">إضافة نمط ا</sys:String>
 
     <sys:String x:Key="LOCCommonMargin">Margin</sys:String>
     
@@ -34,7 +34,7 @@
     <!-- Common Stores -->
 
     <sys:String x:Key="LOCCommonAuthenticateLabel">Authenticate</sys:String>
-    <sys:String x:Key="LOCCommonNotLoggedIn">يتطلب المصاد</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedIn">يتطلب المصا</sys:String>
     <sys:String x:Key="LOCCommonLoggedIn">تم مصادقة المستخ</sys:String>
     <sys:String x:Key="LOCCommonAccountName">اسم الحسا</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Checking authentication status…</sys:String>
@@ -43,7 +43,7 @@
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticate</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: لا يوجد مفتاح API</sys:String>
 
-    <sys:String x:Key="LOCCommonIgnoredItems">العناصر المه</sys:String>
+    <sys:String x:Key="LOCCommonIgnoredItems">العناصر الم</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">Input the item to ignore</sys:String>
     
     <sys:String x:Key="LOCCommonProgression">الت</sys:String>
@@ -51,7 +51,7 @@
 
     <sys:String x:Key="LOCCommonGameTime">Game time</sys:String>
     
-    <sys:String x:Key="LOCCommonSelectFilters">اختيار التصف</sys:String>
+    <sys:String x:Key="LOCCommonSelectFilters">اختيار التص</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Recently Added</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Only missing</sys:String>
     <sys:String x:Key="LOCCommonMissingData">Tag games missing data</sys:String>
@@ -115,7 +115,7 @@ Do you want to open the directory?</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonOptions">Button options</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">إظهار الأيقونة فقط</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonDetails">زر بتفاص</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonIsToggle">باستخدام زر التب</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonIsToggle">باستخدام زر الت</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationViewItemOptions">View item options</sys:String>
     
