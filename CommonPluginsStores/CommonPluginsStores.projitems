@@ -17,6 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicDlcData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicEntitledOfferItems.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicWishlistData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\QueryAddonsByNamespace.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\QueryEntitledOfferItems.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gog\GogApi.cs" />
@@ -28,7 +29,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\ProfileUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\ProfileUserFriends.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\UserData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\WishlistResult.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\AccountGameInfos.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\AccountWishlist.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\BasicAccountGameInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\GameAchievement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\GameInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\GameDlcOwned.cs" />

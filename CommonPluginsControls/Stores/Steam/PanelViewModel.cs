@@ -23,13 +23,10 @@ namespace CommonPluginsControls.Stores.Steam
         public AuthStatus AuthStatus => SteamApi.IsUserLoggedIn ? AuthStatus.Ok : AuthStatus.AuthRequired;
 
 
-        public RelayCommand<object> LoginCommand
-        {
-            get => new RelayCommand<object>((a) =>
+        public RelayCommand<object> LoginCommand => new RelayCommand<object>((a) =>
             {
                 SteamApi.Login();
                 OnPropertyChanged(nameof(AuthStatus));
             });
-        }
     }
 }

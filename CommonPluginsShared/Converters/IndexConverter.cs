@@ -1,16 +1,7 @@
-﻿using CommonPlayniteShared;
-using Playnite.SDK;
-using System;
-using System.Drawing.Imaging;
+﻿using System;
 using System.Globalization;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Markup;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace CommonPluginsShared.Converters
 {
@@ -20,9 +11,8 @@ namespace CommonPluginsShared.Converters
         {
             try
             {
-                if (value is ListBoxItem)
+                if (value is ListBoxItem item)
                 {
-                    ListBoxItem item = (ListBoxItem)value;
                     ListBox listView = ItemsControl.ItemsControlFromItemContainer(item) as ListBox;
                     int index = listView.ItemContainerGenerator.IndexFromContainer(item);
                     return index.ToString();

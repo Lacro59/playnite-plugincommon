@@ -16,8 +16,8 @@ namespace CommonPluginsStores.PCGamingWiki
 {
     public class PCGamingWikiApi
     {
-        internal static readonly ILogger logger = LogManager.GetLogger();
-        internal static readonly IResourceProvider resources = new ResourceProvider();
+        internal static ILogger Logger => LogManager.GetLogger();
+        internal static IResourceProvider ResourceProvider => new ResourceProvider();
 
         internal string PluginName { get; set; }
         internal string ClientName => "PCGamingWiki";
@@ -31,10 +31,9 @@ namespace CommonPluginsStores.PCGamingWiki
         #endregion
 
 
-
-        public PCGamingWikiApi(string PluginName)
+        public PCGamingWikiApi(string pluginName)
         {
-            this.PluginName = PluginName;
+            PluginName = pluginName;
         }
 
 
@@ -128,7 +127,7 @@ namespace CommonPluginsStores.PCGamingWiki
             WebResponse = Web.DownloadStringData(url).GetAwaiter().GetResult(); 
             if (WebResponse.ToLower().Contains("database query error has occurred"))
             {
-                logger.Warn($"Error on PCGamingWiki search with {Name}");
+                Logger.Warn($"Error on PCGamingWiki search with {Name}");
             }
             else
             {
@@ -152,7 +151,7 @@ namespace CommonPluginsStores.PCGamingWiki
             WebResponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
             if (WebResponse.ToLower().Contains("database query error has occurred"))
             {
-                logger.Warn($"Error on PCGamingWiki search with {game.Name}");
+                Logger.Warn($"Error on PCGamingWiki search with {game.Name}");
             }
             else
             {

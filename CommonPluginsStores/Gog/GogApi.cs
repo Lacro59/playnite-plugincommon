@@ -35,19 +35,24 @@ namespace CommonPluginsStores.Gog
         private const string UrlGogGame = UrlBase + @"/game/{0}";
 
         private const string UrlFriends = @"https://embed.gog.com/users/info/{0}?expand=friendStatus";
+
+        private static string UrlWishlist => UrlBase + @"/u/{0}/wishlist";
         #endregion
 
-
         #region Url API
-        private const string UrlApiGamePlay = @"https://gameplay.gog.com";
-        private const string UrlApi = @"https://api.gog.com";
+        private static string UrlApiGamePlay => @"https://gameplay.gog.com";
+        private static string UrlApi => @"https://api.gog.com";
+        private static string UrlEmbed => @"https://embed.gog.com";
 
-        private const string UrlApiGamePlayUserAchievements = UrlApiGamePlay + @"/clients/{0}/users/{1}/achievements";
-        private const string UrlApiGamePlayFriendAchievements = UrlApiGamePlay + @"/clients/{0}/users/{1}/friends_achievements_unlock_progresses";
+        private static string UrlApiGamePlayUserAchievements => UrlApiGamePlay + @"/clients/{0}/users/{1}/achievements";
+        private static string UrlApiGamePlayFriendAchievements => UrlApiGamePlay + @"/clients/{0}/users/{1}/friends_achievements_unlock_progresses";
 
-        private const string UrlApiGameInfo = UrlApi + @"/products/{0}?expand=description&locale={1}";
+        private static string UrlApiGameInfo => UrlApi + @"/products/{0}?expand=description&locale={1}";
 
-        private static string UrlApiPrice = UrlApi + @"/products/prices?ids={0}&countryCode={1}&currency={2}";
+        private static string UrlApiPrice => UrlApi + @"/products/prices?ids={0}&countryCode={1}&currency={2}";
+
+        private static string UrlApiWishlist => UrlEmbed + @"/user/wishlist.json";
+        private static string UrlApiRemoveWishlist => UrlEmbed + @"/user/wishlist/remove/{0}";
         #endregion
 
 
@@ -77,7 +82,6 @@ namespace CommonPluginsStores.Gog
         {
 
         }
-
 
         #region Configuration
         protected override bool GetIsUserLoggedIn()
@@ -113,7 +117,6 @@ namespace CommonPluginsStores.Gog
         }
         #endregion
 
-
         #region Current user
         protected override AccountInfos GetCurrentAccountInfos()
         {
@@ -128,16 +131,13 @@ namespace CommonPluginsStores.Gog
                 if (WebData.IndexOf("window.profilesData.currentUser") == -1)
                 {
                     IsUserLoggedIn = false;
-                    logger.Warn($"Not found: window.profilesData.currentUser");
+                    Logger.Warn($"Not found: window.profilesData.currentUser");
                     return null;
                 }
 
                 string JsonDataString = Tools.GetJsonInString(WebData, "window.profilesData.currentUser = ", "window.profilesData.profileUser = ", "]}};");
-                Serialization.TryFromJson(JsonDataString, out ProfileUser profileUser);
-
-                if (profileUser != null)
+                if (Serialization.TryFromJson(JsonDataString, out ProfileUser profileUser) && long.TryParse(profileUser?.userId, out long UserId))
                 {
-                    long.TryParse(profileUser.userId, out long UserId);
                     string Avatar = profileUser.avatar.Replace("\\", string.Empty);
                     string Pseudo = profileUser.username;
                     string Link = string.Format(UrlUserFriends, profileUser.username);
@@ -174,7 +174,7 @@ namespace CommonPluginsStores.Gog
                 if (WebData.IndexOf("window.profilesData.currentUser") == -1)
                 {
                     IsUserLoggedIn = false;
-                    logger.Warn($"Not found: window.profilesData.profileUserFriends");
+                    Logger.Warn($"Not found: window.profilesData.profileUserFriends");
                     return null;
                 }
 
@@ -216,7 +216,6 @@ namespace CommonPluginsStores.Gog
             return null;
         }
         #endregion
-
 
         #region User details
         public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
@@ -374,6 +373,115 @@ namespace CommonPluginsStores.Gog
                 Url = $"https://www.gog.com/u/{UserName}/game/{Id}?sort=user_unlock_date&sort_user_id={accountInfos.UserId}"
             };
         }
+
+        public override ObservableCollection<AccountWishlist> GetWishlist(AccountInfos accountInfos)
+        {
+            if (accountInfos != null)
+            {
+                string response;
+                bool HasError = false;
+                ObservableCollection<AccountWishlist> data = new ObservableCollection<AccountWishlist>();
+
+                // With api
+                if (accountInfos.IsCurrent)
+                {
+                    try
+                    {
+                        WebViewOffscreen.NavigateAndWait(UrlApiWishlist);
+                        response = WebViewOffscreen.GetPageText();
+
+                        if (Serialization.TryFromJson(response, out WishlistResult wishlistResult))
+                        {
+                            foreach (dynamic gameWishlist in wishlistResult.wishlist)
+                            {
+                                if ((bool)gameWishlist.Value)
+                                {
+                                    string StoreId = gameWishlist.Name;
+                                    GameInfos gameInfos = GetGameInfos(StoreId, null);
+                                    if (gameInfos != null)
+                                    {
+                                        data.Add(new AccountWishlist
+                                        {
+                                            Id = gameInfos.Id,
+                                            Name = gameInfos.Name,
+                                            Link = gameInfos.Link,
+                                            Released = gameInfos.Released,
+                                            Added = null,
+                                            Image = gameInfos.Image
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Logger.Warn($"GOG is disconnected");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, true, PluginName);
+                        HasError = true;
+                    }
+                }
+
+                if (!HasError && data.Count > 0)
+                {
+                    return data;
+                }
+
+                // Without Api
+                WebViewOffscreen.NavigateAndWait(string.Format(UrlWishlist, accountInfos.Pseudo));
+                response = WebViewOffscreen.GetPageSource();
+
+                // Get game information for wishlist
+                if (!response.IsNullOrEmpty())
+                {
+                    HtmlParser parser = new HtmlParser();
+                    IHtmlDocument HtmlRequirement = parser.Parse(response);
+
+                    foreach (var el in HtmlRequirement.QuerySelectorAll(".product-row-wrapper .product-state-holder"))
+                    {
+                        string StoreId = el.GetAttribute("gog-product");
+                        GameInfos gameInfos = GetGameInfos(StoreId, null);
+                        if (gameInfos != null)
+                        {
+                            data.Add(new AccountWishlist
+                            {
+                                Id = gameInfos.Id,
+                                Name = gameInfos.Name,
+                                Link = gameInfos.Link,
+                                Released = gameInfos.Released,
+                                Added = null,
+                                Image = gameInfos.Image
+                            });
+                        }
+                    }
+                }
+
+                return data;
+            }
+
+            return null;
+        }
+
+        public override bool RemoveWishlist(string Id)
+        {
+            if (IsUserLoggedIn)
+            {
+                try
+                {
+                    WebViewOffscreen.NavigateAndWait(string.Format(UrlApiRemoveWishlist, Id));
+                    return WebViewOffscreen.GetPageSource().ToLower().IndexOf("unable to remove product from wishlist") == -1;
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Error remove {Id} in GOG wishlist", true, PluginName);
+                }
+            }
+
+            return false;
+        }
         #endregion
 
 
@@ -392,7 +500,8 @@ namespace CommonPluginsStores.Gog
                     Name = productApiDetail?.title,
                     Link = productApiDetail?.links?.product_card,
                     Image = "https:" + productApiDetail?.images?.logo2x,
-                    Description = RemoveDescriptionPromos(productApiDetail.description.full).Trim()
+                    Description = RemoveDescriptionPromos(productApiDetail.description.full).Trim(),
+                    Released = productApiDetail?.release_date
                 };
 
                 // DLC
@@ -468,7 +577,7 @@ namespace CommonPluginsStores.Gog
                     }
                     else
                     {
-                        logger.Warn($"No dlc data for {el.id}");
+                        Logger.Warn($"No dlc data for {el.id}");
                     }
                 }
                 catch (Exception ex)
@@ -479,7 +588,7 @@ namespace CommonPluginsStores.Gog
                     }
                     else
                     {
-                        logger.Warn($"No dlc data for {el.id}");
+                        Logger.Warn($"No dlc data for {el.id}");
                     }
                 }
             }
@@ -569,7 +678,7 @@ namespace CommonPluginsStores.Gog
 
             if (dataObj["message"] != null)
             {
-                logger.Info($"{dataObj["message"]}");
+                Logger.Info($"{dataObj["message"]}");
                 return null;
             }
 
@@ -601,7 +710,7 @@ namespace CommonPluginsStores.Gog
                 Common.LogError(ex, false, true, ClientName);
             }
 
-            logger.Warn("Used USD only");
+            Logger.Warn("Used USD only");
             return new List<StoreCurrency>
             {
                 new StoreCurrency { country = "US", currency = "USD", symbol = "$" }

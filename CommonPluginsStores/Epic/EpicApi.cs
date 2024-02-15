@@ -13,11 +13,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows;
+using static CommonPlayniteShared.PluginLibrary.EpicLibrary.Models.WebStoreModels.QuerySearchResponse.Data.CatalogItem.SearchStore;
 using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.Epic
@@ -25,42 +25,39 @@ namespace CommonPluginsStores.Epic
     public class EpicApi : StoreApi
     {
         #region Url
-        private const string UrlBase = @"https://www.epicgames.com";
+        private string UrlBase => @"https://www.epicgames.com";
 
-        private string UrlStore = UrlBase + @"/store/{0}/p/{1}";
-        private string UrlAchievements = UrlBase + @"/store/{0}/achievements/{1}";
+        private string UrlStore => UrlBase + @"/store/{0}/p/{1}";
+        private string UrlAchievements => UrlBase + @"/store/{0}/achievements/{1}";
 
-        private string UrlGraphQL = @"https://graphql.epicgames.com/graphql";
+        private string UrlGraphQL => @"https://graphql.epicgames.com/graphql";
         #endregion
 
-
-        protected static EpicAccountClient _epicAccountClient;
-        internal static EpicAccountClient epicAccountClient
+        protected static EpicAccountClient _EpicAccountClient;
+        internal static EpicAccountClient EpicAccountClient
         {
             get
             {
-                if (_epicAccountClient == null)
+                if (_EpicAccountClient == null)
                 {
-                    _epicAccountClient = new EpicAccountClient(
+                    _EpicAccountClient = new EpicAccountClient(
                         API.Instance,
                         PlaynitePaths.ExtensionsDataPath + "\\00000002-DBD1-46C6-B5D0-B1BA559D10E4\\tokens.json"
                     );
                 }
-                return _epicAccountClient;
+                return _EpicAccountClient;
             }
 
-            set => _epicAccountClient = value;
+            set => _EpicAccountClient = value;
         }
 
-
-        public bool forced { get; set; } = false;
+        public bool Forced { get; set; } = false;
 
 
         public EpicApi(string PluginName) : base(PluginName, ExternalPlugin.EpicLibrary, "Epic")
         {
 
         }
-
 
         #region Cookies
         internal override List<HttpCookie> GetWebCookies()
@@ -97,15 +94,14 @@ namespace CommonPluginsStores.Epic
         }
         #endregion
 
-
         #region Configuration
         protected override bool GetIsUserLoggedIn()
         {
-            bool isLogged = epicAccountClient.GetIsUserLoggedIn();
+            bool isLogged = EpicAccountClient.GetIsUserLoggedIn();
 
             if (isLogged)
             {
-                OauthResponse tokens = epicAccountClient.loadTokens();
+                OauthResponse tokens = EpicAccountClient.loadTokens();
                 AuthToken = new StoreToken
                 {
                     Token = tokens.access_token,
@@ -121,7 +117,6 @@ namespace CommonPluginsStores.Epic
         }
         #endregion
 
-
         #region Current user
         // TODO 
         protected override AccountInfos GetCurrentAccountInfos()
@@ -133,8 +128,15 @@ namespace CommonPluginsStores.Epic
 
             try
             {
-                AccountInfos accountInfos = new AccountInfos { IsCurrent = true };
-                return accountInfos;
+                AccountInfos userInfos = new AccountInfos
+                {
+                    //UserId = long.Parse(player.steamid),
+                    //Avatar = player.avatarfull,
+                    //Pseudo = player.personaname,
+                    //Link = player.profileurl,
+                    IsCurrent = true
+                };
+                return userInfos;
             }
             catch (Exception ex)
             {
@@ -144,7 +146,6 @@ namespace CommonPluginsStores.Epic
             return null;
         }
         #endregion
-
 
         #region User details
         // TODO
@@ -189,13 +190,13 @@ namespace CommonPluginsStores.Epic
                     string ProductSlug = GetProductSlug(PlayniteTools.NormalizeGameName(Id));
                     if (ProductSlug.IsNullOrEmpty())
                     {
-                        logger.Warn($"No ProductSlug for {Id}");
+                        Logger.Warn($"No ProductSlug for {Id}");
                         return null;
                     }
 
                     List<HttpCookie> Cookies = GetStoredCookies();
                     Url = string.Format(UrlAchievements, LocalLang, ProductSlug);
-                    using (var WebViews = API.Instance.WebViews.CreateOffscreenView())
+                    using (IWebView WebViews = API.Instance.WebViews.CreateOffscreenView())
                     {
                         _ = WebViews.CanExecuteJavascriptInMainFrame;
                         Cookies.ForEach(x => { WebViews.SetCookies(Url, x); });
@@ -233,7 +234,7 @@ namespace CommonPluginsStores.Epic
                 {
                     if (ex.Message.Contains("404"))
                     {
-                        logger.Warn($"Error 404 for {Id}");
+                        Logger.Warn($"Error 404 for {Id}");
                     }
                     else
                     {
@@ -245,15 +246,15 @@ namespace CommonPluginsStores.Epic
 
                 if (!ResultWeb.Contains("\"achievements\":[{\"achievement\""))
                 {
-                    if (!forced)
+                    if (!Forced)
                     {
-                        forced = true;
+                        Forced = true;
                         ObservableCollection<GameAchievement> data = GetAchievements(Id, accountInfos);
-                        forced = false;
+                        Forced = false;
                         return data;
                     }
 
-                    logger.Warn($"Error 404 for {Id}");
+                    Logger.Warn($"Error 404 for {Id}");
                     return null;
                 }
 
@@ -323,7 +324,7 @@ namespace CommonPluginsStores.Epic
                 }
                 else
                 {
-                    logger.Warn($"Error 404 for {Id}");
+                    Logger.Warn($"Error 404 for {Id}");
                 }
 
                 return gameAchievements;
@@ -341,7 +342,7 @@ namespace CommonPluginsStores.Epic
             string ProductSlug = GetProductSlug(PlayniteTools.NormalizeGameName(Name));
             if (ProductSlug.IsNullOrEmpty())
             {
-                logger.Warn($"No ProductSlug for {Name}");
+                Logger.Warn($"No ProductSlug for {Name}");
                 return null;
             }
 
@@ -355,8 +356,98 @@ namespace CommonPluginsStores.Epic
                 Url = Url
             };
         }
-        #endregion
 
+        public override ObservableCollection<AccountWishlist> GetWishlist(AccountInfos accountInfos)
+        {
+            if (accountInfos != null)
+            {
+                string query = "query wishlistQuery { Wishlist { wishlistItems { elements { id order created offerId updated namespace offer {id title offerType effectiveDate expiryDate status isCodeRedemptionOnly keyImages { type url width height }catalogNs { mappings(pageType: \"productHome\") { pageSlug pageType } } offerMappings { pageSlug pageType } } } } } }";
+                dynamic variables = new { };
+                string response = QueryWishList(query, variables).GetAwaiter().GetResult();
+
+                if (!response.IsNullOrEmpty() && Serialization.TryFromJson(response, out EpicWishlistData epicWishlistData))
+                {
+                    try
+                    {
+                        if (epicWishlistData?.data?.Wishlist?.wishlistItems?.elements != null)
+                        {
+                            ObservableCollection<AccountWishlist> data = new ObservableCollection<AccountWishlist>();
+
+                            foreach (WishlistElement gameWishlist in epicWishlistData.data.Wishlist.wishlistItems.elements)
+                            {
+                                string Id = string.Empty;
+                                string Name = string.Empty;
+                                DateTime? Released = null;
+                                DateTime? Added = null;
+                                string Image = string.Empty;
+                                string Link = string.Empty;
+
+                                try
+                                {
+                                    Id = gameWishlist.offerId + "|" + gameWishlist.@namespace;
+                                    Name = WebUtility.HtmlDecode(gameWishlist.offer.title);
+                                    Image = gameWishlist.offer.keyImages?.FirstOrDefault(x => x.type.IsEqual("Thumbnail"))?.url;
+                                    Released = gameWishlist.offer.effectiveDate.ToUniversalTime();
+                                    Added = gameWishlist.created.ToUniversalTime();
+                                    Link = gameWishlist.offer?.catalogNs?.mappings?.FirstOrDefault()?.pageSlug;
+
+                                    data.Add(new AccountWishlist
+                                    {
+                                        Id = Id,
+                                        Name = Name,
+                                        Link = Link.IsNullOrEmpty() ? string.Empty : string.Format(UrlStore, CodeLang.GetEpicLang(Local), Link),
+                                        Released = Released,
+                                        Added = Added,
+                                        Image = Image
+                                    });
+                                }
+                                catch (Exception ex)
+                                {
+                                    Common.LogError(ex, true, $"Error in parse Epic wishlist - {Name}");
+                                }
+                            }
+
+                            return data;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, "Error in parse Epic wishlist", true, PluginName);
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public override bool RemoveWishlist(string Id)
+        {
+            if (IsUserLoggedIn)
+            {
+                try
+                {
+                    string EpicOfferId = Id.Split('|')[0];
+                    string EpicNamespace = Id.Split('|')[1];
+
+                    string query = @"mutation removeFromWishlistMutation($namespace: String!, $offerId: String!, $operation: RemoveOperation!) { Wishlist { removeFromWishlist(namespace: $namespace, offerId: $offerId, operation: $operation) { success } } }";
+                    dynamic variables = new
+                    {
+                        @namespace = EpicNamespace,
+                        offerId = EpicOfferId,
+                        operation = "REMOVE"
+                    };
+                    string ResultWeb = QueryWishList(query, variables).GetAwaiter().GetResult();
+                    return ResultWeb.IndexOf("\"success\":true") > -1;
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Error remove {Id} in Epic wishlist", true, PluginName);
+                }
+            }
+
+            return false;
+        }
+        #endregion
 
         #region Game
         // TODO
@@ -385,7 +476,7 @@ namespace CommonPluginsStores.Epic
                 EpicAddonsByNamespace dataDLC = GetAddonsByNamespace(Id).GetAwaiter().GetResult();
                 if (dataDLC?.data?.Catalog?.catalogOffers?.elements == null)
                 {
-                    logger.Warn($"No dlc for {Id}");
+                    Logger.Warn($"No dlc for {Id}");
                     return null;
                 }
 
@@ -423,7 +514,6 @@ namespace CommonPluginsStores.Epic
         }
         #endregion
 
-
         #region Epic
         public string GetProductSlug(string Name)
         {
@@ -442,11 +532,11 @@ namespace CommonPluginsStores.Epic
             {
                 using (WebStoreClient client = new WebStoreClient())
                 {
-                    var catalogs = client.QuerySearch(Name).GetAwaiter().GetResult();
+                    List<SearchStoreElement> catalogs = client.QuerySearch(Name).GetAwaiter().GetResult();
                     if (catalogs.HasItems())
                     {
                         catalogs = catalogs.OrderBy(x => x.title.Length).ToList();
-                        var catalog = catalogs.FirstOrDefault(a => a.title.IsEqual(Name, true));
+                        SearchStoreElement catalog = catalogs.FirstOrDefault(a => a.title.IsEqual(Name, true));
                         if (catalog == null)
                         {
                             catalog = catalogs[0];
@@ -454,7 +544,7 @@ namespace CommonPluginsStores.Epic
 
                         if (catalog.productSlug.IsNullOrEmpty())
                         {
-                            var mapping = catalog.catalogNs.mappings.FirstOrDefault(b => b.pageType.Equals("productHome", StringComparison.InvariantCultureIgnoreCase));
+                            SearchStoreElement.CatalogNs.Mappings mapping = catalog.catalogNs.mappings.FirstOrDefault(b => b.pageType.Equals("productHome", StringComparison.InvariantCultureIgnoreCase));
                             catalog.productSlug = mapping.pageSlug;
                         }
 
@@ -478,11 +568,11 @@ namespace CommonPluginsStores.Epic
             {
                 using (WebStoreClient client = new WebStoreClient())
                 {
-                    var catalogs = client.QuerySearch(Name).GetAwaiter().GetResult();
+                    List<SearchStoreElement> catalogs = client.QuerySearch(Name).GetAwaiter().GetResult();
                     if (catalogs.HasItems())
                     {
                         catalogs = catalogs.OrderBy(x => x.title.Length).ToList();
-                        var catalog = catalogs.FirstOrDefault(a => a.title.IsEqual(Name, true));
+                        SearchStoreElement catalog = catalogs.FirstOrDefault(a => a.title.IsEqual(Name, true));
                         if (catalog == null)
                         {
                             catalog = catalogs[0];
@@ -505,7 +595,7 @@ namespace CommonPluginsStores.Epic
         {
             try
             {
-                EpicEntitledOfferItems ownedDLC = GetEntitledOfferItems(productNameSpace, Id, AuthToken.Token).GetAwaiter().GetResult();
+                EpicEntitledOfferItems ownedDLC = GetEntitledOfferItems(productNameSpace, Id).GetAwaiter().GetResult();
                 return (ownedDLC?.data?.Launcher?.entitledOfferItems?.entitledToAllItemsInOffer ?? false) && (ownedDLC?.data?.Launcher?.entitledOfferItems?.entitledToAnyItemInOffer ?? false);
             }
             catch (Exception ex)
@@ -520,15 +610,15 @@ namespace CommonPluginsStores.Epic
         {
             try
             {
-                var query = new QueryAddonsByNamespace();
+                QueryAddonsByNamespace query = new QueryAddonsByNamespace();
                 query.variables.epic_namespace = epic_namespace;
                 query.variables.locale = CodeLang.GetEpicLang(Local);
                 query.variables.country = CodeLang.GetOriginLangCountry(Local);
-                var content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
+                StringContent content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
                 HttpClient httpClient = new HttpClient();
-                var response = await httpClient.PostAsync(UrlGraphQL, content);
-                var str = await response.Content.ReadAsStringAsync();
-                var data = Serialization.FromJson<EpicAddonsByNamespace>(str);
+                HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content);
+                string str = await response.Content.ReadAsStringAsync();
+                EpicAddonsByNamespace data = Serialization.FromJson<EpicAddonsByNamespace>(str);
                 return data;
             }
             catch (Exception ex)
@@ -538,17 +628,41 @@ namespace CommonPluginsStores.Epic
             }
         }
 
-        private async Task<EpicEntitledOfferItems> GetEntitledOfferItems(string productNameSpace, string offerId, string token)
+        private async Task<EpicEntitledOfferItems> GetEntitledOfferItems(string productNameSpace, string offerId)
         {
             try
             {
-                var query = new QueryEntitledOfferItems();
+                QueryEntitledOfferItems query = new QueryEntitledOfferItems();
                 query.variables.productNameSpace = productNameSpace;
                 query.variables.offerId = offerId;
-                var content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
-                string str = await Web.PostStringData(UrlGraphQL, token, content);
-                var data = Serialization.FromJson<EpicEntitledOfferItems>(str);
+                StringContent content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
+                string str = await Web.PostStringData(UrlGraphQL, AuthToken.Token, content);
+                EpicEntitledOfferItems data = Serialization.FromJson<EpicEntitledOfferItems>(str);
                 return data;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return null;
+            }
+        }
+
+        public async Task<string> QueryWishList(string query, dynamic variables)
+        {
+            try
+            {
+                HttpClient client = new HttpClient();
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + AuthToken.Token);
+
+                var queryObject = new
+                {
+                    query = query,
+                    variables = variables
+                };
+                StringContent content = new StringContent(Serialization.ToJson(queryObject), Encoding.UTF8, "application/json");
+                string str = await Web.PostStringData(UrlGraphQL, AuthToken.Token, content);
+
+                return str;
             }
             catch (Exception ex)
             {

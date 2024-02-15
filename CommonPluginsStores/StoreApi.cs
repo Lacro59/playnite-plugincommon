@@ -38,8 +38,8 @@ namespace CommonPluginsStores
 
     public abstract class StoreApi : ObservableObject
     {
-        internal static ILogger logger => LogManager.GetLogger();
-        internal static IResourceProvider resources => new ResourceProvider();
+        internal static ILogger Logger => LogManager.GetLogger();
+        internal static IResourceProvider ResourceProvider => new ResourceProvider();
 
 
         protected static IWebView _WebViewOffscreen;
@@ -103,7 +103,6 @@ namespace CommonPluginsStores
 
             set => SetValue(ref _CurrentGamesInfos, value);
         }
-
 
         protected ObservableCollection<GameDlcOwned> _CurrentGamesDlcsOwned;
         public ObservableCollection<GameDlcOwned> CurrentGamesDlcsOwned
@@ -220,7 +219,7 @@ namespace CommonPluginsStores
                 }
             }
 
-            logger.Info(InfoMessage);
+            Logger.Info(InfoMessage);
             List<HttpCookie> httpCookies = GetWebCookies();
             if (httpCookies?.Count > 0)
             {
@@ -350,6 +349,16 @@ namespace CommonPluginsStores
         {
             return null;
         }
+
+        public virtual ObservableCollection<AccountWishlist> GetWishlist(AccountInfos accountInfos)
+        {
+            return null;
+        }
+
+        public virtual bool RemoveWishlist(string Id)
+        {
+            return false;
+        }
         #endregion
 
 
@@ -388,11 +397,11 @@ namespace CommonPluginsStores
                     {
                         LocalDateTimeConverter localDateTimeConverter = new LocalDateTimeConverter();
                         string formatedDateLastWrite = localDateTimeConverter.Convert(DateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
-                        logger.Warn($"Use saved UserData - {formatedDateLastWrite}");
+                        Logger.Warn($"Use saved UserData - {formatedDateLastWrite}");
                         API.Instance.Notifications.Add(new NotificationMessage(
                             $"{PluginName}-{ClientName}-LoadGamesDlcsOwned",
                             $"{PluginName}" + Environment.NewLine
-                                + string.Format(resources.GetString("LOCCommonNotificationOldData"), ClientName, formatedDateLastWrite),
+                                + string.Format(ResourceProvider.GetString("LOCCommonNotificationOldData"), ClientName, formatedDateLastWrite),
                             NotificationType.Info,
                             () =>
                             {

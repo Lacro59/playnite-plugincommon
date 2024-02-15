@@ -297,9 +297,9 @@ namespace CommonPluginsShared
         /// <returns></returns>
         public static async Task<string> DownloadStringData(string url)
         {
-            using (var client = new HttpClient())
+            using (HttpClient client = new HttpClient())
             {
-                var request = new HttpRequestMessage()
+                HttpRequestMessage request = new HttpRequestMessage()
                 {
                     RequestUri = new Uri(url),
                     Method = HttpMethod.Get
@@ -719,13 +719,15 @@ namespace CommonPluginsShared
             {
                 CookieContainer cookieContainer = new CookieContainer();
 
-                foreach (var cookie in Cookies)
+                foreach (HttpCookie cookie in Cookies)
                 {
-                    Cookie c = new Cookie();
-                    c.Name = cookie.Name;
-                    c.Value = Tools.FixCookieValue(cookie.Value);
-                    c.Domain = cookie.Domain;
-                    c.Path = cookie.Path;
+                    Cookie c = new Cookie
+                    {
+                        Name = cookie.Name,
+                        Value = Tools.FixCookieValue(cookie.Value),
+                        Domain = cookie.Domain,
+                        Path = cookie.Path
+                    };
 
                     try
                     {
@@ -782,13 +784,15 @@ namespace CommonPluginsShared
             {
                 CookieContainer cookieContainer = new CookieContainer();
 
-                foreach (var cookie in Cookies)
+                foreach (HttpCookie cookie in Cookies)
                 {
-                    Cookie c = new Cookie();
-                    c.Name = cookie.Name;
-                    c.Value = Tools.FixCookieValue(cookie.Value);
-                    c.Domain = cookie.Domain;
-                    c.Path = cookie.Path;
+                    Cookie c = new Cookie
+                    {
+                        Name = cookie.Name,
+                        Value = Tools.FixCookieValue(cookie.Value),
+                        Domain = cookie.Domain,
+                        Path = cookie.Path
+                    };
 
                     try
                     {

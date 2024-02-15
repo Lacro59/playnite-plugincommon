@@ -7,13 +7,6 @@ using System.Text;
 
 namespace CommonPluginsStores.Models
 {
-    public class BasicAccountGameInfos
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string Link { get; set; }
-    }
-
     public class AccountGameInfos : BasicAccountGameInfos
     {
         public bool IsCommun { get; set; }

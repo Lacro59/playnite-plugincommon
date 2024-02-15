@@ -19,6 +19,7 @@ namespace CommonPluginsStores.Models
         public string Name { get; set; }
         public string Link { get; set; }
         public string Description { get; set; }
+        public DateTime? Released { get; set; }
 
         public string Image { get; set; }
         [DontSerialize]

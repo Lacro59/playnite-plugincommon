@@ -15,6 +15,8 @@ namespace CommonPluginsStores.Epic.Models
     {
         public string type { get; set; }
         public string url { get; set; }
+        public int? width { get; set; }
+        public int? height { get; set; }
     }
 
     public class Seller

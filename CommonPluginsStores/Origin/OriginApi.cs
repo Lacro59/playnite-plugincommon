@@ -330,7 +330,7 @@ namespace CommonPluginsStores.Origin
 
                 if (originAchievements?["achievements"] == null)
                 {
-                    logger.Warn($"No achievements data for {Id}");
+                    Logger.Warn($"No achievements data for {Id}");
                     return null;
                 }
 
@@ -668,7 +668,7 @@ namespace CommonPluginsStores.Origin
                 }
                 else
                 {
-                    logger.Warn($"appsListResponse is empty");
+                    Logger.Warn($"appsListResponse is empty");
                 }
             }
             catch (Exception ex)
