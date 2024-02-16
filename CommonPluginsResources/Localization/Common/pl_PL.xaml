@@ -42,7 +42,7 @@
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: użytkownik nie jest uwierzytelniony</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: Brak klucza API</sys:String>
-    <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Bad configuration</sys:String>
+    <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Błędna konfiguracja</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Ignorowane elementy</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">Wprowadź element do zignorowania</sys:String>
