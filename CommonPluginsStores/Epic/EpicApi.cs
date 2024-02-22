@@ -361,14 +361,15 @@ namespace CommonPluginsStores.Epic
         {
             if (accountInfos != null)
             {
-                string query = "query wishlistQuery { Wishlist { wishlistItems { elements { id order created offerId updated namespace offer {id title offerType effectiveDate expiryDate status isCodeRedemptionOnly keyImages { type url width height }catalogNs { mappings(pageType: \"productHome\") { pageSlug pageType } } offerMappings { pageSlug pageType } } } } } }";
-                dynamic variables = new { };
-                string response = QueryWishList(query, variables).GetAwaiter().GetResult();
-
-                if (!response.IsNullOrEmpty() && Serialization.TryFromJson(response, out EpicWishlistData epicWishlistData))
+                try
                 {
-                    try
+                    string query = "query wishlistQuery { Wishlist { wishlistItems { elements { id order created offerId updated namespace offer {id title offerType effectiveDate expiryDate status isCodeRedemptionOnly keyImages { type url width height }catalogNs { mappings(pageType: \"productHome\") { pageSlug pageType } } offerMappings { pageSlug pageType } } } } } }";
+                    dynamic variables = new { };
+                    string response = QueryWishList(query, variables).GetAwaiter().GetResult();
+
+                    if (!response.IsNullOrEmpty() && Serialization.TryFromJson(response, out EpicWishlistData epicWishlistData))
                     {
+
                         if (epicWishlistData?.data?.Wishlist?.wishlistItems?.elements != null)
                         {
                             ObservableCollection<AccountWishlist> data = new ObservableCollection<AccountWishlist>();
@@ -403,17 +404,18 @@ namespace CommonPluginsStores.Epic
                                 }
                                 catch (Exception ex)
                                 {
-                                    Common.LogError(ex, true, $"Error in parse Epic wishlist - {Name}");
+                                    Common.LogError(ex, true, $"Error in parse {ClientName} wishlist - {Name}");
                                 }
                             }
 
                             return data;
                         }
+
                     }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, false, "Error in parse Epic wishlist", true, PluginName);
-                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Error in parse {ClientName} wishlist", true, PluginName);
                 }
             }
 
@@ -441,7 +443,7 @@ namespace CommonPluginsStores.Epic
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false, $"Error remove {Id} in Epic wishlist", true, PluginName);
+                    Common.LogError(ex, false, $"Error remove {Id} in {ClientName} wishlist", true, PluginName);
                 }
             }
 

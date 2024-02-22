@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using CommonPluginsStores.Steam;
 
 namespace CommonPluginsControls.Stores.Steam
@@ -82,7 +70,7 @@ namespace CommonPluginsControls.Stores.Steam
         {
             if (sender is PanelView obj)
             {
-                obj.panelViewModel.SteamApi = ((SteamApi)e.NewValue);
+                obj.panelViewModel.SteamApi = (SteamApi)e.NewValue;
             }
         }
         #endregion
@@ -91,7 +79,7 @@ namespace CommonPluginsControls.Stores.Steam
         {
             InitializeComponent();
 
-            this.DataContext = panelViewModel;
+            DataContext = panelViewModel;
         }
     }
 
@@ -137,15 +125,13 @@ namespace CommonPluginsControls.Stores.Steam
             // when the BindPassword attached property is set on a PasswordBox,
             // start listening to its PasswordChanged event
 
-            PasswordBox box = dp as PasswordBox;
-
-            if (box == null)
+            if (!(dp is PasswordBox box))
             {
                 return;
             }
 
-            bool wasBound = (bool)(e.OldValue);
-            bool needToBind = (bool)(e.NewValue);
+            bool wasBound = (bool)e.OldValue;
+            bool needToBind = (bool)e.NewValue;
 
             if (wasBound)
             {

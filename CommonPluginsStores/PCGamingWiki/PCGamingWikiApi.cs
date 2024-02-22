@@ -47,7 +47,7 @@ namespace CommonPluginsStores.PCGamingWiki
             {
                 url = string.Format(UrlWithSteamId, SteamId);
 
-                Thread.Sleep(1000);
+                Thread.Sleep(500);
                 WebResponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
                 if (!WebResponse.ToLower().Contains("search results"))
                 {
@@ -78,7 +78,7 @@ namespace CommonPluginsStores.PCGamingWiki
 
                 if (!url.IsNullOrEmpty())
                 {
-                    Thread.Sleep(1000);
+                    Thread.Sleep(500);
                     WebResponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
                     if (!WebResponse.ToLower().Contains("search results"))
                     {
@@ -123,7 +123,7 @@ namespace CommonPluginsStores.PCGamingWiki
 
             // old method
             url = UrlPCGamingWikiSearch + WebUtility.UrlEncode(Name);
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
             WebResponse = Web.DownloadStringData(url).GetAwaiter().GetResult(); 
             if (WebResponse.ToLower().Contains("database query error has occurred"))
             {
@@ -147,7 +147,7 @@ namespace CommonPluginsStores.PCGamingWiki
 
 
             url = UrlPCGamingWikiSearch + WebUtility.UrlEncode(game.Name);
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
             WebResponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
             if (WebResponse.ToLower().Contains("database query error has occurred"))
             {

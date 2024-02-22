@@ -10,8 +10,10 @@ using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using static CommonPluginsShared.PlayniteTools;
 
@@ -31,23 +33,23 @@ namespace CommonPluginsStores.Origin
         private static string UrlDataCurrency       => @"https://data3.origin.com/defaults/web-defaults/localization/currency.json";
         #endregion
 
-
         #region Url API
-        private const string UrlApi1 = @"https://api1.origin.com";
-        private const string UrlApi2 = @"https://api2.origin.com";
-        private const string UrlApi3 = @"https://api3.origin.com";
+        private static string UrlApi1 => @"https://api1.origin.com";
+        private static string UrlApi2 => @"https://api2.origin.com";
+        private static string UrlApi3 => @"https://api3.origin.com";
 
-        private const string UrlApi1EncodePair = UrlApi1 + @"/gifting/idobfuscate/users/{0}/encodePair";
-        private const string UrlApi1Avatar = UrlApi1 + @"/avatar/user/{0}/avatars?size=2";
-        private const string UrlApi1Price = UrlApi1 + @"/supercarp/rating/offers?country={0}&locale={1}&pid={2}&currency={3}&offerIds={4}";
+        private static string UrlApi1EncodePair => UrlApi1 + @"/gifting/idobfuscate/users/{0}/encodePair";
+        private static string UrlApi1Avatar => UrlApi1 + @"/avatar/user/{0}/avatars?size=2";
+        private static string UrlApi1Price => UrlApi1 + @"/supercarp/rating/offers?country={0}&locale={1}&pid={2}&currency={3}&offerIds={4}";
 
-        private const string UrlApi2UserInfos = UrlApi2 + @"/atom/users?userIds={0}"; 
-        private const string UrlApi2GameInfo = UrlApi2 + @"/ecommerce2/public/supercat/{0}/{1}?country={2}";
+        private static string UrlApi2UserInfos => UrlApi2 + @"/atom/users?userIds={0}"; 
+        private static string UrlApi2GameInfo => UrlApi2 + @"/ecommerce2/public/supercat/{0}/{1}?country={2}";
+        private static string UrlApi2Wishlist => UrlApi2 + @"/gifting/users/{0}/wishlist";
+        private static string UrlApi2WishlistDelete => UrlApi2 + @"/gifting/users/{0}/wishlist?offerId={1}";
 
-        private const string UrlApi3UserGames = UrlApi3 + @"/atom/users/{0}/other/{1}/games";
-        private const string UrlApi3AppsList = UrlApi3 + @"/supercat/{0}/{1}/supercat-PCWIN_MAC-{0}-{1}.json.gz";
+        private static string UrlApi3UserGames => UrlApi3 + @"/atom/users/{0}/other/{1}/games";
+        private static string UrlApi3AppsList => UrlApi3 + @"/supercat/{0}/{1}/supercat-PCWIN_MAC-{0}-{1}.json.gz";
         #endregion
-
 
         protected static OriginAccountClient _OriginAPI;
         internal static OriginAccountClient OriginAPI
@@ -96,7 +98,6 @@ namespace CommonPluginsStores.Origin
             set => _AppsList = value;
         }
 
-
         #region Paths
         private readonly string AppsListPath;
         #endregion
@@ -106,7 +107,6 @@ namespace CommonPluginsStores.Origin
         {
             AppsListPath = Path.Combine(PathStoresData, "Origin_AppsList.json");
         }
-
 
         #region Configuration
         protected override bool GetIsUserLoggedIn()
@@ -146,7 +146,6 @@ namespace CommonPluginsStores.Origin
             LocalCurrency = currency;
         }
         #endregion
-
 
         #region Current user
         protected override AccountInfos GetCurrentAccountInfos()
@@ -244,7 +243,6 @@ namespace CommonPluginsStores.Origin
             return null;
         }
         #endregion
-
 
         #region User details
         public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
@@ -370,8 +368,91 @@ namespace CommonPluginsStores.Origin
                 Url = $"{UrlBase}/{LangUrl}/game-library/ogd/{Id}/achievements"
             };
         }
-        #endregion
+        
+        public override ObservableCollection<AccountWishlist> GetWishlist(AccountInfos accountInfos)
+        {
+            if (accountInfos != null)
+            {
+                try
+                {
+                    ObservableCollection<AccountWishlist> data = new ObservableCollection<AccountWishlist>();
 
+                    // Get informations from Origin plugin.
+                    string accessToken = OriginAPI.GetAccessToken().access_token;
+                    long userId = OriginAPI.GetAccountInfo(OriginAPI.GetAccessToken()).pid.pidId;
+
+                    using (WebClient webClient = new WebClient { Encoding = Encoding.UTF8 })
+                    {
+                        webClient.Headers.Add("authToken", accessToken);
+                        webClient.Headers.Add("accept", "application/vnd.origin.v3+json; x-cache/force-write");
+
+                        string response = webClient.DownloadString(string.Format(UrlApi2Wishlist, userId));
+                        Wishlists WishlistData = Serialization.FromJson<Wishlists>(response);
+
+                        foreach (Wishlist item in WishlistData.wishlist)
+                        {
+                            string offerId = item.offerId;
+                            GameInfos gameInfos = GetGameInfos(offerId, null);
+
+                            DateTime? Added = null;
+                            if (int.TryParse(item.addedAt.ToString().Substring(0, 10), out int int_addedAt))
+                            {
+                                Added = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(int_addedAt).ToUniversalTime();
+                            }
+
+                            if (gameInfos != null)
+                            {
+                                data.Add(new AccountWishlist
+                                {
+                                    Id = gameInfos.Id,
+                                    Name = gameInfos.Name,
+                                    Link = gameInfos.Link,
+                                    Released = gameInfos.Released,
+                                    Added = Added,
+                                    Image = gameInfos.Image
+                                });
+                            }
+                        }
+                    }
+
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Error in {ClientName} wishlist", true, PluginName);
+                }
+            }
+
+            return null;
+        }
+
+        public override bool RemoveWishlist(string Id)
+        {
+            if (IsUserLoggedIn)
+            {
+                try
+                {
+                    string accessToken = OriginAPI.GetAccessToken().access_token;
+                    long userId = OriginAPI.GetAccountInfo(OriginAPI.GetAccessToken()).pid.pidId;
+
+                    using (WebClient webClient = new WebClient { Encoding = Encoding.UTF8 })
+                    {
+                        webClient.Headers.Add("authToken", accessToken);
+                        webClient.Headers.Add("accept", "application/vnd.origin.v3+json; x-cache/force-write");
+
+                        string stringData = Encoding.UTF8.GetString(webClient.UploadValues(string.Format(UrlApi2WishlistDelete, userId, Id), "DELETE", new NameValueCollection()));
+                        return stringData.Contains("\"ok\"");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Error remove {Id} in {ClientName} wishlist", true, PluginName);
+                }
+            }
+
+            return false;
+        }
+        #endregion
 
         #region Game
         public override GameInfos GetGameInfos(string Id, AccountInfos accountInfos)
@@ -504,7 +585,6 @@ namespace CommonPluginsStores.Origin
         }
         #endregion
 
-
         #region Games owned
         internal override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
         {
@@ -532,7 +612,6 @@ namespace CommonPluginsStores.Origin
             }
         }
         #endregion
-
 
         #region Origin
         /// <summary>

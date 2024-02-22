@@ -103,6 +103,9 @@
     <Compile Include="LiveChartsCommon\CustomerToolTipForTime.xaml.cs">
       <DependentUpon>CustomerToolTipForTime.xaml</DependentUpon>
     </Compile>
+    <Compile Include="PlayniteControls\DdItemListSelectionBox.xaml.cs">
+      <DependentUpon>DdItemListSelectionBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PlayniteControls\NullableIntBox.xaml.cs">
       <DependentUpon>NullableIntBox.xaml</DependentUpon>
     </Compile>
@@ -183,6 +186,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="LiveChartsCommon\CustomerToolTipForTime.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="PlayniteControls\DdItemListSelectionBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

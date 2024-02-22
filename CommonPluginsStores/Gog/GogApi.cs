@@ -431,35 +431,42 @@ namespace CommonPluginsStores.Gog
                 }
 
                 // Without Api
-                WebViewOffscreen.NavigateAndWait(string.Format(UrlWishlist, accountInfos.Pseudo));
-                response = WebViewOffscreen.GetPageSource();
-
-                // Get game information for wishlist
-                if (!response.IsNullOrEmpty())
+                try
                 {
-                    HtmlParser parser = new HtmlParser();
-                    IHtmlDocument HtmlRequirement = parser.Parse(response);
+                    WebViewOffscreen.NavigateAndWait(string.Format(UrlWishlist, accountInfos.Pseudo));
+                    response = WebViewOffscreen.GetPageSource();
 
-                    foreach (var el in HtmlRequirement.QuerySelectorAll(".product-row-wrapper .product-state-holder"))
+                    // Get game information for wishlist
+                    if (!response.IsNullOrEmpty())
                     {
-                        string StoreId = el.GetAttribute("gog-product");
-                        GameInfos gameInfos = GetGameInfos(StoreId, null);
-                        if (gameInfos != null)
+                        HtmlParser parser = new HtmlParser();
+                        IHtmlDocument HtmlRequirement = parser.Parse(response);
+
+                        foreach (var el in HtmlRequirement.QuerySelectorAll(".product-row-wrapper .product-state-holder"))
                         {
-                            data.Add(new AccountWishlist
+                            string StoreId = el.GetAttribute("gog-product");
+                            GameInfos gameInfos = GetGameInfos(StoreId, null);
+                            if (gameInfos != null)
                             {
-                                Id = gameInfos.Id,
-                                Name = gameInfos.Name,
-                                Link = gameInfos.Link,
-                                Released = gameInfos.Released,
-                                Added = null,
-                                Image = gameInfos.Image
-                            });
+                                data.Add(new AccountWishlist
+                                {
+                                    Id = gameInfos.Id,
+                                    Name = gameInfos.Name,
+                                    Link = gameInfos.Link,
+                                    Released = gameInfos.Released,
+                                    Added = null,
+                                    Image = gameInfos.Image
+                                });
+                            }
                         }
                     }
-                }
 
-                return data;
+                    return data;
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Error in {ClientName} wishlist", true, PluginName);
+                }
             }
 
             return null;
@@ -476,7 +483,7 @@ namespace CommonPluginsStores.Gog
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false, $"Error remove {Id} in GOG wishlist", true, PluginName);
+                    Common.LogError(ex, false, $"Error remove {Id} in {ClientName} wishlist", true, PluginName);
                 }
             }
 
@@ -492,7 +499,7 @@ namespace CommonPluginsStores.Gog
             {
                 string Url = string.Format(UrlApiGameInfo, Id, CodeLang.GetGogLang(Local).ToLower());
                 string WebData = Web.DownloadStringData(Url).GetAwaiter().GetResult();
-                Serialization.TryFromJson(WebData, out Models.ProductApiDetail productApiDetail);
+                _ = Serialization.TryFromJson(WebData, out Models.ProductApiDetail productApiDetail);
 
                 GameInfos gameInfos = new GameInfos
                 {

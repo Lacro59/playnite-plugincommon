@@ -47,6 +47,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\ProductInfosResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\StoreToken.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\AccountInfos.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\Wishlists.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Origin\OriginApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\UsersInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PCGamingWiki\PCGamingWikiApi.cs" />
@@ -63,5 +64,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Steam\SteamApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StoreApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UbisoftAPI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Xbox\Models\Wishlists.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Xbox\XboxApi.cs" />
   </ItemGroup>
 </Project>

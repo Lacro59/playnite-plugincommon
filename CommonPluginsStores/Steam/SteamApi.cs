@@ -591,7 +591,7 @@ namespace CommonPluginsStores.Steam
                     }
                     catch (Exception ex)
                     {
-                        Common.LogError(ex, false, $"Error download Steam wishlist for page {iPage}", true, PluginName);
+                        Common.LogError(ex, false, $"Error download {ClientName} wishlist for page {iPage}", true, PluginName);
                         return null;
                     }
 
@@ -609,7 +609,7 @@ namespace CommonPluginsStores.Steam
                     {
                         if (response == "[]")
                         {
-                            Logger.Info($"No result after page {iPage} for Steam wishlist");
+                            Logger.Info($"No result after page {iPage} for {ClientName} wishlist");
                             break;
                         }
 
@@ -659,7 +659,7 @@ namespace CommonPluginsStores.Steam
                                 }
                                 catch (Exception ex)
                                 {
-                                    Common.LogError(ex, true, $"Error in parse Steam wishlist - {Name}");
+                                    Common.LogError(ex, true, $"Error in parse {ClientName} wishlist - {Name}");
                                 }
                             }
 
@@ -667,7 +667,7 @@ namespace CommonPluginsStores.Steam
                         }
                         catch (Exception ex)
                         {
-                            Common.LogError(ex, false, "Error in parse Steam wishlist", true, PluginName);
+                            Common.LogError(ex, false, $"Error in parse {ClientName} wishlist", true, PluginName);
                         }
                     }
                     else
@@ -712,7 +712,7 @@ namespace CommonPluginsStores.Steam
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false, $"Error remove {id} in Steam wishlist", true, PluginName);
+                    Common.LogError(ex, false, $"Error remove {id} in {ClientName} wishlist", true, PluginName);
                 }
             }
 
@@ -866,7 +866,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, true, PluginName ,"Failed to load Steam API keys.");
+                Common.LogError(ex, false, true, PluginName , $"Failed to load {ClientName} API keys.");
             }
 
             return key;
@@ -959,7 +959,7 @@ namespace CommonPluginsStores.Steam
 
             if (found != null)
             {
-                Common.LogDebug(true, $"Found Steam data for {AppId} - {Serialization.ToJson(found)}");
+                Common.LogDebug(true, $"Found {ClientName} data for {AppId} - {Serialization.ToJson(found)}");
                 return found.name;
             }
 
@@ -1045,7 +1045,7 @@ namespace CommonPluginsStores.Steam
                 Common.LogError(ex, false, true, PluginName);
             }
 
-            Logger.Warn("No Steam installation found");
+            Logger.Warn($"No {ClientName} installation found");
             return string.Empty;
         }
 
@@ -1062,7 +1062,7 @@ namespace CommonPluginsStores.Steam
                 return PathScreeshotsFolder;
             }
 
-            Logger.Warn("No Steam screenshots folder found");
+            Logger.Warn($"No {ClientName} screenshots folder found");
             return string.Empty;
         }
 

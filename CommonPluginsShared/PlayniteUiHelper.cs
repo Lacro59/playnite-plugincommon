@@ -86,10 +86,10 @@ namespace CommonPluginsShared
                 windowExtension.SizeToContent = SizeToContent.WidthAndHeight;
             }
 
-            if (windowExtension.ResizeMode == ResizeMode.NoResize)
-            {
-                windowExtension.SizeToContent = SizeToContent.WidthAndHeight;
-            }
+            //if (windowExtension.ResizeMode == ResizeMode.NoResize)
+            //{
+            //    windowExtension.SizeToContent = SizeToContent.WidthAndHeight;
+            //}
 
             // Add escape event
             windowExtension.PreviewKeyDown += new KeyEventHandler(HandleEsc);

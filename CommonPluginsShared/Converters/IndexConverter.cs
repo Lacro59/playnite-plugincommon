@@ -14,6 +14,10 @@ namespace CommonPluginsShared.Converters
                 if (value is ListBoxItem item)
                 {
                     ListBox listView = ItemsControl.ItemsControlFromItemContainer(item) as ListBox;
+                    if (listView == null)
+                    {
+                        return "-1";
+                    }
                     int index = listView.ItemContainerGenerator.IndexFromContainer(item);
                     return index.ToString();
                 }
