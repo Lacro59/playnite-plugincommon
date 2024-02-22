@@ -574,6 +574,20 @@ namespace CommonPluginsShared
 
             return newName.ToLowerInvariant();
         }
+
+        public static string RemoveGameEdition(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return string.Empty;
+            }
+
+            string newName = name;
+            newName = newName.Replace(" (CD)", string.Empty);
+            newName = EditionInGameName.Replace(newName, string.Empty);
+
+            return newName.ToLowerInvariant();
+        }
         #endregion
 
 

@@ -369,7 +369,6 @@ namespace CommonPluginsStores.Epic
 
                     if (!response.IsNullOrEmpty() && Serialization.TryFromJson(response, out EpicWishlistData epicWishlistData))
                     {
-
                         if (epicWishlistData?.data?.Wishlist?.wishlistItems?.elements != null)
                         {
                             ObservableCollection<AccountWishlist> data = new ObservableCollection<AccountWishlist>();
