@@ -11,24 +11,29 @@ namespace CommonPluginsShared
 {
     public class LocalSystem
     {
-        private static readonly ILogger logger = LogManager.GetLogger();
+        private static ILogger Logger => LogManager.GetLogger();
 
-        private SystemConfiguration systemConfiguration;
-        private int IdConfiguration = -1;
-        private List<SystemConfiguration> Configurations = new List<SystemConfiguration>();
+        private SystemConfiguration SystemConfiguration { get; set; }
+        private int IdConfiguration { get; set; } = -1;
+        private List<SystemConfiguration> Configurations { get; set; } = new List<SystemConfiguration>();
 
 
         public LocalSystem(string ConfigurationsPath, bool WithDiskInfos = true)
         {
-            systemConfiguration = GetPcInfo(WithDiskInfos);
+            SystemConfiguration = GetPcInfo(WithDiskInfos);
 
             if (File.Exists(ConfigurationsPath))
             {
-                if (!Serialization.TryFromJsonFile(ConfigurationsPath, out Configurations))
+                if (!Serialization.TryFromJsonFile(ConfigurationsPath, out List<SystemConfiguration> Conf))
                 {
-                    logger.Warn($"Failed to load {ConfigurationsPath}");
+                    Logger.Warn($"Failed to load {ConfigurationsPath}");
                     Configurations = new List<SystemConfiguration>();
                 }
+                else
+                {
+                    Configurations = Conf;
+                }
+
                 if (Configurations == null)
                 {
                     Configurations = new List<SystemConfiguration>();
@@ -36,15 +41,15 @@ namespace CommonPluginsShared
             }
 
             IdConfiguration = Configurations?.FindIndex(x => 
-                    x.Cpu == systemConfiguration.Cpu && 
-                    x.Name == systemConfiguration.Name && 
-                    x.GpuName == systemConfiguration.GpuName && 
-                    x.RamUsage == systemConfiguration.RamUsage
+                    x.Cpu == SystemConfiguration.Cpu && 
+                    x.Name == SystemConfiguration.Name && 
+                    x.GpuName == SystemConfiguration.GpuName && 
+                    x.RamUsage == SystemConfiguration.RamUsage
             ) ?? -1;
 
             if (IdConfiguration == -1)
             {
-                Configurations.Add(systemConfiguration);
+                Configurations.Add(SystemConfiguration);
                 FileSystem.WriteStringToFileSafe(ConfigurationsPath, Serialization.ToJson(Configurations));
 
                 IdConfiguration = Configurations.Count - 1;
@@ -52,8 +57,8 @@ namespace CommonPluginsShared
             // TODO Temp
             else
             {
-                Configurations[IdConfiguration].CurrentHorizontalResolution = systemConfiguration.CurrentHorizontalResolution;
-                Configurations[IdConfiguration].CurrentVerticalResolution = systemConfiguration.CurrentVerticalResolution;
+                Configurations[IdConfiguration].CurrentHorizontalResolution = SystemConfiguration.CurrentHorizontalResolution;
+                Configurations[IdConfiguration].CurrentVerticalResolution = SystemConfiguration.CurrentVerticalResolution;
                 FileSystem.WriteStringToFileSafe(ConfigurationsPath, Serialization.ToJson(Configurations));
             }
         }
@@ -61,23 +66,19 @@ namespace CommonPluginsShared
 
         private bool CallIsNvidia(string GpuName)
         {
-            return GpuName.IsNullOrEmpty()
-                ? false
-                : GpuName.ToLower().IndexOf("nvidia") > -1 || GpuName.ToLower().IndexOf("geforce") > -1 || GpuName.ToLower().IndexOf("gtx") > -1 || GpuName.ToLower().IndexOf("rtx") > -1;
+            return !GpuName.IsNullOrEmpty() && (GpuName.ToLower().IndexOf("nvidia") > -1 || GpuName.ToLower().IndexOf("geforce") > -1 || GpuName.ToLower().IndexOf("gtx") > -1 || GpuName.ToLower().IndexOf("rtx") > -1);
         }
         private bool CallIsAmd(string GpuName)
         {
-            return GpuName.IsNullOrEmpty()
-                ? false
-                : GpuName.ToLower().IndexOf("amd") > -1 || GpuName.ToLower().IndexOf("radeon") > -1 || GpuName.ToLower().IndexOf("ati ") > -1 || GpuName.ToLower().IndexOf("rx ") > -1;
+            return !GpuName.IsNullOrEmpty() && (GpuName.ToLower().IndexOf("amd") > -1 || GpuName.ToLower().IndexOf("radeon") > -1 || GpuName.ToLower().IndexOf("ati ") > -1 || GpuName.ToLower().IndexOf("rx ") > -1);
         }
         private bool CallIsIntel(string GpuName)
         {
-            return GpuName.IsNullOrEmpty() ? false : GpuName.ToLower().IndexOf("intel") > -1;
+            return !GpuName.IsNullOrEmpty() && GpuName.ToLower().IndexOf("intel") > -1;
         }
         private bool IsNotIntegrated(string GpuName)
         {
-            return GpuName.IsNullOrEmpty() ? false : GpuName.ToLower().IndexOf("graphics") == -1;
+            return !GpuName.IsNullOrEmpty() && GpuName.ToLower().IndexOf("graphics") == -1;
         }
 
 
@@ -87,7 +88,7 @@ namespace CommonPluginsShared
         /// <returns></returns>
         public SystemConfiguration GetSystemConfiguration()
         {
-            return systemConfiguration;
+            return SystemConfiguration;
         }
 
         /// <summary>
@@ -125,7 +126,6 @@ namespace CommonPluginsShared
                 }
                 #endregion
 
-
                 #region System informations
                 string Os = string.Empty;
                 string Cpu = string.Empty;
@@ -135,7 +135,6 @@ namespace CommonPluginsShared
                 uint CurrentHorizontalResolution = 0;
                 uint CurrentVerticalResolution = 0;
                 long Ram = 0;
-
 
                 // OS
                 try
@@ -231,7 +230,6 @@ namespace CommonPluginsShared
                 }
                 #endregion
 
-
                 systemConfiguration.Name = Name?.Trim();
                 systemConfiguration.Os = Os?.Trim();
                 systemConfiguration.Cpu = Cpu?.Trim();
@@ -268,7 +266,7 @@ namespace CommonPluginsShared
                     }
                     catch (Exception ex)
                     {
-                        logger.Warn($"Error on VolumeLabel - {ex.Message.Trim()}");
+                        Logger.Warn($"Error on VolumeLabel - {ex.Message.Trim()}");
                     }
 
                     string Name = string.Empty;
@@ -278,7 +276,7 @@ namespace CommonPluginsShared
                     }
                     catch (Exception ex)
                     {
-                        logger.Warn($"Error on Name - {ex.Message.Trim()}");
+                        Logger.Warn($"Error on Name - {ex.Message.Trim()}");
                     }
 
                     long FreeSpace = 0;
@@ -288,7 +286,7 @@ namespace CommonPluginsShared
                     }
                     catch (Exception ex)
                     {
-                        logger.Warn($"Error on TotalFreeSpace - {ex.Message.Trim()}");
+                        Logger.Warn($"Error on TotalFreeSpace - {ex.Message.Trim()}");
                     }
 
                     string FreeSpaceUsage = string.Empty;
@@ -298,7 +296,7 @@ namespace CommonPluginsShared
                     }
                     catch (Exception ex)
                     {
-                        logger.Warn($"Error on FreeSpaceUsage - {ex.Message.Trim()}");
+                        Logger.Warn($"Error on FreeSpaceUsage - {ex.Message.Trim()}");
                     }
 
                     Disks.Add(new SystemDisk
