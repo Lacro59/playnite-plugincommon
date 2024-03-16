@@ -943,7 +943,11 @@ namespace CommonPluginsStores.Steam
                 Common.LogDebug(true, $"Found SteamAppId data for {Name} - {Serialization.ToJson(found)}");
                 return found.First();
             }
-
+            if (Name.Contains(": "))
+            {
+                Name = Name.Replace(": ", " - ");
+                return GetAppId(Name);
+            }
             return 0;
         }
 
