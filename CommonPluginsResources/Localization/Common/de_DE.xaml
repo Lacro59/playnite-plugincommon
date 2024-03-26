@@ -23,7 +23,7 @@
     <sys:String x:Key="LOCCommonTransferPluginData">Plugin Daten übertragen</sys:String>
     <sys:String x:Key="LOCCommonSelectTransferData">Die zu übertragenden Daten auswählen</sys:String>
     <sys:String x:Key="LOCCommonMergedOrErased">Zusammenführen anstatt löschen</sys:String>
-    <sys:String x:Key="LOCCommonErasedWarning">Achtung, die Daten am Ziel werden überschrieben!</sys:String>
+    <sys:String x:Key="LOCCommonErasedWarning">Sei vorsichtig, die Zieldaten werden überschrieben!</sys:String>
 
 
     <!-- Remove plugin data -->
@@ -38,11 +38,11 @@
     <sys:String x:Key="LOCCommonLoggedIn">Benutzer ist authentifiziert</sys:String>
     <sys:String x:Key="LOCCommonAccountName">Kontoname</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Authentifizierungsstatus wird überprüft …</sys:String>
-    <sys:String x:Key="LOCCommonPrivateChecking">Checking private status…</sys:String>
+    <sys:String x:Key="LOCCommonPrivateChecking">Überprüfung des Datenschutzstatus…</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: Benutzer ist nicht authentifiziert</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: Kein API Schlüssel</sys:String>
-    <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Bad configuration</sys:String>
+    <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Ungültige Konfiguration</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Ignorierte Einträge</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">Zum Ignorieren den Eintrag eingeben</sys:String>
