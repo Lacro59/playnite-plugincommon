@@ -87,7 +87,7 @@ namespace CommonPluginsShared.Controls
                 {
                     if (newSource is string str)
                     {
-                        var tmpImage = new ImageConverter().Convert(values, null, parameter, null);
+                        object tmpImage = new ImageConverter().Convert(values, null, parameter, null);
                         if (tmpImage is BitmapImage)
                         {
                             ((BitmapImage)tmpImage).Freeze();

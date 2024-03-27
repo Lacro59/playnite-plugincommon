@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
+using System.Windows.Resources;
 
 namespace CommonPluginsShared
 {
@@ -91,7 +92,7 @@ namespace CommonPluginsShared
                 }
             }
 
-            var resource = ResourceProvider.GetResource(resourceKey) as BitmapImage;
+            BitmapImage resource = ResourceProvider.GetResource(resourceKey) as BitmapImage;
             if (loadProperties?.MaxDecodePixelWidth > 0 && resource?.PixelWidth > loadProperties?.MaxDecodePixelWidth)
             {
                 resource = resource.GetClone(loadProperties);
@@ -99,7 +100,7 @@ namespace CommonPluginsShared
 
             if (cached && resource != null)
             {
-                Cache.TryAdd(resourceKey, resource, resource.GetSizeInMemory(),
+                _ = Cache.TryAdd(resourceKey, resource, resource.GetSizeInMemory(),
                     new Dictionary<string, object>
                     {
                         { btmpPropsFld, loadProperties }
@@ -143,24 +144,24 @@ namespace CommonPluginsShared
             {
                 try
                 {
-                    var imagePath = source;
+                    string imagePath = source;
                     if (source.StartsWith("resources:"))
                     {
                         imagePath = source.Replace("resources:", "pack://application:,,,");
                     }
 
-                    var streamInfo = Application.GetResourceStream(new Uri(imagePath));
-                    using (var stream = streamInfo.Stream)
+                    StreamResourceInfo streamInfo = Application.GetResourceStream(new Uri(imagePath));
+                    using (Stream stream = streamInfo.Stream)
                     {
-                        var imageData = BitmapExtensions.BitmapFromStream(stream, loadProperties);
+                        BitmapImage imageData = BitmapExtensions.BitmapFromStream(stream, loadProperties);
                         if (imageData != null)
                         {
                             if (cached)
                             {
-                                Cache.TryAdd(source, imageData, imageData.GetSizeInMemory(),
+                                _ = Cache.TryAdd(source, imageData, imageData.GetSizeInMemory(),
                                     new Dictionary<string, object>
                                     {
-                                    { btmpPropsFld, loadProperties }
+                                        { btmpPropsFld, loadProperties }
                                     });
                             }
 
@@ -179,7 +180,7 @@ namespace CommonPluginsShared
             {
                 try
                 {
-                    var cachedFile = HttpFileCachePlugin.GetWebFile(source);
+                    string cachedFile = HttpFileCachePlugin.GetWebFile(source);
                     if (string.IsNullOrEmpty(cachedFile))
                     {
                         cachedFile = HttpFileCache.GetWebFile(source);
