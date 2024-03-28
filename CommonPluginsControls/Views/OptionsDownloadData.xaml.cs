@@ -14,8 +14,6 @@ namespace CommonPluginsControls.Controls
     /// </summary>
     public partial class OptionsDownloadData : UserControl
     {
-        private static IResourceProvider RessourceProvider => new ResourceProvider();
-
         private List<Game> FilteredGames { get; set; }
 
 
@@ -26,7 +24,7 @@ namespace CommonPluginsControls.Controls
             if (WithoutMissing)
             {
                 PART_OnlyMissing.Visibility = Visibility.Collapsed;
-                PART_BtDownload.Content = RessourceProvider.GetString("LOCGameTagsTitle");
+                PART_BtDownload.Content = ResourceProvider.GetString("LOCGameTagsTitle");
             }
             else
             {

@@ -21,7 +21,6 @@ namespace CommonPluginsShared
     public class PlayniteTools
     {
         private static readonly ILogger logger = LogManager.GetLogger();
-        private static IResourceProvider resources = new ResourceProvider();
 
         private static List<Emulator> ListEmulators = null;
 
@@ -813,7 +812,7 @@ namespace CommonPluginsShared
 
         public static void CreateLogPackage(string PluginName)
         {
-            var response = API.Instance.Dialogs.ShowMessage(resources.GetString("LOCCommonCreateLog"), PluginName, System.Windows.MessageBoxButton.YesNo);
+            var response = API.Instance.Dialogs.ShowMessage(ResourceProvider.GetString("LOCCommonCreateLog"), PluginName, System.Windows.MessageBoxButton.YesNo);
 
             if (response == System.Windows.MessageBoxResult.Yes)
             {

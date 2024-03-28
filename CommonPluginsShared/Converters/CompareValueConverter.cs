@@ -16,9 +16,6 @@ namespace CommonPluginsShared.Converters
 {
     public class CompareValueConverter : IMultiValueConverter
     {
-        public static IResourceProvider resources = new ResourceProvider();
-
-
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             try
@@ -35,7 +32,7 @@ namespace CommonPluginsShared.Converters
                     {
                         if (ValueData > ValueControl)
                         {
-                            return resources.GetResource("TextBrush");
+                            return ResourceProvider.GetResource("TextBrush");
                         }
                         else
                         {
@@ -46,7 +43,7 @@ namespace CommonPluginsShared.Converters
                     {
                         if (ValueData < ValueControl)
                         {
-                            return resources.GetResource("TextBrush");
+                            return ResourceProvider.GetResource("TextBrush");
                         }
                         else
                         {
@@ -56,13 +53,13 @@ namespace CommonPluginsShared.Converters
                 }
                 else
                 {
-                    return resources.GetResource("TextBrush");
+                    return ResourceProvider.GetResource("TextBrush");
                 }
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, false);
-                return (Brushes)resources.GetResource("TextBrush");
+                return (Brushes)ResourceProvider.GetResource("TextBrush");
             }
         }
 

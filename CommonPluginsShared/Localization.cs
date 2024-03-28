@@ -11,7 +11,6 @@ namespace CommonPluginsShared
     public class PluginLocalization
     {
         private static ILogger logger = LogManager.GetLogger();
-        private static IResourceProvider resources = new ResourceProvider();
 
 
         /// <summary>
@@ -77,9 +76,9 @@ namespace CommonPluginsShared
             {
                 DateTime LastDate = default;
                 string FileName = "Common_" + Path.GetFileName(langFileCommon);
-                if (resources.GetResource(FileName) != null)
+                if (ResourceProvider.GetResource(FileName) != null)
                 {
-                    LastDate = (DateTime)resources.GetResource(FileName);
+                    LastDate = (DateTime)ResourceProvider.GetResource(FileName);
                 }
 
                 DateTime lastModified = File.GetLastWriteTime(langFileCommon);

@@ -15,7 +15,6 @@ namespace CommonPluginsShared
     public class Common
     {
         private static readonly ILogger logger = LogManager.GetLogger();
-        private static readonly IResourceProvider resources = new ResourceProvider();
 
 
         /// <summary>
@@ -44,9 +43,9 @@ namespace CommonPluginsShared
                     string LastFolderName = Path.GetFileName(Path.GetDirectoryName(CommonFile));
                     string RessourceName = LastFolderName + "_" + FileName;
 
-                    if (resources.GetResource(RessourceName) != null)
+                    if (ResourceProvider.GetResource(RessourceName) != null)
                     {
-                        LastDate = (DateTime)resources.GetResource(RessourceName);
+                        LastDate = (DateTime)ResourceProvider.GetResource(RessourceName);
                     }
 
                     DateTime lastModified = File.GetLastWriteTime(CommonFile);
@@ -95,9 +94,9 @@ namespace CommonPluginsShared
             if (File.Exists(FontFile))
             {
                 long fileSize = 0;
-                if (resources.GetResource("CommonFontSize") != null)
+                if (ResourceProvider.GetResource("CommonFontSize") != null)
                 {
-                    fileSize = (long)resources.GetResource("CommonFontSize");
+                    fileSize = (long)ResourceProvider.GetResource("CommonFontSize");
                 }
 
                 // Load only the newest

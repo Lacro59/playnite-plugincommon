@@ -25,7 +25,6 @@ namespace CommonPluginsShared.Collections
         where TItem : PluginDataBaseGameBase
     {
         protected static ILogger Logger => LogManager.GetLogger();
-        protected static IResourceProvider ResourceProvider => new ResourceProvider();
 
         public TSettings PluginSettings { get; set; }
 

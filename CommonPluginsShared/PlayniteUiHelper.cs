@@ -12,7 +12,6 @@ namespace CommonPluginsShared
     public class PlayniteUiHelper
     {
         public static ILogger Logger => LogManager.GetLogger();
-        public static IResourceProvider RessourceProvider => new ResourceProvider();
 
 
         /// <summary>
