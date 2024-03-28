@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -15,22 +14,19 @@ namespace CommonPluginsControls.Controls
     /// </summary>
     public partial class OptionsDownloadData : UserControl
     {
-        private static IResourceProvider resources = new ResourceProvider();
+        private static IResourceProvider RessourceProvider => new ResourceProvider();
 
-        private IPlayniteAPI _PlayniteApi { get; set; }
-        private List<Game> _FilteredGames { get; set; }
+        private List<Game> FilteredGames { get; set; }
 
 
-        public OptionsDownloadData(IPlayniteAPI PlayniteApi, bool WithoutMissing = false)
+        public OptionsDownloadData(bool WithoutMissing = false)
         {
-            _PlayniteApi = PlayniteApi;
-
             InitializeComponent();
 
             if (WithoutMissing)
             {
                 PART_OnlyMissing.Visibility = Visibility.Collapsed;
-                PART_BtDownload.Content = resources.GetString("LOCGameTagsTitle");
+                PART_BtDownload.Content = RessourceProvider.GetString("LOCGameTagsTitle");
             }
             else
             {
@@ -46,7 +42,7 @@ namespace CommonPluginsControls.Controls
 
         private void PART_BtDownload_Click(object sender, RoutedEventArgs e)
         {
-            _FilteredGames = _PlayniteApi.Database.Games.Where(x => x.Hidden == false).ToList();
+            FilteredGames = API.Instance.Database.Games.Where(x => x.Hidden == false).ToList();
 
             if ((bool)PART_AllGames.IsChecked)
             {
@@ -55,27 +51,27 @@ namespace CommonPluginsControls.Controls
 
             if ((bool)PART_GamesRecentlyPlayed.IsChecked)
             {
-                _FilteredGames = _FilteredGames.Where(x => x.LastActivity != null && (DateTime)x.LastActivity >= DateTime.Now.AddMonths(-1)).ToList();
+                FilteredGames = FilteredGames.Where(x => x.LastActivity != null && (DateTime)x.LastActivity >= DateTime.Now.AddMonths(-1)).ToList();
             }
 
             if ((bool)PART_GamesRecentlyAdded.IsChecked)
             {
-                _FilteredGames = _FilteredGames.Where(x => x.Added != null && (DateTime)x.Added >= DateTime.Now.AddMonths(-1)).ToList();
+                FilteredGames = FilteredGames.Where(x => x.Added != null && (DateTime)x.Added >= DateTime.Now.AddMonths(-1)).ToList();
             }
 
             if ((bool)PART_GamesInstalled.IsChecked)
             {
-                _FilteredGames = _FilteredGames.Where(x => x.IsInstalled).ToList();
+                FilteredGames = FilteredGames.Where(x => x.IsInstalled).ToList();
             }
 
             if ((bool)PART_GamesNotInstalled.IsChecked)
             {
-                _FilteredGames = _FilteredGames.Where(x => !x.IsInstalled).ToList();
+                FilteredGames = FilteredGames.Where(x => !x.IsInstalled).ToList();
             }
 
             if ((bool)PART_GamesFavorite.IsChecked)
             {
-                _FilteredGames = _FilteredGames.Where(x => x.Favorite).ToList();
+                FilteredGames = FilteredGames.Where(x => x.Favorite).ToList();
             }
 
             ((Window)this.Parent).Close();
@@ -84,8 +80,9 @@ namespace CommonPluginsControls.Controls
 
         public List<Game> GetFilteredGames()
         {
-            return _FilteredGames;
+            return FilteredGames;
         }
+
         public bool GetTagMissing()
         {
             return (bool)PART_TagMissing.IsChecked;

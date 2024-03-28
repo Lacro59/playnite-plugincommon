@@ -123,10 +123,9 @@ namespace CommonPluginsShared
         /// <summary>
         /// Load common event
         /// </summary>
-        /// <param name="PlayniteAPI"></param>
-        public static void SetEvent(IPlayniteAPI PlayniteAPI)
+        public static void SetEvent()
         {
-            if (PlayniteAPI.ApplicationInfo.Mode == ApplicationMode.Desktop)
+            if (API.Instance.ApplicationInfo.Mode == ApplicationMode.Desktop)
             {
                 EventManager.RegisterClassHandler(typeof(Window), Window.LoadedEvent, new RoutedEventHandler(WindowBase_LoadedEvent));
             }

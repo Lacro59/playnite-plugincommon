@@ -12,20 +12,18 @@ namespace CommonPluginsShared.PlayniteExtended
 {
     public abstract class PluginExtended<ISettings> : PlaynitePlugin<ISettings>
     {
-        public PluginExtended(IPlayniteAPI api) : base(api)
+        public PluginExtended(IPlayniteAPI playniteAPI) : base(playniteAPI)
         {
-
         }
     }
 
 
-    public abstract class PluginExtended<ISettings, TPluginDatabase> : PlaynitePlugin<ISettings>
-        where TPluginDatabase : IPluginDatabase
+    public abstract class PluginExtended<ISettings, TPluginDatabase> : PlaynitePlugin<ISettings> where TPluginDatabase : IPluginDatabase
     {
         public static TPluginDatabase PluginDatabase { get; set; }
 
 
-        public PluginExtended(IPlayniteAPI api) : base(api)
+        public PluginExtended(IPlayniteAPI playniteAPI) : base(playniteAPI)
         {
             TransfertOldDatabase();
             CleanOldDatabase();
@@ -40,16 +38,13 @@ namespace CommonPluginsShared.PlayniteExtended
         #region Transfert database directory
         private void TransfertOldDatabase()
         {
-            string OldDirectory = string.Empty;
-            string NewDirectory = string.Empty;
-
-            OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "Activity");
-            NewDirectory = Path.Combine(this.GetPluginUserDataPath(), "GameActivity");
+            string OldDirectory = Path.Combine(GetPluginUserDataPath(), "Activity");
+            string NewDirectory = Path.Combine(GetPluginUserDataPath(), "GameActivity");
             if (Directory.Exists(OldDirectory))
             {
                 if (Directory.Exists(NewDirectory))
                 {
-                    logger.Warn($"{NewDirectory} already exists");
+                    Logger.Warn($"{NewDirectory} already exists");
                 }
                 else
                 {
@@ -63,7 +58,7 @@ namespace CommonPluginsShared.PlayniteExtended
             {
                 if (Directory.Exists(NewDirectory))
                 {
-                    logger.Warn($"{NewDirectory} already exists");
+                    Logger.Warn($"{NewDirectory} already exists");
                 }
                 else
                 {
@@ -77,7 +72,7 @@ namespace CommonPluginsShared.PlayniteExtended
             {
                 if (Directory.Exists(NewDirectory))
                 {
-                    logger.Warn($"{NewDirectory} already exists");
+                    Logger.Warn($"{NewDirectory} already exists");
                 }
                 else
                 {
@@ -86,14 +81,13 @@ namespace CommonPluginsShared.PlayniteExtended
             }
         }
 
+        // TODO Temp; must be deleted
         private void CleanOldDatabase()
         {
-            string OldDirectory = string.Empty;
-
             try
             {
                 // Clean old database
-                OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "activity_old");
+                string OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "activity_old");
                 FileSystem.DeleteDirectory(OldDirectory);
 
                 OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "activityDetails_old");
@@ -102,10 +96,7 @@ namespace CommonPluginsShared.PlayniteExtended
                 OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "cache");
                 FileSystem.DeleteDirectory(OldDirectory);
             }
-            catch
-            {
-
-            }
+            catch { }
         }
         #endregion
     }
@@ -113,15 +104,15 @@ namespace CommonPluginsShared.PlayniteExtended
 
     public abstract class PlaynitePlugin<ISettings> : GenericPlugin
     {
-        internal static readonly ILogger logger = LogManager.GetLogger();
-        internal static IResourceProvider resources = new ResourceProvider();
+        internal static ILogger Logger => LogManager.GetLogger();
+        internal static IResourceProvider ResourceProvider => new ResourceProvider();
 
         public ISettings PluginSettings { get; set; }
 
         public string PluginFolder { get; set; }
 
 
-        protected PlaynitePlugin(IPlayniteAPI api) : base(api)
+        protected PlaynitePlugin(IPlayniteAPI playniteAPI) : base(playniteAPI)
         {
             Properties = new GenericPluginProperties { HasSettings = true };
 
@@ -138,7 +129,7 @@ namespace CommonPluginsShared.PlayniteExtended
         {
             // Set the common resourses & event
             Common.Load(PluginFolder, PlayniteApi.ApplicationSettings.Language);
-            Common.SetEvent(PlayniteApi);
+            Common.SetEvent();
         }
     }
 }

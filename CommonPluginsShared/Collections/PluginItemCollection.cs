@@ -13,12 +13,12 @@ namespace CommonPluginsShared.Collections
         {
         }
 
-        public void SetGameInfo<T>(IPlayniteAPI PlayniteApi, Guid Id)
+        public void SetGameInfo<T>(Guid Id)
         {
             try
             {
                 Items.TryGetValue(Id, out var item);
-                Game game = PlayniteApi.Database.Games.Get(Id);
+                Game game = API.Instance.Database.Games.Get(Id);
 
                 if (game != null && item is PluginDataBaseGame<T>)
                 {
@@ -40,22 +40,22 @@ namespace CommonPluginsShared.Collections
             }
         }
 
-        public void SetGameInfo<T>(IPlayniteAPI PlayniteApi)
+        public void SetGameInfo<T>()
         {
-            System.Threading.SpinWait.SpinUntil(() => PlayniteApi.Database.IsOpen, -1);
+            System.Threading.SpinWait.SpinUntil(() => API.Instance.Database.IsOpen, -1);
 
             foreach (var item in Items)
             {
-                SetGameInfo<T>(PlayniteApi, item.Key);
+                SetGameInfo<T>(item.Key);
             }
         }
 
-        public void SetGameInfoDetails<T, Y>(IPlayniteAPI PlayniteApi, Guid Id)
+        public void SetGameInfoDetails<T, Y>( Guid Id)
         {
             try
             {
                 Items.TryGetValue(Id, out var item);
-                Game game = PlayniteApi.Database.Games.Get(Id);
+                Game game = API.Instance.Database.Games.Get(Id);
 
                 if (game != null && item is PluginDataBaseGameDetails<T, Y>)
                 {
@@ -77,13 +77,13 @@ namespace CommonPluginsShared.Collections
             }
         }
 
-        public void SetGameInfoDetails<T, Y>(IPlayniteAPI PlayniteApi)
+        public void SetGameInfoDetails<T, Y>()
         {
-            System.Threading.SpinWait.SpinUntil(() => PlayniteApi.Database.IsOpen, -1);
+            System.Threading.SpinWait.SpinUntil(() => API.Instance.Database.IsOpen, -1);
 
             foreach (var item in Items)
             {
-                SetGameInfoDetails<T, Y>(PlayniteApi, item.Key);
+                SetGameInfoDetails<T, Y>(item.Key);
             }
         }
     }

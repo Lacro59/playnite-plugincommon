@@ -6,19 +6,17 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Playnite.SDK;
-using Playnite.SDK.Models;
-using Playnite.SDK.Data;
 
 namespace CommonPluginsShared
 {
     public class PlayniteUiHelper
     {
-        public static readonly ILogger logger = LogManager.GetLogger();
-        public static IResourceProvider resources = new ResourceProvider();
+        public static ILogger Logger => LogManager.GetLogger();
+        public static IResourceProvider RessourceProvider => new ResourceProvider();
 
 
         /// <summary>
-        /// Can to exit window with escape  key
+        /// Can to exit window with escape key
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -26,10 +24,10 @@ namespace CommonPluginsShared
         {
             if (e.Key == Key.Escape)
             {
-                if (sender is Window)
+                if (sender is Window window)
                 {
                     e.Handled = true;
-                    ((Window)sender).Close();
+                    window.Close();
                 }
             }
         }
@@ -37,12 +35,11 @@ namespace CommonPluginsShared
         /// <summary>
         /// Create Window with Playnite SDK
         /// </summary>
-        /// <param name="PlayniteApi"></param>
         /// <param name="Title"></param>
         /// <param name="ViewExtension"></param>
         /// <param name="windowOptions"></param>
         /// <returns></returns>
-        public static Window CreateExtensionWindow(IPlayniteAPI PlayniteApi, string Title, UserControl ViewExtension, WindowOptions windowOptions = null)
+        public static Window CreateExtensionWindow(string Title, UserControl ViewExtension, WindowOptions windowOptions = null)
         {
             // Default window options
             if (windowOptions == null)
@@ -55,12 +52,12 @@ namespace CommonPluginsShared
                 };
             }
 
-            Window windowExtension = PlayniteApi.Dialogs.CreateWindow(windowOptions);
+            Window windowExtension = API.Instance.Dialogs.CreateWindow(windowOptions);
 
             windowExtension.Title = Title;
             windowExtension.ShowInTaskbar = false;
             windowExtension.ResizeMode = windowOptions.CanBeResizable ? ResizeMode.CanResize : ResizeMode.NoResize;
-            windowExtension.Owner = PlayniteApi.Dialogs.GetCurrentAppWindow();
+            windowExtension.Owner = API.Instance.Dialogs.GetCurrentAppWindow();
             windowExtension.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             windowExtension.Content = ViewExtension;
 
@@ -105,6 +102,5 @@ namespace CommonPluginsShared
         public double Height { get; set; }
 
         public bool CanBeResizable { get; set; } = false;
-
     }
 }

@@ -15,7 +15,7 @@ namespace CommonPluginsShared.Controls
         private Grid PART_GridContener;
 
 
-        public SidebarItemControl(IPlayniteAPI PlayniteApi)
+        public SidebarItemControl()
         {
             // Link
             TextBlock textBlockLink = new TextBlock
@@ -25,7 +25,7 @@ namespace CommonPluginsShared.Controls
             WindowChrome.SetIsHitTestVisibleInChrome(textBlockLink, true);
 
             Hyperlink hyperlink = new Hyperlink();
-            hyperlink.Click += (s, e) => { PlayniteApi.MainView.SwitchToLibraryView(); };
+            hyperlink.Click += (s, e) => { API.Instance.MainView.SwitchToLibraryView(); };
             hyperlink.Inlines.Add(new TextBlock
             {
                 Text = "\uea5c",

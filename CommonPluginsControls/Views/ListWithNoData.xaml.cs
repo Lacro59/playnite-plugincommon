@@ -29,7 +29,7 @@ namespace CommonPluginsControls.Views
 
         RelayCommand<Guid> GoToGame { get; set; }
 
-        public ListWithNoData(IPlayniteAPI PlayniteApi, IPluginDatabase PluginDatabase)
+        public ListWithNoData(IPluginDatabase PluginDatabase)
         {
             this.PluginDatabase = PluginDatabase;
 
@@ -37,8 +37,8 @@ namespace CommonPluginsControls.Views
 
             GoToGame = new RelayCommand<Guid>((Id) =>
             {
-                PlayniteApi.MainView.SelectGame(Id);
-                PlayniteApi.MainView.SwitchToLibraryView();
+                API.Instance.MainView.SelectGame(Id);
+                API.Instance.MainView.SwitchToLibraryView();
             });
 
             RefreshData();
