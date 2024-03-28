@@ -20,7 +20,7 @@ namespace CommonPluginsShared
 {
     public class PlayniteTools
     {
-        private static readonly ILogger logger = LogManager.GetLogger();
+        private static ILogger Logger => LogManager.GetLogger();
 
         private static List<Emulator> ListEmulators = null;
 
@@ -156,7 +156,7 @@ namespace CommonPluginsShared
 
                 if (emulator == null)
                 {
-                    logger.Warn($"No emulator found for {game.Name}");
+                    Logger.Warn($"No emulator found for {game.Name}");
                     return false;
                 }
 
@@ -194,14 +194,14 @@ namespace CommonPluginsShared
 
                 if (emulator == null)
                 {
-                    logger.Warn($"No emulator found for {game.Name}");
+                    Logger.Warn($"No emulator found for {game.Name}");
                     return false;
                 }
 
                 string BuiltInConfigId = string.Empty;
                 if (emulator.BuiltInConfigId == null)
                 {
-                    logger.Warn($"No BuiltInConfigId found for {emulator.Name}");
+                    Logger.Warn($"No BuiltInConfigId found for {emulator.Name}");
                 }
                 else
                 {
@@ -232,14 +232,14 @@ namespace CommonPluginsShared
 
                 if (emulator == null)
                 {
-                    logger.Warn($"No emulator found for {game.Name}");
+                    Logger.Warn($"No emulator found for {game.Name}");
                     return false;
                 }
 
                 string BuiltInConfigId = string.Empty;
                 if (emulator.BuiltInConfigId == null)
                 {
-                    logger.Warn($"No BuiltInConfigId found for {emulator.Name}");
+                    Logger.Warn($"No BuiltInConfigId found for {emulator.Name}");
                 }
                 else
                 {
@@ -335,7 +335,7 @@ namespace CommonPluginsShared
                 }
                 else
                 {
-                    logger.Warn($"File not found {FileConfig}");
+                    Logger.Warn($"File not found {FileConfig}");
                     return new HashSet<string>();
                 }
             }
@@ -476,7 +476,7 @@ namespace CommonPluginsShared
                     var Source = API.Instance.Database.Sources.Get(SourceId);
                     if (Source == null)
                     {
-                        logger.Warn($"SourceName not found for {SourceId.ToString()}");
+                        Logger.Warn($"SourceName not found for {SourceId.ToString()}");
                         return "Playnite";
                     }
                     return Source.Name;
@@ -490,7 +490,7 @@ namespace CommonPluginsShared
 
             if (PlatformsIds == null)
             {
-                logger.Warn($"No PlatformsIds for {Serialization.ToJson(PlatformsIds)}");
+                Logger.Warn($"No PlatformsIds for {Serialization.ToJson(PlatformsIds)}");
                 return SourceName;
             }
 

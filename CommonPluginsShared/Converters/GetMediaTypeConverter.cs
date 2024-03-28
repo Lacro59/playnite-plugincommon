@@ -9,8 +9,6 @@ namespace CommonPluginsShared.Converters
 {
     public class GetMediaTypeConverter : IValueConverter
     {
-        private static ILogger logger = LogManager.GetLogger();
-
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             try

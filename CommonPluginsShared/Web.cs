@@ -28,7 +28,7 @@ namespace CommonPluginsShared
 
     public class Web
     {
-        private static ILogger logger = LogManager.GetLogger();
+        private static ILogger Logger => LogManager.GetLogger();
 
         public static string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0";
 
@@ -385,7 +385,7 @@ namespace CommonPluginsShared
                 }
                 else
                 {
-                    logger.Warn($"DownloadStringData() with statuscode {statusCode} for {url}");
+                    Logger.Warn($"DownloadStringData() with statuscode {statusCode} for {url}");
                     return string.Empty;
                 }
             }
@@ -494,7 +494,7 @@ namespace CommonPluginsShared
                 {
                     if (ex.Message.Contains("Section=ResponseHeader Detail=CR"))
                     {
-                        logger.Warn($"Used UserAgent: Anything");
+                        Logger.Warn($"Used UserAgent: Anything");
                         return DownloadStringData(url, Cookies, "Anything").GetAwaiter().GetResult();
                     }
                     else
@@ -538,7 +538,7 @@ namespace CommonPluginsShared
                     }
                     else
                     {
-                        logger.Error($"Web error with status code {result.StatusCode.ToString()}");
+                        Logger.Error($"Web error with status code {result.StatusCode.ToString()}");
                     }
                 }
                 catch (Exception ex)
@@ -607,7 +607,7 @@ namespace CommonPluginsShared
                     }
                     else
                     {
-                        logger.Error($"Web error with status code {result.StatusCode.ToString()}");
+                        Logger.Error($"Web error with status code {result.StatusCode.ToString()}");
                     }
                 }
                 catch (Exception ex)
@@ -759,7 +759,7 @@ namespace CommonPluginsShared
                     }
                     else
                     {
-                        logger.Error($"Web error with status code {result.StatusCode.ToString()}");
+                        Logger.Error($"Web error with status code {result.StatusCode.ToString()}");
                     }
                 }
                 catch (Exception ex)
@@ -826,7 +826,7 @@ namespace CommonPluginsShared
                     }
                     else
                     {
-                        logger.Error($"Web error with status code {result.StatusCode.ToString()}");
+                        Logger.Error($"Web error with status code {result.StatusCode.ToString()}");
                     }
                 }
                 catch (Exception ex)

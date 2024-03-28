@@ -9,9 +9,6 @@ namespace CommonPluginsShared
 {
     public static class Commands
     {
-        private static ILogger logger = LogManager.GetLogger();
-
-
         public static RelayCommand<object> NavigateUrl => new RelayCommand<object>((url) =>
         {
             try

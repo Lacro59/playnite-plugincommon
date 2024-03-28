@@ -10,7 +10,7 @@ namespace CommonPluginsShared
 {
     public class PluginLocalization
     {
-        private static ILogger logger = LogManager.GetLogger();
+        private static ILogger Logger => LogManager.GetLogger();
 
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace CommonPluginsShared
                 }
                 else
                 {
-                    logger.Warn($"File {langFile} not found");
+                    Logger.Warn($"File {langFile} not found");
                 }
             }
 #endif
@@ -112,7 +112,7 @@ namespace CommonPluginsShared
             }
             else
             {
-                logger.Warn($"File {langFileCommon} not found");
+                Logger.Warn($"File {langFileCommon} not found");
             }
         }
     }

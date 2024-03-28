@@ -28,9 +28,6 @@ namespace CommonPluginsShared
 
     public class ImageTools
     {
-        private static readonly ILogger logger = LogManager.GetLogger();
-
-
         #region ImageProperty
         public static ImageProperty GetImapeProperty(string srcPath)
         {
@@ -94,7 +91,6 @@ namespace CommonPluginsShared
             }
         }
         #endregion
-
 
         #region Resize
         public static string Resize(string srcPath, int width, int height)
@@ -248,7 +244,6 @@ namespace CommonPluginsShared
             }
         }
         #endregion
-
 
         #region Convert
         public static FormatConvertedBitmap ConvertBitmapImage(BitmapImage IconImage, ImageColor imageColor = ImageColor.None)

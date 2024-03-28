@@ -13,9 +13,6 @@ namespace CommonPluginsShared
 {
     public class Tools
     {
-        private static readonly ILogger logger = LogManager.GetLogger();
-
-
         /// <summary>
         /// 
         /// </summary>

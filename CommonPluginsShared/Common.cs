@@ -14,7 +14,7 @@ namespace CommonPluginsShared
 {
     public class Common
     {
-        private static readonly ILogger logger = LogManager.GetLogger();
+        private static ILogger Logger => LogManager.GetLogger();
 
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace CommonPluginsShared
                 }
                 else
                 {
-                    logger.Warn($"File {CommonFile} not found");
+                    Logger.Warn($"File {CommonFile} not found");
                     return;
                 }
             }
@@ -112,7 +112,7 @@ namespace CommonPluginsShared
             }
             else
             {
-                logger.Warn($"File {FontFile} not found");
+                Logger.Warn($"File {FontFile} not found");
             }
             #endregion
         }
@@ -184,7 +184,7 @@ namespace CommonPluginsShared
             }
 
 #if DEBUG
-            logger.Debug(Message);
+            Logger.Debug(Message);
 #else
             if (!IsIgnored) 
             {            
@@ -238,7 +238,7 @@ namespace CommonPluginsShared
             Message = $"{Message}|{traceInfos.FileName}|{traceInfos.LineNumber}";
 
 #if DEBUG
-            logger.Error(ex, $"{Message}");
+            Logger.Error(ex, $"{Message}");
 #else
             if (!IsIgnored) 
             {

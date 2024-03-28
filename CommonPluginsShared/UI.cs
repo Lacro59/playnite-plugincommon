@@ -13,7 +13,7 @@ namespace CommonPluginsShared
 {
     public class UI
     {
-        private static ILogger logger = LogManager.GetLogger();
+        private static ILogger Logger => LogManager.GetLogger();
 
 
         public bool AddResources(List<ResourcesList> ResourcesList)
@@ -45,7 +45,7 @@ namespace CommonPluginsShared
                             }
                             else
                             {
-                                logger.Warn($"Different type for {ItemKey}");
+                                Logger.Warn($"Different type for {ItemKey}");
                                 continue;
                             }
                         }
@@ -55,7 +55,7 @@ namespace CommonPluginsShared
                 }
                 catch (Exception ex)
                 {
-                    logger.Error($"Error in AddResources({ItemKey})");
+                    Logger.Error($"Error in AddResources({ItemKey})");
                     Common.LogError(ex, true, $"Error in AddResources({ItemKey})");
                 }
             }

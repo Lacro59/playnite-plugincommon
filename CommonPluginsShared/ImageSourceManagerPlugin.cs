@@ -16,7 +16,8 @@ namespace CommonPluginsShared
 {
     public class ImageSourceManagerPlugin
     {
-        private static ILogger logger = LogManager.GetLogger();
+        private static ILogger Logger => LogManager.GetLogger();
+
         public static MemoryCache Cache = new MemoryCache(Units.MegaBytesToBytes(100));
         private const string btmpPropsFld = "bitmappros";
 
@@ -41,7 +42,7 @@ namespace CommonPluginsShared
                 }
                 catch (Exception e)
                 {
-                    logger.Error(e, "Failed to create bitmap from resources " + source);
+                    Logger.Error(e, "Failed to create bitmap from resources " + source);
                     return null;
                 }
             }
@@ -171,7 +172,7 @@ namespace CommonPluginsShared
                 }
                 catch (Exception e)
                 {
-                    logger.Error(e, "Failed to create bitmap from resources " + source);
+                    Logger.Error(e, "Failed to create bitmap from resources " + source);
                     return null;
                 }
             }
@@ -194,7 +195,7 @@ namespace CommonPluginsShared
                 }
                 catch (Exception exc) 
                 {
-                    logger.Error(exc, $"Failed to create bitmap from {source} file.");
+                    Logger.Error(exc, $"Failed to create bitmap from {source} file.");
                     return null;
                 }
             }
@@ -220,7 +221,7 @@ namespace CommonPluginsShared
                 }
                 catch (Exception e)
                 {
-                    logger.Error(e, "Failed to create bitmap from " + source);
+                    Logger.Error(e, "Failed to create bitmap from " + source);
                     return null;
                 }
             }

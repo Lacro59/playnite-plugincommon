@@ -13,7 +13,7 @@ namespace CommonPluginsShared.Controls
 {
     public class PluginUserControlExtendBase : PluginUserControl
     {
-        internal static ILogger logger => LogManager.GetLogger();
+        internal static ILogger Logger => LogManager.GetLogger();
 
         internal virtual IDataContext _ControlDataContext { get; set; }
         internal DispatcherTimer _updateDataTimer { get; set; }

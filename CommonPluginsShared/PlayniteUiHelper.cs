@@ -11,9 +11,6 @@ namespace CommonPluginsShared
 {
     public class PlayniteUiHelper
     {
-        public static ILogger Logger => LogManager.GetLogger();
-
-
         /// <summary>
         /// Can to exit window with escape key
         /// </summary>

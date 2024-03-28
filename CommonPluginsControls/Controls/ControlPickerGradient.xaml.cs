@@ -23,8 +23,6 @@ namespace CommonPluginsControls.Controls
     /// </summary>
     public partial class ControlPickerGradient : UserControl
     {
-        private static readonly ILogger logger = LogManager.GetLogger();
-
         private Point StartPoint = new Point(0, 1);
         private Point EndPoint = new Point(0, 0);
 
