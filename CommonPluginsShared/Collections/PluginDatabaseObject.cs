@@ -176,7 +176,7 @@ namespace CommonPluginsShared.Collections
         public virtual void DeleteDataWithDeletedGame()
         {
             var GamesDeleted = Database.Items.Where(x => PlayniteApi.Database.Games.Get(x.Key) == null).Select(x => x).ToList();
-            foreach(var el in GamesDeleted)
+            foreach (var el in GamesDeleted)
             {
                 logger.Info($"Delete date for missing game: {el.Value.Name} - {el.Key}");
                 Database.Remove(el.Key);
@@ -186,11 +186,11 @@ namespace CommonPluginsShared.Collections
 
         public virtual void GetSelectData()
         {
-            var View = new OptionsDownloadData(PlayniteApi);
+            OptionsDownloadData View = new OptionsDownloadData(PlayniteApi);
             Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(PlayniteApi, PluginName + " - " + resources.GetString("LOCCommonSelectData"), View);
-            windowExtension.ShowDialog();
+            _ = windowExtension.ShowDialog();
 
-            var PlayniteDb = View.GetFilteredGames();
+            List<Game> PlayniteDb = View.GetFilteredGames();
             bool OnlyMissing = View.GetOnlyMissing();
 
             if (PlayniteDb == null)
@@ -209,16 +209,16 @@ namespace CommonPluginsShared.Collections
             );
             globalProgressOptions.IsIndeterminate = false;
 
-            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            _ = PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
-            try
-            {
-                Stopwatch stopWatch = new Stopwatch();
-                stopWatch.Start();
+                try
+                {
+                    Stopwatch stopWatch = new Stopwatch();
+                    stopWatch.Start();
 
-                activateGlobalProgress.ProgressMaxValue = (double)PlayniteDb.Count();
+                    activateGlobalProgress.ProgressMaxValue = (double)PlayniteDb.Count();
 
-                string CancelText = string.Empty;
+                    string CancelText = string.Empty;
 
                     foreach (Game game in PlayniteDb)
                     {
@@ -232,13 +232,13 @@ namespace CommonPluginsShared.Collections
 
                         try
                         {
-                            Get(game, false, true);
+                            _ = Get(game, false, true);
                         }
                         catch (Exception ex)
                         {
                             Common.LogError(ex, false);
                         }
-                        
+
                         activateGlobalProgress.CurrentProgressValue++;
                     }
 
@@ -258,7 +258,7 @@ namespace CommonPluginsShared.Collections
         {
             List<Game> GamesList = new List<Game>();
 
-            foreach (var item in Database.Items)
+            foreach (KeyValuePair<Guid, TItem> item in Database.Items)
             {
                 Game game = PlayniteApi.Database.Games.Get(item.Key);
 
@@ -314,13 +314,7 @@ namespace CommonPluginsShared.Collections
         public virtual TItem GetDefault(Guid Id)
         {
             Game game = PlayniteApi.Database.Games.Get(Id);
-
-            if (game == null)
-            {
-                return null;
-            }
-
-            return GetDefault(game);
+            return game == null ? null : GetDefault(game);
         }
 
         public virtual TItem GetDefault(Game game)
@@ -369,7 +363,7 @@ namespace CommonPluginsShared.Collections
                 Common.LogError(ex, false);
                 PlayniteApi.Notifications.Add(new NotificationMessage(
                     $"{PluginName}-Error-Add",
-                    $"{PluginName}" + System.Environment.NewLine + $"{ex.Message}",
+                    $"{PluginName}" + Environment.NewLine + $"{ex.Message}",
                     NotificationType.Error,
                     () => PlayniteTools.CreateLogPackage(PluginName)
                 ));
@@ -410,7 +404,7 @@ namespace CommonPluginsShared.Collections
                 Common.LogError(ex, false);
                 PlayniteApi.Notifications.Add(new NotificationMessage(
                     $"{PluginName}-Error-Update",
-                    $"{PluginName}" + System.Environment.NewLine + $"{ex.Message}",
+                    $"{PluginName}" + Environment.NewLine + $"{ex.Message}",
                     NotificationType.Error,
                     () => PlayniteTools.CreateLogPackage(PluginName)
                 ));
@@ -425,8 +419,7 @@ namespace CommonPluginsShared.Collections
                 return;
             }
 
-            var itemCached = GetOnlyCache(item.Id);
-
+            TItem itemCached = GetOnlyCache(item.Id);
             if (itemCached == null)
             {
                 Add(item);
@@ -446,7 +439,7 @@ namespace CommonPluginsShared.Collections
             );
             globalProgressOptions.IsIndeterminate = true;
 
-            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            _ = PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
                 RefreshNoLoader(Id);
             }, globalProgressOptions);
@@ -460,7 +453,7 @@ namespace CommonPluginsShared.Collections
             );
             globalProgressOptions.IsIndeterminate = false;
 
-            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            _ = PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
@@ -533,40 +526,37 @@ namespace CommonPluginsShared.Collections
         public virtual bool Remove(Guid Id)
         {
             // If tag system
-            var Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
+            object Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
             PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
 
             if (propertyInfo != null)
             {
-                Common.LogDebug(true, $"RemoveTag for {Id.ToString()}");
+                Common.LogDebug(true, $"RemoveTag for {Id}");
                 RemoveTag(Id);
             }
 
-            if (Database.Items.ContainsKey(Id))
-            {
-                return (bool)Application.Current.Dispatcher?.Invoke(() => { return Database.Remove(Id); }, DispatcherPriority.Send);
-            }
-
-            return false;
+            return Database.Items.ContainsKey(Id)
+                ? (bool)Application.Current.Dispatcher?.Invoke(() => { return Database.Remove(Id); }, DispatcherPriority.Send)
+                : false;
         }
 
         public virtual bool Remove(List<Guid> Ids)
         {
             // If tag system
-            var Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
+            object Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
             PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
 
             foreach (Guid Id in Ids)
             {
                 if (propertyInfo != null)
                 {
-                    Common.LogDebug(true, $"RemoveTag for {Id.ToString()}");
+                    Common.LogDebug(true, $"RemoveTag for {Id}");
                     RemoveTag(Id);
                 }
 
                 if (Database.Items.ContainsKey(Id))
                 {
-                    Application.Current.Dispatcher?.Invoke(() => { Database.Remove(Id); }, DispatcherPriority.Send);
+                    Application.Current.Dispatcher?.Invoke(() => { _ = Database.Remove(Id); }, DispatcherPriority.Send);
                 }
             }
 
@@ -750,15 +740,17 @@ namespace CommonPluginsShared.Collections
             );
             globalProgressOptions.IsIndeterminate = false;
 
-            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            _ = PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
                 try
                 {
+                    PlayniteApi.Database.Games.BeginBufferUpdate();
+
                     Stopwatch stopWatch = new Stopwatch();
                     stopWatch.Start();
 
-                    var PlayniteDb = PlayniteApi.Database.Games.Where(x => x.Hidden == false);
-                    activateGlobalProgress.ProgressMaxValue = (double)PlayniteDb.Count();
+                    IEnumerable<Game> PlayniteDb = PlayniteApi.Database.Games.Where(x => x.Hidden == false);
+                    activateGlobalProgress.ProgressMaxValue = PlayniteDb.Count();
 
                     string CancelText = string.Empty;
 
@@ -773,7 +765,7 @@ namespace CommonPluginsShared.Collections
                         Thread.Sleep(10);
 
                         try
-                        { 
+                        {
                             RemoveTag(game, true);
                             AddTag(game);
                         }
@@ -793,16 +785,20 @@ namespace CommonPluginsShared.Collections
                 {
                     Common.LogError(ex, false);
                 }
+                finally
+                {
+                    PlayniteApi.Database.Games.EndBufferUpdate();
+                }
             }, globalProgressOptions);
         }
 
         public void AddTagSelectData()
         {
-            var View = new OptionsDownloadData(PlayniteApi, true);
+            OptionsDownloadData View = new OptionsDownloadData(PlayniteApi, true);
             Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(PlayniteApi, PluginName + " - " + resources.GetString("LOCCommonSelectGames"), View);
-            windowExtension.ShowDialog();
+            _ = windowExtension.ShowDialog();
 
-            var PlayniteDb = View.GetFilteredGames();
+            List<Game> PlayniteDb = View.GetFilteredGames();
             TagMissing = View.GetTagMissing();
 
             if (PlayniteDb == null)
@@ -816,10 +812,12 @@ namespace CommonPluginsShared.Collections
             );
             globalProgressOptions.IsIndeterminate = false;
 
-            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            _ = PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
                 try
                 {
+                    PlayniteApi.Database.Games.BeginBufferUpdate();
+
                     Stopwatch stopWatch = new Stopwatch();
                     stopWatch.Start();
 
@@ -859,6 +857,10 @@ namespace CommonPluginsShared.Collections
                 catch (Exception ex)
                 {
                     Common.LogError(ex, false);
+                }
+                finally
+                {
+                    PlayniteApi.Database.Games.EndBufferUpdate();
                 }
             }, globalProgressOptions);
         }
@@ -903,27 +905,24 @@ namespace CommonPluginsShared.Collections
             Common.LogDebug(true, "RemoveTagAllGame()");
 
             string Message = string.Empty;
-            if (FromClearDatabase)
-            {
-                Message = $"{PluginName} - {resources.GetString("LOCCommonClearingAllTag")}";
-            }
-            else
-            {
-                Message = $"{PluginName} - {resources.GetString("LOCCommonRemovingAllTag")}";
-            }
+            Message = FromClearDatabase
+                ? $"{PluginName} - {resources.GetString("LOCCommonClearingAllTag")}"
+                : $"{PluginName} - {resources.GetString("LOCCommonRemovingAllTag")}";
 
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(Message, true);
             globalProgressOptions.IsIndeterminate = false;
 
-            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            _ = PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
                 try
                 {
+                    PlayniteApi.Database.Games.BeginBufferUpdate();
+
                     Stopwatch stopWatch = new Stopwatch();
                     stopWatch.Start();
 
-                    var PlayniteDb = PlayniteApi.Database.Games.Where(x => x.Hidden == false);
-                    activateGlobalProgress.ProgressMaxValue = (double)PlayniteDb.Count();
+                    IEnumerable<Game> PlayniteDb = PlayniteApi.Database.Games.Where(x => x.Hidden == false);
+                    activateGlobalProgress.ProgressMaxValue = PlayniteDb.Count();
 
                     string CancelText = string.Empty;
 
@@ -936,7 +935,7 @@ namespace CommonPluginsShared.Collections
                         }
 
                         try
-                        { 
+                        {
                             RemoveTag(game);
                         }
                         catch (Exception ex)
@@ -954,6 +953,10 @@ namespace CommonPluginsShared.Collections
                 catch (Exception ex)
                 {
                     Common.LogError(ex, false);
+                }
+                finally
+                {
+                    PlayniteApi.Database.Games.EndBufferUpdate();
                 }
             }, globalProgressOptions);
         }
@@ -976,7 +979,7 @@ namespace CommonPluginsShared.Collections
             );
             globalProgressOptions.IsIndeterminate = true;
 
-            PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            _ = PlayniteApi.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
                 try
                 {
@@ -1002,7 +1005,7 @@ namespace CommonPluginsShared.Collections
         {
             if (e?.UpdatedItems != null)
             {
-                foreach (var GameUpdated in e.UpdatedItems)
+                foreach (ItemUpdateEvent<Game> GameUpdated in e.UpdatedItems)
                 {
                     Database.SetGameInfo<T>(PlayniteApi, GameUpdated.NewData.Id);
                 }
@@ -1013,9 +1016,9 @@ namespace CommonPluginsShared.Collections
         {
             if (e?.RemovedItems != null)
             {
-                foreach (var GameRemoved in e.RemovedItems)
+                foreach (Game GameRemoved in e.RemovedItems)
                 {
-                    Remove(GameRemoved);
+                    _ = Remove(GameRemoved);
                 }
             }
         }
