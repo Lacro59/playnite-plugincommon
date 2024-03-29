@@ -12,7 +12,7 @@ namespace CommonPluginsShared.Controls
 {
     public class PluginUserControlExtend : PluginUserControlExtendBase
     {
-        internal virtual IPluginDatabase _PluginDatabase { get; set; }
+        internal virtual IPluginDatabase _PluginDatabase { get; }
 
 
         #region OnPropertyChange

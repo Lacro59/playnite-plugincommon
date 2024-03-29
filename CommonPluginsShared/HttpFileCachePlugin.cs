@@ -14,15 +14,16 @@ namespace CommonPluginsShared
 {
     public class HttpFileCachePlugin
     {
-        private static object cacheLock { get; set; } = new object();
+        private static ILogger Logger => LogManager.GetLogger();
 
+        private static object CacheLock { get; set; } = new object();
         public static string CacheDirectory { get; set; } = PlaynitePaths.ImagesCachePath;
 
         private static string GetFileNameFromUrl(string url)
         {
-            var uri = new Uri(url);
-            var extension = Path.GetExtension(uri.Segments[uri.Segments.Length - 1]);
-            var md5 = url.MD5();
+            Uri uri = new Uri(url);
+            string extension = Path.GetExtension(uri.Segments[uri.Segments.Length - 1]);
+            string md5 = url.MD5();
             return md5 + extension;
         }
 
@@ -32,7 +33,7 @@ namespace CommonPluginsShared
             {
                 return true;
             }
-            if (!StringExtensions.IsHttpUrl(url)) 
+            if (!StringExtensions.IsHttpUrl(url))
             {
                 return true;
             }
@@ -48,12 +49,11 @@ namespace CommonPluginsShared
                 return string.Empty;
             }
 
-            var cacheFile = Path.Combine(CacheDirectory, GetFileNameFromUrl(url));
-            lock (cacheLock)
+            string cacheFile = Path.Combine(CacheDirectory, GetFileNameFromUrl(url));
+            lock (CacheLock)
             {
                 if (File.Exists(cacheFile) && new FileInfo(cacheFile).Length != 0)
                 {
-                    //logger.Debug($"Returning {url} from file cache {cacheFile}.");
                     return cacheFile;
                 }
                 else
@@ -66,7 +66,7 @@ namespace CommonPluginsShared
                         {
                             string tmpPath = Path.Combine(PlaynitePaths.ImagesCachePath, Path.GetFileName(cacheFile));
                             HttpDownloader.DownloadFile(url, tmpPath);
-                            ImageTools.Resize(tmpPath, resize, resize, cacheFile);
+                            _ = ImageTools.Resize(tmpPath, resize, resize, cacheFile);
                             FileSystem.DeleteFileSafe(tmpPath);
                         }
                         else
@@ -83,7 +83,7 @@ namespace CommonPluginsShared
                             throw;
                         }
 
-                        var response = (HttpWebResponse)e.Response;
+                        HttpWebResponse response = (HttpWebResponse)e.Response;
                         if (response.StatusCode != HttpStatusCode.NotFound)
                         {
                             throw;
@@ -104,19 +104,18 @@ namespace CommonPluginsShared
                 return;
             }
 
-            lock (cacheLock)
+            lock (CacheLock)
             {
-                var cacheFile = Path.Combine(CacheDirectory, GetFileNameFromUrl(url));
+                string cacheFile = Path.Combine(CacheDirectory, GetFileNameFromUrl(url));
                 if (File.Exists(cacheFile))
                 {
-                    //logger.Debug($"Removing {url} from file cache: {cacheFile}");
                     try
                     {
                         FileSystem.DeleteFileSafe(cacheFile);
                     }
-                    catch (Exception e) //when (!PlayniteEnvironment.ThrowAllErrors)
+                    catch (Exception e)
                     {
-                        logger.Error(e, $"Failed to remove {url} from cache.");
+                        Logger.Error(e, $"Failed to remove {url} from cache.");
                     }
                 }
             }
