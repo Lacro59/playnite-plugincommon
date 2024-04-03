@@ -29,7 +29,7 @@ namespace CommonPluginsShared.PlayniteExtended
             CleanOldDatabase();
 
             // Get plugin's database if used
-            PluginDatabase = typeof(TPluginDatabase).CrateInstance<TPluginDatabase>(PlayniteApi, PluginSettings, this.GetPluginUserDataPath());
+            PluginDatabase = typeof(TPluginDatabase).CrateInstance<TPluginDatabase>(PluginSettings, this.GetPluginUserDataPath());
             PluginDatabase.InitializeDatabase();
         }
 
