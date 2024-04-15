@@ -1055,11 +1055,14 @@ namespace CommonPluginsStores.Steam
         /// <returns></returns>
         public string GetScreeshotsPath()
         {
-            string PathScreeshotsFolder = Path.Combine(InstallationPath, "userdata", CurrentUser.AccountId.ToString(), "760", "remote");
-
-            if (Directory.Exists(PathScreeshotsFolder))
+            if (CurrentUser != null)
             {
-                return PathScreeshotsFolder;
+                string PathScreeshotsFolder = Path.Combine(InstallationPath, "userdata", CurrentUser.AccountId.ToString(), "760", "remote");
+
+                if (Directory.Exists(PathScreeshotsFolder))
+                {
+                    return PathScreeshotsFolder;
+                }
             }
 
             Logger.Warn($"No {ClientName} screenshots folder found");

@@ -270,6 +270,12 @@ namespace CommonPluginsShared
                     case ImageColor.Black:
                         ConvertBitmapSource.Source = IconImage;
                         break;
+
+                    case ImageColor.None:
+                        break;
+
+                    default:
+                        break;
                 }
 
                 ConvertBitmapSource.EndInit();
@@ -287,11 +293,11 @@ namespace CommonPluginsShared
         {
             try
             {
-                var bitmapData = bitmap.LockBits(
+                BitmapData bitmapData = bitmap.LockBits(
                     new Rectangle(0, 0, bitmap.Width, bitmap.Height),
                     ImageLockMode.ReadOnly, bitmap.PixelFormat);
 
-                var bitmapSource = BitmapSource.Create(
+                BitmapSource bitmapSource = BitmapSource.Create(
                     bitmapData.Width, bitmapData.Height,
                     bitmap.HorizontalResolution, bitmap.VerticalResolution,
                     PixelFormats.Bgr24, null,
@@ -312,12 +318,12 @@ namespace CommonPluginsShared
         {
             try
             {
-                using (var memory = new MemoryStream())
+                using (MemoryStream memory = new MemoryStream())
                 {
                     bitmap.Save(memory, ImageFormat.Png);
                     memory.Position = 0;
 
-                    var bitmapImage = new BitmapImage();
+                    BitmapImage bitmapImage = new BitmapImage();
                     bitmapImage.BeginInit();
                     bitmapImage.StreamSource = memory;
                     bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
@@ -338,12 +344,12 @@ namespace CommonPluginsShared
         {
             try
             {
-                using (var memory = new MemoryStream())
+                using (MemoryStream memory = new MemoryStream())
                 {
                     image.Save(memory, ImageFormat.Png);
                     memory.Position = 0;
 
-                    var bitmapImage = new BitmapImage();
+                    BitmapImage bitmapImage = new BitmapImage();
                     bitmapImage.BeginInit();
                     bitmapImage.StreamSource = memory;
                     bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
@@ -360,7 +366,7 @@ namespace CommonPluginsShared
         }
 
 
-        public static string ConvertToJpg(string srcPath, Int64 quality = 98L)
+        public static string ConvertToJpg(string srcPath, long quality = 98L)
         {
             try
             {
@@ -372,7 +378,7 @@ namespace CommonPluginsShared
 
                         //  Set the quality
                         EncoderParameters parameters = new EncoderParameters(1);
-                        parameters.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, quality);
+                        parameters.Param[0] = new EncoderParameter(Encoder.Quality, quality);
 
                         string destPath = srcPath.Replace(Path.GetExtension(srcPath), ".jpg");
                         if (!File.Exists(destPath))
