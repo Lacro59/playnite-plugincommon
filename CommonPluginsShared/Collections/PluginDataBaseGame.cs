@@ -10,7 +10,7 @@ namespace CommonPluginsShared.Collections
     {
         public abstract List<T> Items { get; set; }
 
-        public DateTime DateLastRefresh { get; set; } = default(DateTime);
+        public DateTime DateLastRefresh { get; set; } = default;
 
         [DontSerialize]
         public override bool HasData => Items?.Count > 0;

@@ -12,12 +12,12 @@ namespace CommonPluginsShared.Extensions
             string normalizedString = text.Normalize(NormalizationForm.FormD);
             StringBuilder stringBuilder = new StringBuilder();
 
-            foreach (var c in normalizedString)
+            foreach (char c in normalizedString)
             {
-                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                UnicodeCategory unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
                 if (unicodeCategory != UnicodeCategory.NonSpacingMark)
                 {
-                    stringBuilder.Append(c);
+                    _ = stringBuilder.Append(c);
                 }
             }
 

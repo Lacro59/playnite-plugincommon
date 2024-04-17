@@ -4,6 +4,7 @@ using CommonPlayniteShared.Database;
 using System;
 using System.Linq;
 using System.Text;
+using System.Collections.Generic;
 
 namespace CommonPluginsShared.Collections
 {
@@ -17,7 +18,7 @@ namespace CommonPluginsShared.Collections
         {
             try
             {
-                Items.TryGetValue(Id, out var item);
+                _ = Items.TryGetValue(Id, out TItem item);
                 Game game = API.Instance.Database.Games.Get(Id);
 
                 if (game != null && item is PluginDataBaseGame<T>)
@@ -42,9 +43,8 @@ namespace CommonPluginsShared.Collections
 
         public void SetGameInfo<T>()
         {
-            System.Threading.SpinWait.SpinUntil(() => API.Instance.Database.IsOpen, -1);
-
-            foreach (var item in Items)
+            _ = System.Threading.SpinWait.SpinUntil(() => API.Instance.Database.IsOpen, -1);
+            foreach (KeyValuePair<Guid, TItem> item in Items)
             {
                 SetGameInfo<T>(item.Key);
             }
@@ -54,7 +54,7 @@ namespace CommonPluginsShared.Collections
         {
             try
             {
-                Items.TryGetValue(Id, out var item);
+                _ = Items.TryGetValue(Id, out TItem item);
                 Game game = API.Instance.Database.Games.Get(Id);
 
                 if (game != null && item is PluginDataBaseGameDetails<T, Y>)
@@ -81,7 +81,7 @@ namespace CommonPluginsShared.Collections
         {
             System.Threading.SpinWait.SpinUntil(() => API.Instance.Database.IsOpen, -1);
 
-            foreach (var item in Items)
+            foreach (KeyValuePair<Guid, TItem> item in Items)
             {
                 SetGameInfoDetails<T, Y>(item.Key);
             }

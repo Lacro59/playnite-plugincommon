@@ -41,7 +41,7 @@ namespace CommonPluginsShared.Controls
 
         private static void UpdateExpanderArrow(Expander expander, bool visible)
         {
-            foreach (var el in UI.FindVisualChildren<TextBlock>(expander))
+            foreach (TextBlock el in UI.FindVisualChildren<TextBlock>(expander))
             {
                 if (el.Name == "DownArrow")
                 {

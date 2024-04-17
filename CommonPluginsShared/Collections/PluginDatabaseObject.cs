@@ -35,7 +35,7 @@ namespace CommonPluginsShared.Collections
         public TDatabase Database { get; set; }
         public Game GameContext { get; set; }
 
-        protected string TagBefore = string.Empty;
+        protected string TagBefore { get; set; } = string.Empty;
         public List<Tag> PluginTags { get; set; } = new List<Tag>();
 
 
@@ -980,16 +980,13 @@ namespace CommonPluginsShared.Collections
             {
                 try
                 {
-                    if (Directory.Exists(PathDirectory))
-                    {
-                        Thread.Sleep(2000);
-                        Directory.Delete(PathDirectory, true);
-                    }
+                    Thread.Sleep(2000);
+                    FileSystem.DeleteDirectory(PathDirectory, true);
                 }
                 catch (Exception ex)
                 {
                     Common.LogError(ex, false);
-                    API.Instance.Dialogs.ShowErrorMessage(
+                    _ = API.Instance.Dialogs.ShowErrorMessage(
                         string.Format(ResourceProvider.GetString("LOCCommonErrorDeleteCache"), PathDirectory),
                         PluginName
                     );

@@ -17,12 +17,11 @@ namespace CommonPluginsShared.Controls
         public bool WidthStretch { get; set; }
         #endregion  
 
-
         #region BubblingScrollEvents
         public bool BubblingScrollEvents
         {
-            get { return (bool)GetValue(BubblingScrollEventsProperty); }
-            set { SetValue(BubblingScrollEventsProperty, value); }
+            get => (bool)GetValue(BubblingScrollEventsProperty);
+            set => SetValue(BubblingScrollEventsProperty, value);
         }
 
         public static readonly DependencyProperty BubblingScrollEventsProperty = DependencyProperty.Register(
@@ -33,7 +32,7 @@ namespace CommonPluginsShared.Controls
 
         private static void BubblingScrollEventsChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var obj = sender as ListBoxExtend;
+            ListBoxExtend obj = sender as ListBoxExtend;
             if (obj != null && e.NewValue != e.OldValue)
             {
                 if ((bool)e.NewValue)

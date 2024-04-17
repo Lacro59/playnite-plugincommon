@@ -23,18 +23,18 @@ namespace CommonPluginsShared.Extensions
         public static string ToCsv<T>(this List<T> items, string delimiter = ",")
         {
             Type itemType = typeof(T);
-            var props = itemType.GetProperties(BindingFlags.Public | BindingFlags.Instance).OrderBy(p => p.Name);
+            IOrderedEnumerable<PropertyInfo> props = itemType.GetProperties(BindingFlags.Public | BindingFlags.Instance).OrderBy(p => p.Name);
 
-            var csv = new StringBuilder();
+            StringBuilder csv = new StringBuilder();
 
             // Write Headers
-            csv.AppendLine(string.Join(delimiter, props.Select(p => p.Name)));
+            _ = csv.AppendLine(string.Join(delimiter, props.Select(p => p.Name)));
 
             // Write Rows
-            foreach (var item in items)
+            foreach (T item in items)
             {
                 // Write Fields
-                csv.AppendLine(string.Join(delimiter, props.Select(p => GetCsvFieldasedOnValue(p, item))));
+                _ = csv.AppendLine(string.Join(delimiter, props.Select(p => GetCsvFieldasedOnValue(p, item))));
             }
 
             return csv.ToString();
@@ -49,13 +49,19 @@ namespace CommonPluginsShared.Extensions
         /// <returns></returns>
         private static object GetCsvFieldasedOnValue<T>(PropertyInfo p, T item)
         {
-            string value = "";
-
+            string value;
             try
             {
                 value = p.GetValue(item, null)?.ToString();
-                if (value == null) return "NULL";  // Deal with nulls
-                if (value.Trim().Length == 0) return ""; // Deal with spaces and blanks
+                if (value == null)
+                {
+                    return "NULL";  // Deal with nulls
+                }
+
+                if (value.Trim().Length == 0)
+                {
+                    return ""; // Deal with spaces and blanks
+                }
 
                 // Guard strings with "s, they may contain the delimiter!
                 if (p.PropertyType == typeof(string))

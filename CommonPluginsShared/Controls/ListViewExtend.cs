@@ -29,8 +29,8 @@ namespace CommonPluginsShared.Controls
         #region BubblingScrollEvents
         public bool BubblingScrollEvents
         {
-            get { return (bool)GetValue(BubblingScrollEventsProperty); }
-            set { SetValue(BubblingScrollEventsProperty, value); }
+            get => (bool)GetValue(BubblingScrollEventsProperty);
+            set => SetValue(BubblingScrollEventsProperty, value);
         }
 
         public static readonly DependencyProperty BubblingScrollEventsProperty = DependencyProperty.Register(
@@ -41,7 +41,7 @@ namespace CommonPluginsShared.Controls
 
         private static void BubblingScrollEventsChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var obj = sender as ListViewExtend;
+            ListViewExtend obj = sender as ListViewExtend;
             if (obj != null && e.NewValue != e.OldValue)
             {
                 if ((bool)e.NewValue)
@@ -55,7 +55,6 @@ namespace CommonPluginsShared.Controls
             }
         }
         #endregion
-
 
         #region Save column order
         public static readonly DependencyProperty SaveColumnProperty;
@@ -109,14 +108,14 @@ namespace CommonPluginsShared.Controls
 
 
         #region Sorting
-        private readonly string CaretDown = "\uea67";
-        private readonly string CaretUp = "\uea6a";
+        private string CaretDown => "\uea67";
+        private string CaretUp => "\uea6a";
 
 
         public bool SortingEnable
         {
-            get { return (bool)GetValue(SortingEnableProperty); }
-            set { SetValue(SortingEnableProperty, value); }
+            get => (bool)GetValue(SortingEnableProperty);
+            set => SetValue(SortingEnableProperty, value);
         }
 
         public static readonly DependencyProperty SortingEnableProperty = DependencyProperty.Register(
@@ -128,8 +127,8 @@ namespace CommonPluginsShared.Controls
 
         public string SortingDefaultDataName
         {
-            get { return (string)GetValue(SortingDefaultDataNameProperty); }
-            set { SetValue(SortingDefaultDataNameProperty, value); }
+            get => (string)GetValue(SortingDefaultDataNameProperty);
+            set => SetValue(SortingDefaultDataNameProperty, value);
         }
 
         public static readonly DependencyProperty SortingDefaultDataNameProperty = DependencyProperty.Register(
@@ -141,8 +140,8 @@ namespace CommonPluginsShared.Controls
 
         public ListSortDirection SortingSortDirection
         {
-            get { return (ListSortDirection)GetValue(SortingSortDirectionProperty); }
-            set { SetValue(SortingSortDirectionProperty, value); }
+            get => (ListSortDirection)GetValue(SortingSortDirectionProperty);
+            set => SetValue(SortingSortDirectionProperty, value);
         }
 
         public static readonly DependencyProperty SortingSortDirectionProperty = DependencyProperty.Register(
@@ -159,14 +158,9 @@ namespace CommonPluginsShared.Controls
             {
                 if (e.NewValue is ListSortDirection)
                 {
-                    if ((ListSortDirection)e.NewValue == ListSortDirection.Ascending)
-                    {
-                        obj._lastDirection = ListSortDirection.Descending;
-                    }
-                    else
-                    {
-                        obj._lastDirection = ListSortDirection.Ascending;
-                    }
+                    obj._lastDirection = (ListSortDirection)e.NewValue == ListSortDirection.Ascending 
+                        ? ListSortDirection.Descending
+                        : ListSortDirection.Ascending;
                 }
                 else
                 {
@@ -340,19 +334,11 @@ namespace CommonPluginsShared.Controls
                                 Label labelCaret = new Label();
                                 labelCaret.FontFamily = Application.Current?.TryFindResource("FontIcoFont") as FontFamily;
 
-                                if (direction == ListSortDirection.Ascending)
-                                {
-                                    labelCaret.Content = $" {CaretUp}";
-                                }
-                                else
-                                {
-                                    labelCaret.Content = $" {CaretDown}";
-                                }
+                                labelCaret.Content = direction == ListSortDirection.Ascending ? $" {CaretUp}" : $" {CaretDown}";
 
-                                StackPanel stackPanel = new StackPanel();
-                                stackPanel.Orientation = Orientation.Horizontal;
-                                stackPanel.Children.Add(labelHeader);
-                                stackPanel.Children.Add(labelCaret);
+                                StackPanel stackPanel = new StackPanel { Orientation = Orientation.Horizontal };
+                                _ = stackPanel.Children.Add(labelHeader);
+                                _ = stackPanel.Children.Add(labelCaret);
 
                                 headerClicked.Content = stackPanel;
 
@@ -381,7 +367,7 @@ namespace CommonPluginsShared.Controls
         {
             if (_lastHeaderClicked != null)
             {
-                var headerClicked = _lastHeaderClicked;
+                GridViewColumnHeader headerClicked = _lastHeaderClicked;
                 if (headerClicked.Column != null)
                 {
                     Binding columnBinding;
@@ -422,7 +408,6 @@ namespace CommonPluginsShared.Controls
             }
         }
         #endregion
-
 
         #region Save column order
         private void Columns_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -485,8 +470,8 @@ namespace CommonPluginsShared.Controls
     {
         public int RefIndex
         {
-            get { return (int)GetValue(RefIndexProperty); }
-            set { SetValue(RefIndexProperty, value); }
+            get => (int)GetValue(RefIndexProperty);
+            set => SetValue(RefIndexProperty, value);
         }
 
         public static readonly DependencyProperty RefIndexProperty = DependencyProperty.Register(

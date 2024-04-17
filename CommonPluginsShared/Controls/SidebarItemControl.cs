@@ -11,8 +11,8 @@ namespace CommonPluginsShared.Controls
 {
     public partial class SidebarItemControl : UserControl
     {
-        private TextBlock PART_TextBlockTitle;
-        private Grid PART_GridContener;
+        private TextBlock PART_TextBlockTitle { get; set; }
+        private Grid PART_GridContener { get; set; }
 
 
         public SidebarItemControl()
@@ -70,8 +70,8 @@ namespace CommonPluginsShared.Controls
 
             // Control
             DockPanel dockPanel = new DockPanel();
-            dockPanel.Children.Add(stackPanel);
-            dockPanel.Children.Add(scrollViewer);
+            _ = dockPanel.Children.Add(stackPanel);
+            _ = dockPanel.Children.Add(scrollViewer);
 
             this.Content = dockPanel;
         }
@@ -84,7 +84,7 @@ namespace CommonPluginsShared.Controls
 
         public void AddContent(FrameworkElement content)
         {
-            PART_GridContener.Children.Add(content);
+            _ = PART_GridContener.Children.Add(content);
         }
     }
 }

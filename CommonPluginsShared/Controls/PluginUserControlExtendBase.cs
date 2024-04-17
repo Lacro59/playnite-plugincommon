@@ -123,7 +123,6 @@ namespace CommonPluginsShared.Controls
         }
         #endregion
 
-
         #region OnPropertyChange
         // When a control properties is changed
         internal static void ControlsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
@@ -144,42 +143,9 @@ namespace CommonPluginsShared.Controls
         // When game selection is changed
         public override void GameContextChanged(Game oldContext, Game newContext)
         {
-            //if (newContext == null || oldContext?.Id == newContext?.Id)
-            //{
-            //    return;
-            //}
-            //
-            //SetDefaultDataContext();
-            //
-            //MustDisplay = _ControlDataContext.IsActivated;
-            //
-            //// When control is not used
-            //if (!_ControlDataContext.IsActivated)
-            //{
-            //    return;
-            //}
-            //
-            //try
-            //{
-            //    if (MustDisplay)
-            //    {
-            //        SetData(newContext);
-            //        SetDataAsync(newContext);
-            //    }
-            //    else if (AlwaysShow)
-            //    {
-            //        SetData(newContext);
-            //        SetDataAsync(newContext);
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    Common.LogError(ex, false);
-            //}
-
             _updateDataTimer.Stop();
 
-            Visibility = System.Windows.Visibility.Collapsed;
+            Visibility = Visibility.Collapsed;
             SetDefaultDataContext();
             MustDisplay = AlwaysShow ? AlwaysShow : _ControlDataContext.IsActivated;
 
@@ -202,7 +168,7 @@ namespace CommonPluginsShared.Controls
                 }
 
                 // Publish changes for the currently displayed game if updated
-                var ActualItem = e.UpdatedItems.Find(x => x.NewData.Id == GameContext.Id);
+                ItemUpdateEvent<TItem> ActualItem = e.UpdatedItems.Find(x => x.NewData.Id == GameContext.Id);
                 if (ActualItem != null)
                 {
                     Guid Id = ActualItem.NewData.Id;
@@ -239,7 +205,7 @@ namespace CommonPluginsShared.Controls
                     return;
                 }
 
-                var ActualItem = e.UpdatedItems.Find(x => x.NewData.Id == GameContext.Id);
+                ItemUpdateEvent<Game> ActualItem = e.UpdatedItems.Find(x => x.NewData.Id == GameContext.Id);
                 if (ActualItem != null)
                 {
                     Game newContext = ActualItem.NewData;
@@ -270,7 +236,7 @@ namespace CommonPluginsShared.Controls
         public virtual async Task UpdateDataAsync()
         {
             _updateDataTimer.Stop();
-            Visibility = MustDisplay ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
+            Visibility = MustDisplay ? Visibility.Visible : Visibility.Collapsed;
 
             if (GameContext is null)
             {
