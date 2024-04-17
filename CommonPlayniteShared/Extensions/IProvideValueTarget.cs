@@ -13,6 +13,11 @@ namespace CommonPlayniteShared.Extensions
     {
         public static Type GetTargetType(IProvideValueTarget provider)
         {
+            if (provider.TargetProperty == null)
+            {
+                return null;
+            }
+
             var type = provider.TargetProperty.GetType();
             if (type == typeof(DependencyProperty))
             {

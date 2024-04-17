@@ -24,7 +24,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\GlobalRandom.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Images.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\IniParser.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Common\InteropMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Media\Icons\IconExtractor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\MemoryCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Paths.cs" />
@@ -37,8 +36,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\Web\Downloader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Web\HttpDownloader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Xaml.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Controls\MenuHelpers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MenuHelpers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Native\Psapi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ObservableObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Services\EpicAccountClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\PSNLibrary\Services\PSNClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Plugins\ExtensionFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SelectableItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\VirtualizingGridPanel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\VirtualizingTilePanel.cs" />
@@ -71,7 +74,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Native\Winnt.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Native\Winuser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\BattleNetLibrary\Models\BattleNetApiStatus.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\EpicAccountClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\EpicLauncher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Models\AccountResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Models\AssetsResponse.cs" />
@@ -87,8 +89,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\OriginLibrary\Models\AppsListResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\PSNLibrary\Models\PSNLibrarySettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\PSNLibrary\Models\PSNModels.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\PSNLibrary\PSNAccountClient.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\XboxLibrary\XboxAccountClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\XboxLibrary\Services\XboxAccountClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Settings\PlaynitePaths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Settings\PlayniteSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Models\WebStoreModels.cs" />
@@ -113,6 +114,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Themes.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)PluginLibrary\XboxLibrary\Services\" />
     <Folder Include="$(MSBuildThisFileDirectory)Settings\" />
   </ItemGroup>
 </Project>

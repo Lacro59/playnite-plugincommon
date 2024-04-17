@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 using System.Web;
 using CommonPlayniteShared.PluginLibrary.XboxLibrary.Models;//using XboxLibrary.Models;
 
-namespace CommonPlayniteShared.PluginLibrary.XboxLibrary
+namespace CommonPlayniteShared.PluginLibrary.XboxLibrary.Services
 {
     public class XboxAccountClient
     {

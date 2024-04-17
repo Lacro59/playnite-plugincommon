@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using CommonPlayniteShared.Controls;
 using Playnite.SDK.Plugins;
 using static CommonPluginsShared.PlayniteTools;
+using CommonPlayniteShared;
 
 namespace CommonPluginsShared.Plugins
 {

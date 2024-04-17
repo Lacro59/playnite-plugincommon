@@ -16,7 +16,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace CommonPlayniteShared.PluginLibrary.EpicLibrary
+namespace CommonPlayniteShared.PluginLibrary.EpicLibrary.Services
 {
     public class TokenException : Exception
     {

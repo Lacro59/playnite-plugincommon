@@ -59,7 +59,7 @@ namespace CommonPluginsShared
 
                     return cachedFile;
                 }
-                catch (Exception exc) 
+                catch (Exception exc)
                 {
                     Common.LogError(exc, true, $"Failed to create bitmap from {source} file.");
                     return null;
@@ -101,11 +101,23 @@ namespace CommonPluginsShared
 
             if (cached && resource != null)
             {
-                _ = Cache.TryAdd(resourceKey, resource, resource.GetSizeInMemory(),
-                    new Dictionary<string, object>
+                long imageSize = 0;
+                try
+                {
+                    imageSize = resource.GetSizeInMemory();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e, $"Failed to get image memory size: {resourceKey}");
+                }
+
+                if (imageSize > 0)
+                {
+                    Cache.TryAdd(resourceKey, resource, imageSize, new Dictionary<string, object>
                     {
                         { btmpPropsFld, loadProperties }
                     });
+                }
             }
 
             return resource;
@@ -193,7 +205,7 @@ namespace CommonPluginsShared
 
                     return BitmapExtensions.BitmapFromFile(cachedFile, loadProperties);
                 }
-                catch (Exception exc) 
+                catch (Exception exc)
                 {
                     Logger.Error(exc, $"Failed to create bitmap from {source} file.");
                     return null;

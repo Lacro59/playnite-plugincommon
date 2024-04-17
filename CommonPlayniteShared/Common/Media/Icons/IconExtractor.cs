@@ -25,8 +25,8 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-using CommonPlayniteShared.Common;
 using Playnite.SDK;
+using CommonPlayniteShared.Native;//using Playnite.Native;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -210,7 +210,7 @@ namespace CommonPlayniteShared.Common.Media.Icons
             IntPtr hModule = IntPtr.Zero;
             try
             {
-                hModule = Interop.LoadLibraryEx(fileName, IntPtr.Zero, LOAD_LIBRARY_AS_IMAGE_RESOURCE);
+                hModule = Kernel32.LoadLibraryEx(fileName, IntPtr.Zero, LOAD_LIBRARY_AS_IMAGE_RESOURCE);
                 if (hModule == IntPtr.Zero)
                     throw new Win32Exception();
 
@@ -272,14 +272,14 @@ namespace CommonPlayniteShared.Common.Media.Icons
 
                     return true;
                 };
-                Interop.EnumResourceNames(hModule, RT_GROUP_ICON, callback, IntPtr.Zero);
+                Kernel32.EnumResourceNames(hModule, RT_GROUP_ICON, callback, IntPtr.Zero);
 
                 iconData = tmpData.ToArray();
             }
             finally
             {
                 if (hModule != IntPtr.Zero)
-                    Interop.FreeLibrary(hModule);
+                    Kernel32.FreeLibrary(hModule);
             }
         }
 
@@ -287,19 +287,19 @@ namespace CommonPlayniteShared.Common.Media.Icons
         {
             // Load the binary data from the specified resource.
 
-            IntPtr hResInfo = Interop.FindResource(hModule, name, type);
+            IntPtr hResInfo = Kernel32.FindResource(hModule, name, type);
             if (hResInfo == IntPtr.Zero)
                 throw new Win32Exception();
 
-            IntPtr hResData = Interop.LoadResource(hModule, hResInfo);
+            IntPtr hResData = Kernel32.LoadResource(hModule, hResInfo);
             if (hResData == IntPtr.Zero)
                 throw new Win32Exception();
 
-            IntPtr pResData = Interop.LockResource(hResData);
+            IntPtr pResData = Kernel32.LockResource(hResData);
             if (pResData == IntPtr.Zero)
                 throw new Win32Exception();
 
-            uint size = Interop.SizeofResource(hModule, hResInfo);
+            uint size = Kernel32.SizeofResource(hModule, hResInfo);
             if (size == 0)
                 throw new Win32Exception();
 
@@ -320,8 +320,8 @@ namespace CommonPlayniteShared.Common.Media.Icons
             string fileName;
             {
                 var buf = new StringBuilder(MAX_PATH);
-                int len = Interop.GetMappedFileName(
-                    Interop.GetCurrentProcess(), hModule, buf, buf.Capacity);
+                int len = Psapi.GetMappedFileName(
+                    Kernel32.GetCurrentProcess(), hModule, buf, buf.Capacity);
                 if (len == 0)
                     throw new Win32Exception();
 
@@ -335,7 +335,7 @@ namespace CommonPlayniteShared.Common.Media.Icons
             {
                 var drive = c + ":";
                 var buf = new StringBuilder(MAX_PATH);
-                int len = Interop.QueryDosDevice(drive, buf, buf.Capacity);
+                int len = Kernel32.QueryDosDevice(drive, buf, buf.Capacity);
                 if (len == 0)
                     continue;
 

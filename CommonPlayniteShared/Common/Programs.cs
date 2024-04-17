@@ -1,10 +1,11 @@
-﻿using CommonPlayniteShared.Common;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using Playnite.SDK;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -48,18 +49,29 @@ namespace CommonPlayniteShared.Common
 
     public partial class Programs
     {
-        private static readonly string[] uninstallerMasks = new string[]
+        private static readonly string[] scanFileExclusionMasks = new string[]
         {
             "uninst",
             "setup",
-            @"unins\d+"
+            @"unins\d+",
+            "Config",
+            "DXSETUP",
+            @"vc_redist\.x64",
+            @"vc_redist\.x86",
+            @"^UnityCrashHandler32\.exe$",
+            @"^UnityCrashHandler64\.exe$",
+            @"^notification_helper\.exe$",
+            @"^python\.exe$",
+            @"^pythonw\.exe$",
+            @"^zsync\.exe$",
+            @"^zsyncmake\.exe$"
         };
 
         private static ILogger logger = LogManager.GetLogger();
 
-        public static bool IsPathUninstaller(string path)
+        public static bool IsFileScanExcluded(string path)
         {
-            return uninstallerMasks.Any(a => Regex.IsMatch(path, a, RegexOptions.IgnoreCase));
+            return scanFileExclusionMasks.Any(a => Regex.IsMatch(path, a, RegexOptions.IgnoreCase));
         }
 
         public static void CreateUrlShortcut(string url, string iconPath, string shortcutPath)
@@ -81,35 +93,46 @@ IconIndex=0";
             var rootString = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\";
             void SearchRoot(RegistryHive hive, List<UninstallProgram> programs)
             {
-                var root = RegistryKey.OpenBaseKey(hive, view);
-                var keyList = root.OpenSubKey(rootString);
-                if (keyList == null)
+                using (var root = RegistryKey.OpenBaseKey(hive, view))
                 {
-                    return;
-                }
-
-                foreach (var key in keyList.GetSubKeyNames())
-                {
-                    var prog = root.OpenSubKey(rootString + key);
-                    if (prog == null)
+                    var keyList = root.OpenSubKey(rootString);
+                    if (keyList == null)
                     {
-                        continue;
+                        return;
                     }
 
-                    var program = new UninstallProgram()
+                    foreach (var key in keyList.GetSubKeyNames())
                     {
-                        DisplayIcon = prog.GetValue("DisplayIcon")?.ToString(),
-                        DisplayVersion = prog.GetValue("DisplayVersion")?.ToString(),
-                        DisplayName = prog.GetValue("DisplayName")?.ToString(),
-                        InstallLocation = prog.GetValue("InstallLocation")?.ToString(),
-                        Publisher = prog.GetValue("Publisher")?.ToString(),
-                        UninstallString = prog.GetValue("UninstallString")?.ToString(),
-                        URLInfoAbout = prog.GetValue("URLInfoAbout")?.ToString(),
-                        Path = prog.GetValue("Path")?.ToString(),
-                        RegistryKeyName = key
-                    };
+                        try
+                        {
+                            using (var prog = root.OpenSubKey(rootString + key))
+                            {
+                                if (prog == null)
+                                {
+                                    continue;
+                                }
 
-                    programs.Add(program);
+                                var program = new UninstallProgram()
+                                {
+                                    DisplayIcon = prog.GetValue("DisplayIcon")?.ToString(),
+                                    DisplayVersion = prog.GetValue("DisplayVersion")?.ToString(),
+                                    DisplayName = prog.GetValue("DisplayName")?.ToString(),
+                                    InstallLocation = prog.GetValue("InstallLocation")?.ToString(),
+                                    Publisher = prog.GetValue("Publisher")?.ToString(),
+                                    UninstallString = prog.GetValue("UninstallString")?.ToString(),
+                                    URLInfoAbout = prog.GetValue("URLInfoAbout")?.ToString(),
+                                    Path = prog.GetValue("Path")?.ToString(),
+                                    RegistryKeyName = key
+                                };
+
+                                programs.Add(program);
+                            }
+                        }
+                        catch (System.Security.SecurityException e)
+                        {
+                            logger.Warn(e, $"Failed to read registry key {rootString + key}");
+                        }
+                    }
                 }
             }
 

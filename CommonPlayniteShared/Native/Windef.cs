@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-
 namespace CommonPlayniteShared.Native
 {
     public static class Windef

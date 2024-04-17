@@ -1,5 +1,4 @@
-﻿//using Playnite.Common;
-using Playnite.SDK;
+﻿using Playnite.SDK;
 using Playnite.SDK.Data;
 using CommonPlayniteShared.PluginLibrary.PSNLibrary.Models;//using PSNLibrary.Models;
 using System;
@@ -19,19 +18,19 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Net.Http.Headers;
 using System.Security;
 
-namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
+namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
 {
     public class ApiRedirectResponse
     {
         public string redirectUrl { get; set; }
         public string sid { get; set; }
     }
-    public class PSNAccountClient
+    public class PSNClient
     {
         private static readonly ILogger logger = LogManager.GetLogger();
         private IPlayniteAPI api;
-        public MobileTokens mobileToken;//private MobileTokens mobileToken;
-        //private readonly PSNLibrary library;
+        private MobileTokens mobileToken;
+        private PSNLibrarySettings psnLibrarySettings = null;//private readonly PSNLibrary psnLibrary;
         private readonly string tokenPath;
         private const int pageRequestLimit = 100;
         private const string loginUrl = @"https://web.np.playstation.com/api/session/v1/signin?redirect_uri=https://io.playstation.com/central/auth/login%3FpostSignInURL=https://www.playstation.com/home%26cancelURL=https://www.playstation.com/home&smcid=web:pdc";
@@ -40,17 +39,15 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
         private const string mobileCodeUrl = "https://ca.account.sony.com/api/authz/v3/oauth/authorize?access_type=offline&client_id=09515159-7237-4370-9b40-3806e67c0891&redirect_uri=com.scee.psxandroid.scecompcall%3A%2F%2Fredirect&response_type=code&scope=psn%3Amobile.v2.core%20psn%3Aclientapp";
         private const string mobileTokenUrl = "https://ca.account.sony.com/api/authz/v3/oauth/token";
         private const string mobileTokenAuth = "MDk1MTUxNTktNzIzNy00MzcwLTliNDAtMzgwNmU2N2MwODkxOnVjUGprYTV0bnRCMktxc1A=";
-        private const string playedMobileListUrl = "https://m.np.playstation.com/api/gamelist/v2/users/me/titles?categories=ps4_game,ps5_native_game&limit=250&offset={0}";
+        private const string playedMobileListUrl = "https://m.np.playstation.com/api/gamelist/v2/users/me/titles?categories=ps4_game,ps5_native_game&limit=200&offset={0}";
         private const string trophiesMobileUrl = @"https://m.np.playstation.com/api/trophy/v1/users/me/trophyTitles?limit=250&offset={0}";
-        public const string trophiesWithIdsMobileUrl = @"https://m.np.playstation.com/api/trophy/v1/users/me/titles/trophyTitles?npTitleIds={0}";//private const string trophiesWithIdsMobileUrl = @"https://m.np.playstation.com/api/trophy/v1/users/me/titles/trophyTitles?npTitleIds={0}";
-        private PSNLibrarySettings pSNLibrarySettings = null;
+        private const string trophiesWithIdsMobileUrl = @"https://m.np.playstation.com/api/trophy/v1/users/me/titles/trophyTitles?npTitleIds={0}";
 
-        public PSNAccountClient(IPlayniteAPI api, string PsnPluginUserDataPath)//public PSNAccountClient(PSNLibrary library, IPlayniteAPI api)
+        public PSNClient(string PsnPluginUserDataPath)//public PSNClient(PSNLibrary psnLibrary)
         {
-            //this.library = library;
-            this.api = api;
-            tokenPath = Path.Combine(PsnPluginUserDataPath, "token.json");//Path.Combine(library.GetPluginUserDataPath(), "token.json");
-            Serialization.TryFromJsonFile(Path.Combine(PsnPluginUserDataPath, "config.json"), out pSNLibrarySettings);
+            Serialization.TryFromJsonFile(Path.Combine(PsnPluginUserDataPath, "config.json"), out psnLibrarySettings);//this.psnLibrary = psnLibrary;
+            this.api = API.Instance;//this.api = psnLibrary.PlayniteApi;
+            tokenPath = Path.Combine(PsnPluginUserDataPath, "token.json");//tokenPath = Path.Combine(psnLibrary.GetPluginUserDataPath(), "token.json");
         }
 
         public void Login()
@@ -232,7 +229,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
 
         public async Task CheckAuthentication()
         {
-            string npsso = pSNLibrarySettings?.Npsso;//string npsso = library.SettingsViewModel.Settings.Npsso;
+            string npsso = psnLibrarySettings?.Npsso;//string npsso = library.SettingsViewModel.Settings.Npsso;
             if (!File.Exists(tokenPath) && npsso == null)
             {
                 throw new Exception("User is not authenticated: token file doesn't exist.");
@@ -272,8 +269,6 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
 
         public async Task<List<PlayedTitlesResponseData.PlayedTitlesRetrieve.Title>> GetPlayedTitles()
         {
-            await CheckAuthentication();
-
             var titles = new List<PlayedTitlesResponseData.PlayedTitlesRetrieve.Title>();
 
             var cookieContainer = ReadCookiesFromDisk();
@@ -291,8 +286,6 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
 
         public async Task<List<AccountTitlesResponseData.AccountTitlesRetrieve.Title>> GetAccountTitles()
         {
-            await CheckAuthentication();
-
             var titles = new List<AccountTitlesResponseData.AccountTitlesRetrieve.Title>();
 
             var cookieContainer = ReadCookiesFromDisk();
@@ -322,8 +315,6 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
 
         public async Task<List<PlayedTitlesMobile.PlayedTitleMobile>> GetPlayedTitlesMobile()
         {
-            await CheckAuthentication();
-
             var titles = new List<PlayedTitlesMobile.PlayedTitleMobile>();
 
             var cookieContainer = ReadCookiesFromDisk();
@@ -351,8 +342,6 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
 
         public async Task<List<TrophyTitleMobile>> GetTrohpiesMobile()
         {
-            await CheckAuthentication();
-
             var titles = new List<TrophyTitleMobile>();
 
             var cookieContainer = ReadCookiesFromDisk();
@@ -379,8 +368,6 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
 
         public async Task<List<TrophyTitlesWithIdsMobile.TrophyTitleWithIdsMobile>> GetTrohpiesWithIdsMobile(string[] titleIdsArray)
         {
-            await CheckAuthentication();
-
             var titles = new List<TrophyTitlesWithIdsMobile.TrophyTitleWithIdsMobile>();
 
             var cookieContainer = ReadCookiesFromDisk();
@@ -416,7 +403,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
                     webView.Close();
                 };
 
-                string npsso = pSNLibrarySettings?.Npsso;//string npsso = library.SettingsViewModel.Settings.Npsso;
+                string npsso = psnLibrarySettings?.Npsso;//string npsso = library.SettingsViewModel.Settings.Npsso;
                 Playnite.SDK.HttpCookie npssoCookie = new Playnite.SDK.HttpCookie();
                 npssoCookie.Domain = "ca.account.sony.com";
                 npssoCookie.Value = npsso;
@@ -431,7 +418,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary
 
         public async Task<bool> GetIsUserLoggedIn()
         {
-            string npsso = pSNLibrarySettings?.Npsso;//string npsso = library.SettingsViewModel.Settings.Npsso;
+            string npsso = psnLibrarySettings?.Npsso;//string npsso = library.SettingsViewModel.Settings.Npsso;
             if (!File.Exists(tokenPath) && npsso == null)
             {
                 return false;

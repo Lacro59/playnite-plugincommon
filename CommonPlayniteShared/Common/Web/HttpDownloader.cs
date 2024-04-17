@@ -27,6 +27,11 @@ namespace CommonPlayniteShared.Common.Web
             return downloader.DownloadString(url);
         }
 
+        public static string DownloadString(string url, CancellationToken cancelToken)
+        {
+            return downloader.DownloadString(url, cancelToken);
+        }
+
         public static string DownloadString(string url, Encoding encoding)
         {
             return downloader.DownloadString(url, encoding);
@@ -57,6 +62,11 @@ namespace CommonPlayniteShared.Common.Web
             return downloader.DownloadData(url);
         }
 
+        public static byte[] DownloadData(string url, CancellationToken cancelToken)
+        {
+            return downloader.DownloadData(url, cancelToken);
+        }
+
         public static void DownloadFile(string url, string path)
         {
             downloader.DownloadFile(url, path);
@@ -67,11 +77,23 @@ namespace CommonPlayniteShared.Common.Web
             downloader.DownloadFile(url, path, cancelToken);
         }
 
-        public static HttpStatusCode GetResponseCode(string url)
+        public static HttpStatusCode GetResponseCode(string url, out Dictionary<string, string> headers)
         {
+            headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
             try
             {
-                var response = httpClient.GetAsync(url).GetAwaiter().GetResult();
+                var response = httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, url)).GetAwaiter().GetResult();
+                foreach (var header in response.Headers)
+                {
+                    headers.Add(header.Key, string.Join(",", header.Value));
+                }
+
+                foreach (var header in response.Content.Headers)
+                {
+                    headers.Add(header.Key, string.Join(",", header.Value));
+                }
+
                 return response.StatusCode;
             }
             catch (Exception e)

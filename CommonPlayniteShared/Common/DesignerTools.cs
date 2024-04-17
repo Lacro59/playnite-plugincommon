@@ -9,7 +9,19 @@ namespace CommonPlayniteShared.Common
 {
     public class DesignerTools
     {
-        public static bool IsInDesignMode => DesignerProperties.GetIsInDesignMode(new System.Windows.DependencyObject());
+        private static bool? inDesignMode = null;
 
+        public static bool IsInDesignMode
+        {
+            get
+            {
+                if (inDesignMode == null)
+                {
+                    inDesignMode = DesignerProperties.GetIsInDesignMode(new System.Windows.DependencyObject());
+                }
+
+                return inDesignMode.Value;
+            }
+        }
     }
 }
