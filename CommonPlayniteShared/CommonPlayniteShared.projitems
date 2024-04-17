@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Behaviors\LeftClickContextMenuBehavior.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Behaviors\MediaElementBehaviors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Commands\GlobalCommands.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\BindingTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\DesignerTools.cs" />
@@ -28,6 +29,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\MemoryCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Paths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\ProcessMonitor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\ProcessStarter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Programs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\SafeFileEnumerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Sizes.cs" />
