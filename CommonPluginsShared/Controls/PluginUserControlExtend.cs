@@ -12,7 +12,7 @@ namespace CommonPluginsShared.Controls
 {
     public class PluginUserControlExtend : PluginUserControlExtendBase
     {
-        internal virtual IPluginDatabase _PluginDatabase { get; }
+        internal virtual IPluginDatabase pluginDatabase { get; }
 
 
         public virtual void SetData(Game newContext, PluginDataBaseGameBase PluginGameData)
@@ -21,7 +21,7 @@ namespace CommonPluginsShared.Controls
 
         public override async Task UpdateDataAsync()
         {
-            _updateDataTimer.Stop();
+            UpdateDataTimer.Stop();
             Visibility = MustDisplay ? Visibility.Visible : Visibility.Collapsed;
 
             if (GameContext is null)
@@ -35,7 +35,7 @@ namespace CommonPluginsShared.Controls
                 return;
             }
 
-            PluginDataBaseGameBase PluginGameData = _PluginDatabase.Get(GameContext, true);
+            PluginDataBaseGameBase PluginGameData = pluginDatabase.Get(GameContext, true);
             if (GameContext is null || GameContext.Id != contextGame.Id || (!PluginGameData?.HasData ?? true))
             {
                 Visibility = AlwaysShow ? Visibility.Visible : Visibility.Collapsed;

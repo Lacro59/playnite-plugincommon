@@ -15,8 +15,8 @@ namespace CommonPluginsShared.Controls
     {
         internal static ILogger Logger => LogManager.GetLogger();
 
-        internal virtual IDataContext _ControlDataContext { get; set; }
-        internal DispatcherTimer _updateDataTimer { get; set; }
+        internal virtual IDataContext controlDataContext { get; set; }
+        internal DispatcherTimer UpdateDataTimer { get; set; }
 
 
         #region Properties
@@ -40,7 +40,7 @@ namespace CommonPluginsShared.Controls
         {
             if (sender is PluginUserControlExtendBase obj && e.NewValue != e.OldValue)
             {
-                obj._updateDataTimer.Interval = TimeSpan.FromMilliseconds((int)e.NewValue);
+                obj.UpdateDataTimer.Interval = TimeSpan.FromMilliseconds((int)e.NewValue);
                 obj.RestartTimer();
             }
         }
@@ -107,11 +107,11 @@ namespace CommonPluginsShared.Controls
                 ActiveViewAtCreation = API.Instance.MainView.ActiveDesktopView;
             }
 
-            _updateDataTimer = new DispatcherTimer
+            UpdateDataTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromMilliseconds(Delay)
             };
-            _updateDataTimer.Tick += new EventHandler(UpdateDataEvent);
+            UpdateDataTimer.Tick += new EventHandler(UpdateDataEvent);
         }
 
         private static void SettingsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
@@ -143,11 +143,11 @@ namespace CommonPluginsShared.Controls
         // When game selection is changed
         public override void GameContextChanged(Game oldContext, Game newContext)
         {
-            _updateDataTimer.Stop();
+            UpdateDataTimer.Stop();
 
             Visibility = Visibility.Collapsed;
             SetDefaultDataContext();
-            MustDisplay = AlwaysShow ? AlwaysShow : _ControlDataContext.IsActivated;
+            MustDisplay = AlwaysShow ? AlwaysShow : controlDataContext.IsActivated;
 
             if (newContext is null || !MustDisplay)
             {
@@ -160,7 +160,7 @@ namespace CommonPluginsShared.Controls
         // When plugin database is udpated
         internal virtual void Database_ItemUpdated<TItem>(object sender, ItemUpdatedEventArgs<TItem> e) where TItem : DatabaseObject
         {
-            this.Dispatcher?.BeginInvoke(DispatcherPriority.Render, (Action)delegate
+            _ = Application.Current.Dispatcher?.BeginInvoke(DispatcherPriority.Render, (Action)delegate
             {
                 if (GameContext == null)
                 {
@@ -183,7 +183,7 @@ namespace CommonPluginsShared.Controls
         // When plugin database is udpated
         internal virtual void Database_ItemCollectionChanged<TItem>(object sender, ItemCollectionChangedEventArgs<TItem> e) where TItem : DatabaseObject
         {
-            this.Dispatcher?.BeginInvoke(DispatcherPriority.Render, (Action)delegate
+            _ = Application.Current.Dispatcher?.BeginInvoke(DispatcherPriority.Render, (Action)delegate
             {
                 if (GameContext == null)
                 {
@@ -197,7 +197,7 @@ namespace CommonPluginsShared.Controls
         // When game is updated
         internal virtual void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e)
         {
-            this.Dispatcher?.BeginInvoke(DispatcherPriority.Render, (Action)delegate
+            _ = Application.Current.Dispatcher?.BeginInvoke(DispatcherPriority.Render, (Action)delegate
             {
                 // Publish changes for the currently displayed game if updated
                 if (GameContext == null)
@@ -235,7 +235,7 @@ namespace CommonPluginsShared.Controls
 
         public virtual async Task UpdateDataAsync()
         {
-            _updateDataTimer.Stop();
+            UpdateDataTimer.Stop();
             Visibility = MustDisplay ? Visibility.Visible : Visibility.Collapsed;
 
             if (GameContext is null)
@@ -259,8 +259,8 @@ namespace CommonPluginsShared.Controls
 
         public void RestartTimer()
         {
-            _updateDataTimer.Stop();
-            _updateDataTimer.Start();
+            UpdateDataTimer.Stop();
+            UpdateDataTimer.Start();
         }
     }
 }
