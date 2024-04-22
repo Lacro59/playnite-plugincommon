@@ -160,7 +160,7 @@
         {
             string stringReturn = string.Empty;
 
-            switch (Name.ToLower())
+            switch (Name?.ToLower())
             {
                 #region plugin
                 case "howlongtobeat":
