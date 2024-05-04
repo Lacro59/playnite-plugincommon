@@ -56,20 +56,8 @@ namespace CommonPluginsStores.Gog
         #endregion
 
 
-        protected static GogAccountClient _GogAPI;
-        internal static GogAccountClient GogAPI
-        {
-            get
-            {
-                if (_GogAPI == null)
-                {
-                    _GogAPI = new GogAccountClient(WebViewOffscreen);
-                }
-                return _GogAPI;
-            }
-
-            set => _GogAPI = value;
-        }
+        private static readonly Lazy<GogAccountClient> gogAPI = new Lazy<GogAccountClient>(() => new GogAccountClient(WebViewOffscreen));
+        internal static GogAccountClient GogAPI => gogAPI.Value;
 
 
         private string UserId { get; set; }

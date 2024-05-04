@@ -13,11 +13,11 @@ namespace CommonPluginsStores.Steam.Models
         public string ApiKey { get; set; }
 
 
-        private bool _IsPrivateAccount = true;
-        public bool IsPrivateAccount { get => _IsPrivateAccount; set => SetValue(ref _IsPrivateAccount, value); }
+        private bool isPrivateAccount = true;
+        public bool IsPrivateAccount { get => isPrivateAccount; set => SetValue(ref isPrivateAccount, value); }
 
 
-        private AccountStatus _AccountStatus = AccountStatus.Checking;
-        public AccountStatus AccountStatus { get => _AccountStatus; set => SetValue(ref _AccountStatus, value); }
+        private AccountStatus accountStatus = AccountStatus.Checking;
+        public AccountStatus AccountStatus { get => accountStatus; set => SetValue(ref accountStatus, value); }
     }
 }

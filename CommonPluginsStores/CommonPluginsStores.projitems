@@ -30,6 +30,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\ProfileUserFriends.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\UserData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\WishlistResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IStoreApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\AccountGameInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\AccountWishlist.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\BasicAccountGameInfos.cs" />

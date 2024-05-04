@@ -19,138 +19,108 @@ using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores
 {
-    public enum AuthStatus
-    {
-        Ok,
-        Checking,
-        AuthRequired,
-        PrivateAccount,
-        Failed
-    }
-
-    public enum AccountStatus
-    {
-        Checking,
-        Private,
-        Public
-    }
-
-
-    public abstract class StoreApi : ObservableObject
+    public abstract class StoreApi : ObservableObject, IStoreApi
     {
         internal static ILogger Logger => LogManager.GetLogger();
-        internal static IResourceProvider ResourceProvider => new ResourceProvider();
 
 
-        protected static IWebView _WebViewOffscreen;
-        internal static IWebView WebViewOffscreen
-        {
-            get
-            {
-                if (_WebViewOffscreen == null)
-                {
-                    _WebViewOffscreen = API.Instance.WebViews.CreateOffscreenView();
-                }
-                return _WebViewOffscreen;
-            }
-
-            set => _WebViewOffscreen = value;
-        }
+        private static readonly Lazy<IWebView> webViewOffscreen = new Lazy<IWebView>(() => API.Instance.WebViews.CreateOffscreenView());
+        internal static IWebView WebViewOffscreen => webViewOffscreen.Value;
 
 
         #region Account data
-        protected AccountInfos _CurrentAccountInfos;
+        protected AccountInfos currentAccountInfos;
         public AccountInfos CurrentAccountInfos
         {
             get
             {
-                if (_CurrentAccountInfos == null)
+                if (currentAccountInfos == null)
                 {
-                    _CurrentAccountInfos = GetCurrentAccountInfos();
+                    currentAccountInfos = GetCurrentAccountInfos();
                 }
-                return _CurrentAccountInfos;
+                return currentAccountInfos;
             }
 
-            set => SetValue(ref _CurrentAccountInfos, value);
+            set => SetValue(ref currentAccountInfos, value);
         }
 
-        protected ObservableCollection<AccountInfos> _CurrentFriendsInfos;
+        protected ObservableCollection<AccountInfos> currentFriendsInfos;
         public ObservableCollection<AccountInfos> CurrentFriendsInfos
         {
             get
             {
-                if (_CurrentFriendsInfos == null)
+                if (currentFriendsInfos == null)
                 {
-                    _CurrentFriendsInfos = GetCurrentFriendsInfos();
+                    currentFriendsInfos = GetCurrentFriendsInfos();
                 }
-                return _CurrentFriendsInfos;
+                return currentFriendsInfos;
             }
 
-            set => SetValue(ref _CurrentFriendsInfos, value);
+            set => SetValue(ref currentFriendsInfos, value);
         }
 
-        protected ObservableCollection<AccountGameInfos> _CurrentGamesInfos;
+        protected ObservableCollection<AccountGameInfos> currentGamesInfos;
         public ObservableCollection<AccountGameInfos> CurrentGamesInfos
         {
             get
             {
-                if (_CurrentGamesInfos == null)
+                if (currentGamesInfos == null)
                 {
-                    _CurrentGamesInfos = GetAccountGamesInfos(CurrentAccountInfos);
+                    currentGamesInfos = GetAccountGamesInfos(CurrentAccountInfos);
                 }
-                return _CurrentGamesInfos;
+                return currentGamesInfos;
             }
 
-            set => SetValue(ref _CurrentGamesInfos, value);
+            set => SetValue(ref currentGamesInfos, value);
         }
 
-        protected ObservableCollection<GameDlcOwned> _CurrentGamesDlcsOwned;
+        protected ObservableCollection<GameDlcOwned> currentGamesDlcsOwned;
         public ObservableCollection<GameDlcOwned> CurrentGamesDlcsOwned
         {
             get
             {
-                if (_CurrentGamesDlcsOwned == null)
+                if (currentGamesDlcsOwned == null)
                 {
-                    _CurrentGamesDlcsOwned = LoadGamesDlcsOwned();
-                    if (_CurrentGamesDlcsOwned == null)
+                    currentGamesDlcsOwned = LoadGamesDlcsOwned();
+                    if (currentGamesDlcsOwned == null)
                     {
-                        _CurrentGamesDlcsOwned = GetGamesDlcsOwned();
-                        if (_CurrentGamesDlcsOwned?.Count > 0)
+                        currentGamesDlcsOwned = GetGamesDlcsOwned();
+                        if (currentGamesDlcsOwned?.Count > 0)
                         {
-                            SaveGamesDlcsOwned(_CurrentGamesDlcsOwned);
+                            _ = SaveGamesDlcsOwned(currentGamesDlcsOwned);
                         }
                         else
                         {
-                            _CurrentGamesDlcsOwned = LoadGamesDlcsOwned(false);
+                            currentGamesDlcsOwned = LoadGamesDlcsOwned(false);
                         }
                     }
                 }
 
-                return _CurrentGamesDlcsOwned;
+                return currentGamesDlcsOwned;
             }
 
-            set => SetValue(ref _CurrentGamesDlcsOwned, value);
+            set => SetValue(ref currentGamesDlcsOwned, value);
         }
         #endregion
 
 
-        protected bool? _IsUserLoggedIn;
+        protected bool? isUserLoggedIn;
         public bool IsUserLoggedIn
         {
             get
             {
-                if (_IsUserLoggedIn == null)
+                if (isUserLoggedIn == null)
                 {
-                    _IsUserLoggedIn = GetIsUserLoggedIn();
-                    if ((bool)_IsUserLoggedIn)
+                    isUserLoggedIn = GetIsUserLoggedIn();
+                    if ((bool)isUserLoggedIn)
                     {
-                        SetStoredCookies(GetWebCookies());
+                        _ = SetStoredCookies(GetWebCookies());
                     }
                 }
-                return (bool)_IsUserLoggedIn;
+                return (bool)isUserLoggedIn;
             }
 
-            set => SetValue(ref _IsUserLoggedIn, value);
+            set => SetValue(ref isUserLoggedIn, value);
         }
 
 
@@ -269,7 +239,7 @@ namespace CommonPluginsStores
         #region Configuration
         public void ResetIsUserLoggedIn()
         {
-            _IsUserLoggedIn = null;
+            isUserLoggedIn = null;
         }
 
         protected abstract bool GetIsUserLoggedIn();
@@ -406,7 +376,7 @@ namespace CommonPluginsStores
                             () =>
                             {
                                 ResetIsUserLoggedIn();
-                                CommonPluginsShared.PlayniteTools.ShowPluginSettings(PluginLibrary);
+                                ShowPluginSettings(PluginLibrary);
                             }
                         ));
                     }
