@@ -22,8 +22,8 @@
     <sys:String x:Key="LOCCommonTransfer">Transferir</sys:String>
     <sys:String x:Key="LOCCommonTransferPluginData">Transferir datos del plugin</sys:String>
     <sys:String x:Key="LOCCommonSelectTransferData">Seleccionando los datos para transferir</sys:String>
-    <sys:String x:Key="LOCCommonMergedOrErased">Merged instead of clearing</sys:String>
-    <sys:String x:Key="LOCCommonErasedWarning">Be careful, the target data will be overwritten!</sys:String>
+    <sys:String x:Key="LOCCommonMergedOrErased">Fusionado en lugar de borrado</sys:String>
+    <sys:String x:Key="LOCCommonErasedWarning">Ten cuidado, ¡los datos de destino serán sobreescritos!</sys:String>
 
 
     <!-- Remove plugin data -->
@@ -42,8 +42,8 @@
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: El usuario no está autenticado</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: No hay clave API</sys:String>
-    <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Bad configuration</sys:String>
-    <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: no configuration found</sys:String>
+    <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Configuración incorrecta</sys:String>
+    <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: Configuración no encontrada</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Elementos ignorados</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">Introduce el elemento para ignorar</sys:String>
