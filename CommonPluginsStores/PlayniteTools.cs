@@ -45,7 +45,6 @@ namespace CommonPluginsStores
             string result = inputString;
             result = CommonPluginsShared.PlayniteTools.StringExpandWithoutStore(game, result, fixSeparators);
 
-
             // Steam
             if (result.Contains("{Steam"))
             {
@@ -68,11 +67,10 @@ namespace CommonPluginsStores
                     SteamScreenshotsDir = steamApi.GetScreeshotsPath();
                 }
 
-                result = result.Replace("{SteamId}", SteamId);
-                result = result.Replace("{SteamInstallDir}", SteamInstallDir);
-                result = result.Replace("{SteamScreenshotsDir}", SteamScreenshotsDir);
+                result = SteamId.IsNullOrEmpty() ? result : result.Replace("{SteamId}", SteamId);
+                result = SteamInstallDir.IsNullOrEmpty() ? result : result.Replace("{SteamInstallDir}", SteamInstallDir);
+                result = SteamScreenshotsDir.IsNullOrEmpty() ? result : result.Replace("{SteamScreenshotsDir}", SteamScreenshotsDir);
             }
-
 
             // Ubisoft Connect
             if (result.Contains("{Ubisoft"))
@@ -90,10 +88,9 @@ namespace CommonPluginsStores
                     UbisoftScreenshotsDir = ubisoftAPI.GetScreeshotsPath();
                 }
 
-                result = result.Replace("{UbisoftInstallDir}", UbisoftInstallDir);
-                result = result.Replace("{UbisoftScreenshotsDir}", UbisoftScreenshotsDir);
+                result = UbisoftInstallDir.IsNullOrEmpty() ? result : result.Replace("{UbisoftInstallDir}", UbisoftInstallDir);
+                result = UbisoftScreenshotsDir.IsNullOrEmpty() ? result : result.Replace("{UbisoftScreenshotsDir}", UbisoftScreenshotsDir);
             }
-
 
             return fixSeparators ? Paths.FixSeparators(result) : result;
         }
@@ -108,35 +105,19 @@ namespace CommonPluginsStores
             string result = inputString;
 
             string SteamId = StringExpandWithStores(game, "{SteamId}");
-            if (!SteamId.IsNullOrEmpty())
-            {
-                result = result.Replace(SteamId, "{SteamId}");
-            }
+            result = SteamId.IsNullOrEmpty() ? result : result.Replace(SteamId, "{SteamId}");
 
             string SteamInstallDir = StringExpandWithStores(game, "{SteamInstallDir}");
-            if (!SteamInstallDir.IsNullOrEmpty())
-            {
-                result = result.Replace(SteamInstallDir, "{SteamInstallDir}");
-            }
+            result = SteamInstallDir.IsNullOrEmpty() ? result : result.Replace(SteamInstallDir, "{SteamInstallDir}");
 
             string SteamScreenshotsDir = StringExpandWithStores(game, "{SteamScreenshotsDir}");
-            if (!SteamScreenshotsDir.IsNullOrEmpty())
-            {
-                result = result.Replace(SteamScreenshotsDir, "{SteamScreenshotsDir}");
-            }
+            result = SteamScreenshotsDir.IsNullOrEmpty() ? result : result.Replace(SteamScreenshotsDir, "{SteamScreenshotsDir}");
 
             string UbisoftInstallDir = StringExpandWithStores(game, "{UbisoftInstallDir}");
-            if (!UbisoftInstallDir.IsNullOrEmpty())
-            {
-                result = result.Replace(UbisoftInstallDir, "{UbisoftInstallDir}");
-            }
+            result = UbisoftInstallDir.IsNullOrEmpty() ? result : result.Replace(UbisoftInstallDir, "{UbisoftInstallDir}");
 
             string UbisoftScreenshotsDir = StringExpandWithStores(game, "{UbisoftScreenshotsDir}");
-            if (!UbisoftScreenshotsDir.IsNullOrEmpty())
-            {
-                result = result.Replace(UbisoftScreenshotsDir, "{UbisoftScreenshotsDir}");
-            }
-
+            result = UbisoftScreenshotsDir.IsNullOrEmpty() ? result : result.Replace(UbisoftScreenshotsDir, "{UbisoftScreenshotsDir}");
 
             result = CommonPluginsShared.PlayniteTools.PathToRelativeWithoutStores(game, result);
             return result;
