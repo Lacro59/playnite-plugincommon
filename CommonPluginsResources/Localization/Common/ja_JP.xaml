@@ -42,8 +42,8 @@
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: ユーザーが認証されていません</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: API キーがありません</sys:String>
-    <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Bad configuration</sys:String>
-    <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: no configuration found</sys:String>
+    <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: 設定が不正です</sys:String>
+    <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: 設定が見つかりません</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">無視した項目</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">無視する項目を入力</sys:String>
@@ -73,7 +73,7 @@
     <sys:String x:Key="LOCCommon70to80">70 から 80 時間</sys:String>
     <sys:String x:Key="LOCCommon80to90">80 から 90 時間</sys:String>
     <sys:String x:Key="LOCCommon90to100">90 から 100 時間</sys:String>
-    <sys:String x:Key="LOCCommon100plus">100 時間以</sys:String>
+    <sys:String x:Key="LOCCommon100plus">100 時間以上</sys:String>
     <sys:String x:Key="LOCCommonNoData"></sys:String>
 
     <sys:String x:Key="LOCCommonDefaultSorting"></sys:String>
