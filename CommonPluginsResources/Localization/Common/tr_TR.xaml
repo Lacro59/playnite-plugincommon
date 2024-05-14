@@ -54,7 +54,7 @@
     <sys:String x:Key="LOCCommonGameTime">Oyun zamanı</sys:String>
     
     <sys:String x:Key="LOCCommonSelectFilters">Filtreleri seç</sys:String>
-    <sys:String x:Key="LOCCommonRecentlyAdded">En son eklenmi</sys:String>
+    <sys:String x:Key="LOCCommonRecentlyAdded">En Son Eklenen</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Sadece eksik olanlar</sys:String>
     <sys:String x:Key="LOCCommonMissingData">Verisi eksik olan oyunları etiketle</sys:String>
 
