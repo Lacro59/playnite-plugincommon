@@ -43,6 +43,7 @@
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: користувач не автентифікований</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: немає API ключа</sys:String>
     <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: погана конфігурація</sys:String>
+    <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: конфігурацій не знайдено</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Ігноровані елементи</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">Введіть елемент для ігнорування</sys:String>

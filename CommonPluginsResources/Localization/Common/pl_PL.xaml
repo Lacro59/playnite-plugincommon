@@ -9,7 +9,7 @@
 
     <sys:String x:Key="LOCCommonAddFolder">Dodaj katalog</sys:String>
     <sys:String x:Key="LOCCommonRemoveFolder">Usuń katalog</sys:String>
-    <sys:String x:Key="LOCCommonAddFilePattern">Add file pattern</sys:String>
+    <sys:String x:Key="LOCCommonAddFilePattern">Dodaj szablon pliku</sys:String>
 
     <sys:String x:Key="LOCCommonMargin">Margines</sys:String>
     
@@ -28,7 +28,7 @@
 
     <!-- Remove plugin data -->
 
-    <sys:String x:Key="LOCCommonIsolatedPluginData">Isolated plugin data</sys:String>
+    <sys:String x:Key="LOCCommonIsolatedPluginData">Dane odizolowanej wtyczki</sys:String>
     
     
     <!-- Common Stores -->
@@ -43,6 +43,7 @@
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: użytkownik nie jest uwierzytelniony</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: Brak klucza API</sys:String>
     <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Błędna konfiguracja</sys:String>
+    <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: nie znaleziono konfiguracji</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Ignorowane elementy</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">Wprowadź element do zignorowania</sys:String>
@@ -55,10 +56,10 @@
     <sys:String x:Key="LOCCommonSelectFilters">Wybierz filtry</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Ostatnio dodane</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Tylko brakujące</sys:String>
-    <sys:String x:Key="LOCCommonMissingData">Tag games missing data</sys:String>
+    <sys:String x:Key="LOCCommonMissingData">Oznacz brakujące dane gier</sys:String>
 
     <sys:String x:Key="LOCCommonTotal">Łącznie</sys:String>
-    <sys:String x:Key="LOCCommonCut">Cut</sys:String>
+    <sys:String x:Key="LOCCommonCut">Wytnij</sys:String>
 
     <sys:String x:Key="LOCCommon0to1">00 do 01 godzin</sys:String>
     <sys:String x:Key="LOCCommon1to5">01 do 05 godzin</sys:String>
@@ -79,15 +80,15 @@
 
     <sys:String x:Key="LOCCommonAutoImport">Automatycznie zaimportuj dane podczas aktualizacji biblioteki</sys:String>
 
-    <sys:String x:Key="LOCCommonChartHideOptions">Hide chart options on control</sys:String>
-    <sys:String x:Key="LOCCommonChartAllPeriod">Display all data on chart by default</sys:String>
-    <sys:String x:Key="LOCCommonChartCutPeriod">Display only data with value by default</sys:String>
+    <sys:String x:Key="LOCCommonChartHideOptions">Ukryj opcje wykresu na panelu</sys:String>
+    <sys:String x:Key="LOCCommonChartAllPeriod">Domyślnie wyświetlaj wszystkie dane na wykresie</sys:String>
+    <sys:String x:Key="LOCCommonChartCutPeriod">Wyświetl domyślnie tylko dane z wartością</sys:String>
     
     <sys:String x:Key="LOCCommonExportData">Eksportuj dane</sys:String>
-    <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} data has been exported.
-Do you want to open the directory?</sys:String>
+    <sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">Dane {0} zostały wyeksportowane.
+Czy chcesz otworzyć katalog?</sys:String>
 
-    <sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Impossible to delete cache folder:
+    <sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Nie można usunąć folderu pamięci podręcznej:
 {0}</sys:String>
 
     <!-- CommonMenus -->
@@ -99,7 +100,7 @@ Do you want to open the directory?</sys:String>
     <sys:String x:Key="LOCCommonMenuInExtensions">Pokaż menu wtyczki w podmenu rozszerzeń *</sys:String>
     <sys:String x:Key="LOCCommonIconStore">Pokaż ikonę sklepu</sys:String>
     
-    <sys:String x:Key="LOCCommonSaveColumOrder">Save column order</sys:String>
+    <sys:String x:Key="LOCCommonSaveColumOrder">Zapisz kolejność kolumn</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationFullScreen">Pełny ekran</sys:String>
     <sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Włącz pełnoekranową integrację</sys:String>
@@ -141,7 +142,7 @@ Do you want to open the directory?</sys:String>
 
     <!-- CommonMenus -->
 
-    <sys:String x:Key="LOCCommonViewNoData">View games without plugin data</sys:String>
+    <sys:String x:Key="LOCCommonViewNoData">Wyświetl gry bez danych wtyczki</sys:String>
     
     <sys:String x:Key="LOCCommonRefreshGameData">Odśwież dane</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">Odśwież wszystkie dane</sys:String>
@@ -184,8 +185,8 @@ Proszę spróbować ponownie.</sys:String>
     <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Błąd podczas dodawania tagu z {0}.
 Proszę wyczyść wszystkie tagi w menu wtyczki.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Use old saved data for {0} [{1}]
-You must authenticate.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Użyj zapisanych danych dla {0} [{1}]
+Musisz uwierzytelnić.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Wymiary</sys:String>
