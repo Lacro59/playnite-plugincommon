@@ -197,7 +197,7 @@ Kimlik doğrulamanız gerekmektedir.</sys:String>
 
 
     <sys:String x:Key="LOCCommonMisc">Çeşitli</sys:String>
-    <sys:String x:Key="LOCCommonSelectVariable">Değişken seçin</sys:String>
+    <sys:String x:Key="LOCCommonSelectVariable">Değişken seç</sys:String>
 
 
     <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Dinamik bir söz dizimi eklemek için özel değişkenler kullanılabilir:
