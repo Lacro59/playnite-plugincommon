@@ -188,7 +188,7 @@ namespace CommonPluginsShared
 #else
             if (!IsIgnored) 
             {            
-                logger.Debug(Message); 
+                Logger.Debug(Message); 
             }
 #endif
         }
@@ -242,7 +242,7 @@ namespace CommonPluginsShared
 #else
             if (!IsIgnored) 
             {
-                logger.Error(ex, $"{Message}");
+                Logger.Error(ex, $"{Message}");
             }
 #endif
 
