@@ -48,7 +48,7 @@ namespace CommonPlayniteShared.Common.Web
 
         public string DownloadString(IEnumerable<string> mirrors)
         {
-            logger.Debug($"Downloading string content from multiple mirrors.");
+            //logger.Debug($"Downloading string content from multiple mirrors.");
             foreach (var mirror in mirrors)
             {
                 try
@@ -71,7 +71,7 @@ namespace CommonPlayniteShared.Common.Web
 
         public string DownloadString(string url, CancellationToken cancelToken)
         {
-            logger.Debug($"Downloading string content from {url} using UTF8 encoding.");
+            //logger.Debug($"Downloading string content from {url} using UTF8 encoding.");
 
             try
             {
@@ -91,7 +91,7 @@ namespace CommonPlayniteShared.Common.Web
 
         public string DownloadString(string url, Encoding encoding)
         {
-            logger.Debug($"Downloading string content from {url} using {encoding} encoding.");
+            //logger.Debug($"Downloading string content from {url} using {encoding} encoding.");
             using (var webClient = new WebClient { Encoding = encoding })
             {
                 webClient.Headers.Add("User-Agent", playniteUserAgent);
@@ -106,7 +106,7 @@ namespace CommonPlayniteShared.Common.Web
 
         public string DownloadString(string url, List<Cookie> cookies, Encoding encoding)
         {
-            logger.Debug($"Downloading string content from {url} using cookies and {encoding} encoding.");
+            //logger.Debug($"Downloading string content from {url} using cookies and {encoding} encoding.");
             using (var webClient = new WebClient { Encoding = encoding })
             {
                 webClient.Headers.Add("User-Agent", playniteUserAgent);
@@ -127,7 +127,7 @@ namespace CommonPlayniteShared.Common.Web
 
         public void DownloadString(string url, string path, Encoding encoding)
         {
-            logger.Debug($"Downloading string content from {url} to {path} using {encoding} encoding.");
+            //logger.Debug($"Downloading string content from {url} to {path} using {encoding} encoding.");
             using (var webClient = new WebClient { Encoding = encoding })
             {
                 webClient.Headers.Add("User-Agent", playniteUserAgent);
@@ -138,7 +138,7 @@ namespace CommonPlayniteShared.Common.Web
 
         public byte[] DownloadData(string url)
         {
-            logger.Debug($"Downloading data from {url}.");
+            //logger.Debug($"Downloading data from {url}.");
             using (var webClient = new WebClient())
             {
                 webClient.Headers.Add("User-Agent", playniteUserAgent);
@@ -148,7 +148,7 @@ namespace CommonPlayniteShared.Common.Web
 
         public byte[] DownloadData(string url, CancellationToken cancelToken)
         {
-            logger.Debug($"Downloading data from {url}.");
+            //logger.Debug($"Downloading data from {url}.");
 
             try
             {
@@ -168,7 +168,7 @@ namespace CommonPlayniteShared.Common.Web
 
         public void DownloadFile(string url, string path)
         {
-            logger.Debug($"Downloading data from {url} to {path}.");
+            //logger.Debug($"Downloading data from {url} to {path}.");
             FileSystem.CreateDirectory(Path.GetDirectoryName(path));
             using (var webClient = new WebClient())
             {
@@ -179,7 +179,7 @@ namespace CommonPlayniteShared.Common.Web
 
         public void DownloadFile(string url, string path, CancellationToken cancelToken)
         {
-            logger.Debug($"Downloading data from {url} to {path}.");
+            //logger.Debug($"Downloading data from {url} to {path}.");
             FileSystem.CreateDirectory(Path.GetDirectoryName(path));
 
             try
@@ -199,7 +199,7 @@ namespace CommonPlayniteShared.Common.Web
 
         public async Task DownloadFileAsync(string url, string path, Action<DownloadProgressChangedEventArgs> progressHandler)
         {
-            logger.Debug($"Downloading data async from {url} to {path}.");
+            //logger.Debug($"Downloading data async from {url} to {path}.");
             FileSystem.CreateDirectory(Path.GetDirectoryName(path));
             using (var webClient = new WebClient())
             {
@@ -212,7 +212,7 @@ namespace CommonPlayniteShared.Common.Web
 
         public async Task DownloadFileAsync(IEnumerable<string> mirrors, string path, Action<DownloadProgressChangedEventArgs> progressHandler)
         {
-            logger.Debug($"Downloading data async from multiple mirrors.");
+            //logger.Debug($"Downloading data async from multiple mirrors.");
             foreach (var mirror in mirrors)
             {
                 try
@@ -231,7 +231,7 @@ namespace CommonPlayniteShared.Common.Web
 
         public void DownloadFile(IEnumerable<string> mirrors, string path)
         {
-            logger.Debug($"Downloading data from multiple mirrors.");
+            //logger.Debug($"Downloading data from multiple mirrors.");
             foreach (var mirror in mirrors)
             {
                 try
