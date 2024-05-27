@@ -552,7 +552,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </None>
-    <None Include="ResourcesPlaynite\ItchioLibrary.xaml">
+    <None Include="ResourcesPlaynite\ItchioLocSource.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </None>
@@ -577,7 +577,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </None>
-    <None Include="ResourcesPlaynite\UplayLibrary.xaml">
+    <None Include="ResourcesPlaynite\UplayLocSource.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </None>
