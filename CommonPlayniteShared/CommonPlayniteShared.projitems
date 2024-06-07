@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Behaviors\LeftClickContextMenuBehavior.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Behaviors\MediaElementBehaviors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Behaviors\SelectorBehaviors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Commands\GlobalCommands.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\BindingTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Constants.cs" />
@@ -38,6 +39,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\Web\Downloader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Web\HttpDownloader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Xaml.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Controls\NullIntNumericBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MenuHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Native\Psapi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ObservableObject.cs" />
