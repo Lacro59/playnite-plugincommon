@@ -663,7 +663,7 @@ namespace CommonPluginsShared
             if (result.Contains("{RetroArchScreenshotsDir"))
             {
                 string RetroarchScreenshots = string.Empty;
-                Emulator emulator = API.Instance.Database.Emulators.Where(x => x.Name.Contains("RetroArch", StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+                Emulator emulator = API.Instance.Database.Emulators.FirstOrDefault(x => x.Name.Contains("RetroArch", StringComparison.OrdinalIgnoreCase));
                 if (emulator != null)
                 {
                     string cfg = Path.Combine(emulator.InstallDir, "retroarch.cfg");
@@ -680,10 +680,10 @@ namespace CommonPluginsShared
                                                             .Replace("\"", string.Empty)
                                                             .Trim();
 
-                                if (!File.Exists(RetroarchScreenshots))
+                                if (RetroarchScreenshots.StartsWith(":"))
                                 {
                                     RetroarchScreenshots = RetroarchScreenshots.Replace(":", emulator.InstallDir);
-                                }                          
+                                }
                             }
                         }
                         file.Close();
