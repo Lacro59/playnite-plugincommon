@@ -24,10 +24,6 @@ namespace CommonPluginsStores
         internal static ILogger Logger => LogManager.GetLogger();
 
 
-        private static readonly Lazy<IWebView> webViewOffscreen = new Lazy<IWebView>(() => API.Instance.WebViews.CreateOffscreenView());
-        internal static IWebView WebViewOffscreen => webViewOffscreen.Value;
-
-
         #region Account data
         protected AccountInfos currentAccountInfos;
         public AccountInfos CurrentAccountInfos
@@ -126,25 +122,29 @@ namespace CommonPluginsStores
 
         internal string PluginName { get; }
         internal string ClientName { get; }
+        internal string ClientNameLog { get; }
         internal string Local { get; set; } = "en_US";
 
         internal string PathStoresData { get; }
+        internal string FileUser { get; }
         internal string FileCookies { get; }
         internal string FileGamesDlcsOwned { get; }
 
-        internal StoreToken AuthToken;
+        internal StoreToken AuthToken { get; set; }
         internal ExternalPlugin PluginLibrary { get; }
 
 
-        public StoreApi(string PluginName, ExternalPlugin PluginLibrary, string ClientName)
+        public StoreApi(string pluginName, ExternalPlugin pluginLibrary, string clientName)
         {
-            this.PluginName = PluginName;
-            this.PluginLibrary = PluginLibrary;
-            this.ClientName = ClientName;
+            PluginName = pluginName;
+            PluginLibrary = pluginLibrary;
+            ClientName = clientName;
+            ClientNameLog = clientName.RemoveWhiteSpace();
 
-            PathStoresData = Path.Combine(PlaynitePaths.ExtensionsDataPath, "StoresData");
-            FileCookies = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientName}.json"));
-            FileGamesDlcsOwned = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientName}_GamesDlcsOwned.json"));
+            PathStoresData = Path.Combine(PlaynitePaths.ExtensionsDataPath, "StoresData"); 
+            FileUser = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_User.dat"));
+            FileCookies = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_Cookies.dat"));
+            FileGamesDlcsOwned = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_GamesDlcsOwned.json"));
 
             FileSystem.CreateDirectory(PathStoresData);
         }
@@ -189,11 +189,11 @@ namespace CommonPluginsStores
                 }
             }
 
-            Logger.Info(InfoMessage);
+            Logger.Warn(InfoMessage);
             List<HttpCookie> httpCookies = GetWebCookies();
             if (httpCookies?.Count > 0)
             {
-                SetStoredCookies(httpCookies);
+                _ = SetStoredCookies(httpCookies);
                 return httpCookies;
             }
 
@@ -230,8 +230,11 @@ namespace CommonPluginsStores
         /// <returns></returns>
         internal virtual List<HttpCookie> GetWebCookies()
         {
-            List<HttpCookie> httpCookies = WebViewOffscreen.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName.ToLower()) ?? false)?.ToList() ?? new List<HttpCookie>();
-            return httpCookies;
+            using (IWebView webViewOffscreen = API.Instance.WebViews.CreateOffscreenView())
+            {
+                List<HttpCookie> httpCookies = webViewOffscreen.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName.ToLower()) ?? false)?.ToList() ?? new List<HttpCookie>();
+                return httpCookies;
+            }
         }
         #endregion
 
@@ -255,10 +258,43 @@ namespace CommonPluginsStores
 
         public virtual void Login()
         {
+            throw new NotImplementedException();
         }
 
-        public virtual void Save()
+        public AccountInfos LoadCurrentUser()
         {
+            if (FileSystem.FileExists(FileUser))
+            {
+                try
+                {
+                    string user = Encryption.DecryptFromFile(
+                        FileUser,
+                        Encoding.UTF8,
+                        WindowsIdentity.GetCurrent().User.Value);
+
+                    _ = Serialization.TryFromJson(user, out AccountInfos accountInfos);
+                    return accountInfos;
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, true, PluginName, $"Failed to load {ClientName} user.");
+                }
+            }
+
+            return null;
+        }
+
+        public virtual void SaveCurrentUser()
+        {
+            if (CurrentAccountInfos != null)
+            {
+                FileSystem.PrepareSaveFile(FileUser);
+                Encryption.EncryptToFile(
+                    FileUser,
+                    Serialization.ToJson(CurrentAccountInfos),
+                    Encoding.UTF8,
+                    WindowsIdentity.GetCurrent().User.Value);
+            }
         }
         #endregion
 
@@ -301,10 +337,10 @@ namespace CommonPluginsStores
         /// <summary>
         /// Get a list of a game's achievements with a user's possessions.
         /// </summary>
-        /// <param name="Id"></param>
+        /// <param name="id"></param>
         /// <param name="accountInfos"></param>
         /// <returns></returns>
-        public virtual ObservableCollection<GameAchievement> GetAchievements(string Id, AccountInfos accountInfos)
+        public virtual ObservableCollection<GameAchievement> GetAchievements(string id, AccountInfos accountInfos)
         {
             return null;
         }
@@ -312,10 +348,10 @@ namespace CommonPluginsStores
         /// <summary>
         /// Get achievements SourceLink.
         /// </summary>
-        /// <param name="Id"></param>
+        /// <param name="id"></param>
         /// <param name="accountInfos"></param>
         /// <returns></returns>
-        public virtual SourceLink GetAchievementsSourceLink(string Name, string Id, AccountInfos accountInfos)
+        public virtual SourceLink GetAchievementsSourceLink(string name, string id, AccountInfos accountInfos)
         {
             return null;
         }
@@ -325,7 +361,7 @@ namespace CommonPluginsStores
             return null;
         }
 
-        public virtual bool RemoveWishlist(string Id)
+        public virtual bool RemoveWishlist(string id)
         {
             return false;
         }
@@ -336,17 +372,23 @@ namespace CommonPluginsStores
         /// <summary>
         /// Get game informations.
         /// </summary>
-        /// <param name="Id"></param>
+        /// <param name="id"></param>
         /// <param name="Local"></param>
         /// <returns></returns>
-        public virtual GameInfos GetGameInfos(string Id, AccountInfos accountInfos) { return null; }
+        public virtual GameInfos GetGameInfos(string id, AccountInfos accountInfos) 
+        { 
+            return null;
+        }
 
         /// <summary>
         /// Get dlc informations for a game.
         /// </summary>
-        /// <param name="Id"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        public virtual ObservableCollection<DlcInfos> GetDlcInfos(string Id, AccountInfos accountInfos) { return null; }
+        public virtual ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos) 
+        {
+            return null;
+        }
         #endregion
 
 
@@ -369,7 +411,7 @@ namespace CommonPluginsStores
                         string formatedDateLastWrite = localDateTimeConverter.Convert(DateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
                         Logger.Warn($"Use saved UserData - {formatedDateLastWrite}");
                         API.Instance.Notifications.Add(new NotificationMessage(
-                            $"{PluginName}-{ClientName}-LoadGamesDlcsOwned",
+                            $"{PluginName}-{ClientNameLog}-LoadGamesDlcsOwned",
                             $"{PluginName}" + Environment.NewLine
                                 + string.Format(ResourceProvider.GetString("LOCCommonNotificationOldData"), ClientName, formatedDateLastWrite),
                             NotificationType.Info,
@@ -392,12 +434,12 @@ namespace CommonPluginsStores
             return null;
         }
 
-        private bool SaveGamesDlcsOwned(ObservableCollection<GameDlcOwned> CurrentGamesDlcsOwned)
+        private bool SaveGamesDlcsOwned(ObservableCollection<GameDlcOwned> gamesDlcsOwned)
         {
             try
             {
                 FileSystem.PrepareSaveFile(FileGamesDlcsOwned);
-                File.WriteAllText(FileGamesDlcsOwned, Serialization.ToJson(CurrentGamesDlcsOwned));
+                File.WriteAllText(FileGamesDlcsOwned, Serialization.ToJson(gamesDlcsOwned));
                 return true;
             }
             catch (Exception ex)
@@ -414,11 +456,11 @@ namespace CommonPluginsStores
         }
 
 
-        internal virtual bool DlcIsOwned(string Id)
+        internal virtual bool IsDlcOwned(string id)
         {
             try
             {
-                bool IsOwned = CurrentGamesDlcsOwned.Where(x => x.Id.IsEqual(Id)).Count() != 0;
+                bool IsOwned = CurrentGamesDlcsOwned.Count(x => x.Id.IsEqual(id)) != 0;
                 return IsOwned;
             }
             catch (Exception ex)

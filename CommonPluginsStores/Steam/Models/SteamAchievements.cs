@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Playnite.SDK.Data;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,22 +7,31 @@ namespace CommonPluginsStores.Steam.Models
 {
     public class SteamAchievements
     {
-        public SteamAchievementsResponse response { get; set; }
+        [SerializationPropertyName("response")]
+        public AchievementsResponse Response { get; set; }
     }
 
     public class Achievement
     {
-        public string internal_name { get; set; }
-        public string localized_name { get; set; }
-        public string localized_desc { get; set; }
-        public string icon { get; set; }
-        public string icon_gray { get; set; }
-        public bool hidden { get; set; }
-        public string player_percent_unlocked { get; set; }
+        [SerializationPropertyName("internal_name")]
+        public string InternalName { get; set; }
+        [SerializationPropertyName("localized_name")]
+        public string LocalizedName { get; set; }
+        [SerializationPropertyName("localized_desc")]
+        public string LocalizedDesc { get; set; }
+        [SerializationPropertyName("icon")]
+        public string Icon { get; set; }
+        [SerializationPropertyName("icon_gray")]
+        public string IconGray { get; set; }
+        [SerializationPropertyName("hidden")]
+        public bool Hidden { get; set; }
+        [SerializationPropertyName("player_percent_unlocked")]
+        public string PlayerPercentUnlocked { get; set; }
     }
 
-    public class SteamAchievementsResponse
+    public class AchievementsResponse
     {
-        public List<Achievement> achievements { get; set; }
+        [SerializationPropertyName("achievements")]
+        public List<Achievement> Achievements { get; set; }
     }
 }

@@ -5,12 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CommonPluginsControls.Stores.Steam" 
              xmlns:stores="clr-namespace:CommonPluginsStores" 
-             xmlns:pcmd="clr-namespace:CommonPluginsShared"
+             xmlns:pcmd="clr-namespace:CommonPluginsShared" 
+             xmlns:converters="clr-namespace:CommonPlayniteShared.Converters"
              d:DataContext="{d:DesignInstance Type=local:PanelViewModel, IsDesignTimeCreatable=True}"
-             mc:Ignorable="d" d:DesignWidth="500">
+             mc:Ignorable="d" d:DesignWidth="600">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:InvertedBoolenConverter x:Key="InvertedBoolenConverter" />
+        <converters:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
     </UserControl.Resources>
     
     <Expander Grid.Row="0">
@@ -30,21 +33,24 @@
 				    BorderThickness="{DynamicResource PopupBorderThickness}">
                 
                 <StackPanel>
+                    <!-- User infos -->
                     <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="auto" />
                             <ColumnDefinition Width="10" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="20" />
                             <ColumnDefinition Width="auto" />
                             <ColumnDefinition Width="10" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="auto" />
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Column="0" Style="{StaticResource BaseTextBlockStyle}" Text="{DynamicResource LOCCommonAccountName}" />
-                        <TextBlock Grid.Column="2" Style="{StaticResource BaseTextBlockStyle}" Text="{Binding User.PersonaName, FallbackValue=unknown}" />
+                        <TextBlock Grid.Column="2" Style="{StaticResource BaseTextBlockStyle}" Text="{Binding User.Pseudo}" />
 
-                        <TextBlock Grid.Column="6" HorizontalAlignment="Right">
+                        <Image Grid.Column="4" Source="{Binding User.Avatar, IsAsync=True}" Height="32" Width="32" HorizontalAlignment="Left" />
+
+                        <TextBlock Grid.Column="6" Visibility="{Binding User.Pseudo, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}">
                             <TextBlock.Tag>
                                 <PriorityBinding>
                                     <Binding Path="User.AccountStatus" IsAsync="True" FallbackValue="{x:Static stores:AccountStatus.Checking}" />
@@ -70,74 +76,113 @@
                         </TextBlock>
                     </Grid>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10" Visibility="{Binding UseAuth, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <StackPanel.Tag>
-                            <PriorityBinding>
-                                <Binding Path="User.AccountStatus" IsAsync="True" FallbackValue="{x:Static stores:AccountStatus.Checking}" />
-                                <Binding Source="{x:Static stores:AccountStatus.Checking}" />
-                            </PriorityBinding>
-                        </StackPanel.Tag>
-                        
-                        <StackPanel.Style>
-                            <Style TargetType="StackPanel">
-                                <Setter Property="IsEnabled" Value="False" />
-                                <Style.Triggers>
-                                    <Trigger Property="Tag" Value="{x:Static stores:AccountStatus.Private}">
-                                        <Setter Property="IsEnabled" Value="True" />
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-                        
-                        <Button Content="{DynamicResource LOCSteamAuthenticateLabel}" Command="{Binding LoginCommand}"/>
+                    <!-- Configuration -->
+                    <GroupBox Header="{DynamicResource LOCCommonAccountConfiguration}" Padding="5" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
 
-                        <TextBlock VerticalAlignment="Center" Margin="10,0,0,0">
-                            <TextBlock.Tag>
-                                <PriorityBinding>
-                                    <Binding Path="AuthStatus" IsAsync="True" />
-                                    <Binding Source="{x:Static stores:AuthStatus.Checking}" />
-                                </PriorityBinding>
-                            </TextBlock.Tag>
+                            <CheckBox Grid.Column="0" Content="{DynamicResource LOCCommonHasApiKey}" Name="PART_HasApiKey" IsChecked="{Binding UseApi}" Click="PART_HasApiKey_Click" />
+                            <CheckBox Grid.Column="1" Content="{DynamicResource LOCCommonIsPrivate}" Name="PART_IsPrivate" IsChecked="{Binding UseAuth}" Click="PART_IsPrivate_Click" />
+                        </Grid>
+                    </GroupBox>
 
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
-                                    <Style.Triggers>
-                                        <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.Checking}">
-                                            <Setter Property="Text" Value="{DynamicResource LOCSteamLoginChecking}" />
-                                        </Trigger>
-                                        <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.Ok}">
-                                            <Setter Property="Text" Value="{DynamicResource LOCSteamLoggedIn}" />
-                                        </Trigger>
-                                        <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.AuthRequired}">
-                                            <Setter Property="Text" Value="{DynamicResource LOCSteamNotLoggedIn}" />
-                                        </Trigger>
-                                        <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.PrivateAccount}">
-                                            <Setter Property="Text" Value="{DynamicResource LOCSteamRequiresApiKey}" />
-                                        </Trigger>
-                                        <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.Failed}">
-                                            <Setter Property="Text" Value="{DynamicResource LOCSteamNotLoggedInError}" />
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </StackPanel>
+                    <Border CornerRadius="{DynamicResource ControlCornerRadius}" BorderThickness="{DynamicResource ControlBorderThickness}" 
+                            Background="Transparent" Padding="10,0,10,10" BorderBrush="{DynamicResource NormalBorderBrush}">
 
-                    <StackPanel Orientation="Horizontal" Visibility="{Binding UseApi, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Label Content="{DynamicResource LOCSteamAPIKey}" VerticalAlignment="Center"/>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
+                                        Visibility="{Binding ElementName=PART_IsPrivate, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
 
-                        <PasswordBox local:PasswordBoxAssistant.BindPassword="True"
-                                     local:PasswordBoxAssistant.BoundPassword="{Binding User.ApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=150}"
-                                     Width="300" VerticalAlignment="Center" Margin="10,0,10,0" />
+                                <StackPanel.Tag>
+                                    <PriorityBinding>
+                                        <Binding Path="User.AccountStatus" IsAsync="True" FallbackValue="{x:Static stores:AccountStatus.Checking}" />
+                                        <Binding Source="{x:Static stores:AccountStatus.Checking}" />
+                                    </PriorityBinding>
+                                </StackPanel.Tag>
 
-                        <TextBlock VerticalAlignment="Center">
-                            <Hyperlink NavigateUri="https://steamcommunity.com/dev/apikey"
-                                       Command="{x:Static pcmd:Commands.NavigateUrl}"
-                                       CommandParameter="{Binding NavigateUri, RelativeSource={RelativeSource Self}}">
-                                <Run Text="{DynamicResource LOCSettingsApiKeyUrlText}" />
-                            </Hyperlink>
-                        </TextBlock>
-                    </StackPanel>
+                                <!--StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="IsEnabled" Value="False" />
+                                        <Style.Triggers>
+                                            <Trigger Property="Tag" Value="{x:Static stores:AccountStatus.Private}">
+                                                <Setter Property="IsEnabled" Value="True" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style-->
+
+                                <Button Content="{DynamicResource LOCSteamAuthenticateLabel}" Command="{Binding LoginCommand}"/>
+
+                                <TextBlock VerticalAlignment="Center" Margin="10,0,0,0">
+                                    <TextBlock.Tag>
+                                        <PriorityBinding>
+                                            <Binding Path="AuthStatus" IsAsync="True" />
+                                            <Binding Source="{x:Static stores:AuthStatus.Checking}" />
+                                        </PriorityBinding>
+                                    </TextBlock.Tag>
+
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+                                            <Style.Triggers>
+                                                <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.Checking}">
+                                                    <Setter Property="Text" Value="{DynamicResource LOCSteamLoginChecking}" />
+                                                </Trigger>
+                                                <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.Ok}">
+                                                    <Setter Property="Text" Value="{DynamicResource LOCSteamLoggedIn}" />
+                                                </Trigger>
+                                                <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.AuthRequired}">
+                                                    <Setter Property="Text" Value="{DynamicResource LOCSteamNotLoggedIn}" />
+                                                </Trigger>
+                                                <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.PrivateAccount}">
+                                                    <Setter Property="Text" Value="{DynamicResource LOCSteamRequiresApiKey}" />
+                                                </Trigger>
+                                                <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.Failed}">
+                                                    <Setter Property="Text" Value="{DynamicResource LOCSteamNotLoggedInError}" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
+                                        IsEnabled="{Binding ElementName=PART_IsPrivate, Path=IsChecked, Converter={StaticResource InvertedBoolenConverter}}">
+                                <Label Content="{DynamicResource LOCCommonAccountName}" Width="120" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                <TextBox Text="{Binding User.Pseudo}" Width="250" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
+                                        IsEnabled="{Binding ElementName=PART_IsPrivate, Path=IsChecked, Converter={StaticResource InvertedBoolenConverter}}">
+                                <Label Content="{DynamicResource LOCSteamAccountID}" Width="120" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                <TextBox Text="{Binding User.UserId}" Width="250" Margin="0,0,10,0" />
+                                <TextBlock VerticalAlignment="Center">
+                                    <Hyperlink NavigateUri="https://store.steampowered.com/account"
+                                               Command="{x:Static pcmd:Commands.NavigateUrl}"
+                                               CommandParameter="{Binding NavigateUri, RelativeSource={RelativeSource Self}}">
+                                        <Run Text="{DynamicResource LOCCommonGetAccountID}" />
+                                    </Hyperlink>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
+                                        Visibility="{Binding ElementName=PART_HasApiKey, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Label Content="{DynamicResource LOCSteamAPIKey}" Width="120" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                <PasswordBox local:PasswordBoxAssistant.BindPassword="True" Width="300" Margin="0,0,10,0"
+                                             local:PasswordBoxAssistant.BoundPassword="{Binding User.ApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=150}" />
+                                <TextBlock VerticalAlignment="Center">
+                                    <Hyperlink NavigateUri="https://steamcommunity.com/dev/apikey"
+                                               Command="{x:Static pcmd:Commands.NavigateUrl}"
+                                               CommandParameter="{Binding NavigateUri, RelativeSource={RelativeSource Self}}">
+                                        <Run Text="{DynamicResource LOCSettingsApiKeyUrlText}" />
+                                    </Hyperlink>
+                                </TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </Border>
         </Expander.Content>

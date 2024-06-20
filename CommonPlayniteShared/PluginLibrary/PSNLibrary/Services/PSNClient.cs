@@ -29,7 +29,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
     {
         private static readonly ILogger logger = LogManager.GetLogger();
         private IPlayniteAPI api;
-        private MobileTokens mobileToken;
+        public MobileTokens mobileToken;//private MobileTokens mobileToken;
         private PSNLibrarySettings psnLibrarySettings = null;//private readonly PSNLibrary psnLibrary;
         private readonly string tokenPath;
         private const int pageRequestLimit = 100;

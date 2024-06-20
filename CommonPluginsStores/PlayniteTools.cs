@@ -52,11 +52,14 @@ namespace CommonPluginsStores
 
                 if (SteamId == "null")
                 {
-                    SteamId = steamApi.CurrentUser?.SteamId.ToString() ?? string.Empty;
+                    SteamId = steamApi.CurrentAccountInfos?.UserId.ToString() ?? string.Empty;
                 }
                 if (SteamAccountId == "null")
                 {
-                    SteamAccountId = steamApi.CurrentUser?.AccountId.ToString() ?? string.Empty;
+                    if (steamApi.CurrentAccountInfos != null)
+                    {
+                        SteamAccountId = SteamApi.GetAccountId(ulong.Parse(steamApi.CurrentAccountInfos.UserId)).ToString() ?? string.Empty;
+                    }
                 }
                 if (SteamInstallDir == "null")
                 {

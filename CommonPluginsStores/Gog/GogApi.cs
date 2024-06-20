@@ -8,6 +8,7 @@ using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Models;
 using CommonPluginsStores.Gog.Models;
 using CommonPluginsStores.Models;
+using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
@@ -56,7 +57,7 @@ namespace CommonPluginsStores.Gog
         #endregion
 
 
-        private static readonly Lazy<GogAccountClient> gogAPI = new Lazy<GogAccountClient>(() => new GogAccountClient(WebViewOffscreen));
+        protected static readonly Lazy<GogAccountClient> gogAPI = new Lazy<GogAccountClient>(() => new GogAccountClient(API.Instance.WebViews.CreateOffscreenView()));
         internal static GogAccountClient GogAPI => gogAPI.Value;
 
 
@@ -124,8 +125,9 @@ namespace CommonPluginsStores.Gog
                 }
 
                 string JsonDataString = Tools.GetJsonInString(WebData, "window.profilesData.currentUser = ", "window.profilesData.profileUser = ", "]}};");
-                if (Serialization.TryFromJson(JsonDataString, out ProfileUser profileUser) && long.TryParse(profileUser?.userId, out long UserId))
+                if (Serialization.TryFromJson(JsonDataString, out ProfileUser profileUser))
                 {
+                    string UserId = profileUser.userId;
                     string Avatar = profileUser.avatar.Replace("\\", string.Empty);
                     string Pseudo = profileUser.username;
                     string Link = string.Format(UrlUserFriends, profileUser.username);
@@ -177,8 +179,8 @@ namespace CommonPluginsStores.Gog
                 ObservableCollection<AccountInfos> accountsInfos = new ObservableCollection<AccountInfos>();
                 profileUserFriends.ForEach(x =>
                 {
-                    DateTime.TryParse(x.date_accepted.date, out DateTime DateAdded);
-                    long.TryParse(x.user.id, out long UserId);
+                    _ = DateTime.TryParse(x.date_accepted.date, out DateTime DateAdded);
+                    string UserId = x.user.id;
                     string Avatar = x.user.avatar.Replace("\\", string.Empty);
                     string Pseudo = x.user.username;
                     string Link = string.Format(UrlUserFriends, Pseudo);
@@ -375,35 +377,38 @@ namespace CommonPluginsStores.Gog
                 {
                     try
                     {
-                        WebViewOffscreen.NavigateAndWait(UrlApiWishlist);
-                        response = WebViewOffscreen.GetPageText();
-
-                        if (Serialization.TryFromJson(response, out WishlistResult wishlistResult))
+                        using (IWebView WebViewOffscreen = API.Instance.WebViews.CreateOffscreenView())
                         {
-                            foreach (dynamic gameWishlist in wishlistResult.wishlist)
+                            WebViewOffscreen.NavigateAndWait(UrlApiWishlist);
+                            response = WebViewOffscreen.GetPageText();
+
+                            if (Serialization.TryFromJson(response, out WishlistResult wishlistResult))
                             {
-                                if ((bool)gameWishlist.Value)
+                                foreach (dynamic gameWishlist in wishlistResult.wishlist)
                                 {
-                                    string StoreId = gameWishlist.Name;
-                                    GameInfos gameInfos = GetGameInfos(StoreId, null);
-                                    if (gameInfos != null)
+                                    if ((bool)gameWishlist.Value)
                                     {
-                                        data.Add(new AccountWishlist
+                                        string StoreId = gameWishlist.Name;
+                                        GameInfos gameInfos = GetGameInfos(StoreId, null);
+                                        if (gameInfos != null)
                                         {
-                                            Id = gameInfos.Id,
-                                            Name = gameInfos.Name,
-                                            Link = gameInfos.Link,
-                                            Released = gameInfos.Released,
-                                            Added = null,
-                                            Image = gameInfos.Image
-                                        });
+                                            data.Add(new AccountWishlist
+                                            {
+                                                Id = gameInfos.Id,
+                                                Name = gameInfos.Name,
+                                                Link = gameInfos.Link,
+                                                Released = gameInfos.Released,
+                                                Added = null,
+                                                Image = gameInfos.Image
+                                            });
+                                        }
                                     }
                                 }
                             }
-                        }
-                        else
-                        {
-                            Logger.Warn($"GOG is disconnected");
+                            else
+                            {
+                                Logger.Warn($"GOG is disconnected");
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -421,35 +426,38 @@ namespace CommonPluginsStores.Gog
                 // Without Api
                 try
                 {
-                    WebViewOffscreen.NavigateAndWait(string.Format(UrlWishlist, accountInfos.Pseudo));
-                    response = WebViewOffscreen.GetPageSource();
-
-                    // Get game information for wishlist
-                    if (!response.IsNullOrEmpty())
+                    using (IWebView WebViewOffscreen = API.Instance.WebViews.CreateOffscreenView())
                     {
-                        HtmlParser parser = new HtmlParser();
-                        IHtmlDocument HtmlRequirement = parser.Parse(response);
+                        WebViewOffscreen.NavigateAndWait(string.Format(UrlWishlist, accountInfos.Pseudo));
+                        response = WebViewOffscreen.GetPageSource();
 
-                        foreach (var el in HtmlRequirement.QuerySelectorAll(".product-row-wrapper .product-state-holder"))
+                        // Get game information for wishlist
+                        if (!response.IsNullOrEmpty())
                         {
-                            string StoreId = el.GetAttribute("gog-product");
-                            GameInfos gameInfos = GetGameInfos(StoreId, null);
-                            if (gameInfos != null)
+                            HtmlParser parser = new HtmlParser();
+                            IHtmlDocument HtmlRequirement = parser.Parse(response);
+
+                            foreach (var el in HtmlRequirement.QuerySelectorAll(".product-row-wrapper .product-state-holder"))
                             {
-                                data.Add(new AccountWishlist
+                                string StoreId = el.GetAttribute("gog-product");
+                                GameInfos gameInfos = GetGameInfos(StoreId, null);
+                                if (gameInfos != null)
                                 {
-                                    Id = gameInfos.Id,
-                                    Name = gameInfos.Name,
-                                    Link = gameInfos.Link,
-                                    Released = gameInfos.Released,
-                                    Added = null,
-                                    Image = gameInfos.Image
-                                });
+                                    data.Add(new AccountWishlist
+                                    {
+                                        Id = gameInfos.Id,
+                                        Name = gameInfos.Name,
+                                        Link = gameInfos.Link,
+                                        Released = gameInfos.Released,
+                                        Added = null,
+                                        Image = gameInfos.Image
+                                    });
+                                }
                             }
                         }
-                    }
 
-                    return data;
+                        return data;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -466,8 +474,11 @@ namespace CommonPluginsStores.Gog
             {
                 try
                 {
-                    WebViewOffscreen.NavigateAndWait(string.Format(UrlApiRemoveWishlist, Id));
-                    return WebViewOffscreen.GetPageSource().ToLower().IndexOf("unable to remove product from wishlist") == -1;
+                    using (IWebView WebViewOffscreen = API.Instance.WebViews.CreateOffscreenView())
+                    {
+                        WebViewOffscreen.NavigateAndWait(string.Format(UrlApiRemoveWishlist, Id));
+                        return WebViewOffscreen.GetPageSource().ToLower().IndexOf("unable to remove product from wishlist") == -1;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -555,7 +566,7 @@ namespace CommonPluginsStores.Gog
                         bool IsOwned = false;
                         if (accountInfos != null && accountInfos.IsCurrent)
                         {
-                            IsOwned = DlcIsOwned(el.id.ToString());
+                            IsOwned = IsDlcOwned(el.id.ToString());
                         }
 
                         DlcInfos dlc = new DlcInfos

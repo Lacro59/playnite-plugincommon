@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
 using CommonPluginsStores;
+using CommonPluginsStores.Models;
 using CommonPluginsStores.Steam;
 using CommonPluginsStores.Steam.Models;
 using Playnite.SDK;
@@ -11,18 +15,22 @@ namespace CommonPluginsControls.Stores.Steam
 {
     public class PanelViewModel : ObservableObject
     {
-        internal SteamApi SteamApi { get; set; }
-        public SteamUser User => SteamApi?.CurrentUser;
+        internal IStoreApi StoreApi { get; set; }
+        public AccountInfos User => StoreApi.CurrentAccountInfos;
 
-        public bool UseApi { get; set; } = true;
-        public bool UseAuth { get; set; } = true;
+        private bool useApi = true;
+        public bool UseApi { get => useApi; set => SetValue(ref useApi, value); }
 
-        public AuthStatus AuthStatus => SteamApi == null ? AuthStatus.Failed : SteamApi.IsUserLoggedIn ? AuthStatus.Ok : AuthStatus.AuthRequired;
+        private bool useAuth = true;
+        public bool UseAuth { get => useAuth; set => SetValue(ref useAuth, value); }
+
+        public AuthStatus AuthStatus => StoreApi == null ? AuthStatus.Failed : StoreApi.IsUserLoggedIn ? AuthStatus.Ok : AuthStatus.AuthRequired;
 
         public RelayCommand<object> LoginCommand => new RelayCommand<object>((a) =>
         {
-            SteamApi.Login();
+            StoreApi.Login();
             OnPropertyChanged(nameof(AuthStatus));
+            OnPropertyChanged(nameof(User));
         });
     }
 }

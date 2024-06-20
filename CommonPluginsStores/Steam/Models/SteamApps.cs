@@ -8,17 +8,21 @@ namespace CommonPluginsStores.Steam.Models
 {
     public class SteamApps
     {
-        public Applist applist { get; set; }
+        [SerializationPropertyName("applist")]
+        public Applist AppList { get; set; }
     }
 
     public class App
     {
-        public int appid { get; set; }
-        public string name { get; set; }
+        [SerializationPropertyName("appid")]
+        public int AppId { get; set; }
+        [SerializationPropertyName("name")]
+        public string Name { get; set; }
     }
 
     public class Applist
     {
-        public List<App> apps { get; set; }
+        [SerializationPropertyName("apps")]
+        public List<App> Apps { get; set; }
     }
 }

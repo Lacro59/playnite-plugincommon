@@ -13,7 +13,7 @@ namespace CommonPluginsStores.Origin.Models
     {
         public string externalRefType { get; set; }
         public string externalRefValue { get; set; }
-        public long pidId { get; set; }
+        public string pidId { get; set; }
         //public string email { get; set; }
         public string emailStatus { get; set; }
         public string strength { get; set; }

@@ -6,6 +6,7 @@ using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Models;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Origin.Models;
+using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
@@ -51,20 +52,9 @@ namespace CommonPluginsStores.Origin
         private static string UrlApi3AppsList => UrlApi3 + @"/supercat/{0}/{1}/supercat-PCWIN_MAC-{0}-{1}.json.gz";
         #endregion
 
-        protected static OriginAccountClient _OriginAPI;
-        internal static OriginAccountClient OriginAPI
-        {
-            get
-            {
-                if (_OriginAPI == null)
-                {
-                    _OriginAPI = new OriginAccountClient(WebViewOffscreen);
-                }
-                return _OriginAPI;
-            }
 
-            set => _OriginAPI = value;
-        }
+        protected static readonly Lazy<OriginAccountClient> _OriginAPI = new Lazy<OriginAccountClient>(() => new OriginAccountClient(API.Instance.WebViews.CreateOffscreenView()));
+        internal static OriginAccountClient OriginAPI => _OriginAPI.Value;
 
 
         private Models.AccountInfoResponse accountInfoResponse;
@@ -159,10 +149,10 @@ namespace CommonPluginsStores.Origin
             {
                 if (accountInfoResponse != null)
                 {
-                    long UserId = accountInfoResponse.pid.pidId;
-                    UsersInfos usersInfos = GetUsersInfos(new List<long> { UserId });
+                    string UserId = accountInfoResponse.pid.pidId;
+                    UsersInfos usersInfos = GetUsersInfos(new List<string> { UserId });
 
-                    long.TryParse(usersInfos?.users?.First()?.personaId, out long ClientId);
+                    string ClientId = usersInfos?.users?.First()?.personaId;
                     string Avatar = GetAvatar(UserId);
                     string Pseudo = usersInfos?.users?.First()?.eaId;
                     string Link = string.Format(UrlUserProfile, GetEncoded(UserId));
@@ -197,14 +187,14 @@ namespace CommonPluginsStores.Origin
             try
             {
                 List<HttpHeader> httpHeaders = new List<HttpHeader> 
-                { 
+                {
                     new HttpHeader { Key = "AuthToken", Value = AuthToken.Token },
                     new HttpHeader { Key = "X-Api-Version", Value = "2" },
                     new HttpHeader { Key = "X-Application-Key", Value = "Origin" }
                 };
                 string Url = string.Format(UrlUserFriends, CurrentAccountInfos.UserId);
                 string WebData = Web.DownloadStringData(Url, httpHeaders).GetAwaiter().GetResult();
-                Serialization.TryFromJson(WebData, out FriendsResponse friendsResponse);
+                _ = Serialization.TryFromJson(WebData, out FriendsResponse friendsResponse);
 
                 if (friendsResponse?.entries == null)
                 {
@@ -214,8 +204,8 @@ namespace CommonPluginsStores.Origin
                 ObservableCollection<AccountInfos> accountsInfos = new ObservableCollection<AccountInfos>();
                 friendsResponse?.entries.ForEach(x => 
                 {
-                    long UserId = x.userId;
-                    long ClientId = x.personaId;
+                    string UserId = x.userId;
+                    string ClientId = x.personaId;
                     string Avatar = GetAvatar(UserId);
                     string Pseudo = x.displayName;
                     string Link = string.Format(UrlUserProfile, GetEncoded(UserId));
@@ -529,7 +519,7 @@ namespace CommonPluginsStores.Origin
                     bool IsOwned = false;
                     if (accountInfos != null && accountInfos.IsCurrent)
                     {
-                        IsOwned = DlcIsOwned(Id);
+                        IsOwned = IsDlcOwned(Id);
                     }
                     
                     DlcInfos dlc = new DlcInfos
@@ -596,7 +586,7 @@ namespace CommonPluginsStores.Origin
             try
             {
                 ObservableCollection<GameDlcOwned> GamesDlcsOwned = new ObservableCollection<GameDlcOwned>();
-                long UserId = accountInfoResponse.pid.pidId;
+                long UserId = long.Parse(accountInfoResponse.pid.pidId);
                 List<AccountEntitlementsResponse.Entitlement> UserDataOwned = OriginAPI.GetOwnedGames(UserId, OriginAPI.GetAccessToken());
 
                 UserDataOwned?.ForEach(x =>
@@ -619,7 +609,7 @@ namespace CommonPluginsStores.Origin
         /// </summary>
         /// <param name="UserId"></param>
         /// <returns></returns>
-        private string GetEncoded(long UserId)
+        private string GetEncoded(string UserId)
         {
             if (!IsUserLoggedIn)
             {
@@ -635,7 +625,7 @@ namespace CommonPluginsStores.Origin
                 };
                 string Url = string.Format(UrlApi1EncodePair, UserId);
                 string WebData = Web.DownloadStringData(Url, httpHeaders).GetAwaiter().GetResult();
-                Serialization.TryFromJson(WebData, out Encoded encoded);
+                _ = Serialization.TryFromJson(WebData, out Encoded encoded);
 
                 return encoded?.id;
             }
@@ -653,7 +643,7 @@ namespace CommonPluginsStores.Origin
         /// </summary>
         /// <param name="UserId"></param>
         /// <returns></returns>
-        private string GetAvatar(long UserId)
+        private string GetAvatar(string UserId)
         {
             if (!IsUserLoggedIn)
             {
@@ -669,7 +659,7 @@ namespace CommonPluginsStores.Origin
                 };
                 string Url = string.Format(UrlApi1Avatar, UserId);
                 string WebData = Web.DownloadStringData(Url, httpHeaders).GetAwaiter().GetResult();
-                Serialization.TryFromJson(WebData, out AvatarResponse avatarResponse);
+                _ = Serialization.TryFromJson(WebData, out AvatarResponse avatarResponse);
 
                 if (avatarResponse != null)
                 {
@@ -689,7 +679,7 @@ namespace CommonPluginsStores.Origin
         /// </summary>
         /// <param name="UserIds"></param>
         /// <returns></returns>
-        private UsersInfos GetUsersInfos(List<long> UserIds)
+        private UsersInfos GetUsersInfos(List<string> UserIds)
         {
             if (!IsUserLoggedIn)
             {
@@ -705,7 +695,7 @@ namespace CommonPluginsStores.Origin
                 };
                 string Url = string.Format(UrlApi2UserInfos, string.Join(",", UserIds));
                 string WebData = Web.DownloadStringData(Url, httpHeaders).GetAwaiter().GetResult();
-                Serialization.TryFromJson(WebData, out UsersInfos usersInfos);
+                _ = Serialization.TryFromJson(WebData, out UsersInfos usersInfos);
 
                 return usersInfos;
             }
@@ -803,7 +793,7 @@ namespace CommonPluginsStores.Origin
 
             try
             {
-                long UserId = accountInfoResponse.pid.pidId;
+                string UserId = accountInfoResponse.pid.pidId;
                 string joined = string.Join(",", ids);
                 string UrlPrice = string.Format(UrlApi1Price, LocalCurrency.country, Local, UserId, LocalCurrency.currency, joined);
 

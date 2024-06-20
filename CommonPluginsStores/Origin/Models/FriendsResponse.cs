@@ -23,8 +23,8 @@ namespace CommonPluginsStores.Origin.Models
         public long timestamp { get; set; }
         public string friendType { get; set; }
         public DateTime? dateTime { get; set; }
-        public long userId { get; set; }
-        public long personaId { get; set; }
+        public string userId { get; set; }
+        public string personaId { get; set; }
         public bool favorite { get; set; }
         public string nickName { get; set; }
         public string userType { get; set; }

@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using CommonPluginsStores;
 using CommonPluginsStores.Steam;
 
 namespace CommonPluginsControls.Stores.Steam
@@ -9,7 +10,7 @@ namespace CommonPluginsControls.Stores.Steam
     /// </summary>
     public partial class PanelView : UserControl
     {
-        private readonly PanelViewModel panelViewModel = new PanelViewModel();
+        private PanelViewModel PanelViewModel { get; set; } = new PanelViewModel();
 
         #region Properties
         public bool UseApi
@@ -28,7 +29,7 @@ namespace CommonPluginsControls.Stores.Steam
         {
             if (sender is PanelView obj)
             {
-                obj.panelViewModel.UseApi = (bool)e.NewValue;
+                obj.PanelViewModel.UseApi = (bool)e.NewValue;
             }
         }
 
@@ -49,20 +50,20 @@ namespace CommonPluginsControls.Stores.Steam
         {
             if (sender is PanelView obj)
             {
-                obj.panelViewModel.UseAuth = (bool)e.NewValue;
+                obj.PanelViewModel.UseAuth = (bool)e.NewValue;
             }
         }
 
 
-        public SteamApi SteamApi
+        public IStoreApi StoreApi
         {
             get => (SteamApi)GetValue(steamApiProperty);
             set => SetValue(steamApiProperty, value);
         }
 
         public static readonly DependencyProperty steamApiProperty = DependencyProperty.Register(
-            nameof(SteamApi),
-            typeof(SteamApi),
+            nameof(StoreApi),
+            typeof(IStoreApi),
             typeof(PanelView),
             new FrameworkPropertyMetadata(null, SteamApiPropertyChangedCallback));
 
@@ -70,7 +71,7 @@ namespace CommonPluginsControls.Stores.Steam
         {
             if (sender is PanelView obj)
             {
-                obj.panelViewModel.SteamApi = (SteamApi)e.NewValue;
+                obj.PanelViewModel.StoreApi = (IStoreApi)e.NewValue;
             }
         }
         #endregion
@@ -79,7 +80,17 @@ namespace CommonPluginsControls.Stores.Steam
         {
             InitializeComponent();
 
-            DataContext = panelViewModel;
+            DataContext = PanelViewModel;
+        }
+
+        private void PART_HasApiKey_Click(object sender, RoutedEventArgs e)
+        {
+            UseApi = PanelViewModel.UseApi;
+        }
+
+        private void PART_IsPrivate_Click(object sender, RoutedEventArgs e)
+        {
+            UseAuth = PanelViewModel.UseAuth;
         }
     }
 

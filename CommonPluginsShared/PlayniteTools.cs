@@ -110,6 +110,30 @@ namespace CommonPluginsShared
             return ListEmulators;
         }
 
+        public static Emulator GetGameEmulator(Game game)
+        {
+            if (!game.GameActions.HasItems())
+            {
+                return null;
+            }
+
+            foreach (GameAction gameAction in game.GameActions)
+            {
+                if (gameAction.Type != GameActionType.Emulator)
+                {
+                    continue;
+                }
+
+                Emulator emulator = API.Instance.Database.Emulators[gameAction.EmulatorId];
+                if (emulator != null)
+                {
+                    return emulator;
+                }
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Check if the game used an emulator
         /// </summary>

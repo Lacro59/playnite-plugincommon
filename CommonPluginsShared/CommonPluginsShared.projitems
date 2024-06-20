@@ -35,7 +35,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\ImageConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\ImageToGrayConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\IndexConverter.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Converters\InvertedBoolenConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\ListMoreOneBoolConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\LocalDateConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\LocalDateTimeConverter.cs" />

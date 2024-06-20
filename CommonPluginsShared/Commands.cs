@@ -9,6 +9,7 @@ namespace CommonPluginsShared
 {
     public static class Commands
     {
+        [Obsolete("Use CommonPlayniteShared.Commands.NavigateUrlCommand", true)]
         public static RelayCommand<object> NavigateUrl => new RelayCommand<object>((url) =>
         {
             try
