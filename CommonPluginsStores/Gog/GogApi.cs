@@ -79,7 +79,7 @@ namespace CommonPluginsStores.Gog
 
             if (isLogged)
             {
-                AccountBasicRespose AccountBasic = GogAPI.GetAccountInfo();
+                AccountBasicResponse AccountBasic = GogAPI.GetAccountInfo();
                 AuthToken = new StoreToken
                 {
                     Token = AccountBasic.accessToken

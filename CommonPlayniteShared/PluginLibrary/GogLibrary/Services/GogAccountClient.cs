@@ -1,44 +1,50 @@
-﻿using Playnite.SDK;
+﻿using CommonPlayniteShared.PluginLibrary.GogLibrary.Models;//using GogLibrary.Models;
+using Playnite.SDK;
 using Playnite.SDK.Data;
-using CommonPlayniteShared.Common.Web;
-using CommonPlayniteShared.PluginLibrary.GogLibrary;
-using CommonPlayniteShared.PluginLibrary.GogLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 
 namespace CommonPlayniteShared.PluginLibrary.Services.GogLibrary
 {
     public class GogAccountClient
     {
         private ILogger logger = LogManager.GetLogger();
-        internal IWebView webView;//private IWebView webView;
+        private IWebView webView;
 
         public GogAccountClient(IWebView webView)
         {
             this.webView = webView;
         }
 
-        public bool GetIsUserLoggedIn()
+        public bool GetIsUserLoggedIn() => GetIsUserLoggedIn(webView);
+
+        private static bool GetIsUserLoggedIn(IWebView webView)
         {
-            webView.NavigateAndWait(@"https://www.gog.com/account/getFilteredProducts?hiddenFlag=0&mediaType=1&page=1&sortBy=title");
-            return webView.GetCurrentAddress().Contains("getFilteredProducts");
+            var account = GetAccountInfo(webView);
+            return account?.isLoggedIn ?? false;
         }
 
-        public void Login()
+        public void Login(IWebView backgroundWebView)
         {
-            var loginUrl = Gog.GetLoginUrl();
-            loginUrl = Regex.Replace(loginUrl, $"&gog_lc=.+$", "&gog_lc=" + Gog.EnStoreLocaleString);
-            webView.LoadingChanged += (s, e) =>
+            var loginUrl = "https://www.gog.com/account/";
+
+            webView.LoadingChanged += async (s, e) =>
             {
-                if (webView.GetCurrentAddress().Contains("/on_login_success"))
+                var url = webView.GetCurrentAddress();
+                if (!url.EndsWith("#openlogin"))
                 {
-                    webView.Close();
+                    var loggedIn = await Task.Run(() => GetIsUserLoggedIn(backgroundWebView));
+                    if (loggedIn)
+                    {
+                        webView.Close();
+                    }
                 }
             };
 
+            webView.DeleteDomainCookies(".gog.com");
             webView.Navigate(loginUrl);
             webView.OpenDialog();
         }
@@ -48,44 +54,17 @@ namespace CommonPlayniteShared.PluginLibrary.Services.GogLibrary
             webView.Navigate(@"https://www.gog.com/user/changeLanguage/" + localeCode);
         }
 
-        public AccountBasicRespose GetAccountInfo()
+        public AccountBasicResponse GetAccountInfo() => GetAccountInfo(webView);
+
+        private static AccountBasicResponse GetAccountInfo(IWebView webView)
         {
             webView.NavigateAndWait(@"https://menu.gog.com/v1/account/basic");
             var stringInfo = webView.GetPageText();
-            var accountInfo = Serialization.FromJson<AccountBasicRespose>(stringInfo);
+            var accountInfo = Serialization.FromJson<AccountBasicResponse>(stringInfo);
             return accountInfo;
         }
 
-        public List<LibraryGameResponse> GetOwnedGamesFromPublicAccount(string accountName)
-        {
-            var baseUrl = @"https://www.gog.com/u/{0}/games/stats?sort=recent_playtime&order=desc&page={1}";
-            var url = string.Format(baseUrl, accountName, 1);
-            var gamesList = HttpDownloader.DownloadString(url);
-            var games = new List<LibraryGameResponse>();
-            var libraryData = Serialization.FromJson<PagedResponse<LibraryGameResponse>>(gamesList);
-
-            if (libraryData == null)
-            {
-                logger.Error("GOG library content is empty or private.");
-                return null;
-            }
-
-            games.AddRange(libraryData._embedded.items);
-
-            if (libraryData.pages > 1)
-            {
-                for (int i = 2; i <= libraryData.pages; i++)
-                {
-                    gamesList = HttpDownloader.DownloadString(string.Format(baseUrl, accountName, i));
-                    var pageData = Serialization.FromJson<PagedResponse<LibraryGameResponse>>(gamesList);
-                    games.AddRange(pageData._embedded.items);
-                }
-            }
-
-            return games;
-        }
-
-        public List<LibraryGameResponse> GetOwnedGames(AccountBasicRespose account)
+        public List<LibraryGameResponse> GetOwnedGames(AccountBasicResponse account)
         {
             var baseUrl = @"https://www.gog.com/u/{0}/games/stats?sort=recent_playtime&order=desc&page={1}";
             var stringLibContent = string.Empty;
@@ -120,7 +99,7 @@ namespace CommonPlayniteShared.PluginLibrary.Services.GogLibrary
             catch (Exception e)
             {
                 logger.Error(e, $"Failed to library from new API for account {account.username}, falling back to legacy.");
-                //logger.Debug(stringLibContent);
+                logger.Debug(stringLibContent);
                 return GetOwnedGames();
             }
         }

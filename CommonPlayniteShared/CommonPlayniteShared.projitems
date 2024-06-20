@@ -98,7 +98,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Settings\PlayniteSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Models\WebStoreModels.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Gog.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Models\AccountBasicRespose.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Models\AccountBasicResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Models\GetOwnedGamesResult.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Models\LibraryGameResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Models\PagedResponse.cs" />

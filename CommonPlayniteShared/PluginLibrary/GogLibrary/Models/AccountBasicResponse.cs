@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CommonPlayniteShared.PluginLibrary.GogLibrary.Models
 {
-    public class AccountBasicRespose
+    public class AccountBasicResponse
     {
         public string accessToken;
         public int accessTokenExpires;
