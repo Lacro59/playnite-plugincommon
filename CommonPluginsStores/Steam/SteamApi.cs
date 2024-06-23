@@ -29,6 +29,7 @@ using static CommonPluginsShared.PlayniteTools;
 using System.Net.Http;
 using System.Windows;
 using System.Threading;
+using CommonPluginsStores.Steam.Models.SteamKit;
 
 namespace CommonPluginsStores.Steam
 {
@@ -46,51 +47,45 @@ namespace CommonPluginsStores.Steam
         private static string UrlLogin => UrlSteamCommunity + @"/login/home/?goto=";
         private static string UrlProfileById => UrlSteamCommunity + @"/profiles/{0}";
         private static string UrlProfileByName => UrlSteamCommunity + @"/id/{0}";
+        private static string UrlFriends => UrlSteamCommunity + @"/profiles/{0}/friends";
 
         private static string UrlUserData => UrlStore + @"/dynamicstore/userdata/";
         private static string UrlWishlist => UrlStore + @"/wishlist/profiles/{0}/wishlistdata/?p={1}&v=";
         private static string UrlWishlistRemove => UrlStore + @"/api/removefromwishlist";
 
-        private static string UrlApiAppsList => UrlApi +  @"/ISteamApps/GetAppList/v2/";
-        private static string UrlApiFriendList => UrlApi + @"/ISteamUser/GetFriendList/v1/?key={0}&steamid={1}";
-        private static string UrlApiPlayerSummaries => UrlApi + @"/ISteamUser/GetPlayerSummaries/v2/?key={0}&steamids={1}";
-        private static string UrlGetPlayerAchievements => UrlApi + @"/ISteamUserStats/GetPlayerAchievements/v1/?appid={0}&language={1}&key={2}&steamid={3}";
-        private static string UrlGetGameAchievements => UrlApi + @"/IPlayerService/GetGameAchievements/v1/?format=json&appid={0}&language={1}";
-
         private static string UrlApiGameDetails => UrlStore + @"/api/appdetails?appids={0}&l={1}";
         private static string UrlSteamGame => UrlApi + @"/app/{0}/?l={1}";
-
-        private static string UrlAchievementImg => @"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/{0}/{1}";
         #endregion
 
-
-        protected List<App> appsList;
-
-        internal List<App> AppsList
+        protected List<SteamApp> steamApps;
+        internal List<SteamApp> SteamApps
         {
             get
             {
-                if (appsList == null)
+                if (steamApps == null)
                 {
                     // From cache if exists & not expired
                     if (File.Exists(AppsListPath) && File.GetLastWriteTime(AppsListPath).AddDays(3) > DateTime.Now)
                     {
                         Common.LogDebug(true, "GetSteamAppListFromCache");
-                        appsList = Serialization.FromJsonFile<List<App>>(AppsListPath);
+                        _ = Serialization.TryFromJsonFile(AppsListPath, out steamApps);
                     }
                     // From web
                     else
                     {
                         Common.LogDebug(true, "GetSteamAppsListFromWeb");
-                        appsList = GetSteamAppsList();
+                        steamApps = SteamKit.GetAppList();
+                        if (steamApps?.Count > 0)
+                        {
+                            FileSystem.WriteStringToFileSafe(AppsListPath, Serialization.ToJson(steamApps));
+                        }
                     }
                 }
-                return appsList;
+                return steamApps;
             }
 
-            set => appsList = value;
+            set => steamApps = value;
         }
-
 
         private SteamUserData userData = null;
         public SteamUserData UserData
@@ -117,7 +112,6 @@ namespace CommonPluginsStores.Steam
 
             set => userData = value;
         }
-
 
         #region Paths
         private string AppsListPath { get; }
@@ -236,7 +230,7 @@ namespace CommonPluginsStores.Steam
                 return false;
             }
 
-            string SteamId = CurrentAccountInfos.UserId.ToString();
+            string SteamId = CurrentAccountInfos.UserId;
             string SteamUser = CurrentAccountInfos.Pseudo;
 
             return !SteamId.IsNullOrEmpty() && !SteamUser.IsNullOrEmpty();
@@ -256,7 +250,7 @@ namespace CommonPluginsStores.Steam
 
                     if (CurrentAccountInfos.Avatar.IsNullOrEmpty() && IsConfigured())
                     {
-                        ObservableCollection<AccountInfos> playerSummaries = GetPlayerSummaries(new List<ulong> { ulong.Parse(currentAccountInfos.UserId) });
+                        ObservableCollection<AccountInfos> playerSummaries = GetPlayerSummaries(new List<string> { currentAccountInfos.UserId });
                         CurrentAccountInfos.Avatar = playerSummaries?.FirstOrDefault().Avatar;
                     }
 
@@ -265,46 +259,21 @@ namespace CommonPluginsStores.Steam
                 });
                 return accountInfos;
             }
-            return new AccountInfos();
+            return new AccountInfos { IsCurrent = true };
         }
 
-        // TODO
         protected override ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
         {
             try
             {
-                //List<HttpHeader> httpHeaders = new List<HttpHeader>
-                //{
-                //    new HttpHeader { Key = "AuthToken", Value = AuthToken.Token },
-                //    new HttpHeader { Key = "X-Api-Version", Value = "2" },
-                //    new HttpHeader { Key = "X-Application-Key", Value = "Origin" }
-                //};
-                //string Url = string.Format(UrlUserFriends, CurrentAccountInfos.UserId);
-                //string WebData = Web.DownloadStringData(Url, httpHeaders).GetAwaiter().GetResult();
-                //Serialization.TryFromJson(WebData, out FriendsResponse friendsResponse);
-                //
-                //ObservableCollection<AccountInfos> accountsInfos = new ObservableCollection<AccountInfos>();
-                //friendsResponse?.entries.ForEach(x =>
-                //{
-                //    long UserId = x.userId;
-                //    long ClientId = x.personaId;
-                //    string Avatar = GetAvatar(UserId);
-                //    string Pseudo = x.displayName;
-                //    string Link = string.Format(UrlUserProfile, GetEncoded(UserId));
-                //    DateTime? DateAdded = x.dateTime;
-                //
-                //    AccountInfos userInfos = new AccountInfos
-                //    {
-                //        ClientId = ClientId,
-                //        UserId = UserId,
-                //        Avatar = Avatar,
-                //        Pseudo = Pseudo,
-                //        Link = Link
-                //    };
-                //    accountsInfos.Add(userInfos);
-                //});
-                //
-                //return accountsInfos;
+                ObservableCollection<AccountInfos> accountInfos = null;
+                if (CurrentAccountInfos != null && CurrentAccountInfos.IsCurrent)
+                {
+                    accountInfos = CurrentAccountInfos.IsPrivate || CurrentAccountInfos.ApiKey.IsNullOrEmpty()
+                        ? GetCurrentFriendsInfosByWeb()
+                        : GetCurrentFriendsInfosByApi();
+                }
+                return accountInfos;
             }
             catch (Exception ex)
             {
@@ -314,7 +283,6 @@ namespace CommonPluginsStores.Steam
             return null;
         }
         #endregion
-
 
         #region User details
         // TODO
@@ -369,7 +337,6 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                // Error 403 when no data
                 Common.LogError(ex, false, true, PluginName);
             }
 
@@ -385,35 +352,7 @@ namespace CommonPluginsStores.Steam
                     return new ObservableCollection<GameAchievement>();
                 }
 
-                #region Get game achievements schema
-                string WebData = Web.DownloadStringData(string.Format(UrlGetGameAchievements, id, CodeLang.GetSteamLang(Local))).GetAwaiter().GetResult();
-                ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
-
-                if (Serialization.TryFromJson(WebData, out SteamAchievements steamAchievements))
-                {
-                    if (steamAchievements?.Response?.Achievements == null)
-                    {
-                        return gameAchievements;
-                    }
-
-                    foreach (Achievement achievements in steamAchievements.Response.Achievements)
-                    {
-                        GameAchievement gameAchievement = new GameAchievement
-                        {
-                            Id = achievements.InternalName,
-                            Name = achievements.LocalizedName,
-                            Description = achievements.LocalizedDesc,
-                            UrlUnlocked = achievements.Icon.IsNullOrEmpty() ? string.Empty : string.Format(UrlAchievementImg, id, achievements.Icon),
-                            UrlLocked = achievements.IconGray.IsNullOrEmpty() ? string.Empty : string.Format(UrlAchievementImg, id, achievements.IconGray),
-                            DateUnlocked = default,
-                            Percent = float.Parse(achievements.PlayerPercentUnlocked?.Replace(".", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator) ?? "100"),
-                            IsHidden = achievements.Hidden
-                        };
-                        gameAchievements.Add(gameAchievement);
-                    }
-                }
-                #endregion
-
+                ObservableCollection<GameAchievement> gameAchievements = GetAchievementsSchema(id);
                 if (gameAchievements?.Count() == 0)
                 {
                     return gameAchievements;
@@ -430,12 +369,12 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                // Error 403 when no data
                 Common.LogError(ex, false, true, PluginName);
             }
 
             return null;
         }
+
 
         public override ObservableCollection<AccountWishlist> GetWishlist(AccountInfos accountInfos)
         {
@@ -680,7 +619,6 @@ namespace CommonPluginsStores.Steam
         }
         #endregion
 
-
         #region Games owned
         internal override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
         {
@@ -715,14 +653,14 @@ namespace CommonPluginsStores.Steam
         /// <returns></returns>
         public int GetAppId(string Name)
         {
-            if (AppsList == null)
+            if (SteamApps == null)
             {
-                Logger.Warn("AppsList is empty");
+                Logger.Warn("SteamApps is empty");
                 return 0;
             }
 
-            AppsList.Sort((x, y) => x.AppId.CompareTo(y.AppId));
-            List<int> found = AppsList.FindAll(x => x.Name.IsEqual(Name, true)).Select(x => x.AppId).Distinct().ToList();
+            SteamApps.Sort((x, y) => x.AppId.CompareTo(y.AppId));
+            List<int> found = SteamApps.FindAll(x => x.Name.IsEqual(Name, true)).Select(x => x.AppId).Distinct().ToList();
 
             if (found != null && found.Count > 0)
             {
@@ -740,24 +678,22 @@ namespace CommonPluginsStores.Steam
         }
 
         /// <summary>
-        /// Get name from Steam store with a AppId.
+        /// Get name from Steam store with an appId.
         /// </summary>
-        /// <param name="AppId"></param>
+        /// <param name="appId"></param>
         /// <returns></returns>
-        public string GetGameName(int AppId)
+        public string GetGameName(int appId)
         {
-            App found = AppsList?.Find(x => x.AppId == AppId);
-
+            SteamApp found = SteamApps?.Find(x => x.AppId == appId);
             if (found != null)
             {
-                Common.LogDebug(true, $"Found {ClientName} data for {AppId} - {Serialization.ToJson(found)}");
+                Common.LogDebug(true, $"Found {ClientName} data for {appId} - {Serialization.ToJson(found)}");
                 return found.Name;
             }
             else
             {
-                Logger.Warn("AppsList is empty");
+                Logger.Warn($"Not found {ClientName} data for {appId}");
             }
-
             return string.Empty;
         }
 
@@ -945,7 +881,7 @@ namespace CommonPluginsStores.Steam
                 WebViewOffscreen.NavigateAndWait(UrlUserData);
 
                 string data = WebViewOffscreen.GetPageText();
-                if (Serialization.TryFromJson(data, out userData) && userData?.RgOwnedApps?.Count > 0)
+                if (Serialization.TryFromJson(data, out SteamUserData userData))
                 {
                     SaveUserData(userData);
                 }
@@ -953,15 +889,19 @@ namespace CommonPluginsStores.Steam
                 {
                     userData = LoadUserData();
                 }
-
                 return userData;
             }
         }
 
-        private void SaveUserData(SteamUserData UserData)
+        private void SaveUserData(SteamUserData userData)
         {
+            if (userData?.RgOwnedApps?.Count == 0)
+            {
+                return;
+            }
+
             FileSystem.PrepareSaveFile(FileUserData);
-            File.WriteAllText(FileUserData, Serialization.ToJson(UserData));
+            File.WriteAllText(FileUserData, Serialization.ToJson(userData));
         }
 
 
@@ -973,139 +913,83 @@ namespace CommonPluginsStores.Steam
 
         #region Steam Api
         /// <summary>
-        /// Get the list of all games.
+        /// Get game achievements schema with hidden description & percent & without stats
         /// </summary>
+        /// <param name="id"></param>
         /// <returns></returns>
-        private List<App> GetSteamAppsList()
+        public ObservableCollection<GameAchievement> GetAchievementsSchema(string id)
         {
-            string Url = string.Empty;
-            List<App> AppsList = null;
-            try
+            ObservableCollection<GameAchievement> gameAchievements = null;
+            if (int.TryParse(id, out int appId))
             {
-                string WebData = Web.DownloadStringData(UrlApiAppsList).GetAwaiter().GetResult();
-                if (WebData.IsNullOrEmpty() || WebData == "{\"applist\":{\"apps\":[]}}")
+                List<Models.SteamKit.SteamAchievements> steamAchievements = SteamKit.GetGameAchievements(appId, CodeLang.GetSteamLang(Local));
+                gameAchievements = steamAchievements?.Select(x => new GameAchievement 
                 {
-                    WebData = "{}";
-                }
-                _ = Serialization.TryFromJson(WebData, out Models.SteamApps appsListResponse);
-
-                // Write file for cache
-                if (appsListResponse?.AppList?.Apps != null)
-                {
-                    AppsList = appsListResponse.AppList.Apps;
-                    File.WriteAllText(AppsListPath, Serialization.ToJson(AppsList), Encoding.UTF8);
-                }
-                else
-                {
-                    Logger.Warn($"appsListResponse is empty");
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, $"Failed to load from {Url}");
+                    Id = x.InternalName,
+                    Name = x.LocalizedName,
+                    Description = x.LocalizedDesc,
+                    UrlUnlocked = x.Icon,
+                    UrlLocked = x.IconGray,
+                    DateUnlocked = default,
+                    Percent = x.PlayerPercentUnlocked,
+                    IsHidden = x.Hidden
+                }).ToObservable();
             }
 
-            return AppsList;
+            return gameAchievements;
         }
+        #endregion
 
-        private ObservableCollection<AccountInfos> GetPlayerSummaries(List<ulong> steamIds)
+        #region Steam Api with api key
+        private ObservableCollection<AccountInfos> GetPlayerSummaries(List<string> steamIds)
         {
-            try
+            ObservableCollection<AccountInfos> playerSummaries = null;
+            if (steamIds?.Count > 0 && !currentAccountInfos.ApiKey.IsNullOrEmpty())
             {
-                string url = string.Format(UrlApiPlayerSummaries, currentAccountInfos.ApiKey, string.Join(",", steamIds));
-                string webData = Web.DownloadStringData(url).GetAwaiter().GetResult();
-                _ = Serialization.TryFromJson(webData, out SteamPlayerSummaries steamPlayerSummaries);
-
-                ObservableCollection<AccountInfos> accountsInfos = new ObservableCollection<AccountInfos>();
-                steamPlayerSummaries?.Response.Players?.ForEach(x =>
+                List<Models.SteamKit.SteamPlayerSummaries> steamPlayerSummaries = SteamKit.GetPlayerSummaries(currentAccountInfos.ApiKey, steamIds);
+                playerSummaries = steamPlayerSummaries?.Select(x => new AccountInfos
                 {
-                    AccountInfos userInfos = new AccountInfos
-                    {
-                        UserId = x.SteamId.ToString(),
-                        Avatar = x.AvatarFull,
-                        Pseudo = x.PersonaName,
-                        Link = x.ProfileUrl
-                    };
-                    accountsInfos.Add(userInfos);
-                });
-
-                return accountsInfos;
+                    UserId = x.SteamId,
+                    Avatar = x.AvatarFull,
+                    Pseudo = x.PersonaName,
+                    Link = x.ProfileUrl
+                }).ToObservable();
             }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-            }
-
-            return null;
+            return playerSummaries;
         }
 
         private ObservableCollection<AccountInfos> GetCurrentFriendsInfosByApi()
         {
-            try
+            ObservableCollection<AccountInfos> currentFriendsInfos = null;
+            if (!currentAccountInfos.ApiKey.IsNullOrEmpty() && !currentAccountInfos.UserId.IsNullOrEmpty())
             {
-                string Url = string.Format(UrlApiFriendList, currentAccountInfos.ApiKey, currentAccountInfos.UserId);
-                string WebData = Web.DownloadStringData(Url).GetAwaiter().GetResult();
-                _ = Serialization.TryFromJson(WebData, out SteamFriendsList friendsList);
+                List<SteamFriend> friendList = SteamKit.GetFriendList(currentAccountInfos.ApiKey, currentAccountInfos.UserId);
+                List<string> steamIds = friendList?.Select(x => x.SteamId)?.ToList() ?? new List<string>();
+                currentFriendsInfos = GetPlayerSummaries(steamIds);
 
-                List<ulong> steamIds = friendsList?.FriendsList?.Friends?.Select(x => x.SteamId)?.ToList() ?? new List<ulong>();
-                ObservableCollection<AccountInfos> accountInfos = GetPlayerSummaries(steamIds);
-
-                friendsList?.FriendsList?.Friends?.ForEach(x =>
+                friendList?.ForEach(x =>
                 {
-                    DateTime? DateAdded = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(x.FriendSince);
-                    AccountInfos userInfos = accountInfos?.FirstOrDefault(y => ulong.Parse(y.UserId) == x.SteamId);
-
+                    AccountInfos userInfos = currentFriendsInfos?.FirstOrDefault(y => y.UserId.IsEqual(x.SteamId));
                     if (userInfos != null)
                     {
-                        userInfos.DateAdded = DateAdded;
-                    }
-                    else
-                    {
-                        accountInfos.Add(new AccountInfos
-                        {
-                            UserId = x.SteamId.ToString(),
-                            DateAdded = DateAdded
-                        });
+                        userInfos.DateAdded = x.FriendSince;
                     }
                 });
-
-                return accountInfos;
             }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-            }
-
-            return null;
+            return currentFriendsInfos;
         }
 
         private ObservableCollection<GameAchievement> GetAchievementsByApi(string id, AccountInfos accountInfos, ObservableCollection<GameAchievement> gameAchievements)
         {
-            using (dynamic steamWebAPI = WebAPI.GetInterface("ISteamUserStats", accountInfos.ApiKey))
+            if (int.TryParse(id, out int appId) && !currentAccountInfos.ApiKey.IsNullOrEmpty() && !currentAccountInfos.UserId.IsNullOrEmpty())
             {
-                KeyValue PlayerAchievements = steamWebAPI.GetPlayerAchievements(steamid: accountInfos.UserId, appid: id, l: CodeLang.GetSteamLang(Local));
-
-                if (PlayerAchievements != null && PlayerAchievements.Children != null)
+                List<SteamPlayerAchievement> steamPlayerAchievements = SteamKit.GetPlayerAchievements(currentAccountInfos.ApiKey, appId, accountInfos.UserId, CodeLang.GetSteamLang(Local));
+                steamPlayerAchievements?.ForEach(x =>
                 {
-                    KeyValue PlayerAchievementsData = PlayerAchievements.Children.Find(x => x.Name == "achievements");
-                    if (PlayerAchievementsData != null)
-                    {
-                        foreach (KeyValue AchievementsData in PlayerAchievementsData.Children)
-                        {
-                            string ApiName = AchievementsData.Children.Find(x => x.Name == "apiname").Value;
-                            string Name = AchievementsData.Children.Find(x => x.Name == "name").Value;
-                            string Description = AchievementsData.Children.Find(x => x.Name == "description").Value;
-                            bool achieved = int.Parse(AchievementsData.Children.Find(x => x.Name == "achieved").Value) == 1;
-                            _ = int.TryParse(AchievementsData.Children.Find(x => x.Name == "unlocktime").Value, out int unlocktime);
-                            DateTime DateUnlocked = achieved ? new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(unlocktime).ToLocalTime() : default;
-
-                            gameAchievements.FirstOrDefault(x => x.Id.IsEqual(ApiName)).DateUnlocked = DateUnlocked;
-                        }
-                    }
-                }
-
-                return gameAchievements;
+                    gameAchievements.FirstOrDefault(y => y.Id.IsEqual(x.ApiName)).DateUnlocked = x.UnlockTime;
+                });
             }
+            return gameAchievements;
         }
         #endregion
 
@@ -1120,22 +1004,22 @@ namespace CommonPluginsStores.Steam
             {
                 do
                 {
-                    string UrlById = string.Format(UrlProfileById, accountInfos.UserId) + $"/stats/{id}/achievements?l={lang}";
-                    string UrlByPersona = string.Format(UrlProfileByName, accountInfos.Pseudo) + $"/stats/{id}?l={lang}";
+                    string urlById = string.Format(UrlProfileById, accountInfos.UserId) + $"/stats/{id}/achievements?l={lang}";
+                    string urlByPersona = string.Format(UrlProfileByName, accountInfos.Pseudo) + $"/stats/{id}?l={lang}";
                     needLocalized = false;
 
                     List<HttpCookie> cookies = GetStoredCookies();
-                    string Url = UrlById;
-                    string ResultWeb = Web.DownloadStringData(Url, cookies, string.Empty, true).GetAwaiter().GetResult();
-                    if (ResultWeb.IndexOf("achieveRow") == -1)
+                    string url = urlById;
+                    string resultWeb = Web.DownloadStringData(url, cookies, string.Empty, true).GetAwaiter().GetResult();
+                    if (resultWeb.IndexOf("achieveRow") == -1)
                     {
-                        Url = UrlByPersona;
-                        ResultWeb = Web.DownloadStringData(UrlByPersona, cookies, string.Empty, true).GetAwaiter().GetResult();
+                        url = urlByPersona;
+                        resultWeb = Web.DownloadStringData(urlByPersona, cookies, string.Empty, true).GetAwaiter().GetResult();
                     }
 
-                    if (ResultWeb.IndexOf("achieveRow") > -1)
+                    if (resultWeb.IndexOf("achieveRow") > -1)
                     {
-                        IHtmlDocument htmlDocument = new HtmlParser().Parse(ResultWeb);
+                        IHtmlDocument htmlDocument = new HtmlParser().Parse(resultWeb);
                         int i = 0;
                         IHtmlCollection<IElement> elements = htmlDocument.QuerySelectorAll(".achieveRow");
                         foreach (IElement el in elements)
@@ -1199,7 +1083,7 @@ namespace CommonPluginsStores.Steam
                             lang = CodeLang.GetSteamLang(Local);
                         }
                     }
-                    else if (ResultWeb.IndexOf("The specified profile could not be found") > -1)
+                    else if (resultWeb.IndexOf("The specified profile could not be found") > -1)
                     {
 
                     }
@@ -1211,6 +1095,41 @@ namespace CommonPluginsStores.Steam
             }
 
             return gameAchievements;
+        }
+        
+        private ObservableCollection<AccountInfos> GetCurrentFriendsInfosByWeb()
+        {
+            try
+            {
+                ObservableCollection<AccountInfos> currentFriendsInfos = new ObservableCollection<AccountInfos>();
+                List<HttpCookie> cookies = GetStoredCookies();
+                string url = string.Format(UrlFriends, CurrentAccountInfos.UserId);
+                string resultWeb = Web.DownloadStringData(url, cookies).GetAwaiter().GetResult();
+
+                IHtmlDocument htmlDocument = new HtmlParser().Parse(resultWeb);
+                IHtmlCollection<IElement> elements = htmlDocument.QuerySelectorAll(".friend_block_v2");
+                foreach (IElement el in elements)
+                {
+                    string steamId = el.GetAttribute("data-steamid");
+                    string urlProfil = el.QuerySelector("a.selectable_overlay").GetAttribute("href");
+                    string avatar = el.QuerySelector("img").GetAttribute("src").Replace("_medium", "_full");
+                    string pseudo = el.QuerySelector("div.friend_block_content").InnerHtml.Split(new string[] { "<br>" }, StringSplitOptions.None)[0];
+
+                    currentFriendsInfos.Add(new AccountInfos
+                    {
+                        UserId = steamId,
+                        Avatar = avatar,
+                        Pseudo = pseudo,
+                        Link = urlProfil
+                    });
+                }
+                return currentFriendsInfos;
+            }
+            catch (WebException ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return null;
+            }
         }
         #endregion
 
