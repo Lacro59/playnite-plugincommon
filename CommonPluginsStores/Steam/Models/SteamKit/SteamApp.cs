@@ -6,7 +6,7 @@ namespace CommonPluginsStores.Steam.Models.SteamKit
 {
     public class SteamApp
     {
-        public int AppId { get; set; }
+        public uint AppId { get; set; }
         public string Name { get; set; }
     }
 }

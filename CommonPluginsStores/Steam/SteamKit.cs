@@ -1,4 +1,5 @@
-﻿using CommonPluginsStores.Steam.Models.SteamKit;
+﻿using CommonPluginsShared;
+using CommonPluginsStores.Steam.Models.SteamKit;
 using SteamKit2;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,7 @@ namespace CommonPluginsStores.Steam
                     {
                         appList.Add(new SteamApp
                         {
-                            AppId = data["appid"].AsInteger(),
+                            AppId = data["appid"].AsUnsignedInteger(),
                             Name = data["name"].AsString()
                         });
                     }
@@ -34,19 +35,20 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
+                Common.LogError(ex, false);
                 return null;
             }
         }
         #endregion
 
         #region ISteamUser
-        public static List<SteamFriend> GetFriendList(string apiKey, string steamId)
+        public static List<SteamFriend> GetFriendList(string apiKey, ulong steamId)
         {
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
                 {
-                    ["steamId"] = steamId
+                    ["steamId"] = steamId.ToString()
                 };
 
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("ISteamUser", apiKey))
@@ -57,7 +59,7 @@ namespace CommonPluginsStores.Steam
                     {
                         friendList.Add(new SteamFriend
                         {
-                            SteamId = data["steamid"].AsString(),
+                            SteamId = data["steamid"].AsUnsignedLong(),
                             Relationship = data["relationship"].AsString(),
                             FriendSince = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(data["friend_since"].AsInteger()).ToLocalTime(),
                         });
@@ -67,12 +69,13 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
+                Common.LogError(ex, false);
                 return null;
             }
         }
 
 
-        public static List<SteamPlayerSummaries> GetPlayerSummaries(string apiKey, List<string> steamIds)
+        public static List<SteamPlayerSummaries> GetPlayerSummaries(string apiKey, List<ulong> steamIds)
         {
             try
             {
@@ -111,19 +114,20 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
+                Common.LogError(ex, false);
                 return null;
             }
         }
         #endregion
 
         #region IPlayerService
-        public static List<SteamOwnedGame> GetOwnedGames(string apiKey, string steamId)
+        public static List<SteamOwnedGame> GetOwnedGames(string apiKey, ulong steamId)
         {
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
                 {
-                    ["steamId"] = steamId
+                    ["steamId"] = steamId.ToString()
                 };
 
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("IPlayerService", apiKey))
@@ -150,18 +154,19 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
+                Common.LogError(ex, false);
                 return null;
             }
         }
 
 
-        public static List<SteamAchievements> GetGameAchievements(int appId)
+        public static List<SteamAchievements> GetGameAchievements(uint appId)
         {
             return GetGameAchievements(appId, "english");
         }
 
 
-        public static List<SteamAchievements> GetGameAchievements(int appId, string language)
+        public static List<SteamAchievements> GetGameAchievements(uint appId, string language)
         {
             try
             {
@@ -193,18 +198,19 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
+                Common.LogError(ex, false);
                 return null;
             }
         }
         #endregion
 
         #region ISteamUserStats
-        public static SteamSchema GetSchemaForGame(string apiKey, int appId)
+        public static SteamSchema GetSchemaForGame(string apiKey, uint appId)
         {
             return GetSchemaForGame(apiKey, appId, "english");
         }
 
-        public static SteamSchema GetSchemaForGame(string apiKey, int appId, string language)
+        public static SteamSchema GetSchemaForGame(string apiKey, uint appId, string language)
         {
             try
             {
@@ -244,19 +250,20 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
+                Common.LogError(ex, false);
                 return null;
             }
         }
 
 
-        public static List<SteamStats> GetUserStatsForGame(string apiKey, int appId, string steamId)
+        public static List<SteamStats> GetUserStatsForGame(string apiKey, uint appId, ulong steamId)
         {
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
                 {
                     ["appId"] = appId.ToString(),
-                    ["steamId"] = steamId
+                    ["steamId"] = steamId.ToString()
                 };
 
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("ISteamUserStats", apiKey))
@@ -276,24 +283,25 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
+                Common.LogError(ex, false);
                 return null;
             }
         }
 
 
-        public static List<SteamPlayerAchievement> GetPlayerAchievements(string apiKey, int appId, string steamId)
+        public static List<SteamPlayerAchievement> GetPlayerAchievements(string apiKey, uint appId, ulong steamId)
         {
             return GetPlayerAchievements(apiKey, appId, steamId, "english");
         }
 
-        public static List<SteamPlayerAchievement> GetPlayerAchievements(string apiKey, int appId, string steamId, string language)
+        public static List<SteamPlayerAchievement> GetPlayerAchievements(string apiKey, uint appId, ulong steamId, string language)
         {
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
                 {
                     ["appId"] = appId.ToString(),
-                    ["steamId"] = steamId,
+                    ["steamId"] = steamId.ToString(),
                     ["l"] = language
                 };
 
@@ -317,6 +325,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
+                Common.LogError(ex, false);
                 return null;
             }
         }

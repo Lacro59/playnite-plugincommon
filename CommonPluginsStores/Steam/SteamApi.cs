@@ -248,9 +248,9 @@ namespace CommonPluginsStores.Steam
                 {
                     Thread.Sleep(1000);
 
-                    if (CurrentAccountInfos.Avatar.IsNullOrEmpty() && IsConfigured())
+                    if (CurrentAccountInfos.Avatar.IsNullOrEmpty() && IsConfigured() && ulong.TryParse(currentAccountInfos.UserId, out ulong steamId))
                     {
-                        ObservableCollection<AccountInfos> playerSummaries = GetPlayerSummaries(new List<string> { currentAccountInfos.UserId });
+                        ObservableCollection<AccountInfos> playerSummaries = GetPlayerSummaries(new List<ulong> { steamId });
                         CurrentAccountInfos.Avatar = playerSummaries?.FirstOrDefault().Avatar;
                     }
 
@@ -347,12 +347,12 @@ namespace CommonPluginsStores.Steam
         {
             try
             {
-                if (id.IsNullOrEmpty() || id == "0")
+                if (!uint.TryParse(id, out uint appId))
                 {
                     return new ObservableCollection<GameAchievement>();
                 }
 
-                ObservableCollection<GameAchievement> gameAchievements = GetAchievementsSchema(id);
+                ObservableCollection<GameAchievement> gameAchievements = GetAchievementsSchema(appId);
                 if (gameAchievements?.Count() == 0)
                 {
                     return gameAchievements;
@@ -361,8 +361,8 @@ namespace CommonPluginsStores.Steam
                 if (accountInfos != null && accountInfos.IsCurrent)
                 {
                     gameAchievements = accountInfos.IsPrivate || accountInfos.ApiKey.IsNullOrEmpty()
-                        ? GetAchievementsByWeb(id, accountInfos, gameAchievements)
-                        : GetAchievementsByApi(id, accountInfos, gameAchievements);
+                        ? GetAchievementsByWeb(appId, accountInfos, gameAchievements)
+                        : GetAchievementsByApi(appId, accountInfos, gameAchievements);
                 }
 
                 return gameAchievements;
@@ -521,30 +521,30 @@ namespace CommonPluginsStores.Steam
 
 
         #region Game
-        public override GameInfos GetGameInfos(string Id, AccountInfos accountInfos)
+        public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
         {
             try
             {
-                string Url = string.Format(UrlApiGameDetails, Id, CodeLang.GetSteamLang(Local));
+                string Url = string.Format(UrlApiGameDetails, id, CodeLang.GetSteamLang(Local));
                 string WebData = Web.DownloadStringData(Url).GetAwaiter().GetResult();
 
                 if (Serialization.TryFromJson(WebData, out Dictionary<string, StoreAppDetailsResult> parsedData))
                 {
-                    StoreAppDetailsResult storeAppDetailsResult = parsedData[Id];
+                    StoreAppDetailsResult storeAppDetailsResult = parsedData[id];
 
                     GameInfos gameInfos = new GameInfos
                     {
                         Id = storeAppDetailsResult?.data.steam_appid.ToString(),
                         Name = storeAppDetailsResult?.data.name,
-                        Link = string.Format(UrlSteamGame, Id, CodeLang.GetSteamLang(Local)),
+                        Link = string.Format(UrlSteamGame, id, CodeLang.GetSteamLang(Local)),
                         Image = storeAppDetailsResult?.data.header_image,
                         Description = ParseDescription(storeAppDetailsResult?.data.about_the_game)
                     };
 
                     // DLC
-                    List<int> DlcsIdSteam = storeAppDetailsResult?.data.dlc ?? new List<int>();
-                    List<int> DlcsIdSteamDb = GetDlcFromSteamDb(storeAppDetailsResult?.data.steam_appid.ToString());
-                    List<int> DlcsId = DlcsIdSteam.Union(DlcsIdSteamDb).Distinct().OrderBy(x => x).ToList();
+                    List<uint> DlcsIdSteam = storeAppDetailsResult?.data.dlc ?? new List<uint>();
+                    List<uint> DlcsIdSteamDb = GetDlcFromSteamDb(storeAppDetailsResult?.data.steam_appid ?? 0);
+                    List<uint> DlcsId = DlcsIdSteam.Union(DlcsIdSteamDb).Distinct().OrderBy(x => x).ToList();
 
                     if (DlcsId.Count > 0)
                     {
@@ -567,13 +567,13 @@ namespace CommonPluginsStores.Steam
             return null;
         }
 
-        public override ObservableCollection<DlcInfos> GetDlcInfos(string Id, AccountInfos accountInfos)
+        public override ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos)
         {
-            GameInfos gameInfos = GetGameInfos(Id, accountInfos);
+            GameInfos gameInfos = GetGameInfos(id, accountInfos);
             return gameInfos?.Dlcs ?? new ObservableCollection<DlcInfos>();
         }
 
-        public ObservableCollection<DlcInfos> GetDlcInfos(List<int> dlcs, AccountInfos accountInfos)
+        public ObservableCollection<DlcInfos> GetDlcInfos(List<uint> dlcs, AccountInfos accountInfos)
         {
             try
             {
@@ -651,7 +651,7 @@ namespace CommonPluginsStores.Steam
         /// </summary>
         /// <param name="Name"></param>
         /// <returns></returns>
-        public int GetAppId(string Name)
+        public uint GetAppId(string Name)
         {
             if (SteamApps == null)
             {
@@ -660,7 +660,7 @@ namespace CommonPluginsStores.Steam
             }
 
             SteamApps.Sort((x, y) => x.AppId.CompareTo(y.AppId));
-            List<int> found = SteamApps.FindAll(x => x.Name.IsEqual(Name, true)).Select(x => x.AppId).Distinct().ToList();
+            List<uint> found = SteamApps.FindAll(x => x.Name.IsEqual(Name, true)).Select(x => x.AppId).Distinct().ToList();
 
             if (found != null && found.Count > 0)
             {
@@ -682,7 +682,7 @@ namespace CommonPluginsStores.Steam
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        public string GetGameName(int appId)
+        public string GetGameName(uint appId)
         {
             SteamApp found = SteamApps?.Find(x => x.AppId == appId);
             if (found != null)
@@ -915,12 +915,12 @@ namespace CommonPluginsStores.Steam
         /// <summary>
         /// Get game achievements schema with hidden description & percent & without stats
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="appId"></param>
         /// <returns></returns>
-        public ObservableCollection<GameAchievement> GetAchievementsSchema(string id)
+        public ObservableCollection<GameAchievement> GetAchievementsSchema(uint appId)
         {
             ObservableCollection<GameAchievement> gameAchievements = null;
-            if (int.TryParse(id, out int appId))
+            if (appId > 0)
             {
                 List<Models.SteamKit.SteamAchievements> steamAchievements = SteamKit.GetGameAchievements(appId, CodeLang.GetSteamLang(Local));
                 gameAchievements = steamAchievements?.Select(x => new GameAchievement 
@@ -941,7 +941,7 @@ namespace CommonPluginsStores.Steam
         #endregion
 
         #region Steam Api with api key
-        private ObservableCollection<AccountInfos> GetPlayerSummaries(List<string> steamIds)
+        private ObservableCollection<AccountInfos> GetPlayerSummaries(List<ulong> steamIds)
         {
             ObservableCollection<AccountInfos> playerSummaries = null;
             if (steamIds?.Count > 0 && !currentAccountInfos.ApiKey.IsNullOrEmpty())
@@ -961,15 +961,15 @@ namespace CommonPluginsStores.Steam
         private ObservableCollection<AccountInfos> GetCurrentFriendsInfosByApi()
         {
             ObservableCollection<AccountInfos> currentFriendsInfos = null;
-            if (!currentAccountInfos.ApiKey.IsNullOrEmpty() && !currentAccountInfos.UserId.IsNullOrEmpty())
+            if (!currentAccountInfos.ApiKey.IsNullOrEmpty() && ulong.TryParse(currentAccountInfos.UserId, out ulong steamId))
             {
-                List<SteamFriend> friendList = SteamKit.GetFriendList(currentAccountInfos.ApiKey, currentAccountInfos.UserId);
-                List<string> steamIds = friendList?.Select(x => x.SteamId)?.ToList() ?? new List<string>();
+                List<SteamFriend> friendList = SteamKit.GetFriendList(currentAccountInfos.ApiKey, steamId);
+                List<ulong> steamIds = friendList?.Select(x => x.SteamId)?.ToList() ?? new List<ulong>();
                 currentFriendsInfos = GetPlayerSummaries(steamIds);
 
                 friendList?.ForEach(x =>
                 {
-                    AccountInfos userInfos = currentFriendsInfos?.FirstOrDefault(y => y.UserId.IsEqual(x.SteamId));
+                    AccountInfos userInfos = currentFriendsInfos?.FirstOrDefault(y => y.UserId.IsEqual(x.SteamId.ToString()));
                     if (userInfos != null)
                     {
                         userInfos.DateAdded = x.FriendSince;
@@ -979,11 +979,11 @@ namespace CommonPluginsStores.Steam
             return currentFriendsInfos;
         }
 
-        private ObservableCollection<GameAchievement> GetAchievementsByApi(string id, AccountInfos accountInfos, ObservableCollection<GameAchievement> gameAchievements)
+        private ObservableCollection<GameAchievement> GetAchievementsByApi(uint appId, AccountInfos accountInfos, ObservableCollection<GameAchievement> gameAchievements)
         {
-            if (int.TryParse(id, out int appId) && !currentAccountInfos.ApiKey.IsNullOrEmpty() && !currentAccountInfos.UserId.IsNullOrEmpty())
+            if (appId > 0 && ulong.TryParse(accountInfos.UserId, out ulong steamId) && !currentAccountInfos.ApiKey.IsNullOrEmpty())
             {
-                List<SteamPlayerAchievement> steamPlayerAchievements = SteamKit.GetPlayerAchievements(currentAccountInfos.ApiKey, appId, accountInfos.UserId, CodeLang.GetSteamLang(Local));
+                List<SteamPlayerAchievement> steamPlayerAchievements = SteamKit.GetPlayerAchievements(currentAccountInfos.ApiKey, appId, steamId, CodeLang.GetSteamLang(Local));
                 steamPlayerAchievements?.ForEach(x =>
                 {
                     gameAchievements.FirstOrDefault(y => y.Id.IsEqual(x.ApiName)).DateUnlocked = x.UnlockTime;
@@ -994,7 +994,7 @@ namespace CommonPluginsStores.Steam
         #endregion
 
         #region Steam Web
-        private ObservableCollection<GameAchievement> GetAchievementsByWeb(string id, AccountInfos accountInfos, ObservableCollection<GameAchievement> gameAchievements)
+        private ObservableCollection<GameAchievement> GetAchievementsByWeb(uint appId, AccountInfos accountInfos, ObservableCollection<GameAchievement> gameAchievements)
         {
             string lang = "english";
             bool needLocalized = false;
@@ -1004,8 +1004,8 @@ namespace CommonPluginsStores.Steam
             {
                 do
                 {
-                    string urlById = string.Format(UrlProfileById, accountInfos.UserId) + $"/stats/{id}/achievements?l={lang}";
-                    string urlByPersona = string.Format(UrlProfileByName, accountInfos.Pseudo) + $"/stats/{id}?l={lang}";
+                    string urlById = string.Format(UrlProfileById, accountInfos.UserId) + $"/stats/{appId}/achievements?l={lang}";
+                    string urlByPersona = string.Format(UrlProfileByName, accountInfos.Pseudo) + $"/stats/{appId}?l={lang}";
                     needLocalized = false;
 
                     List<HttpCookie> cookies = GetStoredCookies();
@@ -1134,9 +1134,13 @@ namespace CommonPluginsStores.Steam
         #endregion
 
 
-        private List<int> GetDlcFromSteamDb(string AppId)
+        private List<uint> GetDlcFromSteamDb(uint appId)
         {
-            List<int> Dlcs = new List<int>();
+            List<uint> Dlcs = new List<uint>();
+            if (appId == 0)
+            {
+                return Dlcs;
+            }
 
             try
             {
@@ -1147,7 +1151,7 @@ namespace CommonPluginsStores.Steam
 
                 using (IWebView WebViewOffScreen = API.Instance.WebViews.CreateOffscreenView(settings))
                 {
-                    WebViewOffScreen.NavigateAndWait(string.Format(SteamDbDlc, AppId));
+                    WebViewOffScreen.NavigateAndWait(string.Format(SteamDbDlc, appId));
                     string data = WebViewOffScreen.GetPageSource();
 
                     IHtmlDocument htmlDocument = new HtmlParser().Parse(data);
@@ -1157,9 +1161,7 @@ namespace CommonPluginsStores.Steam
                         foreach (IElement el in SectionDlcs)
                         {
                             string DlcIdString = el.QuerySelector("td a")?.InnerHtml;
-                            _ = int.TryParse(DlcIdString, out int DlcId);
-
-                            if (DlcId != 0)
+                            if (uint.TryParse(DlcIdString, out uint DlcId))
                             {
                                 Dlcs.Add(DlcId);
                             }

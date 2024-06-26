@@ -103,10 +103,10 @@ namespace CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared
 
             public string type;
             public string name;
-            public int steam_appid;
+            public uint steam_appid;
             public int required_age;
             public bool is_free;
-            public List<int> dlc;
+            public List<uint> dlc;
             public string header_image;
             public string background;
             public string detailed_description;
