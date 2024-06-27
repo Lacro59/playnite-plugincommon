@@ -40,11 +40,11 @@
     <sys:String x:Key="LOCCommonLoginChecking">Verificando status da autenticação…</sys:String>
     <sys:String x:Key="LOCCommonPrivateChecking">Verificando status privado…</sys:String>
 
-    <sys:String x:Key="LOCCommonAccountConfiguration">Account configuration</sys:String>
-    <sys:String x:Key="LOCCommonIsPrivate">Is private</sys:String>
-    <sys:String x:Key="LOCCommonHasApiKey">Has api key</sys:String>
-    <sys:String x:Key="LOCCommonControlConfiguration">Control configuration</sys:String>
-    <sys:String x:Key="LOCCommonGetAccountID">Get account ID</sys:String>
+    <sys:String x:Key="LOCCommonAccountConfiguration">Configuração de conta</sys:String>
+    <sys:String x:Key="LOCCommonIsPrivate">É privado</sys:String>
+    <sys:String x:Key="LOCCommonHasApiKey">Possui chave de API</sys:String>
+    <sys:String x:Key="LOCCommonControlConfiguration">Configuração de controle</sys:String>
+    <sys:String x:Key="LOCCommonGetAccountID">Obter ID da conta</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: usuário não está autenticado</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: Nenhuma chave de API</sys:String>
