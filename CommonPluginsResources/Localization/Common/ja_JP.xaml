@@ -196,7 +196,7 @@
 
 
     <sys:String x:Key="LOCCommonDimensions">寸法</sys:String>
-    <sys:String x:Key="LOCCommonStyles"></sys:String>
+    <sys:String x:Key="LOCCommonStyles">スタイル</sys:String>
     <sys:String x:Key="LOCCommonTypes">種類</sys:String>
     <sys:String x:Key="LOCCommonSortByDate">日付</sys:String>
     <sys:String x:Key="LOCCommonSortByScore">スコア順</sys:String>
