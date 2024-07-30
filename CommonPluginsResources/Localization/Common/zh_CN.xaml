@@ -84,7 +84,7 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">默认的游戏列表排序</sys:String>
 
-    <sys:String x:Key="LOCCommonAutoImport">更新库时自动导入数据</sys:String>
+    <sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated (only new)</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">在控制中隐藏图表选项</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">默认在图表上显示所有数据</sys:String>
