@@ -216,7 +216,7 @@ namespace CommonPluginsShared
 
         public static void LogError(Exception ex, bool IsIgnored, string Message, bool ShowNotification, string PluginName)
         {
-            LogError(ex, IsIgnored, string.Empty, ShowNotification, PluginName, string.Empty);
+            LogError(ex, IsIgnored, Message, ShowNotification, PluginName, string.Empty);
         }
 
         public static void LogError(Exception ex, bool IsIgnored, string Message, bool ShowNotification, string PluginName, string NotificationMessage)

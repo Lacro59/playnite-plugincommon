@@ -1,5 +1,4 @@
 ﻿using Playnite.SDK;
-//using PSNLibrary.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,6 +19,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Models
         public bool ps3 = true;
         public bool psp = true;
         public bool psvita = true;
+        public bool pc = true;
         public bool migration = true;
         public bool tags = true;
         public bool noTags = false;
@@ -34,6 +34,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Models
         public bool PS3 { get => ps3; set => SetValue(ref ps3, value); }
         public bool PSP { get => psp; set => SetValue(ref psp, value); }
         public bool PSVITA { get => psvita; set => SetValue(ref psvita, value); }
+        public bool PC { get => pc; set => SetValue(ref pc, value); }
         public bool Migration { get => migration; set => SetValue(ref migration, value); }
         public bool Tags { get => tags; set => SetValue(ref tags, value); }
         public bool NoTags { get => noTags; set => SetValue(ref noTags, value); }
