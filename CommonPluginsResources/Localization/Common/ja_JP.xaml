@@ -84,7 +84,7 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">デフォルトのゲームリストの並べ替え順</sys:String>
 
-    <sys:String x:Key="LOCCommonAutoImport">ライブラリの更新時に自動的にデータをインポート</sys:String>
+    <sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated (only new)</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">コントロール時にグラフのオプションを非表示</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">すべてのデータをグラフ上にデフォルトで表示</sys:String>
