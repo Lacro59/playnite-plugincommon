@@ -521,14 +521,20 @@ namespace CommonPluginsStores.Steam
 
 
         #region Game
+        /// <summary>
+        /// Get game informations.
+        /// </summary>
+        /// <param name="id">appId</param>
+        /// <param name="accountInfos"></param>
+        /// <returns></returns>
         public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
         {
             try
             {
-                string Url = string.Format(UrlApiGameDetails, id, CodeLang.GetSteamLang(Local));
-                string WebData = Web.DownloadStringData(Url).GetAwaiter().GetResult();
+                string url = string.Format(UrlApiGameDetails, id, CodeLang.GetSteamLang(Local));
+                string webData = Web.DownloadStringData(url).GetAwaiter().GetResult();
 
-                if (Serialization.TryFromJson(WebData, out Dictionary<string, StoreAppDetailsResult> parsedData))
+                if (Serialization.TryFromJson(webData, out Dictionary<string, StoreAppDetailsResult> parsedData))
                 {
                     StoreAppDetailsResult storeAppDetailsResult = parsedData[id];
 
@@ -542,13 +548,13 @@ namespace CommonPluginsStores.Steam
                     };
 
                     // DLC
-                    List<uint> DlcsIdSteam = storeAppDetailsResult?.data.dlc ?? new List<uint>();
-                    List<uint> DlcsIdSteamDb = GetDlcFromSteamDb(storeAppDetailsResult?.data.steam_appid ?? 0);
-                    List<uint> DlcsId = DlcsIdSteam.Union(DlcsIdSteamDb).Distinct().OrderBy(x => x).ToList();
+                    List<uint> dlcsIdSteam = storeAppDetailsResult?.data.dlc ?? new List<uint>();
+                    List<uint> dlcsIdSteamDb = GetDlcFromSteamDb(storeAppDetailsResult?.data.steam_appid ?? 0);
+                    List<uint> dlcsId = dlcsIdSteam.Union(dlcsIdSteamDb).Distinct().OrderBy(x => x).ToList();
 
-                    if (DlcsId.Count > 0)
+                    if (dlcsId.Count > 0)
                     {
-                        ObservableCollection<DlcInfos> Dlcs = GetDlcInfos(DlcsId, accountInfos);
+                        ObservableCollection<DlcInfos> Dlcs = GetDlcInfos(dlcsId, accountInfos);
                         gameInfos.Dlcs = Dlcs;
                     }
 

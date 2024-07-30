@@ -375,7 +375,7 @@ namespace CommonPluginsStores
         /// Get game informations.
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="Local"></param>
+        /// <param name="accountInfos"></param>
         /// <returns></returns>
         public virtual GameInfos GetGameInfos(string id, AccountInfos accountInfos)
         {
