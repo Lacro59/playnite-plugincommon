@@ -84,7 +84,7 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">Öntanımlı oyun listesi sıralaması</sys:String>
 
-    <sys:String x:Key="LOCCommonAutoImport">Kütüphane güncellendiğinde kendiliğinden veriyi içeri aktar</sys:String>
+    <sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated (only new)</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">Kontrol ekranında kart seçeneklerini gizle</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">Öntanımlı olarak kart üstünde tüm veriyi görüntüle</sys:String>
