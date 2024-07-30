@@ -1,5 +1,4 @@
 ﻿using CommonPlayniteShared;
-using CommonPlayniteShared.PluginLibrary.EpicLibrary;
 using CommonPlayniteShared.PluginLibrary.EpicLibrary.Models;
 using CommonPlayniteShared.PluginLibrary.EpicLibrary.Services;
 using CommonPluginsShared;
@@ -33,22 +32,22 @@ namespace CommonPluginsStores.Epic
         private string UrlGraphQL => @"https://graphql.epicgames.com/graphql";
         #endregion
 
-        protected static EpicAccountClient _EpicAccountClient;
+        protected static EpicAccountClient epicAccountClient;
         internal static EpicAccountClient EpicAccountClient
         {
             get
             {
-                if (_EpicAccountClient == null)
+                if (epicAccountClient == null)
                 {
-                    _EpicAccountClient = new EpicAccountClient(
+                    epicAccountClient = new EpicAccountClient(
                         API.Instance,
-                        PlaynitePaths.ExtensionsDataPath + "\\00000002-DBD1-46C6-B5D0-B1BA559D10E4\\tokens.json"
+                        PlaynitePaths.ExtensionsDataPath + "\\" + GetPluginId(ExternalPlugin.EpicLibrary) + "\\tokens.json"
                     );
                 }
-                return _EpicAccountClient;
+                return epicAccountClient;
             }
 
-            set => _EpicAccountClient = value;
+            set => epicAccountClient = value;
         }
 
         public bool Forced { get; set; } = false;
@@ -169,7 +168,13 @@ namespace CommonPluginsStores.Epic
             return null;
         }
 
-        public override ObservableCollection<GameAchievement> GetAchievements(string Id, AccountInfos accountInfos)
+        /// <summary>
+        /// Get a list of a game's achievements with a user's possessions.
+        /// </summary>
+        /// <param name="id">productSlug</param>
+        /// <param name="accountInfos"></param>
+        /// <returns></returns>
+        public override ObservableCollection<GameAchievement> GetAchievements(string id, AccountInfos accountInfos)
         {
             if (!IsUserLoggedIn)
             {
@@ -180,30 +185,23 @@ namespace CommonPluginsStores.Epic
             {
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
 
-                string Url = string.Empty;
-                string ResultWeb = string.Empty;
-                string LocalLang = CodeLang.GetEpicLang(Local);
-                string LocalLangShort = CodeLang.GetGogLang(Local);
+                string url = string.Empty;
+                string resultWeb = string.Empty;
+                string localLang = CodeLang.GetEpicLang(Local);
+                string localLangShort = CodeLang.GetGogLang(Local);
 
                 try
                 {
-                    string ProductSlug = GetProductSlug(PlayniteTools.NormalizeGameName(Id));
-                    if (ProductSlug.IsNullOrEmpty())
+                    List<HttpCookie> cookies = GetStoredCookies();
+                    url = string.Format(UrlAchievements, localLang, id);
+                    using (IWebView webViews = API.Instance.WebViews.CreateOffscreenView())
                     {
-                        Logger.Warn($"No ProductSlug for {Id}");
-                        return null;
-                    }
+                        _ = webViews.CanExecuteJavascriptInMainFrame;
+                        cookies.ForEach(x => { webViews.SetCookies(url, x); });
+                        webViews.NavigateAndWait(url);
+                        resultWeb = webViews.GetPageSource();
 
-                    List<HttpCookie> Cookies = GetStoredCookies();
-                    Url = string.Format(UrlAchievements, LocalLang, ProductSlug);
-                    using (IWebView WebViews = API.Instance.WebViews.CreateOffscreenView())
-                    {
-                        _ = WebViews.CanExecuteJavascriptInMainFrame;
-                        Cookies.ForEach(x => { WebViews.SetCookies(Url, x); });
-                        WebViews.NavigateAndWait(Url);
-                        ResultWeb = WebViews.GetPageSource();
-
-                        if (ResultWeb.Contains("data-translate=\"please_wait\"", StringComparison.InvariantCultureIgnoreCase))
+                        if (resultWeb.Contains("data-translate=\"please_wait\"", StringComparison.InvariantCultureIgnoreCase))
                         {
                             Common.LogDebug(true, "Checking browser...");
                             ResetIsUserLoggedIn();
@@ -211,17 +209,17 @@ namespace CommonPluginsStores.Epic
                         }
                     }
 
-                    if (!ResultWeb.Contains("lang=\"" + LocalLang + "\"", StringComparison.InvariantCultureIgnoreCase))
+                    if (!resultWeb.Contains("lang=\"" + localLang + "\"", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        Url = string.Format(UrlAchievements, LocalLangShort, ProductSlug);
-                        using (var WebViews = API.Instance.WebViews.CreateOffscreenView())
+                        url = string.Format(UrlAchievements, localLangShort, id);
+                        using (IWebView webViews = API.Instance.WebViews.CreateOffscreenView())
                         {
-                            _ = WebViews.CanExecuteJavascriptInMainFrame;
-                            Cookies.ForEach(x => { WebViews.SetCookies(Url, x); });
-                            WebViews.NavigateAndWait(Url);
-                            ResultWeb = WebViews.GetPageSource();
+                            _ = webViews.CanExecuteJavascriptInMainFrame;
+                            cookies.ForEach(x => { webViews.SetCookies(url, x); });
+                            webViews.NavigateAndWait(url);
+                            resultWeb = webViews.GetPageSource();
 
-                            if (ResultWeb.Contains("data-translate=\"please_wait\"", StringComparison.InvariantCultureIgnoreCase))
+                            if (resultWeb.Contains("data-translate=\"please_wait\"", StringComparison.InvariantCultureIgnoreCase))
                             {
                                 Common.LogDebug(true, "Checking browser...");
                                 ResetIsUserLoggedIn();
@@ -234,7 +232,7 @@ namespace CommonPluginsStores.Epic
                 {
                     if (ex.Message.Contains("404"))
                     {
-                        Logger.Warn($"Error 404 for {Id}");
+                        Logger.Warn($"Error 404 for {id}");
                     }
                     else
                     {
@@ -244,37 +242,36 @@ namespace CommonPluginsStores.Epic
                     return null;
                 }
 
-                if (!ResultWeb.Contains("\"achievements\":[{\"achievement\""))
+                if (!resultWeb.Contains("\"achievements\":[{\"achievement\""))
                 {
                     if (!Forced)
                     {
                         Forced = true;
-                        ObservableCollection<GameAchievement> data = GetAchievements(Id, accountInfos);
+                        ObservableCollection<GameAchievement> data = GetAchievements(id, accountInfos);
                         Forced = false;
                         return data;
                     }
 
-                    Logger.Warn($"Error 404 for {Id}");
+                    Logger.Warn($"Error 404 for {id}");
                     return null;
                 }
 
-                if (ResultWeb != string.Empty && !ResultWeb.Contains("<span>404</span>", StringComparison.InvariantCultureIgnoreCase))
+                if (resultWeb != string.Empty && !resultWeb.Contains("<span>404</span>", StringComparison.InvariantCultureIgnoreCase))
                 {
                     try
                     {
-                        string JsonDataString = Tools.GetJsonInString(ResultWeb, "window.__REACT_QUERY_INITIAL_QUERIES__ =", "window.server_rendered", "}]};");
+                        string JsonDataString = Tools.GetJsonInString(resultWeb, "window.__REACT_QUERY_INITIAL_QUERIES__ =", "window.server_rendered", "}]};");
                         EpicData epicData = Serialization.FromJson<EpicData>(JsonDataString);
 
                         // Achievements data
                         Query achievemenstData = epicData.queries
-                                .Where(x => (Serialization.ToJson(x.state.data)).Contains("\"achievements\":[{\"achievement\"", StringComparison.InvariantCultureIgnoreCase))
-                                .FirstOrDefault();
+                            .FirstOrDefault(x => Serialization.ToJson(x.state.data).Contains("\"achievements\":[{\"achievement\"", StringComparison.InvariantCultureIgnoreCase));
 
                         EpicAchievementsData epicAchievementsData = Serialization.FromJson<EpicAchievementsData>(Serialization.ToJson(achievemenstData.state.data));
 
                         if (epicAchievementsData != null && epicAchievementsData.Achievement.productAchievementsRecordBySandbox.achievements?.Count > 0)
                         {
-                            foreach (var ach in epicAchievementsData.Achievement.productAchievementsRecordBySandbox.achievements)
+                            foreach (Achievement2 ach in epicAchievementsData.Achievement.productAchievementsRecordBySandbox.achievements)
                             {
                                 GameAchievement gameAchievement = new GameAchievement
                                 {
@@ -283,7 +280,7 @@ namespace CommonPluginsStores.Epic
                                     Description = ach.achievement.unlockedDescription,
                                     UrlUnlocked = ach.achievement.unlockedIconLink,
                                     UrlLocked = ach.achievement.lockedIconLink,
-                                    DateUnlocked = default(DateTime),
+                                    DateUnlocked = default,
                                     Percent = ach.achievement.rarity.percent
                                 };
                                 gameAchievements.Add(gameAchievement);
@@ -291,9 +288,8 @@ namespace CommonPluginsStores.Epic
                         }
 
                         // Owned achievement
-                        var achievemenstOwnedData = epicData.queries
-                            .Where(x => (Serialization.ToJson(x.state.data)).Contains("\"playerAchievements\":[{\"playerAchievement\"", StringComparison.InvariantCultureIgnoreCase))
-                            .FirstOrDefault();
+                        Query achievemenstOwnedData = epicData.queries
+                            .FirstOrDefault(x => Serialization.ToJson(x.state.data).Contains("\"playerAchievements\":[{\"playerAchievement\"", StringComparison.InvariantCultureIgnoreCase));
 
                         if (achievemenstOwnedData != null)
                         {
@@ -302,7 +298,7 @@ namespace CommonPluginsStores.Epic
 
                             if (epicAchievementsOwnedData != null && epicAchievementsOwnedData.PlayerAchievement.playerAchievementGameRecordsBySandbox.records.FirstOrDefault()?.playerAchievements?.Count() > 0)
                             {
-                                foreach (var ach in epicAchievementsOwnedData.PlayerAchievement.playerAchievementGameRecordsBySandbox.records.FirstOrDefault().playerAchievements)
+                                foreach (PlayerAchievement2 ach in epicAchievementsOwnedData.PlayerAchievement.playerAchievementGameRecordsBySandbox.records.FirstOrDefault().playerAchievements)
                                 {
                                     GameAchievement owned = gameAchievements.Where(x => x.Id.IsEqual(ach.playerAchievement.achievementName))?.FirstOrDefault();
                                     if (owned != null)
@@ -324,7 +320,7 @@ namespace CommonPluginsStores.Epic
                 }
                 else
                 {
-                    Logger.Warn($"Error 404 for {Id}");
+                    Logger.Warn($"Error 404 for {id}");
                 }
 
                 return gameAchievements;
@@ -337,21 +333,21 @@ namespace CommonPluginsStores.Epic
             return null;
         }
 
-        public override SourceLink GetAchievementsSourceLink(string Name, string Id, AccountInfos accountInfos)
+        /// <summary>
+        /// Get achievements SourceLink.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="id">productSlug</param>
+        /// <param name="accountInfos"></param>
+        /// <returns></returns>
+        public override SourceLink GetAchievementsSourceLink(string name, string id, AccountInfos accountInfos)
         {
-            string ProductSlug = GetProductSlug(PlayniteTools.NormalizeGameName(Name));
-            if (ProductSlug.IsNullOrEmpty())
-            {
-                Logger.Warn($"No ProductSlug for {Name}");
-                return null;
-            }
-
             string LocalLang = CodeLang.GetEpicLang(Local);
-            string Url = string.Format(UrlAchievements, LocalLang, ProductSlug);
+            string Url = string.Format(UrlAchievements, LocalLang, id);
 
             return new SourceLink
             {
-                GameName = Name,
+                GameName = name,
                 Name = ClientName,
                 Url = Url
             };
@@ -421,14 +417,14 @@ namespace CommonPluginsStores.Epic
             return null;
         }
 
-        public override bool RemoveWishlist(string Id)
+        public override bool RemoveWishlist(string id)
         {
             if (IsUserLoggedIn)
             {
                 try
                 {
-                    string EpicOfferId = Id.Split('|')[0];
-                    string EpicNamespace = Id.Split('|')[1];
+                    string EpicOfferId = id.Split('|')[0];
+                    string EpicNamespace = id.Split('|')[1];
 
                     string query = @"mutation removeFromWishlistMutation($namespace: String!, $offerId: String!, $operation: RemoveOperation!) { Wishlist { removeFromWishlist(namespace: $namespace, offerId: $offerId, operation: $operation) { success } } }";
                     dynamic variables = new
@@ -442,7 +438,7 @@ namespace CommonPluginsStores.Epic
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false, $"Error remove {Id} in {ClientName} wishlist", true, PluginName);
+                    Common.LogError(ex, false, $"Error remove {id} in {ClientName} wishlist", true, PluginName);
                 }
             }
 
@@ -452,7 +448,7 @@ namespace CommonPluginsStores.Epic
 
         #region Game
         // TODO
-        public override GameInfos GetGameInfos(string Id, AccountInfos accountInfos)
+        public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
         {
             try
             {
@@ -466,7 +462,13 @@ namespace CommonPluginsStores.Epic
             return null;
         }
 
-        public override ObservableCollection<DlcInfos> GetDlcInfos(string Id, AccountInfos accountInfos)
+        /// <summary>
+        /// Get dlc informations for a game.
+        /// </summary>
+        /// <param name="id">epic_namespace</param>
+        /// <param name="accountInfos"></param>
+        /// <returns></returns>
+        public override ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos)
         {
             try
             {
@@ -474,10 +476,10 @@ namespace CommonPluginsStores.Epic
                 ObservableCollection<DlcInfos> Dlcs = new ObservableCollection<DlcInfos>();
 
                 // List DLC
-                EpicAddonsByNamespace dataDLC = GetAddonsByNamespace(Id).GetAwaiter().GetResult();
+                EpicAddonsByNamespace dataDLC = GetAddonsByNamespace(id).GetAwaiter().GetResult();
                 if (dataDLC?.data?.Catalog?.catalogOffers?.elements == null)
                 {
-                    Logger.Warn($"No dlc for {Id}");
+                    Logger.Warn($"No dlc for {id}");
                     return null;
                 }
 
@@ -486,7 +488,7 @@ namespace CommonPluginsStores.Epic
                     bool IsOwned = false;
                     if (accountInfos != null && accountInfos.IsCurrent)
                     {
-                        IsOwned = DlcIsOwned(Id, el.id);
+                        IsOwned = DlcIsOwned(id, el.id);
                     }
 
                     DlcInfos dlc = new DlcInfos
@@ -516,13 +518,13 @@ namespace CommonPluginsStores.Epic
         #endregion
 
         #region Epic
-        public string GetProductSlug(string Name)
+        public string GetProductSlug(string name)
         {
-            if (Name.IsEqual("warhammer 40 000 mechanicus"))
+            if (name.IsEqual("warhammer 40 000 mechanicus"))
             {
-                Name = "warhammer mechanicus";
+                name = "warhammer mechanicus";
             }
-            else if (Name.IsEqual("death stranding"))
+            else if (name.IsEqual("death stranding"))
             {
                 return "death-stranding";
             }
@@ -533,11 +535,11 @@ namespace CommonPluginsStores.Epic
             {
                 using (WebStoreClient client = new WebStoreClient())
                 {
-                    List<SearchStoreElement> catalogs = client.QuerySearch(Name).GetAwaiter().GetResult();
+                    List<SearchStoreElement> catalogs = client.QuerySearch(name).GetAwaiter().GetResult();
                     if (catalogs.HasItems())
                     {
                         catalogs = catalogs.OrderBy(x => x.title.Length).ToList();
-                        SearchStoreElement catalog = catalogs.FirstOrDefault(a => a.title.IsEqual(Name, true));
+                        SearchStoreElement catalog = catalogs.FirstOrDefault(a => a.title.IsEqual(name, true));
                         if (catalog == null)
                         {
                             catalog = catalogs[0];
@@ -561,7 +563,26 @@ namespace CommonPluginsStores.Epic
             return ProductSlug;
         }
 
-        public string GetNameSpace(string Name)
+        public string GetProductSlugByUrl(string url)
+        {
+            string ProductSlug = string.Empty;
+
+            try
+            {
+                if (url.Contains(".epicgames.com/", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    ProductSlug = url.Split('/').Last();
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+            }
+
+            return ProductSlug;
+        }
+
+        public string GetNameSpace(string name)
         {
             string NameSpace = string.Empty;
 
@@ -569,11 +590,11 @@ namespace CommonPluginsStores.Epic
             {
                 using (WebStoreClient client = new WebStoreClient())
                 {
-                    List<SearchStoreElement> catalogs = client.QuerySearch(Name).GetAwaiter().GetResult();
+                    List<SearchStoreElement> catalogs = client.QuerySearch(name).GetAwaiter().GetResult();
                     if (catalogs.HasItems())
                     {
                         catalogs = catalogs.OrderBy(x => x.title.Length).ToList();
-                        SearchStoreElement catalog = catalogs.FirstOrDefault(a => a.title.IsEqual(Name, true));
+                        SearchStoreElement catalog = catalogs.FirstOrDefault(a => a.title.IsEqual(name, true));
                         if (catalog == null)
                         {
                             catalog = catalogs[0];
@@ -592,11 +613,11 @@ namespace CommonPluginsStores.Epic
         }
 
 
-        private bool DlcIsOwned(string productNameSpace, string Id)
+        private bool DlcIsOwned(string productNameSpace, string id)
         {
             try
             {
-                EpicEntitledOfferItems ownedDLC = GetEntitledOfferItems(productNameSpace, Id).GetAwaiter().GetResult();
+                EpicEntitledOfferItems ownedDLC = GetEntitledOfferItems(productNameSpace, id).GetAwaiter().GetResult();
                 return (ownedDLC?.data?.Launcher?.entitledOfferItems?.entitledToAllItemsInOffer ?? false) && (ownedDLC?.data?.Launcher?.entitledOfferItems?.entitledToAnyItemInOffer ?? false);
             }
             catch (Exception ex)

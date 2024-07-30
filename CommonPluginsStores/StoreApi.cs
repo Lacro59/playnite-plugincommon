@@ -7,6 +7,7 @@ using CommonPluginsShared.Models;
 using CommonPluginsStores.Models;
 using Playnite.SDK;
 using Playnite.SDK.Data;
+using Playnite.SDK.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -348,6 +349,7 @@ namespace CommonPluginsStores
         /// <summary>
         /// Get achievements SourceLink.
         /// </summary>
+        /// <param name="name"></param>
         /// <param name="id"></param>
         /// <param name="accountInfos"></param>
         /// <returns></returns>
@@ -375,8 +377,8 @@ namespace CommonPluginsStores
         /// <param name="id"></param>
         /// <param name="Local"></param>
         /// <returns></returns>
-        public virtual GameInfos GetGameInfos(string id, AccountInfos accountInfos) 
-        { 
+        public virtual GameInfos GetGameInfos(string id, AccountInfos accountInfos)
+        {
             return null;
         }
 
@@ -384,8 +386,9 @@ namespace CommonPluginsStores
         /// Get dlc informations for a game.
         /// </summary>
         /// <param name="id"></param>
+        /// <param name="accountInfos"></param>
         /// <returns></returns>
-        public virtual ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos) 
+        public virtual ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos)
         {
             return null;
         }
