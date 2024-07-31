@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Epic\EpicApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicAccountResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicAchievementResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicAddonsByNamespace.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicCatalogOffer.cs" />

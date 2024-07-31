@@ -1,4 +1,5 @@
 ﻿using CommonPlayniteShared;
+using CommonPlayniteShared.Common;
 using CommonPlayniteShared.PluginLibrary.EpicLibrary.Models;
 using CommonPlayniteShared.PluginLibrary.EpicLibrary.Services;
 using CommonPluginsShared;
@@ -11,9 +12,11 @@ using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using static CommonPlayniteShared.PluginLibrary.EpicLibrary.Models.WebStoreModels.QuerySearchResponse.Data.CatalogItem.SearchStore;
@@ -25,43 +28,35 @@ namespace CommonPluginsStores.Epic
     {
         #region Url
         private string UrlBase => @"https://www.epicgames.com";
-
         private string UrlStore => UrlBase + @"/store/{0}/p/{1}";
         private string UrlAchievements => UrlBase + @"/store/{0}/achievements/{1}";
+        private string UrlLogin => UrlBase + @"/id/login?redirectUrl=https%3A//www.epicgames.com/id/api/redirect%3FclientId%3D34a02cf8f4414e29b15921876da36f9a%26responseType%3Dcode";
 
         private string UrlGraphQL => @"https://graphql.epicgames.com/graphql";
+
+        private string UrlApiServiceBase => @"https://account-public-service-prod03.ol.epicgames.com";
+        private string UrlAccountAuth => UrlApiServiceBase + @"/account/api/oauth/token";
+        private string UrlAccount => UrlApiServiceBase + @"/account/api/public/account/{0}";
+        private string UrlAccountLinkAchievements => @"https://store.epicgames.com/u/{0}";
+        private string UrlAccountLinkFriends => @"https://store.epicgames.com/u/{0}/friends";
         #endregion
 
-        protected static EpicAccountClient epicAccountClient;
-        internal static EpicAccountClient EpicAccountClient
-        {
-            get
-            {
-                if (epicAccountClient == null)
-                {
-                    epicAccountClient = new EpicAccountClient(
-                        API.Instance,
-                        PlaynitePaths.ExtensionsDataPath + "\\" + GetPluginId(ExternalPlugin.EpicLibrary) + "\\tokens.json"
-                    );
-                }
-                return epicAccountClient;
-            }
+        private const string AuthEncodedString = "MzRhMDJjZjhmNDQxNGUyOWIxNTkyMTg3NmRhMzZmOWE6ZGFhZmJjY2M3Mzc3NDUwMzlkZmZlNTNkOTRmYzc2Y2Y=";
 
-            set => epicAccountClient = value;
-        }
-
-        public bool Forced { get; set; } = false;
+        #region Paths
+        private string TokensPath { get; }
+        #endregion
 
 
         public EpicApi(string PluginName) : base(PluginName, ExternalPlugin.EpicLibrary, "Epic")
         {
-
+            TokensPath = Path.Combine(PathStoresData, "Epic_Tokens.dat");
         }
 
         #region Cookies
         internal override List<HttpCookie> GetWebCookies()
         {
-            string LocalLangShort = CodeLang.GetGogLang(Local);
+            string LocalLangShort = CodeLang.GetEpicLangCountry(Local);
             List<HttpCookie> httpCookies = new List<HttpCookie>
             {
                 new HttpCookie
@@ -96,11 +91,10 @@ namespace CommonPluginsStores.Epic
         #region Configuration
         protected override bool GetIsUserLoggedIn()
         {
-            bool isLogged = EpicAccountClient.GetIsUserLoggedIn();
-
+            bool isLogged = CheckIsUserLoggedIn();
             if (isLogged)
             {
-                OauthResponse tokens = EpicAccountClient.loadTokens();
+                OauthResponse tokens = LoadTokens();
                 AuthToken = new StoreToken
                 {
                     Token = tokens.access_token,
@@ -114,33 +108,48 @@ namespace CommonPluginsStores.Epic
 
             return isLogged;
         }
-        #endregion
 
-        #region Current user
-        // TODO 
-        protected override AccountInfos GetCurrentAccountInfos()
+        public override void Login()
         {
-            if (!IsUserLoggedIn)
-            {
-                return null;
-            }
-
             try
             {
-                OauthResponse tokens = EpicAccountClient.loadTokens();
-                AccountInfos userInfos = new AccountInfos
+                ResetIsUserLoggedIn();
+                EpicLogin();
+
+                OauthResponse tokens = LoadTokens();
+                if (tokens != null)
                 {
-                    UserId = tokens?.account_id,
-                    IsCurrent = true
-                };
-                return userInfos;
+                    List<HttpHeader> httpHeaders = new List<HttpHeader>
+                    {
+                        new HttpHeader { Key = "Authorization", Value = tokens.token_type + " " + tokens.access_token }
+                    };
+                    string response = Web.DownloadStringData(string.Format(UrlAccount, tokens.account_id), httpHeaders).GetAwaiter().GetResult();
+                    if (Serialization.TryFromJson(response, out EpicAccountResponse epicAccountResponse))
+                    {
+                        CurrentAccountInfos = new AccountInfos
+                        {
+                            UserId = tokens.account_id,
+                            Pseudo = epicAccountResponse?.DisplayName,
+                            Link = string.Format(UrlAccountLinkAchievements, tokens.account_id),
+                            IsCurrent = true
+                        };
+                        SaveCurrentUser();
+                        _ = GetCurrentAccountInfos();
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, true, PluginName);
+                Common.LogError(ex, false, false, PluginName);
             }
+        }
+        #endregion
 
-            return null;
+        #region Current user
+        protected override AccountInfos GetCurrentAccountInfos()
+        {
+            AccountInfos accountInfos = LoadCurrentUser();
+            return accountInfos;
         }
         #endregion
 
@@ -411,6 +420,172 @@ namespace CommonPluginsStores.Epic
         #endregion
 
         #region Epic
+        private OauthResponse LoadTokens()
+        {
+            if (File.Exists(TokensPath))
+            {
+                try
+                {
+                    return Serialization.FromJson<OauthResponse>(
+                        Encryption.DecryptFromFile(
+                            TokensPath,
+                            Encoding.UTF8,
+                            WindowsIdentity.GetCurrent().User.Value));
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, false, PluginName);
+                }
+            }
+
+            return null;
+        }
+
+        private EpicAccountResponse GetEpicAccount()
+        {
+            OauthResponse tokens = LoadTokens();
+            if (tokens != null)
+            {
+                List<HttpHeader> httpHeaders = new List<HttpHeader>
+                    {
+                        new HttpHeader { Key = "Authorization", Value = tokens.token_type + " " + tokens.access_token }
+                    };
+                string response = Web.DownloadStringData(string.Format(UrlAccount, tokens.account_id), httpHeaders).GetAwaiter().GetResult();
+                if (Serialization.TryFromJson(response, out EpicAccountResponse epicAccountResponse))
+                {
+                    return epicAccountResponse;
+                }
+            }
+
+            return null;
+        }
+
+        private bool CheckIsUserLoggedIn()
+        {
+            OauthResponse tokens = LoadTokens();
+            if (tokens == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                EpicAccountResponse account = GetEpicAccount();
+                return account.Id == tokens.account_id;
+            }
+            catch (Exception ex)
+            {
+                if (ex is TokenException)
+                {
+                    RenewTokens(tokens.refresh_token);
+                    tokens = LoadTokens();
+                    if (tokens.account_id.IsNullOrEmpty() || tokens.access_token.IsNullOrEmpty())
+                    {
+                        return false;
+                    }
+
+                    EpicAccountResponse account = GetEpicAccount();
+                    return account.Id == tokens.account_id;
+                }
+                else
+                {
+                    Common.LogError(ex, false, "Failed to validation Epic authentication.", false, PluginName);
+                    return false;
+                }
+            }
+        }
+
+        private void EpicLogin()
+        {
+            bool loggedIn = false;
+            string apiRedirectContent = string.Empty;
+
+            using (IWebView view = API.Instance.WebViews.CreateView(new WebViewSettings
+            {
+                WindowWidth = 580,
+                WindowHeight = 700,
+                // This is needed otherwise captcha won't pass
+                UserAgent = @"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Vivaldi/5.5.2805.50"
+            }))
+            {
+                view.LoadingChanged += async (s, e) =>
+                {
+                    string address = view.GetCurrentAddress();
+                    if (address.StartsWith(@"https://www.epicgames.com/id/api/redirect"))
+                    {
+                        apiRedirectContent = await view.GetPageTextAsync();
+                        loggedIn = true;
+                        view.Close();
+                    }
+                };
+
+                view.DeleteDomainCookies(".epicgames.com");
+                view.Navigate(UrlLogin);
+                _ = view.OpenDialog();
+            }
+
+            if (!loggedIn)
+            {
+                return;
+            }
+
+            if (apiRedirectContent.IsNullOrEmpty())
+            {
+                return;
+            }
+
+            string authorizationCode = Serialization.FromJson<ApiRedirectResponse>(apiRedirectContent).authorizationCode;
+            FileSystem.DeleteFile(TokensPath);
+            if (string.IsNullOrEmpty(authorizationCode))
+            {
+                Logger.Error("Failed to get login exchange key for Epic account.");
+                return;
+            }
+
+            using (HttpClient httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Clear();
+                httpClient.DefaultRequestHeaders.Add("Authorization", "basic " + AuthEncodedString);
+                using (StringContent content = new StringContent($"grant_type=authorization_code&code={authorizationCode}&token_type=eg1"))
+                {
+                    content.Headers.Clear();
+                    content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+                    HttpResponseMessage response = httpClient.PostAsync(UrlAccountAuth, content).GetAwaiter().GetResult();
+                    string respContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    FileSystem.CreateDirectory(Path.GetDirectoryName(TokensPath));
+                    Encryption.EncryptToFile(
+                        TokensPath,
+                        respContent,
+                        Encoding.UTF8,
+                        WindowsIdentity.GetCurrent().User.Value);
+                }
+            }
+        }
+
+
+        private void RenewTokens(string refreshToken)
+        {
+            using (HttpClient httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Clear();
+                httpClient.DefaultRequestHeaders.Add("Authorization", "basic " + AuthEncodedString);
+                using (StringContent content = new StringContent($"grant_type=refresh_token&refresh_token={refreshToken}&token_type=eg1"))
+                {
+                    content.Headers.Clear();
+                    content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+                    HttpResponseMessage response = httpClient.PostAsync(UrlAccountAuth, content).GetAwaiter().GetResult();
+                    string respContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    FileSystem.CreateDirectory(Path.GetDirectoryName(TokensPath));
+                    Encryption.EncryptToFile(
+                        TokensPath,
+                        respContent,
+                        Encoding.UTF8,
+                        WindowsIdentity.GetCurrent().User.Value);
+                }
+            }
+        }
+
+
         public string GetProductSlug(string name)
         {
             if (name.IsEqual("warhammer 40 000 mechanicus"))
@@ -495,10 +670,10 @@ namespace CommonPluginsStores.Epic
 
                         SearchStoreElement catalog = null;
                         if (productSlug.IsNullOrEmpty())
-                        { 
+                        {
                             catalog = catalogs.FirstOrDefault(a => a.title.IsEqual(name, true)); }
-                        else 
-                        { 
+                        else
+                        {
                             catalog = catalogs.FirstOrDefault(a => a.productSlug.IsEqual(productSlug, true));
                             if (catalog == null)
                             {
@@ -506,7 +681,7 @@ namespace CommonPluginsStores.Epic
                                 {
                                     if (catalog == null)
                                     {
-                                        var finded = x.catalogNs.mappings.FirstOrDefault(b => b.pageSlug.IsEqual(productSlug));
+                                        SearchStoreElement.CatalogNs.Mappings finded = x.catalogNs.mappings.FirstOrDefault(b => b.pageSlug.IsEqual(productSlug));
                                         if (finded != null)
                                         {
                                             catalog = x;

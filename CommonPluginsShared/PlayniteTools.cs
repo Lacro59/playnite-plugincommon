@@ -15,6 +15,7 @@ using System.IO.Compression;
 using System.Diagnostics;
 using Microsoft.Win32;
 using Playnite.SDK.Plugins;
+using System.Windows;
 
 namespace CommonPluginsShared
 {
@@ -22,10 +23,10 @@ namespace CommonPluginsShared
     {
         private static ILogger Logger => LogManager.GetLogger();
 
-        private static List<Emulator> ListEmulators = null;
+        private static List<Emulator> ListEmulators { get; set; } = null;
 
-        private static HashSet<string> _disabledPlugins;
-        private static HashSet<string> DisabledPlugins => _disabledPlugins ?? (_disabledPlugins = GetDisabledPlugins());
+        private static HashSet<string> disabledPlugins;
+        private static HashSet<string> DisabledPlugins => disabledPlugins ?? (disabledPlugins = GetDisabledPlugins());
 
 
         #region External plugin
@@ -53,7 +54,8 @@ namespace CommonPluginsShared
             SuccessStory,
             CheckDlc,
 
-            EmuLibrary
+            EmuLibrary,
+            LegendaryLibrary,
         }
 
         private static readonly Dictionary<Guid, ExternalPlugin> PluginsById = new Dictionary<Guid, ExternalPlugin>
@@ -76,6 +78,7 @@ namespace CommonPluginsShared
             { new Guid("77346DD6-B0CC-4F7D-80F0-C1D138CCAE58"), ExternalPlugin.OculusLibrary },
             { new Guid("317a5e2e-eac1-48bc-adb3-fb9e321afd3f"), ExternalPlugin.RiotLibrary },
             { new Guid("41e49490-0583-4148-94d2-940c7c74f1d9"), ExternalPlugin.EmuLibrary },
+            { new Guid("EAD65C3B-2F8F-4E37-B4E6-B3DE6BE540C6"), ExternalPlugin.LegendaryLibrary },
 
             { new Guid("cebe6d32-8c46-4459-b993-5a5189d60788"), ExternalPlugin.SuccessStory },
             { new Guid("bf78d9af-6e79-4c73-aca6-c23a11a485ae"), ExternalPlugin.CheckDlc }
@@ -83,7 +86,7 @@ namespace CommonPluginsShared
 
         public static ExternalPlugin GetPluginType(Guid PluginId)
         {
-            PluginsById.TryGetValue(PluginId, out ExternalPlugin PluginSource);
+            _ = PluginsById.TryGetValue(PluginId, out ExternalPlugin PluginSource);
             return PluginSource;
         }
 
@@ -301,7 +304,7 @@ namespace CommonPluginsShared
             {
                 if (!Directory.Exists(Path.Combine(PlaynitePaths.DataCachePath, PluginName)))
                 {
-                    Directory.CreateDirectory(Path.Combine(PlaynitePaths.DataCachePath, PluginName));
+                    _ = Directory.CreateDirectory(Path.Combine(PlaynitePaths.DataCachePath, PluginName));
                 }
 
                 string PathImageFileName = Path.Combine(PlaynitePaths.DataCachePath, PluginName, FileName);
@@ -314,7 +317,7 @@ namespace CommonPluginsShared
                 {
                     if (!FileName.IsNullOrEmpty() && Options?.CachedFileIfMissing ?? false)
                     {
-                        Task.Run(() =>
+                        _ = Task.Run(() =>
                         {
                             Common.LogDebug(true, $"DownloadFileImage is missing - {FileName}");
                             Web.DownloadFileImage(FileName, Options.Url, PlaynitePaths.DataCachePath, PluginName).GetAwaiter().GetResult();
@@ -350,12 +353,12 @@ namespace CommonPluginsShared
                 {
                     dynamic playniteConfig = Serialization.FromJsonFile<dynamic>(FileConfig);
                     dynamic disabledPlugins = playniteConfig.DisabledPlugins;
-                    var output = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    HashSet<string> output = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                     if (disabledPlugins != null)
                     {
-                        foreach (var pluginName in disabledPlugins)
+                        foreach (dynamic pluginName in disabledPlugins)
                         {
-                            output.Add(pluginName.ToString());
+                            _ = output.Add(pluginName.ToString());
                         }
                     }
                     return output;
@@ -383,11 +386,7 @@ namespace CommonPluginsShared
         public static string GetSourceName(Guid Id)
         {
             Game game = API.Instance.Database.Games.Get(Id);
-            if (game == null)
-            {
-                return "Playnite";
-            }
-            return GetSourceName(game);
+            return game == null ? "Playnite" : GetSourceName(game);
         }
 
         /// <summary>
@@ -427,7 +426,7 @@ namespace CommonPluginsShared
                 {
                     SourceName = "Xbox";
                 }
-                else if (game.SourceId != null && game.SourceId != default(Guid))
+                else if (game.SourceId != null && game.SourceId != default)
                 {
                     SourceName = API.Instance.Database.Sources.Get(game.SourceId)?.Name;
                 }
@@ -437,20 +436,13 @@ namespace CommonPluginsShared
                 Common.LogError(ex, false, $"Error on GetSourceName({game.Name})");
             }
 
-            if (!SourceName.IsNullOrEmpty())
-            {
-                return SourceName;
-            }
-            else
-            {
-                return "Playnite";
-            }
-               
+            return !SourceName.IsNullOrEmpty() ? SourceName : "Playnite";
+
         }
 
         public static string GetSourceByPluginId(Guid PluginId)
         {
-            PluginsById.TryGetValue(PluginId, out ExternalPlugin PluginSource);
+            _ = PluginsById.TryGetValue(PluginId, out ExternalPlugin PluginSource);
             switch (PluginSource)
             {
                 case ExternalPlugin.AmazonGamesLibrary:
@@ -460,6 +452,7 @@ namespace CommonPluginsShared
                 case ExternalPlugin.BethesdaLibrary:
                     return "Bethesda";
                 case ExternalPlugin.EpicLibrary:
+                case ExternalPlugin.LegendaryLibrary:
                     return "Epic";
                 case ExternalPlugin.GogLibrary:
                     return "GOG";
@@ -487,6 +480,18 @@ namespace CommonPluginsShared
                     return "Oculus";
                 case ExternalPlugin.RiotLibrary:
                     return "Riot Games";
+
+                case ExternalPlugin.None:
+                    break;
+                case ExternalPlugin.SuccessStory:
+                    break;
+                case ExternalPlugin.CheckDlc:
+                    break;
+                case ExternalPlugin.EmuLibrary:
+                    break;
+
+                default:
+                    break;
             }
 
             return string.Empty;
@@ -496,11 +501,11 @@ namespace CommonPluginsShared
         {
             string SourceName = "Playnite";
 
-            if (SourceId != default(Guid))
+            if (SourceId != default)
             {
                 try
                 {
-                    var Source = API.Instance.Database.Sources.Get(SourceId);
+                    GameSource Source = API.Instance.Database.Sources.Get(SourceId);
                     if (Source == null)
                     {
                         Logger.Warn($"SourceName not found for {SourceId.ToString()}");
@@ -523,9 +528,9 @@ namespace CommonPluginsShared
 
             foreach (Guid PlatformID in PlatformsIds)
             {
-                if (PlatformID !=default(Guid))
+                if (PlatformID != default)
                 {
-                    var platform = API.Instance.Database.Platforms.Get(PlatformID);
+                    Platform platform = API.Instance.Database.Platforms.Get(PlatformID);
                     if (platform != null)
                     {
                         switch (platform.Name.ToLower())
@@ -535,6 +540,7 @@ namespace CommonPluginsShared
                             case "pc (mac)":
                             case "pc (linux)":
                                 return "Playnite";
+
                             default:
                                 return platform.Name;
                         }
@@ -554,11 +560,7 @@ namespace CommonPluginsShared
         public static string GetPlatformIcon(string PlatformName)
         {
             Platform PlatformFound = API.Instance.Database.Platforms?.Where(x => x.Name.IsEqual(PlatformName)).FirstOrDefault();
-            if (!(PlatformFound?.Icon).IsNullOrEmpty())
-            {
-                return API.Instance.Database.GetFullFilePath(PlatformFound.Icon);
-            }
-            return string.Empty;
+            return !(PlatformFound?.Icon).IsNullOrEmpty() ? API.Instance.Database.GetFullFilePath(PlatformFound.Icon) : string.Empty;
         }
 
         private static Regex NonWordCharactersAndTrimmableWhitespace = new Regex(@"(?<start>^[\W_]+)|(?<end>[\W_]+$)|(?<middle>[\W_]+)", RegexOptions.Compiled);
@@ -629,7 +631,7 @@ namespace CommonPluginsShared
             ThemeManager.SetDefaultTheme(defaultTheme);
 
             ThemeManifest customTheme = null;
-            var theme = API.Instance.ApplicationSettings.DesktopTheme;
+            string theme = API.Instance.ApplicationSettings.DesktopTheme;
             if (theme != ThemeManager.DefaultTheme.Name)
             {
                 customTheme = ThemeManager.GetAvailableThemes(ApplicationMode.Desktop).FirstOrDefault(a => a.Id == theme);
@@ -667,7 +669,7 @@ namespace CommonPluginsShared
                 game = new Game();
             }
             result = API.Instance.ExpandGameVariables(game, inputString);
-            
+
 
             // Dropbox
             if (result.Contains("{Dropbox"))
@@ -825,7 +827,7 @@ namespace CommonPluginsShared
 
         private static string GetOneDriveInstallationPath()
         {
-            using (var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\OneDrive"))
+            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\OneDrive"))
             {
                 if (key?.GetValueNames().Contains("UserFolder") == true)
                 {
@@ -839,30 +841,31 @@ namespace CommonPluginsShared
 
         public static void CreateLogPackage(string PluginName)
         {
-            var response = API.Instance.Dialogs.ShowMessage(ResourceProvider.GetString("LOCCommonCreateLog"), PluginName, System.Windows.MessageBoxButton.YesNo);
-
-            if (response == System.Windows.MessageBoxResult.Yes)
+            MessageBoxResult response = API.Instance.Dialogs.ShowMessage(ResourceProvider.GetString("LOCCommonCreateLog"), PluginName, MessageBoxButton.YesNo);
+            if (response == MessageBoxResult.Yes)
             {
                 string path = Path.Combine(PlaynitePaths.DataCachePath, PluginName + "_" + DateTime.Now.ToString("yyyy-MM-dd") + ".zip");
 
                 FileSystem.DeleteFile(path);
                 using (FileStream zipToOpen = new FileStream(path, FileMode.Create))
-                using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
                 {
-                    foreach (var logFile in Directory.GetFiles(PlaynitePaths.ConfigRootPath, "*.log", SearchOption.TopDirectoryOnly))
+                    using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
                     {
-                        if (Path.GetFileName(logFile) == "cef.log" || Path.GetFileName(logFile) == "debug.log")
+                        foreach (string logFile in Directory.GetFiles(PlaynitePaths.ConfigRootPath, "*.log", SearchOption.TopDirectoryOnly))
                         {
-                            continue;
-                        }
-                        else
-                        {
-                            archive.CreateEntryFromFile(logFile, Path.GetFileName(logFile));
+                            if (Path.GetFileName(logFile) == "cef.log" || Path.GetFileName(logFile) == "debug.log")
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                _ = archive.CreateEntryFromFile(logFile, Path.GetFileName(logFile));
+                            }
                         }
                     }
                 }
 
-                Process.Start(PlaynitePaths.DataCachePath);
+                _ = Process.Start(PlaynitePaths.DataCachePath);
             }
         }
 
@@ -875,7 +878,7 @@ namespace CommonPluginsShared
                 Plugin plugin = API.Instance.Addons.Plugins.FirstOrDefault(x => x.Id == PluginId);
                 if (plugin != null)
                 {
-                    plugin.OpenSettingsView();
+                    _ = plugin.OpenSettingsView();
                 }
             }
             catch (Exception ex)

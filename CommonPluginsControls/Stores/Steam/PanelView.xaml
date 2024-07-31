@@ -115,7 +115,7 @@
                                     </Style>
                                 </StackPanel.Style-->
 
-                                <Button Content="{DynamicResource LOCSteamAuthenticateLabel}" Command="{Binding LoginCommand}"/>
+                                <Button Content="{DynamicResource LOCCommonAuthenticateLabel}" Command="{Binding LoginCommand}"/>
 
                                 <TextBlock VerticalAlignment="Center" Margin="10,0,0,0">
                                     <TextBlock.Tag>
@@ -129,19 +129,19 @@
                                         <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
                                             <Style.Triggers>
                                                 <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.Checking}">
-                                                    <Setter Property="Text" Value="{DynamicResource LOCSteamLoginChecking}" />
+                                                    <Setter Property="Text" Value="{DynamicResource LOCCommonLoginChecking}" />
                                                 </Trigger>
                                                 <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.Ok}">
-                                                    <Setter Property="Text" Value="{DynamicResource LOCSteamLoggedIn}" />
+                                                    <Setter Property="Text" Value="{DynamicResource LOCCommonLoggedIn}" />
                                                 </Trigger>
                                                 <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.AuthRequired}">
-                                                    <Setter Property="Text" Value="{DynamicResource LOCSteamNotLoggedIn}" />
+                                                    <Setter Property="Text" Value="{DynamicResource LOCCommonNotLoggedIn}" />
                                                 </Trigger>
                                                 <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.PrivateAccount}">
                                                     <Setter Property="Text" Value="{DynamicResource LOCSteamRequiresApiKey}" />
                                                 </Trigger>
                                                 <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.Failed}">
-                                                    <Setter Property="Text" Value="{DynamicResource LOCSteamNotLoggedInError}" />
+                                                    <Setter Property="Text" Value="{DynamicResource LOCCommonNotLoggedInError}" />
                                                 </Trigger>
                                             </Style.Triggers>
                                         </Style>
