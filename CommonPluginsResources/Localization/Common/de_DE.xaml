@@ -39,6 +39,7 @@
     <sys:String x:Key="LOCCommonAccountName">Kontoname</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Authentifizierungsstatus wird überprüft …</sys:String>
     <sys:String x:Key="LOCCommonPrivateChecking">Überprüfung des Datenschutzstatus…</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedInError">Benutzer-Authentifizierung fehlgeschlagen</sys:String>
 
     <sys:String x:Key="LOCCommonAccountConfiguration">Kontenkonfiguration</sys:String>
     <sys:String x:Key="LOCCommonIsPrivate">Privat</sys:String>
