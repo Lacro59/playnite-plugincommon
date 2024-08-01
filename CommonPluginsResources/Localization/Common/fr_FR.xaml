@@ -39,6 +39,7 @@
     <sys:String x:Key="LOCCommonAccountName">Nom du compte</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Vérification du statut d'authentification…</sys:String>
     <sys:String x:Key="LOCCommonPrivateChecking">Vérification du statut privé…</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedInError">Failed to authenticate user</sys:String>
 
     <sys:String x:Key="LOCCommonAccountConfiguration">Account configuration</sys:String>
     <sys:String x:Key="LOCCommonIsPrivate">Is private</sys:String>
