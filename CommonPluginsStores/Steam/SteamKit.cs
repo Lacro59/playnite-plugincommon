@@ -1,16 +1,24 @@
 ﻿using CommonPluginsShared;
 using CommonPluginsStores.Steam.Models.SteamKit;
+using Playnite.SDK.Data;
 using SteamKit2;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using System.Threading;
 
 namespace CommonPluginsStores.Steam
 {
     public class SteamKit
     {
         private static string UrlAchievementImg => @"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/{0}/{1}";
+
+        private static string UrlApi => @"http://api.steampowered.com";
+        private static string UrlGetGameAchievements => UrlApi + @"/IPlayerService/GetGameAchievements/v1/?appid={0}&language={1}";
+        private static string UrlGetPlayerAchievements => UrlApi + @"/ISteamUserStats/GetPlayerAchievements/v1/?appid={0}&l={1}&key={2}&steamid={3}";
+
+
 
 
         #region ISteamApps
@@ -165,7 +173,6 @@ namespace CommonPluginsStores.Steam
             return GetGameAchievements(appId, "english");
         }
 
-
         public static List<SteamAchievements> GetGameAchievements(uint appId, string language)
         {
             try
@@ -180,25 +187,55 @@ namespace CommonPluginsStores.Steam
                 {
                     List<SteamAchievements> achievementLists = new List<SteamAchievements>();
                     KeyValue results = steamInterface.Call("GetGameAchievements", 1, args);
-                    foreach (KeyValue data in results["achievements"].Children)
+
+                    // By moment, SteamKit return nothing
+                    if (results["achievements"].Children.Count == 0)
                     {
-                        achievementLists.Add(new SteamAchievements
+                        string data = Web.DownloadStringData(string.Format(UrlGetGameAchievements, appId, language)).GetAwaiter().GetResult();
+                        if (Serialization.TryFromJson(data, out Models.SteamAchievements steamAchievements))
                         {
-                            Hidden = data["hidden"].AsBoolean(),
-                            Icon = string.IsNullOrEmpty(data["icon"].AsString()) ? string.Empty : string.Format(UrlAchievementImg, appId, data["icon"].AsString()),
-                            IconGray = string.IsNullOrEmpty(data["icon_gray"].AsString()) ? string.Empty : string.Format(UrlAchievementImg, appId, data["icon_gray"].AsString()),
-                            InternalName = data["internal_name"].AsString(),
-                            LocalizedDesc = data["localized_desc"].AsString(),
-                            LocalizedName = data["localized_name"].AsString(),
-                            PlayerPercentUnlocked = string.IsNullOrEmpty(data["player_percent_unlocked"].AsString()) ? 100 : float.Parse(data["player_percent_unlocked"].AsString().Replace(".", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)),
-                        });
+                            steamAchievements.Response?.Achievements?.ForEach(x =>
+                            {
+                                achievementLists.Add(new SteamAchievements
+                                {
+                                    Hidden = x.Hidden,
+                                    Icon = x.Icon.IsNullOrEmpty() ? string.Empty : string.Format(UrlAchievementImg, appId, x.Icon),
+                                    IconGray = x.IconGray.IsNullOrEmpty() ? string.Empty : string.Format(UrlAchievementImg, appId, x.IconGray),
+                                    InternalName = x.InternalName,
+                                    LocalizedDesc = x.LocalizedDesc,
+                                    LocalizedName = x.LocalizedName,
+                                    PlayerPercentUnlocked = x.PlayerPercentUnlocked.IsNullOrEmpty() ? 100 : float.Parse(x.PlayerPercentUnlocked.Replace(".", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)),
+                                });
+                            });
+                        }
+
+                        if (achievementLists.Count > 0)
+                        {
+                            Common.LogDebug(true, $"GetGameAchievements by old method for {appId}");
+                        }
+                    }
+                    else
+                    {
+                        foreach (KeyValue data in results["achievements"].Children)
+                        {
+                            achievementLists.Add(new SteamAchievements
+                            {
+                                Hidden = data["hidden"].AsBoolean(),
+                                Icon = string.IsNullOrEmpty(data["icon"].AsString()) ? string.Empty : string.Format(UrlAchievementImg, appId, data["icon"].AsString()),
+                                IconGray = string.IsNullOrEmpty(data["icon_gray"].AsString()) ? string.Empty : string.Format(UrlAchievementImg, appId, data["icon_gray"].AsString()),
+                                InternalName = data["internal_name"].AsString(),
+                                LocalizedDesc = data["localized_desc"].AsString(),
+                                LocalizedName = data["localized_name"].AsString(),
+                                PlayerPercentUnlocked = string.IsNullOrEmpty(data["player_percent_unlocked"].AsString()) ? 100 : float.Parse(data["player_percent_unlocked"].AsString().Replace(".", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)),
+                            });
+                        }
                     }
                     return achievementLists;
                 }
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, $"With {appId}");
                 return null;
             }
         }
@@ -250,7 +287,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, $"With {appId}");
                 return null;
             }
         }
@@ -283,7 +320,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, $"With {appId}");
                 return null;
             }
         }
@@ -309,24 +346,70 @@ namespace CommonPluginsStores.Steam
                 {
                     List<SteamPlayerAchievement> steamPlayerAchievements = new List<SteamPlayerAchievement>();
                     KeyValue results = steamInterface.Call("GetPlayerAchievements", 1, args);
-                    foreach (KeyValue data in results["achievements"].Children)
+
+                    if (results["achievements"].Children.Count == 0)
                     {
-                        steamPlayerAchievements.Add(new SteamPlayerAchievement
+                        //if (Serialization.TryFromJson(data, out dynamic steamAchievements))
+                        //string data = Web.DownloadStringData(string.Format(UrlGetPlayerAchievements, appId, language, apiKey, steamId)).GetAwaiter().GetResult();
+                        //{
+                        //    foreach (dynamic dataApi in steamAchievements["playerstats"]["achievements"])
+                        //    {
+                        //        steamPlayerAchievements.Add(new SteamPlayerAchievement
+                        //        {
+                        //            Achieved = (int)dataApi["achieved"],
+                        //            ApiName = dataApi["apiname"],
+                        //            Description = dataApi["description"],
+                        //            Name = dataApi["name"],
+                        //            UnlockTime = (int)dataApi["unlocktime"] == 0 ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds((int)dataApi["unlocktime"]).ToLocalTime()
+                        //        });
+                        //    }
+                        //}
+                    }
+                    else
+                    {
+                        foreach (KeyValue data in results["achievements"].Children)
                         {
-                            Achieved = data["achieved"].AsInteger(),
-                            ApiName = data["apiname"].AsString(),
-                            Description = data["description"].AsString(),
-                            Name = data["name"].AsString(),
-                            UnlockTime = data["unlocktime"].AsInteger() == 0 ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(data["unlocktime"].AsInteger()).ToLocalTime()
-                        });
+                            steamPlayerAchievements.Add(new SteamPlayerAchievement
+                            {
+                                Achieved = data["achieved"].AsInteger(),
+                                ApiName = data["apiname"].AsString(),
+                                Description = data["description"].AsString(),
+                                Name = data["name"].AsString(),
+                                UnlockTime = data["unlocktime"].AsInteger() == 0 ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(data["unlocktime"].AsInteger()).ToLocalTime()
+                            });
+                        }
                     }
                     return steamPlayerAchievements;
                 }
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, $"With {appId}");
                 return null;
+            }
+        }
+
+        public static bool CheckGameIsPrivate(string apiKey, uint appId, ulong steamId)
+        {
+            try
+            {
+                Dictionary<string, string> args = new Dictionary<string, string>
+                {
+                    ["appId"] = appId.ToString(),
+                    ["steamId"] = steamId.ToString(),
+                    ["l"] = "english"
+                };
+
+                using (WebAPI.Interface steamInterface = WebAPI.GetInterface("ISteamUserStats", apiKey))
+                {
+                    List<SteamPlayerAchievement> steamPlayerAchievements = new List<SteamPlayerAchievement>();
+                    KeyValue results = steamInterface.Call("GetPlayerAchievements", 1, args);
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message.Contains("403");
             }
         }
         #endregion

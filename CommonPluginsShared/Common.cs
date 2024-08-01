@@ -227,7 +227,18 @@ namespace CommonPluginsShared
             {
                 if (!traceInfos.InitialCaller.IsNullOrEmpty())
                 {
-                    Message += $"Error on {traceInfos.InitialCaller}()";
+                    Message = $"Error on {traceInfos.InitialCaller}()";
+                }
+                else
+                {
+                    Message = $"Error on ???";
+                }
+            }
+            else
+            {
+                if (!traceInfos.InitialCaller.IsNullOrEmpty())
+                {
+                    Message = $"Error on {traceInfos.InitialCaller}(): {Message}";
                 }
             }
 
@@ -250,7 +261,7 @@ namespace CommonPluginsShared
             {
                 API.Instance.Notifications.Add(new NotificationMessage(
                      $"{PluginName}-{new Guid()}",
-                     $"{PluginName}" + System.Environment.NewLine + (NotificationMessage.IsNullOrEmpty() ? $"{ex.Message}" : NotificationMessage),
+                     $"{PluginName}" + Environment.NewLine + (NotificationMessage.IsNullOrEmpty() ? $"{ex.Message}": NotificationMessage),
                      NotificationType.Error,
                      () => PlayniteTools.CreateLogPackage(PluginName)
                  ));

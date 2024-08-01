@@ -357,6 +357,10 @@ namespace CommonPluginsStores.Steam
                 {
                     return gameAchievements;
                 }
+                if (gameAchievements?.Count() == 0)
+                {
+                    return gameAchievements;
+                }
 
                 if (accountInfos != null && accountInfos.IsCurrent)
                 {
@@ -915,6 +919,15 @@ namespace CommonPluginsStores.Steam
         {
             return description.Replace("%CDN_HOST_MEDIA_SSL%", "steamcdn-a.akamaihd.net");
         }
+
+
+
+        public bool CheckGameIsPrivate(uint appId, AccountInfos accountInfos)
+        {
+            return accountInfos.IsPrivate || accountInfos.ApiKey.IsNullOrEmpty()
+                ? CheckGameIsPrivateByWeb(appId, accountInfos)
+                : SteamKit.CheckGameIsPrivate(accountInfos.ApiKey, appId, ulong.Parse(accountInfos.UserId));
+        }
         #endregion
 
         #region Steam Api
@@ -929,7 +942,7 @@ namespace CommonPluginsStores.Steam
             if (appId > 0)
             {
                 List<Models.SteamKit.SteamAchievements> steamAchievements = SteamKit.GetGameAchievements(appId, CodeLang.GetSteamLang(Local));
-                gameAchievements = steamAchievements?.Select(x => new GameAchievement 
+                gameAchievements = steamAchievements?.Select(x => new GameAchievement
                 {
                     Id = x.InternalName,
                     Name = x.LocalizedName,
@@ -999,7 +1012,29 @@ namespace CommonPluginsStores.Steam
         }
         #endregion
 
-        #region Steam Web
+        #region Steam Web        
+        private bool CheckGameIsPrivateByWeb(uint appId, AccountInfos accountInfos)
+        {
+            string urlById = string.Format(UrlProfileById, accountInfos.UserId) + $"/stats/{appId}/achievements?l=english";
+            string urlByPersona = string.Format(UrlProfileByName, accountInfos.Pseudo) + $"/stats/{appId}?l=english";
+            List<HttpCookie> cookies = GetStoredCookies();
+            
+            string resultWeb = Web.DownloadStringData(urlById, cookies, string.Empty, true).GetAwaiter().GetResult();
+            if (resultWeb.IndexOf("profile_fatalerror") == 1)
+            {
+                return true;
+            }
+            else
+            {
+                resultWeb = Web.DownloadStringData(urlByPersona, cookies, string.Empty, true).GetAwaiter().GetResult();
+                if (resultWeb.IndexOf("profile_fatalerror") == 1)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private ObservableCollection<GameAchievement> GetAchievementsByWeb(uint appId, AccountInfos accountInfos, ObservableCollection<GameAchievement> gameAchievements)
         {
             string lang = "english";
