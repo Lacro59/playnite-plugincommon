@@ -39,6 +39,7 @@
     <sys:String x:Key="LOCCommonAccountName">Hesap adı</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Kimlik doğrulama durumu denetleniyor…</sys:String>
     <sys:String x:Key="LOCCommonPrivateChecking">Özel durum kontrol ediliyor…</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedInError">Kullanıcı kimliği doğrulanamadı</sys:String>
 
     <sys:String x:Key="LOCCommonAccountConfiguration">Hesap yapılandırması</sys:String>
     <sys:String x:Key="LOCCommonIsPrivate">Özel mi</sys:String>
