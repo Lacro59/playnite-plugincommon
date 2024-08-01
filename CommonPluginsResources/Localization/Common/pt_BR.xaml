@@ -39,6 +39,7 @@
     <sys:String x:Key="LOCCommonAccountName">Nome da conta</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Verificando status da autenticação…</sys:String>
     <sys:String x:Key="LOCCommonPrivateChecking">Verificando status privado…</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedInError">Falha ao autenticar usuário</sys:String>
 
     <sys:String x:Key="LOCCommonAccountConfiguration">Configuração de conta</sys:String>
     <sys:String x:Key="LOCCommonIsPrivate">É privado</sys:String>
@@ -49,7 +50,7 @@
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: usuário não está autenticado</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: Nenhuma chave de API</sys:String>
     <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Configuração inválida</sys:String>
-    <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: no configuration found</sys:String>
+    <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: nenhuma configuração encontrada</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Itens ignorados</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">Insira o item para ignorar</sys:String>
@@ -84,7 +85,7 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">Classificação padrão da lista de jogos</sys:String>
 
-    <sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated (only new)</sys:String>
+    <sys:String x:Key="LOCCommonAutoImport">Importar dados automaticamente quando a biblioteca for atualizada (somente novos)</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">Ocultar opções de gráfico no controle</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">Mostrar todos os dados no gráfico por padrão</sys:String>
