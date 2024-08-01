@@ -39,6 +39,7 @@
     <sys:String x:Key="LOCCommonAccountName">Ім'я облікового запису</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Перевірка стану автентифікації…</sys:String>
     <sys:String x:Key="LOCCommonPrivateChecking">Перевірка приватного статусу…</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedInError">Failed to authenticate user</sys:String>
 
     <sys:String x:Key="LOCCommonAccountConfiguration">Налаштування облікового запису</sys:String>
     <sys:String x:Key="LOCCommonIsPrivate">Приватний</sys:String>
