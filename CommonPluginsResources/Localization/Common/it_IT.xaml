@@ -39,6 +39,13 @@
     <sys:String x:Key="LOCCommonAccountName">Nome Account</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Controllo dello stato di autenticazione…</sys:String>
     <sys:String x:Key="LOCCommonPrivateChecking">Controllo stato privato…</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedInError">Autenticazione dell'utente fallita</sys:String>
+
+    <sys:String x:Key="LOCCommonAccountConfiguration">Configurazione account</sys:String>
+    <sys:String x:Key="LOCCommonIsPrivate">È privata</sys:String>
+    <sys:String x:Key="LOCCommonHasApiKey">Ha chiave API</sys:String>
+    <sys:String x:Key="LOCCommonControlConfiguration">Configurazione di controllo</sys:String>
+    <sys:String x:Key="LOCCommonGetAccountID">Ottieni ID account</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: utente non autenticato</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: nessuna chiave API</sys:String>
@@ -78,7 +85,7 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">Ordinamento predefinito della lista giochi</sys:String>
 
-    <sys:String x:Key="LOCCommonAutoImport">Importa automaticamente i dati quando la libreria viene aggiornata</sys:String>
+    <sys:String x:Key="LOCCommonAutoImport">Importa automaticamente i dati quando la libreria viene aggiornata (solo nuovi)</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">Nascondi le opzioni del grafico sul controllo</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">Mostra tutti i dati sul grafico per impostazione predefinita</sys:String>

@@ -39,6 +39,13 @@
     <sys:String x:Key="LOCCommonAccountName">Hesap adı</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Kimlik doğrulama durumu denetleniyor…</sys:String>
     <sys:String x:Key="LOCCommonPrivateChecking">Özel durum kontrol ediliyor…</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedInError">Kullanıcı kimliği doğrulanamadı</sys:String>
+
+    <sys:String x:Key="LOCCommonAccountConfiguration">Hesap yapılandırması</sys:String>
+    <sys:String x:Key="LOCCommonIsPrivate">Özel mi</sys:String>
+    <sys:String x:Key="LOCCommonHasApiKey">Api anahtarı var</sys:String>
+    <sys:String x:Key="LOCCommonControlConfiguration">Kontrol yapılandırması</sys:String>
+    <sys:String x:Key="LOCCommonGetAccountID">Hesap ID al</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: kullanıcı kimliği doğrulanmadı</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: API anahtarı yok</sys:String>
@@ -78,7 +85,7 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">Öntanımlı oyun listesi sıralaması</sys:String>
 
-    <sys:String x:Key="LOCCommonAutoImport">Kütüphane güncellendiğinde kendiliğinden veriyi içeri aktar</sys:String>
+    <sys:String x:Key="LOCCommonAutoImport">Kütüphane güncellendiğinde veriyi otomatik içeri aktar (sadece yenileri)</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">Kontrol ekranında kart seçeneklerini gizle</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">Öntanımlı olarak kart üstünde tüm veriyi görüntüle</sys:String>
