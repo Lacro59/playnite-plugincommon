@@ -89,7 +89,7 @@ namespace CommonPluginsStores.Epic.Models
         public int? NumCompleted { get; set; }
 
         [SerializationPropertyName("totalAchievements")]
-        public int TotalAchievements { get; set; }
+        public int? TotalAchievements { get; set; }
 
         [SerializationPropertyName("totalXP")]
         public int TotalXP { get; set; }
@@ -116,10 +116,10 @@ namespace CommonPluginsStores.Epic.Models
         public string SandboxId { get; set; }
 
         [SerializationPropertyName("totalAchievements")]
-        public int TotalAchievements { get; set; }
+        public int? TotalAchievements { get; set; }
 
         [SerializationPropertyName("totalProductXP")]
-        public int TotalProductXP { get; set; }
+        public int? TotalProductXP { get; set; }
 
         [SerializationPropertyName("achievementSets")]
         public List<AchievementSet> AchievementSets { get; set; }

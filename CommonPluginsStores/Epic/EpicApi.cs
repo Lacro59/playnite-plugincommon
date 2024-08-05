@@ -199,7 +199,7 @@ namespace CommonPluginsStores.Epic
 
 
                 EpicAchievementResponse epicAchievementResponse = QueryAchievement(id, localLangShort).GetAwaiter().GetResult();
-                epicAchievementResponse.Data.Achievement?.ProductAchievementsRecordBySandbox?.Achievements?.ForEach(x =>
+                epicAchievementResponse?.Data.Achievement?.ProductAchievementsRecordBySandbox?.Achievements?.ForEach(x =>
                 {
                     GameAchievement gameAchievement = new GameAchievement
                     {
@@ -473,9 +473,9 @@ namespace CommonPluginsStores.Epic
                 EpicAccountResponse account = GetEpicAccount();
                 return account.Id == tokens.account_id;
             }
-            catch (Exception ex)
+            catch
             {
-                if (ex is TokenException)
+                try
                 {
                     RenewTokens(tokens.refresh_token);
                     tokens = LoadTokens();
@@ -487,7 +487,7 @@ namespace CommonPluginsStores.Epic
                     EpicAccountResponse account = GetEpicAccount();
                     return account.Id == tokens.account_id;
                 }
-                else
+                catch (Exception ex)
                 {
                     Common.LogError(ex, false, "Failed to validation Epic authentication.", false, PluginName);
                     return false;
