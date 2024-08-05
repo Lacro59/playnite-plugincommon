@@ -22,59 +22,45 @@ namespace CommonPluginsControls.Controls
     /// </summary>
     public partial class ProgressBarExtend : UserControl
     {
-        private Decorator _indicator;
-        private Decorator indicator
+        private Decorator indicator;
+        private Decorator Indicator
         {
             get
             {
-                if (_indicator == null)
+                if (indicator == null)
                 {
-                    _indicator = (Decorator)PART_ProgressBar.Template.FindName("PART_Indicator", PART_ProgressBar);
+                    indicator = (Decorator)PART_ProgressBar.Template.FindName("PART_Indicator", PART_ProgressBar);
                 }
-                return _indicator;
+                return indicator;
             }
 
-            set => _indicator = value;
+            set => indicator = value;
         }
 
 
         #region Text property
         public string TextValue
         {
-            get
-            {
-                return (string)GetValue(TextValueProperty);
-            }
-
-            set
-            {
-                SetValue(TextValueProperty, value);
-            }
+            get => (string)GetValue(TextValueProperty);
+            set => SetValue(TextValueProperty, value);
         }
 
         public static readonly DependencyProperty TextValueProperty = DependencyProperty.Register(
-            nameof(TextValue), 
-            typeof(string), 
-            typeof(ProgressBarExtend), 
+            nameof(TextValue),
+            typeof(string),
+            typeof(ProgressBarExtend),
             new PropertyMetadata(string.Empty, TextValuePropertyChangedCallback));
 
         private static void TextValuePropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var obj = sender as ProgressBarExtend;
+            ProgressBarExtend obj = sender as ProgressBarExtend;
             obj.TextValue = (string)e.NewValue;
         }
 
         public bool TextInsideVisibility
         {
-            get
-            {
-                return (bool)GetValue(TextInsideVisibilityProperty);
-            }
-
-            set
-            {
-                SetValue(TextInsideVisibilityProperty, value);
-            }
+            get => (bool)GetValue(TextInsideVisibilityProperty);
+            set => SetValue(TextInsideVisibilityProperty, value);
         }
 
         public static readonly DependencyProperty TextInsideVisibilityProperty = DependencyProperty.Register(
@@ -85,15 +71,8 @@ namespace CommonPluginsControls.Controls
 
         public bool TextAboveVisibility
         {
-            get
-            {
-                return (bool)GetValue(TextAboveVisibilityProperty);
-            }
-
-            set
-            {
-                SetValue(TextAboveVisibilityProperty, value);
-            }
+            get => (bool)GetValue(TextAboveVisibilityProperty);
+            set => SetValue(TextAboveVisibilityProperty, value);
         }
 
         public static readonly DependencyProperty TextAboveVisibilityProperty = DependencyProperty.Register(
@@ -104,15 +83,8 @@ namespace CommonPluginsControls.Controls
 
         public bool TextBelowVisibility
         {
-            get
-            {
-                return (bool)GetValue(TextBelowVisibilityProperty);
-            }
-
-            set
-            {
-                SetValue(TextBelowVisibilityProperty, value);
-            }
+            get => (bool)GetValue(TextBelowVisibilityProperty);
+            set => SetValue(TextBelowVisibilityProperty, value);
         }
 
         public static readonly DependencyProperty TextBelowVisibilityProperty = DependencyProperty.Register(
@@ -123,7 +95,7 @@ namespace CommonPluginsControls.Controls
 
         private static void TextVisibilityChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            var obj = sender as ProgressBarExtend;
+            ProgressBarExtend obj = sender as ProgressBarExtend;
             if (obj != null && e.NewValue != e.OldValue)
             {
                 switch (e.Property.Name)
@@ -136,6 +108,8 @@ namespace CommonPluginsControls.Controls
                         break;
                     case "TextBelowVisibility":
                         obj.TextBelowVisibility = (bool)e.NewValue;
+                        break;
+                    default:
                         break;
                 }
             }
@@ -297,7 +271,7 @@ namespace CommonPluginsControls.Controls
 
         public double GetIndicatorWidth()
         {
-            return indicator != null ? indicator.ActualWidth : 0;
+            return Indicator != null ? Indicator.ActualWidth : 0;
         }
 
         public double GetIndicatorHeight()
