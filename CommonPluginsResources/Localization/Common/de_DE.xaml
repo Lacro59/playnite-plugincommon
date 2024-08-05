@@ -39,6 +39,13 @@
     <sys:String x:Key="LOCCommonAccountName">Kontoname</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Authentifizierungsstatus wird überprüft …</sys:String>
     <sys:String x:Key="LOCCommonPrivateChecking">Überprüfung des Datenschutzstatus…</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedInError">Benutzer-Authentifizierung fehlgeschlagen</sys:String>
+
+    <sys:String x:Key="LOCCommonAccountConfiguration">Kontenkonfiguration</sys:String>
+    <sys:String x:Key="LOCCommonIsPrivate">Privat</sys:String>
+    <sys:String x:Key="LOCCommonHasApiKey">Api Key vorhanden</sys:String>
+    <sys:String x:Key="LOCCommonControlConfiguration">Steuerungseinstellungen</sys:String>
+    <sys:String x:Key="LOCCommonGetAccountID">Konto-ID abrufen</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: Benutzer ist nicht authentifiziert</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: Kein API Schlüssel</sys:String>
@@ -78,7 +85,7 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">Standardsortierung der Spielliste</sys:String>
 
-    <sys:String x:Key="LOCCommonAutoImport">Daten automatisch importieren, wenn Bibliothek aktualisiert wird</sys:String>
+    <sys:String x:Key="LOCCommonAutoImport">Daten automatisch importieren, wenn Bibliothek aktualisiert wird (nur neue)</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">Diagrammoptionen ausblenden</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">Standardmäßig alle Daten auf Diagramm anzeigen</sys:String>

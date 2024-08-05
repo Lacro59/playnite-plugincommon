@@ -39,6 +39,13 @@
     <sys:String x:Key="LOCCommonAccountName">Account Name</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Checking authentication status…</sys:String>
     <sys:String x:Key="LOCCommonPrivateChecking">Checking private status…</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedInError">Failed to authenticate user</sys:String>
+
+    <sys:String x:Key="LOCCommonAccountConfiguration">Account configuration</sys:String>
+    <sys:String x:Key="LOCCommonIsPrivate">Is private</sys:String>
+    <sys:String x:Key="LOCCommonHasApiKey">Has api key</sys:String>
+    <sys:String x:Key="LOCCommonControlConfiguration">Control configuration</sys:String>
+    <sys:String x:Key="LOCCommonGetAccountID">Get account ID</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticate</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: No API key</sys:String>
@@ -78,7 +85,7 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">Default game list sorting</sys:String>
 
-    <sys:String x:Key="LOCCommonAutoImport">Importer data automatisk når biblioteket oppdateres</sys:String>
+    <sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated (only new)</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">Hide chart options on control</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">Display all data on chart by default</sys:String>
