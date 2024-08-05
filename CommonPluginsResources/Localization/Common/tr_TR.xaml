@@ -16,6 +16,8 @@
     <!-- Filters -->
 
     <sys:String x:Key="LOCCommonUsedFilteredGames">Şu anda filtrelenmiş oyunlar kullanılıyor</sys:String>
+    <sys:String x:Key="LOCCommonDefaultFilters">Restore default filters</sys:String>
+    <sys:String x:Key="LOCCommonSaveFilters">Save current filters</sys:String>
 
     <!-- Transfer plugin data -->
 
