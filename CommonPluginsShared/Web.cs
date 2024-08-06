@@ -395,17 +395,17 @@ namespace CommonPluginsShared
         /// Download string data with custom cookies.
         /// </summary>
         /// <param name="url"></param>
-        /// <param name="Cookies"></param>
-        /// <param name="UserAgent"></param>
+        /// <param name="cookies"></param>
+        /// <param name="userAgent"></param>
         /// <returns></returns>
-        public static async Task<string> DownloadStringData(string url, List<HttpCookie> Cookies = null, string UserAgent = "", bool KeepParam = false)
+        public static async Task<string> DownloadStringData(string url, List<HttpCookie> cookies = null, string userAgent = "", bool keepParam = false)
         {
             HttpClientHandler handler = new HttpClientHandler();
-            if (Cookies != null)
+            if (cookies != null)
             {
                 CookieContainer cookieContainer = new CookieContainer();
 
-                foreach (var cookie in Cookies)
+                foreach (var cookie in cookies)
                 {
                     Cookie c = new Cookie();
                     c.Name = cookie.Name;
@@ -435,13 +435,13 @@ namespace CommonPluginsShared
             HttpResponseMessage response;
             using (var client = new HttpClient(handler))
             {
-                if (UserAgent.IsNullOrEmpty())
+                if (userAgent.IsNullOrEmpty())
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                 }
                 else
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+                    client.DefaultRequestHeaders.Add("User-Agent", userAgent);
                 }
 
                 try
@@ -461,7 +461,7 @@ namespace CommonPluginsShared
                             urlNew = redirectUri.ToString();
                         }
                         
-                        if (KeepParam)
+                        if (keepParam)
                         {
                             var urlParams = url.Split('?').ToList();
                             if (urlParams.Count == 2)
@@ -482,7 +482,7 @@ namespace CommonPluginsShared
                         }
 
                         Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", urlNew));
-                        return await DownloadStringData(urlNew, Cookies, UserAgent);
+                        return await DownloadStringData(urlNew, cookies, userAgent);
                     }
                     else
                     {
@@ -495,7 +495,7 @@ namespace CommonPluginsShared
                     if (ex.Message.Contains("Section=ResponseHeader Detail=CR"))
                     {
                         Logger.Warn($"Used UserAgent: Anything");
-                        return DownloadStringData(url, Cookies, "Anything").GetAwaiter().GetResult();
+                        return DownloadStringData(url, cookies, "Anything").GetAwaiter().GetResult();
                     }
                     else
                     {

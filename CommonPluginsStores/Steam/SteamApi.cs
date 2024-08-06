@@ -369,6 +369,11 @@ namespace CommonPluginsStores.Steam
                         : GetAchievementsByApi(appId, accountInfos, gameAchievements);
                 }
 
+                gameAchievements?.ForEach(x =>
+                {
+                    x.GamerScore = CalcGamerScore(x.Percent);
+                });
+
                 return gameAchievements;
             }
             catch (Exception ex)
@@ -805,6 +810,13 @@ namespace CommonPluginsStores.Steam
             }
 
             return null;
+        }
+
+        public List<SteamStats> GetUsersStats(uint appId, AccountInfos accountInfos)
+        {
+            return accountInfos.IsPrivate || accountInfos.ApiKey.IsNullOrEmpty()
+                        ? new List<SteamStats>()
+                        : SteamKit.GetUserStatsForGame(accountInfos.ApiKey, appId, ulong.Parse(accountInfos.UserId));
         }
 
         public async Task<bool> CheckIsPublic(Models.SteamUser steamUser)

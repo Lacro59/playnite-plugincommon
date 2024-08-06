@@ -304,13 +304,13 @@ namespace CommonPluginsStores.Gog
                 //}
                 Url = string.Format(UrlApiGamePlayUserAchievements, Id, UserId);
 
-                string UrlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Local).ToLower());
-                string WebData = Web.DownloadStringData(Url, AuthToken.Token, UrlLang).GetAwaiter().GetResult();
+                string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Local).ToLower());
+                string webData = Web.DownloadStringData(Url, AuthToken.Token, urlLang).GetAwaiter().GetResult();
 
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
-                if (!WebData.IsNullOrEmpty())
+                if (!webData.IsNullOrEmpty())
                 {
-                    dynamic resultObj = Serialization.FromJson<dynamic>(WebData);
+                    dynamic resultObj = Serialization.FromJson<dynamic>(webData);
                     try
                     {
                         dynamic resultItems = resultObj["items"];
@@ -326,7 +326,8 @@ namespace CommonPluginsStores.Gog
                                     UrlUnlocked = (string)resultItems[i]["image_url_unlocked"],
                                     UrlLocked = (string)resultItems[i]["image_url_locked"],
                                     DateUnlocked = ((string)resultItems[i]["date_unlocked"] == null) ? default : (DateTime)resultItems[i]["date_unlocked"],
-                                    Percent = (float)resultItems[i]["rarity"]
+                                    Percent = (float)resultItems[i]["rarity"],
+                                    GamerScore = CalcGamerScore((float)resultItems[i]["rarity"])
                                 };
                                 gameAchievements.Add(gameAchievement);
                             }

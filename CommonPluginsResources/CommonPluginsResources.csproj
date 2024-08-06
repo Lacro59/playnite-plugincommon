@@ -79,7 +79,9 @@
   <ItemGroup>
     <None Include="ResourcesPlaynite\icofont.ttf" />
     <None Include="Resources\akr.WPF.Controls.ColorPicker.dll" />
-    <Resource Include="Resources\font.ttf" />
+    <None Include="Resources\font.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Common.xaml">

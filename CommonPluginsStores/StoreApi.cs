@@ -473,5 +473,24 @@ namespace CommonPluginsStores
             }
         }
         #endregion
+
+
+        public static float CalcGamerScore(float value)
+        {
+            float gamerScore = 15;
+            if (value < 2)
+            {
+                gamerScore = 180;
+            } 
+            else if (value < 10) 
+            {
+                gamerScore = 90;
+            } 
+            else if (value < 30)
+            {
+                gamerScore = 30;
+            }
+            return gamerScore;
+        }
     }
 }

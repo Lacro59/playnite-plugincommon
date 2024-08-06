@@ -311,7 +311,7 @@ namespace CommonPluginsStores.Steam
                     {
                         userStatsForGames.Add(new SteamStats
                         {
-                            Name = data["name"].AsString(),
+                            Name = data.Name,
                             Value = data["value"].AsString()
                         });
                     }

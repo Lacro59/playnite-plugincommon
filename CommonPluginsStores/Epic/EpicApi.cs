@@ -209,7 +209,8 @@ namespace CommonPluginsStores.Epic
                         UrlUnlocked = x.Achievement.UnlockedIconLink,
                         UrlLocked = x.Achievement.LockedIconLink,
                         DateUnlocked = default,
-                        Percent = x.Achievement.Rarity.Percent
+                        Percent = x.Achievement.Rarity.Percent,
+                        GamerScore = x.Achievement.XP
                     };
                     gameAchievements.Add(gameAchievement);
                 });
