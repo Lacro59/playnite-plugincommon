@@ -199,7 +199,7 @@ namespace CommonPluginsStores.Epic
 
 
                 EpicAchievementResponse epicAchievementResponse = QueryAchievement(id, localLangShort).GetAwaiter().GetResult();
-                epicAchievementResponse?.Data.Achievement?.ProductAchievementsRecordBySandbox?.Achievements?.ForEach(x =>
+                epicAchievementResponse?.Data?.Achievement?.ProductAchievementsRecordBySandbox?.Achievements?.ForEach(x =>
                 {
                     GameAchievement gameAchievement = new GameAchievement
                     {
