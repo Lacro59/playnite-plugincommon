@@ -30,15 +30,17 @@ namespace CommonPluginsShared
     {
         private static ILogger Logger => LogManager.GetLogger();
 
-        public static string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0";
+        public static string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0";
 
 
         private static string StrWebUserAgentType(WebUserAgentType UserAgentType)
         {
             switch (UserAgentType)
             {
-                case (WebUserAgentType.Request):
+                case WebUserAgentType.Request:
                     return "request";
+                default:
+                    break;
             }
             return string.Empty;
         }
