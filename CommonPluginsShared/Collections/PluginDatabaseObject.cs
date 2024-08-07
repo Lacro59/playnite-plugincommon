@@ -452,6 +452,8 @@ namespace CommonPluginsShared.Collections
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
+                API.Instance.Database.Games.BeginBufferUpdate();
+
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
 
@@ -475,6 +477,8 @@ namespace CommonPluginsShared.Collections
                 stopWatch.Stop();
                 TimeSpan ts = stopWatch.Elapsed;
                 Logger.Info($"Task Refresh(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{Ids.Count} items");
+                
+                API.Instance.Database.Games.EndBufferUpdate();
             }, globalProgressOptions);
         }
 
@@ -502,6 +506,33 @@ namespace CommonPluginsShared.Collections
         {
             Refresh(Ids);
         }
+
+        public virtual async Task RefreshInstalled()
+        {
+            await Task.Run(() =>
+            {
+                API.Instance.Database.Games.BeginBufferUpdate();
+
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
+
+                List<Guid> PlayniteDb = API.Instance.Database.Games
+                    .Where(x => x.IsInstalled)
+                    .Select(x => x.Id).ToList();
+
+                PlayniteDb.ForEach(x =>
+                {
+                    RefreshNoLoader(x);
+                });
+
+                stopWatch.Stop();
+                TimeSpan ts = stopWatch.Elapsed;
+                Logger.Info($"Task RefreshInstalled() - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {PlayniteDb.Count} items");
+
+                API.Instance.Database.Games.EndBufferUpdate();
+            });
+        }
+
 
 
         public virtual void ActionAfterRefresh(TItem item)
@@ -539,6 +570,8 @@ namespace CommonPluginsShared.Collections
 
         public virtual bool Remove(List<Guid> Ids)
         {
+            API.Instance.Database.Games.BeginBufferUpdate();
+
             // If tag system
             object Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
             PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
@@ -556,6 +589,8 @@ namespace CommonPluginsShared.Collections
                     Application.Current.Dispatcher?.Invoke(() => { _ = Database.Remove(Id); }, DispatcherPriority.Send);
                 }
             }
+
+            API.Instance.Database.Games.EndBufferUpdate();
 
             return true;
         }
