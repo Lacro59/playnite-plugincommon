@@ -16,8 +16,8 @@
     <!-- Filters -->
 
     <sys:String x:Key="LOCCommonUsedFilteredGames">Giochi attualmente filtrati usati</sys:String>
-    <sys:String x:Key="LOCCommonDefaultFilters">Restore default filters</sys:String>
-    <sys:String x:Key="LOCCommonSaveFilters">Save current filters</sys:String>
+    <sys:String x:Key="LOCCommonDefaultFilters">Ripristina filtri predefiniti</sys:String>
+    <sys:String x:Key="LOCCommonSaveFilters">Salva i filtri attuali</sys:String>
 
     <!-- Transfer plugin data -->
 
@@ -88,7 +88,7 @@
     <sys:String x:Key="LOCCommonDefaultSorting">Ordinamento predefinito della lista giochi</sys:String>
 
     <sys:String x:Key="LOCCommonAutoImport">Importa automaticamente i dati quando la libreria viene aggiornata (solo nuovi)</sys:String>
-    <sys:String x:Key="LOCCommonAutoImportOnInstalled">Automatically import for installed games</sys:String>
+    <sys:String x:Key="LOCCommonAutoImportOnInstalled">Importa automaticamente per i giochi installati</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">Nascondi le opzioni del grafico sul controllo</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">Mostra tutti i dati sul grafico per impostazione predefinita</sys:String>
