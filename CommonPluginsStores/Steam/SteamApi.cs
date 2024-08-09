@@ -36,7 +36,10 @@ namespace CommonPluginsStores.Steam
     public class SteamApi : StoreApi
     {
         #region Url
-        private string SteamDbDlc => "https://steamdb.info/app/{0}/dlc/";
+        private static string SteamDbDlc => "https://steamdb.info/app/{0}/dlc/";
+        private static string SteamDbExtensionAchievements => "https://steamdb.info/api/ExtensionGetAchievements/?appid={0}";
+
+        private static string UrlCapsuleSteam => "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{0}/capsule_184x69.jpg";
 
         private static string UrlSteamCommunity => @"https://steamcommunity.com";
         private static string UrlApi => @"https://api.steampowered.com";
@@ -353,11 +356,7 @@ namespace CommonPluginsStores.Steam
                 }
 
                 ObservableCollection<GameAchievement> gameAchievements = GetAchievementsSchema(appId);
-                if (gameAchievements?.Count() == 0)
-                {
-                    return gameAchievements;
-                }
-                if (gameAchievements?.Count() == 0)
+                if (gameAchievements == null || gameAchievements.Count() == 0)
                 {
                     return gameAchievements;
                 }
@@ -373,6 +372,8 @@ namespace CommonPluginsStores.Steam
                 {
                     x.GamerScore = CalcGamerScore(x.Percent);
                 });
+
+                gameAchievements = SetExtensionsAchievementsFromSteamDb(appId, gameAchievements);
 
                 return gameAchievements;
             }
@@ -1228,6 +1229,57 @@ namespace CommonPluginsStores.Steam
             }
 
             return Dlcs;
+        }
+
+        private ObservableCollection<GameAchievement> SetExtensionsAchievementsFromSteamDb(uint appId, ObservableCollection<GameAchievement> gameAchievements)
+        {
+            try
+            {
+                Thread.Sleep(1000);
+                string data = Web.DownloadStringData(string.Format(SteamDbExtensionAchievements, appId)).GetAwaiter().GetResult();
+                if (Serialization.TryFromJson(data, out ExtensionsAchievements extensionsAchievementse))
+                {
+                    if (!extensionsAchievementse?.Success ?? true)
+                    {
+                        Logger.Warn($"No success in ExtensionsAchievements for {appId}");
+                    }
+
+                    int CategoryOrder = 1;
+                    extensionsAchievementse?.Data?.ForEach(x =>
+                    {
+                        gameAchievements?.ForEach(y =>
+                        {
+                            if (x.AchievementApiNames.Contains(y.Id))
+                            {
+                                int id = (x.DlcAppId != null && x.DlcAppId != 0) ? (int)x.DlcAppId : (int)appId;
+                                y.CategoryIcon = string.Format(UrlCapsuleSteam, id);
+                                y.Category = x.Name.IsNullOrEmpty() ? x.DlcAppName : x.Name;
+                                y.CategoryOrder = CategoryOrder;
+                                y.CategoryDlc = !x.DlcAppName.IsNullOrEmpty();
+                            }
+                        });
+                        CategoryOrder++;
+                    });
+                }
+                else
+                {
+                    Logger.Warn($"No data find in ExtensionsAchievements for {appId}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, false, PluginName);
+            }
+
+            gameAchievements?.ForEach(y =>
+            {
+                if (y.CategoryOrder == 0)
+                {
+                    y.CategoryIcon = string.Format(UrlCapsuleSteam, appId);
+                }
+            });
+
+            return gameAchievements;
         }
     }
 }

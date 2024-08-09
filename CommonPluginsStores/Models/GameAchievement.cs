@@ -14,6 +14,12 @@ namespace CommonPluginsStores.Models
         public DateTime DateUnlocked { get; set; }
         public float Percent { get; set; }
         public bool IsHidden { get; set; }
+
         public float GamerScore { get; set; }
+
+        public int CategoryOrder { get; set; }
+        public string Category { get; set; }
+        public string CategoryIcon { get; set; }
+        public bool CategoryDlc { get; set; }
     }
 }
