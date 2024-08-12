@@ -88,7 +88,7 @@
     <sys:String x:Key="LOCCommonDefaultSorting">Classificação padrão da lista de jogos</sys:String>
 
     <sys:String x:Key="LOCCommonAutoImport">Importar dados automaticamente quando a biblioteca for atualizada (somente novos)</sys:String>
-    <sys:String x:Key="LOCCommonAutoImportOnInstalled">Automatically import for installed games</sys:String>
+    <sys:String x:Key="LOCCommonAutoImportOnInstalled">Importar automaticamente para os jogos instalados</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">Ocultar opções de gráfico no controle</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">Mostrar todos os dados no gráfico por padrão</sys:String>
