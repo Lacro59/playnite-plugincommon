@@ -539,6 +539,11 @@ namespace CommonPluginsStores.Steam
         /// <returns></returns>
         public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
         {
+            return GetGameInfos(id, accountInfos, 1);
+        }
+
+        private GameInfos GetGameInfos(string id, AccountInfos accountInfos, int retryCount)
+        {
             try
             {
                 string url = string.Format(UrlApiGameDetails, id, CodeLang.GetSteamLang(Local));
@@ -547,6 +552,10 @@ namespace CommonPluginsStores.Steam
                 if (Serialization.TryFromJson(webData, out Dictionary<string, StoreAppDetailsResult> parsedData))
                 {
                     StoreAppDetailsResult storeAppDetailsResult = parsedData[id];
+                    if (storeAppDetailsResult?.data == null)
+                    {
+                        return null;
+                    }
 
                     GameInfos gameInfos = new GameInfos
                     {
@@ -559,7 +568,7 @@ namespace CommonPluginsStores.Steam
 
                     // DLC
                     List<uint> dlcsIdSteam = storeAppDetailsResult?.data.dlc ?? new List<uint>();
-                    List<uint> dlcsIdSteamDb = GetDlcFromSteamDb(storeAppDetailsResult?.data.steam_appid ?? 0);
+                    List<uint> dlcsIdSteamDb = new List<uint>(); // GetDlcFromSteamDb(storeAppDetailsResult?.data.steam_appid ?? 0);
                     List<uint> dlcsId = dlcsIdSteam.Union(dlcsIdSteamDb).Distinct().OrderBy(x => x).ToList();
 
                     if (dlcsId.Count > 0)
@@ -572,6 +581,17 @@ namespace CommonPluginsStores.Steam
                 }
                 else
                 {
+                    if (webData.Length < 25 && retryCount < 11)
+                    {
+                        Thread.Sleep(20000 * retryCount);
+                        Logger.Warn($"Api limit for Steam with {id} - {retryCount}");
+                        retryCount++;
+                        return GetGameInfos(id, accountInfos, retryCount);
+                    }
+                    else if (retryCount == 10)
+                    {
+                        Logger.Warn($"Api limit exced for Steam with {id}");
+                    }
                     return null;
                 }
             }
@@ -602,25 +622,28 @@ namespace CommonPluginsStores.Steam
                     if (Serialization.TryFromJson(WebData, out Dictionary<string, StoreAppDetailsResult> parsedData))
                     {
                         StoreAppDetailsResult storeAppDetailsResult = parsedData[x.ToString()];
-                        bool IsOwned = false;
-                        if (accountInfos != null && accountInfos.IsCurrent)
+                        if (storeAppDetailsResult?.data != null)
                         {
-                            IsOwned = IsDlcOwned(storeAppDetailsResult?.data.steam_appid.ToString());
+                            bool IsOwned = false;
+                            if (accountInfos != null && accountInfos.IsCurrent)
+                            {
+                                IsOwned = IsDlcOwned(storeAppDetailsResult?.data.steam_appid.ToString());
+                            }
+
+                            DlcInfos dlc = new DlcInfos
+                            {
+                                Id = storeAppDetailsResult.data.steam_appid.ToString(),
+                                Name = storeAppDetailsResult.data.name,
+                                Description = ParseDescription(storeAppDetailsResult?.data.about_the_game),
+                                Image = storeAppDetailsResult.data.header_image,
+                                Link = string.Format(UrlSteamGame, storeAppDetailsResult.data.steam_appid.ToString(), CodeLang.GetSteamLang(Local)),
+                                IsOwned = IsOwned,
+                                Price = storeAppDetailsResult.data.is_free ? "0" : storeAppDetailsResult.data.price_overview?.final_formatted,
+                                PriceBase = storeAppDetailsResult.data.is_free ? "0" : storeAppDetailsResult.data.price_overview?.initial_formatted
+                            };
+
+                            Dlcs.Add(dlc);
                         }
-
-                        DlcInfos dlc = new DlcInfos
-                        {
-                            Id = storeAppDetailsResult.data.steam_appid.ToString(),
-                            Name = storeAppDetailsResult.data.name,
-                            Description = ParseDescription(storeAppDetailsResult?.data.about_the_game),
-                            Image = storeAppDetailsResult.data.header_image,
-                            Link = string.Format(UrlSteamGame, storeAppDetailsResult.data.steam_appid.ToString(), CodeLang.GetSteamLang(Local)),
-                            IsOwned = IsOwned,
-                            Price = storeAppDetailsResult.data.is_free ? "0" : storeAppDetailsResult.data.price_overview?.final_formatted,
-                            PriceBase = storeAppDetailsResult.data.is_free ? "0" : storeAppDetailsResult.data.price_overview?.initial_formatted
-                        };
-
-                        Dlcs.Add(dlc);
                     }
                 });
 

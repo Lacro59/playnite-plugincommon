@@ -225,7 +225,7 @@ namespace CommonPluginsShared.Collections
                             break;
                         }
 
-                        Thread.Sleep(10);
+                        Thread.Sleep(100);
 
                         try
                         {
@@ -442,7 +442,7 @@ namespace CommonPluginsShared.Collections
             }, globalProgressOptions);
         }
 
-        public virtual void Refresh(List<Guid> Ids)
+        public virtual void Refresh(List<Guid> ids)
         {
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
                 $"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}",
@@ -457,27 +457,32 @@ namespace CommonPluginsShared.Collections
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
 
-                activateGlobalProgress.ProgressMaxValue = Ids.Count;
+                activateGlobalProgress.ProgressMaxValue = ids.Count;
 
                 string CancelText = string.Empty;
 
-                foreach (Guid Id in Ids)
+                foreach (Guid id in ids)
                 {
+                    Game game = API.Instance.Database.Games.Get(id);
+                    activateGlobalProgress.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}"
+                        + "\n\n" + game.Name + (game.Source == null ? string.Empty : $" ({game.Source.Name})");
+
                     if (activateGlobalProgress.CancelToken.IsCancellationRequested)
                     {
                         CancelText = " canceled";
                         break;
                     }
 
-                    RefreshNoLoader(Id);
+                    Thread.Sleep(100);
+                    RefreshNoLoader(id);
 
                     activateGlobalProgress.CurrentProgressValue++;
                 }
 
                 stopWatch.Stop();
                 TimeSpan ts = stopWatch.Elapsed;
-                Logger.Info($"Task Refresh(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{Ids.Count} items");
-                
+                Logger.Info($"Task Refresh(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{ids.Count} items");
+
                 API.Instance.Database.Games.EndBufferUpdate();
             }, globalProgressOptions);
         }
@@ -563,9 +568,7 @@ namespace CommonPluginsShared.Collections
                 RemoveTag(Id);
             }
 
-            return Database.Items.ContainsKey(Id)
-                ? (bool)Application.Current.Dispatcher?.Invoke(() => { return Database.Remove(Id); }, DispatcherPriority.Send)
-                : false;
+            return Database.Items.ContainsKey(Id) && (bool)Application.Current.Dispatcher?.Invoke(() => { return Database.Remove(Id); }, DispatcherPriority.Send);
         }
 
         public virtual bool Remove(List<Guid> Ids)
@@ -788,6 +791,9 @@ namespace CommonPluginsShared.Collections
 
                     foreach (Game game in PlayniteDb)
                     {
+                        activateGlobalProgress.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}"
+                            + "\n\n" + game.Name + (game.Source == null ? string.Empty : $" ({game.Source.Name})");
+
                         if (activateGlobalProgress.CancelToken.IsCancellationRequested)
                         {
                             CancelText = " canceled";
@@ -859,6 +865,9 @@ namespace CommonPluginsShared.Collections
 
                     foreach (Game game in PlayniteDb)
                     {
+                        activateGlobalProgress.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}"
+                            + "\n\n" + game.Name + (game.Source == null ? string.Empty : $" ({game.Source.Name})");
+
                         if (activateGlobalProgress.CancelToken.IsCancellationRequested)
                         {
                             CancelText = " canceled";
@@ -960,6 +969,9 @@ namespace CommonPluginsShared.Collections
 
                     foreach (Game game in PlayniteDb)
                     {
+                        activateGlobalProgress.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}"
+                            + "\n\n" + game.Name + (game.Source == null ? string.Empty : $" ({game.Source.Name})");
+
                         if (activateGlobalProgress.CancelToken.IsCancellationRequested)
                         {
                             CancelText = " canceled";

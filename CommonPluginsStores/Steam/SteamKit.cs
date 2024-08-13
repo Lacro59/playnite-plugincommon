@@ -19,8 +19,6 @@ namespace CommonPluginsStores.Steam
         private static string UrlGetPlayerAchievements => UrlApi + @"/ISteamUserStats/GetPlayerAchievements/v1/?appid={0}&l={1}&key={2}&steamid={3}";
 
 
-
-
         #region ISteamApps
         public static List<SteamApp> GetAppList()
         {
