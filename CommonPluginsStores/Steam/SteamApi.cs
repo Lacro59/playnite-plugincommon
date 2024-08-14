@@ -373,7 +373,7 @@ namespace CommonPluginsStores.Steam
                     x.GamerScore = CalcGamerScore(x.Percent);
                 });
 
-                gameAchievements = SetExtensionsAchievementsFromSteamDb(appId, gameAchievements);
+                //gameAchievements = SetExtensionsAchievementsFromSteamDb(appId, gameAchievements);
 
                 return gameAchievements;
             }
@@ -546,6 +546,7 @@ namespace CommonPluginsStores.Steam
         {
             try
             {
+                Thread.Sleep(2000); // Prevent http 429
                 string url = string.Format(UrlApiGameDetails, id, CodeLang.GetSteamLang(Local));
                 string webData = Web.DownloadStringData(url).GetAwaiter().GetResult();
 

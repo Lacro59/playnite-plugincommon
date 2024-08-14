@@ -12,11 +12,12 @@ namespace CommonPluginsStores.Steam
 {
     public class SteamKit
     {
+        #region Urls
         private static string UrlAchievementImg => @"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/{0}/{1}";
 
         private static string UrlApi => @"https://api.steampowered.com";
         private static string UrlGetGameAchievements => UrlApi + @"/IPlayerService/GetGameAchievements/v1/?appid={0}&language={1}";
-        private static string UrlGetPlayerAchievements => UrlApi + @"/ISteamUserStats/GetPlayerAchievements/v1/?appid={0}&l={1}&key={2}&steamid={3}";
+        #endregion
 
 
         #region ISteamApps

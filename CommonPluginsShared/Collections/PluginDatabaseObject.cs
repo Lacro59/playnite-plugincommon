@@ -39,8 +39,8 @@ namespace CommonPluginsShared.Collections
         public List<Tag> PluginTags { get; set; } = new List<Tag>();
 
 
-        private bool _isLoaded = false;
-        public bool IsLoaded { get => _isLoaded; set => SetValue(ref _isLoaded, value); }
+        private bool isLoaded = false;
+        public bool IsLoaded { get => isLoaded; set => SetValue(ref isLoaded, value); }
 
         public bool IsViewOpen = false;
 
@@ -50,18 +50,17 @@ namespace CommonPluginsShared.Collections
         public RelayCommand<Guid> GoToGame { get; }
 
 
-        protected PluginDatabaseObject(TSettings PluginSettings, string PluginName, string PluginUserDataPath)
+        protected PluginDatabaseObject(TSettings pluginSettings, string pluginName, string pluginUserDataPath)
         {
-            this.PluginSettings = PluginSettings;
-
-            this.PluginName = PluginName;
+            PluginSettings = pluginSettings;
+            PluginName = pluginName;
 
             Paths = new PluginPaths
             {
                 PluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-                PluginUserDataPath = PluginUserDataPath,
-                PluginDatabasePath = Path.Combine(PluginUserDataPath, PluginName),
-                PluginCachePath = Path.Combine(PlaynitePaths.DataCachePath, PluginName),
+                PluginUserDataPath = pluginUserDataPath,
+                PluginDatabasePath = Path.Combine(pluginUserDataPath, pluginName),
+                PluginCachePath = Path.Combine(PlaynitePaths.DataCachePath, pluginName),
             };
             HttpFileCachePlugin.CacheDirectory = Paths.PluginCachePath;
 
@@ -111,25 +110,19 @@ namespace CommonPluginsShared.Collections
             }
 
             // Publish changes for the currently displayed game if updated
-            var ActualItem = e.UpdatedItems.Find(x => x.NewData.Id == GameContext.Id);
-            if (ActualItem != null)
+            ItemUpdateEvent<TItem> ActualItem = e.UpdatedItems.Find(x => x.NewData.Id == GameContext.Id);
+            if (ActualItem?.NewData?.Id != null)
             {
-                Guid Id = ActualItem.NewData.Id;
-                if (Id != null)
-                {
-                    SetThemesResources(GameContext);
-                }
+                SetThemesResources(GameContext);
             }
         }
 
         private void Database_ItemCollectionChanged(object sender, ItemCollectionChangedEventArgs<TItem> e)
         {
-            if (GameContext == null)
+            if (GameContext != null)
             {
-                return;
+                SetThemesResources(GameContext);
             }
-
-            SetThemesResources(GameContext);
         }
 
 
@@ -139,30 +132,29 @@ namespace CommonPluginsShared.Collections
         {
             bool IsOk = false;
 
-            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
-                $"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}",
-                false
-            );
-            globalProgressOptions.IsIndeterminate = false;
+            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}")
+            {
+                Cancelable = false,
+                IsIndeterminate = false
+            };
 
-            API.Instance.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
+            _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
             {
                 try
                 {
                     List<Game> gamesList = GetGamesList();
-                    activateGlobalProgress.ProgressMaxValue = gamesList.Count();
-
-                    foreach (Game game in gamesList)
+                    a.ProgressMaxValue = gamesList.Count();
+                    gamesList.ForEach(x =>
                     {
-                        Remove(game);
-                        activateGlobalProgress.CurrentProgressValue++;
-                    }
+                        Remove(x);
+                        a.CurrentProgressValue++;
+                    });
 
                     IsOk = true;
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, true);
+                    Common.LogError(ex, true, false, PluginName);
                 }
 
             }, globalProgressOptions);
@@ -172,12 +164,12 @@ namespace CommonPluginsShared.Collections
 
         public virtual void DeleteDataWithDeletedGame()
         {
-            var GamesDeleted = Database.Items.Where(x => API.Instance.Database.Games.Get(x.Key) == null).Select(x => x).ToList();
-            foreach (var el in GamesDeleted)
+            List<KeyValuePair<Guid, TItem>> GamesDeleted = Database.Items.Where(x => API.Instance.Database.Games.Get(x.Key) == null).Select(x => x).ToList();
+            GamesDeleted.ForEach(x =>
             {
-                Logger.Info($"Delete date for missing game: {el.Value.Name} - {el.Key}");
-                Database.Remove(el.Key);
-            }
+                Logger.Info($"Delete date for missing game: {x.Value.Name} - {x.Key}");
+                _ = Database.Remove(x.Key);
+            });
         }
 
 
@@ -200,11 +192,11 @@ namespace CommonPluginsShared.Collections
                 PlayniteDb = PlayniteDb.FindAll(x => !Get(x.Id, true).HasData);
             }
 
-            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
-                $"{PluginName} - {ResourceProvider.GetString("LOCCommonGettingData")}",
-                true
-            );
-            globalProgressOptions.IsIndeterminate = false;
+            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonGettingData")}")
+            {
+                Cancelable = true,
+                IsIndeterminate = false
+            };
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
@@ -214,30 +206,28 @@ namespace CommonPluginsShared.Collections
                     stopWatch.Start();
 
                     activateGlobalProgress.ProgressMaxValue = PlayniteDb.Count();
-
                     string CancelText = string.Empty;
 
-                    foreach (Game game in PlayniteDb)
+                    PlayniteDb.ForEach(x =>
                     {
                         if (activateGlobalProgress.CancelToken.IsCancellationRequested)
                         {
                             CancelText = " canceled";
-                            break;
+                            return;
                         }
 
                         Thread.Sleep(100);
-
                         try
                         {
-                            _ = Get(game, false, true);
+                            _ = Get(x, false, true);
                         }
                         catch (Exception ex)
                         {
-                            Common.LogError(ex, false);
+                            Common.LogError(ex, false, false, PluginName);
                         }
 
                         activateGlobalProgress.CurrentProgressValue++;
-                    }
+                    });
 
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
@@ -245,7 +235,7 @@ namespace CommonPluginsShared.Collections
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false);
+                    Common.LogError(ex, false, false, PluginName);
                 }
             }, globalProgressOptions);
         }
@@ -357,7 +347,7 @@ namespace CommonPluginsShared.Collections
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, false, PluginName);
                 API.Instance.Notifications.Add(new NotificationMessage(
                     $"{PluginName}-Error-Add",
                     $"{PluginName}" + Environment.NewLine + $"{ex.Message}",
@@ -398,7 +388,7 @@ namespace CommonPluginsShared.Collections
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, false, PluginName);
                 API.Instance.Notifications.Add(new NotificationMessage(
                     $"{PluginName}-Error-Update",
                     $"{PluginName}" + Environment.NewLine + $"{ex.Message}",
@@ -430,11 +420,11 @@ namespace CommonPluginsShared.Collections
 
         public virtual void Refresh(Guid Id)
         {
-            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
-                $"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}",
-                false
-            );
-            globalProgressOptions.IsIndeterminate = true;
+            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}")
+            {
+                Cancelable = false,
+                IsIndeterminate = true
+            };
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
@@ -444,11 +434,11 @@ namespace CommonPluginsShared.Collections
 
         public virtual void Refresh(List<Guid> ids)
         {
-            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
-                $"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}",
-                true
-            );
-            globalProgressOptions.IsIndeterminate = false;
+            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}")
+            {
+                Cancelable = true,
+                IsIndeterminate = false
+            };
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
@@ -769,11 +759,11 @@ namespace CommonPluginsShared.Collections
 
         public void AddTagAllGame()
         {
-            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
-                $"{PluginName} - {ResourceProvider.GetString("LOCCommonAddingAllTag")}",
-                true
-            );
-            globalProgressOptions.IsIndeterminate = false;
+            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonAddingAllTag")}")
+            {
+                Cancelable = true,
+                IsIndeterminate = false
+            };
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
@@ -791,7 +781,7 @@ namespace CommonPluginsShared.Collections
 
                     foreach (Game game in PlayniteDb)
                     {
-                        activateGlobalProgress.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}"
+                        activateGlobalProgress.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonAddingAllTag")}"
                             + "\n\n" + game.Name + (game.Source == null ? string.Empty : $" ({game.Source.Name})");
 
                         if (activateGlobalProgress.CancelToken.IsCancellationRequested)
@@ -809,7 +799,7 @@ namespace CommonPluginsShared.Collections
                         }
                         catch (Exception ex)
                         {
-                            Common.LogError(ex, false);
+                            Common.LogError(ex, false, false, PluginName);
                         }
 
                         activateGlobalProgress.CurrentProgressValue++;
@@ -821,7 +811,7 @@ namespace CommonPluginsShared.Collections
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false);
+                    Common.LogError(ex, false, false, PluginName);
                 }
                 finally
                 {
@@ -844,11 +834,11 @@ namespace CommonPluginsShared.Collections
                 return;
             }
 
-            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
-                $"{PluginName} - {ResourceProvider.GetString("LOCCommonAddingAllTag")}",
-                true
-            );
-            globalProgressOptions.IsIndeterminate = false;
+            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonAddingAllTag")}")
+            {
+                Cancelable = true,
+                IsIndeterminate = false
+            };
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
@@ -865,7 +855,7 @@ namespace CommonPluginsShared.Collections
 
                     foreach (Game game in PlayniteDb)
                     {
-                        activateGlobalProgress.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}"
+                        activateGlobalProgress.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonAddingAllTag")}"
                             + "\n\n" + game.Name + (game.Source == null ? string.Empty : $" ({game.Source.Name})");
 
                         if (activateGlobalProgress.CancelToken.IsCancellationRequested)
@@ -883,7 +873,7 @@ namespace CommonPluginsShared.Collections
                         }
                         catch (Exception ex)
                         {
-                            Common.LogError(ex, false);
+                            Common.LogError(ex, false, false, PluginName);
                         }
 
                         activateGlobalProgress.CurrentProgressValue++;
@@ -897,7 +887,7 @@ namespace CommonPluginsShared.Collections
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false);
+                    Common.LogError(ex, false, false, PluginName);
                 }
                 finally
                 {
@@ -945,13 +935,15 @@ namespace CommonPluginsShared.Collections
         {
             Common.LogDebug(true, "RemoveTagAllGame()");
 
-            string Message = string.Empty;
-            Message = FromClearDatabase
+            string message = FromClearDatabase
                 ? $"{PluginName} - {ResourceProvider.GetString("LOCCommonClearingAllTag")}"
                 : $"{PluginName} - {ResourceProvider.GetString("LOCCommonRemovingAllTag")}";
 
-            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(Message, true);
-            globalProgressOptions.IsIndeterminate = false;
+            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(message)
+            {
+                Cancelable = true,
+                IsIndeterminate = false
+            };
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
@@ -969,8 +961,7 @@ namespace CommonPluginsShared.Collections
 
                     foreach (Game game in PlayniteDb)
                     {
-                        activateGlobalProgress.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}"
-                            + "\n\n" + game.Name + (game.Source == null ? string.Empty : $" ({game.Source.Name})");
+                        activateGlobalProgress.Text = message + "\n\n" + game.Name + (game.Source == null ? string.Empty : $" ({game.Source.Name})");
 
                         if (activateGlobalProgress.CancelToken.IsCancellationRequested)
                         {
@@ -984,7 +975,7 @@ namespace CommonPluginsShared.Collections
                         }
                         catch (Exception ex)
                         {
-                            Common.LogError(ex, false);
+                            Common.LogError(ex, false, false, PluginName);
                         }
 
                         activateGlobalProgress.CurrentProgressValue++;
@@ -996,7 +987,7 @@ namespace CommonPluginsShared.Collections
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false);
+                    Common.LogError(ex, false, false, PluginName);
                 }
                 finally
                 {
@@ -1017,11 +1008,11 @@ namespace CommonPluginsShared.Collections
         {
             string PathDirectory = Path.Combine(PlaynitePaths.DataCachePath, PluginName);
 
-            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions(
-                $"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}",
-                false
-            );
-            globalProgressOptions.IsIndeterminate = true;
+            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}")
+            {
+                Cancelable = false,
+                IsIndeterminate = true
+            };
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
@@ -1032,7 +1023,7 @@ namespace CommonPluginsShared.Collections
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false);
+                    Common.LogError(ex, false, false, PluginName);
                     _ = API.Instance.Dialogs.ShowErrorMessage(
                         string.Format(ResourceProvider.GetString("LOCCommonErrorDeleteCache"), PathDirectory),
                         PluginName
