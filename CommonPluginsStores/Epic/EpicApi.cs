@@ -632,15 +632,20 @@ namespace CommonPluginsStores.Epic
             return ProductSlug;
         }
 
-        public string GetProductSlugByUrl(string url)
+        public string GetProductSlugByUrl(string url, string gameName)
         {
             string ProductSlug = string.Empty;
 
             try
             {
-                if (url.Contains(".epicgames.com/", StringComparison.InvariantCultureIgnoreCase))
+                string[] urlSplit = url.Split('/');
+
+                foreach (string slug in urlSplit)
                 {
-                    ProductSlug = url.Replace("/home", string.Empty).Split('/').Last();
+                    if (slug.ContainsInvariantCulture(gameName.ToLower(), System.Globalization.CompareOptions.IgnoreSymbols))
+                    {
+                        ProductSlug = slug;
+                    }
                 }
             }
             catch (Exception ex)
