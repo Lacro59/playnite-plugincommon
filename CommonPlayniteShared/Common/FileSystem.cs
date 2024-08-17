@@ -94,7 +94,7 @@ namespace CommonPlayniteShared.Common
         {
             sourcePath = Paths.FixPathLength(sourcePath);
             targetPath = Paths.FixPathLength(targetPath);
-            logger.Debug($"Copying file {sourcePath} to {targetPath}");
+            //logger.Debug($"Copying file {sourcePath} to {targetPath}");
             PrepareSaveFile(targetPath);
             File.Copy(sourcePath, targetPath, overwrite);
         }

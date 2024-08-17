@@ -636,21 +636,23 @@ namespace CommonPluginsStores.Epic
         {
             string ProductSlug = string.Empty;
 
-            try
+            if (url.Contains("store.epicgames.com", StringComparison.InvariantCultureIgnoreCase))
             {
-                string[] urlSplit = url.Split('/');
-
-                foreach (string slug in urlSplit)
+                try
                 {
-                    if (slug.ContainsInvariantCulture(gameName.ToLower(), System.Globalization.CompareOptions.IgnoreSymbols))
+                    string[] urlSplit = url.Split('/');
+                    foreach (string slug in urlSplit)
                     {
-                        ProductSlug = slug;
+                        if (slug.ContainsInvariantCulture(gameName.ToLower(), System.Globalization.CompareOptions.IgnoreSymbols))
+                        {
+                            ProductSlug = slug;
+                        }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, true, PluginName);
+                }
             }
 
             return ProductSlug;
@@ -687,7 +689,7 @@ namespace CommonPluginsStores.Epic
                                 {
                                     if (catalog == null)
                                     {
-                                        SearchStoreElement.CatalogNs.Mappings finded = x.catalogNs.mappings.FirstOrDefault(b => b.pageSlug.IsEqual(productSlug));
+                                        SearchStoreElement.CatalogNs.Mappings finded = x?.catalogNs?.mappings?.FirstOrDefault(b => b?.pageSlug?.IsEqual(productSlug) ?? false);
                                         if (finded != null)
                                         {
                                             catalog = x;
