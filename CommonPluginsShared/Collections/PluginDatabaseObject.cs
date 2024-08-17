@@ -36,7 +36,7 @@ namespace CommonPluginsShared.Collections
         public Game GameContext { get; set; }
 
         protected string TagBefore { get; set; } = string.Empty;
-        public List<Tag> PluginTags { get; set; } = new List<Tag>();
+        protected List<Tag> PluginTags { get; set; } = new List<Tag>();
 
 
         private bool isLoaded = false;
@@ -45,9 +45,6 @@ namespace CommonPluginsShared.Collections
         public bool IsViewOpen = false;
 
         public bool TagMissing { get; set; } = false;
-
-
-        public RelayCommand<Guid> GoToGame { get; }
 
 
         protected PluginDatabaseObject(TSettings pluginSettings, string pluginName, string pluginUserDataPath)
@@ -69,12 +66,6 @@ namespace CommonPluginsShared.Collections
 
             API.Instance.Database.Games.ItemUpdated += Games_ItemUpdated;
             API.Instance.Database.Games.ItemCollectionChanged += Games_ItemCollectionChanged;
-
-            GoToGame = new RelayCommand<Guid>((Id) =>
-            {
-                API.Instance.MainView.SelectGame(Id);
-                API.Instance.MainView.SwitchToLibraryView();
-            });
         }
 
 
@@ -1035,23 +1026,34 @@ namespace CommonPluginsShared.Collections
 
         public virtual void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e)
         {
-            if (e?.UpdatedItems != null)
+            try
             {
-                foreach (ItemUpdateEvent<Game> GameUpdated in e.UpdatedItems)
+                e?.UpdatedItems?.ForEach(x =>
                 {
-                    Database.SetGameInfo<T>(GameUpdated.NewData.Id);
-                }
+                    if (x.NewData?.Id != null)
+                    {
+                        Database.SetGameInfo<T>(x.NewData.Id);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, false, PluginName);
             }
         }
 
         private void Games_ItemCollectionChanged(object sender, ItemCollectionChangedEventArgs<Game> e)
         {
-            if (e?.RemovedItems != null)
+            try
             {
-                foreach (Game GameRemoved in e.RemovedItems)
+                e?.RemovedItems?.ForEach(x =>
                 {
-                    _ = Remove(GameRemoved);
-                }
+                    _ = Remove(x);
+                });
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, false, PluginName);
             }
         }
 

@@ -33,7 +33,6 @@ namespace CommonPluginsShared
             }
         });
 
-
         public static RelayCommand<object> RestartRequired => new RelayCommand<object>((sender) =>
         {
             try
@@ -49,6 +48,12 @@ namespace CommonPluginsShared
             {
                 Common.LogError(ex, false);
             }
+        });
+
+        public static RelayCommand<Guid> GoToGame => new RelayCommand<Guid>((Id) =>
+        {
+            API.Instance.MainView.SelectGame(Id);
+            API.Instance.MainView.SwitchToLibraryView();
         });
     }
 }
