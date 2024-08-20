@@ -493,22 +493,44 @@ namespace CommonPluginsShared.Collections
             Refresh(Ids);
         }
 
-        public virtual async Task RefreshInstalled()
+        public virtual void RefreshInstalled()
         {
-            await Task.Run(() =>
+            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}")
+            {
+                Cancelable = true,
+                IsIndeterminate = false
+            };
+
+            _ = API.Instance.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
                 API.Instance.Database.Games.BeginBufferUpdate();
 
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
 
-                List<Guid> PlayniteDb = API.Instance.Database.Games
+                string CancelText = string.Empty;
+
+                List<Game> PlayniteDb = API.Instance.Database.Games
                     .Where(x => x.IsInstalled)
-                    .Select(x => x.Id).ToList();
+                    .Select(x => x).ToList();
+
+                activateGlobalProgress.ProgressMaxValue = PlayniteDb.Count;
 
                 PlayniteDb.ForEach(x =>
                 {
-                    RefreshNoLoader(x);
+                    activateGlobalProgress.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}"
+                        + "\n\n" + x.Name + (x.Source == null ? string.Empty : $" ({x.Source.Name})");
+
+                    if (activateGlobalProgress.CancelToken.IsCancellationRequested)
+                    {
+                        CancelText = " canceled";
+                        return;
+                    }
+
+                    Thread.Sleep(100);
+                    RefreshNoLoader(x.Id);
+
+                    activateGlobalProgress.CurrentProgressValue++;
                 });
 
                 stopWatch.Stop();
@@ -516,7 +538,7 @@ namespace CommonPluginsShared.Collections
                 Logger.Info($"Task RefreshInstalled() - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {PlayniteDb.Count} items");
 
                 API.Instance.Database.Games.EndBufferUpdate();
-            });
+            }, globalProgressOptions);
         }
 
 
