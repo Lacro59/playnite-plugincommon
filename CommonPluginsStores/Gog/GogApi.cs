@@ -16,6 +16,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.Gog
@@ -284,7 +285,12 @@ namespace CommonPluginsStores.Gog
             return null;
         }
 
-        public override ObservableCollection<GameAchievement> GetAchievements(string Id, AccountInfos accountInfos)
+        public override ObservableCollection<GameAchievement> GetAchievements(string id, AccountInfos accountInfos)
+        {
+            return GetAchievements(id, accountInfos, false);
+        }
+
+        private ObservableCollection<GameAchievement> GetAchievements(string id, AccountInfos accountInfos, bool isRetry)
         {
             if (!IsUserLoggedIn)
             {
@@ -302,7 +308,7 @@ namespace CommonPluginsStores.Gog
                 //{
                 //    Url = string.Format(UrlApiGamePlayFriendAchievements, Id, UserId);
                 //}
-                Url = string.Format(UrlApiGamePlayUserAchievements, Id, UserId);
+                Url = string.Format(UrlApiGamePlayUserAchievements, id, UserId);
 
                 string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Local).ToLower());
                 string webData = Web.DownloadStringData(Url, AuthToken.Token, urlLang).GetAwaiter().GetResult();
@@ -344,12 +350,24 @@ namespace CommonPluginsStores.Gog
             catch (Exception ex)
             {
                 // Reset login status when 401 error
-                if (ex.Message.Contains("401"))
+                if (ex.Message.Contains("401") || ex.Message.Contains("access_denied"))
                 {
-                    ResetIsUserLoggedIn();
+                    if (isRetry)
+                    {
+                        Logger.Warn($"Error 401");
+                        ResetIsUserLoggedIn();
+                    }
+                    else
+                    {
+                        Logger.Warn($"Error 401 - Wait and retry");
+                        Thread.Sleep(5000);
+                        return GetAchievements(id, accountInfos, true);
+                    }
                 }
-
-                Common.LogError(ex, false, true, PluginName);
+                else
+                {
+                    Common.LogError(ex, false, true, PluginName);
+                }
             }
 
             return null;
