@@ -373,13 +373,13 @@ namespace CommonPluginsStores.Gog
             return null;
         }
 
-        public override SourceLink GetAchievementsSourceLink(string Name, string Id, AccountInfos accountInfos)
+        public override SourceLink GetAchievementsSourceLink(string name, string id, AccountInfos accountInfos)
         {
             return new SourceLink
             {
-                GameName = Name,
+                GameName = name,
                 Name = ClientName,
-                Url = $"https://www.gog.com/u/{UserName}/game/{Id}?sort=user_unlock_date&sort_user_id={accountInfos.UserId}"
+                Url = $"https://www.gog.com/u/{UserName}/game/{id}?sort=user_unlock_date&sort_user_id={accountInfos.UserId}"
             };
         }
 
@@ -487,7 +487,7 @@ namespace CommonPluginsStores.Gog
             return null;
         }
 
-        public override bool RemoveWishlist(string Id)
+        public override bool RemoveWishlist(string id)
         {
             if (IsUserLoggedIn)
             {
@@ -495,13 +495,13 @@ namespace CommonPluginsStores.Gog
                 {
                     using (IWebView WebViewOffscreen = API.Instance.WebViews.CreateOffscreenView())
                     {
-                        WebViewOffscreen.NavigateAndWait(string.Format(UrlApiRemoveWishlist, Id));
+                        WebViewOffscreen.NavigateAndWait(string.Format(UrlApiRemoveWishlist, id));
                         return WebViewOffscreen.GetPageSource().ToLower().IndexOf("unable to remove product from wishlist") == -1;
                     }
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false, $"Error remove {Id} in {ClientName} wishlist", true, PluginName);
+                    Common.LogError(ex, false, $"Error remove {id} in {ClientName} wishlist", true, PluginName);
                 }
             }
 
