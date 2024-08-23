@@ -1,5 +1,6 @@
 ﻿using CommonPluginsShared;
 using CommonPluginsStores.Steam.Models.SteamKit;
+using Playnite.SDK;
 using Playnite.SDK.Data;
 using SteamKit2;
 using System;
@@ -12,6 +13,8 @@ namespace CommonPluginsStores.Steam
 {
     public class SteamKit
     {
+        internal static ILogger Logger => LogManager.GetLogger();
+
         #region Urls
         private static string UrlAchievementImg => @"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/{0}/{1}";
 
@@ -392,6 +395,7 @@ namespace CommonPluginsStores.Steam
         {
             try
             {
+                Logger.Info($"CheckGameIsPrivate({appId})");
                 Dictionary<string, string> args = new Dictionary<string, string>
                 {
                     ["appId"] = appId.ToString(),

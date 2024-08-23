@@ -1052,10 +1052,11 @@ namespace CommonPluginsStores.Steam
         #region Steam Web        
         private bool CheckGameIsPrivateByWeb(uint appId, AccountInfos accountInfos)
         {
-            string urlById = string.Format(UrlProfileById, accountInfos.UserId) + $"/stats/{appId}/achievements?l=english";
-            string urlByPersona = string.Format(UrlProfileByName, accountInfos.Pseudo) + $"/stats/{appId}?l=english";
+            Logger.Info($"CheckGameIsPrivateByWeb({appId})");
+            string urlById = string.Format(UrlProfileById, accountInfos.UserId) + $"/stats/{appId}/achievements";
+            string urlByPersona = string.Format(UrlProfileByName, accountInfos.Pseudo) + $"/stats/{appId}";
             List<HttpCookie> cookies = GetStoredCookies();
-            
+
             string resultWeb = Web.DownloadStringData(urlById, cookies, string.Empty, true).GetAwaiter().GetResult();
             if (resultWeb.IndexOf("profile_fatalerror") == 1)
             {
