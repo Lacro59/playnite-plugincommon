@@ -79,8 +79,7 @@ namespace CommonPluginsShared.Collections
 
         public void SetGameInfoDetails<T, Y>()
         {
-            System.Threading.SpinWait.SpinUntil(() => API.Instance.Database.IsOpen, -1);
-
+            _ = System.Threading.SpinWait.SpinUntil(() => API.Instance.Database.IsOpen, -1);
             foreach (KeyValuePair<Guid, TItem> item in Items)
             {
                 SetGameInfoDetails<T, Y>(item.Key);

@@ -433,7 +433,8 @@ namespace CommonPluginsShared.Collections
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
-                API.Instance.Database.Games.BeginBufferUpdate();
+                Logger.Info($"Refresh() started");
+                Database.BeginBufferUpdate();
 
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
@@ -454,8 +455,15 @@ namespace CommonPluginsShared.Collections
                         break;
                     }
 
-                    Thread.Sleep(100);
-                    RefreshNoLoader(id);
+                    try
+                    {
+                        Thread.Sleep(100);
+                        RefreshNoLoader(id);
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, true, PluginName);
+                    }
 
                     activateGlobalProgress.CurrentProgressValue++;
                 }
@@ -464,7 +472,7 @@ namespace CommonPluginsShared.Collections
                 TimeSpan ts = stopWatch.Elapsed;
                 Logger.Info($"Task Refresh(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {activateGlobalProgress.CurrentProgressValue}/{ids.Count} items");
 
-                API.Instance.Database.Games.EndBufferUpdate();
+                Database.EndBufferUpdate();
             }, globalProgressOptions);
         }
 
@@ -503,7 +511,8 @@ namespace CommonPluginsShared.Collections
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
             {
-                API.Instance.Database.Games.BeginBufferUpdate();
+                Logger.Info($"RefreshInstalled() started");
+                Database.BeginBufferUpdate();
 
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
@@ -527,8 +536,15 @@ namespace CommonPluginsShared.Collections
                         return;
                     }
 
-                    Thread.Sleep(100);
-                    RefreshNoLoader(x.Id);
+                    try
+                    {
+                        Thread.Sleep(100);
+                        RefreshNoLoader(x.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, true, PluginName);
+                    }
 
                     a.CurrentProgressValue++;
                 });
@@ -537,7 +553,7 @@ namespace CommonPluginsShared.Collections
                 TimeSpan ts = stopWatch.Elapsed;
                 Logger.Info($"Task RefreshInstalled() - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {playniteDb.Count} items");
 
-                API.Instance.Database.Games.EndBufferUpdate();
+                Database.EndBufferUpdate();
             }, options);
         }
 
@@ -576,7 +592,9 @@ namespace CommonPluginsShared.Collections
 
         public virtual bool Remove(List<Guid> ids)
         {
+            Logger.Info($"Remove() started");
             API.Instance.Database.Games.BeginBufferUpdate();
+            Database.BeginBufferUpdate();
 
             // If tag system
             object Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
@@ -584,19 +602,27 @@ namespace CommonPluginsShared.Collections
 
             foreach (Guid id in ids)
             {
-                if (propertyInfo != null)
+                try
                 {
-                    Common.LogDebug(true, $"RemoveTag for {id}");
-                    RemoveTag(id);
-                }
+                    if (propertyInfo != null)
+                    {
+                        Common.LogDebug(true, $"RemoveTag for {id}");
+                        RemoveTag(id);
+                    }
 
-                if (Database.Items.ContainsKey(id))
+                    if (Database.Items.ContainsKey(id))
+                    {
+                        Application.Current.Dispatcher?.Invoke(() => { _ = Database.Remove(id); }, DispatcherPriority.Send);
+                    }
+                }
+                catch (Exception ex)
                 {
-                    Application.Current.Dispatcher?.Invoke(() => { _ = Database.Remove(id); }, DispatcherPriority.Send);
+                    Common.LogError(ex, false, true, PluginName);
                 }
             }
 
             API.Instance.Database.Games.EndBufferUpdate();
+            Database.EndBufferUpdate();
 
             return true;
         }
@@ -782,6 +808,7 @@ namespace CommonPluginsShared.Collections
             {
                 try
                 {
+                    Logger.Info($"AddTagAllGame() started");
                     API.Instance.Database.Games.BeginBufferUpdate();
 
                     Stopwatch stopWatch = new Stopwatch();
@@ -857,6 +884,7 @@ namespace CommonPluginsShared.Collections
             {
                 try
                 {
+                    Logger.Info($"AddTagSelectData() started");
                     API.Instance.Database.Games.BeginBufferUpdate();
 
                     Stopwatch stopWatch = new Stopwatch();
@@ -962,6 +990,7 @@ namespace CommonPluginsShared.Collections
             {
                 try
                 {
+                    Logger.Info($"RemoveTagAllGame() started");
                     API.Instance.Database.Games.BeginBufferUpdate();
 
                     Stopwatch stopWatch = new Stopwatch();
