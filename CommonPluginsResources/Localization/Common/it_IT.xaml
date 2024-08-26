@@ -171,7 +171,9 @@ Vuoi aprire la cartella?</sys:String>
     <!-- CommonGlobalProgress -->
 
     <sys:String x:Key="LOCCommonGettingData">Scaricamento dati...</sys:String>
-    <sys:String x:Key="LOCCommonGettingAllDatas">Scaricamento dati di tutti i giochi...</sys:String>
+    <sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingInstalledDatas">Downloading data from installed games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingNewDatas">Downloading data from new games...</sys:String>
     <sys:String x:Key="LOCCommonAddingAllTag">Aggiungere etichette per tutti i giochi...</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Rimozione dell'etichetta da tutti i giochi...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Pulizia del database...</sys:String>
