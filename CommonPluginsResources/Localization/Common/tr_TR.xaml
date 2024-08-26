@@ -171,7 +171,9 @@ Dizini açmak ister misiniz?</sys:String>
     <!-- CommonGlobalProgress -->
 
     <sys:String x:Key="LOCCommonGettingData">Veri indiriliyor...</sys:String>
-    <sys:String x:Key="LOCCommonGettingAllDatas">Downloading data...</sys:String>
+    <sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingInstalledDatas">Downloading data from installed games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingNewDatas">Downloading data from new games...</sys:String>
     <sys:String x:Key="LOCCommonAddingAllTag">Tüm oyunlar için etiket ekleniyor...</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Tüm oyunlardaki etiket kaldırılıyor...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Veritabanı temizleniyor...</sys:String>
