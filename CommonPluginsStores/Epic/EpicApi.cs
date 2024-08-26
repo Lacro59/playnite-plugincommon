@@ -689,8 +689,8 @@ namespace CommonPluginsStores.Epic
                                 {
                                     if (catalog == null)
                                     {
-                                        SearchStoreElement.CatalogNs.Mappings finded = x?.catalogNs?.mappings?.FirstOrDefault(b => b?.pageSlug?.IsEqual(productSlug) ?? false);
-                                        if (finded != null)
+                                        SearchStoreElement.CatalogNs.Mappings found = x?.catalogNs?.mappings?.FirstOrDefault(b => b?.pageSlug?.IsEqual(productSlug) ?? false);
+                                        if (found != null)
                                         {
                                             catalog = x;
                                         }
