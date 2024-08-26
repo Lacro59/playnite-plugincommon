@@ -171,7 +171,9 @@
     <!-- CommonGlobalProgress -->
 
     <sys:String x:Key="LOCCommonGettingData">Descargando datos...</sys:String>
-    <sys:String x:Key="LOCCommonGettingAllDatas">Descargando datos de todos los juegos...</sys:String>
+    <sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingInstalledDatas">Downloading data from installed games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingNewDatas">Downloading data from new games...</sys:String>
     <sys:String x:Key="LOCCommonAddingAllTag">Añadiendo etiqueta para todos los juegos...</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Quitando etiqueta de todos los juegos...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Limpiando base de datos...</sys:String>
