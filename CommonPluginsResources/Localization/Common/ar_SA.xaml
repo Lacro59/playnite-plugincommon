@@ -171,7 +171,9 @@ Do you want to open the directory?</sys:String>
     <!-- CommonGlobalProgress -->
 
     <sys:String x:Key="LOCCommonGettingData">جارٍ تحميل البيانات...</sys:String>
-    <sys:String x:Key="LOCCommonGettingAllDatas">Downloading data of all games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingInstalledDatas">Downloading data from installed games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingNewDatas">Downloading data from new games...</sys:String>
     <sys:String x:Key="LOCCommonAddingAllTag">Adding tag for all games...</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Removing tag from all games...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">مسح قاعدة البيانات...</sys:String>
