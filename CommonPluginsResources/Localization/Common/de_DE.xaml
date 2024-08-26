@@ -171,7 +171,9 @@ Soll das Verzeichnis geöffnet werden?</sys:String>
     <!-- CommonGlobalProgress -->
 
     <sys:String x:Key="LOCCommonGettingData">Daten werden heruntergeladen...</sys:String>
-    <sys:String x:Key="LOCCommonGettingAllDatas">Daten aller Spiele werden heruntergeladen...</sys:String>
+    <sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingInstalledDatas">Downloading data from installed games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingNewDatas">Downloading data from new games...</sys:String>
     <sys:String x:Key="LOCCommonAddingAllTag">Füge Tag zu allen Spielen hinzu...</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Entferne Tag von allen Spielen...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Datenbank wird gelöscht...</sys:String>
