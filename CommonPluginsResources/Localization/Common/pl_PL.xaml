@@ -171,9 +171,9 @@ Czy chcesz otworzyć katalog?</sys:String>
     <!-- CommonGlobalProgress -->
 
     <sys:String x:Key="LOCCommonGettingData">Pobieranie danych...</sys:String>
-    <sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games...</sys:String>
-    <sys:String x:Key="LOCCommonGettingInstalledDatas">Downloading data from installed games...</sys:String>
-    <sys:String x:Key="LOCCommonGettingNewDatas">Downloading data from new games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingAllDatas">Pobieranie danych dla wszystkich gier...</sys:String>
+    <sys:String x:Key="LOCCommonGettingInstalledDatas">Pobieranie danych z zainstalowanych gier...</sys:String>
+    <sys:String x:Key="LOCCommonGettingNewDatas">Pobieranie danych z nowych gier...</sys:String>
     <sys:String x:Key="LOCCommonAddingAllTag">Dodawanie tagu do wszystkich gier...</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Usuwanie tagu ze wszystkich gier...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Czyszczenie bazy danych...</sys:String>
@@ -199,6 +199,9 @@ Proszę wyczyść wszystkie tagi w menu wtyczki.</sys:String>
 
     <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Użyj zapisanych danych dla {0} [{1}]
 Musisz uwierzytelnić.</sys:String>
+
+    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">Znaleziono więcej niż 1 danych dla {0}.
+Sprawdź ustawienia wtyczki.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Wymiary</sys:String>
