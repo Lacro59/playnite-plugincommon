@@ -200,6 +200,9 @@ Fjern alle taggene i programtillegg-menyen.</sys:String>
     <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Use old saved data for {0} [{1}]
 You must authenticate.</sys:String>
 
+    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">More than 1 data found for {0}.
+Please check the plugin settings.</sys:String>
+
 
     <sys:String x:Key="LOCCommonDimensions">Dimensions</sys:String>
     <sys:String x:Key="LOCCommonStyles">Styles</sys:String>
