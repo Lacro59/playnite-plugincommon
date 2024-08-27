@@ -200,6 +200,9 @@ Veuillez effacer toutes les étiquettes dans le menu du plugin.</sys:String>
     <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Utilisation des données sauvegardées pour {0} [{1}]
 Vous devez vous authentifier.</sys:String>
 
+    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">More than 1 data found for {0}.
+Please check the plugin settings.</sys:String>
+
 
     <sys:String x:Key="LOCCommonDimensions">Dimensions</sys:String>
     <sys:String x:Key="LOCCommonStyles">Styles</sys:String>
