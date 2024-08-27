@@ -200,6 +200,9 @@
     <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Використовувати старі збережені дані для {0} [{1}]
 Ви повинні автентифікуватися.</sys:String>
 
+    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">More than 1 data found for {0}.
+Please check the plugin settings.</sys:String>
+
 
     <sys:String x:Key="LOCCommonDimensions">Розміри</sys:String>
     <sys:String x:Key="LOCCommonStyles">Стилі</sys:String>
