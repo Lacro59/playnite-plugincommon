@@ -11,6 +11,7 @@ namespace CommonPluginsControls.Stores.Steam
     public partial class PanelView : UserControl
     {
         private PanelViewModel PanelViewModel { get; set; } = new PanelViewModel();
+        private bool IsStarted { get; set; } = false;
 
         #region Properties
         public bool UseApi
@@ -79,7 +80,6 @@ namespace CommonPluginsControls.Stores.Steam
         public PanelView()
         {
             InitializeComponent();
-
             DataContext = PanelViewModel;
         }
 
@@ -91,6 +91,20 @@ namespace CommonPluginsControls.Stores.Steam
         private void PART_IsPrivate_Click(object sender, RoutedEventArgs e)
         {
             UseAuth = PanelViewModel.UseAuth;
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (IsStarted)
+            {
+                PanelViewModel.User.Link = null;
+                PanelViewModel.User.Avatar = null;
+            }
+        }
+
+        private void Expander_Loaded(object sender, RoutedEventArgs e)
+        {
+            IsStarted = true;
         }
     }
 
