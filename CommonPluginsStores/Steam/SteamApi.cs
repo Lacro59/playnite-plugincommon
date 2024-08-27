@@ -250,11 +250,11 @@ namespace CommonPluginsStores.Steam
                 _ = Task.Run(() =>
                 {
                     Thread.Sleep(1000);
-
-                    if (CurrentAccountInfos.Avatar.IsNullOrEmpty() && IsConfigured() && ulong.TryParse(currentAccountInfos.UserId, out ulong steamId))
+                    if ((CurrentAccountInfos.Avatar.IsNullOrEmpty() || CurrentAccountInfos.Link.IsNullOrEmpty()) && IsConfigured() && ulong.TryParse(currentAccountInfos.UserId, out ulong steamId))
                     {
                         ObservableCollection<AccountInfos> playerSummaries = GetPlayerSummaries(new List<ulong> { steamId });
                         CurrentAccountInfos.Avatar = playerSummaries?.FirstOrDefault().Avatar;
+                        CurrentAccountInfos.Link = playerSummaries?.FirstOrDefault().Link;
                     }
 
                     CurrentAccountInfos.IsPrivate = !CheckIsPublic(accountInfos).GetAwaiter().GetResult();
