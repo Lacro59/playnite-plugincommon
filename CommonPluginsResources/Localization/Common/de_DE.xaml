@@ -171,9 +171,9 @@ Soll das Verzeichnis geöffnet werden?</sys:String>
     <!-- CommonGlobalProgress -->
 
     <sys:String x:Key="LOCCommonGettingData">Daten werden heruntergeladen...</sys:String>
-    <sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games...</sys:String>
-    <sys:String x:Key="LOCCommonGettingInstalledDatas">Downloading data from installed games...</sys:String>
-    <sys:String x:Key="LOCCommonGettingNewDatas">Downloading data from new games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingAllDatas">Daten von installierten Spielen werden heruntergeladen...</sys:String>
+    <sys:String x:Key="LOCCommonGettingInstalledDatas">Daten von installierten Spielen werden heruntergeladen...</sys:String>
+    <sys:String x:Key="LOCCommonGettingNewDatas">Daten von neuen Spielen werden heruntergeladen...</sys:String>
     <sys:String x:Key="LOCCommonAddingAllTag">Füge Tag zu allen Spielen hinzu...</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Entferne Tag von allen Spielen...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Datenbank wird gelöscht...</sys:String>
@@ -199,6 +199,9 @@ Bitte alle Tags im Plugin Menü löschen.</sys:String>
 
     <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Alte gespeicherte Daten für {0} [{1}] verwenden
 Sie müssen sich authentifizieren.</sys:String>
+
+    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">Mehr als 1 Eintrag für {0} gefunden.
+Bitte überprüfe die Plugin-Einstellungen.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Abmessungen</sys:String>
