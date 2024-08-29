@@ -20,11 +20,10 @@ namespace CommonPluginsShared.Converters
         {
             try
             {
-                if (value != null && (DateTime)value != default(DateTime))
+                if (value != null && (DateTime)value != default)
                 {
                     DateTime dt = ((DateTime)value).ToLocalTime();
-                    return (dt.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern)
-                        + " " + dt.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern));
+                    return dt.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern) + " " + dt.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern);
                 }
                 else
                 {

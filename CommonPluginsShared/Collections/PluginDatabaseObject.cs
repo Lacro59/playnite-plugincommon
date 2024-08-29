@@ -293,9 +293,9 @@ namespace CommonPluginsShared.Collections
 
 
         #region Database item methods
-        public virtual TItem GetDefault(Guid Id)
+        public virtual TItem GetDefault(Guid id)
         {
-            Game game = API.Instance.Database.Games.Get(Id);
+            Game game = API.Instance.Database.Games.Get(id);
             return game == null ? null : GetDefault(game);
         }
 
@@ -405,7 +405,7 @@ namespace CommonPluginsShared.Collections
         }
 
 
-        public virtual void Refresh(Guid Id)
+        public virtual void Refresh(Guid id)
         {
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}")
             {
@@ -415,7 +415,7 @@ namespace CommonPluginsShared.Collections
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
-                RefreshNoLoader(Id);
+                RefreshNoLoader(id);
             }, globalProgressOptions);
         }
 
@@ -473,13 +473,13 @@ namespace CommonPluginsShared.Collections
             }, globalProgressOptions);
         }
 
-        public virtual void RefreshNoLoader(Guid Id)
+        public virtual void RefreshNoLoader(Guid id)
         {
-            Game game = API.Instance.Database.Games.Get(Id);
+            Game game = API.Instance.Database.Games.Get(id);
             Logger.Info($"RefreshNoLoader({game?.Name} - {game?.Id})");
 
-            TItem loadedItem = Get(Id, true);
-            TItem webItem = GetWeb(Id);
+            TItem loadedItem = Get(id, true);
+            TItem webItem = GetWeb(id);
 
             if (webItem != null && !ReferenceEquals(loadedItem, webItem))
             {
@@ -493,9 +493,9 @@ namespace CommonPluginsShared.Collections
             ActionAfterRefresh(webItem);
         }
 
-        public virtual void RefreshWithNoData(List<Guid> Ids)
+        public virtual void RefreshWithNoData(List<Guid> ids)
         {
-            Refresh(Ids);
+            Refresh(ids);
         }
 
         public virtual void RefreshInstalled()
@@ -642,10 +642,10 @@ namespace CommonPluginsShared.Collections
             return Remove(game.Id);
         }
 
-        public virtual bool Remove(Guid Id)
+        public virtual bool Remove(Guid id)
         {
-            RemoveTag(Id);
-            return Database.Items.ContainsKey(Id) && (bool)Application.Current.Dispatcher?.Invoke(() => { return Database.Remove(Id); }, DispatcherPriority.Send);
+            RemoveTag(id);
+            return Database.Items.ContainsKey(id) && (bool)Application.Current.Dispatcher?.Invoke(() => { return Database.Remove(id); }, DispatcherPriority.Send);
         }
 
         public virtual bool Remove(List<Guid> ids)
@@ -673,9 +673,9 @@ namespace CommonPluginsShared.Collections
         }
 
 
-        public virtual TItem GetOnlyCache(Guid Id)
+        public virtual TItem GetOnlyCache(Guid id)
         {
-            return Database?.Get(Id);
+            return Database?.Get(id);
         }
 
         public virtual TItem GetOnlyCache(Game game)
@@ -684,9 +684,9 @@ namespace CommonPluginsShared.Collections
         }
 
 
-        public virtual TItem GetClone(Guid Id)
+        public virtual TItem GetClone(Guid id)
         {
-            return Serialization.GetClone(Get(Id, true, false));
+            return Serialization.GetClone(Get(id, true, false));
         }
 
         public virtual TItem GetClone(Game game)
@@ -696,17 +696,17 @@ namespace CommonPluginsShared.Collections
 
 
 #pragma warning disable CS1066 // La valeur par défaut spécifiée pour le paramètre n'aura aucun effet, car elle s'applique à un membre utilisé dans des contextes qui n'autorisent pas les arguments facultatifs
-        PluginDataBaseGameBase IPluginDatabase.Get(Game game, bool OnlyCache, bool Force = false)
+        PluginDataBaseGameBase IPluginDatabase.Get(Game game, bool onlyCache, bool force = false)
 #pragma warning restore CS1066 // La valeur par défaut spécifiée pour le paramètre n'aura aucun effet, car elle s'applique à un membre utilisé dans des contextes qui n'autorisent pas les arguments facultatifs
         {
-            return Get(game, OnlyCache, Force);
+            return Get(game, onlyCache, force);
         }
 
 #pragma warning disable CS1066 // La valeur par défaut spécifiée pour le paramètre n'aura aucun effet, car elle s'applique à un membre utilisé dans des contextes qui n'autorisent pas les arguments facultatifs
-        PluginDataBaseGameBase IPluginDatabase.Get(Guid Id, bool OnlyCache, bool Force = false)
+        PluginDataBaseGameBase IPluginDatabase.Get(Guid id, bool onlyCache, bool force = false)
 #pragma warning restore CS1066 // La valeur par défaut spécifiée pour le paramètre n'aura aucun effet, car elle s'applique à un membre utilisé dans des contextes qui n'autorisent pas les arguments facultatifs
         {
-            return Get(Id, OnlyCache, Force);
+            return Get(id, onlyCache, force);
         }
 
 
@@ -715,9 +715,9 @@ namespace CommonPluginsShared.Collections
             return GetClone(game);
         }
 
-        PluginDataBaseGameBase IPluginDatabase.GetClone(Guid Id)
+        PluginDataBaseGameBase IPluginDatabase.GetClone(Guid id)
         {
-            return GetClone(Id);
+            return GetClone(id);
         }
 
 
@@ -727,15 +727,15 @@ namespace CommonPluginsShared.Collections
         }
 
 
-        public abstract TItem Get(Guid Id, bool OnlyCache = false, bool Force = false);
+        public abstract TItem Get(Guid id, bool onlyCache = false, bool force = false);
 
-        public virtual TItem Get(Game game, bool OnlyCache = false, bool Force = false)
+        public virtual TItem Get(Game game, bool onlyCache = false, bool force = false)
         {
-            return Get(game.Id, OnlyCache, Force);
+            return Get(game.Id, onlyCache, force);
         }
 
 
-        public virtual TItem GetWeb(Guid Id)
+        public virtual TItem GetWeb(Guid dd)
         {
             return null;
         }
