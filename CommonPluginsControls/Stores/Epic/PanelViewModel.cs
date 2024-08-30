@@ -18,6 +18,9 @@ namespace CommonPluginsControls.Stores.Epic
         internal IStoreApi StoreApi { get; set; }
         public AccountInfos User => StoreApi.CurrentAccountInfos;
 
+        private bool useAuth = true;
+        public bool UseAuth { get => useAuth; set => SetValue(ref useAuth, value); }
+
         public AuthStatus AuthStatus => StoreApi == null ? AuthStatus.Failed : StoreApi.IsUserLoggedIn ? AuthStatus.Ok : AuthStatus.AuthRequired;
 
         public RelayCommand<object> LoginCommand => new RelayCommand<object>((a) =>

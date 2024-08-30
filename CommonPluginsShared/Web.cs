@@ -699,6 +699,17 @@ namespace CommonPluginsShared
             }
         }
 
+        public static async Task<string> PostStringData(string url, StringContent content)
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
+                var response = await client.PostAsync(url, content);
+                var str = await response.Content.ReadAsStringAsync();
+                return str;
+            }
+        }
+
         /// <summary>
         /// Post data with a payload.
         /// </summary>

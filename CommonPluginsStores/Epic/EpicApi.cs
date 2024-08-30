@@ -1,5 +1,4 @@
-﻿using CommonPlayniteShared;
-using CommonPlayniteShared.Common;
+﻿using CommonPlayniteShared.Common;
 using CommonPlayniteShared.PluginLibrary.EpicLibrary.Models;
 using CommonPlayniteShared.PluginLibrary.EpicLibrary.Services;
 using CommonPluginsShared;
@@ -18,6 +17,7 @@ using System.Net;
 using System.Net.Http;
 using System.Security.Principal;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using static CommonPlayniteShared.PluginLibrary.EpicLibrary.Models.WebStoreModels.QuerySearchResponse.Data.CatalogItem.SearchStore;
 using static CommonPluginsShared.PlayniteTools;
@@ -37,11 +37,13 @@ namespace CommonPluginsStores.Epic
         private string UrlApiServiceBase => @"https://account-public-service-prod03.ol.epicgames.com";
         private string UrlAccountAuth => UrlApiServiceBase + @"/account/api/oauth/token";
         private string UrlAccount => UrlApiServiceBase + @"/account/api/public/account/{0}";
-        private string UrlAccountLinkAchievements => @"https://store.epicgames.com/u/{0}";
-        private string UrlAccountLinkFriends => @"https://store.epicgames.com/u/{0}/friends";
+        private string UrlStoreEpic => @"https://store.epicgames.com";
+        private string UrlAccountProfile => UrlStoreEpic + @"/u/{0}";
+        private string UrlAccountLinkFriends => UrlStoreEpic + @"/u/{0}/friends";
+        private string UrlAccountAchievementss => UrlStoreEpic + @"/{0}/u/{1}/details/{2}";
         #endregion
 
-        private const string AuthEncodedString = "MzRhMDJjZjhmNDQxNGUyOWIxNTkyMTg3NmRhMzZmOWE6ZGFhZmJjY2M3Mzc3NDUwMzlkZmZlNTNkOTRmYzc2Y2Y=";
+        private static string AuthEncodedString => "MzRhMDJjZjhmNDQxNGUyOWIxNTkyMTg3NmRhMzZmOWE6ZGFhZmJjY2M3Mzc3NDUwMzlkZmZlNTNkOTRmYzc2Y2Y=";
 
         #region Paths
         private string TokensPath { get; }
@@ -91,6 +93,11 @@ namespace CommonPluginsStores.Epic
         #region Configuration
         protected override bool GetIsUserLoggedIn()
         {
+            if (!currentAccountInfos.IsPrivate)
+            {
+                return true;
+            }
+
             bool isLogged = CheckIsUserLoggedIn();
             if (isLogged)
             {
@@ -130,7 +137,7 @@ namespace CommonPluginsStores.Epic
                         {
                             UserId = tokens.account_id,
                             Pseudo = epicAccountResponse?.DisplayName,
-                            Link = string.Format(UrlAccountLinkAchievements, tokens.account_id),
+                            Link = string.Format(UrlAccountProfile, tokens.account_id),
                             IsCurrent = true
                         };
                         SaveCurrentUser();
@@ -149,7 +156,17 @@ namespace CommonPluginsStores.Epic
         protected override AccountInfos GetCurrentAccountInfos()
         {
             AccountInfos accountInfos = LoadCurrentUser();
-            return accountInfos;
+            if (accountInfos != null)
+            {
+                _ = Task.Run(() =>
+                {
+                    Thread.Sleep(1000);
+                    CurrentAccountInfos.IsPrivate = !CheckIsPublic(accountInfos).GetAwaiter().GetResult();
+                    CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
+                });
+                return accountInfos;
+            }
+            return new AccountInfos { IsCurrent = true };
         }
         #endregion
 
@@ -197,8 +214,9 @@ namespace CommonPluginsStores.Epic
                 string localLang = CodeLang.GetEpicLang(Local);
                 string localLangShort = CodeLang.GetEpicLangCountry(Local);
 
-
+                // Get Achievement game schema
                 EpicAchievementResponse epicAchievementResponse = QueryAchievement(id, localLangShort).GetAwaiter().GetResult();
+                string productId = epicAchievementResponse.Data?.Achievement?.ProductAchievementsRecordBySandbox?.ProductId;
                 epicAchievementResponse?.Data?.Achievement?.ProductAchievementsRecordBySandbox?.Achievements?.ForEach(x =>
                 {
                     GameAchievement gameAchievement = new GameAchievement
@@ -215,15 +233,30 @@ namespace CommonPluginsStores.Epic
                     gameAchievements.Add(gameAchievement);
                 });
 
-                EpicPlayerAchievementResponse epicPlayerAchievementResponse = QueryPlayerAchievement(accountInfos.UserId, id).GetAwaiter().GetResult();
-                epicPlayerAchievementResponse?.Data?.PlayerAchievement?.PlayerAchievementGameRecordsBySandbox?.Records?.FirstOrDefault().PlayerAchievements.ForEach(x =>
+                if (!accountInfos.IsPrivate)
                 {
-                    GameAchievement owned = gameAchievements.Where(y => y.Id.IsEqual(x.PlayerAchievement.AchievementName))?.FirstOrDefault();
-                    if (owned != null)
+                    PlayerProfileAchievementsByProductId playerProfileAchievementsByProductId = QueryPlayerAchievementPublic(accountInfos.UserId, productId).GetAwaiter().GetResult();
+                    playerProfileAchievementsByProductId?.Data?.PlayerProfile?.PlayerProfile2?.ProductAchievements?.Data?.PlayerAchievements?.ForEach(x =>
                     {
-                        owned.DateUnlocked = x.PlayerAchievement?.UnlockDate ?? default;
-                    }
-                });
+                        GameAchievement owned = gameAchievements.Where(y => y.Id.IsEqual(x.PlayerAchievement.AchievementName))?.FirstOrDefault();
+                        if (owned != null)
+                        {
+                            owned.DateUnlocked = x?.PlayerAchievement.UnlockDate ?? default;
+                        }
+                    });
+                }
+                else
+                {
+                    EpicPlayerAchievementResponse epicPlayerAchievementResponse = QueryPlayerAchievement(accountInfos.UserId, id).GetAwaiter().GetResult();
+                    epicPlayerAchievementResponse?.Data?.PlayerAchievement?.PlayerAchievementGameRecordsBySandbox?.Records?.FirstOrDefault().PlayerAchievements.ForEach(x =>
+                    {
+                        GameAchievement owned = gameAchievements.Where(y => y.Id.IsEqual(x.PlayerAchievement.AchievementName))?.FirstOrDefault();
+                        if (owned != null)
+                        {
+                            owned.DateUnlocked = x.PlayerAchievement?.UnlockDate ?? default;
+                        }
+                    });
+                }
 
                 return gameAchievements;
             }
@@ -461,6 +494,22 @@ namespace CommonPluginsStores.Epic
             return null;
         }
 
+        public async Task<bool> CheckIsPublic(AccountInfos accountInfos)
+        {
+            try
+            {
+                string url = string.Format(UrlAccountProfile, accountInfos.UserId);
+                string response = await Web.DownloadStringData(url);
+                return !response.Contains("private-view-text");
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+            }
+
+            return false;
+        }
+
         private bool CheckIsUserLoggedIn()
         {
             OauthResponse tokens = LoadTokens();
@@ -562,7 +611,6 @@ namespace CommonPluginsStores.Epic
                 }
             }
         }
-
 
         private void RenewTokens(string refreshToken)
         {
@@ -802,7 +850,6 @@ namespace CommonPluginsStores.Epic
             try
             {
                 HttpClient client = new HttpClient();
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + AuthToken.Token);
 
                 var queryObject = new
                 {
@@ -819,7 +866,7 @@ namespace CommonPluginsStores.Epic
                 };
 
                 StringContent content = new StringContent(Serialization.ToJson(queryObject), Encoding.UTF8, "application/json");
-                string str = await Web.PostStringData(UrlGraphQL, AuthToken.Token, content);
+                string str = await Web.PostStringData(UrlGraphQL, content);
                 EpicAchievementResponse data = Serialization.FromJson<EpicAchievementResponse>(str);
                 return data;
             }
@@ -840,6 +887,24 @@ namespace CommonPluginsStores.Epic
                 StringContent content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
                 string str = await Web.PostStringData(UrlGraphQL, AuthToken.Token, content);
                 EpicPlayerAchievementResponse data = Serialization.FromJson<EpicPlayerAchievementResponse>(str.Replace("\"unlockDate\":\"N/A\",", string.Empty));
+                return data;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return null;
+            }
+        }
+
+        private async Task<PlayerProfileAchievementsByProductId> QueryPlayerAchievementPublic(string epicAccountId, string productId)
+        {
+            try
+            {
+                string param = "?operationName=playerProfileAchievementsByProductId&variables={\"epicAccountId\":\"" + epicAccountId + "\",\"productId\":\"" + productId + "\"}&extensions={\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"70ff714976f88a85aafa3cb5abb9909d52e12a3ff585d7b49550d2493a528fb0\"}}";
+                string url = UrlGraphQL + param;
+                string str = await Web.DownloadStringData(url);
+
+                PlayerProfileAchievementsByProductId data = Serialization.FromJson<PlayerProfileAchievementsByProductId>(str.Replace("\"unlockDate\":\"N/A\",", string.Empty));
                 return data;
             }
             catch (Exception ex)

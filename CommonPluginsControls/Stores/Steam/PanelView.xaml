@@ -16,7 +16,7 @@
         <converters:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
     </UserControl.Resources>
     
-    <Expander Grid.Row="0" Loaded="Expander_Loaded">
+    <Expander Loaded="Expander_Loaded">
         <Expander.Style>
             <Style TargetType="{x:Type Expander}" BasedOn="{StaticResource {x:Type Expander}}">
                 <Setter Property="Background" Value="Transparent" />

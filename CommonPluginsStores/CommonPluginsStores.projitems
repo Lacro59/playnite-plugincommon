@@ -19,6 +19,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicEntitledOfferItems.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicPlayerAchievementResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicWishlistData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\PlayerProfileAchievementsByProductId.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\QueryAddonsByNamespace.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\QueryEntitledOfferItems.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\QueryPlayerAchievement.cs" />
