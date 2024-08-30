@@ -5,15 +5,6 @@ using System.Text;
 
 namespace CommonPluginsStores.Epic.Models
 {
-    public class PlayerProfileAchievementsByProductId
-    {
-        [SerializationPropertyName("data")]
-        public DataPublic Data { get; set; }
-
-        [SerializationPropertyName("extensions")]
-        public Extensions Extensions { get; set; }
-    }
-
     public class Avatar
     {
         [SerializationPropertyName("small")]
@@ -26,7 +17,13 @@ namespace CommonPluginsStores.Epic.Models
         public string Large { get; set; }
     }
 
-    public class DataPublic
+    public class DataAchievementsByProductId
+    {
+        [SerializationPropertyName("PlayerProfile")]
+        public PlayerProfile PlayerProfile { get; set; }
+    }
+
+    public class DataProductAchievements
     {
         [SerializationPropertyName("PlayerProfile")]
         public PlayerProfile PlayerProfile { get; set; }
@@ -50,43 +47,13 @@ namespace CommonPluginsStores.Epic.Models
         public List<object> PlayerAwards { get; set; }
 
         [SerializationPropertyName("playerAchievements")]
-        public List<PlayerAchievementPublic> PlayerAchievements { get; set; }
+        public List<PlayerAchievements> PlayerAchievements { get; set; }
     }
 
-    public class PlayerAchievementPublic
+    public class PlayerAchievements
     {
         [SerializationPropertyName("playerAchievement")]
-        public PlayerAchievementPublic2 PlayerAchievement { get; set; }
-    }
-
-    public class PlayerAchievementPublic2
-    {
-        [SerializationPropertyName("achievementName")]
-        public string AchievementName { get; set; }
-
-        [SerializationPropertyName("epicAccountId")]
-        public string EpicAccountId { get; set; }
-
-        [SerializationPropertyName("progress")]
-        public int Progress { get; set; }
-
-        [SerializationPropertyName("sandboxId")]
-        public string SandboxId { get; set; }
-
-        [SerializationPropertyName("unlocked")]
-        public bool Unlocked { get; set; }
-
-        [SerializationPropertyName("unlockDate")]
-        public DateTime UnlockDate { get; set; }
-
-        [SerializationPropertyName("XP")]
-        public int XP { get; set; }
-
-        [SerializationPropertyName("achievementSetId")]
-        public string AchievementSetId { get; set; }
-
-        [SerializationPropertyName("isBase")]
-        public bool IsBase { get; set; }
+        public PlayerAchievement3 PlayerAchievement { get; set; }
     }
 
     public class PlayerProfile
@@ -115,10 +82,13 @@ namespace CommonPluginsStores.Epic.Models
 
     public class ProductAchievements
     {
-        [SerializationPropertyName("__typename")]
-        public string Typename { get; set; }
-
         [SerializationPropertyName("data")]
-        public DataPublic Data { get; set; }
+        public DataProductAchievements Data { get; set; }
+    }
+
+    public class EpicPlayerProfileAchievementsByProductIdResponse
+    {
+        [SerializationPropertyName("data")]
+        public DataAchievementsByProductId Data { get; set; }
     }
 }

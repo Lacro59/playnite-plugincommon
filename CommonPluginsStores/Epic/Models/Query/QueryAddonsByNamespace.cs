@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CommonPluginsStores.Epic.Models
+namespace CommonPluginsStores.Epic.Models.Query
 {
     public class QueryAddonsByNamespace
     {

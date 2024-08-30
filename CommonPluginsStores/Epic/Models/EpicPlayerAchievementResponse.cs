@@ -81,9 +81,6 @@ namespace CommonPluginsStores.Epic.Models
     {
         [SerializationPropertyName("data")]
         public DataPlayerAchievement Data { get; set; }
-
-        //[SerializationPropertyName("extensions")]
-        //public Extensions Extensions { get; set; }
     }
 
 

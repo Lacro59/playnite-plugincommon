@@ -5,6 +5,7 @@ using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Models;
 using CommonPluginsStores.Epic.Models;
+using CommonPluginsStores.Epic.Models.Query;
 using CommonPluginsStores.Models;
 using Playnite.SDK;
 using Playnite.SDK.Data;
@@ -24,6 +25,7 @@ using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.Epic
 {
+    // https://gist.github.com/woctezuma/8ca464a276b15d7dfad475fd6b6cbee9
     public class EpicApi : StoreApi
     {
         #region Url
@@ -71,7 +73,7 @@ namespace CommonPluginsStores.Epic
                 {
                     Domain = ".www.epicgames.com",
                     Name = "EPIC_EG1",
-                    Value = AuthToken.Token
+                    Value = AuthToken?.Token ?? string.Empty
                 },
                 new HttpCookie
                 {
@@ -83,7 +85,7 @@ namespace CommonPluginsStores.Epic
                 {
                     Domain = "store.epicgames.com",
                     Name = "EPIC_EG1",
-                    Value = AuthToken.Token
+                    Value = AuthToken?.Token ?? string.Empty
                 }
             };
             return httpCookies;
@@ -235,7 +237,7 @@ namespace CommonPluginsStores.Epic
 
                 if (!accountInfos.IsPrivate)
                 {
-                    PlayerProfileAchievementsByProductId playerProfileAchievementsByProductId = QueryPlayerAchievementPublic(accountInfos.UserId, productId).GetAwaiter().GetResult();
+                    EpicPlayerProfileAchievementsByProductIdResponse playerProfileAchievementsByProductId = QueryPlayerProfileAchievementsByProductId(accountInfos.UserId, productId).GetAwaiter().GetResult();
                     playerProfileAchievementsByProductId?.Data?.PlayerProfile?.PlayerProfile2?.ProductAchievements?.Data?.PlayerAchievements?.ForEach(x =>
                     {
                         GameAchievement owned = gameAchievements.Where(y => y.Id.IsEqual(x.PlayerAchievement.AchievementName))?.FirstOrDefault();
@@ -849,23 +851,10 @@ namespace CommonPluginsStores.Epic
         {
             try
             {
-                HttpClient client = new HttpClient();
-
-                var queryObject = new
-                {
-                    operationName = "Achievement",
-                    variables = new { sandboxId, locale },
-                    extensions = new
-                    {
-                        persistedQuery = new
-                        {
-                            version = 1,
-                            sha256Hash = "7d54399ad8b8b5538bc2d93ee66b07014432b5488945cda35fe0b1fc70eea83a"
-                        }
-                    }
-                };
-
-                StringContent content = new StringContent(Serialization.ToJson(queryObject), Encoding.UTF8, "application/json");
+                QueryAchievement query = new QueryAchievement();
+                query.variables.locale = locale;
+                query.variables.sandboxId = sandboxId;
+                StringContent content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
                 string str = await Web.PostStringData(UrlGraphQL, content);
                 EpicAchievementResponse data = Serialization.FromJson<EpicAchievementResponse>(str);
                 return data;
@@ -896,15 +885,16 @@ namespace CommonPluginsStores.Epic
             }
         }
 
-        private async Task<PlayerProfileAchievementsByProductId> QueryPlayerAchievementPublic(string epicAccountId, string productId)
+        private async Task<EpicPlayerProfileAchievementsByProductIdResponse> QueryPlayerProfileAchievementsByProductId(string epicAccountId, string productId)
         {
             try
             {
-                string param = "?operationName=playerProfileAchievementsByProductId&variables={\"epicAccountId\":\"" + epicAccountId + "\",\"productId\":\"" + productId + "\"}&extensions={\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"70ff714976f88a85aafa3cb5abb9909d52e12a3ff585d7b49550d2493a528fb0\"}}";
-                string url = UrlGraphQL + param;
-                string str = await Web.DownloadStringData(url);
-
-                PlayerProfileAchievementsByProductId data = Serialization.FromJson<PlayerProfileAchievementsByProductId>(str.Replace("\"unlockDate\":\"N/A\",", string.Empty));
+                QueryPlayerProfileAchievementsByProductId query = new QueryPlayerProfileAchievementsByProductId();
+                query.variables.epicAccountId = epicAccountId;
+                query.variables.productId = productId;
+                StringContent content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
+                string str = await Web.PostStringData(UrlGraphQL, content);
+                EpicPlayerProfileAchievementsByProductIdResponse data = Serialization.FromJson<EpicPlayerProfileAchievementsByProductIdResponse>(str.Replace("\"unlockDate\":\"N/A\",", string.Empty));
                 return data;
             }
             catch (Exception ex)

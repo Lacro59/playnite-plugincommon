@@ -9,7 +9,7 @@ namespace CommonPluginsStores.Epic.Models
     public class EpicData
     {
         public List<object> mutations { get; set; }
-        public List<Query> queries { get; set; }
+        public List<QueryData> queries { get; set; }
     }
 
     public class State
@@ -28,7 +28,7 @@ namespace CommonPluginsStores.Epic.Models
         public string status { get; set; }
     }
 
-    public class Query
+    public class QueryData
     {
         public State state { get; set; }
         public object queryKey { get; set; }
