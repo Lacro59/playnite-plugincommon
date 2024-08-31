@@ -15,7 +15,7 @@
     
     <!-- Filters -->
 
-    <sys:String x:Key="LOCCommonUsedFilteredGames">現在フィルターされているゲー</sys:String>
+    <sys:String x:Key="LOCCommonUsedFilteredGames">現在フィルターされているゲーム</sys:String>
     <sys:String x:Key="LOCCommonDefaultFilters">Restore default filters</sys:String>
     <sys:String x:Key="LOCCommonSaveFilters">Save current filters</sys:String>
 
@@ -58,7 +58,7 @@
     <sys:String x:Key="LOCCommonInputItemIgnore">無視する項目を入力</sys:String>
     
     <sys:String x:Key="LOCCommonProgression">達成度</sys:String>
-    <sys:String x:Key="LOCCommonCompleted">完</sys:String>
+    <sys:String x:Key="LOCCommonCompleted">完了</sys:String>
 
     <sys:String x:Key="LOCCommonGameTime">ゲーム時間</sys:String>
     
@@ -122,10 +122,10 @@
     <sys:String x:Key="LOCCommonIntegrationButton">ゲーム詳細にプラグインボタンを表示</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInDescription">ゲーム詳細にプラグイン情報を表示</sys:String>
 
-    <sys:String x:Key="LOCCommonIntegrationSelectElements">詳細ビューコンポーネン</sys:String>
+    <sys:String x:Key="LOCCommonIntegrationSelectElements">詳細ビューコンポーネント</sys:String>
 
     <sys:String x:Key="LOCCommonIntegrationButtonOptions">ボタンのオプション</sys:String>
-    <sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon"></sys:String>
+    <sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">アイコンのみ表示</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonDetails">詳細ボタンを表示</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonIsToggle">トグルボタンあり</sys:String>
 
@@ -171,7 +171,9 @@
     <!-- CommonGlobalProgress -->
 
     <sys:String x:Key="LOCCommonGettingData">データをダウンロード中...</sys:String>
-    <sys:String x:Key="LOCCommonGettingAllDatas">すべてのゲームのデータをダウンロード中...</sys:String>
+    <sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingInstalledDatas">Downloading data from installed games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingNewDatas">Downloading data from new games...</sys:String>
     <sys:String x:Key="LOCCommonAddingAllTag">すべてのゲームにタグを追加中...</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">すべてのゲームからタグを削除中...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">データベースをクリア中...</sys:String>
@@ -185,7 +187,7 @@
     <!-- CommonNotifications -->
 
     <sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">{0} からデータを取得中にエラーが発生しました。
-もう一度お試しくださ</sys:String>
+もう一度お試しください。</sys:String>
     
     <sys:String x:Key="LOCCommonCreateLog">ログパッケージを作成しますか？</sys:String>
     
@@ -193,16 +195,19 @@
     <sys:String x:Key="LOCCommonDataErrorRemove">プラグインデータの削除中にエラーが発生しました。もう一度やり直してください。</sys:String>
 
     <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">{0} でタグを追加する際にエラーが発生しました。
-プラグインメニューのすべてのタグを消去してくださ</sys:String>
+プラグインメニューのすべてのタグを消去してください。</sys:String>
 
     <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">{0} [{1}] の保存データを使用します。
-認証が必要です</sys:String>
+認証が必要です。</sys:String>
+
+    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">More than 1 data found for {0}.
+Please check the plugin settings.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">寸法</sys:String>
     <sys:String x:Key="LOCCommonStyles">スタイル</sys:String>
     <sys:String x:Key="LOCCommonTypes">種類</sys:String>
-    <sys:String x:Key="LOCCommonSortByDate">日付</sys:String>
+    <sys:String x:Key="LOCCommonSortByDate">日付順</sys:String>
     <sys:String x:Key="LOCCommonSortByScore">スコア順</sys:String>
 
 

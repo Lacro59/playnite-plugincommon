@@ -171,7 +171,9 @@ Vuoi aprire la cartella?</sys:String>
     <!-- CommonGlobalProgress -->
 
     <sys:String x:Key="LOCCommonGettingData">Scaricamento dati...</sys:String>
-    <sys:String x:Key="LOCCommonGettingAllDatas">Scaricamento dati di tutti i giochi...</sys:String>
+    <sys:String x:Key="LOCCommonGettingAllDatas">Scaricamento dati per tutti i giochi...</sys:String>
+    <sys:String x:Key="LOCCommonGettingInstalledDatas">Scaricamento dati dai giochi installati...</sys:String>
+    <sys:String x:Key="LOCCommonGettingNewDatas">Scaricamento dati dai nuovi giochi...</sys:String>
     <sys:String x:Key="LOCCommonAddingAllTag">Aggiungere etichette per tutti i giochi...</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Rimozione dell'etichetta da tutti i giochi...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Pulizia del database...</sys:String>
@@ -197,6 +199,9 @@ Si prega di cancellare tutti le etichette nel menu del plugin.</sys:String>
 
     <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Utilizzare i vecchi dati salvati per {0} [{1}]
 È necessario autenticarsi.</sys:String>
+
+    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">Più di 1 dato trovato per {0}.
+Si prega di controllare le impostazioni del plugin.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Dimensioni</sys:String>

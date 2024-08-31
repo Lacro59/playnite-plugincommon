@@ -171,7 +171,9 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
     <!-- CommonGlobalProgress -->
 
     <sys:String x:Key="LOCCommonGettingData">Téléchargement des données...</sys:String>
-    <sys:String x:Key="LOCCommonGettingAllDatas">Téléchargement des données...</sys:String>
+    <sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingInstalledDatas">Downloading data from installed games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingNewDatas">Downloading data from new games...</sys:String>
     <sys:String x:Key="LOCCommonAddingAllTag">Ajouter des étiquettes pour tous les jeux...</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Suppression des étiquettes...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Nettoyage de la base de données...</sys:String>
@@ -197,6 +199,9 @@ Veuillez effacer toutes les étiquettes dans le menu du plugin.</sys:String>
 
     <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Utilisation des données sauvegardées pour {0} [{1}]
 Vous devez vous authentifier.</sys:String>
+
+    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">More than 1 data found for {0}.
+Please check the plugin settings.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Dimensions</sys:String>
