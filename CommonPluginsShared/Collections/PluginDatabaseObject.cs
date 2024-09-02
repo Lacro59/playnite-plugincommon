@@ -430,6 +430,7 @@ namespace CommonPluginsShared.Collections
             _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
             {
                 Logger.Info($"Refresh() started");
+                API.Instance.Database.BeginBufferUpdate();
                 Database.BeginBufferUpdate();
 
                 Stopwatch stopWatch = new Stopwatch();
@@ -470,6 +471,7 @@ namespace CommonPluginsShared.Collections
                 Logger.Info($"Task Refresh(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{ids.Count} items");
 
                 Database.EndBufferUpdate();
+                API.Instance.Database.EndBufferUpdate();
             }, globalProgressOptions);
         }
 
@@ -508,6 +510,7 @@ namespace CommonPluginsShared.Collections
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
             {
+                API.Instance.Database.BeginBufferUpdate();
                 Database.BeginBufferUpdate();
 
                 Stopwatch stopWatch = new Stopwatch();
@@ -552,6 +555,7 @@ namespace CommonPluginsShared.Collections
                 Logger.Info($"Task RefreshInstalled() - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {playniteDb.Count} items");
 
                 Database.EndBufferUpdate();
+                API.Instance.Database.EndBufferUpdate();
             }, options);
         }
 
@@ -565,6 +569,7 @@ namespace CommonPluginsShared.Collections
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
             {
+                API.Instance.Database.BeginBufferUpdate();
                 Database.BeginBufferUpdate();
 
                 Stopwatch stopWatch = new Stopwatch();
@@ -622,6 +627,7 @@ namespace CommonPluginsShared.Collections
                 Logger.Info($"Task RefreshRecent() - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {playniteDb.Count} items");
 
                 Database.EndBufferUpdate();
+                API.Instance.Database.EndBufferUpdate();
             }, options);
         }
 
@@ -854,6 +860,7 @@ namespace CommonPluginsShared.Collections
                 try
                 {
                     Logger.Info($"AddTagAllGame() started");
+                    API.Instance.Database.BeginBufferUpdate();
                     API.Instance.Database.Games.BeginBufferUpdate();
 
                     Stopwatch stopWatch = new Stopwatch();
@@ -902,6 +909,7 @@ namespace CommonPluginsShared.Collections
                 finally
                 {
                     API.Instance.Database.Games.EndBufferUpdate();
+                    API.Instance.Database.EndBufferUpdate();
                 }
             }, options);
         }
@@ -931,6 +939,7 @@ namespace CommonPluginsShared.Collections
                 try
                 {
                     Logger.Info($"AddTagSelectData() started");
+                    API.Instance.Database.BeginBufferUpdate();
                     API.Instance.Database.Games.BeginBufferUpdate();
 
                     Stopwatch stopWatch = new Stopwatch();
@@ -980,6 +989,7 @@ namespace CommonPluginsShared.Collections
                 finally
                 {
                     API.Instance.Database.Games.EndBufferUpdate();
+                    API.Instance.Database.EndBufferUpdate();
                 }
             }, options);
         }
@@ -1038,6 +1048,7 @@ namespace CommonPluginsShared.Collections
                 try
                 {
                     Logger.Info($"RemoveTagAllGame() started");
+                    API.Instance.Database.BeginBufferUpdate();
                     API.Instance.Database.Games.BeginBufferUpdate();
 
                     Stopwatch stopWatch = new Stopwatch();
@@ -1083,6 +1094,7 @@ namespace CommonPluginsShared.Collections
                 finally
                 {
                     API.Instance.Database.Games.EndBufferUpdate();
+                    API.Instance.Database.EndBufferUpdate();
                 }
             }, options);
         }
