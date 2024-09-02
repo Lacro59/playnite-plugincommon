@@ -95,7 +95,7 @@ namespace CommonPluginsStores.Epic
         #region Configuration
         protected override bool GetIsUserLoggedIn()
         {
-            if (!currentAccountInfos.IsPrivate)
+            if (!currentAccountInfos.IsPrivate && !ForceAuth)
             {
                 return true;
             }
@@ -812,7 +812,7 @@ namespace CommonPluginsStores.Epic
                 query.variables.productNameSpace = productNameSpace;
                 query.variables.offerId = offerId;
                 StringContent content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
-                string str = await Web.PostStringData(UrlGraphQL, AuthToken.Token, content);
+                string str = await Web.PostStringData(UrlGraphQL, AuthToken?.Token, content);
                 EpicEntitledOfferItems data = Serialization.FromJson<EpicEntitledOfferItems>(str);
                 return data;
             }

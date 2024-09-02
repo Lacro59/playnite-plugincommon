@@ -21,6 +21,9 @@ namespace CommonPluginsControls.Stores.Epic
         private bool useAuth = true;
         public bool UseAuth { get => useAuth; set => SetValue(ref useAuth, value); }
 
+        private bool forceAuth = false;
+        public bool ForceAuth { get => forceAuth; set => SetValue(ref forceAuth, value); }
+
         public AuthStatus AuthStatus => StoreApi == null ? AuthStatus.Failed : StoreApi.IsUserLoggedIn ? AuthStatus.Ok : AuthStatus.AuthRequired;
 
         public RelayCommand<object> LoginCommand => new RelayCommand<object>((a) =>

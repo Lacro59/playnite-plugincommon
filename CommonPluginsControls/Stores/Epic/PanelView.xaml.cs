@@ -34,6 +34,26 @@ namespace CommonPluginsControls.Stores.Epic
             }
         }
 
+        public bool ForceAuth
+        {
+            get => (bool)GetValue(ForceAuthProperty);
+            set => SetValue(ForceAuthProperty, value);
+        }
+
+        public static readonly DependencyProperty ForceAuthProperty = DependencyProperty.Register(
+            nameof(ForceAuth),
+            typeof(bool),
+            typeof(PanelView),
+            new FrameworkPropertyMetadata(false, ForceAuthPropertyChangedCallback));
+
+        private static void ForceAuthPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (sender is PanelView obj)
+            {
+                obj.PanelViewModel.ForceAuth = (bool)e.NewValue;
+            }
+        }
+
         public IStoreApi StoreApi
         {
             get => (SteamApi)GetValue(steamApiProperty);

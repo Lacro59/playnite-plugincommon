@@ -13,6 +13,7 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <converters:InvertedBoolenConverter x:Key="InvertedBoolenConverter" />
+        <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter" />
         <converters:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
     </UserControl.Resources>
 
@@ -79,7 +80,8 @@
 
 
                     <!-- Configuration -->
-                    <GroupBox Header="{DynamicResource LOCCommonAccountConfiguration}" Padding="5" Margin="0,0,0,10">
+                    <GroupBox Header="{DynamicResource LOCCommonAccountConfiguration}" Padding="5" Margin="0,0,0,10"
+                              Visibility="{Binding ForceAuth, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />

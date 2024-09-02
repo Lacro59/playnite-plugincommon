@@ -120,6 +120,7 @@ namespace CommonPluginsStores
             set => SetValue(ref isUserLoggedIn, value);
         }
 
+        public bool ForceAuth { get; set; } = false;
 
         internal string PluginName { get; }
         internal string ClientName { get; }
@@ -255,6 +256,11 @@ namespace CommonPluginsStores
         public void SetLanguage(string local)
         {
             Local = local;
+        }
+
+        public void SetForceAuth(bool forceAuth)
+        {
+            ForceAuth = forceAuth;
         }
 
         public virtual void Login()
