@@ -9,6 +9,8 @@ namespace CommonPluginsShared.Collections
 {
     public class PluginDataBaseGameBase : DatabaseObject
     {
+        public DateTime DateLastRefresh { get; set; } = default;
+
         [DontSerialize]
         internal Game Game { get; set; }
 

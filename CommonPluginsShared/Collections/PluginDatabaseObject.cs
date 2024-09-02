@@ -359,7 +359,8 @@ namespace CommonPluginsShared.Collections
                 }
 
                 itemToUpdate.IsSaved = true;
-                Database.Items.TryUpdate(itemToUpdate.Id, itemToUpdate, Get(itemToUpdate.Id, true));
+                itemToUpdate.DateLastRefresh = DateTime.Now.ToUniversalTime();
+                _ = Database.Items.TryUpdate(itemToUpdate.Id, itemToUpdate, Get(itemToUpdate.Id, true));
                 Application.Current.Dispatcher?.Invoke(() => Database.Update(itemToUpdate), DispatcherPriority.Send);
 
                 // If tag system
