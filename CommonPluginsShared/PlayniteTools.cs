@@ -94,6 +94,59 @@ namespace CommonPluginsShared
         {
             return PluginsById.FirstOrDefault(x => x.Value == externalPlugin).Key;
         }
+
+        [Obsolete]
+        public static bool IsDisabledPlaynitePlugins(string PluginName)
+        {
+            return DisabledPlugins?.Contains(PluginName) ?? false;
+        }
+
+        private static HashSet<string> GetDisabledPlugins()
+        {
+            try
+            {
+                string FileConfig = PlaynitePaths.ConfigFilePath;
+                if (File.Exists(FileConfig))
+                {
+                    dynamic playniteConfig = Serialization.FromJsonFile<dynamic>(FileConfig);
+                    dynamic disabledPlugins = playniteConfig.DisabledPlugins;
+                    HashSet<string> output = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    if (disabledPlugins != null)
+                    {
+                        foreach (dynamic pluginName in disabledPlugins)
+                        {
+                            _ = output.Add(pluginName.ToString());
+                        }
+                    }
+                    return output;
+                }
+                else
+                {
+                    Logger.Warn($"File not found {FileConfig}");
+                    return new HashSet<string>();
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                return null;
+            }
+        }
+
+        public static bool IsEnabledPlaynitePlugin(Guid id)
+        {
+            try
+            {
+                Plugin Plugin = API.Instance?.Addons?.Plugins?.FirstOrDefault(p => p.Id == id) ?? null;
+                return Plugin != null;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+            }
+
+            return false;
+        }
         #endregion
 
 
@@ -334,49 +387,6 @@ namespace CommonPluginsShared
         }
 
 
-        /// <summary>
-        /// Check if a plugin is disabled
-        /// </summary>
-        /// <param name="PluginName"></param>
-        /// <returns></returns>
-        public static bool IsDisabledPlaynitePlugins(string PluginName)
-        {
-            return DisabledPlugins?.Contains(PluginName) ?? false;
-        }
-
-        private static HashSet<string> GetDisabledPlugins()
-        {
-            try
-            {
-                string FileConfig = PlaynitePaths.ConfigFilePath;
-                if (File.Exists(FileConfig))
-                {
-                    dynamic playniteConfig = Serialization.FromJsonFile<dynamic>(FileConfig);
-                    dynamic disabledPlugins = playniteConfig.DisabledPlugins;
-                    HashSet<string> output = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    if (disabledPlugins != null)
-                    {
-                        foreach (dynamic pluginName in disabledPlugins)
-                        {
-                            _ = output.Add(pluginName.ToString());
-                        }
-                    }
-                    return output;
-                }
-                else
-                {
-                    Logger.Warn($"File not found {FileConfig}");
-                    return new HashSet<string>();
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false);
-                return null;
-            }
-        }
-
-
         #region Game informations
         /// <summary>
         /// Get normalized source name
@@ -481,20 +491,16 @@ namespace CommonPluginsShared
                 case ExternalPlugin.RiotLibrary:
                     return "Riot Games";
 
-                case ExternalPlugin.None:
-                    break;
-                case ExternalPlugin.SuccessStory:
-                    break;
-                case ExternalPlugin.CheckDlc:
-                    break;
                 case ExternalPlugin.EmuLibrary:
-                    break;
+                    return "EmuLibrary";
+
+                case ExternalPlugin.None:
+                case ExternalPlugin.SuccessStory:
+                case ExternalPlugin.CheckDlc:
 
                 default:
-                    break;
+                    return PluginId.ToString();
             }
-
-            return string.Empty;
         }
 
         public static string GetSourceBySourceIdOrPlatformId(Guid SourceId, List<Guid> PlatformsIds)

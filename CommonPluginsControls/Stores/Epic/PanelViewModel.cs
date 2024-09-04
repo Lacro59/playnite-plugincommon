@@ -16,7 +16,7 @@ namespace CommonPluginsControls.Stores.Epic
     public class PanelViewModel : ObservableObject
     {
         internal IStoreApi StoreApi { get; set; }
-        public AccountInfos User => StoreApi.CurrentAccountInfos;
+        public AccountInfos User => StoreApi?.CurrentAccountInfos;
 
         private bool useAuth = true;
         public bool UseAuth { get => useAuth; set => SetValue(ref useAuth, value); }
