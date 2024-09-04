@@ -9,6 +9,7 @@ using CommonPluginsStores.Epic.Models.Query;
 using CommonPluginsStores.Models;
 using Playnite.SDK;
 using Playnite.SDK.Data;
+using Playnite.SDK.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -637,7 +638,29 @@ namespace CommonPluginsStores.Epic
         }
 
 
-        public string GetProductSlug(string name)
+        public string GetProducSlug(Game game)
+        {
+            string productSlug = string.Empty;
+            string normalizedEpicName = PlayniteTools.NormalizeGameName(game.Name.Replace("'", ""));
+            game.Links?.ForEach(x =>
+            {
+                productSlug = GetProductSlugByUrl(x.Url, normalizedEpicName).IsNullOrEmpty() ? productSlug : GetProductSlugByUrl(x.Url, normalizedEpicName);
+            });
+
+            if (productSlug.IsNullOrEmpty())
+            {
+                productSlug = GetProductSlug(normalizedEpicName);
+            }
+
+            if (productSlug.IsNullOrEmpty())
+            {
+                Logger.Warn($"No ProductSlug for {game.Name}");
+            }
+
+            return productSlug;
+        }
+
+        private string GetProductSlug(string name)
         {
             if (name.IsEqual("warhammer 40 000 mechanicus"))
             {
@@ -682,7 +705,7 @@ namespace CommonPluginsStores.Epic
             return ProductSlug;
         }
 
-        public string GetProductSlugByUrl(string url, string gameName)
+        private string GetProductSlugByUrl(string url, string gameName)
         {
             string ProductSlug = string.Empty;
 
@@ -708,12 +731,12 @@ namespace CommonPluginsStores.Epic
             return ProductSlug;
         }
 
-        public string GetNameSpace(string name)
+        private string GetNameSpace(string name)
         {
             return GetNameSpace(name, string.Empty);
         }
 
-        public string GetNameSpace(string name, string productSlug)
+        private string GetNameSpace(string name, string productSlug)
         {
             string nameSpace = string.Empty;
 
@@ -766,6 +789,16 @@ namespace CommonPluginsStores.Epic
             return nameSpace;
         }
 
+        public string GetNameSpace(Game game)
+        {
+            string productSlug = GetProducSlug(game);
+            string normalizedEpicName = PlayniteTools.NormalizeGameName(game.Name.Replace("'", ""));
+            if (productSlug.IsNullOrEmpty())
+            {
+                return GetNameSpace(normalizedEpicName);
+            }
+            return GetNameSpace(normalizedEpicName, productSlug);
+        }
 
         private bool DlcIsOwned(string productNameSpace, string id)
         {
