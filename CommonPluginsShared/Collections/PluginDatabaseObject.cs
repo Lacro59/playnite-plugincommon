@@ -323,7 +323,7 @@ namespace CommonPluginsShared.Collections
                 }
 
                 itemToAdd.IsSaved = true;
-                Application.Current.Dispatcher?.Invoke(() => Database.Add(itemToAdd), DispatcherPriority.Send);
+                Application.Current.Dispatcher?.Invoke(() => Database?.Add(itemToAdd), DispatcherPriority.Send);
 
                 // If tag system
                 object Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
@@ -360,8 +360,8 @@ namespace CommonPluginsShared.Collections
 
                 itemToUpdate.IsSaved = true;
                 itemToUpdate.DateLastRefresh = DateTime.Now.ToUniversalTime();
-                _ = Database.Items.TryUpdate(itemToUpdate.Id, itemToUpdate, Get(itemToUpdate.Id, true));
-                Application.Current.Dispatcher?.Invoke(() => Database.Update(itemToUpdate), DispatcherPriority.Send);
+                _ = Database?.Items.TryUpdate(itemToUpdate.Id, itemToUpdate, Get(itemToUpdate.Id, true));
+                Application.Current.Dispatcher?.Invoke(() => Database?.Update(itemToUpdate), DispatcherPriority.Send);
 
                 // If tag system
                 object Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
