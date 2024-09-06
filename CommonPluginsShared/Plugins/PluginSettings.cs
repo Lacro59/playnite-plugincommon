@@ -1,0 +1,37 @@
+﻿using Playnite.SDK.Data;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace CommonPluginsShared.Plugins
+{
+    public class PluginSettings : ObservableObject
+    {
+        public bool MenuInExtensions { get; set; } = true;
+
+        public bool EnableTag { get; set; } = false;
+
+        #region Automatic update when updating library
+        public DateTime LastAutoLibUpdateAssetsDownload { get; set; } = DateTime.Now;
+        public bool AutoImport { get; set; } = true;
+        #endregion
+
+        #region Variables exposed for custom themes
+        private bool hasData = false;
+        [DontSerialize]
+        public bool HasData { get => hasData; set => SetValue(ref hasData, value); }
+        #endregion
+
+        [DontSerialize]
+        public PluginState PluginState => new PluginState();
+
+    }
+
+    public class PluginState
+    {
+        public bool SteamIsEnabled => PlayniteTools.IsEnabledPlaynitePlugin(PlayniteTools.GetPluginId(PlayniteTools.ExternalPlugin.SteamLibrary));
+        public bool EpicIsEnabled => PlayniteTools.IsEnabledPlaynitePlugin(PlayniteTools.GetPluginId(PlayniteTools.ExternalPlugin.EpicLibrary)) || PlayniteTools.IsEnabledPlaynitePlugin(PlayniteTools.GetPluginId(PlayniteTools.ExternalPlugin.LegendaryLibrary));
+        public bool GogIsEnabled => PlayniteTools.IsEnabledPlaynitePlugin(PlayniteTools.GetPluginId(PlayniteTools.ExternalPlugin.GogLibrary));
+        public bool OriginIsEnabled => PlayniteTools.IsEnabledPlaynitePlugin(PlayniteTools.GetPluginId(PlayniteTools.ExternalPlugin.OriginLibrary));
+    }
+}
