@@ -793,11 +793,13 @@ namespace CommonPluginsStores.Epic
         {
             string productSlug = GetProducSlug(game);
             string normalizedEpicName = PlayniteTools.NormalizeGameName(game.Name.Replace("'", ""));
-            if (productSlug.IsNullOrEmpty())
+
+            // The search don't find the classic game
+            if (productSlug == "death-stranding")
             {
-                return GetNameSpace(normalizedEpicName);
+                return "f4a904fcef2447439c35c4e6457f3027";
             }
-            return GetNameSpace(normalizedEpicName, productSlug);
+            return productSlug.IsNullOrEmpty() ? GetNameSpace(normalizedEpicName) : GetNameSpace(normalizedEpicName, productSlug);
         }
 
         private bool DlcIsOwned(string productNameSpace, string id)
