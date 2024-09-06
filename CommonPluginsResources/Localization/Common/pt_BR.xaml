@@ -16,8 +16,8 @@
     <!-- Filters -->
 
     <sys:String x:Key="LOCCommonUsedFilteredGames">Jogos filtrados atualmente em uso</sys:String>
-    <sys:String x:Key="LOCCommonDefaultFilters">Restore default filters</sys:String>
-    <sys:String x:Key="LOCCommonSaveFilters">Save current filters</sys:String>
+    <sys:String x:Key="LOCCommonDefaultFilters">Restaurar filtros padrão</sys:String>
+    <sys:String x:Key="LOCCommonSaveFilters">Salvar os filtros atuais</sys:String>
 
     <!-- Transfer plugin data -->
 
@@ -171,9 +171,9 @@ Você quer abrir o diretório?</sys:String>
     <!-- CommonGlobalProgress -->
 
     <sys:String x:Key="LOCCommonGettingData">Baixando dados...</sys:String>
-    <sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games...</sys:String>
-    <sys:String x:Key="LOCCommonGettingInstalledDatas">Downloading data from installed games...</sys:String>
-    <sys:String x:Key="LOCCommonGettingNewDatas">Downloading data from new games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingAllDatas">Baixando dados para todos os jogos...</sys:String>
+    <sys:String x:Key="LOCCommonGettingInstalledDatas">Baixando dados dos jogos instalados...</sys:String>
+    <sys:String x:Key="LOCCommonGettingNewDatas">Baixando dados de novos jogos...</sys:String>
     <sys:String x:Key="LOCCommonAddingAllTag">Adicionando tags para todos os jogos...</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Removendo tags de todos os jogos...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Limpando banco de dados...</sys:String>
