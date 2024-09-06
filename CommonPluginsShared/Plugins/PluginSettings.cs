@@ -16,6 +16,10 @@ namespace CommonPluginsShared.Plugins
         public bool AutoImport { get; set; } = true;
         #endregion
 
+        #region Automatic update when game is installed
+        public bool AutoImportOnInstalled { get; set; } = false;
+        #endregion
+
         #region Variables exposed for custom themes
         private bool hasData = false;
         [DontSerialize]
