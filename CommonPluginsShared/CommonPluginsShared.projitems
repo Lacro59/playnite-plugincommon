@@ -53,6 +53,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)HttpFileCachePlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageSourceManagerPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageTools.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\CheckElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\DataGame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Folder.cs" />

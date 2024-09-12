@@ -1,11 +1,12 @@
-﻿using Playnite.SDK.Data;
+﻿using CommonPluginsShared.Interfaces;
+using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace CommonPluginsShared.Plugins
 {
-    public class PluginSettings : ObservableObject
+    public class PluginSettings : ObservableObject, IPluginSettings
     {
         public bool MenuInExtensions { get; set; } = true;
 
@@ -28,7 +29,6 @@ namespace CommonPluginsShared.Plugins
 
         [DontSerialize]
         public PluginState PluginState => new PluginState();
-
     }
 
     public class PluginState

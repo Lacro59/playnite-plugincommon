@@ -46,6 +46,8 @@ namespace CommonPluginsShared.Collections
 
         public bool TagMissing { get; set; } = false;
 
+        private List<Guid> previousIds { get; set; } = new List<Guid>();
+
 
         protected PluginDatabaseObject(TSettings pluginSettings, string pluginName, string pluginUserDataPath)
         {
@@ -170,69 +172,20 @@ namespace CommonPluginsShared.Collections
             Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(PluginName + " - " + ResourceProvider.GetString("LOCCommonSelectData"), View);
             _ = windowExtension.ShowDialog();
 
-            List<Game> PlayniteDb = View.GetFilteredGames();
-            bool OnlyMissing = View.GetOnlyMissing();
+            List<Game> playniteDb = View.GetFilteredGames();
+            bool onlyMissing = View.GetOnlyMissing();
 
-            if (PlayniteDb == null)
+            if (playniteDb == null)
             {
                 return;
             }
 
-            if (OnlyMissing)
+            if (onlyMissing)
             {
-                PlayniteDb = PlayniteDb.FindAll(x => !Get(x.Id, true).HasData);
+                playniteDb = playniteDb.FindAll(x => !Get(x.Id, true).HasData);
             }
 
-            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonGettingData")}")
-            {
-                Cancelable = true,
-                IsIndeterminate = false
-            };
-
-            _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
-            {
-                try
-                {
-                    Stopwatch stopWatch = new Stopwatch();
-                    stopWatch.Start();
-
-                    a.ProgressMaxValue = PlayniteDb.Count();
-                    string CancelText = string.Empty;
-
-                    PlayniteDb.ForEach(x =>
-                    {
-                        a.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonGettingData")}"
-                            + "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}"
-                            + "\n" + x.Name + (x.Source == null ? string.Empty : $" ({x.Source.Name})");
-
-                        if (a.CancelToken.IsCancellationRequested)
-                        {
-                            CancelText = " canceled";
-                            return;
-                        }
-
-                        Thread.Sleep(100);
-                        try
-                        {
-                            _ = Get(x, false, true);
-                        }
-                        catch (Exception ex)
-                        {
-                            Common.LogError(ex, false, false, PluginName);
-                        }
-
-                        a.CurrentProgressValue++;
-                    });
-
-                    stopWatch.Stop();
-                    TimeSpan ts = stopWatch.Elapsed;
-                    Logger.Info($"Task GetSelectData(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{(double)PlayniteDb.Count()} items");
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, false, PluginName);
-                }
-            }, globalProgressOptions);
+            Refresh(playniteDb.Select(x => x.Id).ToList());
         }
 
 
@@ -422,7 +375,13 @@ namespace CommonPluginsShared.Collections
 
         public virtual void Refresh(List<Guid> ids)
         {
-            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}")
+            Logger.Info("Refresh() started");
+            Refresh(ids, ResourceProvider.GetString("LOCCommonProcessing"));
+        }
+
+        internal virtual void Refresh(List<Guid> ids, string message)
+        {
+            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {message}")
             {
                 Cancelable = true,
                 IsIndeterminate = false
@@ -430,7 +389,6 @@ namespace CommonPluginsShared.Collections
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
             {
-                Logger.Info($"Refresh() started");
                 API.Instance.Database.BeginBufferUpdate();
                 Database.BeginBufferUpdate();
 
@@ -444,7 +402,7 @@ namespace CommonPluginsShared.Collections
                 foreach (Guid id in ids)
                 {
                     Game game = API.Instance.Database.Games.Get(id);
-                    a.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}"
+                    a.Text = $"{PluginName} - {message}"
                         + "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}"
                         + "\n" + game.Name + (game.Source == null ? string.Empty : $" ({game.Source.Name})");
 
@@ -503,133 +461,40 @@ namespace CommonPluginsShared.Collections
 
         public virtual void RefreshInstalled()
         {
-            GlobalProgressOptions options = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonGettingInstalledDatas")}")
-            {
-                Cancelable = true,
-                IsIndeterminate = false
-            };
+            Logger.Info("RefreshInstalled() started");
+            List<Guid> ids = API.Instance.Database.Games.Where(x => x.IsInstalled && !x.Hidden).Select(x => x.Id).ToList();
+            Logger.Info($"RefreshInstalled found {ids.Count} game(s) that need updating");
+            Refresh(ids, ResourceProvider.GetString("LOCCommonGettingInstalledDatas"));
+        }
 
-            _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
-            {
-                API.Instance.Database.BeginBufferUpdate();
-                Database.BeginBufferUpdate();
-
-                Stopwatch stopWatch = new Stopwatch();
-                stopWatch.Start();
-
-                string cancelText = string.Empty;
-
-                List<Game> playniteDb = API.Instance.Database.Games
-                    .Where(x => x.IsInstalled)
-                    .Select(x => x).ToList();
-
-                Logger.Info($"RefreshInstalled found {playniteDb.Count} game(s) that need updating");
-                a.ProgressMaxValue = playniteDb.Count;
-
-                playniteDb.ForEach(x =>
-                {
-                    a.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonGettingInstalledDatas")}"
-                        + "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}"
-                        + "\n" + x.Name + (x.Source == null ? string.Empty : $" ({x.Source.Name})");
-
-                    if (a.CancelToken.IsCancellationRequested)
-                    {
-                        cancelText = " canceled";
-                        return;
-                    }
-
-                    try
-                    {
-                        Thread.Sleep(100);
-                        RefreshNoLoader(x.Id);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, false, true, PluginName);
-                    }
-
-                    a.CurrentProgressValue++;
-                });
-
-                stopWatch.Stop();
-                TimeSpan ts = stopWatch.Elapsed;
-                Logger.Info($"Task RefreshInstalled() - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {playniteDb.Count} items");
-
-                Database.EndBufferUpdate();
-                API.Instance.Database.EndBufferUpdate();
-            }, options);
+        public virtual void RefreshInstalled(List<Guid> ids)
+        {
+            Logger.Info("RefreshInstalled() started");
+            Refresh(ids, ResourceProvider.GetString("LOCCommonGettingInstalledDatas"));
         }
 
         public virtual void RefreshRecent()
         {
-            GlobalProgressOptions options = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonGettingNewDatas")}")
+            Logger.Info("RefreshRecent() started");
+            object Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
+            PropertyInfo propertyInfo = Settings.GetType().GetProperty("LastAutoLibUpdateAssetsDownload");
+            DateTime LastAutoLibUpdateAssetsDownload;
+            if (propertyInfo == null)
             {
-                Cancelable = true,
-                IsIndeterminate = false
-            };
-
-            _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
+                Logger.Warn($"No LastAutoLibUpdateAssetsDownload find");
+                LastAutoLibUpdateAssetsDownload = DateTime.Now.AddMonths(-1);
+            }
+            else
             {
-                API.Instance.Database.BeginBufferUpdate();
-                Database.BeginBufferUpdate();
+                LastAutoLibUpdateAssetsDownload = (DateTime)propertyInfo.GetValue(Settings);
+            }
 
-                Stopwatch stopWatch = new Stopwatch();
-                stopWatch.Start();
-
-                string cancelText = string.Empty;
-
-                object Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
-                PropertyInfo propertyInfo = Settings.GetType().GetProperty("LastAutoLibUpdateAssetsDownload");
-                DateTime LastAutoLibUpdateAssetsDownload;
-                if (propertyInfo == null)
-                {
-                    Logger.Warn($"No LastAutoLibUpdateAssetsDownload find");
-                    LastAutoLibUpdateAssetsDownload = DateTime.Now.AddMonths(-1);
-                }
-                else
-                {
-                    LastAutoLibUpdateAssetsDownload = (DateTime)propertyInfo.GetValue(Settings);
-                }
-
-                List<Game> playniteDb = API.Instance.Database.Games
-                        .Where(x => x.Added != null && x.Added > LastAutoLibUpdateAssetsDownload)
-                        .ToList();
-
-                Logger.Info($"RefreshRecent found {playniteDb.Count} game(s) that need updating");
-                a.ProgressMaxValue = playniteDb.Count;
-
-                playniteDb.ForEach(x =>
-                {
-                    a.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonGettingNewDatas")}"
-                        + "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}"
-                        + "\n" + x.Name + (x.Source == null ? string.Empty : $" ({x.Source.Name})");
-
-                    if (a.CancelToken.IsCancellationRequested)
-                    {
-                        cancelText = " canceled";
-                        return;
-                    }
-
-                    try
-                    {
-                        Thread.Sleep(100);
-                        RefreshNoLoader(x.Id);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, false, true, PluginName);
-                    }
-
-                    a.CurrentProgressValue++;
-                });
-
-                stopWatch.Stop();
-                TimeSpan ts = stopWatch.Elapsed;
-                Logger.Info($"Task RefreshRecent() - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {playniteDb.Count} items");
-
-                Database.EndBufferUpdate();
-                API.Instance.Database.EndBufferUpdate();
-            }, options);
+            List<Guid> ids = API.Instance.Database.Games
+                .Where(x => x.Added != null && x.Added > LastAutoLibUpdateAssetsDownload)
+                .Select(x => x.Id)
+                .ToList();
+            Logger.Info($"RefreshRecent found {ids.Count} game(s) that need updating");
+            Refresh(ids, ResourceProvider.GetString("LOCCommonGettingNewDatas"));
         }
 
 
@@ -1141,13 +1006,30 @@ namespace CommonPluginsShared.Collections
         {
             try
             {
-                e?.UpdatedItems?.ForEach(x =>
+                if (e?.UpdatedItems?.Count > 0)
                 {
-                    if (x.NewData?.Id != null)
+                    e?.UpdatedItems?.ForEach(x =>
                     {
-                        Database.SetGameInfo<T>(x.NewData.Id);
+                        if (x.NewData?.Id != null)
+                        {
+                            Database.SetGameInfo<T>(x.NewData.Id);
+                        }
+                    });
+
+                    // If auto update for installed
+                    object settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
+                    PropertyInfo propertyInfo = settings.GetType().GetProperty("AutoImportOnInstalled");
+                    if (propertyInfo != null && (bool)propertyInfo.GetValue(settings))
+                    {
+                        // Only for a new installation
+                        List<Guid> ids = e.UpdatedItems.Where(x => !x.OldData.IsInstalled & x.NewData.IsInstalled && !previousIds.Contains(x.NewData.Id)).Select(x => x.NewData.Id).ToList();
+                        previousIds = ids;
+                        if (ids?.Count > 0)
+                        {
+                            RefreshInstalled(ids);
+                        }
                     }
-                });
+                }
             }
             catch (Exception ex)
             {
