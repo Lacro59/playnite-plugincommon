@@ -641,7 +641,7 @@ namespace CommonPluginsStores.Epic
         public string GetProducSlug(Game game)
         {
             string productSlug = string.Empty;
-            string normalizedEpicName = PlayniteTools.NormalizeGameName(game.Name.Replace("'", ""));
+            string normalizedEpicName = PlayniteTools.NormalizeGameName(game.Name.Replace("'", "").Replace(",", ""));
             game.Links?.ForEach(x =>
             {
                 productSlug = GetProductSlugByUrl(x.Url, normalizedEpicName).IsNullOrEmpty() ? productSlug : GetProductSlugByUrl(x.Url, normalizedEpicName);
