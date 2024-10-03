@@ -57,7 +57,7 @@ namespace CommonPluginsStores.Steam
         private static string UrlWishlistRemove => UrlStore + @"/api/removefromwishlist";
 
         private static string UrlApiGameDetails => UrlStore + @"/api/appdetails?appids={0}&l={1}";
-        private static string UrlSteamGame => UrlApi + @"/app/{0}/?l={1}";
+        private static string UrlSteamGame => UrlStore + @"/app/{0}/?l={1}";
         #endregion
 
         protected List<SteamApp> steamApps;
