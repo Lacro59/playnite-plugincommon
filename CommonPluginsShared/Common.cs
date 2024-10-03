@@ -225,14 +225,7 @@ namespace CommonPluginsShared
 
             if (Message.IsNullOrEmpty())
             {
-                if (!traceInfos.InitialCaller.IsNullOrEmpty())
-                {
-                    Message = $"Error on {traceInfos.InitialCaller}()";
-                }
-                else
-                {
-                    Message = $"Error on ???";
-                }
+                Message = !traceInfos.InitialCaller.IsNullOrEmpty() ? $"Error on {traceInfos.InitialCaller}()" : $"Error on ???";
             }
             else
             {
@@ -257,7 +250,7 @@ namespace CommonPluginsShared
             }
 #endif
 
-            if (ShowNotification)
+            if (ShowNotification && !IsIgnored)
             {
                 API.Instance.Notifications.Add(new NotificationMessage(
                      $"{PluginName}-{new Guid()}",

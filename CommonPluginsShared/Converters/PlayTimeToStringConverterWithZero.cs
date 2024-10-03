@@ -51,6 +51,9 @@ namespace CommonPluginsShared.Converters
 
                 case PlayTimeFormat.OnlyHour:
                     return string.Format(ResourceProvider.GetString("LOCPlayedHoursOnly"), time.TotalHours.ToString("0.##"));
+
+                case PlayTimeFormat.RoundHour:
+                    return string.Format(ResourceProvider.GetString("LOCPlayedHoursOnly"), Math.Round(time.TotalHours * 2, MidpointRounding.AwayFromZero) / 2);
             }
 
             return string.Empty;
@@ -65,6 +68,6 @@ namespace CommonPluginsShared.Converters
 
     public enum PlayTimeFormat
     {
-        OnlyHour, DefaultFormat
+        OnlyHour, RoundHour, DefaultFormat
     }
 }

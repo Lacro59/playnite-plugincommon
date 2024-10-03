@@ -792,7 +792,7 @@ namespace CommonPluginsStores.Epic
         public string GetNameSpace(Game game)
         {
             string productSlug = GetProducSlug(game);
-            string normalizedEpicName = PlayniteTools.NormalizeGameName(game.Name.Replace("'", ""));
+            string normalizedEpicName = PlayniteTools.NormalizeGameName(game.Name.Replace("'", "").Replace(",", ""));
 
             // The search don't find the classic game
             if (productSlug == "death-stranding")

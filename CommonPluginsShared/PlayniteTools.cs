@@ -499,7 +499,7 @@ namespace CommonPluginsShared
                 case ExternalPlugin.CheckDlc:
 
                 default:
-                    return PluginId.ToString();
+                    return string.Empty;
             }
         }
 
