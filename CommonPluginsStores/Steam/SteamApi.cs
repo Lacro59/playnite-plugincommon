@@ -1037,6 +1037,7 @@ namespace CommonPluginsStores.Steam
 
         private ObservableCollection<GameAchievement> GetAchievementsByApi(uint appId, AccountInfos accountInfos, ObservableCollection<GameAchievement> gameAchievements)
         {
+            Logger.Info($"GetAchievementsByApi()");
             if (appId > 0 && ulong.TryParse(accountInfos.UserId, out ulong steamId) && !currentAccountInfos.ApiKey.IsNullOrEmpty())
             {
                 List<SteamPlayerAchievement> steamPlayerAchievements = SteamKit.GetPlayerAchievements(currentAccountInfos.ApiKey, appId, steamId, CodeLang.GetSteamLang(Local));
@@ -1075,6 +1076,7 @@ namespace CommonPluginsStores.Steam
 
         private ObservableCollection<GameAchievement> GetAchievementsByWeb(uint appId, AccountInfos accountInfos, ObservableCollection<GameAchievement> gameAchievements)
         {
+            Logger.Info($"GetAchievementsByWeb()");
             string lang = "english";
             bool needLocalized = false;
             DateTime[] unlockedDates = null;
