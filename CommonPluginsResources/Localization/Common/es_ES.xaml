@@ -16,8 +16,8 @@
     <!-- Filters -->
 
     <sys:String x:Key="LOCCommonUsedFilteredGames">Juegos filtrados usados actualmente</sys:String>
-    <sys:String x:Key="LOCCommonDefaultFilters">Restore default filters</sys:String>
-    <sys:String x:Key="LOCCommonSaveFilters">Save current filters</sys:String>
+    <sys:String x:Key="LOCCommonDefaultFilters">Restaurar filtros por defecto</sys:String>
+    <sys:String x:Key="LOCCommonSaveFilters">Guardar filtros actuales</sys:String>
 
     <!-- Transfer plugin data -->
 
@@ -41,13 +41,13 @@
     <sys:String x:Key="LOCCommonAccountName">Nombre de la cuenta</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Comprobando el estado de la autenticación…</sys:String>
     <sys:String x:Key="LOCCommonPrivateChecking">Comprobando el estado de privacidad…</sys:String>
-    <sys:String x:Key="LOCCommonNotLoggedInError">Failed to authenticate user</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedInError">Fallo al autenticar usuario</sys:String>
 
-    <sys:String x:Key="LOCCommonAccountConfiguration">Account configuration</sys:String>
-    <sys:String x:Key="LOCCommonIsPrivate">Is private</sys:String>
-    <sys:String x:Key="LOCCommonHasApiKey">Has api key</sys:String>
-    <sys:String x:Key="LOCCommonControlConfiguration">Control configuration</sys:String>
-    <sys:String x:Key="LOCCommonGetAccountID">Get account ID</sys:String>
+    <sys:String x:Key="LOCCommonAccountConfiguration">Configuracion de cuenta</sys:String>
+    <sys:String x:Key="LOCCommonIsPrivate">Es privado</sys:String>
+    <sys:String x:Key="LOCCommonHasApiKey">Tiene clave api</sys:String>
+    <sys:String x:Key="LOCCommonControlConfiguration">Configuración de control</sys:String>
+    <sys:String x:Key="LOCCommonGetAccountID">Obtener ID de cuenta</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: El usuario no está autenticado</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: No hay clave API</sys:String>
@@ -87,8 +87,8 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">Orden predeterminado de lista de juegos</sys:String>
 
-    <sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated (only new)</sys:String>
-    <sys:String x:Key="LOCCommonAutoImportOnInstalled">Automatically import for installed games</sys:String>
+    <sys:String x:Key="LOCCommonAutoImport">Importar automáticamente datos cuando la biblioteca se actualiza (solo nuevos)</sys:String>
+    <sys:String x:Key="LOCCommonAutoImportOnInstalled">Importar automáticamente para juegos instalados</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">Ocultar opciones de gráfico en control</sys:String>
     <sys:String x:Key="LOCCommonChartAllPeriod">Mostrar todos los datos en el gráfico por defecto</sys:String>
@@ -171,9 +171,9 @@
     <!-- CommonGlobalProgress -->
 
     <sys:String x:Key="LOCCommonGettingData">Descargando datos...</sys:String>
-    <sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games...</sys:String>
-    <sys:String x:Key="LOCCommonGettingInstalledDatas">Downloading data from installed games...</sys:String>
-    <sys:String x:Key="LOCCommonGettingNewDatas">Downloading data from new games...</sys:String>
+    <sys:String x:Key="LOCCommonGettingAllDatas">Descargando datos para todos los juegos...</sys:String>
+    <sys:String x:Key="LOCCommonGettingInstalledDatas">Descargando datos de juegos instalados...</sys:String>
+    <sys:String x:Key="LOCCommonGettingNewDatas">Descargando datos de nuevos juegos...</sys:String>
     <sys:String x:Key="LOCCommonAddingAllTag">Añadiendo etiqueta para todos los juegos...</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Quitando etiqueta de todos los juegos...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Limpiando base de datos...</sys:String>
@@ -200,8 +200,8 @@ Por favor, borre todas las etiquetas en el menú del plugin.</sys:String>
     <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Usar datos guardados para {0} [{1}]
 Debe autenticarse.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">More than 1 data found for {0}.
-Please check the plugin settings.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">Se han encontrado más de 1 datos para {0}.
+Por favor, comprueba la configuración del plugin.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Dimensiones</sys:String>
