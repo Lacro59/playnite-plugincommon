@@ -31,10 +31,7 @@ namespace CommonPluginsStores
         {
             get
             {
-                if (currentAccountInfos == null)
-                {
-                    currentAccountInfos = GetCurrentAccountInfos();
-                }
+                currentAccountInfos = currentAccountInfos ?? GetCurrentAccountInfos();
                 return currentAccountInfos;
             }
 
@@ -46,10 +43,7 @@ namespace CommonPluginsStores
         {
             get
             {
-                if (currentFriendsInfos == null)
-                {
-                    currentFriendsInfos = GetCurrentFriendsInfos();
-                }
+                currentFriendsInfos = currentFriendsInfos ?? GetCurrentFriendsInfos();
                 return currentFriendsInfos;
             }
 
@@ -61,10 +55,7 @@ namespace CommonPluginsStores
         {
             get
             {
-                if (currentGamesInfos == null)
-                {
-                    currentGamesInfos = GetAccountGamesInfos(CurrentAccountInfos);
-                }
+                currentGamesInfos = currentGamesInfos ?? GetAccountGamesInfos(CurrentAccountInfos);
                 return currentGamesInfos;
             }
 
@@ -76,20 +67,18 @@ namespace CommonPluginsStores
         {
             get
             {
+                currentGamesDlcsOwned = currentGamesDlcsOwned ?? LoadGamesDlcsOwned();
+
                 if (currentGamesDlcsOwned == null)
                 {
-                    currentGamesDlcsOwned = LoadGamesDlcsOwned();
-                    if (currentGamesDlcsOwned == null)
+                    currentGamesDlcsOwned = GetGamesDlcsOwned();
+                    if (currentGamesDlcsOwned?.Count > 0)
                     {
-                        currentGamesDlcsOwned = GetGamesDlcsOwned();
-                        if (currentGamesDlcsOwned?.Count > 0)
-                        {
-                            _ = SaveGamesDlcsOwned(currentGamesDlcsOwned);
-                        }
-                        else
-                        {
-                            currentGamesDlcsOwned = LoadGamesDlcsOwned(false);
-                        }
+                        _ = SaveGamesDlcsOwned(currentGamesDlcsOwned);
+                    }
+                    else
+                    {
+                        currentGamesDlcsOwned = LoadGamesDlcsOwned(false);
                     }
                 }
 
@@ -106,13 +95,10 @@ namespace CommonPluginsStores
         {
             get
             {
-                if (isUserLoggedIn == null)
+                isUserLoggedIn = isUserLoggedIn ?? GetIsUserLoggedIn();
+                if ((bool)isUserLoggedIn)
                 {
-                    isUserLoggedIn = GetIsUserLoggedIn();
-                    if ((bool)isUserLoggedIn)
-                    {
-                        _ = SetStoredCookies(GetWebCookies());
-                    }
+                    _ = SetStoredCookies(GetWebCookies());
                 }
                 return (bool)isUserLoggedIn;
             }
@@ -469,7 +455,7 @@ namespace CommonPluginsStores
         {
             try
             {
-                bool IsOwned = CurrentGamesDlcsOwned.Count(x => x.Id.IsEqual(id)) != 0;
+                bool IsOwned = CurrentGamesDlcsOwned?.Count(x => x.Id.IsEqual(id)) > 0;
                 return IsOwned;
             }
             catch (Exception ex)
