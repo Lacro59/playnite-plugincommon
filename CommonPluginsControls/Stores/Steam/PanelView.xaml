@@ -14,6 +14,7 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <converters:InvertedBoolenConverter x:Key="InvertedBoolenConverter" />
         <converters:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
+        <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter" />
     </UserControl.Resources>
     
     <Expander Loaded="Expander_Loaded">
@@ -50,7 +51,7 @@
 
                         <Image Grid.Column="4" Source="{Binding User.Avatar, IsAsync=True}" Height="32" Width="32" HorizontalAlignment="Left" />
 
-                        <TextBlock Grid.Column="6" Visibility="{Binding User.Pseudo, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}">
+                        <TextBlock Grid.Column="6">
                             <TextBlock.Tag>
                                 <PriorityBinding>
                                     <Binding Path="User.AccountStatus" IsAsync="True" FallbackValue="{x:Static stores:AccountStatus.Checking}" />
@@ -60,6 +61,7 @@
 
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+                                    <Setter Property="Visibility" Value="{Binding User.Pseudo, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}" />
                                     <Style.Triggers>
                                         <Trigger Property="Tag" Value="{x:Static stores:AccountStatus.Private}">
                                             <Setter Property="Text" Value="{DynamicResource LOCSteamPrivateAccount}" />
@@ -77,7 +79,8 @@
                     </Grid>
 
                     <!-- Configuration -->
-                    <GroupBox Header="{DynamicResource LOCCommonAccountConfiguration}" Padding="5" Margin="0,0,0,10">
+                    <GroupBox Header="{DynamicResource LOCCommonAccountConfiguration}" Padding="5" Margin="0,0,0,10"
+                              Visibility="{Binding ForceAuth, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -149,14 +152,34 @@
                                 </TextBlock>
                             </StackPanel>
 
-                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
-                                        IsEnabled="{Binding ElementName=PART_IsPrivate, Path=IsChecked, Converter={StaticResource InvertedBoolenConverter}}">
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                <StackPanel.Style>
+                                    <Style TargetType="{x:Type StackPanel}">
+                                        <Setter Property="IsEnabled" Value="{Binding ElementName=PART_IsPrivate, Path=IsChecked, Converter={StaticResource InvertedBoolenConverter}}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ForceAuth}" Value="True">
+                                                <Setter Property="IsEnabled" Value="False" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                
                                 <Label Content="{DynamicResource LOCCommonAccountName}" Width="120" VerticalAlignment="Center" Margin="0,0,10,0" />
                                 <TextBox Text="{Binding User.Pseudo}" Width="250" TextChanged="TextBox_TextChanged" />
                             </StackPanel>
 
-                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
-                                        IsEnabled="{Binding ElementName=PART_IsPrivate, Path=IsChecked, Converter={StaticResource InvertedBoolenConverter}}">
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                <StackPanel.Style>
+                                    <Style TargetType="{x:Type StackPanel}">
+                                        <Setter Property="IsEnabled" Value="{Binding ElementName=PART_IsPrivate, Path=IsChecked, Converter={StaticResource InvertedBoolenConverter}}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ForceAuth}" Value="True">
+                                                <Setter Property="IsEnabled" Value="False" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                
                                 <Label Content="{DynamicResource LOCSteamAccountID}" Width="120" VerticalAlignment="Center" Margin="0,0,10,0" />
                                 <TextBox Text="{Binding User.UserId}" Width="250" Margin="0,0,10,0" TextChanged="TextBox_TextChanged" />
                                 <TextBlock VerticalAlignment="Center">
@@ -170,6 +193,7 @@
 
                             <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
                                         Visibility="{Binding ElementName=PART_HasApiKey, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+
                                 <Label Content="{DynamicResource LOCSteamAPIKey}" Width="120" VerticalAlignment="Center" Margin="0,0,10,0" />
                                 <PasswordBox local:PasswordBoxAssistant.BindPassword="True" Width="300" Margin="0,0,10,0"
                                              local:PasswordBoxAssistant.BoundPassword="{Binding User.ApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=150}" />

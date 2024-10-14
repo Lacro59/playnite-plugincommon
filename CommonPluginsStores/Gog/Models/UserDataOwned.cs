@@ -2,7 +2,7 @@
 
 namespace CommonPluginsStores.Gog.Models
 {
-    class UserDataOwned
+    public class UserDataOwned
     {
         public List<int> owned { get; set; }
     }

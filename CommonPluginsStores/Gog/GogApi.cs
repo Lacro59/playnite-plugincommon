@@ -1,9 +1,11 @@
 ﻿using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
+using CommonPlayniteShared.Common;
 using CommonPlayniteShared.PluginLibrary.GogLibrary.Models;
 using CommonPlayniteShared.PluginLibrary.Services.GogLibrary;
 using CommonPluginsShared;
+using CommonPluginsShared.Converters;
 using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Models;
 using CommonPluginsStores.Gog.Models;
@@ -13,6 +15,8 @@ using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -57,9 +61,27 @@ namespace CommonPluginsStores.Gog
         private static string UrlApiRemoveWishlist => UrlEmbed + @"/user/wishlist/remove/{0}";
         #endregion
 
+        private string FileUserDataOwned { get; }
 
         protected static readonly Lazy<GogAccountClient> gogAPI = new Lazy<GogAccountClient>(() => new GogAccountClient(API.Instance.WebViews.CreateOffscreenView()));
         internal static GogAccountClient GogAPI => gogAPI.Value;
+
+
+        private UserDataOwned UserDataOwned
+        {
+            get
+            {
+                try
+                {
+                    return LoadUserDataOwned() ?? GetUserDataOwnedData() ?? LoadUserDataOwned(false);
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, ClientName, true, PluginName);
+                    return null;
+                }
+            }
+        }
 
 
         private string UserId { get; set; }
@@ -70,7 +92,7 @@ namespace CommonPluginsStores.Gog
 
         public GogApi(string PluginName) : base(PluginName, ExternalPlugin.GogLibrary, "GOG")
         {
-
+            FileUserDataOwned = Path.Combine(PathStoresData, "GOG_UserDataOwned.json");
         }
 
         #region Configuration
@@ -665,9 +687,6 @@ namespace CommonPluginsStores.Gog
             try
             {
                 ObservableCollection<GameDlcOwned> GamesDlcsOwned = new ObservableCollection<GameDlcOwned>();
-                string data = Web.DownloadStringData(UrlUserOwned, AuthToken.Token).GetAwaiter().GetResult();
-                UserDataOwned UserDataOwned = Serialization.FromJson<UserDataOwned>(data);
-
                 UserDataOwned?.owned?.ForEach(x =>
                 {
                     GamesDlcsOwned.Add(new GameDlcOwned { Id = x.ToString() });
@@ -684,6 +703,75 @@ namespace CommonPluginsStores.Gog
 
 
         #region GOG
+        private UserDataOwned LoadUserDataOwned(bool onlyNow = true)
+        {
+            if (File.Exists(FileUserDataOwned))
+            {
+                try
+                {
+                    DateTime dateLastWrite = File.GetLastWriteTime(FileUserDataOwned);
+                    if (onlyNow && dateLastWrite.AddMinutes(5) <= DateTime.Now)
+                    {
+                        return null;
+                    }
+
+                    if (!onlyNow)
+                    {
+                        LocalDateTimeConverter localDateTimeConverter = new LocalDateTimeConverter();
+                        string formatedDateLastWrite = localDateTimeConverter.Convert(dateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
+                        Logger.Warn($"Use saved UserDataOwned - {formatedDateLastWrite}");
+                        API.Instance.Notifications.Add(new NotificationMessage(
+                            $"{PluginName}-gog-saveddata",
+                            $"{PluginName}" + Environment.NewLine
+                                + string.Format(ResourceProvider.GetString("LOCCommonNotificationOldData"), ClientName, formatedDateLastWrite),
+                            NotificationType.Info
+                        ));
+                    }
+
+                    return Serialization.FromJsonFile<UserDataOwned>(FileUserDataOwned);
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, true, PluginName);
+                }
+            }
+
+            return null;
+        }
+
+        private UserDataOwned GetUserDataOwnedData()
+        {
+            try
+            {
+                string data = Web.DownloadStringData(UrlUserOwned, AuthToken.Token).GetAwaiter().GetResult();
+                if (Serialization.TryFromJson(data, out UserDataOwned userDataOwned))
+                {
+                    SaveUserDataOwned(userDataOwned);
+                }
+                else
+                {
+                    userDataOwned = LoadUserDataOwned(false);
+                }
+                return userDataOwned;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return null;
+            }
+        }
+
+        private void SaveUserDataOwned(UserDataOwned userDataOwned)
+        {
+            if (userDataOwned?.owned?.Count == 0)
+            {
+                return;
+            }
+
+            FileSystem.PrepareSaveFile(FileUserDataOwned);
+            File.WriteAllText(FileUserDataOwned, Serialization.ToJson(userDataOwned));
+        }
+
         private PriceData GetPrice(List<string> ids, string Local, StoreCurrency LocalCurrency)
         {
             string joined = string.Join(",", ids);

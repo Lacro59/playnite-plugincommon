@@ -404,7 +404,7 @@ namespace CommonPluginsShared.Collections
                     Game game = API.Instance.Database.Games.Get(id);
                     a.Text = $"{PluginName} - {message}"
                         + "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}"
-                        + "\n" + game.Name + (game.Source == null ? string.Empty : $" ({game.Source.Name})");
+                        + "\n" + game?.Name + (game?.Source == null ? string.Empty : $" ({game?.Source.Name})");
 
                     if (a.CancelToken.IsCancellationRequested)
                     {
@@ -741,7 +741,7 @@ namespace CommonPluginsShared.Collections
                     {
                         a.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonAddingAllTag")}"
                             + "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}"
-                            + "\n" + game.Name + (game.Source == null ? string.Empty : $" ({game.Source.Name})");
+                            + "\n" + game?.Name + (game?.Source == null ? string.Empty : $" ({game?.Source.Name})");
 
                         if (a.CancelToken.IsCancellationRequested)
                         {
@@ -819,7 +819,7 @@ namespace CommonPluginsShared.Collections
                     {
                         a.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonAddingAllTag")}"
                             + "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}"
-                            + "\n" + game.Name + (game.Source == null ? string.Empty : $" ({game.Source.Name})");
+                            + "\n" + game?.Name + (game?.Source == null ? string.Empty : $" ({game?.Source.Name})");
 
                         if (a.CancelToken.IsCancellationRequested)
                         {
@@ -929,7 +929,7 @@ namespace CommonPluginsShared.Collections
                     {
                         a.Text = message 
                             + "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}"
-                            + "\n" + game.Name + (game.Source == null ? string.Empty : $" ({game.Source.Name})");
+                            + "\n" + game?.Name + (game?.Source == null ? string.Empty : $" ({game?.Source.Name})");
 
                         if (a.CancelToken.IsCancellationRequested)
                         {

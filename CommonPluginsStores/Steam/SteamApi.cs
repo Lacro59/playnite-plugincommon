@@ -90,30 +90,20 @@ namespace CommonPluginsStores.Steam
             set => steamApps = value;
         }
 
-        private SteamUserData userData = null;
-        public SteamUserData UserData
+        private SteamUserData UserData
         {
             get
             {
-                if (userData == null)
+                try
                 {
-                    try
-                    {
-                        userData = LoadUserData(true);
-                        if (userData == null)
-                        {
-                            userData = GetUserData();
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, false, ClientName, true, PluginName);
-                    }
+                    return LoadUserData() ?? GetUserData() ?? LoadUserData(false);
                 }
-                return userData;
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, ClientName, true, PluginName);
+                    return null;
+                }
             }
-
-            set => userData = value;
         }
 
         #region Paths
@@ -154,6 +144,12 @@ namespace CommonPluginsStores.Steam
             if (CurrentAccountInfos == null)
             {
                 return false;
+            }
+
+            if (ForceAuth)
+            {
+                SteamUserData userData = GetUserData();
+                return userData?.RgOwnedApps?.Count > 0;
             }
 
             Task<bool> withId = IsProfilePublic(string.Format(UrlProfileById, CurrentAccountInfos.UserId), GetStoredCookies());
@@ -884,22 +880,22 @@ namespace CommonPluginsStores.Steam
         }
 
 
-        private SteamUserData LoadUserData(bool OnlyNow = false)
+        private SteamUserData LoadUserData(bool onlyNow = true)
         {
             if (File.Exists(FileUserData))
             {
                 try
                 {
-                    DateTime DateLastWrite = File.GetLastWriteTime(FileUserData);
-                    if (OnlyNow && !(DateLastWrite.ToString("yyyy-MM-dd") == DateTime.Now.ToString("yyyy-MM-dd")))
+                    DateTime dateLastWrite = File.GetLastWriteTime(FileUserData);
+                    if (onlyNow && dateLastWrite.AddMinutes(5) <= DateTime.Now)
                     {
                         return null;
                     }
 
-                    if (!OnlyNow)
+                    if (!onlyNow)
                     {
                         LocalDateTimeConverter localDateTimeConverter = new LocalDateTimeConverter();
-                        string formatedDateLastWrite = localDateTimeConverter.Convert(DateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
+                        string formatedDateLastWrite = localDateTimeConverter.Convert(dateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
                         Logger.Warn($"Use saved UserData - {formatedDateLastWrite}");
                         API.Instance.Notifications.Add(new NotificationMessage(
                             $"{PluginName}-steam-saveddata",
@@ -922,21 +918,24 @@ namespace CommonPluginsStores.Steam
 
         private SteamUserData GetUserData()
         {
-            using (IWebView WebViewOffscreen = API.Instance.WebViews.CreateOffscreenView())
+            try
             {
-                WebViewOffscreen.NavigateAndWait(UrlUserData);
-                WebViewOffscreen.NavigateAndWait(UrlUserData);
-
-                string data = WebViewOffscreen.GetPageText();
-                if (Serialization.TryFromJson(data, out SteamUserData userData))
+                List<HttpCookie> cookies = GetStoredCookies();
+                string resultWeb = Web.DownloadStringData(UrlUserData, cookies, Web.UserAgent, true).GetAwaiter().GetResult();
+                if (Serialization.TryFromJson(resultWeb, out SteamUserData userData))
                 {
                     SaveUserData(userData);
                 }
                 else
                 {
-                    userData = LoadUserData();
+                    userData = LoadUserData(false);
                 }
                 return userData;
+            }
+            catch (WebException ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return null;
             }
         }
 

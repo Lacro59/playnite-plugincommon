@@ -24,7 +24,6 @@ namespace CommonPluginsStores
     {
         internal static ILogger Logger => LogManager.GetLogger();
 
-
         #region Account data
         protected AccountInfos currentAccountInfos;
         public AccountInfos CurrentAccountInfos
@@ -62,30 +61,14 @@ namespace CommonPluginsStores
             set => SetValue(ref currentGamesInfos, value);
         }
 
-        protected ObservableCollection<GameDlcOwned> currentGamesDlcsOwned;
         public ObservableCollection<GameDlcOwned> CurrentGamesDlcsOwned
         {
             get
             {
-                currentGamesDlcsOwned = currentGamesDlcsOwned ?? LoadGamesDlcsOwned();
-
-                if (currentGamesDlcsOwned == null)
-                {
-                    currentGamesDlcsOwned = GetGamesDlcsOwned();
-                    if (currentGamesDlcsOwned?.Count > 0)
-                    {
-                        _ = SaveGamesDlcsOwned(currentGamesDlcsOwned);
-                    }
-                    else
-                    {
-                        currentGamesDlcsOwned = LoadGamesDlcsOwned(false);
-                    }
-                }
-
+                ObservableCollection<GameDlcOwned> currentGamesDlcsOwned = LoadGamesDlcsOwned() ?? GetGamesDlcsOwned() ?? LoadGamesDlcsOwned(false);
+                _ = SaveGamesDlcsOwned(currentGamesDlcsOwned);
                 return currentGamesDlcsOwned;
             }
-
-            set => SetValue(ref currentGamesDlcsOwned, value);
         }
         #endregion
 
@@ -106,7 +89,7 @@ namespace CommonPluginsStores
             set => SetValue(ref isUserLoggedIn, value);
         }
 
-        public bool ForceAuth { get; set; } = false;
+        internal bool ForceAuth { get; set; } = false;
 
         internal string PluginName { get; }
         internal string ClientName { get; }
@@ -388,22 +371,22 @@ namespace CommonPluginsStores
 
 
         #region Games owned
-        private ObservableCollection<GameDlcOwned> LoadGamesDlcsOwned(bool OnlyNow = true)
+        private ObservableCollection<GameDlcOwned> LoadGamesDlcsOwned(bool onlyNow = true)
         {
             if (File.Exists(FileGamesDlcsOwned))
             {
                 try
                 {
-                    DateTime DateLastWrite = File.GetLastWriteTime(FileGamesDlcsOwned);
-                    if (OnlyNow && !DateLastWrite.ToString("yyyy-MM-dd").IsEqual(DateTime.Now.ToString("yyyy-MM-dd")))
+                    DateTime dateLastWrite = File.GetLastWriteTime(FileGamesDlcsOwned);
+                    if (onlyNow && dateLastWrite.AddMinutes(5) <= DateTime.Now)
                     {
                         return null;
                     }
 
-                    if (!OnlyNow)
+                    if (!onlyNow)
                     {
                         LocalDateTimeConverter localDateTimeConverter = new LocalDateTimeConverter();
-                        string formatedDateLastWrite = localDateTimeConverter.Convert(DateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
+                        string formatedDateLastWrite = localDateTimeConverter.Convert(dateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
                         Logger.Warn($"Use saved UserData - {formatedDateLastWrite}");
                         API.Instance.Notifications.Add(new NotificationMessage(
                             $"{PluginName}-{ClientNameLog}-LoadGamesDlcsOwned",
