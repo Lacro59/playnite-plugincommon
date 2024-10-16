@@ -34,9 +34,9 @@ namespace CommonPluginsShared.Interfaces
 
 
         void Refresh(Guid Id);
-        void Refresh(List<Guid> Ids);
+        void Refresh(IEnumerable<Guid> Ids);
 
-        void RefreshWithNoData(List<Guid> Ids);
+        void RefreshWithNoData(IEnumerable<Guid> Ids);
 
         List<Game> GetGamesWithNoData();
     }

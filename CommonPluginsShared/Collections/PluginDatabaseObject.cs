@@ -36,17 +36,18 @@ namespace CommonPluginsShared.Collections
         public Game GameContext { get; set; }
 
         protected string TagBefore { get; set; } = string.Empty;
-        protected List<Tag> PluginTags { get; set; } = new List<Tag>();
+
+        protected IEnumerable<Tag> PluginTags => GetPluginTags();
 
 
-        private bool isLoaded = false;
-        public bool IsLoaded { get => isLoaded; set => SetValue(ref isLoaded, value); }
+        private bool _isLoaded = false;
+        public bool IsLoaded { get => _isLoaded; set => SetValue(ref _isLoaded, value); }
 
         public bool IsViewOpen = false;
 
         public bool TagMissing { get; set; } = false;
 
-        private List<Guid> previousIds { get; set; } = new List<Guid>();
+        private IEnumerable<Guid> PreviousIds { get; set; } = new List<Guid>();
 
 
         protected PluginDatabaseObject(TSettings pluginSettings, string pluginName, string pluginUserDataPath)
@@ -285,7 +286,7 @@ namespace CommonPluginsShared.Collections
                 if (propertyInfo != null && (bool)propertyInfo.GetValue(Settings))
                 {
                     Common.LogDebug(true, $"RemoveTag & AddTag for {itemToAdd.Name} with {itemToAdd.Id}");
-                    RemoveTag(itemToAdd.Id, true);
+                    RemoveTag(itemToAdd.Id);
                     AddTag(itemToAdd.Id);
                 }
             }
@@ -323,7 +324,7 @@ namespace CommonPluginsShared.Collections
                 if (propertyInfo != null && (bool)propertyInfo.GetValue(Settings))
                 {
                     Common.LogDebug(true, $"RemoveTag & AddTag for {itemToUpdate.Name} with {itemToUpdate.Id}");
-                    RemoveTag(itemToUpdate.Id, true);
+                    RemoveTag(itemToUpdate.Id);
                     AddTag(itemToUpdate.Id);
                 }
             }
@@ -373,13 +374,13 @@ namespace CommonPluginsShared.Collections
             }, globalProgressOptions);
         }
 
-        public virtual void Refresh(List<Guid> ids)
+        public virtual void Refresh(IEnumerable<Guid> ids)
         {
             Logger.Info("Refresh() started");
             Refresh(ids, ResourceProvider.GetString("LOCCommonProcessing"));
         }
 
-        internal virtual void Refresh(List<Guid> ids, string message)
+        internal virtual void Refresh(IEnumerable<Guid> ids, string message)
         {
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {message}")
             {
@@ -395,7 +396,7 @@ namespace CommonPluginsShared.Collections
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
 
-                a.ProgressMaxValue = ids.Count;
+                a.ProgressMaxValue = ids.Count();
 
                 string CancelText = string.Empty;
 
@@ -427,7 +428,7 @@ namespace CommonPluginsShared.Collections
 
                 stopWatch.Stop();
                 TimeSpan ts = stopWatch.Elapsed;
-                Logger.Info($"Task Refresh(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{ids.Count} items");
+                Logger.Info($"Task Refresh(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{ids.Count()} items");
 
                 Database.EndBufferUpdate();
                 API.Instance.Database.EndBufferUpdate();
@@ -454,7 +455,7 @@ namespace CommonPluginsShared.Collections
             ActionAfterRefresh(webItem);
         }
 
-        public virtual void RefreshWithNoData(List<Guid> ids)
+        public virtual void RefreshWithNoData(IEnumerable<Guid> ids)
         {
             Refresh(ids);
         }
@@ -467,7 +468,7 @@ namespace CommonPluginsShared.Collections
             Refresh(ids, ResourceProvider.GetString("LOCCommonGettingInstalledDatas"));
         }
 
-        public virtual void RefreshInstalled(List<Guid> ids)
+        public virtual void RefreshInstalled(IEnumerable<Guid> ids)
         {
             Logger.Info("RefreshInstalled() started");
             Refresh(ids, ResourceProvider.GetString("LOCCommonGettingInstalledDatas"));
@@ -489,11 +490,10 @@ namespace CommonPluginsShared.Collections
                 LastAutoLibUpdateAssetsDownload = (DateTime)propertyInfo.GetValue(Settings);
             }
 
-            List<Guid> ids = API.Instance.Database.Games
+            IEnumerable<Guid> ids = API.Instance.Database.Games
                 .Where(x => x.Added != null && x.Added > LastAutoLibUpdateAssetsDownload)
-                .Select(x => x.Id)
-                .ToList();
-            Logger.Info($"RefreshRecent found {ids.Count} game(s) that need updating");
+                .Select(x => x.Id);
+            Logger.Info($"RefreshRecent found {ids.Count()} game(s) that need updating");
             Refresh(ids, ResourceProvider.GetString("LOCCommonGettingNewDatas"));
         }
 
@@ -520,7 +520,7 @@ namespace CommonPluginsShared.Collections
             return Database.Items.ContainsKey(id) && (bool)Application.Current.Dispatcher?.Invoke(() => { return Database.Remove(id); }, DispatcherPriority.Send);
         }
 
-        public virtual bool Remove(List<Guid> ids)
+        public virtual bool Remove(IEnumerable<Guid> ids)
         {
             Logger.Info($"Remove() started");
             API.Instance.Database.Games.BeginBufferUpdate();
@@ -620,35 +620,32 @@ namespace CommonPluginsShared.Collections
 
 
         #region Tag system
-        public void GetPluginTags()
+        private IEnumerable<Tag> GetPluginTags()
         {
-            PluginTags = new List<Tag>();
+            IEnumerable<Tag> PluginTags = new List<Tag>();
             if (!TagBefore.IsNullOrEmpty())
             {
                 PluginTags = API.Instance.Database.Tags?.Where(x => (bool)x.Name?.StartsWith(TagBefore))?.ToList() ?? new List<Tag>();
             }
+            return PluginTags;
         }
 
         internal Guid? CheckTagExist(string tagName)
         {
             string completTagName = TagBefore.IsNullOrEmpty() ? tagName : TagBefore + " " + tagName;
-
-            Guid? findGoodPluginTags = PluginTags.Find(x => x.Name == completTagName)?.Id;
+            Guid? findGoodPluginTags = PluginTags.FirstOrDefault(x => x.Name == completTagName)?.Id;
             if (findGoodPluginTags == null)
             {
                 API.Instance.Database.Tags.Add(new Tag { Name = completTagName });
-                GetPluginTags();
-                findGoodPluginTags = PluginTags.Find(x => x.Name == completTagName).Id;
+                findGoodPluginTags = PluginTags.FirstOrDefault(x => x.Name == completTagName).Id;
             }
             return findGoodPluginTags;
         }
 
 
-        public virtual void AddTag(Game game, bool noUpdate = false)
+        public virtual void AddTag(Game game)
         {
-            GetPluginTags();
             TItem item = Get(game, true);
-
             if (item.HasData)
             {
                 try
@@ -664,20 +661,12 @@ namespace CommonPluginsShared.Collections
                         {
                             game.TagIds = new List<Guid> { (Guid)TagId };
                         }
-
-                        if (!noUpdate)
-                        {
-                            Application.Current.Dispatcher?.Invoke(() =>
-                            {
-                                API.Instance.Database.Games.Update(game);
-                                game.OnPropertyChanged();
-                            }, DispatcherPriority.Send);
-                        }
                     }
                 }
                 catch (Exception ex)
                 {
                     Common.LogError(ex, false, $"Tag insert error with {game.Name}", true, PluginName, string.Format(ResourceProvider.GetString("LOCCommonNotificationTagError"), game.Name));
+                    return;
                 }
             }
             else if (TagMissing)
@@ -690,32 +679,27 @@ namespace CommonPluginsShared.Collections
                 {
                     game.TagIds = new List<Guid> { (Guid)AddNoDataTag() };
                 }
-
-                if (!noUpdate)
-                {
-                    Application.Current.Dispatcher?.Invoke(() =>
-                    {
-                        API.Instance.Database.Games.Update(game);
-                        game.OnPropertyChanged();
-                    }, DispatcherPriority.Send);
-                }
-
             }
+
+            API.Instance.MainView.UIDispatcher?.Invoke(() =>
+            {
+                API.Instance.Database.Games.Update(game);
+                game.OnPropertyChanged();
+            });
         }
 
-        public void AddTag(Guid id, bool noUpdate = false)
+        public void AddTag(Guid id)
         {
             Game game = API.Instance.Database.Games.Get(id);
             if (game != null)
             {
-                AddTag(game, noUpdate);
+                AddTag(game);
             }
         }
 
-
-        public void AddTagAllGame()
+        public void AddTag(IEnumerable<Guid> ids, string message)
         {
-            GlobalProgressOptions options = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonAddingAllTag")}")
+            GlobalProgressOptions options = new GlobalProgressOptions(message)
             {
                 Cancelable = true,
                 IsIndeterminate = false
@@ -725,21 +709,25 @@ namespace CommonPluginsShared.Collections
             {
                 try
                 {
-                    Logger.Info($"AddTagAllGame() started");
                     API.Instance.Database.BeginBufferUpdate();
                     API.Instance.Database.Games.BeginBufferUpdate();
 
                     Stopwatch stopWatch = new Stopwatch();
                     stopWatch.Start();
 
-                    IEnumerable<Game> playniteDb = API.Instance.Database.Games.Where(x => x.Hidden == false);
-                    a.ProgressMaxValue = playniteDb.Count();
+                    a.ProgressMaxValue = ids.Count();
 
                     string cancelText = string.Empty;
 
-                    foreach (Game game in playniteDb)
+                    foreach (Guid id in ids)
                     {
-                        a.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonAddingAllTag")}"
+                        Game game = API.Instance.Database.Games.Get(id);
+                        if (game == null)
+                        {
+                            continue;
+                        }
+
+                        a.Text = message
                             + "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}"
                             + "\n" + game?.Name + (game?.Source == null ? string.Empty : $" ({game?.Source.Name})");
 
@@ -753,7 +741,7 @@ namespace CommonPluginsShared.Collections
 
                         try
                         {
-                            RemoveTag(game, true);
+                            RemoveTag(game);
                             AddTag(game);
                         }
                         catch (Exception ex)
@@ -766,7 +754,7 @@ namespace CommonPluginsShared.Collections
 
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
-                    Logger.Info($"AddTagAllGame(){cancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{(double)playniteDb.Count()} items");
+                    Logger.Info($"AddTag(){cancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{(double)ids.Count()} items");
                 }
                 catch (Exception ex)
                 {
@@ -780,8 +768,17 @@ namespace CommonPluginsShared.Collections
             }, options);
         }
 
+        public void AddTagAllGame()
+        {
+            Logger.Info($"AddTagAllGame() started");
+            IEnumerable<Guid> ids = API.Instance.Database.Games.Where(x => x.Hidden == false).Select(x => x.Id);
+            AddTag(ids, $"{PluginName} - {ResourceProvider.GetString("LOCCommonAddingAllTag")}");
+        }
+
         public void AddTagSelectData()
         {
+            Logger.Info($"AddTagSelectData() started");
+
             OptionsDownloadData View = new OptionsDownloadData(true);
             Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(PluginName + " - " + ResourceProvider.GetString("LOCCommonSelectGames"), View);
             _ = windowExtension.ShowDialog();
@@ -791,106 +788,35 @@ namespace CommonPluginsShared.Collections
 
             if (playniteDb == null)
             {
+                TagMissing = false;
                 return;
             }
 
-            GlobalProgressOptions options = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonAddingAllTag")}")
-            {
-                Cancelable = true,
-                IsIndeterminate = false
-            };
-
-            _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
-            {
-                try
-                {
-                    Logger.Info($"AddTagSelectData() started");
-                    API.Instance.Database.BeginBufferUpdate();
-                    API.Instance.Database.Games.BeginBufferUpdate();
-
-                    Stopwatch stopWatch = new Stopwatch();
-                    stopWatch.Start();
-
-                    a.ProgressMaxValue = (double)playniteDb.Count();
-
-                    string cancelText = string.Empty;
-
-                    foreach (Game game in playniteDb)
-                    {
-                        a.Text = $"{PluginName} - {ResourceProvider.GetString("LOCCommonAddingAllTag")}"
-                            + "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}"
-                            + "\n" + game?.Name + (game?.Source == null ? string.Empty : $" ({game?.Source.Name})");
-
-                        if (a.CancelToken.IsCancellationRequested)
-                        {
-                            cancelText = " canceled";
-                            break;
-                        }
-
-                        Thread.Sleep(10);
-
-                        try
-                        {
-                            RemoveTag(game, true);
-                            AddTag(game);
-                        }
-                        catch (Exception ex)
-                        {
-                            Common.LogError(ex, false, false, PluginName);
-                        }
-
-                        a.CurrentProgressValue++;
-                    }
-
-                    TagMissing = false;
-
-                    stopWatch.Stop();
-                    TimeSpan ts = stopWatch.Elapsed;
-                    Logger.Info($"AddTagSelectData(){cancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{(double)playniteDb.Count()} items");
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, false, PluginName);
-                }
-                finally
-                {
-                    API.Instance.Database.Games.EndBufferUpdate();
-                    API.Instance.Database.EndBufferUpdate();
-                }
-            }, options);
+            IEnumerable<Guid> ids = playniteDb.Select(x => x.Id);
+            AddTag(ids, $"{PluginName} - {ResourceProvider.GetString("LOCCommonAddingAllTag")}");
+            TagMissing = false;
         }
 
 
-        public void RemoveTag(Game game, bool noUpdate = false)
+        public void RemoveTag(Game game)
         {
             if (game?.TagIds != null)
             {
-                if (PluginTags.Count == 0)
+                game.TagIds = game.TagIds.Where(x => !PluginTags.Any(y => x == y.Id)).ToList();
+                API.Instance.MainView.UIDispatcher?.Invoke(() =>
                 {
-                    GetPluginTags();
-                }
-
-                if (game.TagIds.Where(x => PluginTags.Any(y => x == y.Id)).Count() > 0)
-                {
-                    game.TagIds = game.TagIds.Where(x => !PluginTags.Any(y => x == y.Id)).ToList();
-                    if (!noUpdate)
-                    {
-                        Application.Current.Dispatcher?.Invoke(() =>
-                        {
-                            API.Instance.Database.Games.Update(game);
-                            game.OnPropertyChanged();
-                        }, DispatcherPriority.Send);
-                    }
-                }
+                    API.Instance.Database.Games.Update(game);
+                    game.OnPropertyChanged();
+                });
             }
         }
 
-        public void RemoveTag(Guid id, bool noUpdate = false)
+        public void RemoveTag(Guid id)
         {
             Game game = API.Instance.Database.Games.Get(id);
             if (game != null)
             {
-                RemoveTag(game, noUpdate);
+                RemoveTag(game);
             }
         }
 
@@ -1022,8 +948,8 @@ namespace CommonPluginsShared.Collections
                     if (propertyInfo != null && (bool)propertyInfo.GetValue(settings))
                     {
                         // Only for a new installation
-                        List<Guid> ids = e.UpdatedItems.Where(x => !x.OldData.IsInstalled & x.NewData.IsInstalled && !previousIds.Contains(x.NewData.Id)).Select(x => x.NewData.Id).ToList();
-                        previousIds = ids;
+                        List<Guid> ids = e.UpdatedItems.Where(x => !x.OldData.IsInstalled & x.NewData.IsInstalled && !PreviousIds.Contains(x.NewData.Id)).Select(x => x.NewData.Id).ToList();
+                        PreviousIds = ids;
                         if (ids?.Count > 0)
                         {
                             RefreshInstalled(ids);
