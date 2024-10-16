@@ -55,6 +55,7 @@
     <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: yapılandırma bulunamadı</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Yok sayılan öğeler</sys:String>
+    <sys:String x:Key="LOCCommonNotIgnoredItems">Not ignored items</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">Yok saymak için bir öğe girin</sys:String>
     
     <sys:String x:Key="LOCCommonProgression">İlerleme</sys:String>
