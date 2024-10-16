@@ -55,6 +55,7 @@
     <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: 設定が見つかりません</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">無視した項目</sys:String>
+    <sys:String x:Key="LOCCommonNotIgnoredItems">Not ignored items</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">無視する項目を入力</sys:String>
     
     <sys:String x:Key="LOCCommonProgression">達成度</sys:String>
