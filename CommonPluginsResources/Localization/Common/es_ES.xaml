@@ -55,6 +55,7 @@
     <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: Configuración no encontrada</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Elementos ignorados</sys:String>
+    <sys:String x:Key="LOCCommonNotIgnoredItems">Not ignored items</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">Introduce el elemento para ignorar</sys:String>
     
     <sys:String x:Key="LOCCommonProgression">Progresión</sys:String>
