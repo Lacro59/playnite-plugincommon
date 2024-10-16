@@ -55,6 +55,7 @@
     <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: конфігурацій не знайдено</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Ігноровані елементи</sys:String>
+    <sys:String x:Key="LOCCommonNotIgnoredItems">Не ігноровані елементи</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">Введіть елемент для ігнорування</sys:String>
     
     <sys:String x:Key="LOCCommonProgression">Просування</sys:String>
