@@ -12,7 +12,10 @@
     <sys:String x:Key="LOCCommonAddFilePattern">Dateimuster hinzufügen</sys:String>
 
     <sys:String x:Key="LOCCommonMargin">Abstand</sys:String>
-    
+
+    <sys:String x:Key="LOCCommonExtractToCsv">Extract plugin data to CSV</sys:String>
+    <sys:String x:Key="LOCCommonExtracting">Extracting...</sys:String>
+
     <!-- Filters -->
 
     <sys:String x:Key="LOCCommonUsedFilteredGames">Derzeit gefilterte Spiele verwendet</sys:String>
