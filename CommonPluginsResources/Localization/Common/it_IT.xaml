@@ -12,7 +12,10 @@
     <sys:String x:Key="LOCCommonAddFilePattern">Aggiungi sequenza file</sys:String>
 
     <sys:String x:Key="LOCCommonMargin">Margine</sys:String>
-    
+
+    <sys:String x:Key="LOCCommonExtractToCsv">Estrai i dati del plugin in CSV</sys:String>
+    <sys:String x:Key="LOCCommonExtracting">Estrazione in corso...</sys:String>
+
     <!-- Filters -->
 
     <sys:String x:Key="LOCCommonUsedFilteredGames">Giochi attualmente filtrati usati</sys:String>
