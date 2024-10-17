@@ -124,7 +124,7 @@ namespace CommonPluginsShared.Collections
 
         public virtual bool ClearDatabase()
         {
-            bool IsOk = false;
+            bool IsOk = true;
 
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}")
             {
@@ -134,22 +134,20 @@ namespace CommonPluginsShared.Collections
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
             {
-                try
+                a.ProgressMaxValue = Database.Items.Count();
+                Database.Items.ForEach(x =>
                 {
-                    List<Game> gamesList = GetGamesList();
-                    a.ProgressMaxValue = gamesList.Count();
-                    gamesList.ForEach(x =>
+                    try
                     {
-                        _ = Remove(x);
+                        _ = Remove(x.Key);
                         a.CurrentProgressValue++;
-                    });
-
-                    IsOk = true;
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, true, false, PluginName);
-                }
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, $"Error on {x.Key} - {x.Value.Name}", false, PluginName);
+                        IsOk = false;
+                    }
+                });
 
             }, globalProgressOptions);
 
@@ -158,10 +156,10 @@ namespace CommonPluginsShared.Collections
 
         public virtual void DeleteDataWithDeletedGame()
         {
-            List<KeyValuePair<Guid, TItem>> GamesDeleted = Database.Items.Where(x => API.Instance.Database.Games.Get(x.Key) == null).Select(x => x).ToList();
+            IEnumerable<KeyValuePair<Guid, TItem>> GamesDeleted = Database.Items.Where(x => API.Instance.Database.Games.Get(x.Key) == null).Select(x => x);
             GamesDeleted.ForEach(x =>
             {
-                Logger.Info($"Delete date for missing game: {x.Value.Name} - {x.Key}");
+                Logger.Info($"Delete data for missing game: {x.Value.Name} - {x.Key}");
                 _ = Database.Remove(x.Key);
             });
         }
@@ -186,40 +184,34 @@ namespace CommonPluginsShared.Collections
                 playniteDb = playniteDb.FindAll(x => !Get(x.Id, true).HasData);
             }
 
-            Refresh(playniteDb.Select(x => x.Id).ToList());
+            Refresh(playniteDb.Select(x => x.Id));
         }
 
 
-        public virtual List<Game> GetGamesList()
+        public virtual IEnumerable<Game> GetGamesList()
         {
-            List<Game> GamesList = new List<Game>();
-
             foreach (KeyValuePair<Guid, TItem> item in Database.Items)
             {
                 Game game = API.Instance.Database.Games.Get(item.Key);
-
                 if (game != null)
                 {
-                    GamesList.Add(game);
+                    yield return game;
                 }
             }
-
-            return GamesList;
         }
 
-        public virtual List<Game> GetGamesWithNoData()
+        public virtual IEnumerable<Game> GetGamesWithNoData()
         {
-            List<Game> GamesWithNoData = Database.Items.Where(x => !x.Value.HasData).Select(x => API.Instance.Database.Games.Get(x.Key)).Where(x => x != null).ToList();
-            List<Game> GamesNotInDb = API.Instance.Database.Games.Where(x => !Database.Items.Any(y => y.Key == x.Id)).ToList();
-            List<Game> mergedList = GamesWithNoData.Union(GamesNotInDb).Distinct().ToList();
+            IEnumerable<Game> GamesWithNoData = Database.Items.Where(x => !x.Value.HasData).Select(x => API.Instance.Database.Games.Get(x.Key)).Where(x => x != null);
+            IEnumerable<Game> GamesNotInDb = API.Instance.Database.Games.Where(x => !Database.Items.Any(y => y.Key == x.Id));
+            IEnumerable<Game> mergedList = GamesWithNoData.Union(GamesNotInDb).Distinct();
 
-            mergedList = mergedList.Where(x => !x.Hidden).ToList();
-
+            mergedList = mergedList.Where(x => !x.Hidden);
             return mergedList;
         }
 
 
-        public virtual List<DataGame> GetDataGames()
+        public virtual IEnumerable<DataGame> GetDataGames()
         {
             return Database.Items.Select(x => new DataGame
             {
@@ -228,11 +220,11 @@ namespace CommonPluginsShared.Collections
                 Name = x.Value.Name,
                 IsDeleted = x.Value.IsDeleted,
                 CountData = x.Value.Count
-            }).Distinct().ToList();
+            }).Distinct();
         }
 
 
-        public virtual List<DataGame> GetIsolatedDataGames()
+        public virtual IEnumerable<DataGame> GetIsolatedDataGames()
         {
             return Database.Items.Where(x => x.Value.IsDeleted).Select(x => new DataGame
             {
@@ -241,7 +233,7 @@ namespace CommonPluginsShared.Collections
                 Name = x.Value.Name,
                 IsDeleted = x.Value.IsDeleted,
                 CountData = x.Value.Count
-            }).Distinct().ToList();
+            }).Distinct();
         }
         #endregion
 
@@ -463,8 +455,8 @@ namespace CommonPluginsShared.Collections
         public virtual void RefreshInstalled()
         {
             Logger.Info("RefreshInstalled() started");
-            List<Guid> ids = API.Instance.Database.Games.Where(x => x.IsInstalled && !x.Hidden).Select(x => x.Id).ToList();
-            Logger.Info($"RefreshInstalled found {ids.Count} game(s) that need updating");
+            IEnumerable<Guid> ids = API.Instance.Database.Games.Where(x => x.IsInstalled && !x.Hidden).Select(x => x.Id);
+            Logger.Info($"RefreshInstalled found {ids.Count()} game(s) that need updating");
             Refresh(ids, ResourceProvider.GetString("LOCCommonGettingInstalledDatas"));
         }
 
@@ -517,7 +509,7 @@ namespace CommonPluginsShared.Collections
         public virtual bool Remove(Guid id)
         {
             RemoveTag(id);
-            return Database.Items.ContainsKey(id) && (bool)Application.Current.Dispatcher?.Invoke(() => { return Database.Remove(id); }, DispatcherPriority.Send);
+            return Database.Items.ContainsKey(id) && (bool)API.Instance.MainView.UIDispatcher?.Invoke(() => { return Database.Remove(id); });
         }
 
         public virtual bool Remove(IEnumerable<Guid> ids)
@@ -948,9 +940,9 @@ namespace CommonPluginsShared.Collections
                     if (propertyInfo != null && (bool)propertyInfo.GetValue(settings))
                     {
                         // Only for a new installation
-                        List<Guid> ids = e.UpdatedItems.Where(x => !x.OldData.IsInstalled & x.NewData.IsInstalled && !PreviousIds.Contains(x.NewData.Id)).Select(x => x.NewData.Id).ToList();
+                        IEnumerable<Guid> ids = e.UpdatedItems.Where(x => !x.OldData.IsInstalled & x.NewData.IsInstalled && !PreviousIds.Contains(x.NewData.Id)).Select(x => x.NewData.Id);
                         PreviousIds = ids;
-                        if (ids?.Count > 0)
+                        if (ids?.Count() > 0)
                         {
                             RefreshInstalled(ids);
                         }

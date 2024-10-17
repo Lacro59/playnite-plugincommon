@@ -18,26 +18,26 @@ namespace CommonPluginsShared.Interfaces
         Task<bool> InitializeDatabase();
 
 
-        PluginDataBaseGameBase Get(Game game, bool OnlyCache = false, bool Force = false);
-        PluginDataBaseGameBase Get(Guid Id, bool OnlyCache = false, bool Force = false);
+        PluginDataBaseGameBase Get(Game game, bool onlyCache = false, bool force = false);
+        PluginDataBaseGameBase Get(Guid id, bool onlyCache = false, bool force = false);
 
-        PluginDataBaseGameBase GetClone(Guid Id);
+        PluginDataBaseGameBase GetClone(Guid id);
         PluginDataBaseGameBase GetClone(Game game);
 
         PluginDataBaseGameBase MergeData(Guid fromId, Guid toId);
 
 
         bool Remove(Game game);
-        bool Remove(Guid Id);
+        bool Remove(Guid id);
 
         void AddOrUpdate(PluginDataBaseGameBase item);
 
 
-        void Refresh(Guid Id);
-        void Refresh(IEnumerable<Guid> Ids);
+        void Refresh(Guid id);
+        void Refresh(IEnumerable<Guid> ids);
 
-        void RefreshWithNoData(IEnumerable<Guid> Ids);
+        void RefreshWithNoData(IEnumerable<Guid> ids);
 
-        List<Game> GetGamesWithNoData();
+        IEnumerable<Game> GetGamesWithNoData();
     }
 }
