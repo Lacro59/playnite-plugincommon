@@ -1112,12 +1112,18 @@ namespace CommonPluginsStores.Steam
 
                             if (lang.Equals("english"))
                             {
+                                bool isUnlocked = (el.GetAttribute("data-panel") ?? string.Empty).Contains("autoFocus");
                                 string stringDateUnlocked = el.QuerySelector(".achieveUnlockTime")?.InnerHtml ?? string.Empty;
 
                                 if (!stringDateUnlocked.IsNullOrEmpty())
                                 {
                                     stringDateUnlocked = stringDateUnlocked.Replace("Unlocked", string.Empty).Replace("<br>", string.Empty).Trim();
                                     _ = DateTime.TryParseExact(stringDateUnlocked, new[] { "d MMM, yyyy @ h:mmtt", "d MMM @ h:mmtt" }, new CultureInfo("en-US"), DateTimeStyles.AssumeLocal, out DateUnlocked);
+                                }
+                                else if (isUnlocked)
+                                {
+                                    DateUnlocked = i > 0 ? unlockedDates[i - 1] : DateTime.Today;
+                                    Logger.Warn($"No valid date found for unlocked achievement \"{Name}\"");
                                 }
 
                                 if (unlockedDates == null)
