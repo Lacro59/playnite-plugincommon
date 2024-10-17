@@ -12,7 +12,10 @@
     <sys:String x:Key="LOCCommonAddFilePattern">添加文件模式</sys:String>
 
     <sys:String x:Key="LOCCommonMargin">Margin</sys:String>
-    
+
+    <sys:String x:Key="LOCCommonExtractToCsv">Extract plugin data to CSV</sys:String>
+    <sys:String x:Key="LOCCommonExtracting">Extracting...</sys:String>
+
     <!-- Filters -->
 
     <sys:String x:Key="LOCCommonUsedFilteredGames">当前已使用筛选游戏</sys:String>
