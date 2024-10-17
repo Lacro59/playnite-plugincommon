@@ -16,6 +16,7 @@ using CommonPlayniteShared.Common;
 using CommonPluginsShared.Interfaces;
 using CommonPlayniteShared;
 using Playnite.SDK.Data;
+using System.Text;
 
 namespace CommonPluginsShared.Collections
 {
@@ -845,7 +846,7 @@ namespace CommonPluginsShared.Collections
 
                     foreach (Game game in playniteDb)
                     {
-                        a.Text = message 
+                        a.Text = message
                             + "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}"
                             + "\n" + game?.Name + (game?.Source == null ? string.Empty : $" ({game?.Source.Name})");
 
@@ -978,5 +979,54 @@ namespace CommonPluginsShared.Collections
         public virtual void SetThemesResources(Game game)
         {
         }
+
+
+        #region Extract data
+        public virtual bool ExtractToCsv(string path)
+        {
+            bool isOK = false;
+            try
+            {
+                GlobalProgressOptions options = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonExtracting")}")
+                {
+                    Cancelable = false,
+                    IsIndeterminate = true
+                };
+
+                _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
+                {
+                    Stopwatch stopWatch = new Stopwatch();
+                    stopWatch.Start();
+
+                    path = Path.Combine(path, $"{PluginName}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv");
+                    path = CommonPlayniteShared.Common.Paths.FixPathLength(path);
+                    FileSystem.PrepareSaveFile(path);
+                    string csvData = GetCsvData();
+                    if (!csvData.IsNullOrEmpty())
+                    {
+                        File.WriteAllText(path, csvData, Encoding.UTF8);
+                        isOK = true;
+                    }
+
+                    Logger.Warn($"No csv data for {PluginName}");
+
+                    stopWatch.Stop();
+                    TimeSpan ts = stopWatch.Elapsed;
+                    Logger.Info($"ExtractToCsv() - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {Database.Items?.Count()} items");
+                }, options);
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+            }
+
+            return isOK;
+        }
+
+        internal virtual string GetCsvData()
+        {
+            return null;
+        }
+        #endregion
     }
 }
