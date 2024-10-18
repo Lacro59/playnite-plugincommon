@@ -13,8 +13,8 @@
 
     <sys:String x:Key="LOCCommonMargin">Abstand</sys:String>
 
-    <sys:String x:Key="LOCCommonExtractToCsv">Extract plugin data to CSV</sys:String>
-    <sys:String x:Key="LOCCommonExtracting">Extracting...</sys:String>
+    <sys:String x:Key="LOCCommonExtractToCsv">Plugin-Daten in CSV extrahieren</sys:String>
+    <sys:String x:Key="LOCCommonExtracting">Extrahiere...</sys:String>
 
     <!-- Filters -->
 
