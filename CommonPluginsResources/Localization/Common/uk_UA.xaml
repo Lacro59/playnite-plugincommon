@@ -13,8 +13,8 @@
 
     <sys:String x:Key="LOCCommonMargin">Відступ</sys:String>
 
-    <sys:String x:Key="LOCCommonExtractToCsv">Extract plugin data to CSV</sys:String>
-    <sys:String x:Key="LOCCommonExtracting">Extracting...</sys:String>
+    <sys:String x:Key="LOCCommonExtractToCsv">Видобути дані плагіну в CSV</sys:String>
+    <sys:String x:Key="LOCCommonExtracting">Видобування...</sys:String>
 
     <!-- Filters -->
 
