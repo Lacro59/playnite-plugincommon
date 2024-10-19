@@ -12,7 +12,10 @@
     <sys:String x:Key="LOCCommonAddFilePattern">Додати шаблон файлу</sys:String>
 
     <sys:String x:Key="LOCCommonMargin">Відступ</sys:String>
-    
+
+    <sys:String x:Key="LOCCommonExtractToCsv">Видобути дані плагіну в CSV</sys:String>
+    <sys:String x:Key="LOCCommonExtracting">Видобування...</sys:String>
+
     <!-- Filters -->
 
     <sys:String x:Key="LOCCommonUsedFilteredGames">Наразі використано відфільтрованих ігор</sys:String>
@@ -55,6 +58,7 @@
     <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: конфігурацій не знайдено</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Ігноровані елементи</sys:String>
+    <sys:String x:Key="LOCCommonNotIgnoredItems">Не ігноровані елементи</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">Введіть елемент для ігнорування</sys:String>
     
     <sys:String x:Key="LOCCommonProgression">Просування</sys:String>

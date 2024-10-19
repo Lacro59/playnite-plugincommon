@@ -12,7 +12,10 @@
     <sys:String x:Key="LOCCommonAddFilePattern">添加文件模式</sys:String>
 
     <sys:String x:Key="LOCCommonMargin">Margin</sys:String>
-    
+
+    <sys:String x:Key="LOCCommonExtractToCsv">Extract plugin data to CSV</sys:String>
+    <sys:String x:Key="LOCCommonExtracting">Extracting...</sys:String>
+
     <!-- Filters -->
 
     <sys:String x:Key="LOCCommonUsedFilteredGames">当前已使用筛选游戏</sys:String>
@@ -55,6 +58,7 @@
     <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: no configuration found</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">已忽略项目</sys:String>
+    <sys:String x:Key="LOCCommonNotIgnoredItems">Not ignored items</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">输入要忽略的项目</sys:String>
     
     <sys:String x:Key="LOCCommonProgression">进度</sys:String>

@@ -12,7 +12,10 @@
     <sys:String x:Key="LOCCommonAddFilePattern">Aggiungi sequenza file</sys:String>
 
     <sys:String x:Key="LOCCommonMargin">Margine</sys:String>
-    
+
+    <sys:String x:Key="LOCCommonExtractToCsv">Estrai i dati del plugin in CSV</sys:String>
+    <sys:String x:Key="LOCCommonExtracting">Estrazione in corso...</sys:String>
+
     <!-- Filters -->
 
     <sys:String x:Key="LOCCommonUsedFilteredGames">Giochi attualmente filtrati usati</sys:String>
@@ -55,6 +58,7 @@
     <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: nessuna configurazione trovata</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Oggetti ignorati</sys:String>
+    <sys:String x:Key="LOCCommonNotIgnoredItems">Elementi non ignorati</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">Inserisci l'oggetto da ignorare</sys:String>
     
     <sys:String x:Key="LOCCommonProgression">Progressione</sys:String>

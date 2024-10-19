@@ -12,7 +12,10 @@
     <sys:String x:Key="LOCCommonAddFilePattern">Dosya kalıbı ekle</sys:String>
 
     <sys:String x:Key="LOCCommonMargin">Pay</sys:String>
-    
+
+    <sys:String x:Key="LOCCommonExtractToCsv">Eklenti verilerini CSV olarak ayıkla</sys:String>
+    <sys:String x:Key="LOCCommonExtracting">Ayıklanıyor...</sys:String>
+
     <!-- Filters -->
 
     <sys:String x:Key="LOCCommonUsedFilteredGames">Şu anda filtrelenmiş oyunlar kullanılıyor</sys:String>
@@ -55,6 +58,7 @@
     <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: yapılandırma bulunamadı</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Yok sayılan öğeler</sys:String>
+    <sys:String x:Key="LOCCommonNotIgnoredItems">Yok sayılmayan ögeler</sys:String>
     <sys:String x:Key="LOCCommonInputItemIgnore">Yok saymak için bir öğe girin</sys:String>
     
     <sys:String x:Key="LOCCommonProgression">İlerleme</sys:String>
