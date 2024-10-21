@@ -37,6 +37,9 @@
 
         private static string gameHacked = "\uea36";             
         private static string manualAchievements = "\uea54";
+
+        private static string amazonLuna = "\uea5f";
+        private static string jastUSA = "\uea5e";
         #endregion
 
         #region retrogaming
@@ -197,6 +200,12 @@
                 case "amazon":
                 case "amazon games":
                     stringReturn = amazonGame;
+                    break;
+                case "amazon luna":
+                    stringReturn = amazonLuna;
+                    break;
+                case "jast usa":
+                    stringReturn = jastUSA;
                     break;
                 case "riot launcher":
                 case "riot games":
