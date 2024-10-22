@@ -10,6 +10,7 @@ namespace CommonPluginsShared.Collections
     {
         public abstract List<T> Items { get; set; }
 
+
         [DontSerialize]
         public override bool HasData => Items?.Count > 0;
 

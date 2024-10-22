@@ -1,4 +1,5 @@
-﻿using Playnite.SDK;
+﻿using CommonPluginsShared.Interfaces;
+using Playnite.SDK;
 using Playnite.SDK.Models;
 using System;
 using System.Collections.Generic;
@@ -15,13 +16,16 @@ namespace CommonPluginsControls.Controls
     public partial class OptionsDownloadData : UserControl
     {
         private List<Game> FilteredGames { get; set; }
+        private IPluginDatabase PluginDatabase { get; }
 
 
-        public OptionsDownloadData(bool WithoutMissing = false)
+        public OptionsDownloadData(IPluginDatabase pluginDatabase, bool withoutMissing = false)
         {
+            PluginDatabase = pluginDatabase;
+
             InitializeComponent();
 
-            if (WithoutMissing)
+            if (withoutMissing)
             {
                 PART_OnlyMissing.Visibility = Visibility.Collapsed;
                 PART_BtDownload.Content = ResourceProvider.GetString("LOCGameTagsTitle");
@@ -41,20 +45,20 @@ namespace CommonPluginsControls.Controls
         private void PART_BtDownload_Click(object sender, RoutedEventArgs e)
         {
             FilteredGames = API.Instance.Database.Games.Where(x => x.Hidden == false).ToList();
+            int months = (int)PART_Months.LongValue;
 
             if ((bool)PART_AllGames.IsChecked)
             {
-                
             }
 
             if ((bool)PART_GamesRecentlyPlayed.IsChecked)
             {
-                FilteredGames = FilteredGames.Where(x => x.LastActivity != null && (DateTime)x.LastActivity >= DateTime.Now.AddMonths(-1)).ToList();
+                FilteredGames = FilteredGames.Where(x => x.LastActivity != null && (DateTime)x.LastActivity >= DateTime.Now.AddMonths(-months)).ToList();
             }
 
             if ((bool)PART_GamesRecentlyAdded.IsChecked)
             {
-                FilteredGames = FilteredGames.Where(x => x.Added != null && (DateTime)x.Added >= DateTime.Now.AddMonths(-1)).ToList();
+                FilteredGames = FilteredGames.Where(x => x.Added != null && (DateTime)x.Added >= DateTime.Now.AddMonths(-months)).ToList();
             }
 
             if ((bool)PART_GamesInstalled.IsChecked)
@@ -72,7 +76,12 @@ namespace CommonPluginsControls.Controls
                 FilteredGames = FilteredGames.Where(x => x.Favorite).ToList();
             }
 
-            ((Window)this.Parent).Close();
+            if ((bool)PART_OldData.IsChecked)
+            {
+                FilteredGames = PluginDatabase.GetGamesOldData(months).ToList();
+            }
+
+            ((Window)Parent).Close();
         }
 
 
@@ -89,6 +98,12 @@ namespace CommonPluginsControls.Controls
         public bool GetOnlyMissing()
         {
             return (bool)PART_OnlyMissing.IsChecked;
+        }
+
+        private void RadioButton_Checked(object sender, RoutedEventArgs e)
+        {
+            Part_MonthSelect.IsEnabled = (bool)PART_OldData.IsChecked || (bool)PART_GamesRecentlyAdded.IsChecked || (bool)PART_GamesRecentlyPlayed.IsChecked;
+            PART_OnlyMissing.IsEnabled = !(bool)PART_OldData.IsChecked;
         }
     }
 }

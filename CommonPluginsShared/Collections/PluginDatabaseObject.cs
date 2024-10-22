@@ -168,7 +168,7 @@ namespace CommonPluginsShared.Collections
 
         public virtual void GetSelectData()
         {
-            OptionsDownloadData View = new OptionsDownloadData();
+            OptionsDownloadData View = new OptionsDownloadData(this);
             Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(PluginName + " - " + ResourceProvider.GetString("LOCCommonSelectData"), View);
             _ = windowExtension.ShowDialog();
 
@@ -203,12 +203,18 @@ namespace CommonPluginsShared.Collections
 
         public virtual IEnumerable<Game> GetGamesWithNoData()
         {
-            IEnumerable<Game> GamesWithNoData = Database.Items.Where(x => !x.Value.HasData).Select(x => API.Instance.Database.Games.Get(x.Key)).Where(x => x != null);
-            IEnumerable<Game> GamesNotInDb = API.Instance.Database.Games.Where(x => !Database.Items.Any(y => y.Key == x.Id));
-            IEnumerable<Game> mergedList = GamesWithNoData.Union(GamesNotInDb).Distinct();
+            IEnumerable<Game> gamesWithNoData = Database.Items.Where(x => !x.Value.HasData).Select(x => API.Instance.Database.Games.Get(x.Key)).Where(x => x != null);
+            IEnumerable<Game> gamesNotInDb = API.Instance.Database.Games.Where(x => !Database.Items.Any(y => y.Key == x.Id));
+            IEnumerable<Game> mergedList = gamesWithNoData.Union(gamesNotInDb).Distinct();
 
             mergedList = mergedList.Where(x => !x.Hidden);
             return mergedList;
+        }
+
+        public virtual IEnumerable<Game> GetGamesOldData(int months)
+        {
+            IEnumerable<Game> gamesOldData = Database.Items.Where(x => x.Value.DateLastRefresh <= DateTime.Now.AddMonths(-months)).Select(x => API.Instance.Database.Games.Get(x.Key)).Where(x => x != null);
+            return gamesOldData;
         }
 
 
@@ -772,7 +778,7 @@ namespace CommonPluginsShared.Collections
         {
             Logger.Info($"AddTagSelectData() started");
 
-            OptionsDownloadData View = new OptionsDownloadData(true);
+            OptionsDownloadData View = new OptionsDownloadData(this, true);
             Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(PluginName + " - " + ResourceProvider.GetString("LOCCommonSelectGames"), View);
             _ = windowExtension.ShowDialog();
 

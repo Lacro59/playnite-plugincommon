@@ -9,8 +9,25 @@ namespace CommonPluginsShared.Collections
 {
     public class PluginDataBaseGameBase : DatabaseObject
     {
+        #region Data
         public DateTime DateLastRefresh { get; set; } = default;
 
+
+        [DontSerialize]
+        public bool IsDeleted { get; set; }
+
+        [DontSerialize]
+        public bool IsSaved { get; set; }
+
+
+        [DontSerialize]
+        public virtual bool HasData => false;
+
+        [DontSerialize]
+        public virtual int Count => 0;
+        #endregion
+
+        #region Game data
         [DontSerialize]
         internal Game Game { get; set; }
 
@@ -57,19 +74,6 @@ namespace CommonPluginsShared.Collections
 
         [DontSerialize]
         public bool IsInstalled => Game?.IsInstalled ?? default;
-
-        [DontSerialize]
-        public bool IsDeleted { get; set; }
-
-        [DontSerialize]
-        public bool IsSaved { get; set; }
-
-
-        [DontSerialize]
-        public virtual bool HasData => false;
-
-
-        [DontSerialize]
-        public virtual int Count => 0;
+        #endregion
     }
 }

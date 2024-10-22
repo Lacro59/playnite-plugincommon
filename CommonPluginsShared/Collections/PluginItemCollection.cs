@@ -14,12 +14,12 @@ namespace CommonPluginsShared.Collections
         {
         }
 
-        public void SetGameInfo<T>(Guid Id)
+        public void SetGameInfo<T>(Guid id)
         {
             try
             {
-                _ = Items.TryGetValue(Id, out TItem item);
-                Game game = API.Instance.Database.Games.Get(Id);
+                _ = Items.TryGetValue(id, out TItem item);
+                Game game = API.Instance.Database.Games.Get(id);
 
                 if (game != null && item is PluginDataBaseGame<T>)
                 {
@@ -50,12 +50,12 @@ namespace CommonPluginsShared.Collections
             }
         }
 
-        public void SetGameInfoDetails<T, Y>( Guid Id)
+        public void SetGameInfoDetails<T, Y>( Guid id)
         {
             try
             {
-                _ = Items.TryGetValue(Id, out TItem item);
-                Game game = API.Instance.Database.Games.Get(Id);
+                _ = Items.TryGetValue(id, out TItem item);
+                Game game = API.Instance.Database.Games.Get(id);
 
                 if (game != null && item is PluginDataBaseGameDetails<T, Y>)
                 {

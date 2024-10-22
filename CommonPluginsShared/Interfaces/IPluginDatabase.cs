@@ -39,5 +39,7 @@ namespace CommonPluginsShared.Interfaces
         void RefreshWithNoData(IEnumerable<Guid> ids);
 
         IEnumerable<Game> GetGamesWithNoData();
+
+        IEnumerable<Game> GetGamesOldData(int months);
     }
 }
