@@ -3,6 +3,7 @@
 
     <sys:String x:Key="LOCCommonYear">Year</sys:String>
     <sys:String x:Key="LOCCommonMonth">Month</sys:String>
+    <sys:String x:Key="LOCCommonMonths">Month(s)</sys:String>
     <sys:String x:Key="LOCCommonDateData">Date of data</sys:String>
     
     <sys:String x:Key="LOCCommonLastUpdate">Last update</sys:String>
@@ -67,9 +68,11 @@
     <sys:String x:Key="LOCCommonGameTime">Game time</sys:String>
     
     <sys:String x:Key="LOCCommonSelectFilters">Select filters</sys:String>
-    <sys:String x:Key="LOCCommonRecentlyAdded">Recently Added</sys:String>
+    <sys:String x:Key="LOCCommonOldData">Old data</sys:String>
+    <sys:String x:Key="LOCCommonRecentlyAdded">Recently added</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Only missing</sys:String>
     <sys:String x:Key="LOCCommonMissingData">Tag games missing data</sys:String>
+    <sys:String x:Key="LOCCommonSince">Since</sys:String>
 
     <sys:String x:Key="LOCCommonTotal">Total</sys:String>
     <sys:String x:Key="LOCCommonCut">Truncate</sys:String>
