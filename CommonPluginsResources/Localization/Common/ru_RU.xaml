@@ -3,6 +3,7 @@
 
     <sys:String x:Key="LOCCommonYear">Год</sys:String>
     <sys:String x:Key="LOCCommonMonth">Меся</sys:String>
+    <sys:String x:Key="LOCCommonMonths">Month(s)</sys:String>
     <sys:String x:Key="LOCCommonDateData">Дата внесения данны</sys:String>
     
     <sys:String x:Key="LOCCommonLastUpdate">Последнее обновление</sys:String>
@@ -67,9 +68,11 @@
     <sys:String x:Key="LOCCommonGameTime">Время игры</sys:String>
     
     <sys:String x:Key="LOCCommonSelectFilters">Введите фильтры</sys:String>
-    <sys:String x:Key="LOCCommonRecentlyAdded">Недавно добавленные</sys:String>
+    <sys:String x:Key="LOCCommonOldData">Old data</sys:String>
+    <sys:String x:Key="LOCCommonRecentlyAdded">Recently added</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Только недостающие</sys:String>
     <sys:String x:Key="LOCCommonMissingData">Метка для игр с отсутствующими данными</sys:String>
+    <sys:String x:Key="LOCCommonSince">Since</sys:String>
 
     <sys:String x:Key="LOCCommonTotal">Всего</sys:String>
     <sys:String x:Key="LOCCommonCut">Вырезать</sys:String>
