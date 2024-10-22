@@ -3,6 +3,7 @@
 
     <sys:String x:Key="LOCCommonYear">年</sys:String>
     <sys:String x:Key="LOCCommonMonth">Month</sys:String>
+    <sys:String x:Key="LOCCommonMonths">Month(s)</sys:String>
     <sys:String x:Key="LOCCommonDateData">数据日</sys:String>
     
     <sys:String x:Key="LOCCommonLastUpdate">最近更新</sys:String>
@@ -67,9 +68,11 @@
     <sys:String x:Key="LOCCommonGameTime">游戏时间</sys:String>
     
     <sys:String x:Key="LOCCommonSelectFilters">选择筛</sys:String>
-    <sys:String x:Key="LOCCommonRecentlyAdded">最近添</sys:String>
+    <sys:String x:Key="LOCCommonOldData">Old data</sys:String>
+    <sys:String x:Key="LOCCommonRecentlyAdded">Recently added</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Only missing</sys:String>
     <sys:String x:Key="LOCCommonMissingData">Tag games missing data</sys:String>
+    <sys:String x:Key="LOCCommonSince">Since</sys:String>
 
     <sys:String x:Key="LOCCommonTotal">总计</sys:String>
     <sys:String x:Key="LOCCommonCut">裁剪</sys:String>
