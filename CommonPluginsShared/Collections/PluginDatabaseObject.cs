@@ -891,7 +891,7 @@ namespace CommonPluginsShared.Collections
         }
 
 
-        public virtual Guid? FindGoodPluginTags(string tagName)
+        internal virtual Guid? FindGoodPluginTags(string tagName)
         {
             return CheckTagExist(tagName);
         }
