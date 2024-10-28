@@ -397,8 +397,6 @@ namespace CommonPluginsShared.Collections
 
                 a.ProgressMaxValue = ids.Count();
 
-                string CancelText = string.Empty;
-
                 foreach (Guid id in ids)
                 {
                     Game game = API.Instance.Database.Games.Get(id);
@@ -408,7 +406,6 @@ namespace CommonPluginsShared.Collections
 
                     if (a.CancelToken.IsCancellationRequested)
                     {
-                        CancelText = " canceled";
                         break;
                     }
 
@@ -427,7 +424,7 @@ namespace CommonPluginsShared.Collections
 
                 stopWatch.Stop();
                 TimeSpan ts = stopWatch.Elapsed;
-                Logger.Info($"Task Refresh(){CancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{ids.Count()} items");
+                Logger.Info($"Task Refresh(){(a.CancelToken.IsCancellationRequested ? " canceled" : string.Empty)} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{ids.Count()} items");
 
                 Database.EndBufferUpdate();
                 API.Instance.Database.EndBufferUpdate();
@@ -716,8 +713,6 @@ namespace CommonPluginsShared.Collections
 
                     a.ProgressMaxValue = ids.Count();
 
-                    string cancelText = string.Empty;
-
                     foreach (Guid id in ids)
                     {
                         Game game = API.Instance.Database.Games.Get(id);
@@ -732,7 +727,6 @@ namespace CommonPluginsShared.Collections
 
                         if (a.CancelToken.IsCancellationRequested)
                         {
-                            cancelText = " canceled";
                             break;
                         }
 
@@ -753,7 +747,7 @@ namespace CommonPluginsShared.Collections
 
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
-                    Logger.Info($"AddTag(){cancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{(double)ids.Count()} items");
+                    Logger.Info($"AddTag(){(a.CancelToken.IsCancellationRequested ? " canceled" : string.Empty)} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{(double)ids.Count()} items");
                 }
                 catch (Exception ex)
                 {
@@ -848,8 +842,6 @@ namespace CommonPluginsShared.Collections
                     IEnumerable<Game> playniteDb = API.Instance.Database.Games.Where(x => x.Hidden == false);
                     a.ProgressMaxValue = playniteDb.Count();
 
-                    string cancelText = string.Empty;
-
                     foreach (Game game in playniteDb)
                     {
                         a.Text = message
@@ -858,7 +850,6 @@ namespace CommonPluginsShared.Collections
 
                         if (a.CancelToken.IsCancellationRequested)
                         {
-                            cancelText = " canceled";
                             break;
                         }
 
@@ -876,7 +867,7 @@ namespace CommonPluginsShared.Collections
 
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
-                    Logger.Info($"RemoveTagAllGame(){cancelText} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{(double)playniteDb.Count()} items");
+                    Logger.Info($"RemoveTagAllGame(){(a.CancelToken.IsCancellationRequested ? " canceled" : string.Empty)} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{(double)playniteDb.Count()} items");
                 }
                 catch (Exception ex)
                 {
@@ -988,15 +979,16 @@ namespace CommonPluginsShared.Collections
 
 
         #region Extract data
-        public virtual bool ExtractToCsv(string path)
+        public bool ExtractToCsv(string path, bool minimum)
         {
             bool isOK = false;
             try
             {
+                Logger.Info($"ExtractToCsv({minimum}) started");
                 GlobalProgressOptions options = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonExtracting")}")
                 {
-                    Cancelable = false,
-                    IsIndeterminate = true
+                    Cancelable = true,
+                    IsIndeterminate = false
                 };
 
                 _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
@@ -1007,18 +999,20 @@ namespace CommonPluginsShared.Collections
                     path = Path.Combine(path, $"{PluginName}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv");
                     path = CommonPlayniteShared.Common.Paths.FixPathLength(path);
                     FileSystem.PrepareSaveFile(path);
-                    string csvData = GetCsvData();
+                    string csvData = GetCsvData(a, minimum);
                     if (!csvData.IsNullOrEmpty())
                     {
                         File.WriteAllText(path, csvData, Encoding.UTF8);
                         isOK = true;
                     }
-
-                    Logger.Warn($"No csv data for {PluginName}");
+                    else
+                    {
+                        Logger.Warn($"No csv data for {PluginName}");
+                    }
 
                     stopWatch.Stop();
                     TimeSpan ts = stopWatch.Elapsed;
-                    Logger.Info($"ExtractToCsv() - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {Database.Items?.Count()} items");
+                    Logger.Info($"ExtractToCsv({minimum}){(a.CancelToken.IsCancellationRequested ? " canceled" : string.Empty)} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {Database.Items?.Count()} items");
                 }, options);
             }
             catch (Exception ex)
@@ -1029,7 +1023,7 @@ namespace CommonPluginsShared.Collections
             return isOK;
         }
 
-        internal virtual string GetCsvData()
+        internal virtual string GetCsvData(GlobalProgressActionArgs a, bool minimum)
         {
             return null;
         }
