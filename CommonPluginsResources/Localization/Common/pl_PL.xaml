@@ -15,6 +15,7 @@
     <sys:String x:Key="LOCCommonMargin">Margines</sys:String>
 
     <sys:String x:Key="LOCCommonExtractToCsv">Wyodrębnij dane wtyczki do CSV</sys:String>
+    <sys:String x:Key="LOCCommonExtractAllToCsv">Extract all plugin data to CSV (very long)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Wyodrębnianie...</sys:String>
 
     <!-- Filters -->
