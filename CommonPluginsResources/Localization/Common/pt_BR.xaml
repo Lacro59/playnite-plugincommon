@@ -15,6 +15,7 @@
     <sys:String x:Key="LOCCommonMargin">Margem</sys:String>
 
     <sys:String x:Key="LOCCommonExtractToCsv">Extrair dados do plugin para CSV</sys:String>
+    <sys:String x:Key="LOCCommonExtractAllToCsv">Extract all plugin data to CSV (very long)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Extraindo...</sys:String>
 
     <!-- Filters -->
