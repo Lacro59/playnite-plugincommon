@@ -15,6 +15,7 @@
     <sys:String x:Key="LOCCommonMargin">Abstand</sys:String>
 
     <sys:String x:Key="LOCCommonExtractToCsv">Plugin-Daten in CSV extrahieren</sys:String>
+    <sys:String x:Key="LOCCommonExtractAllToCsv">Extract all plugin data to CSV (very long)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Extrahiere...</sys:String>
 
     <!-- Filters -->
