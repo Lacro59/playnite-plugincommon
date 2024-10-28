@@ -57,8 +57,8 @@ namespace CommonPluginsControls.Views
         private void RefreshData()
         {
             ListViewGames.ItemsSource = null;
-            List<Game> games = PluginDatabase.GetGamesWithNoData();
-            gameData = games.Select(x => new GameData { Id = x.Id, Name = x.Name, GoToGame = GoToGame }).ToList();            
+            IEnumerable<Game> games = PluginDatabase.GetGamesWithNoData();
+            gameData = games.Select(x => new GameData { Id = x.Id, Name = x.Name, GoToGame = GoToGame }).ToList();
             ListViewGames.ItemsSource = gameData;
 
             PART_Count.Content = gameData.Count;

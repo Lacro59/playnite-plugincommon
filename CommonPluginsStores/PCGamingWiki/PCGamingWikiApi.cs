@@ -37,7 +37,7 @@ namespace CommonPluginsStores.PCGamingWiki
         }
 
 
-        public string FindGoodUrl(Game game, int SteamId = 0)
+        public string FindGoodUrl(Game game, uint SteamId = 0)
         {
             string url = string.Empty;
             string urlMatch = string.Empty;
