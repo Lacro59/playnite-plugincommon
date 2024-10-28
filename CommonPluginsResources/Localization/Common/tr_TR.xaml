@@ -15,6 +15,7 @@
     <sys:String x:Key="LOCCommonMargin">Pay</sys:String>
 
     <sys:String x:Key="LOCCommonExtractToCsv">Eklenti verilerini CSV olarak ayıkla</sys:String>
+    <sys:String x:Key="LOCCommonExtractAllToCsv">Extract all plugin data to CSV (very long)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Ayıklanıyor...</sys:String>
 
     <!-- Filters -->
