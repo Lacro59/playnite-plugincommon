@@ -3,6 +3,7 @@
 
     <sys:String x:Key="LOCCommonYear">Jahr</sys:String>
     <sys:String x:Key="LOCCommonMonth">Monat</sys:String>
+    <sys:String x:Key="LOCCommonMonths">Monat(e)</sys:String>
     <sys:String x:Key="LOCCommonDateData">Datum der Daten</sys:String>
     
     <sys:String x:Key="LOCCommonLastUpdate">Letzte Aktualisierung</sys:String>
@@ -14,6 +15,7 @@
     <sys:String x:Key="LOCCommonMargin">Abstand</sys:String>
 
     <sys:String x:Key="LOCCommonExtractToCsv">Plugin-Daten in CSV extrahieren</sys:String>
+    <sys:String x:Key="LOCCommonExtractAllToCsv">Alle Plugin-Daten in CSV extrahieren (lange Laufzeit)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Extrahiere...</sys:String>
 
     <!-- Filters -->
@@ -67,9 +69,11 @@
     <sys:String x:Key="LOCCommonGameTime">Spielzeit</sys:String>
     
     <sys:String x:Key="LOCCommonSelectFilters">Filter wählen</sys:String>
+    <sys:String x:Key="LOCCommonOldData">Veraltete Daten</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Kürzlich hinzugefügt</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Nur fehlende</sys:String>
     <sys:String x:Key="LOCCommonMissingData">Tag Spiele fehlende Daten</sys:String>
+    <sys:String x:Key="LOCCommonSince">Seit</sys:String>
 
     <sys:String x:Key="LOCCommonTotal">Gesamt</sys:String>
     <sys:String x:Key="LOCCommonCut">Schnitt</sys:String>

@@ -3,6 +3,7 @@
 
     <sys:String x:Key="LOCCommonYear">Yıl</sys:String>
     <sys:String x:Key="LOCCommonMonth">Ay</sys:String>
+    <sys:String x:Key="LOCCommonMonths">Ay</sys:String>
     <sys:String x:Key="LOCCommonDateData">Veri tarihi</sys:String>
     
     <sys:String x:Key="LOCCommonLastUpdate">Son güncelleme</sys:String>
@@ -14,6 +15,7 @@
     <sys:String x:Key="LOCCommonMargin">Pay</sys:String>
 
     <sys:String x:Key="LOCCommonExtractToCsv">Eklenti verilerini CSV olarak ayıkla</sys:String>
+    <sys:String x:Key="LOCCommonExtractAllToCsv">Tüm eklenti verilerini CSV olarak ayıkla (çok uzun)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Ayıklanıyor...</sys:String>
 
     <!-- Filters -->
@@ -67,9 +69,11 @@
     <sys:String x:Key="LOCCommonGameTime">Oyun zamanı</sys:String>
     
     <sys:String x:Key="LOCCommonSelectFilters">Filtreleri seç</sys:String>
-    <sys:String x:Key="LOCCommonRecentlyAdded">En Son Eklenen</sys:String>
+    <sys:String x:Key="LOCCommonOldData">Eski veri</sys:String>
+    <sys:String x:Key="LOCCommonRecentlyAdded">Son eklenen</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Sadece eksik olanlar</sys:String>
     <sys:String x:Key="LOCCommonMissingData">Verisi eksik olan oyunları etiketle</sys:String>
+    <sys:String x:Key="LOCCommonSince">Tarih</sys:String>
 
     <sys:String x:Key="LOCCommonTotal">Toplam</sys:String>
     <sys:String x:Key="LOCCommonCut">Kes</sys:String>

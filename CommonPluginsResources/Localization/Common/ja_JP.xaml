@@ -3,6 +3,7 @@
 
     <sys:String x:Key="LOCCommonYear">年</sys:String>
     <sys:String x:Key="LOCCommonMonth">月</sys:String>
+    <sys:String x:Key="LOCCommonMonths">Month(s)</sys:String>
     <sys:String x:Key="LOCCommonDateData">データの日付</sys:String>
     
     <sys:String x:Key="LOCCommonLastUpdate">最終更新</sys:String>
@@ -14,6 +15,7 @@
     <sys:String x:Key="LOCCommonMargin">余白</sys:String>
 
     <sys:String x:Key="LOCCommonExtractToCsv">Extract plugin data to CSV</sys:String>
+    <sys:String x:Key="LOCCommonExtractAllToCsv">Extract all plugin data to CSV (very long)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Extracting...</sys:String>
 
     <!-- Filters -->
@@ -67,9 +69,11 @@
     <sys:String x:Key="LOCCommonGameTime">ゲーム時間</sys:String>
     
     <sys:String x:Key="LOCCommonSelectFilters">フィルターを選択</sys:String>
-    <sys:String x:Key="LOCCommonRecentlyAdded">最近追加したアイテム</sys:String>
+    <sys:String x:Key="LOCCommonOldData">Old data</sys:String>
+    <sys:String x:Key="LOCCommonRecentlyAdded">Recently added</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">不足している場合のみ</sys:String>
     <sys:String x:Key="LOCCommonMissingData">データのないゲームをタグ付けする</sys:String>
+    <sys:String x:Key="LOCCommonSince">Since</sys:String>
 
     <sys:String x:Key="LOCCommonTotal">合計</sys:String>
     <sys:String x:Key="LOCCommonCut">切り捨て</sys:String>
