@@ -3,6 +3,7 @@
 
     <sys:String x:Key="LOCCommonYear">Рік</sys:String>
     <sys:String x:Key="LOCCommonMonth">Місяць</sys:String>
+    <sys:String x:Key="LOCCommonMonths">Місяць(ів)</sys:String>
     <sys:String x:Key="LOCCommonDateData">Дата даних</sys:String>
     
     <sys:String x:Key="LOCCommonLastUpdate">Останнє оновлення</sys:String>
@@ -14,6 +15,7 @@
     <sys:String x:Key="LOCCommonMargin">Відступ</sys:String>
 
     <sys:String x:Key="LOCCommonExtractToCsv">Видобути дані плагіну в CSV</sys:String>
+    <sys:String x:Key="LOCCommonExtractAllToCsv">Extract all plugin data to CSV (very long)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Видобування...</sys:String>
 
     <!-- Filters -->
@@ -67,9 +69,11 @@
     <sys:String x:Key="LOCCommonGameTime">Час гри</sys:String>
     
     <sys:String x:Key="LOCCommonSelectFilters">Обрати фільтри</sys:String>
+    <sys:String x:Key="LOCCommonOldData">Старі дані</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Нещодавно додано</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Лише відсутні</sys:String>
     <sys:String x:Key="LOCCommonMissingData">Поставити теги іграм з відсутніми даними</sys:String>
+    <sys:String x:Key="LOCCommonSince">Від</sys:String>
 
     <sys:String x:Key="LOCCommonTotal">Усього</sys:String>
     <sys:String x:Key="LOCCommonCut">Обрізати</sys:String>

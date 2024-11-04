@@ -646,16 +646,16 @@ namespace CommonPluginsShared.Collections
             {
                 try
                 {
-                    Guid? TagId = FindGoodPluginTags(string.Empty);
-                    if (TagId != null)
+                    Guid? tagId = FindGoodPluginTags(string.Empty);
+                    if (tagId != null)
                     {
                         if (game.TagIds != null)
                         {
-                            game.TagIds.Add((Guid)TagId);
+                            game.TagIds.Add((Guid)tagId);
                         }
                         else
                         {
-                            game.TagIds = new List<Guid> { (Guid)TagId };
+                            game.TagIds = new List<Guid> { (Guid)tagId };
                         }
                     }
                 }

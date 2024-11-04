@@ -2,10 +2,12 @@
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using CommonPluginsShared;
+using FuzzySharp;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -37,64 +39,34 @@ namespace CommonPluginsStores.PCGamingWiki
         }
 
 
-        public string FindGoodUrl(Game game, int SteamId = 0)
+        public string FindGoodUrl(Game game, uint steamId = 0)
         {
             string url = string.Empty;
             string urlMatch = string.Empty;
-            string WebResponse = string.Empty;
+            string webResponse = string.Empty;
 
-            if (SteamId != 0)
+            if (steamId != 0)
             {
-                url = string.Format(UrlWithSteamId, SteamId);
+                url = string.Format(UrlWithSteamId, steamId);
 
                 Thread.Sleep(500);
-                WebResponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
-                if (!WebResponse.ToLower().Contains("search results"))
+                webResponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
+                if (!webResponse.ToLower().Contains("search results"))
                 {
                     return url;
                 }
             }
 
-
-            url = string.Empty;
             if (game.Links != null)
             {
                 foreach (Link link in game.Links)
                 {
-                    if (link.Url.ToLower().Contains("pcgamingwiki"))
+                    if (link.Url.ToLower().Contains("pcgamingwiki") && !link.Url.ToLower().StartsWith(@"http://pcgamingwiki.com/w/index.php?search="))
                     {
-                        url = link.Url;
-
-                        if (url.ToLower().Contains(@"http://pcgamingwiki.com/w/index.php?search="))
-                        {
-                            url = UrlPCGamingWikiSearch + WebUtility.UrlEncode(url.Replace(@"http://pcgamingwiki.com/w/index.php?search=", string.Empty));
-                        }
-                        if (url.Length == UrlPCGamingWikiSearch.Length)
-                        {
-                            url = string.Empty;
-                        }
-                    }
-                }
-
-                if (!url.IsNullOrEmpty())
-                {
-                    Thread.Sleep(500);
-                    WebResponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
-                    if (!WebResponse.ToLower().Contains("search results"))
-                    {
-                        return url;
-                    }
-                    else
-                    {
-                        urlMatch = GetUrlIsOneResult(WebResponse);
-                        if (!urlMatch.IsNullOrEmpty())
-                        {
-                            return urlMatch;
-                        }
+                        return link.Url;
                     }
                 }
             }
-
 
             string Name = Regex.Replace(game.Name, @"([ ]demo\b)", string.Empty, RegexOptions.IgnoreCase);
             Name = Regex.Replace(Name, @"(demo[ ])", string.Empty, RegexOptions.IgnoreCase);
@@ -102,7 +74,7 @@ namespace CommonPluginsStores.PCGamingWiki
 
 
             // Search with release date
-            if (game.ReleaseDate != null) 
+            if (game.ReleaseDate != null)
             {
                 url = string.Format(UrlPCGamingWikiSearchWithApi, WebUtility.UrlEncode(Name + $" ({((ReleaseDate)game.ReleaseDate).Year})"));
                 urlMatch = GetWithSearchApi(url);
@@ -120,56 +92,6 @@ namespace CommonPluginsStores.PCGamingWiki
                 return urlMatch;
             }
 
-
-            // old method
-            url = UrlPCGamingWikiSearch + WebUtility.UrlEncode(Name);
-            Thread.Sleep(500);
-            WebResponse = Web.DownloadStringData(url).GetAwaiter().GetResult(); 
-            if (WebResponse.ToLower().Contains("database query error has occurred"))
-            {
-                Logger.Warn($"Error on PCGamingWiki search with {Name}");
-            }
-            else
-            {
-                if (!WebResponse.ToLower().Contains("search results"))
-                {
-                    return url;
-                }
-                else
-                {
-                    urlMatch = GetUrlIsOneResult(WebResponse);
-                    if (!urlMatch.IsNullOrEmpty())
-                    {
-                        return urlMatch;
-                    }
-                }
-            }
-
-
-            url = UrlPCGamingWikiSearch + WebUtility.UrlEncode(game.Name);
-            Thread.Sleep(500);
-            WebResponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
-            if (WebResponse.ToLower().Contains("database query error has occurred"))
-            {
-                Logger.Warn($"Error on PCGamingWiki search with {game.Name}");
-            }
-            else
-            {
-                if (!WebResponse.ToLower().Contains("search results"))
-                {
-                    return url;
-                }
-                else
-                {
-                    urlMatch = GetUrlIsOneResult(WebResponse);
-                    if (!urlMatch.IsNullOrEmpty())
-                    {
-                        return urlMatch;
-                    }
-                }
-            }
-
-
             return string.Empty;
         }
 
@@ -181,11 +103,22 @@ namespace CommonPluginsStores.PCGamingWiki
             try
             {
                 string WebResponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
-                Serialization.TryFromJson(WebResponse, out dynamic data);
-
-                if (data != null && data[3]?.Count > 0)
+                if (Serialization.TryFromJson(WebResponse, out dynamic data) && data[3]?.Count > 0)
                 {
-                    urlFound = data[3][0];
+                    List<string> listName = Serialization.FromJson<List<string>>(Serialization.ToJson(data[1]));
+                    List<string> listUrl = Serialization.FromJson<List<string>>(Serialization.ToJson(data[3]));
+
+                    Dictionary<string, string> dataFound = new Dictionary<string, string>();
+                    for (int i = 0; i < listName.Count; i++)
+                    {
+                        dataFound.Add(listName[i], listUrl[i]);
+                    }
+
+                    var fuzzList = dataFound.Select(x => new { MatchPercent = Fuzz.Ratio(data[0].ToString().ToLower(), x.Key.ToLower()), Data = x })
+                        .OrderByDescending(x => x.MatchPercent)
+                        .ToList();
+
+                    urlFound = fuzzList.First().MatchPercent >= 95 ? fuzzList.First().Data.Value : string.Empty;
                 }
             }
             catch (Exception ex)
@@ -194,36 +127,6 @@ namespace CommonPluginsStores.PCGamingWiki
             }
 
             return urlFound;
-        }
-
-
-        private string GetUrlIsOneResult(string WebResponse)
-        {
-            string url = string.Empty;
-
-            try
-            {
-                if (!WebResponse.Contains("There were no results matching the query"))
-                {
-                    HtmlParser parser = new HtmlParser();
-                    IHtmlDocument HtmlDocument = parser.Parse(WebResponse);
-
-                    if (HtmlDocument.QuerySelectorAll("ul.mw-search-results")?.Count() == 2)
-                    {
-                        IHtmlCollection<IElement> TitleMatches = HtmlDocument.QuerySelectorAll("ul.mw-search-results")[0].QuerySelectorAll("li");
-                        if (TitleMatches?.Count() == 1)
-                        {
-                            url = UrlBase + TitleMatches[0].QuerySelector("a").GetAttribute("href");
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-            }
-
-            return url;
         }
     }
 }
