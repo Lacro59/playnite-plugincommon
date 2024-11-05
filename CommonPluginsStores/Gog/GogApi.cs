@@ -2,8 +2,6 @@
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using CommonPlayniteShared.Common;
-using CommonPlayniteShared.PluginLibrary.GogLibrary.Models;
-using CommonPlayniteShared.PluginLibrary.Services.GogLibrary;
 using CommonPluginsShared;
 using CommonPluginsShared.Converters;
 using CommonPluginsShared.Extensions;
@@ -21,6 +19,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.Gog
@@ -29,20 +28,22 @@ namespace CommonPluginsStores.Gog
     public class GogApi : StoreApi
     {
         #region Url
-        private const string UrlBase = @"https://www.gog.com";
+        private static string UrlAccountInfo => @"https://menu.gog.com/v1/account/basic";
 
-        private const string UrlUserData = UrlBase + @"/userData.json";
-        private const string UrlUserOwned = "https://embed.gog.com/user/data/games";
+        private static string UrlBase => @"https://www.gog.com";
 
-        private const string UrlUserFriends = UrlBase + @"/u/{0}/friends";
-        private const string UrlUserGames = UrlBase + @"/u/{0}/games/stats?page={1}";
-        private const string UrlGogLang = UrlBase + @"/user/changeLanguage/{0}";
+        private static string UrlLogin => UrlBase + @"/account/";
 
-        private const string UrlGogGame = UrlBase + @"/game/{0}";
+        private static string UrlUserData => UrlBase + @"/userData.json";
 
-        private const string UrlFriends = @"https://embed.gog.com/users/info/{0}?expand=friendStatus";
+        private static string UrlUser => UrlBase + @"/u/{0}";
+        private static string UrlUserFriends => UrlUser + @"/friends";
+        private static string UrlUserGames => UrlUser + @"/games/stats?page={1}";
+        private static string UrlUserGameAchievements => UrlUser + @"/game/{1}?sort=user_unlock_date&sort_user_id={2}";
+        private static string UrlWishlist => UrlUser + @"/wishlist";
 
-        private static string UrlWishlist => UrlBase + @"/u/{0}/wishlist";
+        private static string UrlGogLang => UrlBase + @"/user/changeLanguage/{0}";
+        private static string UrlGogGame => UrlBase + @"/game/{0}";
         #endregion
 
         #region Url API
@@ -59,38 +60,35 @@ namespace CommonPluginsStores.Gog
 
         private static string UrlApiWishlist => UrlEmbed + @"/user/wishlist.json";
         private static string UrlApiRemoveWishlist => UrlEmbed + @"/user/wishlist/remove/{0}";
+
+        private static string UrlFriends => UrlEmbed + @"/users/info/{0}?expand=friendStatus";
+        private static string UrlUserOwned => UrlEmbed + @"/user/data/games";
         #endregion
 
         private string FileUserDataOwned { get; }
 
-        protected static readonly Lazy<GogAccountClient> gogAPI = new Lazy<GogAccountClient>(() => new GogAccountClient(API.Instance.WebViews.CreateOffscreenView()));
-        internal static GogAccountClient GogAPI => gogAPI.Value;
+        private UserDataOwned UserDataOwned => LoadUserDataOwned() ?? GetUserDataOwnedData() ?? LoadUserDataOwned(false);
 
-
-        private UserDataOwned UserDataOwned
+        private AccountBasicResponse _accountBasic;
+        private AccountBasicResponse AccountBasic
         {
             get
             {
-                try
+                if (!_accountBasic?.IsLoggedIn ?? true)
                 {
-                    return LoadUserDataOwned() ?? GetUserDataOwnedData() ?? LoadUserDataOwned(false);
+                    _accountBasic = GetAccountInfo();
                 }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, ClientName, true, PluginName);
-                    return null;
-                }
+                return _accountBasic;
             }
+
+            set => _accountBasic = value;
         }
 
-
-        private string UserId { get; set; }
-        private string UserName { get; set; }
 
         private static StoreCurrency LocalCurrency { get; set; } = new StoreCurrency { country = "US", currency = "USD", symbol = "$" };
 
 
-        public GogApi(string PluginName) : base(PluginName, ExternalPlugin.GogLibrary, "GOG")
+        public GogApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "GOG")
         {
             FileUserDataOwned = Path.Combine(PathStoresData, "GOG_UserDataOwned.json");
         }
@@ -98,18 +96,20 @@ namespace CommonPluginsStores.Gog
         #region Configuration
         protected override bool GetIsUserLoggedIn()
         {
-            bool isLogged = GogAPI.GetIsUserLoggedIn();
+            if (!_currentAccountInfos.IsPrivate && !StoreSettings.UseAuth)
+            {
+                return !_currentAccountInfos.UserId.IsNullOrEmpty();
+            }
 
+            bool isLogged = CheckIsUserLoggedIn();
             if (isLogged)
             {
-                AccountBasicResponse AccountBasic = GogAPI.GetAccountInfo();
+                string response = Web.DownloadStringData(UrlAccountInfo, GetStoredCookies()).GetAwaiter().GetResult();
+                _ = Serialization.TryFromJson(response, out AccountBasicResponse accountBasicResponse);
                 AuthToken = new StoreToken
                 {
-                    Token = AccountBasic.accessToken
+                    Token = accountBasicResponse.AccessToken
                 };
-
-                UserId = AccountBasic.userId;
-                UserName = AccountBasic.username;
             }
             else
             {
@@ -117,6 +117,34 @@ namespace CommonPluginsStores.Gog
             }
 
             return isLogged;
+        }
+
+        public override void Login()
+        {
+            try
+            {
+                ResetIsUserLoggedIn();
+                GogLogin();
+
+                if (AccountBasic?.IsLoggedIn ?? false)
+                {
+                    CurrentAccountInfos = new AccountInfos
+                    {
+                        UserId = AccountBasic.UserId,
+                        Pseudo = AccountBasic.Username,
+                        Link = string.Format(UrlUser, AccountBasic.Username),
+                        Avatar = AccountBasic.Avatars.MenuUserAvBig2,
+                        IsPrivate = true,
+                        IsCurrent = true
+                    };
+                    SaveCurrentUser();
+                    _ = GetCurrentAccountInfos();
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, false, PluginName);
+            }
         }
 
         /// <summary>
@@ -132,46 +160,18 @@ namespace CommonPluginsStores.Gog
         #region Current user
         protected override AccountInfos GetCurrentAccountInfos()
         {
-            if (!IsUserLoggedIn)
+            AccountInfos accountInfos = LoadCurrentUser();
+            if (accountInfos != null)
             {
-                return null;
-            }
-
-            try
-            {
-                string WebData = Web.DownloadStringData(string.Format(UrlUserFriends, UserName), GetStoredCookies()).GetAwaiter().GetResult();
-                if (WebData.IndexOf("window.profilesData.currentUser") == -1)
+                _ = Task.Run(() =>
                 {
-                    IsUserLoggedIn = false;
-                    Logger.Warn($"Not found: window.profilesData.currentUser");
-                    return null;
-                }
-
-                string JsonDataString = Tools.GetJsonInString(WebData, "window.profilesData.currentUser = ", "window.profilesData.profileUser = ", "]}};");
-                if (Serialization.TryFromJson(JsonDataString, out ProfileUser profileUser))
-                {
-                    string UserId = profileUser.userId;
-                    string Avatar = profileUser.avatar.Replace("\\", string.Empty);
-                    string Pseudo = profileUser.username;
-                    string Link = string.Format(UrlUserFriends, profileUser.username);
-
-                    AccountInfos userInfos = new AccountInfos
-                    {
-                        UserId = UserId,
-                        Avatar = Avatar,
-                        Pseudo = Pseudo,
-                        Link = Link,
-                        IsCurrent = true
-                    };
-                    return userInfos;
-                }
+                    Thread.Sleep(1000);
+                    CurrentAccountInfos.IsPrivate = !CheckIsPublic(accountInfos).GetAwaiter().GetResult();
+                    CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
+                });
+                return accountInfos;
             }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-            }
-
-            return null;
+            return new AccountInfos { IsCurrent = true };
         }
 
         protected override ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
@@ -183,16 +183,16 @@ namespace CommonPluginsStores.Gog
 
             try
             {
-                string WebData = Web.DownloadStringData(string.Format(UrlUserFriends, UserName), GetStoredCookies()).GetAwaiter().GetResult();
-                if (WebData.IndexOf("window.profilesData.currentUser") == -1)
+                string reponse = Web.DownloadStringData(string.Format(UrlUserFriends, CurrentAccountInfos.Pseudo), GetStoredCookies()).GetAwaiter().GetResult();
+                if (reponse.IndexOf("window.profilesData.currentUser") == -1)
                 {
                     IsUserLoggedIn = false;
                     Logger.Warn($"Not found: window.profilesData.profileUserFriends");
                     return null;
                 }
 
-                string JsonDataString = Tools.GetJsonInString(WebData, "window.profilesData.profileUserFriends = ", "window.profilesData.currentUserFriends = ", "}}];");
-                Serialization.TryFromJson(JsonDataString, out List<ProfileUserFriends> profileUserFriends);
+                string jsonDataString = Tools.GetJsonInString(reponse, "window.profilesData.profileUserFriends = ", "window.profilesData.currentUserFriends = ", "}}];");
+                _ = Serialization.TryFromJson(jsonDataString, out List<ProfileUserFriends> profileUserFriends);
 
                 if (profileUserFriends == null)
                 {
@@ -203,19 +203,19 @@ namespace CommonPluginsStores.Gog
                 profileUserFriends.ForEach(x =>
                 {
                     _ = DateTime.TryParse(x.date_accepted.date, out DateTime DateAdded);
-                    string UserId = x.user.id;
-                    string Avatar = x.user.avatar.Replace("\\", string.Empty);
-                    string Pseudo = x.user.username;
-                    string Link = string.Format(UrlUserFriends, Pseudo);
+                    string userId = x.user.id;
+                    string avatar = x.user.avatar.Replace("\\", string.Empty);
+                    string pseudo = x.user.username;
+                    string link = string.Format(UrlUserFriends, pseudo);
 
                     AccountInfos userInfos = new AccountInfos
                     {
                         DateAdded = DateAdded,
-                        UserId = UserId,
-                        Avatar = Avatar,
-                        Pseudo = Pseudo,
-                        Link = Link
-                    }; 
+                        UserId = userId,
+                        Avatar = avatar,
+                        Pseudo = pseudo,
+                        Link = link
+                    };
                     accountsInfos.Add(userInfos);
                 });
 
@@ -245,8 +245,8 @@ namespace CommonPluginsStores.Gog
                 {
                     try
                     {
-                        string WebData = Web.DownloadStringData(string.Format(UrlUserGames, accountInfos.Pseudo, idx), GetStoredCookies()).GetAwaiter().GetResult();
-                        Serialization.TryFromJson(WebData, out ProfileGames profileGames);
+                        string response = Web.DownloadStringData(string.Format(UrlUserGames, accountInfos.Pseudo, idx), GetStoredCookies()).GetAwaiter().GetResult();
+                        _ = Serialization.TryFromJson(response, out ProfileGames profileGames);
 
                         if (profileGames == null)
                         {
@@ -255,38 +255,38 @@ namespace CommonPluginsStores.Gog
 
                         profileGames?._embedded?.items?.ForEach(x =>
                         {
-                            string Id = x.game.id;
-                            string Name = x.game.title;
+                            string id = x.game.id;
+                            string name = x.game.title;
 
-                            bool IsCommun = false;
+                            bool isCommun = false;
                             if (!accountInfos.IsCurrent)
                             {
-                                IsCommun = CurrentGamesInfos?.Where(y => y.Id.IsEqual(Id))?.Count() != 0;
+                                isCommun = CurrentGamesInfos?.Where(y => y.Id.IsEqual(id))?.Count() != 0;
                             }
 
-                            long Playtime = 0;
+                            long playtime = 0;
                             foreach (dynamic data in (dynamic)x.stats)
                             {
-                                long.TryParse(((dynamic)x.stats)[data.Path]["playtime"].ToString(), out Playtime);
-                                Playtime *= 60;
+                                long.TryParse(((dynamic)x.stats)[data.Path]["playtime"].ToString(), out playtime);
+                                playtime *= 60;
 
-                                if (Playtime != 0)
+                                if (playtime != 0)
                                 {
                                     break;
                                 }
                             }
 
-                            string Link = UrlBase + x.game.url.Replace("\\", string.Empty);
-                            ObservableCollection<GameAchievement> Achievements = GetAchievements(Id, accountInfos);
+                            string link = UrlBase + x.game.url.Replace("\\", string.Empty);
+                            ObservableCollection<GameAchievement> Achievements = GetAchievements(id, accountInfos);
 
                             AccountGameInfos accountGameInfos = new AccountGameInfos
                             {
-                                Id = Id,
-                                Name = Name,
-                                Link = Link,
-                                IsCommun = IsCommun,
+                                Id = id,
+                                Name = name,
+                                Link = link,
+                                IsCommun = isCommun,
                                 Achievements = Achievements,
-                                Playtime = Playtime
+                                Playtime = playtime
                             };
                             accountGamesInfos.Add(accountGameInfos);
                         });
@@ -309,10 +309,10 @@ namespace CommonPluginsStores.Gog
 
         public override ObservableCollection<GameAchievement> GetAchievements(string id, AccountInfos accountInfos)
         {
-            return GetAchievements(id, accountInfos, false);
+            return accountInfos.IsPrivate || StoreSettings.UseAuth ? GetAchievementsPrivate(id, accountInfos, false) : GetAchievementsPublic(id, accountInfos);
         }
 
-        private ObservableCollection<GameAchievement> GetAchievements(string id, AccountInfos accountInfos, bool isRetry)
+        private ObservableCollection<GameAchievement> GetAchievementsPrivate(string id, AccountInfos accountInfos, bool isRetry)
         {
             if (!IsUserLoggedIn)
             {
@@ -321,50 +321,39 @@ namespace CommonPluginsStores.Gog
 
             try
             {
-                string Url = string.Empty;
-                //if (accountInfos.IsCurrent)
-                //{
-                //    Url = string.Format(UrlApiGamePlayUserAchievements, Id, UserId);
-                //}
-                //else
-                //{
-                //    Url = string.Format(UrlApiGamePlayFriendAchievements, Id, UserId);
-                //}
-                Url = string.Format(UrlApiGamePlayUserAchievements, id, UserId);
+                string url = string.Empty;
+                if (accountInfos.IsCurrent)
+                {
+                    url = string.Format(UrlApiGamePlayUserAchievements, id, accountInfos.UserId);
+                }
+                else
+                {
+                    // TODO Works ?
+                    url = string.Format(UrlApiGamePlayFriendAchievements, id, accountInfos.UserId);
+                }
 
                 string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Local).ToLower());
-                string webData = Web.DownloadStringData(Url, AuthToken.Token, urlLang).GetAwaiter().GetResult();
+                string reponse = Web.DownloadStringData(url, AuthToken?.Token, urlLang).GetAwaiter().GetResult();
 
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
-                if (!webData.IsNullOrEmpty())
+                if (!reponse.IsNullOrEmpty() && Serialization.TryFromJson(reponse, out Achievements achievements) && achievements?.TotalCount > 0)
                 {
-                    dynamic resultObj = Serialization.FromJson<dynamic>(webData);
-                    try
+                    achievements.Items.ForEach(x =>
                     {
-                        dynamic resultItems = resultObj["items"];
-                        if (resultItems.Count > 0)
+                        GameAchievement gameAchievement = new GameAchievement
                         {
-                            for (int i = 0; i < resultItems.Count; i++)
-                            {
-                                GameAchievement gameAchievement = new GameAchievement
-                                {
-                                    Id = (string)resultItems[i]["achievement_key"],
-                                    Name = (string)resultItems[i]["name"],
-                                    Description = (string)resultItems[i]["description"],
-                                    UrlUnlocked = (string)resultItems[i]["image_url_unlocked"],
-                                    UrlLocked = (string)resultItems[i]["image_url_locked"],
-                                    DateUnlocked = ((string)resultItems[i]["date_unlocked"] == null) ? default : (DateTime)resultItems[i]["date_unlocked"],
-                                    Percent = (float)resultItems[i]["rarity"],
-                                    GamerScore = CalcGamerScore((float)resultItems[i]["rarity"])
-                                };
-                                gameAchievements.Add(gameAchievement);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, false, true, PluginName);
-                    }
+                            Id = x.AchievementKey,
+                            Name = x.Name,
+                            Description = x.Description,
+                            UrlUnlocked = x.ImageUrlUnlocked,
+                            UrlLocked = x.ImageUrlLocked,
+                            DateUnlocked = x.DateUnlocked == null ? default : (DateTime)x.DateUnlocked,
+                            Percent = (float)x.Rarity,
+                            GamerScore = CalcGamerScore((float)x.Rarity),
+                            IsHidden = !x.Visible
+                        };
+                        gameAchievements.Add(gameAchievement);
+                    });
                 }
 
                 return gameAchievements;
@@ -383,7 +372,7 @@ namespace CommonPluginsStores.Gog
                     {
                         Logger.Warn($"Error 401 - Wait and retry");
                         Thread.Sleep(5000);
-                        return GetAchievements(id, accountInfos, true);
+                        return GetAchievementsPrivate(id, accountInfos, true);
                     }
                 }
                 else
@@ -395,13 +384,57 @@ namespace CommonPluginsStores.Gog
             return null;
         }
 
+        private ObservableCollection<GameAchievement> GetAchievementsPublic(string id, AccountInfos accountInfos)
+        {
+            try
+            {
+                string url = string.Format(UrlUserGameAchievements, accountInfos.Pseudo, id, accountInfos.UserId);
+                string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Local).ToLower());
+                string response = Web.DownloadStringDataWithUrlBefore(url, urlLang).GetAwaiter().GetResult();
+                string jsonDataString = Tools.GetJsonInString(response, "window.profilesData.achievements = ", "window.profilesData.matchedGame = ", "];");
+
+                ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
+                if (Serialization.TryFromJson(jsonDataString, out dynamic data))
+                {
+                    foreach(dynamic ach in data)
+                    {
+                        dynamic item = ach["achievement"];
+                        AchItem achItem = Serialization.FromJson<AchItem>(item.ToString());
+                        dynamic stats = ach["stats"];
+
+                        GameAchievement gameAchievement = new GameAchievement
+                        {
+                            Id = achItem.Id,
+                            Name = achItem.Name,
+                            Description = achItem.Description,
+                            UrlUnlocked = achItem.ImageUrlUnlocked2,
+                            UrlLocked = achItem.ImageUrlLocked2,
+                            DateUnlocked = !(bool)stats[accountInfos.UserId]["isUnlocked"] ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds((int)stats[accountInfos.UserId]["unlockDate"]).ToUniversalTime(),
+                            Percent = (float)achItem.Rarity,
+                            GamerScore = CalcGamerScore((float)achItem.Rarity),
+                            IsHidden = !achItem.Visible
+                        };
+                        gameAchievements.Add(gameAchievement);
+                    }
+                }
+
+                return gameAchievements;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, $"Error remove {id} in {ClientName} wishlist", true, PluginName);
+            }
+
+            return null;
+        }
+
         public override SourceLink GetAchievementsSourceLink(string name, string id, AccountInfos accountInfos)
         {
             return new SourceLink
             {
                 GameName = name,
                 Name = ClientName,
-                Url = $"https://www.gog.com/u/{UserName}/game/{id}?sort=user_unlock_date&sort_user_id={accountInfos.UserId}"
+                Url = string.Format(UrlUserGameAchievements, accountInfos.Pseudo, id, accountInfos.UserId)
             };
         }
 
@@ -478,7 +511,7 @@ namespace CommonPluginsStores.Gog
                             HtmlParser parser = new HtmlParser();
                             IHtmlDocument HtmlRequirement = parser.Parse(response);
 
-                            foreach (var el in HtmlRequirement.QuerySelectorAll(".product-row-wrapper .product-state-holder"))
+                            foreach (IElement el in HtmlRequirement.QuerySelectorAll(".product-row-wrapper .product-state-holder"))
                             {
                                 string StoreId = el.GetAttribute("gog-product");
                                 GameInfos gameInfos = GetGameInfos(StoreId, null);
@@ -531,15 +564,14 @@ namespace CommonPluginsStores.Gog
         }
         #endregion
 
-
         #region Game
-        public override GameInfos GetGameInfos(string Id, AccountInfos accountInfos)
+        public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
         {
             try
             {
-                string Url = string.Format(UrlApiGameInfo, Id, CodeLang.GetGogLang(Local).ToLower());
-                string WebData = Web.DownloadStringData(Url).GetAwaiter().GetResult();
-                _ = Serialization.TryFromJson(WebData, out Models.ProductApiDetail productApiDetail);
+                string url = string.Format(UrlApiGameInfo, id, CodeLang.GetGogLang(Local).ToLower());
+                string reponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
+                _ = Serialization.TryFromJson(reponse, out Models.ProductApiDetail productApiDetail);
 
                 GameInfos gameInfos = new GameInfos
                 {
@@ -570,32 +602,32 @@ namespace CommonPluginsStores.Gog
             return null;
         }
 
-        public override ObservableCollection<DlcInfos> GetDlcInfos(string Id, AccountInfos accountInfos)
+        public override ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos)
         {
-            string Url = string.Format(UrlApiGameInfo, Id, CodeLang.GetGogLang(Local).ToLower());
-            string WebData = Web.DownloadStringData(Url).GetAwaiter().GetResult();
-            Serialization.TryFromJson(WebData, out Models.ProductApiDetail productApiDetail);
+            string url = string.Format(UrlApiGameInfo, id, CodeLang.GetGogLang(Local).ToLower());
+            string reponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
+            Serialization.TryFromJson(reponse, out Models.ProductApiDetail productApiDetail);
             
             string stringDlcs = Serialization.ToJson(productApiDetail?.dlcs);
             if (!stringDlcs.IsNullOrEmpty() && !stringDlcs.IsEqual("[]"))
             {
-                GogDlcs DlcsData = Serialization.FromJson<GogDlcs>(stringDlcs);
-                return GetDlcInfos(DlcsData, accountInfos);
+                GogDlcs dlcsData = Serialization.FromJson<GogDlcs>(stringDlcs);
+                return GetDlcInfos(dlcsData, accountInfos);
             }
 
             return null;
         }
 
-        private ObservableCollection<DlcInfos> GetDlcInfos(GogDlcs DlcsData, AccountInfos accountInfos)
+        private ObservableCollection<DlcInfos> GetDlcInfos(GogDlcs dlcsData, AccountInfos accountInfos)
         {
             ObservableCollection<DlcInfos> Dlcs = new ObservableCollection<DlcInfos>();
 
-            if (DlcsData?.products == null)
+            if (dlcsData?.products == null)
             {
                 return Dlcs;
             }
 
-            foreach (Product el in DlcsData?.products)
+            foreach (Product el in dlcsData?.products)
             {
                 try
                 {
@@ -675,7 +707,6 @@ namespace CommonPluginsStores.Gog
         }
         #endregion
 
-
         #region Games owned
         internal override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
         {
@@ -701,8 +732,76 @@ namespace CommonPluginsStores.Gog
         }
         #endregion
 
-
         #region GOG
+        public async Task<bool> CheckIsPublic(AccountInfos accountInfos)
+        {
+            try
+            {
+                string url = string.Format(UrlUser, accountInfos.Pseudo);
+                string response = await Web.DownloadStringData(url);
+                return !response.Contains("hook-test=\"isPrivate\"");
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+            }
+
+            return false;
+        }
+
+        private bool CheckIsUserLoggedIn()
+        {
+            return !AccountBasic?.AccessToken.IsNullOrEmpty() ?? false;
+        }
+
+        private void GogLogin()
+        {
+            using (IWebView webView = API.Instance.WebViews.CreateView(new WebViewSettings
+            {
+                WindowWidth = 580,
+                WindowHeight = 700,
+                // This is needed otherwise captcha won't pass
+                UserAgent = @"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Vivaldi/5.5.2805.50"
+            }))
+            {
+                webView.LoadingChanged += async (s, e) =>
+                {
+                    string url = webView.GetCurrentAddress();
+                    if (!url.EndsWith("#openlogin"))
+                    {
+                        bool loggedIn = await Task.Run(() =>
+                        {
+                            using (IWebView webViewBackground = API.Instance.WebViews.CreateOffscreenView())
+                            {
+                                webViewBackground.NavigateAndWait(UrlAccountInfo);
+                                string stringInfo = webViewBackground.GetPageText();
+                                _ = Serialization.TryFromJson(stringInfo, out AccountBasicResponse accountBasicResponse);
+                                AccountBasic = accountBasicResponse;
+                                return AccountBasic?.IsLoggedIn ?? false;
+                            }
+                        });
+                        if (loggedIn)
+                        {
+                            _ = SetStoredCookies(GetWebCookies());
+                            webView.Close();
+                        }
+                    }
+                };
+
+                webView.DeleteDomainCookies(".gog.com");
+                webView.Navigate(UrlLogin);
+                _ = webView.OpenDialog();
+            }
+        }
+
+        private AccountBasicResponse GetAccountInfo()
+        {
+            string response = Web.DownloadStringData(UrlAccountInfo, GetStoredCookies()).GetAwaiter().GetResult();
+            _ = Serialization.TryFromJson(response, out AccountBasicResponse accountBasicResponse);
+            return accountBasicResponse;
+        }
+
+
         private UserDataOwned LoadUserDataOwned(bool onlyNow = true)
         {
             if (File.Exists(FileUserDataOwned))
@@ -717,15 +816,7 @@ namespace CommonPluginsStores.Gog
 
                     if (!onlyNow)
                     {
-                        LocalDateTimeConverter localDateTimeConverter = new LocalDateTimeConverter();
-                        string formatedDateLastWrite = localDateTimeConverter.Convert(dateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
-                        Logger.Warn($"Use saved UserDataOwned - {formatedDateLastWrite}");
-                        API.Instance.Notifications.Add(new NotificationMessage(
-                            $"{PluginName}-gog-saveddata",
-                            $"{PluginName}" + Environment.NewLine
-                                + string.Format(ResourceProvider.GetString("LOCCommonNotificationOldData"), ClientName, formatedDateLastWrite),
-                            NotificationType.Info
-                        ));
+                        ShowNotificationOldData(dateLastWrite);
                     }
 
                     return Serialization.FromJsonFile<UserDataOwned>(FileUserDataOwned);
@@ -772,21 +863,21 @@ namespace CommonPluginsStores.Gog
             File.WriteAllText(FileUserDataOwned, Serialization.ToJson(userDataOwned));
         }
 
-        private PriceData GetPrice(List<string> ids, string Local, StoreCurrency LocalCurrency)
+        private PriceData GetPrice(List<string> ids, string local, StoreCurrency localCurrency)
         {
             string joined = string.Join(",", ids);
-            string UrlPrice = string.Format(UrlApiPrice, joined, LocalCurrency.country.ToUpper(), LocalCurrency.currency.ToUpper());
-            string DataPrice = Web.DownloadStringData(UrlPrice).GetAwaiter().GetResult();
+            string urlPrice = string.Format(UrlApiPrice, joined, localCurrency.country.ToUpper(), localCurrency.currency.ToUpper());
+            string dataPrice = Web.DownloadStringData(urlPrice).GetAwaiter().GetResult();
 
-            Serialization.TryFromJson<dynamic>(DataPrice, out dynamic dataObj);
+            Serialization.TryFromJson<dynamic>(dataPrice, out dynamic dataObj);
 
-            string CodeCurrency = LocalCurrency.currency;
-            string SymbolCurrency = LocalCurrency.symbol;
+            string CodeCurrency = localCurrency.currency;
+            string SymbolCurrency = localCurrency.symbol;
 
             // When no data or error, try with USD
             if (dataObj["message"] != null && ((string)dataObj["message"]).Contains("is not supported in", StringComparison.InvariantCultureIgnoreCase))
             {
-                return GetPrice(ids, Local, new StoreCurrency { country = "US", currency = "USD", symbol = "$" });
+                return GetPrice(ids, local, new StoreCurrency { country = "US", currency = "USD", symbol = "$" });
             }
 
             if (dataObj["message"] != null)
@@ -809,13 +900,11 @@ namespace CommonPluginsStores.Gog
             {
                 if (IsUserLoggedIn)
                 {
-                    string webData = Web.DownloadStringData(UrlUserData).GetAwaiter().GetResult();
-                    Serialization.TryFromJson<UserData>(webData, out UserData userData);
-
-                    if (userData?.currencies != null)
+                    string response = Web.DownloadStringData(UrlUserData).GetAwaiter().GetResult();
+                    if (Serialization.TryFromJson(response, out UserData userData) && userData?.currencies != null)
                     {
                         return userData.currencies.Select(x => new StoreCurrency { country = userData.country, currency = x.code.ToUpper(), symbol = x.symbol }).ToList();
-                    }                    
+                    }
                 }
             }
             catch (Exception ex)
@@ -830,7 +919,7 @@ namespace CommonPluginsStores.Gog
             };
         }
 
-        internal string RemoveDescriptionPromos(string originalDescription)
+        private string RemoveDescriptionPromos(string originalDescription)
         {
             if (originalDescription.IsNullOrEmpty())
             {
@@ -839,9 +928,9 @@ namespace CommonPluginsStores.Gog
 
             // Get opening element in description. Promos are always at the start of description.
             // It has been seen that descriptions start with <a> or <div> elements
-            var parser = new HtmlParser();
-            var document = parser.Parse(originalDescription);
-            var firstChild = document.Body.FirstChild;
+            HtmlParser parser = new HtmlParser();
+            IHtmlDocument document = parser.Parse(originalDescription);
+            INode firstChild = document.Body.FirstChild;
             if (firstChild == null || firstChild.NodeType != NodeType.Element || !firstChild.HasChildNodes)
             {
                 return originalDescription;
@@ -849,9 +938,9 @@ namespace CommonPluginsStores.Gog
 
             // It's possible to check if a description has a promo if the first element contains
             // a child img element with a src that points to know promo image url patterns
-            var htmlElement = firstChild as IHtmlElement;
-            var promoUrlsRegex = @"https:\/\/items.gog.com\/(promobanners|autumn|fall|summer|winter)\/";
-            var containsPromoImage = htmlElement.QuerySelectorAll("img")
+            IHtmlElement htmlElement = firstChild as IHtmlElement;
+            string promoUrlsRegex = @"https:\/\/items.gog.com\/(promobanners|autumn|fall|summer|winter)\/";
+            bool containsPromoImage = htmlElement.QuerySelectorAll("img")
                         .Any(img => img.HasAttribute("src") && Regex.IsMatch(img.GetAttribute("src"), promoUrlsRegex, RegexOptions.IgnoreCase));
             if (!containsPromoImage)
             {
@@ -859,15 +948,15 @@ namespace CommonPluginsStores.Gog
             }
 
             // Remove all following <hr> and <br> elements that GOG adds after a promo
-            var nextSibling = firstChild.NextSibling;
+            INode nextSibling = firstChild.NextSibling;
             while (nextSibling != null && (nextSibling is IHtmlHrElement || nextSibling is IHtmlBreakRowElement))
             {
-                document.Body.RemoveChild(nextSibling);
+                _ = document.Body.RemoveChild(nextSibling);
                 nextSibling = firstChild.NextSibling;
             }
 
             // Remove initial opening element and return description without promo
-            document.Body.RemoveChild(firstChild);
+            _= document.Body.RemoveChild(firstChild);
             return document.Body.InnerHtml;
         }
         #endregion

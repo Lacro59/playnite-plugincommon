@@ -25,40 +25,40 @@ namespace CommonPluginsStores
         internal static ILogger Logger => LogManager.GetLogger();
 
         #region Account data
-        protected AccountInfos currentAccountInfos;
+        protected AccountInfos _currentAccountInfos;
         public AccountInfos CurrentAccountInfos
         {
             get
             {
-                currentAccountInfos = currentAccountInfos ?? GetCurrentAccountInfos();
-                return currentAccountInfos;
+                _currentAccountInfos = _currentAccountInfos ?? GetCurrentAccountInfos();
+                return _currentAccountInfos;
             }
 
-            set => SetValue(ref currentAccountInfos, value);
+            set => SetValue(ref _currentAccountInfos, value);
         }
 
-        protected ObservableCollection<AccountInfos> currentFriendsInfos;
+        protected ObservableCollection<AccountInfos> _currentFriendsInfos;
         public ObservableCollection<AccountInfos> CurrentFriendsInfos
         {
             get
             {
-                currentFriendsInfos = currentFriendsInfos ?? GetCurrentFriendsInfos();
-                return currentFriendsInfos;
+                _currentFriendsInfos = _currentFriendsInfos ?? GetCurrentFriendsInfos();
+                return _currentFriendsInfos;
             }
 
-            set => SetValue(ref currentFriendsInfos, value);
+            set => SetValue(ref _currentFriendsInfos, value);
         }
 
-        protected ObservableCollection<AccountGameInfos> currentGamesInfos;
+        protected ObservableCollection<AccountGameInfos> _currentGamesInfos;
         public ObservableCollection<AccountGameInfos> CurrentGamesInfos
         {
             get
             {
-                currentGamesInfos = currentGamesInfos ?? GetAccountGamesInfos(CurrentAccountInfos);
-                return currentGamesInfos;
+                _currentGamesInfos = _currentGamesInfos ?? GetAccountGamesInfos(CurrentAccountInfos);
+                return _currentGamesInfos;
             }
 
-            set => SetValue(ref currentGamesInfos, value);
+            set => SetValue(ref _currentGamesInfos, value);
         }
 
         public ObservableCollection<GameDlcOwned> CurrentGamesDlcsOwned
@@ -72,6 +72,7 @@ namespace CommonPluginsStores
         }
         #endregion
 
+        public StoreSettings StoreSettings = new StoreSettings();
 
         protected bool? isUserLoggedIn;
         public bool IsUserLoggedIn
@@ -88,8 +89,6 @@ namespace CommonPluginsStores
 
             set => SetValue(ref isUserLoggedIn, value);
         }
-
-        internal bool ForceAuth { get; set; } = false;
 
         internal string PluginName { get; }
         internal string ClientName { get; }
@@ -201,9 +200,9 @@ namespace CommonPluginsStores
         /// <returns></returns>
         internal virtual List<HttpCookie> GetWebCookies()
         {
-            using (IWebView webViewOffscreen = API.Instance.WebViews.CreateOffscreenView())
+            using (IWebView webView = API.Instance.WebViews.CreateOffscreenView())
             {
-                List<HttpCookie> httpCookies = webViewOffscreen.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName.ToLower()) ?? false)?.ToList() ?? new List<HttpCookie>();
+                List<HttpCookie> httpCookies = webView.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName.ToLower()) ?? false)?.ToList() ?? new List<HttpCookie>();
                 return httpCookies;
             }
         }
@@ -229,7 +228,7 @@ namespace CommonPluginsStores
 
         public void SetForceAuth(bool forceAuth)
         {
-            ForceAuth = forceAuth;
+            StoreSettings.ForceAuth = forceAuth;
         }
 
         public virtual void Login()
@@ -385,20 +384,7 @@ namespace CommonPluginsStores
 
                     if (!onlyNow)
                     {
-                        LocalDateTimeConverter localDateTimeConverter = new LocalDateTimeConverter();
-                        string formatedDateLastWrite = localDateTimeConverter.Convert(dateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
-                        Logger.Warn($"Use saved UserData - {formatedDateLastWrite}");
-                        API.Instance.Notifications.Add(new NotificationMessage(
-                            $"{PluginName}-{ClientNameLog}-LoadGamesDlcsOwned",
-                            $"{PluginName}" + Environment.NewLine
-                                + string.Format(ResourceProvider.GetString("LOCCommonNotificationOldData"), ClientName, formatedDateLastWrite),
-                            NotificationType.Info,
-                            () =>
-                            {
-                                ResetIsUserLoggedIn();
-                                ShowPluginSettings(PluginLibrary);
-                            }
-                        ));
+                        ShowNotificationOldData(dateLastWrite);
                     }
 
                     return Serialization.FromJsonFile<ObservableCollection<GameDlcOwned>>(FileGamesDlcsOwned);
@@ -450,22 +436,57 @@ namespace CommonPluginsStores
         #endregion
 
 
+        internal void ShowNotificationOldData(DateTime dateLastWrite)
+        {
+            LocalDateTimeConverter localDateTimeConverter = new LocalDateTimeConverter();
+            string formatedDateLastWrite = localDateTimeConverter.Convert(dateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
+            Logger.Warn($"Use saved UserData - {formatedDateLastWrite}");
+            API.Instance.Notifications.Add(new NotificationMessage(
+                $"{PluginName}-{ClientNameLog}-LoadGamesDlcsOwned",
+                $"{PluginName}" + Environment.NewLine
+                    + string.Format(ResourceProvider.GetString("LOCCommonNotificationOldData"), ClientName, formatedDateLastWrite),
+                NotificationType.Info,
+                () =>
+                {
+                    ResetIsUserLoggedIn();
+                    ShowPluginSettings(PluginLibrary);
+                }
+            ));
+        }
+
+
         public static float CalcGamerScore(float value)
         {
             float gamerScore = 15;
             if (value < 2)
             {
                 gamerScore = 180;
-            } 
-            else if (value < 10) 
+            }
+            else if (value < 10)
             {
                 gamerScore = 90;
-            } 
+            }
             else if (value < 30)
             {
                 gamerScore = 30;
             }
             return gamerScore;
         }
+    }
+
+
+    public class StoreSettings
+    {
+        public bool UseApi { get; set; } = false;
+
+
+        private bool _useAuth;
+        public bool UseAuth
+        {
+            get => ForceAuth || _useAuth;
+            set => _useAuth = value;
+        }
+
+        public bool ForceAuth { get; set; } = false;
     }
 }

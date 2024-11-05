@@ -90,21 +90,7 @@ namespace CommonPluginsStores.Steam
             set => steamApps = value;
         }
 
-        private SteamUserData UserData
-        {
-            get
-            {
-                try
-                {
-                    return LoadUserData() ?? GetUserData() ?? LoadUserData(false);
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, ClientName, true, PluginName);
-                    return null;
-                }
-            }
-        }
+        private SteamUserData UserData => LoadUserData() ?? GetUserData() ?? LoadUserData(false);
 
         #region Paths
         private string AppsListPath { get; }
@@ -129,7 +115,7 @@ namespace CommonPluginsStores.Steam
         #endregion
 
 
-        public SteamApi(string PluginName) : base(PluginName, ExternalPlugin.SteamLibrary, "Steam")
+        public SteamApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "Steam")
         {
             AppsListPath = Path.Combine(PathStoresData, "Steam_AppsList.json");
             FileUserData = Path.Combine(PathStoresData, "Steam_UserData.json");
@@ -146,7 +132,7 @@ namespace CommonPluginsStores.Steam
                 return false;
             }
 
-            if (ForceAuth)
+            if (StoreSettings.UseAuth)
             {
                 SteamUserData userData = GetUserData();
                 return userData?.RgOwnedApps?.Count > 0;
@@ -200,6 +186,7 @@ namespace CommonPluginsStores.Steam
                                 Avatar = string.Format(UrlAvatarFul, avatarhash),
                                 Pseudo = rgProfileData.PersonaName,
                                 Link = rgProfileData.Url,
+                                IsPrivate = true,
                                 IsCurrent = true
                             };
                             SaveCurrentUser();
@@ -246,7 +233,7 @@ namespace CommonPluginsStores.Steam
                 _ = Task.Run(() =>
                 {
                     Thread.Sleep(1000);
-                    if ((CurrentAccountInfos.Avatar.IsNullOrEmpty() || CurrentAccountInfos.Link.IsNullOrEmpty()) && IsConfigured() && ulong.TryParse(currentAccountInfos.UserId, out ulong steamId))
+                    if ((CurrentAccountInfos.Avatar.IsNullOrEmpty() || CurrentAccountInfos.Link.IsNullOrEmpty()) && IsConfigured() && ulong.TryParse(_currentAccountInfos.UserId, out ulong steamId))
                     {
                         ObservableCollection<AccountInfos> playerSummaries = GetPlayerSummaries(new List<ulong> { steamId });
                         CurrentAccountInfos.Avatar = playerSummaries?.FirstOrDefault().Avatar;
@@ -268,7 +255,7 @@ namespace CommonPluginsStores.Steam
                 ObservableCollection<AccountInfos> accountInfos = null;
                 if (CurrentAccountInfos != null && CurrentAccountInfos.IsCurrent)
                 {
-                    accountInfos = CurrentAccountInfos.IsPrivate || CurrentAccountInfos.ApiKey.IsNullOrEmpty()
+                    accountInfos = StoreSettings.UseAuth || CurrentAccountInfos.IsPrivate || !StoreSettings.UseApi || CurrentAccountInfos.ApiKey.IsNullOrEmpty()
                         ? GetCurrentFriendsInfosByWeb()
                         : GetCurrentFriendsInfosByApi();
                 }
@@ -359,7 +346,7 @@ namespace CommonPluginsStores.Steam
 
                 if (accountInfos != null && accountInfos.IsCurrent)
                 {
-                    gameAchievements = accountInfos.IsPrivate || accountInfos.ApiKey.IsNullOrEmpty()
+                    gameAchievements = StoreSettings.UseAuth || accountInfos.IsPrivate || !StoreSettings.UseApi || accountInfos.ApiKey.IsNullOrEmpty()
                         ? GetAchievementsByWeb(appId, accountInfos, gameAchievements)
                         : GetAchievementsByApi(appId, accountInfos, gameAchievements);
                 }
@@ -835,7 +822,7 @@ namespace CommonPluginsStores.Steam
 
         public List<SteamStats> GetUsersStats(uint appId, AccountInfos accountInfos)
         {
-            return accountInfos.IsPrivate || accountInfos.ApiKey.IsNullOrEmpty()
+            return StoreSettings.UseAuth || accountInfos.IsPrivate || !StoreSettings.UseApi || accountInfos.ApiKey.IsNullOrEmpty()
                         ? new List<SteamStats>()
                         : SteamKit.GetUserStatsForGame(accountInfos.ApiKey, appId, ulong.Parse(accountInfos.UserId));
         }
@@ -894,15 +881,7 @@ namespace CommonPluginsStores.Steam
 
                     if (!onlyNow)
                     {
-                        LocalDateTimeConverter localDateTimeConverter = new LocalDateTimeConverter();
-                        string formatedDateLastWrite = localDateTimeConverter.Convert(dateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
-                        Logger.Warn($"Use saved UserData - {formatedDateLastWrite}");
-                        API.Instance.Notifications.Add(new NotificationMessage(
-                            $"{PluginName}-steam-saveddata",
-                            $"{PluginName}" + Environment.NewLine
-                                + string.Format(ResourceProvider.GetString("LOCCommonNotificationOldData"), ClientName, formatedDateLastWrite),
-                            NotificationType.Info
-                        ));
+                        ShowNotificationOldData(dateLastWrite);
                     }
 
                     return Serialization.FromJsonFile<SteamUserData>(FileUserData);
@@ -960,7 +939,7 @@ namespace CommonPluginsStores.Steam
 
         public bool CheckGameIsPrivate(uint appId, AccountInfos accountInfos)
         {
-            return accountInfos.IsPrivate || accountInfos.ApiKey.IsNullOrEmpty()
+            return StoreSettings.UseAuth || accountInfos.IsPrivate || !StoreSettings.UseApi || accountInfos.ApiKey.IsNullOrEmpty()
                 ? CheckGameIsPrivateByWeb(appId, accountInfos)
                 : SteamKit.CheckGameIsPrivate(accountInfos.ApiKey, appId, ulong.Parse(accountInfos.UserId));
         }
@@ -999,9 +978,9 @@ namespace CommonPluginsStores.Steam
         private ObservableCollection<AccountInfos> GetPlayerSummaries(List<ulong> steamIds)
         {
             ObservableCollection<AccountInfos> playerSummaries = null;
-            if (steamIds?.Count > 0 && !currentAccountInfos.ApiKey.IsNullOrEmpty())
+            if (steamIds?.Count > 0 && !_currentAccountInfos.ApiKey.IsNullOrEmpty())
             {
-                List<Models.SteamKit.SteamPlayerSummaries> steamPlayerSummaries = SteamKit.GetPlayerSummaries(currentAccountInfos.ApiKey, steamIds);
+                List<Models.SteamKit.SteamPlayerSummaries> steamPlayerSummaries = SteamKit.GetPlayerSummaries(_currentAccountInfos.ApiKey, steamIds);
                 playerSummaries = steamPlayerSummaries?.Select(x => new AccountInfos
                 {
                     UserId = x.SteamId,
@@ -1016,9 +995,9 @@ namespace CommonPluginsStores.Steam
         private ObservableCollection<AccountInfos> GetCurrentFriendsInfosByApi()
         {
             ObservableCollection<AccountInfos> currentFriendsInfos = null;
-            if (!currentAccountInfos.ApiKey.IsNullOrEmpty() && ulong.TryParse(currentAccountInfos.UserId, out ulong steamId))
+            if (!_currentAccountInfos.ApiKey.IsNullOrEmpty() && ulong.TryParse(_currentAccountInfos.UserId, out ulong steamId))
             {
-                List<SteamFriend> friendList = SteamKit.GetFriendList(currentAccountInfos.ApiKey, steamId);
+                List<SteamFriend> friendList = SteamKit.GetFriendList(_currentAccountInfos.ApiKey, steamId);
                 List<ulong> steamIds = friendList?.Select(x => x.SteamId)?.ToList() ?? new List<ulong>();
                 currentFriendsInfos = GetPlayerSummaries(steamIds);
 
@@ -1037,9 +1016,9 @@ namespace CommonPluginsStores.Steam
         private ObservableCollection<GameAchievement> GetAchievementsByApi(uint appId, AccountInfos accountInfos, ObservableCollection<GameAchievement> gameAchievements)
         {
             Logger.Info($"GetAchievementsByApi()");
-            if (appId > 0 && ulong.TryParse(accountInfos.UserId, out ulong steamId) && !currentAccountInfos.ApiKey.IsNullOrEmpty())
+            if (appId > 0 && ulong.TryParse(accountInfos.UserId, out ulong steamId) && !_currentAccountInfos.ApiKey.IsNullOrEmpty())
             {
-                List<SteamPlayerAchievement> steamPlayerAchievements = SteamKit.GetPlayerAchievements(currentAccountInfos.ApiKey, appId, steamId, CodeLang.GetSteamLang(Local));
+                List<SteamPlayerAchievement> steamPlayerAchievements = SteamKit.GetPlayerAchievements(_currentAccountInfos.ApiKey, appId, steamId, CodeLang.GetSteamLang(Local));
                 steamPlayerAchievements?.ForEach(x =>
                 {
                     gameAchievements.FirstOrDefault(y => y.Id.IsEqual(x.ApiName)).DateUnlocked = x.UnlockTime;

@@ -53,7 +53,7 @@ namespace CommonPluginsStores.Epic
         #endregion
 
 
-        public EpicApi(string PluginName) : base(PluginName, ExternalPlugin.EpicLibrary, "Epic")
+        public EpicApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "Epic")
         {
             TokensPath = Path.Combine(PathStoresData, "Epic_Tokens.dat");
         }
@@ -96,9 +96,9 @@ namespace CommonPluginsStores.Epic
         #region Configuration
         protected override bool GetIsUserLoggedIn()
         {
-            if (!currentAccountInfos.IsPrivate && !ForceAuth)
+            if (!_currentAccountInfos.IsPrivate && !StoreSettings.UseAuth)
             {
-                return true;
+                return !_currentAccountInfos.UserId.IsNullOrEmpty();
             }
 
             bool isLogged = CheckIsUserLoggedIn();
@@ -141,6 +141,7 @@ namespace CommonPluginsStores.Epic
                             UserId = tokens.account_id,
                             Pseudo = epicAccountResponse?.DisplayName,
                             Link = string.Format(UrlAccountProfile, tokens.account_id),
+                            IsPrivate = true,
                             IsCurrent = true
                         };
                         SaveCurrentUser();
@@ -236,7 +237,7 @@ namespace CommonPluginsStores.Epic
                     gameAchievements.Add(gameAchievement);
                 });
 
-                if (!accountInfos.IsPrivate)
+                if (!accountInfos.IsPrivate && StoreSettings.UseAuth)
                 {
                     EpicPlayerProfileAchievementsByProductIdResponse playerProfileAchievementsByProductId = QueryPlayerProfileAchievementsByProductId(accountInfos.UserId, productId).GetAwaiter().GetResult();
                     playerProfileAchievementsByProductId?.Data?.PlayerProfile?.PlayerProfile2?.ProductAchievements?.Data?.PlayerAchievements?.ForEach(x =>

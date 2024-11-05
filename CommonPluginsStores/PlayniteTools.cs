@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CommonPlayniteShared.Common;
 using CommonPluginsStores.Steam;
+using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores
 {
@@ -43,12 +44,12 @@ namespace CommonPluginsStores
             }
 
             string result = inputString;
-            result = CommonPluginsShared.PlayniteTools.StringExpandWithoutStore(game, result, fixSeparators);
+            result = StringExpandWithoutStore(game, result, fixSeparators);
 
             // Steam
             if (result.Contains("{Steam"))
             {
-                SteamApi steamApi = new SteamApi("PlayniteTools");
+                SteamApi steamApi = new SteamApi("PlayniteTools", ExternalPlugin.None);
 
                 if (SteamId == "null")
                 {
