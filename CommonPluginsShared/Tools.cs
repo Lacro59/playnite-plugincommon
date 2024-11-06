@@ -8,6 +8,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Web;
+using System.IO;
+using CommonPluginsShared.Extensions;
 
 namespace CommonPluginsShared
 {
@@ -219,6 +221,30 @@ namespace CommonPluginsShared
             }
 
             return str;
+        }
+
+        public static List<string> FindFile(string path, string fileName, bool scanSubFolders)
+        {
+            try
+            {
+                List<string> files = Directory.GetFiles(path).ToList();
+                List<string> founds = files.Where(x => Path.GetFileName(x).IsEqual(fileName))?.ToList();
+                if (scanSubFolders)
+                {
+                    List<string> dirs = Directory.GetDirectories(path).ToList();
+                    dirs.ForEach(x =>
+                    {
+                        List<string> foundsSub = FindFile(x, fileName, scanSubFolders);
+                        _ = founds.AddMissing(foundsSub);
+                    });
+                }
+                return founds;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+            }
+            return new List<string>();
         }
     }
 }

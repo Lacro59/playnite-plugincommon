@@ -56,32 +56,34 @@ namespace CommonPluginsShared
 
             EmuLibrary,
             LegendaryLibrary,
+            GogOssLibrary
         }
 
         private static readonly Dictionary<Guid, ExternalPlugin> PluginsById = new Dictionary<Guid, ExternalPlugin>
         {
-            { new Guid("e3c26a3d-d695-4cb7-a769-5ff7612c7edd"), ExternalPlugin.BattleNetLibrary },
-            { new Guid("aebe8b7c-6dc3-4a66-af31-e7375c6b5e9e"), ExternalPlugin.GogLibrary },
-            { new Guid("85dd7072-2f20-4e76-a007-41035e390724"), ExternalPlugin.OriginLibrary },
-            { new Guid("e4ac81cb-1b1a-4ec9-8639-9a9633989a71"), ExternalPlugin.PSNLibrary },
-            { new Guid("cb91dfc9-b977-43bf-8e70-55f46e410fab"), ExternalPlugin.SteamLibrary },
-            { new Guid("7e4fbb5e-2ae3-48d4-8ba0-6b30e7a4e287"), ExternalPlugin.XboxLibrary },
-            { new Guid("f7da6eb0-17d7-497c-92fd-347050914954"), ExternalPlugin.IndiegalaLibrary },
-            { new Guid("402674cd-4af6-4886-b6ec-0e695bfa0688"), ExternalPlugin.AmazonGamesLibrary },
+            { new Guid("E3C26A3D-D695-4CB7-A769-5FF7612C7EDD"), ExternalPlugin.BattleNetLibrary },
+            { new Guid("AEBE8B7C-6DC3-4A66-AF31-E7375C6B5E9E"), ExternalPlugin.GogLibrary },
+            { new Guid("85DD7072-2F20-4E76-A007-41035E390724"), ExternalPlugin.OriginLibrary },
+            { new Guid("E4AC81CB-1B1A-4EC9-8639-9A9633989A71"), ExternalPlugin.PSNLibrary },
+            { new Guid("CB91DFC9-B977-43BF-8E70-55F46E410FAB"), ExternalPlugin.SteamLibrary },
+            { new Guid("7E4FBB5E-2AE3-48D4-8BA0-6B30E7A4E287"), ExternalPlugin.XboxLibrary },
+            { new Guid("F7DA6EB0-17D7-497C-92FD-347050914954"), ExternalPlugin.IndiegalaLibrary },
+            { new Guid("402674CD-4AF6-4886-B6EC-0E695BFA0688"), ExternalPlugin.AmazonGamesLibrary },
             { new Guid("0E2E793E-E0DD-4447-835C-C44A1FD506EC"), ExternalPlugin.BethesdaLibrary },
             { new Guid("00000002-DBD1-46C6-B5D0-B1BA559D10E4"), ExternalPlugin.EpicLibrary },
-            { new Guid("96e8c4bc-ec5c-4c8b-87e7-18ee5a690626"), ExternalPlugin.HumbleLibrary },
+            { new Guid("96E8C4BC-EC5C-4C8B-87E7-18EE5A690626"), ExternalPlugin.HumbleLibrary },
             { new Guid("00000001-EBB2-4EEC-ABCB-7C89937A42BB"), ExternalPlugin.ItchioLibrary },
-            { new Guid("88409022-088a-4de8-805a-fdbac291f00a"), ExternalPlugin.RockstarLibrary },
+            { new Guid("88409022-088A-4DE8-805A-FDBAC291F00A"), ExternalPlugin.RockstarLibrary },
             { new Guid("E2A7D494-C138-489D-BB3F-1D786BEEB675"), ExternalPlugin.TwitchLibrary },
             { new Guid("C2F038E5-8B92-4877-91F1-DA9094155FC5"), ExternalPlugin.UplayLibrary },
             { new Guid("77346DD6-B0CC-4F7D-80F0-C1D138CCAE58"), ExternalPlugin.OculusLibrary },
-            { new Guid("317a5e2e-eac1-48bc-adb3-fb9e321afd3f"), ExternalPlugin.RiotLibrary },
-            { new Guid("41e49490-0583-4148-94d2-940c7c74f1d9"), ExternalPlugin.EmuLibrary },
+            { new Guid("317A5E2E-EAC1-48BC-ADB3-FB9E321AFD3F"), ExternalPlugin.RiotLibrary },
+            { new Guid("41E49490-0583-4148-94D2-940C7C74F1D9"), ExternalPlugin.EmuLibrary },
             { new Guid("EAD65C3B-2F8F-4E37-B4E6-B3DE6BE540C6"), ExternalPlugin.LegendaryLibrary },
+            { new Guid("03689811-3F33-4DFB-A121-2EE168FB9A5C"), ExternalPlugin.GogOssLibrary },
 
-            { new Guid("cebe6d32-8c46-4459-b993-5a5189d60788"), ExternalPlugin.SuccessStory },
-            { new Guid("bf78d9af-6e79-4c73-aca6-c23a11a485ae"), ExternalPlugin.CheckDlc }
+            { new Guid("CEBE6D32-8C46-4459-B993-5A5189D60788"), ExternalPlugin.SuccessStory },
+            { new Guid("BF78D9AF-6E79-4C73-ACA6-C23A11A485AE"), ExternalPlugin.CheckDlc }
         };
 
         public static ExternalPlugin GetPluginType(Guid PluginId)
