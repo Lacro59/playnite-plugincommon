@@ -96,9 +96,9 @@ namespace CommonPluginsStores.Gog
         #region Configuration
         protected override bool GetIsUserLoggedIn()
         {
-            if (!_currentAccountInfos.IsPrivate && !StoreSettings.UseAuth)
+            if (!CurrentAccountInfos.IsPrivate && !StoreSettings.UseAuth)
             {
-                return !_currentAccountInfos.UserId.IsNullOrEmpty();
+                return !CurrentAccountInfos.UserId.IsNullOrEmpty();
             }
 
             bool isLogged = CheckIsUserLoggedIn();
@@ -166,6 +166,13 @@ namespace CommonPluginsStores.Gog
                 _ = Task.Run(() =>
                 {
                     Thread.Sleep(1000);
+
+                    string reponse = Web.DownloadStringData(string.Format(UrlUser, accountInfos.Pseudo), GetStoredCookies()).GetAwaiter().GetResult();
+                    string jsonDataString = Tools.GetJsonInString(reponse, "window.profilesData.currentUser = ", "window.profilesData.currentUserPreferences = ", "};");
+                    _ = Serialization.TryFromJson(jsonDataString, out ProfileUser profileUser);
+
+                    CurrentAccountInfos.Avatar = profileUser?.avatar ?? CurrentAccountInfos.Avatar;
+
                     CurrentAccountInfos.IsPrivate = !CheckIsPublic(accountInfos).GetAwaiter().GetResult();
                     CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
                 });

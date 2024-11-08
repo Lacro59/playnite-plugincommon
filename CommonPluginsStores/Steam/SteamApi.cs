@@ -134,7 +134,7 @@ namespace CommonPluginsStores.Steam
 
             if (StoreSettings.UseAuth)
             {
-                SteamUserData userData = GetUserData();
+                SteamUserData userData = GetUserData(true);
                 return userData?.RgOwnedApps?.Count > 0;
             }
 
@@ -178,7 +178,8 @@ namespace CommonPluginsStores.Steam
                             string JsonDataString = Tools.GetJsonInString(source, "g_rgProfileData = ", "\"};") + "\"}";
                             RgProfileData rgProfileData = Serialization.FromJson<RgProfileData>(JsonDataString);
 
-                            string avatarhash = Tools.GetJsonInString(source, "https://avatars.akamai.steamstatic.com/", "_full.jpg\">");
+                            MatchCollection matches = Regex.Matches(source, @"avatars.cloudflare.steamstatic.com/(\w*)_full");
+                            string avatarhash = matches.Count > 0 ? matches[0].Groups[1].Value : null;
 
                             CurrentAccountInfos = new AccountInfos
                             {
@@ -233,11 +234,31 @@ namespace CommonPluginsStores.Steam
                 _ = Task.Run(() =>
                 {
                     Thread.Sleep(1000);
-                    if ((CurrentAccountInfos.Avatar.IsNullOrEmpty() || CurrentAccountInfos.Link.IsNullOrEmpty()) && IsConfigured() && ulong.TryParse(_currentAccountInfos.UserId, out ulong steamId))
+
+                    if (CurrentAccountInfos.ApiKey.IsNullOrEmpty())
+                    {
+                        string withId = Web.DownloadStringData(string.Format(UrlProfileById, accountInfos.UserId), GetStoredCookies()).GetAwaiter().GetResult();
+                        string JsonDataString = Tools.GetJsonInString(withId, "g_rgProfileData = ", "\"};") + "\"}";
+                        if (JsonDataString.Length < 5)
+                        {
+                            string withPersona = Web.DownloadStringData(string.Format(UrlProfileByName, accountInfos.Pseudo), GetStoredCookies()).GetAwaiter().GetResult();
+                            JsonDataString = Tools.GetJsonInString(withPersona, "g_rgProfileData = ", "\"};") + "\"}";
+                        }
+                        _ = Serialization.TryFromJson(JsonDataString, out RgProfileData rgProfileData);
+
+                        MatchCollection matches = Regex.Matches(withId, @"avatars.cloudflare.steamstatic.com/(\w*)_full");
+                        string avatarhash = matches.Count > 0 ? matches[0].Groups[1].Value : null;
+
+                        CurrentAccountInfos.Avatar = string.Format(UrlAvatarFul, avatarhash);
+                        CurrentAccountInfos.Pseudo = rgProfileData?.PersonaName ?? CurrentAccountInfos.Pseudo;
+                        CurrentAccountInfos.Link = rgProfileData?.Url ?? CurrentAccountInfos.Link;
+                    }
+                    else if (ulong.TryParse(accountInfos.UserId, out ulong steamId))
                     {
                         ObservableCollection<AccountInfos> playerSummaries = GetPlayerSummaries(new List<ulong> { steamId });
-                        CurrentAccountInfos.Avatar = playerSummaries?.FirstOrDefault().Avatar;
-                        CurrentAccountInfos.Link = playerSummaries?.FirstOrDefault().Link;
+                        CurrentAccountInfos.Avatar = playerSummaries?.FirstOrDefault().Avatar ?? CurrentAccountInfos.Avatar;
+                        CurrentAccountInfos.Pseudo = playerSummaries?.FirstOrDefault().Pseudo ?? CurrentAccountInfos.Pseudo;
+                        CurrentAccountInfos.Link = playerSummaries?.FirstOrDefault().Link ?? CurrentAccountInfos.Link;
                     }
 
                     CurrentAccountInfos.IsPrivate = !CheckIsPublic(accountInfos).GetAwaiter().GetResult();
@@ -895,7 +916,7 @@ namespace CommonPluginsStores.Steam
             return null;
         }
 
-        private SteamUserData GetUserData()
+        private SteamUserData GetUserData(bool onlyWeb = false)
         {
             try
             {
@@ -907,7 +928,10 @@ namespace CommonPluginsStores.Steam
                 }
                 else
                 {
-                    userData = LoadUserData(false);
+                    if (!onlyWeb)
+                    {
+                        userData = LoadUserData(false);
+                    }
                 }
                 return userData;
             }
@@ -978,9 +1002,9 @@ namespace CommonPluginsStores.Steam
         private ObservableCollection<AccountInfos> GetPlayerSummaries(List<ulong> steamIds)
         {
             ObservableCollection<AccountInfos> playerSummaries = null;
-            if (steamIds?.Count > 0 && !_currentAccountInfos.ApiKey.IsNullOrEmpty())
+            if (steamIds?.Count > 0 && !CurrentAccountInfos.ApiKey.IsNullOrEmpty())
             {
-                List<Models.SteamKit.SteamPlayerSummaries> steamPlayerSummaries = SteamKit.GetPlayerSummaries(_currentAccountInfos.ApiKey, steamIds);
+                List<Models.SteamKit.SteamPlayerSummaries> steamPlayerSummaries = SteamKit.GetPlayerSummaries(CurrentAccountInfos.ApiKey, steamIds);
                 playerSummaries = steamPlayerSummaries?.Select(x => new AccountInfos
                 {
                     UserId = x.SteamId,
