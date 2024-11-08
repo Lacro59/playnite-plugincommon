@@ -606,7 +606,7 @@ namespace CommonPluginsStores.Gog
         {
             string url = string.Format(UrlApiGameInfo, id, CodeLang.GetGogLang(Local).ToLower());
             string reponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
-            Serialization.TryFromJson(reponse, out Models.ProductApiDetail productApiDetail);
+            _ = Serialization.TryFromJson(reponse, out ProductApiDetail productApiDetail);
             
             string stringDlcs = Serialization.ToJson(productApiDetail?.dlcs);
             if (!stringDlcs.IsNullOrEmpty() && !stringDlcs.IsEqual("[]"))
@@ -634,7 +634,7 @@ namespace CommonPluginsStores.Gog
                     string dataDlc = Web.DownloadStringData(string.Format(UrlApiGameInfo, el.id, CodeLang.GetGogLang(Local).ToLower())).GetAwaiter().GetResult();
                     if (!dataDlc.Contains("<!DOCTYPE html>", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        Models.ProductApiDetail productApiDetailDlc = Serialization.FromJson<Models.ProductApiDetail>(dataDlc);
+                        ProductApiDetail productApiDetailDlc = Serialization.FromJson<Models.ProductApiDetail>(dataDlc);
 
                         bool IsOwned = false;
                         if (accountInfos != null && accountInfos.IsCurrent)
@@ -646,7 +646,7 @@ namespace CommonPluginsStores.Gog
                         {
                             Id = el.id.ToString(),
                             Name = productApiDetailDlc?.title,
-                            Description = productApiDetailDlc?.description?.full,
+                            Description = RemoveDescriptionPromos(productApiDetailDlc?.description?.full).Trim(),
                             Image = "https:" + productApiDetailDlc?.images?.logo2x,
                             Link = string.Format(UrlGogGame, productApiDetailDlc?.slug),
                             IsOwned = IsOwned
