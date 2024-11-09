@@ -15,7 +15,7 @@
     <sys:String x:Key="LOCCommonMargin">Відступ</sys:String>
 
     <sys:String x:Key="LOCCommonExtractToCsv">Видобути дані плагіну в CSV</sys:String>
-    <sys:String x:Key="LOCCommonExtractAllToCsv">Extract all plugin data to CSV (very long)</sys:String>
+    <sys:String x:Key="LOCCommonExtractAllToCsv">Видобути всі дані плагіну у CSV (дуже довго)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Видобування...</sys:String>
 
     <!-- Filters -->
@@ -57,7 +57,7 @@
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: користувач не автентифікований</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: немає API ключа</sys:String>
     <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: погана конфігурація</sys:String>
-    <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: No configuration found</sys:String>
+    <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: Конфігурацій не знайдено</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Ігноровані елементи</sys:String>
     <sys:String x:Key="LOCCommonNotIgnoredItems">Не ігноровані елементи</sys:String>
