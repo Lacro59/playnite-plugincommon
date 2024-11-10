@@ -227,6 +227,7 @@ namespace CommonPluginsShared
         {
             try
             {
+                path = CommonPlayniteShared.Common.Paths.FixPathLength(path);
                 List<string> files = Directory.GetFiles(path).ToList();
                 List<string> founds = files.Where(x => Path.GetFileName(x).IsEqual(fileName))?.ToList();
                 if (scanSubFolders)
