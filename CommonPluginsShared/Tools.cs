@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Web;
 using System.IO;
 using CommonPluginsShared.Extensions;
+using System.Text.RegularExpressions;
 
 namespace CommonPluginsShared
 {
@@ -176,7 +177,7 @@ namespace CommonPluginsShared
             return -1;
         }
 
-
+        [Obsolete]
         public static string GetJsonInString(string str, string strStart, string strEnd, string strPurge = "")
         {
             try
@@ -205,6 +206,21 @@ namespace CommonPluginsShared
                 Common.LogError(ex, false);
             }
 
+            return string.Empty;
+        }
+
+        public static string GetJsonInString(string source, string regexBefore)
+        {
+            string pattern = regexBefore + @"({.*});";
+            Match match = Regex.Match(source, pattern);
+            if (match.Success)
+            {
+                return match.Groups[1].Value;
+            }
+            else
+            {
+                Common.LogDebug(true, $"Json not found with {pattern} in {source}");
+            }
             return string.Empty;
         }
 

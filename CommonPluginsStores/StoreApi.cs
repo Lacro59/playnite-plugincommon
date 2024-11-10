@@ -100,6 +100,8 @@ namespace CommonPluginsStores
         internal string FileCookies { get; }
         internal string FileGamesDlcsOwned { get; }
 
+        internal List<string> CookiesDomains { get; set; }
+
         internal StoreToken AuthToken { get; set; }
         internal ExternalPlugin PluginLibrary { get; }
 
@@ -202,7 +204,9 @@ namespace CommonPluginsStores
         {
             using (IWebView webView = API.Instance.WebViews.CreateOffscreenView())
             {
-                List<HttpCookie> httpCookies = webView.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName.ToLower()) ?? false)?.ToList() ?? new List<HttpCookie>();
+                List<HttpCookie> httpCookies = CookiesDomains?.Count > 0
+                    ? webView.GetCookies()?.Where(x => CookiesDomains.Any(y => y.Contains(x?.Domain, StringComparison.InvariantCultureIgnoreCase)))?.ToList() ?? new List<HttpCookie>()
+                    : webView.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName, StringComparison.InvariantCultureIgnoreCase) ?? false)?.ToList() ?? new List<HttpCookie>();                    
                 return httpCookies;
             }
         }
