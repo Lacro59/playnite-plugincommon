@@ -121,6 +121,11 @@ namespace CommonPluginsStores.Steam
             FileUserData = Path.Combine(PathStoresData, "Steam_UserData.json");
 
             LoginUsersPath = Path.Combine(InstallationPath, "config", "loginusers.vdf");
+
+            CookiesDomains = new List<string>
+            {
+                ".steamcommunity.com", "steamcommunity.com", "steampowered.com", "store.steampowered.com", "help.steampowered.com", "login.steampowered.com"
+            };
         }
 
 
@@ -174,17 +179,13 @@ namespace CommonPluginsStores.Steam
                         if (idMatch.Success)
                         {
                             _ = SetStoredCookies(GetWebCookies());
-
-                            string JsonDataString = Tools.GetJsonInString(source, "g_rgProfileData = ", "\"};") + "\"}";
+                            string JsonDataString = Tools.GetJsonInString(source, @"g_rgProfileData[ ]?=[ ]?");
                             RgProfileData rgProfileData = Serialization.FromJson<RgProfileData>(JsonDataString);
-
-                            MatchCollection matches = Regex.Matches(source, @"avatars.cloudflare.steamstatic.com/(\w*)_full");
-                            string avatarhash = matches.Count > 0 ? matches[0].Groups[1].Value : null;
 
                             CurrentAccountInfos = new AccountInfos
                             {
                                 UserId = rgProfileData.SteamId.ToString(),
-                                Avatar = string.Format(UrlAvatarFul, avatarhash),
+                                Avatar = string.Format(UrlAvatarFul, steamId),
                                 Pseudo = rgProfileData.PersonaName,
                                 Link = rgProfileData.Url,
                                 IsPrivate = true,
@@ -198,12 +199,10 @@ namespace CommonPluginsStores.Steam
                     }
                 };
 
-                view.DeleteDomainCookies(".steamcommunity.com");
-                view.DeleteDomainCookies("steamcommunity.com");
-                view.DeleteDomainCookies("steampowered.com");
-                view.DeleteDomainCookies("store.steampowered.com");
-                view.DeleteDomainCookies("help.steampowered.com");
-                view.DeleteDomainCookies("login.steampowered.com");
+                CookiesDomains.ForEach(x =>
+                {
+                    view.DeleteDomainCookies(x);
+                });
 
                 view.Navigate(UrlLogin);
                 _ = view.OpenDialog();
@@ -237,19 +236,16 @@ namespace CommonPluginsStores.Steam
 
                     if (CurrentAccountInfos.ApiKey.IsNullOrEmpty())
                     {
-                        string withId = Web.DownloadStringData(string.Format(UrlProfileById, accountInfos.UserId), GetStoredCookies()).GetAwaiter().GetResult();
-                        string JsonDataString = Tools.GetJsonInString(withId, "g_rgProfileData = ", "\"};") + "\"}";
+                        string response = Web.DownloadStringData(string.Format(UrlProfileById, accountInfos.UserId), GetStoredCookies()).GetAwaiter().GetResult();
+                        string JsonDataString = Tools.GetJsonInString(response, @"g_rgProfileData[ ]?=[ ]?");
                         if (JsonDataString.Length < 5)
                         {
-                            string withPersona = Web.DownloadStringData(string.Format(UrlProfileByName, accountInfos.Pseudo), GetStoredCookies()).GetAwaiter().GetResult();
-                            JsonDataString = Tools.GetJsonInString(withPersona, "g_rgProfileData = ", "\"};") + "\"}";
+                            response = Web.DownloadStringData(string.Format(UrlProfileByName, accountInfos.Pseudo), GetStoredCookies()).GetAwaiter().GetResult();
+                            JsonDataString = Tools.GetJsonInString(response, @"g_rgProfileData[ ]?=[ ]?");
                         }
                         _ = Serialization.TryFromJson(JsonDataString, out RgProfileData rgProfileData);
 
-                        MatchCollection matches = Regex.Matches(withId, @"avatars.cloudflare.steamstatic.com/(\w*)_full");
-                        string avatarhash = matches.Count > 0 ? matches[0].Groups[1].Value : null;
-
-                        CurrentAccountInfos.Avatar = string.Format(UrlAvatarFul, avatarhash);
+                        CurrentAccountInfos.Avatar = string.Format(UrlAvatarFul, accountInfos.UserId);
                         CurrentAccountInfos.Pseudo = rgProfileData?.PersonaName ?? CurrentAccountInfos.Pseudo;
                         CurrentAccountInfos.Link = rgProfileData?.Url ?? CurrentAccountInfos.Link;
                     }

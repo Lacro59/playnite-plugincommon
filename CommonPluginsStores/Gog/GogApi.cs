@@ -168,11 +168,10 @@ namespace CommonPluginsStores.Gog
                     Thread.Sleep(1000);
 
                     string reponse = Web.DownloadStringData(string.Format(UrlUser, accountInfos.Pseudo), GetStoredCookies()).GetAwaiter().GetResult();
-                    string jsonDataString = Tools.GetJsonInString(reponse, "window.profilesData.currentUser = ", "window.profilesData.currentUserPreferences = ", "};");
+                    string jsonDataString = Tools.GetJsonInString(reponse, @"window.profilesData.currentUser[ ]?=[ ]?");
                     _ = Serialization.TryFromJson(jsonDataString, out ProfileUser profileUser);
 
                     CurrentAccountInfos.Avatar = profileUser?.avatar ?? CurrentAccountInfos.Avatar;
-
                     CurrentAccountInfos.IsPrivate = !CheckIsPublic(accountInfos).GetAwaiter().GetResult();
                     CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
                 });
