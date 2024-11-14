@@ -197,7 +197,7 @@ namespace CommonPluginsStores.Gog
                     return null;
                 }
 
-                string jsonDataString = Tools.GetJsonInString(reponse, "window.profilesData.profileUserFriends = ", "window.profilesData.currentUserFriends = ", "}}];");
+                string jsonDataString = Tools.GetJsonInString(reponse, "window.profilesData.profileUserFriends[ ]?=[ ]?");
                 _ = Serialization.TryFromJson(jsonDataString, out List<ProfileUserFriends> profileUserFriends);
 
                 if (profileUserFriends == null)
@@ -397,7 +397,7 @@ namespace CommonPluginsStores.Gog
                 string url = string.Format(UrlUserGameAchievements, accountInfos.Pseudo, id, accountInfos.UserId);
                 string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Local).ToLower());
                 string response = Web.DownloadStringDataWithUrlBefore(url, urlLang).GetAwaiter().GetResult();
-                string jsonDataString = Tools.GetJsonInString(response, "window.profilesData.achievements = ", "window.profilesData.matchedGame = ", "];");
+                string jsonDataString = Tools.GetJsonInString(response, "window.profilesData.achievements[ ]?=[ ]?");
 
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
                 if (Serialization.TryFromJson(jsonDataString, out dynamic data))

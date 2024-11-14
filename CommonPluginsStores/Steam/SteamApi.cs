@@ -237,15 +237,18 @@ namespace CommonPluginsStores.Steam
                     if (CurrentAccountInfos.ApiKey.IsNullOrEmpty())
                     {
                         string response = Web.DownloadStringData(string.Format(UrlProfileById, accountInfos.UserId), GetStoredCookies()).GetAwaiter().GetResult();
-                        string JsonDataString = Tools.GetJsonInString(response, @"g_rgProfileData[ ]?=[ ]?");
-                        if (JsonDataString.Length < 5)
+                        string jsonDataString = Tools.GetJsonInString(response, @"g_rgProfileData[ ]?=[ ]?");
+                        if (jsonDataString.Length < 5)
                         {
                             response = Web.DownloadStringData(string.Format(UrlProfileByName, accountInfos.Pseudo), GetStoredCookies()).GetAwaiter().GetResult();
-                            JsonDataString = Tools.GetJsonInString(response, @"g_rgProfileData[ ]?=[ ]?");
+                            jsonDataString = Tools.GetJsonInString(response, @"g_rgProfileData[ ]?=[ ]?");
                         }
-                        _ = Serialization.TryFromJson(JsonDataString, out RgProfileData rgProfileData);
+                        _ = Serialization.TryFromJson(jsonDataString, out RgProfileData rgProfileData);
 
-                        CurrentAccountInfos.Avatar = string.Format(UrlAvatarFul, accountInfos.UserId);
+                        Match matches = Regex.Match(response, @"<link\srel=""image_src""\shref=""([^""]+)"">");
+                        string avatar = matches.Success ? matches.Groups[1].Value : string.Format(UrlAvatarFul, accountInfos.UserId);
+
+                        CurrentAccountInfos.Avatar = avatar;
                         CurrentAccountInfos.Pseudo = rgProfileData?.PersonaName ?? CurrentAccountInfos.Pseudo;
                         CurrentAccountInfos.Link = rgProfileData?.Url ?? CurrentAccountInfos.Link;
                     }
