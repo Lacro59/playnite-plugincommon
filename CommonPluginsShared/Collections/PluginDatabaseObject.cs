@@ -938,7 +938,7 @@ namespace CommonPluginsShared.Collections
                     if (propertyInfo != null && (bool)propertyInfo.GetValue(settings))
                     {
                         // Only for a new installation
-                        IEnumerable<Guid> ids = e.UpdatedItems.Where(x => !x.OldData.IsInstalled & x.NewData.IsInstalled && !PreviousIds.Contains(x.NewData.Id)).Select(x => x.NewData.Id);
+                        List<Guid> ids = e.UpdatedItems.Where(x => !x.OldData.IsInstalled & x.NewData.IsInstalled && !PreviousIds.Contains(x.NewData.Id)).Select(x => x.NewData.Id).ToList();
                         PreviousIds = ids;
                         if (ids?.Count() > 0)
                         {
