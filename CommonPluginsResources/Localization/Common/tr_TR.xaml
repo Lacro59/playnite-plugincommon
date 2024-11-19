@@ -6,6 +6,7 @@
     <sys:String x:Key="LOCCommonMonths">Ay</sys:String>
     <sys:String x:Key="LOCCommonDateData">Veri tarihi</sys:String>
     
+    <sys:String x:Key="LOCCommonStartDate">Start date</sys:String>
     <sys:String x:Key="LOCCommonLastUpdate">Son güncelleme</sys:String>
 
     <sys:String x:Key="LOCCommonAddFolder">Dizin ekle</sys:String>
@@ -57,7 +58,7 @@
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: kullanıcı kimliği doğrulanmadı</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: API anahtarı yok</sys:String>
     <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Kötü yapılandırma</sys:String>
-    <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: yapılandırma bulunamadı</sys:String>
+    <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: Yapılandırma bulunamadı</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Yok sayılan öğeler</sys:String>
     <sys:String x:Key="LOCCommonNotIgnoredItems">Yok sayılmayan ögeler</sys:String>
