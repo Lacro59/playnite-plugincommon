@@ -6,6 +6,7 @@
     <sys:String x:Key="LOCCommonMonths">Month(s)</sys:String>
     <sys:String x:Key="LOCCommonDateData">データの日付</sys:String>
     
+    <sys:String x:Key="LOCCommonStartDate">Start date</sys:String>
     <sys:String x:Key="LOCCommonLastUpdate">最終更新</sys:String>
 
     <sys:String x:Key="LOCCommonAddFolder">フォルダーを追加</sys:String>
