@@ -6,6 +6,7 @@
     <sys:String x:Key="LOCCommonMonths">Month(s)</sys:String>
     <sys:String x:Key="LOCCommonDateData">Дата внесения данны</sys:String>
     
+    <sys:String x:Key="LOCCommonStartDate">Start date</sys:String>
     <sys:String x:Key="LOCCommonLastUpdate">Последнее обновление</sys:String>
 
     <sys:String x:Key="LOCCommonAddFolder">Добавить папк</sys:String>
