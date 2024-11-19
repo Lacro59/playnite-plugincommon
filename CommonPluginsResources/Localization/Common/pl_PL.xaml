@@ -6,6 +6,7 @@
     <sys:String x:Key="LOCCommonMonths">Month(s)</sys:String>
     <sys:String x:Key="LOCCommonDateData">Data danych</sys:String>
     
+    <sys:String x:Key="LOCCommonStartDate">Start date</sys:String>
     <sys:String x:Key="LOCCommonLastUpdate">Ostatnia aktualizacja</sys:String>
 
     <sys:String x:Key="LOCCommonAddFolder">Dodaj katalog</sys:String>
