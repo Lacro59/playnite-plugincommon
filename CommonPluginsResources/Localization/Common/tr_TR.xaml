@@ -6,7 +6,7 @@
     <sys:String x:Key="LOCCommonMonths">Ay</sys:String>
     <sys:String x:Key="LOCCommonDateData">Veri tarihi</sys:String>
     
-    <sys:String x:Key="LOCCommonStartDate">Start date</sys:String>
+    <sys:String x:Key="LOCCommonStartDate">Başlangıç ​​tarihi</sys:String>
     <sys:String x:Key="LOCCommonLastUpdate">Son güncelleme</sys:String>
 
     <sys:String x:Key="LOCCommonAddFolder">Dizin ekle</sys:String>
