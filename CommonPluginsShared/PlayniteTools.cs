@@ -452,9 +452,20 @@ namespace CommonPluginsShared
 
         }
 
-        public static string GetSourceByPluginId(Guid PluginId)
+        public static string GetSourceNameOrPlatformForEmulated(Game game)
         {
-            _ = PluginsById.TryGetValue(PluginId, out ExternalPlugin PluginSource);
+            string sourceName = GetSourceName(game);
+            if (IsGameEmulated(game))
+            {
+                string platormName = game.Platforms?.FirstOrDefault().Name;
+                sourceName = platormName.IsNullOrEmpty() ? sourceName : platormName;
+            }
+            return sourceName;
+        }
+
+        public static string GetSourceByPluginId(Guid pluginId)
+        {
+            _ = PluginsById.TryGetValue(pluginId, out ExternalPlugin PluginSource);
             switch (PluginSource)
             {
                 case ExternalPlugin.AmazonGamesLibrary:
@@ -505,36 +516,36 @@ namespace CommonPluginsShared
             }
         }
 
-        public static string GetSourceBySourceIdOrPlatformId(Guid SourceId, List<Guid> PlatformsIds)
+        public static string GetSourceBySourceIdOrPlatformId(Guid sourceId, List<Guid> platformsIds)
         {
-            string SourceName = "Playnite";
+            string sourceName = "Playnite";
 
-            if (SourceId != default)
+            if (sourceId != default)
             {
                 try
                 {
-                    GameSource Source = API.Instance.Database.Sources.Get(SourceId);
+                    GameSource Source = API.Instance.Database.Sources.Get(sourceId);
                     if (Source == null)
                     {
-                        Logger.Warn($"SourceName not found for {SourceId.ToString()}");
+                        Logger.Warn($"SourceName not found for {sourceId}");
                         return "Playnite";
                     }
                     return Source.Name;
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false, $"SourceId: {SourceId.ToString()}");
+                    Common.LogError(ex, false, $"SourceId: {sourceId}");
                     return "Playnite";
                 }
             }
 
-            if (PlatformsIds == null)
+            if (platformsIds == null)
             {
-                Logger.Warn($"No PlatformsIds for {Serialization.ToJson(PlatformsIds)}");
-                return SourceName;
+                Logger.Warn($"No PlatformsIds for {Serialization.ToJson(platformsIds)}");
+                return sourceName;
             }
 
-            foreach (Guid PlatformID in PlatformsIds)
+            foreach (Guid PlatformID in platformsIds)
             {
                 if (PlatformID != default)
                 {
@@ -556,7 +567,7 @@ namespace CommonPluginsShared
                 }
             }
 
-            return SourceName;
+            return sourceName;
         }
 
 
