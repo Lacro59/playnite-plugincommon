@@ -6,6 +6,7 @@
     <sys:String x:Key="LOCCommonMonths">Month(s)</sys:String>
     <sys:String x:Key="LOCCommonDateData">Data danych</sys:String>
     
+    <sys:String x:Key="LOCCommonStartDate">Start date</sys:String>
     <sys:String x:Key="LOCCommonLastUpdate">Ostatnia aktualizacja</sys:String>
 
     <sys:String x:Key="LOCCommonAddFolder">Dodaj katalog</sys:String>
@@ -15,7 +16,7 @@
     <sys:String x:Key="LOCCommonMargin">Margines</sys:String>
 
     <sys:String x:Key="LOCCommonExtractToCsv">Wyodrębnij dane wtyczki do CSV</sys:String>
-    <sys:String x:Key="LOCCommonExtractAllToCsv">Extract all plugin data to CSV (very long)</sys:String>
+    <sys:String x:Key="LOCCommonExtractAllToCsv">Wyodrębnij wszystkie dane wtyczki do CSV (bardzo długo)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Wyodrębnianie...</sys:String>
 
     <!-- Filters -->
@@ -57,7 +58,7 @@
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: użytkownik nie jest uwierzytelniony</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: Brak klucza API</sys:String>
     <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Błędna konfiguracja</sys:String>
-    <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: nie znaleziono konfiguracji</sys:String>
+    <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: Nie znaleziono konfiguracji</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Ignorowane elementy</sys:String>
     <sys:String x:Key="LOCCommonNotIgnoredItems">Nie ignorowane elementy</sys:String>

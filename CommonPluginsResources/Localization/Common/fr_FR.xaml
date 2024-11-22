@@ -3,9 +3,10 @@
 
     <sys:String x:Key="LOCCommonYear">Année</sys:String>
     <sys:String x:Key="LOCCommonMonth">Mois</sys:String>
-    <sys:String x:Key="LOCCommonMonths">Month(s)</sys:String>
+    <sys:String x:Key="LOCCommonMonths">Mois</sys:String>
     <sys:String x:Key="LOCCommonDateData">Date des données</sys:String>
     
+    <sys:String x:Key="LOCCommonStartDate">Date de début</sys:String>
     <sys:String x:Key="LOCCommonLastUpdate">Dernière mise à jour</sys:String>
 
     <sys:String x:Key="LOCCommonAddFolder">Ajouter un dossier</sys:String>
@@ -15,7 +16,7 @@
     <sys:String x:Key="LOCCommonMargin">Marge</sys:String>
 
     <sys:String x:Key="LOCCommonExtractToCsv">Extraire les données du plugin en CSV</sys:String>
-    <sys:String x:Key="LOCCommonExtractAllToCsv">Extract all plugin data to CSV (very long)</sys:String>
+    <sys:String x:Key="LOCCommonExtractAllToCsv">Extraire toutes les données du plugin en CSV (très long)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Extraction en cours...</sys:String>
 
     <!-- Filters -->
@@ -57,7 +58,7 @@
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: utilisateur non authentifié</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0} : Aucune clé API</sys:String>
     <sys:String x:Key="LOCCommonStoreBadConfiguration">{0} : Mauvaise configuration</sys:String>
-    <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: aucune configuration trouvée</sys:String>
+    <sys:String x:Key="LOCCommonStoreNoConfiguration">{0} : Aucune configuration trouvée</sys:String>
 
     <sys:String x:Key="LOCCommonIgnoredItems">Éléments ignorés</sys:String>
     <sys:String x:Key="LOCCommonNotIgnoredItems">Ne pas ignorer les éléments</sys:String>
@@ -69,11 +70,11 @@
     <sys:String x:Key="LOCCommonGameTime">Temps de jeu</sys:String>
     
     <sys:String x:Key="LOCCommonSelectFilters">Choisir les filtres</sys:String>
-    <sys:String x:Key="LOCCommonOldData">Old data</sys:String>
-    <sys:String x:Key="LOCCommonRecentlyAdded">Recently added</sys:String>
+    <sys:String x:Key="LOCCommonOldData">Ancienne donnée</sys:String>
+    <sys:String x:Key="LOCCommonRecentlyAdded">Ajoutées récemment</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Manquant uniquement</sys:String>
     <sys:String x:Key="LOCCommonMissingData">Appliquer une étiquette aux jeux avec des données manquantes</sys:String>
-    <sys:String x:Key="LOCCommonSince">Since</sys:String>
+    <sys:String x:Key="LOCCommonSince">Depuis</sys:String>
 
     <sys:String x:Key="LOCCommonTotal">Total</sys:String>
     <sys:String x:Key="LOCCommonCut">Tronquer</sys:String>

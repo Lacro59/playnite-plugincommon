@@ -211,7 +211,7 @@ namespace CommonPluginsShared
 
         public static string GetJsonInString(string source, string regexBefore)
         {
-            string pattern = regexBefore + @"({.*});";
+            string pattern = regexBefore + @"({.*})[;]?[<]?";
             Match match = Regex.Match(source, pattern);
             if (match.Success)
             {
