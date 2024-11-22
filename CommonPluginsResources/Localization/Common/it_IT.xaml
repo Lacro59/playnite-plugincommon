@@ -6,7 +6,7 @@
     <sys:String x:Key="LOCCommonMonths">Mese/i</sys:String>
     <sys:String x:Key="LOCCommonDateData">Data dei dati</sys:String>
     
-    <sys:String x:Key="LOCCommonStartDate">Start date</sys:String>
+    <sys:String x:Key="LOCCommonStartDate">Data iniziale</sys:String>
     <sys:String x:Key="LOCCommonLastUpdate">Ultimo aggiornamento</sys:String>
 
     <sys:String x:Key="LOCCommonAddFolder">Aggiungi cartella</sys:String>
