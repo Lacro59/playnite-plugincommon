@@ -716,7 +716,7 @@ namespace CommonPluginsShared
         /// <param name="url"></param>
         /// <param name="payload"></param>
         /// <returns></returns>
-        public static async Task<string> PostStringDataPayload(string url, string payload, List<HttpCookie> Cookies = null)
+        public static async Task<string> PostStringDataPayload(string url, string payload, List<HttpCookie> Cookies = null, List<KeyValuePair<string, string>> moreHeader = null)
         {
             //var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             //var settings = (SettingsSection)config.GetSection("system.net/settings");
@@ -760,6 +760,12 @@ namespace CommonPluginsShared
                 client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                 client.DefaultRequestHeaders.Add("accept", "application/json, text/javascript, */*; q=0.01");
                 client.DefaultRequestHeaders.Add("Vary", "Accept-Encoding");
+
+                moreHeader?.ForEach(x =>
+                {
+                    client.DefaultRequestHeaders.Add(x.Key, x.Value);
+                });
+
                 HttpContent c = new StringContent(payload, Encoding.UTF8, "application/json");
 
                 HttpResponseMessage result;
