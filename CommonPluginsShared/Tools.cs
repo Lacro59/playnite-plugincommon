@@ -211,11 +211,11 @@ namespace CommonPluginsShared
 
         public static string GetJsonInString(string source, string regexBefore)
         {
-            string pattern = regexBefore + @"({.*})[;]?[<]?";
+            string pattern = regexBefore + @"[{\W\D\S}]+?(?=\;)";
             Match match = Regex.Match(source, pattern);
             if (match.Success)
             {
-                return match.Groups[1].Value;
+                return match.Groups[0].Value;
             }
             else
             {
