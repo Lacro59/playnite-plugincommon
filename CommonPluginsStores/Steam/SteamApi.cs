@@ -921,12 +921,13 @@ namespace CommonPluginsStores.Steam
             {
                 List<HttpCookie> cookies = GetStoredCookies();
                 string resultWeb = Web.DownloadStringData(UrlUserData, cookies, Web.UserAgent, true).GetAwaiter().GetResult();
-                if (Serialization.TryFromJson(resultWeb, out SteamUserData userData))
+                if (Serialization.TryFromJson(resultWeb, out SteamUserData userData, out Exception ex))
                 {
                     SaveUserData(userData);
                 }
                 else
                 {
+                    Common.LogError(ex, false, true, PluginName);
                     if (!onlyWeb)
                     {
                         userData = LoadUserData(false);
