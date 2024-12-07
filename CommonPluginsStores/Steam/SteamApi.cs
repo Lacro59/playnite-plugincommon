@@ -927,7 +927,7 @@ namespace CommonPluginsStores.Steam
                 }
                 else
                 {
-                    Common.LogError(ex, false, true, PluginName);
+                    Common.LogError(ex, false, false, PluginName);
                     if (!onlyWeb)
                     {
                         userData = LoadUserData(false);
