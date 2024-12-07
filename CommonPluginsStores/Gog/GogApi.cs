@@ -397,7 +397,7 @@ namespace CommonPluginsStores.Gog
                 string url = string.Format(UrlUserGameAchievements, accountInfos.Pseudo, id, accountInfos.UserId);
                 string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Local).ToLower());
                 string response = Web.DownloadStringDataWithUrlBefore(url, urlLang).GetAwaiter().GetResult();
-                string jsonDataString = Tools.GetJsonInString(response, "window.profilesData.achievements[ ]?=[ ]?");
+                string jsonDataString = Tools.GetJsonInString(response, "(?<=window.profilesData.achievements\\s=\\s)");
 
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
                 if (Serialization.TryFromJson(jsonDataString, out dynamic data))
