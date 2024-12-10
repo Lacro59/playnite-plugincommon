@@ -8,7 +8,7 @@
              xmlns:pcmd="clr-namespace:CommonPluginsShared" 
              xmlns:converters="clr-namespace:CommonPlayniteShared.Converters"
              d:DataContext="{d:DesignInstance Type=local:PanelViewModel, IsDesignTimeCreatable=True}"
-             mc:Ignorable="d" d:DesignWidth="600">
+             mc:Ignorable="d" d:DesignWidth="650">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
@@ -139,13 +139,14 @@
 
                             <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
                                         IsEnabled="{Binding ElementName=PART_IsPrivate, Path=IsChecked, Converter={StaticResource InvertedBoolenConverter}}">
-                                <Label Content="{DynamicResource LOCEpicAccountID}" Width="120" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                <Label Content="{DynamicResource LOCGOGAccountID}" Width="120" VerticalAlignment="Center" Margin="0,0,10,0" />
                                 <TextBox Text="{Binding User.UserId}" Width="250" Margin="0,0,10,0" TextChanged="TextBox_TextChanged" />
                                 <TextBlock VerticalAlignment="Center">
-                                    <Hyperlink NavigateUri="https://www.epicgames.com/account/personal"
+                                    <Hyperlink NavigateUri="https://www.gog.com/userData.json"
                                                Command="{x:Static pcmd:Commands.NavigateUrl}"
                                                CommandParameter="{Binding NavigateUri, RelativeSource={RelativeSource Self}}">
                                         <Run Text="{DynamicResource LOCCommonGetAccountID}" />
+                                        <Run Text="(galaxyUserId)"/>
                                     </Hyperlink>
                                 </TextBlock>
                             </StackPanel>
