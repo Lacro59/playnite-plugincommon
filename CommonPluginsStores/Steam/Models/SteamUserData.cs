@@ -30,7 +30,7 @@ namespace CommonPluginsStores.Steam.Models
         public List<RgRecommendedTag> RgRecommendedTags { get; set; }
 
         [SerializationPropertyName("rgIgnoredApps")]
-        public List<object> RgIgnoredApps { get; set; }
+        public object RgIgnoredApps { get; set; }
 
         [SerializationPropertyName("rgIgnoredPackages")]
         public List<object> RgIgnoredPackages { get; set; }
