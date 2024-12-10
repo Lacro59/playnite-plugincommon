@@ -202,12 +202,20 @@ namespace CommonPluginsStores
         /// <returns></returns>
         internal virtual List<HttpCookie> GetWebCookies()
         {
-            using (IWebView webView = API.Instance.WebViews.CreateOffscreenView())
+            try
             {
-                List<HttpCookie> httpCookies = CookiesDomains?.Count > 0
-                    ? webView.GetCookies()?.Where(x => CookiesDomains.Any(y => y.Contains(x?.Domain, StringComparison.InvariantCultureIgnoreCase)))?.ToList() ?? new List<HttpCookie>()
-                    : webView.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName, StringComparison.InvariantCultureIgnoreCase) ?? false)?.ToList() ?? new List<HttpCookie>();                    
-                return httpCookies;
+                using (IWebView webView = API.Instance.WebViews.CreateOffscreenView())
+                {
+                    List<HttpCookie> httpCookies = CookiesDomains?.Count > 0
+                        ? webView.GetCookies()?.Where(x => CookiesDomains.Any(y => y.Contains(x?.Domain, StringComparison.InvariantCultureIgnoreCase)))?.ToList() ?? new List<HttpCookie>()
+                        : webView.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName, StringComparison.InvariantCultureIgnoreCase) ?? false)?.ToList() ?? new List<HttpCookie>();
+                    return httpCookies;
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, false, PluginName);
+                return new List<HttpCookie>();
             }
         }
         #endregion
