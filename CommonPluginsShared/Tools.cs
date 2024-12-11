@@ -209,9 +209,9 @@ namespace CommonPluginsShared
             return string.Empty;
         }
 
-        public static string GetJsonInString(string source, string regexBefore)
+        public static string GetJsonInString(string source, string regexForward)
         {
-            string pattern = regexBefore + @"[{\W\D\S}]+?(?=\;)";
+            string pattern = regexForward + @"(\[?{.*}\]?)[;]?[<]?";
             Match match = Regex.Match(source, pattern);
             if (match.Success)
             {
