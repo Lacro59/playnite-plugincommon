@@ -496,7 +496,6 @@ namespace CommonPluginsShared.Collections
 
         public virtual void ActionAfterRefresh(TItem item)
         {
-
         }
 
         public virtual PluginDataBaseGameBase MergeData(Guid fromId, Guid toId)
@@ -922,7 +921,7 @@ namespace CommonPluginsShared.Collections
         {
             try
             {
-                if (e?.UpdatedItems?.Count > 0)
+                if (e?.UpdatedItems?.Count > 0 && Database != null)
                 {
                     e?.UpdatedItems?.ForEach(x =>
                     {
