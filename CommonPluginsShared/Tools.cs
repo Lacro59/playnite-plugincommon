@@ -209,13 +209,13 @@ namespace CommonPluginsShared
             return string.Empty;
         }
 
-        public static string GetJsonInString(string source, string regexBefore)
+        public static string GetJsonInString(string source, string regexForward)
         {
-            string pattern = regexBefore + @"({.*})[;]?[<]?";
+            string pattern = regexForward + @"(\[?{.*}\]?)[;]?[<]?";
             Match match = Regex.Match(source, pattern);
             if (match.Success)
             {
-                return match.Groups[1].Value;
+                return match.Groups[0].Value;
             }
             else
             {
