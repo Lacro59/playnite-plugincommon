@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Playnite.SDK.Data;
+using System.Collections.Generic;
 
 namespace CommonPluginsStores.Gog.Models
 {
     public class UserDataOwned
     {
-        public List<int> owned { get; set; }
+        [SerializationPropertyName("owned")]
+        public List<int> Owned { get; set; }
     }
 }

@@ -1,66 +1,60 @@
-﻿using System;
+﻿using Playnite.SDK.Data;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CommonPluginsStores.Gog.Models
 {
     public class ProfileGames
     {
-        public int page { get; set; }
-        public int limit { get; set; }
-        public int pages { get; set; }
-        public int total { get; set; }
-        public Links _links { get; set; }
-        public Embedded _embedded { get; set; }
-    }
+        [SerializationPropertyName("page")]
+        public int Page { get; set; }
 
-    public class Self
-    {
-        public string href { get; set; }
-    }
+        [SerializationPropertyName("limit")]
+        public int Limit { get; set; }
 
-    public class First
-    {
-        public string href { get; set; }
-    }
+        [SerializationPropertyName("pages")]
+        public int Pages { get; set; }
 
-    public class Last
-    {
-        public string href { get; set; }
-    }
+        [SerializationPropertyName("total")]
+        public int Total { get; set; }
 
-    public class Next
-    {
-        public string href { get; set; }
-    }
+        [SerializationPropertyName("_links")]
+        public Links Links { get; set; }
 
-    public class Links
-    {
-        public Self self { get; set; }
-        public First first { get; set; }
-        public Last last { get; set; }
-        public Next next { get; set; }
+        [SerializationPropertyName("_embedded")]
+        public Embedded Embedded { get; set; }
     }
 
     public class Game
     {
-        public string id { get; set; }
-        public string title { get; set; }
-        public string url { get; set; }
-        public bool achievementSupport { get; set; }
-        public string image { get; set; }
+        [SerializationPropertyName("id")]
+        public string Id { get; set; }
+
+        [SerializationPropertyName("title")]
+        public string Title { get; set; }
+
+        [SerializationPropertyName("url")]
+        public string Url { get; set; }
+
+        [SerializationPropertyName("achievementSupport")]
+        public bool AchievementSupport { get; set; }
+
+        [SerializationPropertyName("image")]
+        public string Image { get; set; }
     }
 
-    public class Item
+    public class GameItem
     {
-        public Game game { get; set; }
-        public object stats { get; set; }
+        [SerializationPropertyName("game")]
+        public Game Game { get; set; }
+
+        [SerializationPropertyName("stats")]
+        public object Stats { get; set; }
     }
 
     public class Embedded
     {
-        public List<Item> items { get; set; }
+        [SerializationPropertyName("items")]
+        public List<GameItem> Items { get; set; }
     }
 }

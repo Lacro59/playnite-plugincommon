@@ -1,40 +1,66 @@
-﻿using System;
+﻿using Playnite.SDK.Data;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CommonPluginsStores.Gog.Models
 {
     public class ProfileUser
     {
-        public string username { get; set; }
-        public DateTime created_date { get; set; }
-        public string userId { get; set; }
-        public string avatar { get; set; }
-        public Settings settings { get; set; }
-        public Stats stats { get; set; }
-        public Background background { get; set; }
+        [SerializationPropertyName("username")]
+        public string Username { get; set; }
+
+        [SerializationPropertyName("created_date")]
+        public DateTime CreatedDate { get; set; }
+
+        [SerializationPropertyName("userId")]
+        public string UserId { get; set; }
+
+        [SerializationPropertyName("avatar")]
+        public string Avatar { get; set; }
+
+        [SerializationPropertyName("settings")]
+        public Settings Settings { get; set; }
+
+        [SerializationPropertyName("stats")]
+        public Stats Stats { get; set; }
+
+        [SerializationPropertyName("background")]
+        public Background Background { get; set; }
     }
 
     public class Settings
     {
-        public string allow_to_be_invited_by { get; set; }
+        [SerializationPropertyName("allow_to_be_invited_by")]
+        public string AllowToBeInvitedBy { get; set; }
     }
 
     public class Stats
     {
-        public int games_owned { get; set; }
-        public int? achievements { get; set; }
-        public int hours_played { get; set; }
+        [SerializationPropertyName("games_owned")]
+        public int GamesOwned { get; set; }
+
+        [SerializationPropertyName("achievements")]
+        public int? Achievements { get; set; }
+
+        [SerializationPropertyName("hours_played")]
+        public int HoursPlayed { get; set; }
     }
 
     public class Background
     {
-        public string id { get; set; }
-        public string name { get; set; }
-        public string type { get; set; }
-        public string src { get; set; }
-        public List<int> background_dominant_color { get; set; }
+        [SerializationPropertyName("id")]
+        public string Id { get; set; }
+
+        [SerializationPropertyName("name")]
+        public string Name { get; set; }
+
+        [SerializationPropertyName("type")]
+        public string Type { get; set; }
+
+        [SerializationPropertyName("src")]
+        public string Src { get; set; }
+
+        [SerializationPropertyName("background_dominant_color")]
+        public List<int> BackgroundDominantColor { get; set; }
     }
 }

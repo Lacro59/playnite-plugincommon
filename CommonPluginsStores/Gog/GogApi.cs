@@ -171,7 +171,7 @@ namespace CommonPluginsStores.Gog
                     string jsonDataString = Tools.GetJsonInString(reponse, @"window.profilesData.currentUser[ ]?=[ ]?");
                     _ = Serialization.TryFromJson(jsonDataString, out ProfileUser profileUser);
 
-                    CurrentAccountInfos.Avatar = profileUser?.avatar ?? CurrentAccountInfos.Avatar;
+                    CurrentAccountInfos.Avatar = profileUser?.Avatar ?? CurrentAccountInfos.Avatar;
                     CurrentAccountInfos.IsPrivate = !CheckIsPublic(accountInfos).GetAwaiter().GetResult();
                     CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
                 });
@@ -208,10 +208,10 @@ namespace CommonPluginsStores.Gog
                 ObservableCollection<AccountInfos> accountsInfos = new ObservableCollection<AccountInfos>();
                 profileUserFriends.ForEach(x =>
                 {
-                    _ = DateTime.TryParse(x.date_accepted.date, out DateTime DateAdded);
-                    string userId = x.user.id;
-                    string avatar = x.user.avatar.Replace("\\", string.Empty);
-                    string pseudo = x.user.username;
+                    _ = DateTime.TryParse(x.DateAccepted.Date, out DateTime DateAdded);
+                    string userId = x.User.Id;
+                    string avatar = x.User.Avatar.Replace("\\", string.Empty);
+                    string pseudo = x.User.Username;
                     string link = string.Format(UrlUserFriends, pseudo);
 
                     AccountInfos userInfos = new AccountInfos
@@ -259,10 +259,10 @@ namespace CommonPluginsStores.Gog
                             break;
                         }
 
-                        profileGames?._embedded?.items?.ForEach(x =>
+                        profileGames?.Embedded?.Items?.ForEach(x =>
                         {
-                            string id = x.game.id;
-                            string name = x.game.title;
+                            string id = x.Game.Id;
+                            string name = x.Game.Title;
 
                             bool isCommun = false;
                             if (!accountInfos.IsCurrent)
@@ -271,9 +271,9 @@ namespace CommonPluginsStores.Gog
                             }
 
                             long playtime = 0;
-                            foreach (dynamic data in (dynamic)x.stats)
+                            foreach (dynamic data in (dynamic)x.Stats)
                             {
-                                long.TryParse(((dynamic)x.stats)[data.Path]["playtime"].ToString(), out playtime);
+                                long.TryParse(((dynamic)x.Stats)[data.Path]["playtime"].ToString(), out playtime);
                                 playtime *= 60;
 
                                 if (playtime != 0)
@@ -282,7 +282,7 @@ namespace CommonPluginsStores.Gog
                                 }
                             }
 
-                            string link = UrlBase + x.game.url.Replace("\\", string.Empty);
+                            string link = UrlBase + x.Game.Url.Replace("\\", string.Empty);
                             ObservableCollection<GameAchievement> Achievements = GetAchievements(id, accountInfos);
 
                             AccountGameInfos accountGameInfos = new AccountGameInfos
@@ -464,7 +464,7 @@ namespace CommonPluginsStores.Gog
 
                             if (Serialization.TryFromJson(response, out WishlistResult wishlistResult))
                             {
-                                foreach (dynamic gameWishlist in wishlistResult.wishlist)
+                                foreach (dynamic gameWishlist in wishlistResult.Wishlist)
                                 {
                                     if ((bool)gameWishlist.Value)
                                     {
@@ -581,16 +581,16 @@ namespace CommonPluginsStores.Gog
 
                 GameInfos gameInfos = new GameInfos
                 {
-                    Id = productApiDetail?.id.ToString(),
-                    Name = productApiDetail?.title,
-                    Link = productApiDetail?.links?.product_card,
-                    Image = "https:" + productApiDetail?.images?.logo2x,
-                    Description = RemoveDescriptionPromos(productApiDetail.description.full).Trim(),
-                    Released = productApiDetail?.release_date
+                    Id = productApiDetail?.Id.ToString(),
+                    Name = productApiDetail?.Title,
+                    Link = productApiDetail?.ProductLinks?.ProductCard,
+                    Image = "https:" + productApiDetail?.ProductImages?.Logo2x,
+                    Description = RemoveDescriptionPromos(productApiDetail.ProductDescription.Full).Trim(),
+                    Released = productApiDetail?.ReleaseDate
                 };
 
                 // DLC
-                string stringDlcs = Serialization.ToJson(productApiDetail?.dlcs);
+                string stringDlcs = Serialization.ToJson(productApiDetail?.Dlcs);
                 if (!stringDlcs.IsNullOrEmpty() && !stringDlcs.IsEqual("[]"))
                 {
                     GogDlcs DlcsData = Serialization.FromJson<GogDlcs>(stringDlcs);
@@ -612,9 +612,13 @@ namespace CommonPluginsStores.Gog
         {
             string url = string.Format(UrlApiGameInfo, id, CodeLang.GetGogLang(Local).ToLower());
             string reponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
-            _ = Serialization.TryFromJson(reponse, out ProductApiDetail productApiDetail);
+            _ = Serialization.TryFromJson(reponse, out ProductApiDetail productApiDetail, out Exception ex);
+            if (ex != null)
+            {
+                ManageException($"No game data for {id}", ex, reponse.Contains("404"));
+            }
             
-            string stringDlcs = Serialization.ToJson(productApiDetail?.dlcs);
+            string stringDlcs = Serialization.ToJson(productApiDetail?.Dlcs);
             if (!stringDlcs.IsNullOrEmpty() && !stringDlcs.IsEqual("[]"))
             {
                 GogDlcs dlcsData = Serialization.FromJson<GogDlcs>(stringDlcs);
@@ -628,33 +632,37 @@ namespace CommonPluginsStores.Gog
         {
             ObservableCollection<DlcInfos> Dlcs = new ObservableCollection<DlcInfos>();
 
-            if (dlcsData?.products == null)
+            if (dlcsData?.Products == null)
             {
                 return Dlcs;
             }
 
-            foreach (Product el in dlcsData?.products)
+            foreach (Product el in dlcsData?.Products)
             {
                 try
                 {
-                    string dataDlc = Web.DownloadStringData(string.Format(UrlApiGameInfo, el.id, CodeLang.GetGogLang(Local).ToLower())).GetAwaiter().GetResult();
+                    string dataDlc = Web.DownloadStringData(string.Format(UrlApiGameInfo, el.Id, CodeLang.GetGogLang(Local).ToLower())).GetAwaiter().GetResult();
                     if (!dataDlc.Contains("<!DOCTYPE html>", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        ProductApiDetail productApiDetailDlc = Serialization.FromJson<Models.ProductApiDetail>(dataDlc);
+                        Serialization.TryFromJson(dataDlc, out ProductApiDetail productApiDetailDlc, out Exception ex);
+                        if (ex != null)
+                        {
+                            ManageException($"No Dlc data for {el.Id}", ex, dataDlc.Contains("404"));
+                        }
 
                         bool IsOwned = false;
                         if (accountInfos != null && accountInfos.IsCurrent)
                         {
-                            IsOwned = IsDlcOwned(el.id.ToString());
+                            IsOwned = IsDlcOwned(el.Id.ToString());
                         }
 
                         DlcInfos dlc = new DlcInfos
                         {
-                            Id = el.id.ToString(),
-                            Name = productApiDetailDlc?.title,
-                            Description = RemoveDescriptionPromos(productApiDetailDlc?.description?.full).Trim(),
-                            Image = "https:" + productApiDetailDlc?.images?.logo2x,
-                            Link = string.Format(UrlGogGame, productApiDetailDlc?.slug),
+                            Id = el.Id.ToString(),
+                            Name = productApiDetailDlc?.Title,
+                            Description = RemoveDescriptionPromos(productApiDetailDlc?.ProductDescription?.Full).Trim(),
+                            Image = "https:" + productApiDetailDlc?.ProductImages?.Logo2x,
+                            Link = string.Format(UrlGogGame, productApiDetailDlc?.Slug),
                             IsOwned = IsOwned
                         };
 
@@ -662,19 +670,12 @@ namespace CommonPluginsStores.Gog
                     }
                     else
                     {
-                        Logger.Warn($"No dlc data for {el.id}");
+                        Logger.Warn($"No dlc data for {el.Id}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    if (!ex.Message.Contains("404"))
-                    {
-                        Common.LogError(ex, false, true, PluginName);
-                    }
-                    else
-                    {
-                        Logger.Warn($"No dlc data for {el.id}");
-                    }
+                    ManageException(el.Id.ToString(), ex, false);
                 }
             }
 
@@ -684,24 +685,28 @@ namespace CommonPluginsStores.Gog
                 try
                 {
                     PriceData priceData = GetPrice(Dlcs.Select(x => x.Id).ToList(), Local, LocalCurrency);
-                    string dataObjString = Serialization.ToJson(priceData?.dataObj["_embedded"]);
-                    PriceResult priceResult = Serialization.FromJson<PriceResult>(dataObjString);
-
-                    foreach (PriceItem el in priceResult?.items)
+                    string dataObjString = Serialization.ToJson(priceData?.DataObj["_embedded"]);
+                    Serialization.TryFromJson(dataObjString, out PriceResult priceResult, out Exception ex);
+                    if (ex != null)
                     {
-                        int idx = Dlcs.ToList().FindIndex(x => x.Id.IsEqual(el._embedded.product.id.ToString()));
+                        ManageException($"No price data for {string.Join(",", Dlcs.Select(x => x.Id))}", ex, dataObjString.Contains("404"));
+                    }
+
+                    priceResult?.Items?.ForEach(y =>
+                    {
+                        int idx = Dlcs.ToList().FindIndex(x => x.Id.IsEqual(y.Embedded.Product.Id.ToString()));
                         if (idx > -1)
                         {
-                            double.TryParse(el._embedded.prices[0].finalPrice.Replace(priceData.CodeCurrency, string.Empty, StringComparison.InvariantCultureIgnoreCase), out double Price);
-                            double.TryParse(el._embedded.prices[0].basePrice.Replace(priceData.CodeCurrency, string.Empty, StringComparison.InvariantCultureIgnoreCase), out double PriceBase);
+                            _ = double.TryParse(y.Embedded.Prices[0].FinalPrice.Replace(priceData.CodeCurrency, string.Empty, StringComparison.InvariantCultureIgnoreCase), out double price);
+                            _ = double.TryParse(y.Embedded.Prices[0].BasePrice.Replace(priceData.CodeCurrency, string.Empty, StringComparison.InvariantCultureIgnoreCase), out double priceBase);
 
-                            Price *= 0.01;
-                            PriceBase *= 0.01;
+                            price *= 0.01;
+                            priceBase *= 0.01;
 
-                            Dlcs[idx].Price = Price + " " + priceData.SymbolCurrency;
-                            Dlcs[idx].PriceBase = PriceBase + " " + priceData.SymbolCurrency;
+                            Dlcs[idx].Price = price + " " + priceData.SymbolCurrency;
+                            Dlcs[idx].PriceBase = priceBase + " " + priceData.SymbolCurrency;
                         }
-                    }
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -724,7 +729,7 @@ namespace CommonPluginsStores.Gog
             try
             {
                 ObservableCollection<GameDlcOwned> GamesDlcsOwned = new ObservableCollection<GameDlcOwned>();
-                UserDataOwned?.owned?.ForEach(x =>
+                UserDataOwned?.Owned?.ForEach(x =>
                 {
                     GamesDlcsOwned.Add(new GameDlcOwned { Id = x.ToString() });
                 });
@@ -860,7 +865,7 @@ namespace CommonPluginsStores.Gog
 
         private void SaveUserDataOwned(UserDataOwned userDataOwned)
         {
-            if (userDataOwned?.owned?.Count == 0)
+            if (userDataOwned?.Owned?.Count == 0)
             {
                 return;
             }
@@ -875,7 +880,11 @@ namespace CommonPluginsStores.Gog
             string urlPrice = string.Format(UrlApiPrice, joined, localCurrency.country.ToUpper(), localCurrency.currency.ToUpper());
             string dataPrice = Web.DownloadStringData(urlPrice).GetAwaiter().GetResult();
 
-            Serialization.TryFromJson<dynamic>(dataPrice, out dynamic dataObj);
+            Serialization.TryFromJson(dataPrice, out dynamic dataObj, out Exception ex);
+            if (ex != null)
+            {
+                ManageException($"No price data for {joined}", ex, dataPrice.Contains("404"));
+            }
 
             string CodeCurrency = localCurrency.currency;
             string SymbolCurrency = localCurrency.symbol;
@@ -894,7 +903,7 @@ namespace CommonPluginsStores.Gog
 
             return new PriceData
             {
-                dataObj = dataObj,
+                DataObj = dataObj,
                 CodeCurrency = CodeCurrency,
                 SymbolCurrency = SymbolCurrency
             };
@@ -907,9 +916,9 @@ namespace CommonPluginsStores.Gog
                 if (IsUserLoggedIn)
                 {
                     string response = Web.DownloadStringData(UrlUserData).GetAwaiter().GetResult();
-                    if (Serialization.TryFromJson(response, out UserData userData) && userData?.currencies != null)
+                    if (Serialization.TryFromJson(response, out UserData userData) && userData?.Currencies != null)
                     {
-                        return userData.currencies.Select(x => new StoreCurrency { country = userData.country, currency = x.code.ToUpper(), symbol = x.symbol }).ToList();
+                        return userData.Currencies.Select(x => new StoreCurrency { country = userData.Country, currency = x.Code.ToUpper(), symbol = x.Symbol }).ToList();
                     }
                 }
             }
@@ -966,5 +975,18 @@ namespace CommonPluginsStores.Gog
             return document.Body.InnerHtml;
         }
         #endregion
+
+
+        private void ManageException (string message, Exception ex, bool is404)
+        {
+            if (ex.Message.Contains("404") || is404)
+            {
+                Logger.Warn(message);
+            }
+            else
+            {
+                Common.LogError(ex, false, true, PluginName);
+            }
+        }
     }
 }

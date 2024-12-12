@@ -1,51 +1,57 @@
-﻿using System;
+﻿using Playnite.SDK.Data;
+using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace CommonPluginsStores.Gog.Models
 {
     public class PriceResult
     {
-        public List<PriceItem> items { get; set; }
-    }
-
-    public class PriceSelf
-    {
-        public string href { get; set; }
-    }
-
-    public class PriceLinks
-    {
-        public PriceSelf self { get; set; }
+        [SerializationPropertyName("items")]
+        public List<PriceItem> Items { get; set; }
     }
 
     public class PriceCurrency
     {
-        public string code { get; set; }
+        [SerializationPropertyName("code")]
+        public string Code { get; set; }
     }
 
     public class Price
     {
-        public PriceCurrency currency { get; set; }
-        public string basePrice { get; set; }
-        public string finalPrice { get; set; }
-        public string bonusWalletFunds { get; set; }
+        [SerializationPropertyName("currency")]
+        public PriceCurrency Currency { get; set; }
+
+        [SerializationPropertyName("basePrice")]
+        public string BasePrice { get; set; }
+
+        [SerializationPropertyName("finalPrice")]
+        public string FinalPrice { get; set; }
+
+        [SerializationPropertyName("bonusWalletFunds")]
+        public string BonusWalletFunds { get; set; }
     }
 
     public class PriceProduct
     {
-        public int id { get; set; }
+        [SerializationPropertyName("id")]
+        public int Id { get; set; }
     }
 
     public class PriceEmbedded
     {
-        public List<Price> prices { get; set; }
-        public PriceProduct product { get; set; }
+        [SerializationPropertyName("prices")]
+        public List<Price> Prices { get; set; }
+
+        [SerializationPropertyName("product")]
+        public PriceProduct Product { get; set; }
     }
 
     public class PriceItem
     {
-        public PriceLinks _links { get; set; }
-        public PriceEmbedded _embedded { get; set; }
+        [SerializationPropertyName("_links")]
+        public Links Links { get; set; }
+
+        [SerializationPropertyName("_embedded")]
+        public PriceEmbedded Embedded { get; set; }
     }
 }

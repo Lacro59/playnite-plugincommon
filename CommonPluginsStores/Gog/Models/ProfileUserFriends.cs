@@ -1,42 +1,72 @@
-﻿using System;
+﻿using Playnite.SDK.Data;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CommonPluginsStores.Gog.Models
 {
     public class ProfileUserFriends
     {
-        public string id { get; set; }
-        public User user { get; set; }
-        public int status { get; set; }
-        public DateCreated date_created { get; set; }
-        public DateAccepted date_accepted { get; set; }
-        public Stats stats { get; set; }
+        [SerializationPropertyName("id")]
+        public string Id { get; set; }
+
+        [SerializationPropertyName("user")]
+        public User User { get; set; }
+
+        [SerializationPropertyName("status")]
+        public int Status { get; set; }
+
+        [SerializationPropertyName("date_created")]
+        public DateCreated DateCreated { get; set; }
+
+        [SerializationPropertyName("date_accepted")]
+        public DateAccepted DateAccepted { get; set; }
+
+        [SerializationPropertyName("stats")]
+        public Stats Stats { get; set; }
     }
 
     public class User
     {
-        public string id { get; set; }
-        public string username { get; set; }
-        public DateTime created_date { get; set; }
-        public string avatar { get; set; }
-        public bool is_employee { get; set; }
-        public List<object> tags { get; set; }
+        [SerializationPropertyName("id")]
+        public string Id { get; set; }
+
+        [SerializationPropertyName("username")]
+        public string Username { get; set; }
+
+        [SerializationPropertyName("created_date")]
+        public DateTime CreatedDate { get; set; }
+
+        [SerializationPropertyName("avatar")]
+        public string Avatar { get; set; }
+
+        [SerializationPropertyName("is_employee")]
+        public bool IsEmployee { get; set; }
+
+        [SerializationPropertyName("tags")]
+        public List<object> Tags { get; set; }
     }
 
     public class DateCreated
     {
-        public string date { get; set; }
-        public int timezone_type { get; set; }
-        public string timezone { get; set; }
+        [SerializationPropertyName("date")]
+        public string Date { get; set; }
+
+        [SerializationPropertyName("timezone_type")]
+        public int TimezoneType { get; set; }
+
+        [SerializationPropertyName("timezone")]
+        public string Timezone { get; set; }
     }
 
     public class DateAccepted
     {
-        public string date { get; set; }
-        public int timezone_type { get; set; }
-        public string timezone { get; set; }
+        [SerializationPropertyName("date")]
+        public string Date { get; set; }
+
+        [SerializationPropertyName("timezone_type")]
+        public int TimezoneType { get; set; }
+
+        [SerializationPropertyName("timezone")]
+        public string Timezone { get; set; }
     }
 }
