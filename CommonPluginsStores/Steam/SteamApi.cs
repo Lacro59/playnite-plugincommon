@@ -179,7 +179,7 @@ namespace CommonPluginsStores.Steam
                         if (idMatch.Success)
                         {
                             _ = SetStoredCookies(GetWebCookies());
-                            string JsonDataString = Tools.GetJsonInString(source, @"g_rgProfileData[ ]?=[ ]?");
+                            string JsonDataString = Tools.GetJsonInString(source, @"(?<=g_rgProfileData[ ]=[ ])");
                             RgProfileData rgProfileData = Serialization.FromJson<RgProfileData>(JsonDataString);
 
                             CurrentAccountInfos = new AccountInfos
