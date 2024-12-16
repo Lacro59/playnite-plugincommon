@@ -122,7 +122,7 @@ namespace CommonPluginsShared.Converters
                 if (((string)values[0]).EndsWith(".tga", StringComparison.OrdinalIgnoreCase))
                 {
                     BitmapImage bitmapImage = BitmapExtensions.TgaToBitmap((string)values[0]);
-                    return bitmapLoadProperties == null ? bitmapImage : bitmapImage.GetClone(bitmapLoadProperties);
+                    return bitmapImage == null ? null : bitmapLoadProperties == null ? bitmapImage : bitmapImage.GetClone(bitmapLoadProperties);
                 }
 
                 return bitmapLoadProperties == null
