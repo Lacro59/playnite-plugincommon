@@ -215,7 +215,7 @@ namespace CommonPluginsShared
             Match match = Regex.Match(source, pattern);
             if (match.Success)
             {
-                return match.Groups[0].Value;
+                return match.Groups[1].Value;
             }
             else
             {

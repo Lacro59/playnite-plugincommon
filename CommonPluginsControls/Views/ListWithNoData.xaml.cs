@@ -37,9 +37,7 @@ namespace CommonPluginsControls.Views
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            List<Guid> Ids = gameData.Select(x => x.Id).ToList();
-            PluginDatabase.RefreshWithNoData(Ids);
-
+            PluginDatabase.Refresh(gameData.Select(x => x.Id));
             RefreshData();
         }
 

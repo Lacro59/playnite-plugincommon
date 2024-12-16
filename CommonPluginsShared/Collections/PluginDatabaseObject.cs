@@ -206,9 +206,7 @@ namespace CommonPluginsShared.Collections
             IEnumerable<Game> gamesWithNoData = Database.Items.Where(x => !x.Value.HasData).Select(x => API.Instance.Database.Games.Get(x.Key)).Where(x => x != null);
             IEnumerable<Game> gamesNotInDb = API.Instance.Database.Games.Where(x => !Database.Items.Any(y => y.Key == x.Id));
             IEnumerable<Game> mergedList = gamesWithNoData.Union(gamesNotInDb).Distinct();
-
-            mergedList = mergedList.Where(x => !x.Hidden);
-            return mergedList;
+            return mergedList.Where(x => !x.Hidden);
         }
 
         public virtual IEnumerable<Game> GetGamesOldData(int months)

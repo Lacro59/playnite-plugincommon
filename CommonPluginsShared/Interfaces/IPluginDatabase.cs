@@ -36,6 +36,7 @@ namespace CommonPluginsShared.Interfaces
         void Refresh(Guid id);
         void Refresh(IEnumerable<Guid> ids);
 
+        [Obsolete("Used Refresh(ids)")]
         void RefreshWithNoData(IEnumerable<Guid> ids);
 
         IEnumerable<Game> GetGamesWithNoData();
