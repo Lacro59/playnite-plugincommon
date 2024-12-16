@@ -119,33 +119,18 @@ namespace CommonPluginsShared.Converters
                     }
                 }
 
-
                 if (((string)values[0]).EndsWith(".tga", StringComparison.OrdinalIgnoreCase))
                 {
                     BitmapImage bitmapImage = BitmapExtensions.TgaToBitmap((string)values[0]);
-
-                    if (bitmapLoadProperties == null)
-                    {
-                        return bitmapImage;
-                    }
-                    else
-                    {
-                        return bitmapImage.GetClone(bitmapLoadProperties);
-                    }
+                    return bitmapLoadProperties == null ? bitmapImage : bitmapImage.GetClone(bitmapLoadProperties);
                 }
 
-
-                if (bitmapLoadProperties == null)
-                {
-                    return BitmapExtensions.BitmapFromFile((string)values[0]);
-                }
-                else
-                {
-                    return BitmapExtensions.BitmapFromFile((string)values[0], bitmapLoadProperties);
-                }
+                return bitmapLoadProperties == null
+                    ? BitmapExtensions.BitmapFromFile((string)values[0])
+                    : BitmapExtensions.BitmapFromFile((string)values[0], bitmapLoadProperties);
             }
 
-            return values[0];
+            return null;
         }
 
         public object[] ConvertBack(object value, Type[] targetType, object parameter, CultureInfo culture)
