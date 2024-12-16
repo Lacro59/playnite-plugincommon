@@ -39,7 +39,7 @@ namespace CommonPluginsControls.Controls
 
         private void PART_BtClose_Click(object sender, RoutedEventArgs e)
         {
-            ((Window)this.Parent).Close();
+            ((Window)Parent).Close();
         }
 
         private void PART_BtDownload_Click(object sender, RoutedEventArgs e)
@@ -49,6 +49,16 @@ namespace CommonPluginsControls.Controls
 
             if ((bool)PART_AllGames.IsChecked)
             {
+            }
+
+            if ((bool)PART_Filtred.IsChecked)
+            {
+                FilteredGames = API.Instance.MainView.FilteredGames;
+            }
+
+            if ((bool)PART_Selected.IsChecked)
+            {
+                FilteredGames = API.Instance.MainView.SelectedGames.ToList();
             }
 
             if ((bool)PART_GamesRecentlyPlayed.IsChecked)
