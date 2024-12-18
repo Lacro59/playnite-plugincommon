@@ -57,7 +57,8 @@ namespace CommonPluginsShared
             EmuLibrary,
             LegendaryLibrary,
             GogOssLibrary,
-            GameActivity
+            GameActivity,
+            MetadataLocal
         }
 
         private static readonly Dictionary<Guid, ExternalPlugin> PluginsById = new Dictionary<Guid, ExternalPlugin>
@@ -85,7 +86,8 @@ namespace CommonPluginsShared
 
             { new Guid("CEBE6D32-8C46-4459-B993-5A5189D60788"), ExternalPlugin.SuccessStory },
             { new Guid("BF78D9AF-6E79-4C73-ACA6-C23A11A485AE"), ExternalPlugin.CheckDlc },
-            { new Guid("AFBB1A0D-04A1-4D0C-9AFA-C6E42CA855B4"), ExternalPlugin.GameActivity }
+            { new Guid("AFBB1A0D-04A1-4D0C-9AFA-C6E42CA855B4"), ExternalPlugin.GameActivity },
+            { new Guid("FFB390B2-758F-40AC-9B20-9BE08FD05A65"), ExternalPlugin.MetadataLocal }
         };
 
         public static ExternalPlugin GetPluginType(Guid PluginId)
