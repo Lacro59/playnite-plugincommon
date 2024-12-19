@@ -237,7 +237,7 @@ namespace CommonPluginsStores.Epic
                     gameAchievements.Add(gameAchievement);
                 });
 
-                if (!accountInfos.IsPrivate && StoreSettings.UseAuth)
+                if (!accountInfos.IsPrivate && !StoreSettings.UseAuth)
                 {
                     EpicPlayerProfileAchievementsByProductIdResponse playerProfileAchievementsByProductId = QueryPlayerProfileAchievementsByProductId(accountInfos.UserId, productId).GetAwaiter().GetResult();
                     playerProfileAchievementsByProductId?.Data?.PlayerProfile?.PlayerProfile2?.ProductAchievements?.Data?.PlayerAchievements?.ForEach(x =>
@@ -906,6 +906,12 @@ namespace CommonPluginsStores.Epic
         {
             try
             {
+                if (AuthToken?.Token?.IsNullOrEmpty() ?? true)
+                {
+                    IsUserLoggedIn = false;
+                    return null;
+                }
+
                 QueryPlayerAchievement query = new QueryPlayerAchievement();
                 query.variables.epicAccountId = epicAccountId;
                 query.variables.sandboxId = sandboxId;
