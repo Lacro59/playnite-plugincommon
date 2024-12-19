@@ -364,7 +364,7 @@ namespace CommonPluginsStores.Steam
                     return gameAchievements;
                 }
 
-                if (accountInfos != null && accountInfos.IsCurrent)
+                if (accountInfos?.IsCurrent ?? false)
                 {
                     gameAchievements = StoreSettings.UseAuth || accountInfos.IsPrivate || !StoreSettings.UseApi || accountInfos.ApiKey.IsNullOrEmpty()
                         ? GetAchievementsByWeb(appId, accountInfos, gameAchievements)
