@@ -237,7 +237,7 @@ namespace CommonPluginsStores.Steam
                     if (CurrentAccountInfos.ApiKey.IsNullOrEmpty())
                     {
                         string response = Web.DownloadStringData(string.Format(UrlProfileById, accountInfos.UserId), GetStoredCookies()).GetAwaiter().GetResult();
-                        string jsonDataString = Tools.GetJsonInString(response, @"g_rgProfileData[ ]?=[ ]?");
+                        string jsonDataString = Tools.GetJsonInString(response, @"(?<=g_rgProfileData[ ]=[ ])");
                         if (jsonDataString.Length < 5)
                         {
                             response = Web.DownloadStringData(string.Format(UrlProfileByName, accountInfos.Pseudo), GetStoredCookies()).GetAwaiter().GetResult();
