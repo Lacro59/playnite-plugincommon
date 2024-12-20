@@ -22,9 +22,9 @@ namespace CommonPluginsShared.Plugins
         #endregion
 
         #region Variables exposed for custom themes
-        private bool hasData = false;
+        private bool _hasData = false;
         [DontSerialize]
-        public bool HasData { get => hasData; set => SetValue(ref hasData, value); }
+        public bool HasData { get => _hasData; set => SetValue(ref _hasData, value); }
         #endregion
 
         [DontSerialize]
