@@ -20,15 +20,19 @@ namespace CommonPluginsShared.Extensions
         /// <param name="items">The list of items to process</param>
         /// <param name="delimiter">Specify the delimiter, default is ,</param>
         /// <returns></returns>
-        public static string ToCsv<T>(this List<T> items, string delimiter = ",")
+        public static string ToCsv<T>(this List<T> items, bool orderBy = true, string delimiter = ",", bool noHeader = false, List<string> header = null)
         {
             Type itemType = typeof(T);
-            IOrderedEnumerable<PropertyInfo> props = itemType.GetProperties(BindingFlags.Public | BindingFlags.Instance).OrderBy(p => p.Name);
-
+            IEnumerable<PropertyInfo> props = orderBy
+                ? itemType.GetProperties(BindingFlags.Public | BindingFlags.Instance).OrderBy(p => p.Name)
+                : (IEnumerable<PropertyInfo>)itemType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             StringBuilder csv = new StringBuilder();
 
             // Write Headers
-            _ = csv.AppendLine(string.Join(delimiter, props.Select(p => p.Name)));
+            if (!noHeader)
+            {
+                _ = header?.Count > 0 ? csv.AppendLine(string.Join(delimiter, header)) : csv.AppendLine(string.Join(delimiter, props.Select(p => p.Name)));
+            }
 
             // Write Rows
             foreach (T item in items)
