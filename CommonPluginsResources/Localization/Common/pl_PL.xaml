@@ -3,7 +3,7 @@
 
     <sys:String x:Key="LOCCommonYear">Rok</sys:String>
     <sys:String x:Key="LOCCommonMonth">Miesiąc</sys:String>
-    <sys:String x:Key="LOCCommonMonths">Month(s)</sys:String>
+    <sys:String x:Key="LOCCommonMonths">Miesiąc(e)</sys:String>
     <sys:String x:Key="LOCCommonDateData">Data danych</sys:String>
     
     <sys:String x:Key="LOCCommonStartDate">Data rozpoczęcia</sys:String>
@@ -22,8 +22,8 @@
     <!-- Filters -->
 
     <sys:String x:Key="LOCCommonUsedFilteredGames">Aktualnie przefiltrowane gry</sys:String>
-    <sys:String x:Key="LOCCommonDefaultFilters">Restore default filters</sys:String>
-    <sys:String x:Key="LOCCommonSaveFilters">Save current filters</sys:String>
+    <sys:String x:Key="LOCCommonDefaultFilters">Przywróć domyślne filtry</sys:String>
+    <sys:String x:Key="LOCCommonSaveFilters">Zapisz bieżące filtry</sys:String>
 
     <!-- Transfer plugin data -->
 
@@ -49,11 +49,11 @@
     <sys:String x:Key="LOCCommonPrivateChecking">Sprawdzanie statusu prywatności…</sys:String>
     <sys:String x:Key="LOCCommonNotLoggedInError">Błąd uwierzytelniania użytkownika</sys:String>
 
-    <sys:String x:Key="LOCCommonAccountConfiguration">Account configuration</sys:String>
-    <sys:String x:Key="LOCCommonIsPrivate">Is private</sys:String>
-    <sys:String x:Key="LOCCommonHasApiKey">Has api key</sys:String>
-    <sys:String x:Key="LOCCommonControlConfiguration">Control configuration</sys:String>
-    <sys:String x:Key="LOCCommonGetAccountID">Get account ID</sys:String>
+    <sys:String x:Key="LOCCommonAccountConfiguration">Konfiguracja konta</sys:String>
+    <sys:String x:Key="LOCCommonIsPrivate">Jest prywatny</sys:String>
+    <sys:String x:Key="LOCCommonHasApiKey">Ma klucz API</sys:String>
+    <sys:String x:Key="LOCCommonControlConfiguration">Konfiguracja sterowania</sys:String>
+    <sys:String x:Key="LOCCommonGetAccountID">Uzyskaj ID konta</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: użytkownik nie jest uwierzytelniony</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: Brak klucza API</sys:String>
@@ -70,11 +70,11 @@
     <sys:String x:Key="LOCCommonGameTime">Czas gry</sys:String>
     
     <sys:String x:Key="LOCCommonSelectFilters">Wybierz filtry</sys:String>
-    <sys:String x:Key="LOCCommonOldData">Old data</sys:String>
-    <sys:String x:Key="LOCCommonRecentlyAdded">Recently added</sys:String>
+    <sys:String x:Key="LOCCommonOldData">Stare dane</sys:String>
+    <sys:String x:Key="LOCCommonRecentlyAdded">Ostatnio dodane</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Tylko brakujące</sys:String>
     <sys:String x:Key="LOCCommonMissingData">Oznacz brakujące dane gier</sys:String>
-    <sys:String x:Key="LOCCommonSince">Since</sys:String>
+    <sys:String x:Key="LOCCommonSince">Odkąd</sys:String>
 
     <sys:String x:Key="LOCCommonTotal">Łącznie</sys:String>
     <sys:String x:Key="LOCCommonCut">Wytnij</sys:String>
@@ -96,7 +96,7 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">Domyślne sortowanie listy gier</sys:String>
 
-    <sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated (only new)</sys:String>
+    <sys:String x:Key="LOCCommonAutoImport">Automatycznie zaimportuj dane podczas aktualizacji biblioteki (tylko nowe)</sys:String>
     <sys:String x:Key="LOCCommonAutoImportOnInstalled">Automatyczny import zainstalowanych gier</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">Ukryj opcje wykresu na panelu</sys:String>
@@ -224,32 +224,32 @@ Sprawdź ustawienia wtyczki.</sys:String>
     <sys:String x:Key="LOCCommonSelectVariable">Wybierz zmienn</sys:String>
 
 
-    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
-{InstallDir} - Game installation directory
-{InstallDirName} - Installation folder name
-{ImagePath} - Game ISO/ROM path if set
-{ImageName} - Game ISO/ROM file name
-{ImageNameNoExt} - Game ISO/ROM file name without extension
-{PlayniteDir} - Playnite installation directory
-{Name} - Game name
+    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Zmienne specjalne mogą być użyte do dodania dynamicznego ciągu znaków:
+{InstallDir} - katalog instalacji gry
+{InstallDirName} - nazwa folderu instalacyjnego
+{ImagePath} - ścieżka ISO/ROM gry, jeśli jest ustawiona
+{ImageName} - nazwa pliku ISO/ROM gry
+{ImageNameNoExt} - nazwa pliku ISO/ROM gry bez rozszerzenia
+{PlayniteDir} - katalog instalacyjny Playnite
+{Name} - nazwa gry
        
-Cloud variables can be used to add a dynamic string:        
+Zmienne w chmurze mogą być użyte do dodania dynamicznego ciągu znaków:        
 {DropboxFolder}
 {OneDriveFolder}
        
-Steam variables can be used to add a dynamic string:        
-{SteamId} - Steam user Id
-{SteamAccountId} - Steam account Id
-{SteamInstallDir} - Steam installation directory
-{SteamScreenshotsDir} - Steam screenshots directory
+Zmienne Steam mogą być użyte do dodania dynamicznego ciągu znaków:        
+{SteamId} - identyfikator użytkownika Steam
+{SteamAccountId} - identyfikator konta Steam
+{SteamInstallDir} - katalog instalacyjny Steam
+{SteamScreenshotsDir} - katalog zrzutów ekranu Steam.
        
-Ubisoft Connect variables can be used to add a dynamic string:        
-{UbisoftInstallDir} - Ubisoft installation directory
-{UbisoftScreenshotsDir} - Ubisoft screenshots directory
+Zmienne Ubisoft Connect mogą być użyte do dodania dynamicznego ciągu znaków:        
+{UbisoftInstallDir} - katalog instalacyjny Ubisoft
+{UbisoftScreenshotsDir} - katalog zrzutów ekranu Ubisoft
         
-{RetroArchScreenshotsDir}
+{RetroArchScreenshotsDir} - katalog zrzutów ekranu Ubisoft.
             
-Windows variables can be used to add a dynamic string:        
+Zmienne Windows mogą być użyte do dodania dynamicznego ciągu znaków:        
 {WinDir}
 {AllUsersProfile}
 {AppData}
