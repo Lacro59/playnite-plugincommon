@@ -382,7 +382,7 @@ namespace CommonPluginsShared.Collections
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {message}")
             {
                 Cancelable = true,
-                IsIndeterminate = false
+                IsIndeterminate = ids.Count() == 1
             };
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
@@ -399,7 +399,7 @@ namespace CommonPluginsShared.Collections
                 {
                     Game game = API.Instance.Database.Games.Get(id);
                     a.Text = $"{PluginName} - {message}"
-                        + "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}"
+                        + (ids.Count() == 1 ? string.Empty : "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}")
                         + "\n" + game?.Name + (game?.Source == null ? string.Empty : $" ({game?.Source.Name})");
 
                     if (a.CancelToken.IsCancellationRequested)
@@ -695,7 +695,7 @@ namespace CommonPluginsShared.Collections
             GlobalProgressOptions options = new GlobalProgressOptions(message)
             {
                 Cancelable = true,
-                IsIndeterminate = false
+                IsIndeterminate = ids.Count() == 1
             };
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
@@ -719,7 +719,7 @@ namespace CommonPluginsShared.Collections
                         }
 
                         a.Text = message
-                            + "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}"
+                            + (ids.Count() == 1 ? string.Empty : "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}")
                             + "\n" + game?.Name + (game?.Source == null ? string.Empty : $" ({game?.Source.Name})");
 
                         if (a.CancelToken.IsCancellationRequested)
