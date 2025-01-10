@@ -1045,7 +1045,9 @@ namespace CommonPluginsStores.Steam
                 List<SteamPlayerAchievement> steamPlayerAchievements = SteamKit.GetPlayerAchievements(_currentAccountInfos.ApiKey, appId, steamId, CodeLang.GetSteamLang(Local));
                 steamPlayerAchievements?.ForEach(x =>
                 {
-                    gameAchievements.FirstOrDefault(y => y.Id.IsEqual(x.ApiName)).DateUnlocked = x.UnlockTime;
+                    // Some achievements don't have a valid unlock time, use fallback date instead
+                    var unlockTime = x.UnlockTime.Year == 1 && x.Achieved == 1 ? new DateTime(year: 2007, month: 10, day: 10) : x.UnlockTime;
+                    gameAchievements.FirstOrDefault(y => y.Id.IsEqual(x.ApiName)).DateUnlocked = unlockTime;
                 });
             }
             return gameAchievements;
