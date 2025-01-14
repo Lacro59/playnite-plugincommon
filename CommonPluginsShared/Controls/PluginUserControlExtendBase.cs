@@ -149,7 +149,7 @@ namespace CommonPluginsShared.Controls
             SetDefaultDataContext();
             MustDisplay = AlwaysShow ? AlwaysShow : controlDataContext.IsActivated;
 
-            if (newContext is null || !MustDisplay)
+            if (!controlDataContext.IsActivated || newContext is null || !MustDisplay)
             {
                 return;
             }
