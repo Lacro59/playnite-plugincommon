@@ -30,6 +30,7 @@ using System.Net.Http;
 using System.Windows;
 using System.Threading;
 using CommonPluginsStores.Steam.Models.SteamKit;
+using Playnite.SDK.Models;
 
 namespace CommonPluginsStores.Steam
 {
