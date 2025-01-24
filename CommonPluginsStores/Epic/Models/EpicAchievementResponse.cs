@@ -82,12 +82,6 @@ namespace CommonPluginsStores.Epic.Models
         [SerializationPropertyName("isBase")]
         public bool IsBase { get; set; }
 
-        [SerializationPropertyName("numProgressed")]
-        public int? NumProgressed { get; set; }
-
-        [SerializationPropertyName("numCompleted")]
-        public int? NumCompleted { get; set; }
-
         [SerializationPropertyName("totalAchievements")]
         public int? TotalAchievements { get; set; }
 
