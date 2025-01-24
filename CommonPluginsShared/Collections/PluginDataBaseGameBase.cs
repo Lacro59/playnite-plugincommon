@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Playnite.SDK;
 
 namespace CommonPluginsShared.Collections
 {
@@ -24,8 +25,12 @@ namespace CommonPluginsShared.Collections
         public virtual bool HasData => false;
 
         [DontSerialize]
-        public virtual int Count => 0;
+        public virtual ulong Count => 0;
         #endregion
+
+        public bool GameExist => API.Instance.Database.Games.Get(Id) != null;
+
+        public RelayCommand<Guid> GoToGame => Commands.GoToGame;
 
         #region Game data
         [DontSerialize]
@@ -64,6 +69,9 @@ namespace CommonPluginsShared.Collections
 
         [DontSerialize]
         public ulong Playtime => Game?.Playtime ?? default;
+
+        [DontSerialize]
+        public ulong PlayCount => Game?.PlayCount ?? default;
 
         [DontSerialize]
         public bool Favorite => Game?.Favorite ?? default;
