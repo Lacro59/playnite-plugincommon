@@ -67,7 +67,7 @@ namespace CommonPluginsControls.Views
 
         private void PART_BtTransfer_Click(object sender, RoutedEventArgs e)
         {
-            var windowOptions = new WindowOptions
+            WindowOptions windowOptions = new WindowOptions
             {
                 ShowMinimizeButton = false,
                 ShowMaximizeButton = false,
@@ -76,9 +76,9 @@ namespace CommonPluginsControls.Views
 
             var data = (DataGame)PART_Lb.SelectedItem;
 
-            var ViewExtension = new TransfertData(data, PluginDatabase);
-            Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(API.Instance, ResourceProvider.GetString("LOCCommonSelectTransferData"), ViewExtension, windowOptions);
-            windowExtension.ShowDialog();
+            TransfertData ViewExtension = new TransfertData(data, PluginDatabase);
+            Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(ResourceProvider.GetString("LOCCommonSelectTransferData"), ViewExtension, windowOptions);
+            _ = windowExtension.ShowDialog();
         }
 
         private void PART_BtClose_Click(object sender, RoutedEventArgs e)

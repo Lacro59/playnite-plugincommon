@@ -993,18 +993,25 @@ namespace CommonPluginsShared.Collections
                     Stopwatch stopWatch = new Stopwatch();
                     stopWatch.Start();
 
-                    path = Path.Combine(path, $"{PluginName}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv");
-                    path = CommonPlayniteShared.Common.Paths.FixPathLength(path);
-                    FileSystem.PrepareSaveFile(path);
-                    string csvData = GetCsvData(a, minimum);
-                    if (!csvData.IsNullOrEmpty())
+                    try
                     {
-                        File.WriteAllText(path, csvData, Encoding.UTF8);
-                        isOK = true;
+                        path = Path.Combine(path, $"{PluginName}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv");
+                        path = CommonPlayniteShared.Common.Paths.FixPathLength(path);
+                        FileSystem.PrepareSaveFile(path);
+                        string csvData = GetCsvData(a, minimum);
+                        if (!csvData.IsNullOrEmpty())
+                        {
+                            File.WriteAllText(path, csvData, Encoding.UTF8);
+                            isOK = true;
+                        }
+                        else
+                        {
+                            Logger.Warn($"No csv data for {PluginName}");
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        Logger.Warn($"No csv data for {PluginName}");
+                        Common.LogError(ex, false, true, PluginName);
                     }
 
                     stopWatch.Stop();

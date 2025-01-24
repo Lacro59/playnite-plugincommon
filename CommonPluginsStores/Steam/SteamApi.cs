@@ -30,6 +30,7 @@ using System.Net.Http;
 using System.Windows;
 using System.Threading;
 using CommonPluginsStores.Steam.Models.SteamKit;
+using Playnite.SDK.Models;
 
 namespace CommonPluginsStores.Steam
 {
@@ -690,12 +691,15 @@ namespace CommonPluginsStores.Steam
 
         #region Steam
         /// <summary>
-        /// Get AppId from Steam store with a game name.
+        /// Get AppId from Steam store with a game.
         /// </summary>
-        /// <param name="Name"></param>
+        /// <param name="game"></param>
         /// <returns></returns>
-        public uint GetAppId(string Name)
+        public uint GetAppId(Game game)
         {
+            var appIdFromLinks = GetAppIdFromLinks(game);
+            if (appIdFromLinks != 0) return appIdFromLinks;
+
             if (SteamApps == null)
             {
                 Logger.Warn("SteamApps is empty");
@@ -703,21 +707,36 @@ namespace CommonPluginsStores.Steam
             }
 
             SteamApps.Sort((x, y) => x.AppId.CompareTo(y.AppId));
-            List<uint> found = SteamApps.FindAll(x => x.Name.IsEqual(Name, true)).Select(x => x.AppId).Distinct().ToList();
+            List<uint> found = SteamApps.FindAll(x => x.Name.IsEqual(game.Name, true)).Select(x => x.AppId).Distinct().ToList();
 
             if (found != null && found.Count > 0)
             {
                 if (found.Count > 1)
                 {
-                    Logger.Warn($"Found {found.Count} SteamAppId data for {Name}: " + string.Join(", ", found));
+                    Logger.Warn($"Found {found.Count} SteamAppId data for {game.Name}: " + string.Join(", ", found));
                     return 0;
                 }
 
-                Common.LogDebug(true, $"Found SteamAppId data for {Name} - {Serialization.ToJson(found)}");
+                Common.LogDebug(true, $"Found SteamAppId data for {game.Name} - {Serialization.ToJson(found)}");
                 return found.First();
             }
 
             return 0;
+        }
+
+        private uint GetAppIdFromLinks(Game game)
+        {
+            var steamLink = game.Links?.FirstOrDefault(link => link.Name.ToLower() == "steam");
+            if (steamLink == null) return 0;
+
+            var linkSplit = steamLink.Url.Split(new[] { "/app/" }, StringSplitOptions.None);
+            var steamIdString = linkSplit?.ElementAtOrDefault(1)?.Split('/').FirstOrDefault();
+            if (steamIdString == null) return 0;
+
+            var success = UInt32.TryParse(steamIdString, out var steamId);
+            if (!success) return 0;
+
+            return steamId;
         }
 
         /// <summary>
@@ -1045,7 +1064,9 @@ namespace CommonPluginsStores.Steam
                 List<SteamPlayerAchievement> steamPlayerAchievements = SteamKit.GetPlayerAchievements(_currentAccountInfos.ApiKey, appId, steamId, CodeLang.GetSteamLang(Local));
                 steamPlayerAchievements?.ForEach(x =>
                 {
-                    gameAchievements.FirstOrDefault(y => y.Id.IsEqual(x.ApiName)).DateUnlocked = x.UnlockTime;
+                    // Some achievements don't have a valid unlock time, use fallback date instead
+                    var unlockTime = x.UnlockTime.Year == 1 && x.Achieved == 1 ? new DateTime(year: 2007, month: 10, day: 10) : x.UnlockTime;
+                    gameAchievements.FirstOrDefault(y => y.Id.IsEqual(x.ApiName)).DateUnlocked = unlockTime;
                 });
             }
             return gameAchievements;
