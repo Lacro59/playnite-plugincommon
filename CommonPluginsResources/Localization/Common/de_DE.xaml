@@ -6,7 +6,7 @@
     <sys:String x:Key="LOCCommonMonths">Monat(e)</sys:String>
     <sys:String x:Key="LOCCommonDateData">Datum der Daten</sys:String>
     
-    <sys:String x:Key="LOCCommonStartDate">Startdatum</sys:String>
+    <sys:String x:Key="LOCCommonStartDate">Anfangsdatum</sys:String>
     <sys:String x:Key="LOCCommonLastUpdate">Letzte Aktualisierung</sys:String>
 
     <sys:String x:Key="LOCCommonAddFolder">Verzeichnis hinzufügen</sys:String>
@@ -15,7 +15,7 @@
 
     <sys:String x:Key="LOCCommonMargin">Abstand</sys:String>
 
-    <sys:String x:Key="LOCCommonExtractToCsv">Plugin-Daten in CSV extrahieren</sys:String>
+    <sys:String x:Key="LOCCommonExtractToCsv">Extrahieren von Plugin Daten in CSV</sys:String>
     <sys:String x:Key="LOCCommonExtractAllToCsv">Extrahieren aller Plugin Daten in CSV (sehr lang)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Extrahiere...</sys:String>
 
@@ -47,13 +47,13 @@
     <sys:String x:Key="LOCCommonAccountName">Kontoname</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Authentifizierungsstatus wird überprüft …</sys:String>
     <sys:String x:Key="LOCCommonPrivateChecking">Überprüfung des Datenschutzstatus…</sys:String>
-    <sys:String x:Key="LOCCommonNotLoggedInError">Benutzer-Authentifizierung fehlgeschlagen</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedInError">Authentifizierung des Benutzers fehlgeschlagen</sys:String>
 
-    <sys:String x:Key="LOCCommonAccountConfiguration">Kontenkonfiguration</sys:String>
-    <sys:String x:Key="LOCCommonIsPrivate">Privat</sys:String>
+    <sys:String x:Key="LOCCommonAccountConfiguration">Konto Konfiguration</sys:String>
+    <sys:String x:Key="LOCCommonIsPrivate">Ist privat</sys:String>
     <sys:String x:Key="LOCCommonHasApiKey">Api Key vorhanden</sys:String>
     <sys:String x:Key="LOCCommonControlConfiguration">Steuerungseinstellungen</sys:String>
-    <sys:String x:Key="LOCCommonGetAccountID">Konto-ID abrufen</sys:String>
+    <sys:String x:Key="LOCCommonGetAccountID">Konto ID abrufen</sys:String>
 
     <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: Benutzer ist nicht authentifiziert</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: Kein API Schlüssel</sys:String>
@@ -70,7 +70,7 @@
     <sys:String x:Key="LOCCommonGameTime">Spielzeit</sys:String>
     
     <sys:String x:Key="LOCCommonSelectFilters">Filter wählen</sys:String>
-    <sys:String x:Key="LOCCommonOldData">Veraltete Daten</sys:String>
+    <sys:String x:Key="LOCCommonOldData">Alte Daten</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Kürzlich hinzugefügt</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Nur fehlende</sys:String>
     <sys:String x:Key="LOCCommonMissingData">Tag Spiele fehlende Daten</sys:String>
@@ -180,9 +180,9 @@ Soll das Verzeichnis geöffnet werden?</sys:String>
     <!-- CommonGlobalProgress -->
 
     <sys:String x:Key="LOCCommonGettingData">Daten werden heruntergeladen...</sys:String>
-    <sys:String x:Key="LOCCommonGettingAllDatas">Daten von installierten Spielen werden heruntergeladen...</sys:String>
-    <sys:String x:Key="LOCCommonGettingInstalledDatas">Daten von installierten Spielen werden heruntergeladen...</sys:String>
-    <sys:String x:Key="LOCCommonGettingNewDatas">Daten von neuen Spielen werden heruntergeladen...</sys:String>
+    <sys:String x:Key="LOCCommonGettingAllDatas">Herunterladen der Daten für alle Spiele...</sys:String>
+    <sys:String x:Key="LOCCommonGettingInstalledDatas">Herunterladen der Daten von installierten Spielen...</sys:String>
+    <sys:String x:Key="LOCCommonGettingNewDatas">Herunterladen der Daten von neuen Spielen...</sys:String>
     <sys:String x:Key="LOCCommonAddingAllTag">Füge Tag zu allen Spielen hinzu...</sys:String>
     <sys:String x:Key="LOCCommonRemovingAllTag">Entferne Tag von allen Spielen...</sys:String>
     <sys:String x:Key="LOCCommonClearingAllTag">Datenbank wird gelöscht...</sys:String>
@@ -210,7 +210,7 @@ Bitte alle Tags im Plugin Menü löschen.</sys:String>
 Sie müssen sich authentifizieren.</sys:String>
 
     <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">Mehr als 1 Eintrag für {0} gefunden.
-Bitte überprüfe die Plugin-Einstellungen.</sys:String>
+Bitte überprüfe die Plugin Einstellungen.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Abmessungen</sys:String>

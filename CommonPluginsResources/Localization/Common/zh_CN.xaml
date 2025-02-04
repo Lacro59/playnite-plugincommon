@@ -70,7 +70,7 @@
     <sys:String x:Key="LOCCommonGameTime">游戏时间</sys:String>
     
     <sys:String x:Key="LOCCommonSelectFilters">选择筛</sys:String>
-    <sys:String x:Key="LOCCommonOldData">Old data</sys:String>
+    <sys:String x:Key="LOCCommonOldData">旧日期</sys:String>
     <sys:String x:Key="LOCCommonRecentlyAdded">Recently added</sys:String>
     <sys:String x:Key="LOCCommonOnlyMissing">Only missing</sys:String>
     <sys:String x:Key="LOCCommonMissingData">Tag games missing data</sys:String>
@@ -92,7 +92,7 @@
     <sys:String x:Key="LOCCommon80to90">80 至 90 小时</sys:String>
     <sys:String x:Key="LOCCommon90to100">90 至 100 小时</sys:String>
     <sys:String x:Key="LOCCommon100plus">100 小时以</sys:String>
-    <sys:String x:Key="LOCCommonNoData">No data</sys:String>
+    <sys:String x:Key="LOCCommonNoData">无日期</sys:String>
 
     <sys:String x:Key="LOCCommonDefaultSorting">默认的游戏列表排序</sys:String>
 

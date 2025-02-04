@@ -17,6 +17,6 @@ namespace CommonPluginsShared.Collections
         public override bool HasData => Items?.Count > 0;
 
         [DontSerialize]
-        public override int Count => Items?.Count ?? 0;
+        public override ulong Count => (ulong)(Items?.Count ?? 0);
     }
 }

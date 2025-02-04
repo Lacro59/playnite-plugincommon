@@ -11,6 +11,6 @@ namespace CommonPluginsShared.Models
         public string Name { get; set; }
 
         public bool IsDeleted { get; set; }
-        public int CountData { get; set; }
+        public ulong CountData { get; set; }
     }
 }

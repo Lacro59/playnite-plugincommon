@@ -37,8 +37,7 @@ namespace CommonPluginsShared
         {
             try
             {
-                var WinParent = UI.FindParent<Window>((FrameworkElement)sender);
-
+                Window WinParent = UI.FindParent<Window>((FrameworkElement)sender);
                 if (WinParent.DataContext?.GetType().GetProperty("IsRestartRequired") != null)
                 {
                     ((dynamic)WinParent.DataContext).IsRestartRequired = true;
@@ -50,9 +49,9 @@ namespace CommonPluginsShared
             }
         });
 
-        public static RelayCommand<Guid> GoToGame => new RelayCommand<Guid>((Id) =>
+        public static RelayCommand<Guid> GoToGame => new RelayCommand<Guid>((id) =>
         {
-            API.Instance.MainView.SelectGame(Id);
+            API.Instance.MainView.SelectGame(id);
             API.Instance.MainView.SwitchToLibraryView();
         });
     }
