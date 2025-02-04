@@ -525,7 +525,7 @@ namespace CommonPluginsStores.Epic
             try
             {
                 EpicAccountResponse account = GetEpicAccount();
-                return account.Id == tokens.account_id;
+                return account != null && account.Id == tokens.account_id;
             }
             catch
             {

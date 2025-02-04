@@ -30,6 +30,7 @@ using System.Net.Http;
 using System.Windows;
 using System.Threading;
 using CommonPluginsStores.Steam.Models.SteamKit;
+using Playnite.SDK.Models;
 
 namespace CommonPluginsStores.Steam
 {
@@ -53,7 +54,7 @@ namespace CommonPluginsStores.Steam
         private static string UrlFriends => UrlSteamCommunity + @"/profiles/{0}/friends";
 
         private static string UrlUserData => UrlStore + @"/dynamicstore/userdata/";
-        private static string UrlWishlist => UrlStore + @"/wishlist/profiles/{0}/wishlistdata/?p={1}&v=";
+        private static string UrlWishlist => UrlStore + @"/wishlist/profiles/{0}/";
         private static string UrlWishlistRemove => UrlStore + @"/api/removefromwishlist";
 
         private static string UrlApiGameDetails => UrlStore + @"/api/appdetails?appids={0}&l={1}";
@@ -393,100 +394,70 @@ namespace CommonPluginsStores.Steam
         {
             if (accountInfos != null)
             {
-                for (int iPage = 0; iPage < 10; iPage++)
+                string url = string.Format(UrlWishlist, accountInfos.UserId);
+                string response;
+                try
                 {
-                    string url = string.Format(UrlWishlist, accountInfos.UserId, iPage);
-                    string response;
+                    WebViewSettings webViewSettings = new WebViewSettings { JavaScriptEnabled = true };
+                    using (IWebView webView = API.Instance.WebViews.CreateOffscreenView(webViewSettings))
+                    {
+                        GetStoredCookies().ForEach(x => webView.SetCookies(url, x));
+                        webView.NavigateAndWait(url);
+                        response = webView.GetPageSource();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, $"Error download {ClientName} wishlist", true, PluginName);
+                    return null;
+                }
+
+                ObservableCollection<AccountWishlist> data = new ObservableCollection<AccountWishlist>();
+
+                string json = Tools.GetJsonInString(response, @"queryData:[ ]?""?")
+                    .Replace("\\\"", "\"")
+                    .Replace("\\\\\"", string.Empty)
+                    .Replace("\",cookiePrefs:{\"version\":1,\"preference_state\":1,\"utm_enabled\":true}}", string.Empty);
+                _ = Serialization.TryFromJson(json, out SteamWishlist steamWishlist, out Exception exSerialization);
+                if (exSerialization != null)
+                {
+                    Common.LogError(exSerialization, true);
+                }
+
+                Query listApps = steamWishlist?.Queries?.FirstOrDefault(x => Serialization.ToJson(x.State.Data).Contains("\"items\":"));
+                _ = Serialization.TryFromJson(Serialization.ToJson(listApps?.State?.Data), out Apps apps, out exSerialization); 
+                if (exSerialization != null)
+                {
+                    Common.LogError(exSerialization, true);
+                }
+
+                steamWishlist?.Queries?.ForEach(x =>
+                {
                     try
                     {
-                        response = Web.DownloadStringData(url, GetStoredCookies()).GetAwaiter().GetResult();
+                        _ = Serialization.TryFromJson(Serialization.ToJson(x.State?.Data), out Wishlist wishlist, out exSerialization);
+                        if (wishlist != null && wishlist.Appid != 0)
+                        {
+                            Item item = apps?.Items.FirstOrDefault(y => y.Appid == wishlist.Appid);
+
+                            data.Add(new AccountWishlist
+                            {
+                                Id = wishlist.Appid.ToString(),
+                                Name = wishlist.Name,
+                                Link = "https://store.steampowered.com/" + wishlist.StoreUrlPath,
+                                Released = null,
+                                Added = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(item.DateAdded).ToUniversalTime(),
+                                Image = string.Format("https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/{0}/header_292x136.jpg", wishlist.Appid)
+                            });
+                        }
                     }
                     catch (Exception ex)
                     {
-                        Common.LogError(ex, false, $"Error download {ClientName} wishlist for page {iPage}", true, PluginName);
-                        return null;
+                        Common.LogError(ex, true, $"Error in parse {ClientName} wishlist - {Serialization.ToJson(x)}");
                     }
+                });
 
-                    if (response.ToLower().Contains("{\"success\":2}"))
-                    {
-                        Logger.Warn($"Private wishlist for {accountInfos.UserId}?");
-                        API.Instance.Notifications.Add(new NotificationMessage(
-                            $"{PluginName}-steam-wishlist-{accountInfos.UserId}",
-                            $"{PluginName}" + Environment.NewLine + ResourceProvider.GetString("LOCSteamPrivateAccount"),
-                            NotificationType.Error
-                        ));
-                    }
-
-                    if (!response.IsNullOrEmpty())
-                    {
-                        if (response == "[]")
-                        {
-                            Logger.Info($"No result after page {iPage} for {ClientName} wishlist");
-                            break;
-                        }
-
-                        try
-                        {
-                            ObservableCollection<AccountWishlist> data = new ObservableCollection<AccountWishlist>();
-                            dynamic resultObj = Serialization.FromJson<dynamic>(response);
-
-                            foreach (dynamic gameWishlist in resultObj)
-                            {
-                                string Id = string.Empty;
-                                string Name = string.Empty;
-                                DateTime? Released = null;
-                                DateTime? Added = null;
-                                string Image = string.Empty;
-
-                                try
-                                {
-                                    dynamic gameWishlistData = (dynamic)gameWishlist.Value;
-
-                                    Id = gameWishlist.Name;
-                                    Name = WebUtility.HtmlDecode((string)gameWishlistData["name"]);
-
-                                    string release_date = ((string)gameWishlistData["release_date"])?.Split('.')[0];
-                                    if (int.TryParse(release_date, out int release_date_int))
-                                    {
-                                        Released = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(release_date_int).ToUniversalTime();
-                                    }
-
-                                    string added_date = ((string)gameWishlistData["added"])?.Split('.')[0];
-                                    if (int.TryParse(added_date, out int added_date_int))
-                                    {
-                                        Added = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(added_date_int).ToUniversalTime();
-                                    }
-
-                                    Image = (string)gameWishlistData["capsule"];
-
-                                    data.Add(new AccountWishlist
-                                    {
-                                        Id = Id,
-                                        Name = Name,
-                                        Link = "https://store.steampowered.com/app/" + Id,
-                                        Released = Released,
-                                        Added = Added,
-                                        Image = Image
-                                    });
-                                }
-                                catch (Exception ex)
-                                {
-                                    Common.LogError(ex, true, $"Error in parse {ClientName} wishlist - {Name}");
-                                }
-                            }
-
-                            return data;
-                        }
-                        catch (Exception ex)
-                        {
-                            Common.LogError(ex, false, $"Error in parse {ClientName} wishlist", true, PluginName);
-                        }
-                    }
-                    else
-                    {
-                        Logger.Warn($"No wishlist for {accountInfos.UserId}?");
-                    }
-                }
+                return data;
             }
 
             return null;
@@ -561,13 +532,23 @@ namespace CommonPluginsStores.Steam
                         return null;
                     }
 
+                    string format = "d MMM, yyyy";
+                    CultureInfo culture = CultureInfo.InvariantCulture;
+                    string dateString = storeAppDetailsResult?.data?.release_date?.date;
+                    DateTime? released = null;
+                    if (DateTime.TryParseExact(dateString, format, culture, DateTimeStyles.None, out DateTime releasedDate))
+                    {
+                        released = releasedDate;
+                    }
+
                     GameInfos gameInfos = new GameInfos
                     {
                         Id = storeAppDetailsResult?.data.steam_appid.ToString(),
                         Name = storeAppDetailsResult?.data.name,
                         Link = string.Format(UrlSteamGame, id, CodeLang.GetSteamLang(Local)),
                         Image = storeAppDetailsResult?.data.header_image,
-                        Description = ParseDescription(storeAppDetailsResult?.data.about_the_game)
+                        Description = ParseDescription(storeAppDetailsResult?.data.about_the_game),
+                        Released = released
                     };
 
                     // DLC

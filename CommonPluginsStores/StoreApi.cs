@@ -72,7 +72,7 @@ namespace CommonPluginsStores
         }
         #endregion
 
-        public StoreSettings StoreSettings = new StoreSettings();
+        public StoreSettings StoreSettings { get; set; } = new StoreSettings();
 
         protected bool? isUserLoggedIn;
         public bool IsUserLoggedIn

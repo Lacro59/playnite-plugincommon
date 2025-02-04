@@ -80,6 +80,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamApps.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamUserData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamWishlist.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\SteamApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\SteamKit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StoreApi.cs" />
