@@ -110,7 +110,9 @@ namespace CommonPluginsControls.Controls
         }
 
         public void SetColors(LinearGradientBrush linearGradient)
-        { 
+        {
+            SetColors(linearGradient.GradientStops[0].Color);
+
             IsSimpleColor = false;
             PART_tbGradient.IsChecked = !IsSimpleColor;
 
