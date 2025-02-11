@@ -59,7 +59,8 @@ namespace CommonPluginsShared
             GogOssLibrary,
             GameActivity,
             MetadataLocal,
-            IsThereAnyDeal
+            IsThereAnyDeal,
+            CheckLocalizations
         }
 
         private static readonly Dictionary<Guid, ExternalPlugin> PluginsById = new Dictionary<Guid, ExternalPlugin>
@@ -89,7 +90,8 @@ namespace CommonPluginsShared
             { new Guid("BF78D9AF-6E79-4C73-ACA6-C23A11A485AE"), ExternalPlugin.CheckDlc },
             { new Guid("AFBB1A0D-04A1-4D0C-9AFA-C6E42CA855B4"), ExternalPlugin.GameActivity },
             { new Guid("FFB390B2-758F-40AC-9B20-9BE08FD05A65"), ExternalPlugin.MetadataLocal },
-            { new Guid("7D5CBEE9-3C86-4389-AC7B-9ABE3DA4C9CD"), ExternalPlugin.IsThereAnyDeal }
+            { new Guid("7D5CBEE9-3C86-4389-AC7B-9ABE3DA4C9CD"), ExternalPlugin.IsThereAnyDeal },
+            { new Guid("7CE83CFE-7894-4AD9-957D-7249C0FB3E7D"), ExternalPlugin.CheckLocalizations }
         };
 
         public static ExternalPlugin GetPluginType(Guid PluginId)

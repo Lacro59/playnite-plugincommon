@@ -357,7 +357,7 @@ namespace CommonPluginsShared.Collections
         }
 
 
-        public virtual void Refresh(Guid id)
+        public void Refresh(Guid id)
         {
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}")
             {
@@ -371,13 +371,13 @@ namespace CommonPluginsShared.Collections
             }, globalProgressOptions);
         }
 
-        public virtual void Refresh(IEnumerable<Guid> ids)
+        public void Refresh(IEnumerable<Guid> ids)
         {
             Logger.Info("Refresh() started");
             Refresh(ids, ResourceProvider.GetString("LOCCommonProcessing"));
         }
 
-        internal virtual void Refresh(IEnumerable<Guid> ids, string message)
+        public void Refresh(IEnumerable<Guid> ids, string message)
         {
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {message}")
             {
