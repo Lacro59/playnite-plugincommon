@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using CommonPluginsStores;
-using CommonPluginsStores.Steam;
+using CommonPluginsStores.Gog;
 
 namespace CommonPluginsControls.Stores.Gog
 {
@@ -56,17 +56,17 @@ namespace CommonPluginsControls.Stores.Gog
 
         public IStoreApi StoreApi
         {
-            get => (SteamApi)GetValue(steamApiProperty);
-            set => SetValue(steamApiProperty, value);
+            get => (GogApi)GetValue(storeApiProperty);
+            set => SetValue(storeApiProperty, value);
         }
 
-        public static readonly DependencyProperty steamApiProperty = DependencyProperty.Register(
+        public static readonly DependencyProperty storeApiProperty = DependencyProperty.Register(
             nameof(StoreApi),
             typeof(IStoreApi),
             typeof(PanelView),
-            new FrameworkPropertyMetadata(null, SteamApiPropertyChangedCallback));
+            new FrameworkPropertyMetadata(null, StoreApiPropertyChangedCallback));
 
-        private static void SteamApiPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        private static void StoreApiPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             if (sender is PanelView obj)
             {

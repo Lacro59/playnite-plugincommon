@@ -41,4 +41,11 @@ namespace CommonPluginsShared.Plugins
         public bool PsnIsEnabled => PlayniteTools.IsEnabledPlaynitePlugin(PlayniteTools.GetPluginId(PlayniteTools.ExternalPlugin.PSNLibrary));
         public bool BattleNetIsEnabled => PlayniteTools.IsEnabledPlaynitePlugin(PlayniteTools.GetPluginId(PlayniteTools.ExternalPlugin.BattleNetLibrary));
     }
+
+    public class PluginUpdate
+    {
+        public bool OnStart { get; set; } = false;
+        public bool EveryHours { get; set; } = false;
+        public uint Hours { get; set; } = 3;
+    }
 }

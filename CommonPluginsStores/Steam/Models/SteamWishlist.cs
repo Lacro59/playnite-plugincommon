@@ -154,4 +154,17 @@ namespace CommonPluginsStores.Steam.Models
         [SerializationPropertyName("best_purchase_option")]
         public BestPurchaseOption BestPurchaseOption { get; set; }
     }
+
+
+    public class Response
+    {
+        [SerializationPropertyName("items")]
+        public List<Item> Items { get; set; }
+    }
+
+    public class SteamWishlistApi
+    {
+        [SerializationPropertyName("response")]
+        public Response Response { get; set; }
+    }
 }

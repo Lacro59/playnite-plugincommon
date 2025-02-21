@@ -48,6 +48,8 @@ namespace CommonPluginsStores.Steam
 
         private static string UrlAvatarFul => @"https://avatars.akamai.steamstatic.com/{0}_full.jpg";
 
+        private static string UrlWishlistApi = UrlApi + @"/IWishlistService/GetWishlist/v1?steamid={0}&key={1}";
+
         private static string UrlLogin => UrlSteamCommunity + @"/login/home/?goto=";
         private static string UrlProfileById => UrlSteamCommunity + @"/profiles/{0}";
         private static string UrlProfileByName => UrlSteamCommunity + @"/id/{0}";
@@ -58,7 +60,8 @@ namespace CommonPluginsStores.Steam
         private static string UrlWishlistRemove => UrlStore + @"/api/removefromwishlist";
 
         private static string UrlApiGameDetails => UrlStore + @"/api/appdetails?appids={0}&l={1}";
-        private static string UrlSteamGame => UrlStore + @"/app/{0}/?l={1}";
+        private static string UrlSteamGame => UrlStore + @"/app/{0}";
+        private static string UrlSteamGameLocalised => UrlStore + @"/app/{0}/?l={1}";
         #endregion
 
         protected List<SteamApp> steamApps;
@@ -392,75 +395,15 @@ namespace CommonPluginsStores.Steam
 
         public override ObservableCollection<AccountWishlist> GetWishlist(AccountInfos accountInfos)
         {
+            ObservableCollection<AccountWishlist> accountWishlists = new ObservableCollection<AccountWishlist>();
             if (accountInfos != null)
             {
-                string url = string.Format(UrlWishlist, accountInfos.UserId);
-                string response;
-                try
-                {
-                    WebViewSettings webViewSettings = new WebViewSettings { JavaScriptEnabled = true };
-                    using (IWebView webView = API.Instance.WebViews.CreateOffscreenView(webViewSettings))
-                    {
-                        GetStoredCookies().ForEach(x => webView.SetCookies(url, x));
-                        webView.NavigateAndWait(url);
-                        response = webView.GetPageSource();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, $"Error download {ClientName} wishlist", true, PluginName);
-                    return null;
-                }
-
-                ObservableCollection<AccountWishlist> data = new ObservableCollection<AccountWishlist>();
-
-                string json = Tools.GetJsonInString(response, @"queryData:[ ]?""?")
-                    .Replace("\\\"", "\"")
-                    .Replace("\\\\\"", string.Empty)
-                    .Replace("\",cookiePrefs:{\"version\":1,\"preference_state\":1,\"utm_enabled\":true}}", string.Empty);
-                _ = Serialization.TryFromJson(json, out SteamWishlist steamWishlist, out Exception exSerialization);
-                if (exSerialization != null)
-                {
-                    Common.LogError(exSerialization, true);
-                }
-
-                Query listApps = steamWishlist?.Queries?.FirstOrDefault(x => Serialization.ToJson(x.State.Data).Contains("\"items\":"));
-                _ = Serialization.TryFromJson(Serialization.ToJson(listApps?.State?.Data), out Apps apps, out exSerialization); 
-                if (exSerialization != null)
-                {
-                    Common.LogError(exSerialization, true);
-                }
-
-                steamWishlist?.Queries?.ForEach(x =>
-                {
-                    try
-                    {
-                        _ = Serialization.TryFromJson(Serialization.ToJson(x.State?.Data), out Wishlist wishlist, out exSerialization);
-                        if (wishlist != null && wishlist.Appid != 0)
-                        {
-                            Item item = apps?.Items.FirstOrDefault(y => y.Appid == wishlist.Appid);
-
-                            data.Add(new AccountWishlist
-                            {
-                                Id = wishlist.Appid.ToString(),
-                                Name = wishlist.Name,
-                                Link = "https://store.steampowered.com/" + wishlist.StoreUrlPath,
-                                Released = null,
-                                Added = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(item.DateAdded).ToUniversalTime(),
-                                Image = string.Format("https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/{0}/header_292x136.jpg", wishlist.Appid)
-                            });
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, true, $"Error in parse {ClientName} wishlist - {Serialization.ToJson(x)}");
-                    }
-                });
-
-                return data;
+                accountWishlists = StoreSettings.UseAuth || accountInfos.IsPrivate || !StoreSettings.UseApi || accountInfos.ApiKey.IsNullOrEmpty()
+                    ? GetWishlistByWeb(accountInfos)
+                    : GetWishlistByApi(accountInfos);
             }
 
-            return null;
+            return accountWishlists;
         }
 
         public override bool RemoveWishlist(string id)
@@ -545,7 +488,7 @@ namespace CommonPluginsStores.Steam
                     {
                         Id = storeAppDetailsResult?.data.steam_appid.ToString(),
                         Name = storeAppDetailsResult?.data.name,
-                        Link = string.Format(UrlSteamGame, id, CodeLang.GetSteamLang(Local)),
+                        Link = string.Format(UrlSteamGameLocalised, id, CodeLang.GetSteamLang(Local)),
                         Image = storeAppDetailsResult?.data.header_image,
                         Description = ParseDescription(storeAppDetailsResult?.data.about_the_game),
                         Released = released
@@ -621,7 +564,7 @@ namespace CommonPluginsStores.Steam
                                 Name = storeAppDetailsResult.data.name,
                                 Description = ParseDescription(storeAppDetailsResult?.data.about_the_game),
                                 Image = storeAppDetailsResult.data.header_image,
-                                Link = string.Format(UrlSteamGame, storeAppDetailsResult.data.steam_appid.ToString(), CodeLang.GetSteamLang(Local)),
+                                Link = string.Format(UrlSteamGameLocalised, storeAppDetailsResult.data.steam_appid.ToString(), CodeLang.GetSteamLang(Local)),
                                 IsOwned = IsOwned,
                                 Price = storeAppDetailsResult.data.is_free ? "0" : storeAppDetailsResult.data.price_overview?.final_formatted,
                                 PriceBase = storeAppDetailsResult.data.is_free ? "0" : storeAppDetailsResult.data.price_overview?.initial_formatted
@@ -677,8 +620,11 @@ namespace CommonPluginsStores.Steam
         /// <returns></returns>
         public uint GetAppId(Game game)
         {
-            var appIdFromLinks = GetAppIdFromLinks(game);
-            if (appIdFromLinks != 0) return appIdFromLinks;
+            uint appIdFromLinks = GetAppIdFromLinks(game);
+            if (appIdFromLinks != 0)
+            {
+                return appIdFromLinks;
+            }
 
             if (SteamApps == null)
             {
@@ -706,17 +652,21 @@ namespace CommonPluginsStores.Steam
 
         private uint GetAppIdFromLinks(Game game)
         {
-            var steamLink = game.Links?.FirstOrDefault(link => link.Name.ToLower() == "steam");
-            if (steamLink == null) return 0;
+            Link steamLink = game.Links?.FirstOrDefault(link => link.Name.ToLower() == "steam");
+            if (steamLink == null)
+            {
+                return 0;
+            }
 
-            var linkSplit = steamLink.Url.Split(new[] { "/app/" }, StringSplitOptions.None);
-            var steamIdString = linkSplit?.ElementAtOrDefault(1)?.Split('/').FirstOrDefault();
-            if (steamIdString == null) return 0;
+            string[] linkSplit = steamLink.Url.Split(new[] { "/app/" }, StringSplitOptions.None);
+            string steamIdString = linkSplit?.ElementAtOrDefault(1)?.Split('/').FirstOrDefault();
+            if (steamIdString == null)
+            {
+                return 0;
+            }
 
-            var success = UInt32.TryParse(steamIdString, out var steamId);
-            if (!success) return 0;
-
-            return steamId;
+            bool success = uint.TryParse(steamIdString, out uint steamId);
+            return !success ? 0 : steamId;
         }
 
         /// <summary>
@@ -1039,17 +989,57 @@ namespace CommonPluginsStores.Steam
         private ObservableCollection<GameAchievement> GetAchievementsByApi(uint appId, AccountInfos accountInfos, ObservableCollection<GameAchievement> gameAchievements)
         {
             Logger.Info($"GetAchievementsByApi()");
-            if (appId > 0 && ulong.TryParse(accountInfos.UserId, out ulong steamId) && !_currentAccountInfos.ApiKey.IsNullOrEmpty())
+            if (appId > 0 && ulong.TryParse(accountInfos.UserId, out ulong steamId) && !CurrentAccountInfos.ApiKey.IsNullOrEmpty())
             {
-                List<SteamPlayerAchievement> steamPlayerAchievements = SteamKit.GetPlayerAchievements(_currentAccountInfos.ApiKey, appId, steamId, CodeLang.GetSteamLang(Local));
+                List<SteamPlayerAchievement> steamPlayerAchievements = SteamKit.GetPlayerAchievements(CurrentAccountInfos.ApiKey, appId, steamId, CodeLang.GetSteamLang(Local));
                 steamPlayerAchievements?.ForEach(x =>
                 {
                     // Some achievements don't have a valid unlock time, use fallback date instead
-                    var unlockTime = x.UnlockTime.Year == 1 && x.Achieved == 1 ? new DateTime(year: 2007, month: 10, day: 10) : x.UnlockTime;
+                    DateTime unlockTime = x.UnlockTime.Year == 1 && x.Achieved == 1 ? new DateTime(year: 2007, month: 10, day: 10) : x.UnlockTime;
                     gameAchievements.FirstOrDefault(y => y.Id.IsEqual(x.ApiName)).DateUnlocked = unlockTime;
                 });
             }
             return gameAchievements;
+        }
+
+        private ObservableCollection<AccountWishlist> GetWishlistByApi(AccountInfos accountInfos)
+        {
+            try
+            {
+                Logger.Info($"GetWishlistByApi()");
+                ObservableCollection<AccountWishlist> accountWishlists = new ObservableCollection<AccountWishlist>();
+                if (ulong.TryParse(accountInfos.UserId, out ulong steamId) && !CurrentAccountInfos.ApiKey.IsNullOrEmpty())
+                {
+                    string json = Web.DownloadStringData(string.Format(UrlWishlistApi, steamId, CurrentAccountInfos.ApiKey)).GetAwaiter().GetResult();
+                    _ = Serialization.TryFromJson(json, out SteamWishlistApi steamWishlistApi, out Exception ex);
+                    if (ex != null)
+                    {
+                        throw ex;
+                    }
+
+                    steamWishlistApi.Response.Items.ForEach(x =>
+                    {
+                        SteamApp steamApp = SteamApps.FirstOrDefault(y => y.AppId == x.Appid);
+                        //GameInfos gameInfos = steamApp != null ? null : GetGameInfos(x.Appid.ToString(), null);
+
+                        accountWishlists.Add(new AccountWishlist
+                        {
+                            Id = x.Appid.ToString(),
+                            Name = steamApp?.Name ?? $"SteamApp? - {x.Appid}",
+                            Link = string.Format(UrlSteamGame, x),
+                            Released = null,
+                            Added = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(x.DateAdded).ToUniversalTime(),
+                            Image = string.Format("https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/{0}/header_292x136.jpg", x.Appid)
+                        });
+                    });
+                }
+                return accountWishlists;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return null;
+            }
         }
         #endregion
 
@@ -1186,7 +1176,7 @@ namespace CommonPluginsStores.Steam
 
             return gameAchievements;
         }
-        
+
         private ObservableCollection<AccountInfos> GetCurrentFriendsInfosByWeb()
         {
             try
@@ -1214,6 +1204,36 @@ namespace CommonPluginsStores.Steam
                     });
                 }
                 return currentFriendsInfos;
+            }
+            catch (WebException ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return null;
+            }
+        }
+
+        private ObservableCollection<AccountWishlist> GetWishlistByWeb(AccountInfos accountInfos)
+        {
+            try
+            {
+                Logger.Info($"GetWishlistByWeb()");
+
+                ObservableCollection<AccountWishlist> accountWishlists = new ObservableCollection<AccountWishlist>();
+                UserData?.RgWishlist?.ForEach(x =>
+                {
+                    SteamApp steamApp = SteamApps.FirstOrDefault(y => y.AppId == x);
+                    accountWishlists.Add(new AccountWishlist
+                    {
+                        Id = x.ToString(),
+                        Name = steamApp?.Name ?? $"SteamApp? - {x}",
+                        Link = string.Format(UrlSteamGame, x),
+                        Released = null,
+                        Added = null,
+                        Image = string.Format("https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/{0}/header_292x136.jpg", x.ToString())
+                    });
+                });
+
+                return accountWishlists;
             }
             catch (WebException ex)
             {
