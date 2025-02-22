@@ -27,10 +27,10 @@
 
     <!-- Update -->
 
-    <sys:String x:Key="LOCCommonUpdate">Update</sys:String>
-    <sys:String x:Key="LOCCommonUpdateOnStart">Update on application startup</sys:String>
-    <sys:String x:Key="LOCCommonUpdateEvery">Update on</sys:String>
-    <sys:String x:Key="LOCCommonHours">Hours</sys:String>
+    <sys:String x:Key="LOCCommonUpdate">Mise à jour</sys:String>
+    <sys:String x:Key="LOCCommonUpdateOnStart">Mettre à jour au démarrage de l'application</sys:String>
+    <sys:String x:Key="LOCCommonUpdateEvery">Mettre à jour tous les</sys:String>
+    <sys:String x:Key="LOCCommonHours">Heures</sys:String>
 
     <!-- Transfer plugin data -->
 
