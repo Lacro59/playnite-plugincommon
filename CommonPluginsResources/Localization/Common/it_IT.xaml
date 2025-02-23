@@ -25,6 +25,13 @@
     <sys:String x:Key="LOCCommonDefaultFilters">Ripristina filtri predefiniti</sys:String>
     <sys:String x:Key="LOCCommonSaveFilters">Salva i filtri attuali</sys:String>
 
+    <!-- Update -->
+
+    <sys:String x:Key="LOCCommonUpdate">Aggiorna</sys:String>
+    <sys:String x:Key="LOCCommonUpdateOnStart">Aggiorna all'avvio dell'applicazione</sys:String>
+    <sys:String x:Key="LOCCommonUpdateEvery">Aggiorna il</sys:String>
+    <sys:String x:Key="LOCCommonHours">Ore</sys:String>
+
     <!-- Transfer plugin data -->
 
     <sys:String x:Key="LOCCommonTransfer">Trasferimento</sys:String>
