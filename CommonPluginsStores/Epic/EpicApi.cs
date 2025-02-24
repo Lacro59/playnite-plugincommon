@@ -146,6 +146,8 @@ namespace CommonPluginsStores.Epic
                         };
                         SaveCurrentUser();
                         _ = GetCurrentAccountInfos();
+
+                        Logger.Info($"{PluginName} logged");
                     }
                 }
             }

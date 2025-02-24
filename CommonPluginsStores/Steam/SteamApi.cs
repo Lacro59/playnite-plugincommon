@@ -198,6 +198,8 @@ namespace CommonPluginsStores.Steam
                             SaveCurrentUser();
                             _ = GetCurrentAccountInfos();
 
+                            Logger.Info($"{PluginName} logged");
+
                             view.Close();
                         }
                     }

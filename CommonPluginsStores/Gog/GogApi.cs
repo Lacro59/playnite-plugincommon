@@ -139,6 +139,8 @@ namespace CommonPluginsStores.Gog
                     };
                     SaveCurrentUser();
                     _ = GetCurrentAccountInfos();
+
+                    Logger.Info($"{PluginName} logged");
                 }
             }
             catch (Exception ex)
