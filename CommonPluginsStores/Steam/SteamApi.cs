@@ -55,6 +55,7 @@ namespace CommonPluginsStores.Steam
         private static string UrlProfileByName => UrlSteamCommunity + @"/id/{0}";
         private static string UrlFriends => UrlSteamCommunity + @"/profiles/{0}/friends";
 
+        private static string UrlAccount => UrlStore + @"/account";
         private static string UrlUserData => UrlStore + @"/dynamicstore/userdata/";
         private static string UrlWishlist => UrlStore + @"/wishlist/profiles/{0}/";
         private static string UrlWishlistRemove => UrlStore + @"/api/removefromwishlist";
@@ -143,7 +144,7 @@ namespace CommonPluginsStores.Steam
 
             if (StoreSettings.UseAuth)
             {
-                SteamUserData userData = GetUserData(true);
+                SteamUserData userData = GetUserData();
                 return userData?.RgOwnedApps?.Count > 0;
             }
 
@@ -866,7 +867,7 @@ namespace CommonPluginsStores.Steam
             return null;
         }
 
-        private SteamUserData GetUserData(bool onlyWeb = false)
+        private SteamUserData GetUserData()
         {
             try
             {
@@ -874,15 +875,13 @@ namespace CommonPluginsStores.Steam
                 string resultWeb = Web.DownloadStringData(UrlUserData, cookies, Web.UserAgent, true).GetAwaiter().GetResult();
                 if (Serialization.TryFromJson(resultWeb, out SteamUserData userData, out Exception ex))
                 {
+                    _ = SetStoredCookies(GetNewWebCookies(UrlAccount));
                     SaveUserData(userData);
                 }
                 else
                 {
                     Common.LogError(ex, false, false, PluginName);
-                    if (!onlyWeb)
-                    {
-                        userData = LoadUserData(false);
-                    }
+                    userData = LoadUserData(false);
                 }
                 return userData;
             }

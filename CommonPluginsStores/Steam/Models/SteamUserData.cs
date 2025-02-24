@@ -72,7 +72,7 @@ namespace CommonPluginsStores.Steam.Models
         public List<string> RgPreferredPlatforms { get; set; }
 
         [SerializationPropertyName("rgPrimaryLanguage")]
-        public int RgPrimaryLanguage { get; set; }
+        public int? RgPrimaryLanguage { get; set; }
 
         [SerializationPropertyName("rgSecondaryLanguages")]
         public List<int> RgSecondaryLanguages { get; set; }

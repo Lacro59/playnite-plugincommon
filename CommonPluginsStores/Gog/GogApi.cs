@@ -110,6 +110,8 @@ namespace CommonPluginsStores.Gog
                 {
                     Token = accountBasicResponse.AccessToken
                 };
+
+                _ = SetStoredCookies(GetNewWebCookies(UrlLogin));
             }
             else
             {
@@ -619,7 +621,7 @@ namespace CommonPluginsStores.Gog
             {
                 ManageException($"No game data for {id}", ex, reponse.Contains("404"));
             }
-            
+
             string stringDlcs = Serialization.ToJson(productApiDetail?.Dlcs);
             if (!stringDlcs.IsNullOrEmpty() && !stringDlcs.IsEqual("[]"))
             {
@@ -646,7 +648,7 @@ namespace CommonPluginsStores.Gog
                     string dataDlc = Web.DownloadStringData(string.Format(UrlApiGameInfo, el.Id, CodeLang.GetGogLang(Local).ToLower())).GetAwaiter().GetResult();
                     if (!dataDlc.Contains("<!DOCTYPE html>", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        Serialization.TryFromJson(dataDlc, out ProductApiDetail productApiDetailDlc, out Exception ex);
+                        _ = Serialization.TryFromJson(dataDlc, out ProductApiDetail productApiDetailDlc, out Exception ex);
                         if (ex != null)
                         {
                             ManageException($"No Dlc data for {el.Id}", ex, dataDlc.Contains("404"));
@@ -688,7 +690,7 @@ namespace CommonPluginsStores.Gog
                 {
                     PriceData priceData = GetPrice(Dlcs.Select(x => x.Id).ToList(), Local, LocalCurrency);
                     string dataObjString = Serialization.ToJson(priceData?.DataObj["_embedded"]);
-                    Serialization.TryFromJson(dataObjString, out PriceResult priceResult, out Exception ex);
+                    _ = Serialization.TryFromJson(dataObjString, out PriceResult priceResult, out Exception ex);
                     if (ex != null)
                     {
                         ManageException($"No price data for {string.Join(",", Dlcs.Select(x => x.Id))}", ex, dataObjString.Contains("404"));

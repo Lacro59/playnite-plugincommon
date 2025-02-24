@@ -110,6 +110,8 @@ namespace CommonPluginsStores.Epic
                     Token = tokens.access_token,
                     Type = tokens.token_type
                 };
+
+                _ = SetStoredCookies(GetNewWebCookies(UrlStoreEpic));
             }
             else
             {

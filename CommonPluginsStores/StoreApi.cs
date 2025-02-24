@@ -180,13 +180,20 @@ namespace CommonPluginsStores
         {
             try
             {
-                FileSystem.CreateDirectory(Path.GetDirectoryName(FileCookies));
-                Encryption.EncryptToFile(
-                    FileCookies,
-                    Serialization.ToJson(httpCookies),
-                    Encoding.UTF8,
-                    WindowsIdentity.GetCurrent().User.Value);
-                return true;
+                if (httpCookies?.Count() > 0)
+                {
+                    FileSystem.CreateDirectory(Path.GetDirectoryName(FileCookies));
+                    Encryption.EncryptToFile(
+                        FileCookies,
+                        Serialization.ToJson(httpCookies),
+                        Encoding.UTF8,
+                        WindowsIdentity.GetCurrent().User.Value);
+                    return true;
+                }
+                else
+                {
+                    Logger.Warn($"No cookies saved for {PluginName}");
+                }
             }
             catch (Exception ex)
             {
@@ -206,6 +213,33 @@ namespace CommonPluginsStores
             {
                 using (IWebView webView = API.Instance.WebViews.CreateOffscreenView())
                 {
+                    List<HttpCookie> httpCookies = CookiesDomains?.Count > 0
+                        ? webView.GetCookies()?.Where(x => CookiesDomains.Any(y => y.Contains(x?.Domain, StringComparison.InvariantCultureIgnoreCase)))?.ToList() ?? new List<HttpCookie>()
+                        : webView.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName, StringComparison.InvariantCultureIgnoreCase) ?? false)?.ToList() ?? new List<HttpCookie>();
+                    return httpCookies;
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, false, PluginName);
+                return new List<HttpCookie>();
+            }
+        }
+
+        internal virtual List<HttpCookie> GetNewWebCookies(string url)
+        {
+            try
+            {
+                using (IWebView webView = API.Instance.WebViews.CreateOffscreenView())
+                {
+                    List<HttpCookie> oldCookies = GetStoredCookies();
+                    oldCookies?.ForEach(x =>
+                    {
+                        webView.SetCookies(url, x);
+                    });
+
+                    webView.NavigateAndWait(url);
+
                     List<HttpCookie> httpCookies = CookiesDomains?.Count > 0
                         ? webView.GetCookies()?.Where(x => CookiesDomains.Any(y => y.Contains(x?.Domain, StringComparison.InvariantCultureIgnoreCase)))?.ToList() ?? new List<HttpCookie>()
                         : webView.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName, StringComparison.InvariantCultureIgnoreCase) ?? false)?.ToList() ?? new List<HttpCookie>();

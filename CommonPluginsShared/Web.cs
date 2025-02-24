@@ -450,7 +450,7 @@ namespace CommonPluginsShared
                 {
                     response = await client.SendAsync(request).ConfigureAwait(false);
                     int statusCode = (int)response.StatusCode;
-                    bool IsRedirected = ((request.RequestUri.ToString() != url) || (statusCode >= 300 && statusCode <= 399));
+                    bool IsRedirected = (request.RequestUri.ToString() != url) || (statusCode >= 300 && statusCode <= 399);
 
                     // We want to handle redirects ourselves so that we can determine the final redirect Location (via header)
                     if (IsRedirected)
