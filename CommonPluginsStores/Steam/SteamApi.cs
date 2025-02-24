@@ -494,6 +494,7 @@ namespace CommonPluginsStores.Steam
                         Link = string.Format(UrlSteamGameLocalised, id, CodeLang.GetSteamLang(Local)),
                         Image = storeAppDetailsResult?.data.header_image,
                         Description = ParseDescription(storeAppDetailsResult?.data.about_the_game),
+                        Languages = storeAppDetailsResult?.data.supported_languages,
                         Released = released
                     };
 
