@@ -109,8 +109,8 @@ namespace CommonPluginsStores.Epic.Models
 
     public class TotalPrice
     {
-        public int discountPrice { get; set; }
-        public int originalPrice { get; set; }
+        public long discountPrice { get; set; }
+        public long originalPrice { get; set; }
         public int voucherDiscount { get; set; }
         public int discount { get; set; }
         public string currencyCode { get; set; }
