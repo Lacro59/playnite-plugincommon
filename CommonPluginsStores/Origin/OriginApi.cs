@@ -102,7 +102,6 @@ namespace CommonPluginsStores.Origin
         protected override bool GetIsUserLoggedIn()
         {
             bool isLogged = OriginAPI.GetIsUserLoggedIn();
-
             if (isLogged)
             {
                 AuthTokenResponse AccessToken = OriginAPI.GetAccessToken();

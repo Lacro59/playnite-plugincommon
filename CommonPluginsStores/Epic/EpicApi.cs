@@ -59,7 +59,7 @@ namespace CommonPluginsStores.Epic
         }
 
         #region Cookies
-        internal override List<HttpCookie> GetWebCookies()
+        internal override List<HttpCookie> GetWebCookies(bool deleteCookies = false)
         {
             string LocalLangShort = CodeLang.GetEpicLangCountry(Local);
             List<HttpCookie> httpCookies = new List<HttpCookie>
@@ -573,6 +573,7 @@ namespace CommonPluginsStores.Epic
                     {
                         apiRedirectContent = await view.GetPageTextAsync();
                         loggedIn = true;
+                        view.DeleteDomainCookies(".epicgames.com");
                         view.Close();
                     }
                 };

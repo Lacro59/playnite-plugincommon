@@ -82,7 +82,7 @@ namespace CommonPluginsStores
                 isUserLoggedIn = isUserLoggedIn ?? GetIsUserLoggedIn();
                 if ((bool)isUserLoggedIn)
                 {
-                    _ = SetStoredCookies(GetWebCookies());
+                    _ = SetStoredCookies(GetWebCookies(true));
                 }
                 return (bool)isUserLoggedIn;
             }
@@ -207,7 +207,7 @@ namespace CommonPluginsStores
         /// Get cookies in WebView or another method.
         /// </summary>
         /// <returns></returns>
-        internal virtual List<HttpCookie> GetWebCookies()
+        internal virtual List<HttpCookie> GetWebCookies(bool deleteCookies = false)
         {
             try
             {
@@ -216,6 +216,12 @@ namespace CommonPluginsStores
                     List<HttpCookie> httpCookies = CookiesDomains?.Count > 0
                         ? webView.GetCookies()?.Where(x => CookiesDomains.Any(y => y.Contains(x?.Domain, StringComparison.InvariantCultureIgnoreCase)))?.ToList() ?? new List<HttpCookie>()
                         : webView.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName, StringComparison.InvariantCultureIgnoreCase) ?? false)?.ToList() ?? new List<HttpCookie>();
+
+                    if (deleteCookies)
+                    {
+                        CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
+                    }
+
                     return httpCookies;
                 }
             }
@@ -243,6 +249,7 @@ namespace CommonPluginsStores
                     List<HttpCookie> httpCookies = CookiesDomains?.Count > 0
                         ? webView.GetCookies()?.Where(x => CookiesDomains.Any(y => y.Contains(x?.Domain, StringComparison.InvariantCultureIgnoreCase)))?.ToList() ?? new List<HttpCookie>()
                         : webView.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName, StringComparison.InvariantCultureIgnoreCase) ?? false)?.ToList() ?? new List<HttpCookie>();
+
                     return httpCookies;
                 }
             }

@@ -129,7 +129,12 @@ namespace CommonPluginsStores.Steam
 
             CookiesDomains = new List<string>
             {
-                ".steamcommunity.com", "steamcommunity.com", "steampowered.com", "store.steampowered.com", "help.steampowered.com", "login.steampowered.com"
+                "steamcommunity.com", ".steamcommunity.com",
+                "steampowered.com",  ".steampowered.com",
+                "store.steampowered.com", ".store.steampowered.com",
+                "checkout.steampowered.com", ".checkout.steampowered.com",
+                "help.steampowered.com", ".help.steampowered.com",
+                "login.steampowered.com", ".login.steampowered.com",
             };
         }
 
@@ -145,6 +150,12 @@ namespace CommonPluginsStores.Steam
             if (StoreSettings.UseAuth)
             {
                 SteamUserData userData = GetUserData();
+                bool isLogged = userData?.RgOwnedApps?.Count > 0;
+                if (!isLogged)
+                {
+                    Thread.Sleep(5000);
+                    userData = GetUserData();
+                }
                 return userData?.RgOwnedApps?.Count > 0;
             }
 
@@ -206,11 +217,7 @@ namespace CommonPluginsStores.Steam
                     }
                 };
 
-                CookiesDomains.ForEach(x =>
-                {
-                    view.DeleteDomainCookies(x);
-                });
-
+                CookiesDomains.ForEach(x => { view.DeleteDomainCookies(x); });
                 view.Navigate(UrlLogin);
                 _ = view.OpenDialog();
             }
@@ -847,7 +854,7 @@ namespace CommonPluginsStores.Steam
                 try
                 {
                     DateTime dateLastWrite = File.GetLastWriteTime(FileUserData);
-                    if (onlyNow && dateLastWrite.AddMinutes(5) <= DateTime.Now)
+                    if (onlyNow && dateLastWrite.AddMinutes(10) <= DateTime.Now)
                     {
                         return null;
                     }
@@ -874,14 +881,17 @@ namespace CommonPluginsStores.Steam
             {
                 List<HttpCookie> cookies = GetStoredCookies();
                 string resultWeb = Web.DownloadStringData(UrlUserData, cookies, Web.UserAgent, true).GetAwaiter().GetResult();
-                if (Serialization.TryFromJson(resultWeb, out SteamUserData userData, out Exception ex))
+                if (Serialization.TryFromJson(resultWeb, out SteamUserData userData, out Exception ex) && userData?.RgOwnedApps?.Count > 0)
                 {
                     _ = SetStoredCookies(GetNewWebCookies(UrlAccount));
                     SaveUserData(userData);
                 }
                 else
                 {
-                    Common.LogError(ex, false, false, PluginName);
+                    if (ex != null)
+                    {
+                        Common.LogError(ex, false, false, PluginName);
+                    }
                     userData = LoadUserData(false);
                 }
                 return userData;

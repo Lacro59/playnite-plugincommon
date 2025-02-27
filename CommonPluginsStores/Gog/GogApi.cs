@@ -91,6 +91,11 @@ namespace CommonPluginsStores.Gog
         public GogApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "GOG")
         {
             FileUserDataOwned = Path.Combine(PathStoresData, "GOG_UserDataOwned.json");
+
+            CookiesDomains = new List<string>
+            {
+                "gog.com", ".gog.com",
+            };
         }
 
         #region Configuration
@@ -803,7 +808,7 @@ namespace CommonPluginsStores.Gog
                     }
                 };
 
-                webView.DeleteDomainCookies(".gog.com");
+                CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
                 webView.Navigate(UrlLogin);
                 _ = webView.OpenDialog();
             }
