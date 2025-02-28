@@ -24,6 +24,8 @@ namespace CommonPluginsStores
 
     public interface IStoreApi
     {
+        StoreSettings StoreSettings { get; set; }
+
         bool IsUserLoggedIn { get; set; }
         AccountInfos CurrentAccountInfos { get; set; }
 

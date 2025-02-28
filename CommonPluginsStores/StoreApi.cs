@@ -532,7 +532,6 @@ namespace CommonPluginsStores
     {
         public bool UseApi { get; set; } = false;
 
-
         private bool _useAuth;
         public bool UseAuth
         {

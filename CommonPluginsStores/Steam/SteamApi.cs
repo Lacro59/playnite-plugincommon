@@ -892,7 +892,6 @@ namespace CommonPluginsStores.Steam
                     {
                         Common.LogError(ex, false, false, PluginName);
                     }
-                    userData = LoadUserData(false);
                 }
                 return userData;
             }

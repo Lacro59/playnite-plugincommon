@@ -68,25 +68,33 @@ namespace CommonPluginsStores.Epic
                 {
                     Domain = ".www.epicgames.com",
                     Name = "EPIC_LOCALE_COOKIE",
-                    Value = LocalLangShort
+                    Value = LocalLangShort,
+                    Creation = DateTime.Now,
+                    LastAccess = DateTime.Now
                 },
                 new HttpCookie
                 {
                     Domain = ".www.epicgames.com",
                     Name = "EPIC_EG1",
-                    Value = AuthToken?.Token ?? string.Empty
+                    Value = AuthToken?.Token ?? string.Empty,
+                    Creation = DateTime.Now,
+                    LastAccess = DateTime.Now
                 },
                 new HttpCookie
                 {
                     Domain = "store.epicgames.com",
                     Name = "EPIC_LOCALE_COOKIE",
-                    Value = LocalLangShort
+                    Value = LocalLangShort,
+                    Creation = DateTime.Now,
+                    LastAccess = DateTime.Now
                 },
                 new HttpCookie
                 {
                     Domain = "store.epicgames.com",
                     Name = "EPIC_EG1",
-                    Value = AuthToken?.Token ?? string.Empty
+                    Value = AuthToken?.Token ?? string.Empty,
+                    Creation = DateTime.Now,
+                    LastAccess = DateTime.Now
                 }
             };
             return httpCookies;
@@ -111,7 +119,7 @@ namespace CommonPluginsStores.Epic
                     Type = tokens.token_type
                 };
 
-                _ = SetStoredCookies(GetNewWebCookies(UrlStoreEpic));
+                _ = SetStoredCookies(GetWebCookies());
             }
             else
             {
