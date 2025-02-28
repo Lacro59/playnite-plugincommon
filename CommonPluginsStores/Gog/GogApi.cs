@@ -16,6 +16,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -97,6 +98,36 @@ namespace CommonPluginsStores.Gog
                 "gog.com", ".gog.com",
             };
         }
+
+        #region Cookies
+        internal override bool SetStoredCookies(List<HttpCookie> httpCookies)
+        {
+            try
+            {
+                if (httpCookies?.Count() > 0)
+                {
+                    httpCookies = httpCookies.Where(x => !x.Name.Contains("_hjSession_", StringComparison.OrdinalIgnoreCase)).ToList();
+                    FileSystem.CreateDirectory(Path.GetDirectoryName(FileCookies));
+                    Encryption.EncryptToFile(
+                        FileCookies,
+                        Serialization.ToJson(httpCookies),
+                        Encoding.UTF8,
+                        WindowsIdentity.GetCurrent().User.Value);
+                    return true;
+                }
+                else
+                {
+                    Logger.Warn($"No cookies saved for {PluginName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, "Failed to save cookies");
+            }
+
+            return false;
+        }
+        #endregion
 
         #region Configuration
         protected override bool GetIsUserLoggedIn()
