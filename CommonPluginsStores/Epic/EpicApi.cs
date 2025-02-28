@@ -33,7 +33,8 @@ namespace CommonPluginsStores.Epic
         private string UrlBase => @"https://www.epicgames.com";
         private string UrlStore => UrlBase + @"/store/{0}/p/{1}";
         private string UrlAchievements => UrlBase + @"/store/{0}/achievements/{1}";
-        private string UrlLogin => UrlBase + @"/id/login?redirectUrl=https%3A//www.epicgames.com/id/api/redirect%3FclientId%3D34a02cf8f4414e29b15921876da36f9a%26responseType%3Dcode";
+        private string UrlLogin => UrlBase + @"/id/login";
+        private string UrlAuthCode => UrlBase + @"/id/api/redirect?clientId=34a02cf8f4414e29b15921876da36f9a&responseType=code";
 
         private string UrlGraphQL => @"https://graphql.epicgames.com/graphql";
 
@@ -135,6 +136,44 @@ namespace CommonPluginsStores.Epic
             {
                 ResetIsUserLoggedIn();
                 EpicLogin();
+
+                OauthResponse tokens = LoadTokens();
+                if (tokens != null)
+                {
+                    List<HttpHeader> httpHeaders = new List<HttpHeader>
+                    {
+                        new HttpHeader { Key = "Authorization", Value = tokens.token_type + " " + tokens.access_token }
+                    };
+                    string response = Web.DownloadStringData(string.Format(UrlAccount, tokens.account_id), httpHeaders).GetAwaiter().GetResult();
+                    if (Serialization.TryFromJson(response, out EpicAccountResponse epicAccountResponse))
+                    {
+                        CurrentAccountInfos = new AccountInfos
+                        {
+                            UserId = tokens.account_id,
+                            Pseudo = epicAccountResponse?.DisplayName,
+                            Link = string.Format(UrlAccountProfile, tokens.account_id),
+                            IsPrivate = true,
+                            IsCurrent = true
+                        };
+                        SaveCurrentUser();
+                        _ = GetCurrentAccountInfos();
+
+                        Logger.Info($"{PluginName} logged");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, false, PluginName);
+            }
+        }
+
+        public override void LoginAlternative()
+        {
+            try
+            {
+                ResetIsUserLoggedIn();
+                EpicLoginAlternative();
 
                 OauthResponse tokens = LoadTokens();
                 if (tokens != null)
@@ -491,6 +530,28 @@ namespace CommonPluginsStores.Epic
             return null;
         }
 
+        private void AuthenticateUsingAuthCode(string authorizationCode)
+        {
+            using (HttpClient httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Clear();
+                httpClient.DefaultRequestHeaders.Add("Authorization", "basic " + AuthEncodedString);
+                using (StringContent content = new StringContent($"grant_type=authorization_code&code={authorizationCode}&token_type=eg1"))
+                {
+                    content.Headers.Clear();
+                    content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+                    HttpResponseMessage response = httpClient.PostAsync(UrlAccountAuth, content).GetAwaiter().GetResult();
+                    string respContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    FileSystem.CreateDirectory(Path.GetDirectoryName(TokensPath));
+                    Encryption.EncryptToFile(
+                        TokensPath,
+                        respContent,
+                        Encoding.UTF8,
+                        WindowsIdentity.GetCurrent().User.Value);
+                }
+            }
+        }
+
         private EpicAccountResponse GetEpicAccount()
         {
             OauthResponse tokens = LoadTokens();
@@ -571,7 +632,7 @@ namespace CommonPluginsStores.Epic
                 WindowWidth = 580,
                 WindowHeight = 700,
                 // This is needed otherwise captcha won't pass
-                UserAgent = @"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Vivaldi/5.5.2805.50"
+                UserAgent = @"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Vivaldi/7.1.3570.39"
             }))
             {
                 view.LoadingChanged += async (s, e) =>
@@ -629,6 +690,21 @@ namespace CommonPluginsStores.Epic
             }
         }
 
+        private void EpicLoginAlternative()
+        {
+            _ = API.Instance.Dialogs.ShowMessage(
+                ResourceProvider.GetString("LOCEpicAlternativeAuthInstructions"), "",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.None);
+            _ = ProcessStarter.StartUrl(UrlAuthCode);
+            StringSelectionDialogResult res = API.Instance.Dialogs.SelectString("LOCEpicAuthCodeInputMessage", "", "");
+            if (!res.Result || res.SelectedString.IsNullOrWhiteSpace())
+            {
+                return;
+            }
+
+            AuthenticateUsingAuthCode(res.SelectedString.Trim().Trim('"'));
+        }
         private void RenewTokens(string refreshToken)
         {
             using (HttpClient httpClient = new HttpClient())

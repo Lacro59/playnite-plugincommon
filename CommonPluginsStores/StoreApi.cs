@@ -176,7 +176,7 @@ namespace CommonPluginsStores
         /// Save the last identified cookies stored.
         /// </summary>
         /// <param name="httpCookies"></param>
-        internal bool SetStoredCookies(List<HttpCookie> httpCookies)
+        internal virtual bool SetStoredCookies(List<HttpCookie> httpCookies)
         {
             try
             {
@@ -285,6 +285,11 @@ namespace CommonPluginsStores
         }
 
         public virtual void Login()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void LoginAlternative()
         {
             throw new NotImplementedException();
         }

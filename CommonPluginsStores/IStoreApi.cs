@@ -34,6 +34,7 @@ namespace CommonPluginsStores
         void SetLanguage(string local);
 
         void Login();
+        void LoginAlternative();
         AccountInfos LoadCurrentUser();
         void SaveCurrentUser();
     }

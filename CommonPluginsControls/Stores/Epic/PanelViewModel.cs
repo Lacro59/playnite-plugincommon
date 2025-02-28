@@ -32,5 +32,12 @@ namespace CommonPluginsControls.Stores.Epic
             OnPropertyChanged(nameof(AuthStatus));
             OnPropertyChanged(nameof(User));
         });
+
+        public RelayCommand<object> LoginAlternativeCommand => new RelayCommand<object>((a) =>
+        {
+            StoreApi.LoginAlternative();
+            OnPropertyChanged(nameof(AuthStatus));
+            OnPropertyChanged(nameof(User));
+        });
     }
 }

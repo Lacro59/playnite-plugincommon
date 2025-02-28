@@ -97,14 +97,13 @@
                             Background="Transparent" Padding="10,0,10,10" BorderBrush="{DynamicResource NormalBorderBrush}">
 
                         <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
-                                        Visibility="{Binding ElementName=PART_IsPrivate, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <StackPanel.Tag>
+                            <DockPanel Margin="0,10,0,0" Visibility="{Binding ElementName=PART_IsPrivate, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <DockPanel.Tag>
                                     <PriorityBinding>
                                         <Binding Path="User.AccountStatus" IsAsync="True" FallbackValue="{x:Static stores:AccountStatus.Checking}" />
                                         <Binding Source="{x:Static stores:AccountStatus.Checking}" />
                                     </PriorityBinding>
-                                </StackPanel.Tag>
+                                </DockPanel.Tag>
 
                                 <Button Content="{DynamicResource LOCCommonAuthenticateLabel}" Command="{Binding LoginCommand}"/>
 
@@ -135,7 +134,9 @@
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
-                            </StackPanel>
+
+                                <Button HorizontalAlignment="Right" Content="{DynamicResource LOCEpicAuthenticateAlternativeLabel}" Command="{Binding LoginAlternativeCommand}"/>
+                            </DockPanel>
 
                             <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
                                         IsEnabled="{Binding ElementName=PART_IsPrivate, Path=IsChecked, Converter={StaticResource InvertedBoolenConverter}}">
