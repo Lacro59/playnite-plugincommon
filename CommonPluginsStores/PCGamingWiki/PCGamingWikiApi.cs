@@ -1,7 +1,5 @@
-﻿using AngleSharp.Dom;
-using AngleSharp.Dom.Html;
-using AngleSharp.Parser.Html;
-using CommonPluginsShared;
+﻿using CommonPluginsShared;
+using CommonPluginsStores.Steam;
 using FuzzySharp;
 using Playnite.SDK;
 using Playnite.SDK.Data;
@@ -10,19 +8,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
+using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.PCGamingWiki
 {
     public class PCGamingWikiApi
     {
         internal static ILogger Logger => LogManager.GetLogger();
-        internal static IResourceProvider ResourceProvider => new ResourceProvider();
 
-        internal string PluginName { get; set; }
+        internal string PluginName { get; }
         internal string ClientName => "PCGamingWiki";
+        internal ExternalPlugin PluginLibrary { get; }
 
 
         #region Url
@@ -33,68 +30,96 @@ namespace CommonPluginsStores.PCGamingWiki
         #endregion
 
 
-        public PCGamingWikiApi(string pluginName)
+        public PCGamingWikiApi(string pluginName, ExternalPlugin pluginLibrary)
         {
             PluginName = pluginName;
+            PluginLibrary = pluginLibrary;
         }
 
 
-        public string FindGoodUrl(Game game, uint steamId = 0)
+        /// <summary>
+        /// Get the url for PCGamingWiki from url on Game or with Steam appId of with a search on website.
+        /// </summary>
+        /// <returns></returns>
+        public string FindGoodUrl(Game game)
         {
-            string url = string.Empty;
-            string urlMatch = string.Empty;
-            string webResponse = string.Empty;
-
-            if (steamId != 0)
+            try
             {
-                url = string.Format(UrlWithSteamId, steamId);
+                string url = string.Empty;
 
-                Thread.Sleep(500);
-                webResponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
-                if (!webResponse.ToLower().Contains("search results"))
+                #region With Steam appId
+                uint appId = 0;
+
+                if (game.PluginId == GetPluginId(ExternalPlugin.SteamLibrary))
                 {
-                    return url;
+                    appId = uint.Parse(game.GameId);
+
                 }
-            }
-
-            if (game.Links != null)
-            {
-                foreach (Link link in game.Links)
+                else
                 {
-                    if (link.Url.ToLower().Contains("pcgamingwiki") && !link.Url.ToLower().StartsWith(@"http://pcgamingwiki.com/w/index.php?search="))
+                    SteamApi steamApi = new SteamApi(PluginName, ExternalPlugin.CheckLocalizations);
+                    appId = steamApi.GetAppId(game);
+                }
+
+                if (appId != 0)
+                {
+                    url = string.Format(UrlWithSteamId, appId);
+                    Thread.Sleep(500);
+                    string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
+                    if (!response.Contains("search results", StringComparison.OrdinalIgnoreCase))
                     {
-                        return link.Url;
+                        Logger.Info($"Url for PCGamingWiki find for {game.Name} - {url}");
+                        return url;
                     }
                 }
-            }
+                #endregion
 
-            string Name = Regex.Replace(game.Name, @"([ ]demo\b)", string.Empty, RegexOptions.IgnoreCase);
-            Name = Regex.Replace(Name, @"(demo[ ])", string.Empty, RegexOptions.IgnoreCase);
-            Name = CommonPluginsShared.PlayniteTools.NormalizeGameName(Name);
+                #region With game links
+                url = game.Links?
+                    .FirstOrDefault(link => link.Url.Contains("pcgamingwiki", StringComparison.OrdinalIgnoreCase) &&
+                                            !link.Url.StartsWith(UrlPCGamingWikiSearch, StringComparison.OrdinalIgnoreCase))
+                    ?.Url;
 
-
-            // Search with release date
-            if (game.ReleaseDate != null)
-            {
-                url = string.Format(UrlPCGamingWikiSearchWithApi, WebUtility.UrlEncode(Name + $" ({((ReleaseDate)game.ReleaseDate).Year})"));
-                urlMatch = GetWithSearchApi(url);
-                if (!urlMatch.IsNullOrEmpty())
+                if (!url.IsNullOrEmpty())
                 {
-                    return urlMatch;
+                    Logger.Info($"Url for PCGamingWiki find for {game.Name} - {url}");
+                    return url;
                 }
-            }
+                #endregion
 
-            // Normal search
-            url = string.Format(UrlPCGamingWikiSearchWithApi, WebUtility.UrlEncode(Name));
-            urlMatch = GetWithSearchApi(url);
-            if (!urlMatch.IsNullOrEmpty())
+                #region With PCGamingWiki search
+                string name = PlayniteTools.NormalizeGameName(game.Name);
+
+                // Search with release date
+                if (game.ReleaseDate != null)
+                {
+                    url = string.Format(UrlPCGamingWikiSearchWithApi, WebUtility.UrlEncode(name + $" ({((ReleaseDate)game.ReleaseDate).Year})"));
+                    url = GetWithSearchApi(url);
+                    if (!url.IsNullOrEmpty())
+                    {
+                        Logger.Info($"Url for PCGamingWiki find for {game.Name} - {url}");
+                        return url;
+                    }
+                }
+
+                // Normal search
+                url = string.Format(UrlPCGamingWikiSearchWithApi, WebUtility.UrlEncode(name));
+                url = GetWithSearchApi(url);
+                if (!url.IsNullOrEmpty())
+                {
+                    Logger.Info($"Url for PCGamingWiki find for {game.Name} - {url}");
+                    return url;
+                }
+                #endregion
+            }
+            catch (Exception ex)
             {
-                return urlMatch;
+                Common.LogError(ex, false, true, PluginName);
             }
 
+            Logger.Warn($"Url for PCGamingWiki not find for {game.Name}");
             return string.Empty;
         }
-
 
         private string GetWithSearchApi(string url)
         {
@@ -102,8 +127,8 @@ namespace CommonPluginsStores.PCGamingWiki
 
             try
             {
-                string WebResponse = Web.DownloadStringData(url).GetAwaiter().GetResult();
-                if (Serialization.TryFromJson(WebResponse, out dynamic data) && data[3]?.Count > 0)
+                string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
+                if (Serialization.TryFromJson(response, out dynamic data) && data[3]?.Count > 0)
                 {
                     List<string> listName = Serialization.FromJson<List<string>>(Serialization.ToJson(data[1]));
                     List<string> listUrl = Serialization.FromJson<List<string>>(Serialization.ToJson(data[3]));
@@ -123,7 +148,7 @@ namespace CommonPluginsStores.PCGamingWiki
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                Common.LogError(ex, false, true, PluginName);
             }
 
             return urlFound;
