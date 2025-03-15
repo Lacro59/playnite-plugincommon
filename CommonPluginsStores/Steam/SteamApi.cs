@@ -12,14 +12,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
-using CommonPlayniteShared;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using AngleSharp.Dom;
 using CommonPlayniteShared.Common;
-using System.Security.Principal;
 using System.Threading.Tasks;
-using CommonPluginsShared.Converters;
 using System.Globalization;
 using System.Windows.Media;
 using System.Text.RegularExpressions;
@@ -27,7 +24,6 @@ using CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared;
 using System.Net;
 using static CommonPluginsShared.PlayniteTools;
 using System.Net.Http;
-using System.Windows;
 using System.Threading;
 using CommonPluginsStores.Steam.Models.SteamKit;
 using Playnite.SDK.Models;
@@ -45,12 +41,16 @@ namespace CommonPluginsStores.Steam
         private static string UrlSteamCommunity => @"https://steamcommunity.com";
         private static string UrlApi => @"https://api.steampowered.com";
         private static string UrlStore => @"https://store.steampowered.com";
+        private static string UrlLogin => @"https://login.steampowered.com";
 
         private static string UrlAvatarFul => @"https://avatars.akamai.steamstatic.com/{0}_full.jpg";
 
         private static string UrlWishlistApi = UrlApi + @"/IWishlistService/GetWishlist/v1?steamid={0}&key={1}";
 
-        private static string UrlLogin => UrlSteamCommunity + @"/login/home/?goto=";
+
+        private static string UrlRefreshToken = UrlLogin + @"/jwt/refresh?redir={0}";
+
+        private static string UrlProfileLogin => UrlSteamCommunity + @"/login/home/?goto=";
         private static string UrlProfileById => UrlSteamCommunity + @"/profiles/{0}";
         private static string UrlProfileByName => UrlSteamCommunity + @"/id/{0}";
         private static string UrlFriends => UrlSteamCommunity + @"/profiles/{0}/friends";
@@ -153,8 +153,20 @@ namespace CommonPluginsStores.Steam
                 bool isLogged = userData?.RgOwnedApps?.Count > 0;
                 if (!isLogged)
                 {
-                    Thread.Sleep(5000);
+                    Thread.Sleep(2000);
                     userData = GetUserData();
+                    isLogged = userData?.RgOwnedApps?.Count > 0;
+
+                    // renew
+                    if (!isLogged)
+                    {
+                        string url = string.Format(UrlRefreshToken, CurrentAccountInfos.Link);
+                        Thread.Sleep(250);
+                        _ = SetStoredCookies(GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, "https://steamcommunity.com/my", UrlStore }, true));
+                        _ = SetStoredCookies(GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, "https://steamcommunity.com/my", UrlStore }, true));
+                        Thread.Sleep(250);
+                        userData = GetUserData();
+                    }
                 }
                 return userData?.RgOwnedApps?.Count > 0;
             }
@@ -170,14 +182,14 @@ namespace CommonPluginsStores.Steam
         {
             ResetIsUserLoggedIn();
             string steamId = string.Empty;
-            using (IWebView view = API.Instance.WebViews.CreateView(675, 440, Colors.Black))
+            using (IWebView webView = API.Instance.WebViews.CreateView(675, 440, Colors.Black))
             {
-                view.LoadingChanged += async (s, e) =>
+                webView.LoadingChanged += async (s, e) =>
                 {
-                    string address = view.GetCurrentAddress();
+                    string address = webView.GetCurrentAddress();
                     if (address.Contains(@"steamcommunity.com"))
                     {
-                        string source = await view.GetPageSourceAsync();
+                        string source = await webView.GetPageSourceAsync();
                         Match idMatch = Regex.Match(source, @"g_steamID = ""(\d+)""");
                         if (idMatch.Success)
                         {
@@ -194,9 +206,9 @@ namespace CommonPluginsStores.Steam
 
                         if (idMatch.Success)
                         {
-                            _ = SetStoredCookies(GetWebCookies());
-                            string JsonDataString = Tools.GetJsonInString(source, @"(?<=g_rgProfileData[ ]=[ ])");
-                            RgProfileData rgProfileData = Serialization.FromJson<RgProfileData>(JsonDataString);
+                            _ = SetStoredCookies(GetWebCookies(true));
+                            string jsonDataString = Tools.GetJsonInString(source, @"(?<=g_rgProfileData[ ]=[ ])");
+                            RgProfileData rgProfileData = Serialization.FromJson<RgProfileData>(jsonDataString);
 
                             CurrentAccountInfos = new AccountInfos
                             {
@@ -212,14 +224,14 @@ namespace CommonPluginsStores.Steam
 
                             Logger.Info($"{PluginName} logged");
 
-                            view.Close();
+                            webView.Close();
                         }
                     }
                 };
 
-                CookiesDomains.ForEach(x => { view.DeleteDomainCookies(x); });
-                view.Navigate(UrlLogin);
-                _ = view.OpenDialog();
+                CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
+                webView.Navigate(UrlProfileLogin);
+                _ = webView.OpenDialog();
             }
         }
 
@@ -883,7 +895,6 @@ namespace CommonPluginsStores.Steam
                 string resultWeb = Web.DownloadStringData(UrlUserData, cookies, Web.UserAgent, true).GetAwaiter().GetResult();
                 if (Serialization.TryFromJson(resultWeb, out SteamUserData userData, out Exception ex) && userData?.RgOwnedApps?.Count > 0)
                 {
-                    _ = SetStoredCookies(GetNewWebCookies(UrlAccount));
                     SaveUserData(userData);
                 }
                 else
