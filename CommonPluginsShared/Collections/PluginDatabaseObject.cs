@@ -357,6 +357,11 @@ namespace CommonPluginsShared.Collections
         }
 
 
+        public void Refresh(Game game)
+        {
+            Refresh(game.Id);
+        }
+
         public void Refresh(Guid id)
         {
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}")
