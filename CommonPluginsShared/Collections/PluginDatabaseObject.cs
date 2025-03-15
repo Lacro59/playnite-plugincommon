@@ -1013,9 +1013,12 @@ namespace CommonPluginsShared.Collections
                         string csvData = GetCsvData(a, minimum);
                         if (!csvData.IsNullOrEmpty())
                         {
-                            File.WriteAllText(filePath, csvData, Encoding.UTF8);
-                            _ = Process.Start("explorer.exe", path);
-                            isOK = true;
+                            if (!a.CancelToken.IsCancellationRequested)
+                            {
+                                File.WriteAllText(filePath, csvData, Encoding.UTF8);
+                                _ = Process.Start("explorer.exe", path);
+                                isOK = true;
+                            }
                         }
                         else
                         {
