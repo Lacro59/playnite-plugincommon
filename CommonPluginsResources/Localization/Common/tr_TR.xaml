@@ -169,7 +169,8 @@ Dizini açmak ister misiniz?</sys:String>
     <!-- CommonMenus -->
 
     <sys:String x:Key="LOCCommonViewNoData">Eklenti verisi olmadan oyunları görüntüle</sys:String>
-    
+
+    <sys:String x:Key="LOCCommonAddManually">Add manually</sys:String>
     <sys:String x:Key="LOCCommonRefreshGameData">Veriyi yenile</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">Tüm verileri yenile</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">Veriyi sil</sys:String>
