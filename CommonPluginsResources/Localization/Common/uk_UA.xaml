@@ -169,7 +169,8 @@
     <!-- CommonMenus -->
 
     <sys:String x:Key="LOCCommonViewNoData">Показати ігри без даних плагіну</sys:String>
-    
+
+    <sys:String x:Key="LOCCommonAddManually">Add manually</sys:String>
     <sys:String x:Key="LOCCommonRefreshGameData">Оновити дані</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">Оновити всі дані</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">Видалити дані</sys:String>
