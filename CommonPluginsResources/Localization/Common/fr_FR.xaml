@@ -169,7 +169,8 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
     <!-- CommonMenus -->
 
     <sys:String x:Key="LOCCommonViewNoData">Voir les jeux sans données</sys:String>
-    
+
+    <sys:String x:Key="LOCCommonAddManually">Add manually</sys:String>
     <sys:String x:Key="LOCCommonRefreshGameData">Rafraichir les données</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">Actualiser les données</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">Supprimer les données</sys:String>
