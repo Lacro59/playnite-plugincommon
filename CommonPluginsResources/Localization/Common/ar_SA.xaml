@@ -169,7 +169,8 @@ Do you want to open the directory?</sys:String>
     <!-- CommonMenus -->
 
     <sys:String x:Key="LOCCommonViewNoData">View games without plugin data</sys:String>
-    
+
+    <sys:String x:Key="LOCCommonAddManually">Add manually</sys:String>
     <sys:String x:Key="LOCCommonRefreshGameData">تحديث البيانات</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">تحديث جميع البيانات</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">حذف البيانات</sys:String>
