@@ -78,6 +78,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamPlayerSummaries.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamAchievementData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamApps.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamSearch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamUser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamUserData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamWishlist.cs" />
