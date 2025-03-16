@@ -62,6 +62,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)PCGamingWiki\PCGamingWikiApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PsnApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Psn\Models\PsnAddOnProducts.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Psn\PsnApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\ExtensionsAchievements.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\RgProfileData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamFriendsApps.cs" />

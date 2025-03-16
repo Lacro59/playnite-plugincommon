@@ -147,7 +147,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
             }
         }
 
-        private CookieContainer ReadCookiesFromDisk()
+        public CookieContainer ReadCookiesFromDisk()//private CookieContainer ReadCookiesFromDisk()
         {
             try
             {
