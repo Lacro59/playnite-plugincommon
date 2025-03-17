@@ -44,6 +44,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Native\Psapi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ObservableObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Services\EpicAccountClient.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\NintendoLibrary\Models\NintendoModels.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\NintendoLibrary\Services\NintendoAccountClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\PSNLibrary\Services\PSNClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\ExtensionFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SelectableItem.cs" />
