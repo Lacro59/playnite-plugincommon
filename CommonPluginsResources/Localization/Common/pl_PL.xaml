@@ -170,7 +170,7 @@ Czy chcesz otworzyć katalog?</sys:String>
 
     <sys:String x:Key="LOCCommonViewNoData">Wyświetl gry bez danych wtyczki</sys:String>
 
-    <sys:String x:Key="LOCCommonAddManually">Add manually</sys:String>
+    <sys:String x:Key="LOCCommonAddManually">Dodaj ręcznie</sys:String>
     <sys:String x:Key="LOCCommonRefreshGameData">Odśwież dane</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">Odśwież wszystkie dane</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">Usuń dane</sys:String>
