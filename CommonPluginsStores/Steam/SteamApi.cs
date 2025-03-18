@@ -11,10 +11,6 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-<<<<<<< HEAD
-=======
-using System.Text;
->>>>>>> 7541d2f32be1352537268e2a851d94cea09fed03
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using AngleSharp.Dom;
