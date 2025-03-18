@@ -53,8 +53,8 @@ namespace CommonPluginsStores.Origin
         #endregion
 
 
-        protected static readonly Lazy<OriginAccountClient> _OriginAPI = new Lazy<OriginAccountClient>(() => new OriginAccountClient(API.Instance.WebViews.CreateOffscreenView()));
-        internal static OriginAccountClient OriginAPI => _OriginAPI.Value;
+        protected static readonly Lazy<OriginAccountClient> _originAPI = new Lazy<OriginAccountClient>(() => new OriginAccountClient(API.Instance.WebViews.CreateOffscreenView()));
+        internal static OriginAccountClient OriginAPI => _originAPI.Value;
 
 
         private Models.AccountInfoResponse accountInfoResponse;
@@ -62,12 +62,12 @@ namespace CommonPluginsStores.Origin
         private static StoreCurrency LocalCurrency { get; set; } = new StoreCurrency { country = "US", currency = "USD", symbol = "$" };
 
 
-        protected List<CommonPlayniteShared.PluginLibrary.OriginLibrary.Models.GameStoreDataResponse> _AppsList;
+        protected List<CommonPlayniteShared.PluginLibrary.OriginLibrary.Models.GameStoreDataResponse> _appsList;
         internal List<CommonPlayniteShared.PluginLibrary.OriginLibrary.Models.GameStoreDataResponse> AppsList
         {
             get
             {
-                if (_AppsList == null)
+                if (_appsList == null)
                 {
                     // From cache if exists & not expired
                     if (File.Exists(AppsListPath) && File.GetLastWriteTime(AppsListPath).AddDays(3) > DateTime.Now)
@@ -82,10 +82,10 @@ namespace CommonPluginsStores.Origin
                         AppsList = GetOriginAppsListFromWeb();
                     }
                 }
-                return _AppsList;
+                return _appsList;
             }
 
-            set => _AppsList = value;
+            set => _appsList = value;
         }
 
         #region Paths
@@ -250,7 +250,7 @@ namespace CommonPluginsStores.Origin
                 };
                 string Url = string.Format(UrlApi3UserGames, CurrentAccountInfos.UserId, accountInfos.UserId);
                 string WebData = Web.DownloadStringData(Url, httpHeaders).GetAwaiter().GetResult();
-                Serialization.TryFromJson(WebData, out ProductInfosResponse productInfosResponse);
+                _ = Serialization.TryFromJson(WebData, out ProductInfosResponse productInfosResponse);
 
                 ObservableCollection<AccountGameInfos> accountGamesInfos = new ObservableCollection<AccountGameInfos>();
                 productInfosResponse?.productInfos?.ForEach(x => 

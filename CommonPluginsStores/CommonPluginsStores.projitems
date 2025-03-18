@@ -73,6 +73,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamKit\SteamOwnedGame.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamKit\SteamPlayerAchievement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamKit\SteamPlayerSummaries.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamKit\SteamProfileGames.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamKit\SteamSchema.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamKit\SteamStats.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamPlayerSummaries.cs" />
