@@ -68,5 +68,16 @@ namespace CommonPluginsShared.Extensions
                 return false;
             }
         }
+
+
+        public static string EscapeDataString(this string str)
+        {
+            if (string.IsNullOrEmpty(str))
+            {
+                return str;
+            }
+
+            return Uri.EscapeDataString(str);
+        }
     }
 }

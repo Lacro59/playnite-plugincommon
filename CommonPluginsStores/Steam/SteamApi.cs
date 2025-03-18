@@ -11,6 +11,10 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+<<<<<<< HEAD
+=======
+using System.Text;
+>>>>>>> 7541d2f32be1352537268e2a851d94cea09fed03
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using AngleSharp.Dom;
@@ -40,12 +44,16 @@ namespace CommonPluginsStores.Steam
         private static string UrlSteamCommunity => @"https://steamcommunity.com";
         private static string UrlApi => @"https://api.steampowered.com";
         private static string UrlStore => @"https://store.steampowered.com";
+        private static string UrlLogin => @"https://login.steampowered.com";
 
         private static string UrlAvatarFul => @"https://avatars.akamai.steamstatic.com/{0}_full.jpg";
 
         private static string UrlWishlistApi = UrlApi + @"/IWishlistService/GetWishlist/v1?steamid={0}&key={1}";
 
-        private static string UrlLogin => UrlSteamCommunity + @"/login/home/?goto=";
+
+        private static string UrlRefreshToken = UrlLogin + @"/jwt/refresh?redir={0}";
+
+        private static string UrlProfileLogin => UrlSteamCommunity + @"/login/home/?goto=";
         private static string UrlProfileById => UrlSteamCommunity + @"/profiles/{0}";
         private static string UrlProfileByName => UrlSteamCommunity + @"/id/{0}";
         private static string UrlFriends => UrlSteamCommunity + @"/profiles/{0}/friends";
@@ -59,6 +67,8 @@ namespace CommonPluginsStores.Steam
         private static string UrlApiGameDetails => UrlStore + @"/api/appdetails?appids={0}&l={1}";
         private static string UrlSteamGame => UrlStore + @"/app/{0}";
         private static string UrlSteamGameLocalised => UrlStore + @"/app/{0}/?l={1}";
+
+        private static string UrlSteamGameSearch = UrlStore + @"/api/storesearch/?term={0}&cc={1}&l={1}";
         #endregion
 
         protected List<SteamApp> steamApps;
@@ -149,8 +159,20 @@ namespace CommonPluginsStores.Steam
                 bool isLogged = userData?.RgOwnedApps?.Count > 0;
                 if (!isLogged)
                 {
-                    Thread.Sleep(5000);
+                    Thread.Sleep(2000);
                     userData = GetUserData();
+                    isLogged = userData?.RgOwnedApps?.Count > 0;
+
+                    // renew
+                    if (!isLogged)
+                    {
+                        string url = string.Format(UrlRefreshToken, CurrentAccountInfos.Link);
+                        Thread.Sleep(250);
+                        _ = SetStoredCookies(GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, "https://steamcommunity.com/my", UrlStore }, true));
+                        _ = SetStoredCookies(GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, "https://steamcommunity.com/my", UrlStore }, true));
+                        Thread.Sleep(250);
+                        userData = GetUserData();
+                    }
                 }
                 return userData?.RgOwnedApps?.Count > 0;
             }
@@ -166,14 +188,14 @@ namespace CommonPluginsStores.Steam
         {
             ResetIsUserLoggedIn();
             string steamId = string.Empty;
-            using (IWebView view = API.Instance.WebViews.CreateView(675, 440, Colors.Black))
+            using (IWebView webView = API.Instance.WebViews.CreateView(675, 440, Colors.Black))
             {
-                view.LoadingChanged += async (s, e) =>
+                webView.LoadingChanged += async (s, e) =>
                 {
-                    string address = view.GetCurrentAddress();
+                    string address = webView.GetCurrentAddress();
                     if (address.Contains(@"steamcommunity.com"))
                     {
-                        string source = await view.GetPageSourceAsync();
+                        string source = await webView.GetPageSourceAsync();
                         Match idMatch = Regex.Match(source, @"g_steamID = ""(\d+)""");
                         if (idMatch.Success)
                         {
@@ -190,9 +212,9 @@ namespace CommonPluginsStores.Steam
 
                         if (idMatch.Success)
                         {
-                            _ = SetStoredCookies(GetWebCookies());
-                            string JsonDataString = Tools.GetJsonInString(source, @"(?<=g_rgProfileData[ ]=[ ])");
-                            RgProfileData rgProfileData = Serialization.FromJson<RgProfileData>(JsonDataString);
+                            _ = SetStoredCookies(GetWebCookies(true));
+                            string jsonDataString = Tools.GetJsonInString(source, @"(?<=g_rgProfileData[ ]=[ ])");
+                            RgProfileData rgProfileData = Serialization.FromJson<RgProfileData>(jsonDataString);
 
                             CurrentAccountInfos = new AccountInfos
                             {
@@ -208,14 +230,14 @@ namespace CommonPluginsStores.Steam
 
                             Logger.Info($"{PluginName} logged");
 
-                            view.Close();
+                            webView.Close();
                         }
                     }
                 };
 
-                CookiesDomains.ForEach(x => { view.DeleteDomainCookies(x); });
-                view.Navigate(UrlLogin);
-                _ = view.OpenDialog();
+                CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
+                webView.Navigate(UrlProfileLogin);
+                _ = webView.OpenDialog();
             }
         }
 
@@ -425,11 +447,11 @@ namespace CommonPluginsStores.Steam
             return GetGameInfos(id, accountInfos, 1);
         }
 
-        private GameInfos GetGameInfos(string id, AccountInfos accountInfos, int retryCount)
+        private GameInfos GetGameInfos(string id, AccountInfos accountInfos, int retryCount, bool minimalInfos = false)
         {
             try
             {
-                Thread.Sleep(2000); // Prevent http 429
+                Thread.Sleep(1000); // Prevent http 429
                 string url = string.Format(UrlApiGameDetails, id, CodeLang.GetSteamLang(Local));
                 string webData = Web.DownloadStringData(url).GetAwaiter().GetResult();
 
@@ -466,10 +488,14 @@ namespace CommonPluginsStores.Steam
                     List<uint> dlcsIdSteamDb = new List<uint>(); // GetDlcFromSteamDb(storeAppDetailsResult?.data.steam_appid ?? 0);
                     List<uint> dlcsId = dlcsIdSteam.Union(dlcsIdSteamDb).Distinct().OrderBy(x => x).ToList();
 
-                    if (dlcsId.Count > 0)
+                    if (dlcsId.Count > 0 && !minimalInfos)
                     {
                         ObservableCollection<DlcInfos> Dlcs = GetDlcInfos(dlcsId, accountInfos);
                         gameInfos.Dlcs = Dlcs;
+                    }
+                    else if(dlcsId.Count > 0)
+                    {
+                        gameInfos.Dlcs = dlcsId.Select(x => new DlcInfos { Id = x.ToString() }).ToObservable();
                     }
 
                     return gameInfos;
@@ -511,18 +537,18 @@ namespace CommonPluginsStores.Steam
                 ObservableCollection<DlcInfos> Dlcs = new ObservableCollection<DlcInfos>();
                 dlcs.ForEach(x =>
                 {
-                    string Url = string.Format(UrlApiGameDetails, x, CodeLang.GetSteamLang(Local));
-                    string WebData = Web.DownloadStringData(Url).GetAwaiter().GetResult();
+                    string url = string.Format(UrlApiGameDetails, x, CodeLang.GetSteamLang(Local));
+                    string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
 
-                    if (Serialization.TryFromJson(WebData, out Dictionary<string, StoreAppDetailsResult> parsedData))
+                    if (Serialization.TryFromJson(response, out Dictionary<string, StoreAppDetailsResult> parsedData))
                     {
                         StoreAppDetailsResult storeAppDetailsResult = parsedData[x.ToString()];
                         if (storeAppDetailsResult?.data != null)
                         {
-                            bool IsOwned = false;
+                            bool isOwned = false;
                             if (accountInfos != null && accountInfos.IsCurrent)
                             {
-                                IsOwned = IsDlcOwned(storeAppDetailsResult?.data.steam_appid.ToString());
+                                isOwned = IsDlcOwned(storeAppDetailsResult?.data.steam_appid.ToString());
                             }
 
                             DlcInfos dlc = new DlcInfos
@@ -532,7 +558,7 @@ namespace CommonPluginsStores.Steam
                                 Description = ParseDescription(storeAppDetailsResult?.data.about_the_game),
                                 Image = storeAppDetailsResult.data.header_image,
                                 Link = string.Format(UrlSteamGameLocalised, storeAppDetailsResult.data.steam_appid.ToString(), CodeLang.GetSteamLang(Local)),
-                                IsOwned = IsOwned,
+                                IsOwned = isOwned,
                                 Price = storeAppDetailsResult.data.is_free ? "0" : storeAppDetailsResult.data.price_overview?.final_formatted,
                                 PriceBase = storeAppDetailsResult.data.is_free ? "0" : storeAppDetailsResult.data.price_overview?.initial_formatted
                             };
@@ -839,7 +865,6 @@ namespace CommonPluginsStores.Steam
                 string resultWeb = Web.DownloadStringData(UrlUserData, cookies, Web.UserAgent, true).GetAwaiter().GetResult();
                 if (Serialization.TryFromJson(resultWeb, out SteamUserData userData, out Exception ex) && userData?.RgOwnedApps?.Count > 0)
                 {
-                    _ = SetStoredCookies(GetNewWebCookies(UrlAccount));
                     SaveUserData(userData);
                 }
                 else
@@ -911,6 +936,32 @@ namespace CommonPluginsStores.Steam
             }
 
             return gameAchievements;
+        }
+
+        public List<GenericItemOption> GetSearchGame(string searchTerm)
+        {
+            List<GenericItemOption> results = new List<GenericItemOption>();
+
+            try
+            {
+                string url = string.Format(UrlSteamGameSearch, searchTerm.NormalizeGameName(), "en");
+                string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
+                _ = Serialization.TryFromJson(response, out SteamSearch steamSearch, out Exception ex);
+                if (ex != null)
+                {
+                    throw ex;
+                }
+
+                results = steamSearch?.Items
+                    ?.Select(x => new GenericItemOption { Name = x.Name, Description = x.Id.ToString() + $" - {GetGameInfos(x.Id.ToString(), null, 1, true)?.Dlcs?.Count() ?? 0} DLC" })
+                    ?.ToList() ?? new List<GenericItemOption>();
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, false, PluginName);
+            }
+
+            return results;
         }
         #endregion
 

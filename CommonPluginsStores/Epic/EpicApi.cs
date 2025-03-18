@@ -57,19 +57,20 @@ namespace CommonPluginsStores.Epic
         public EpicApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "Epic")
         {
             TokensPath = Path.Combine(PathStoresData, "Epic_Tokens.dat");
+            CookiesDomains = new List<string> { ".epicgames.com" };
         }
 
         #region Cookies
         internal override List<HttpCookie> GetWebCookies(bool deleteCookies = false)
         {
-            string LocalLangShort = CodeLang.GetEpicLangCountry(Local);
+            string localLangShort = CodeLang.GetEpicLangCountry(Local);
             List<HttpCookie> httpCookies = new List<HttpCookie>
             {
                 new HttpCookie
                 {
                     Domain = ".www.epicgames.com",
                     Name = "EPIC_LOCALE_COOKIE",
-                    Value = LocalLangShort,
+                    Value = localLangShort,
                     Creation = DateTime.Now,
                     LastAccess = DateTime.Now
                 },
@@ -85,7 +86,7 @@ namespace CommonPluginsStores.Epic
                 {
                     Domain = "store.epicgames.com",
                     Name = "EPIC_LOCALE_COOKIE",
-                    Value = LocalLangShort,
+                    Value = localLangShort,
                     Creation = DateTime.Now,
                     LastAccess = DateTime.Now
                 },
@@ -105,9 +106,14 @@ namespace CommonPluginsStores.Epic
         #region Configuration
         protected override bool GetIsUserLoggedIn()
         {
-            if (!_currentAccountInfos.IsPrivate && !StoreSettings.UseAuth)
+            if (CurrentAccountInfos == null)
             {
-                return !_currentAccountInfos.UserId.IsNullOrEmpty();
+                return false;
+            }
+
+            if (!CurrentAccountInfos.IsPrivate && !StoreSettings.UseAuth)
+            {
+                return !CurrentAccountInfos.UserId.IsNullOrEmpty();
             }
 
             bool isLogged = CheckIsUserLoggedIn();
@@ -119,8 +125,6 @@ namespace CommonPluginsStores.Epic
                     Token = tokens.access_token,
                     Type = tokens.token_type
                 };
-
-                _ = SetStoredCookies(GetWebCookies());
             }
             else
             {
@@ -598,6 +602,17 @@ namespace CommonPluginsStores.Epic
             try
             {
                 EpicAccountResponse account = GetEpicAccount();
+                if (account == null)
+                {
+                    RenewTokens(tokens.refresh_token);
+                    tokens = LoadTokens();
+                    if (tokens.account_id.IsNullOrEmpty() || tokens.access_token.IsNullOrEmpty())
+                    {
+                        return false;
+                    }
+
+                    account = GetEpicAccount();
+                }
                 return account != null && account.Id == tokens.account_id;
             }
             catch
@@ -627,7 +642,7 @@ namespace CommonPluginsStores.Epic
             bool loggedIn = false;
             string apiRedirectContent = string.Empty;
 
-            using (IWebView view = API.Instance.WebViews.CreateView(new WebViewSettings
+            using (IWebView webView = API.Instance.WebViews.CreateView(new WebViewSettings
             {
                 WindowWidth = 580,
                 WindowHeight = 700,
@@ -635,21 +650,21 @@ namespace CommonPluginsStores.Epic
                 UserAgent = @"Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Vivaldi/7.1.3570.39"
             }))
             {
-                view.LoadingChanged += async (s, e) =>
+                webView.LoadingChanged += async (s, e) =>
                 {
-                    string address = view.GetCurrentAddress();
+                    string address = webView.GetCurrentAddress();
                     if (address.StartsWith(@"https://www.epicgames.com/id/api/redirect"))
                     {
-                        apiRedirectContent = await view.GetPageTextAsync();
+                        apiRedirectContent = await webView.GetPageTextAsync();
                         loggedIn = true;
-                        view.DeleteDomainCookies(".epicgames.com");
-                        view.Close();
+                        CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
+                        webView.Close();
                     }
                 };
 
-                view.DeleteDomainCookies(".epicgames.com");
-                view.Navigate(UrlLogin);
-                _ = view.OpenDialog();
+                CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
+                webView.Navigate(UrlLogin);
+                _ = webView.OpenDialog();
             }
 
             if (!loggedIn)
@@ -705,6 +720,7 @@ namespace CommonPluginsStores.Epic
 
             AuthenticateUsingAuthCode(res.SelectedString.Trim().Trim('"'));
         }
+
         private void RenewTokens(string refreshToken)
         {
             using (HttpClient httpClient = new HttpClient())
@@ -821,6 +837,7 @@ namespace CommonPluginsStores.Epic
             return ProductSlug;
         }
 
+
         private string GetNameSpace(string name)
         {
             return GetNameSpace(name, string.Empty);
@@ -892,6 +909,7 @@ namespace CommonPluginsStores.Epic
             return productSlug.IsNullOrEmpty() ? GetNameSpace(normalizedEpicName) : GetNameSpace(normalizedEpicName, productSlug);
         }
 
+
         private bool DlcIsOwned(string productNameSpace, string id)
         {
             try
@@ -947,6 +965,7 @@ namespace CommonPluginsStores.Epic
                 return null;
             }
         }
+
 
         public async Task<string> QueryWishList(string query, dynamic variables)
         {

@@ -40,7 +40,7 @@ namespace CommonPluginsControls.Views
         {
             InitializeComponent();
 
-            List<DataGame> DataGames = API.Instance.Database.Games.Where(x => !x.Hidden).Select(x => new DataGame
+            List<DataGame> DataGames = API.Instance.Database.Games.Select(x => new DataGame
             {
                 Id = x.Id,
                 Icon = x.Icon.IsNullOrEmpty() ? x.Icon : API.Instance.Database.GetFullFilePath(x.Icon),

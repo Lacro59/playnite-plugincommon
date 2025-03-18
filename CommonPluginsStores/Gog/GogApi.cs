@@ -92,46 +92,17 @@ namespace CommonPluginsStores.Gog
         public GogApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "GOG")
         {
             FileUserDataOwned = Path.Combine(PathStoresData, "GOG_UserDataOwned.json");
-
-            CookiesDomains = new List<string>
-            {
-                "gog.com", ".gog.com",
-            };
+            CookiesDomains = new List<string> { "gog.com", ".gog.com" };
         }
-
-        #region Cookies
-        internal override bool SetStoredCookies(List<HttpCookie> httpCookies)
-        {
-            try
-            {
-                if (httpCookies?.Count() > 0)
-                {
-                    httpCookies = httpCookies.Where(x => !x.Name.Contains("_hjSession_", StringComparison.OrdinalIgnoreCase)).ToList();
-                    FileSystem.CreateDirectory(Path.GetDirectoryName(FileCookies));
-                    Encryption.EncryptToFile(
-                        FileCookies,
-                        Serialization.ToJson(httpCookies),
-                        Encoding.UTF8,
-                        WindowsIdentity.GetCurrent().User.Value);
-                    return true;
-                }
-                else
-                {
-                    Logger.Warn($"No cookies saved for {PluginName}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, "Failed to save cookies");
-            }
-
-            return false;
-        }
-        #endregion
 
         #region Configuration
         protected override bool GetIsUserLoggedIn()
         {
+            if (CurrentAccountInfos == null)
+            {
+                return false;
+            }
+
             if (!CurrentAccountInfos.IsPrivate && !StoreSettings.UseAuth)
             {
                 return !CurrentAccountInfos.UserId.IsNullOrEmpty();
@@ -140,6 +111,8 @@ namespace CommonPluginsStores.Gog
             bool isLogged = CheckIsUserLoggedIn();
             if (isLogged)
             {
+                _ = SetStoredCookies(GetNewWebCookies(new List<string> { CurrentAccountInfos.Link }));
+
                 string response = Web.DownloadStringData(UrlAccountInfo, GetStoredCookies()).GetAwaiter().GetResult();
                 _ = Serialization.TryFromJson(response, out AccountBasicResponse accountBasicResponse);
                 AuthToken = new StoreToken
@@ -147,7 +120,22 @@ namespace CommonPluginsStores.Gog
                     Token = accountBasicResponse.AccessToken
                 };
 
-                _ = SetStoredCookies(GetNewWebCookies(UrlLogin));
+                if (AccountBasic?.IsLoggedIn ?? false)
+                {
+                    CurrentAccountInfos = new AccountInfos
+                    {
+                        UserId = AccountBasic.UserId,
+                        Pseudo = AccountBasic.Username,
+                        Link = string.Format(UrlUser, AccountBasic.Username),
+                        Avatar = AccountBasic.Avatars.MenuUserAvBig2,
+                        IsPrivate = true,
+                        IsCurrent = true
+                    };
+                    SaveCurrentUser();
+                    _ = GetCurrentAccountInfos();
+
+                    Logger.Info($"{PluginName} logged");
+                }
             }
             else
             {

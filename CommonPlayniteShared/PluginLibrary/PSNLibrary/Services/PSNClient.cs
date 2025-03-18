@@ -43,11 +43,11 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
         private const string trophiesMobileUrl = @"https://m.np.playstation.com/api/trophy/v1/users/me/trophyTitles?limit=250&offset={0}";
         private const string trophiesWithIdsMobileUrl = @"https://m.np.playstation.com/api/trophy/v1/users/me/titles/trophyTitles?npTitleIds={0}";
 
-        public PSNClient(string PsnPluginUserDataPath)//public PSNClient(PSNLibrary psnLibrary)
+        public PSNClient(string psnPluginUserDataPath)//public PSNClient(PSNLibrary psnLibrary)
         {
-            Serialization.TryFromJsonFile(Path.Combine(PsnPluginUserDataPath, "config.json"), out psnLibrarySettings);//this.psnLibrary = psnLibrary;
+            Serialization.TryFromJsonFile(Path.Combine(psnPluginUserDataPath, "config.json"), out psnLibrarySettings);//this.psnLibrary = psnLibrary;
             this.api = API.Instance;//this.api = psnLibrary.PlayniteApi;
-            tokenPath = Path.Combine(PsnPluginUserDataPath, "token.json");//tokenPath = Path.Combine(psnLibrary.GetPluginUserDataPath(), "token.json");
+            tokenPath = Path.Combine(psnPluginUserDataPath, "token.json");//tokenPath = Path.Combine(psnLibrary.GetPluginUserDataPath(), "token.json");
         }
 
         public void Login()
@@ -147,7 +147,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
             }
         }
 
-        private CookieContainer ReadCookiesFromDisk()
+        public CookieContainer ReadCookiesFromDisk()//private CookieContainer ReadCookiesFromDisk()
         {
             try
             {

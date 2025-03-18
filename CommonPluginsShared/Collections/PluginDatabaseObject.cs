@@ -1000,14 +1000,25 @@ namespace CommonPluginsShared.Collections
 
                     try
                     {
-                        path = Path.Combine(path, $"{PluginName}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv");
-                        path = CommonPlayniteShared.Common.Paths.FixPathLength(path);
-                        FileSystem.PrepareSaveFile(path);
+                        ulong totalItems = 0;
+                        foreach (TItem item in Database.Items?.Values)
+                        {
+                            totalItems += item.Count;
+                        }
+                        a.ProgressMaxValue = totalItems;
+
+                        string filePath = Path.Combine(path, $"{PluginName}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv");
+                        filePath = CommonPlayniteShared.Common.Paths.FixPathLength(filePath);
+                        FileSystem.PrepareSaveFile(filePath);
                         string csvData = GetCsvData(a, minimum);
                         if (!csvData.IsNullOrEmpty())
                         {
-                            File.WriteAllText(path, csvData, Encoding.UTF8);
-                            isOK = true;
+                            if (!a.CancelToken.IsCancellationRequested)
+                            {
+                                File.WriteAllText(filePath, csvData, Encoding.UTF8);
+                                _ = Process.Start("explorer.exe", path);
+                                isOK = true;
+                            }
                         }
                         else
                         {
