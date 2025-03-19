@@ -30,7 +30,7 @@
     <sys:String x:Key="LOCCommonUpdate"></sys:String>
     <sys:String x:Key="LOCCommonUpdateOnStart"></sys:String>
     <sys:String x:Key="LOCCommonUpdateEvery"></sys:String>
-    <sys:String x:Key="LOCCommonHours">Hours</sys:String>
+    <sys:String x:Key="LOCCommonHours">Horas</sys:String>
 
     <!-- Transfer plugin data -->
 
@@ -170,7 +170,7 @@ Você quer abrir o diretório?</sys:String>
 
     <sys:String x:Key="LOCCommonViewNoData">Ver jogos sem dados do plugin</sys:String>
 
-    <sys:String x:Key="LOCCommonAddManually">Add manually</sys:String>
+    <sys:String x:Key="LOCCommonAddManually">Adicionar manualmente</sys:String>
     <sys:String x:Key="LOCCommonRefreshGameData">Atualizar dados</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">Atualizar todos os dados</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">Apagar dados</sys:String>
