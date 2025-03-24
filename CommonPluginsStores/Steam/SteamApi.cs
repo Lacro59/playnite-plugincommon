@@ -11,7 +11,6 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Text;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using AngleSharp.Dom;
@@ -54,6 +53,7 @@ namespace CommonPluginsStores.Steam
         private static string UrlProfileById => UrlSteamCommunity + @"/profiles/{0}";
         private static string UrlProfileByName => UrlSteamCommunity + @"/id/{0}";
         private static string UrlFriends => UrlSteamCommunity + @"/profiles/{0}/friends";
+        private static string UrlProfileGamesById => UrlProfileById + @"/games/?tab=all";
 
         private static string UrlAccount => UrlStore + @"/account";
         private static string UrlUserData => UrlStore + @"/dynamicstore/userdata/";
@@ -326,50 +326,13 @@ namespace CommonPluginsStores.Steam
         {
             try
             {
-                //List<HttpHeader> httpHeaders = new List<HttpHeader>
-                //{
-                //    new HttpHeader { Key = "AuthToken", Value =  AuthToken.Token },
-                //    new HttpHeader { Key = "Accept", Value = "application/json" }
-                //};
-                //string Url = string.Format(UrlApi3UserGames, CurrentAccountInfos.UserId, accountInfos.UserId);
-                //string WebData = Web.DownloadStringData(Url, httpHeaders).GetAwaiter().GetResult();
-                //Serialization.TryFromJson(WebData, out ProductInfosResponse productInfosResponse);
-                //
-                //ObservableCollection<AccountGameInfos> accountGamesInfos = new ObservableCollection<AccountGameInfos>();
-                //productInfosResponse?.productInfos?.ForEach(x =>
-                //{
-                //    string Id = x.productId;
-                //    string Name = x.displayProductName;
-                //
-                //    bool IsCommun = false;
-                //    if (!accountInfos.IsCurrent)
-                //    {
-                //        IsCommun = CurrentGamesInfos?.Where(y => y.Id.IsEqual(Id))?.Count() != 0;
-                //    }
-                //
-                //    GameInfos gameInfos = GetGameInfos(Id, Local);
-                //    string Link = gameInfos?.Link;
-                //
-                //    string achId = x?.softwares?.softwareList?.First().achievementSetOverride;
-                //    ObservableCollection<GameAchievement> Achievements = null;
-                //    if (!achId.IsNullOrEmpty())
-                //    {
-                //        Achievements = GetAchievements(achId, accountInfos);
-                //    }
-                //
-                //    AccountGameInfos accountGameInfos = new AccountGameInfos
-                //    {
-                //        Id = Id,
-                //        Name = Name,
-                //        Link = Link,
-                //        IsCommun = IsCommun,
-                //        Achievements = Achievements,
-                //        HoursPlayed = 0
-                //    };
-                //    accountGamesInfos.Add(accountGameInfos);
-                //});
-                //
-                //return accountGamesInfos;
+                if (CurrentAccountInfos != null && CurrentAccountInfos.IsCurrent)
+                {
+                    ObservableCollection<AccountGameInfos> accountGameInfos = StoreSettings.UseAuth || CurrentAccountInfos.IsPrivate || !StoreSettings.UseApi || CurrentAccountInfos.ApiKey.IsNullOrEmpty()
+                        ? GetAccountGamesInfosByWeb(accountInfos)
+                        : GetAccountGamesInfosByApi(accountInfos);
+                    return accountGameInfos;
+                }
             }
             catch (Exception ex)
             {
@@ -394,12 +357,9 @@ namespace CommonPluginsStores.Steam
                     return gameAchievements;
                 }
 
-                if (accountInfos?.IsCurrent ?? false)
-                {
-                    gameAchievements = StoreSettings.UseAuth || accountInfos.IsPrivate || !StoreSettings.UseApi || accountInfos.ApiKey.IsNullOrEmpty()
-                        ? GetAchievementsByWeb(appId, accountInfos, gameAchievements)
-                        : GetAchievementsByApi(appId, accountInfos, gameAchievements);
-                }
+                gameAchievements = StoreSettings.UseAuth || accountInfos.IsPrivate || !StoreSettings.UseApi || accountInfos.ApiKey.IsNullOrEmpty()
+                    ? GetAchievementsByWeb(appId, accountInfos, gameAchievements)
+                    : GetAchievementsByApi(appId, accountInfos, gameAchievements);
 
                 gameAchievements?.ForEach(x =>
                 {
@@ -1021,12 +981,44 @@ namespace CommonPluginsStores.Steam
             return playerSummaries;
         }
 
+        private ObservableCollection<AccountGameInfos> GetAccountGamesInfosByApi(AccountInfos accountInfos)
+        {
+            ObservableCollection<AccountGameInfos> accountGameInfos = null;
+            if (!CurrentAccountInfos.ApiKey.IsNullOrEmpty() && ulong.TryParse(accountInfos.UserId, out ulong steamId))
+            {
+                accountGameInfos = new ObservableCollection<AccountGameInfos>();
+                List<SteamOwnedGame> steamOwnedGame = SteamKit.GetOwnedGames(CurrentAccountInfos.ApiKey, steamId);
+                steamOwnedGame?.ForEach(x =>
+                {
+                    ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
+                    if (x.PlaytimeForever > 0)
+                    {
+                        // TODO "error": "Profile is not public"
+                        gameAchievements = GetAchievements(x.Appid.ToString(), accountInfos);
+                    }
+
+                    AccountGameInfos gameInfos = new AccountGameInfos
+                    {
+                        Id = x.Appid.ToString(),
+                        Name = x.Name,
+                        Link = string.Format(UrlApiGameDetails, x.Appid, CodeLang.GetSteamLang(Local)),
+                        IsCommun = !accountInfos.IsCurrent && CurrentGamesInfos.FirstOrDefault(y => y.Id == x.Appid.ToString()) != null,
+                        Achievements = gameAchievements,
+                        Playtime = x.PlaytimeForever
+                    };
+
+                    accountGameInfos.Add(gameInfos);
+                });
+            }
+            return accountGameInfos;
+        }
+
         private ObservableCollection<AccountInfos> GetCurrentFriendsInfosByApi()
         {
             ObservableCollection<AccountInfos> currentFriendsInfos = null;
-            if (!_currentAccountInfos.ApiKey.IsNullOrEmpty() && ulong.TryParse(_currentAccountInfos.UserId, out ulong steamId))
+            if (!CurrentAccountInfos.ApiKey.IsNullOrEmpty() && ulong.TryParse(CurrentAccountInfos.UserId, out ulong steamId))
             {
-                List<SteamFriend> friendList = SteamKit.GetFriendList(_currentAccountInfos.ApiKey, steamId);
+                List<SteamFriend> friendList = SteamKit.GetFriendList(CurrentAccountInfos.ApiKey, steamId);
                 List<ulong> steamIds = friendList?.Select(x => x.SteamId)?.ToList() ?? new List<ulong>();
                 currentFriendsInfos = GetPlayerSummaries(steamIds);
 
@@ -1121,6 +1113,50 @@ namespace CommonPluginsStores.Steam
                 }
             }
             return false;
+        }
+
+        private ObservableCollection<AccountGameInfos> GetAccountGamesInfosByWeb(AccountInfos accountInfos)
+        {
+            try
+            {
+                ObservableCollection<AccountGameInfos> accountGameInfos = new ObservableCollection<AccountGameInfos>();
+                List<HttpCookie> cookies = GetStoredCookies();
+                string url = string.Format(UrlProfileGamesById, accountInfos.UserId);
+                string response = Web.DownloadStringData(url, cookies).GetAwaiter().GetResult();
+
+                IHtmlDocument htmlDocument = new HtmlParser().Parse(response);
+                IElement gamesListTemplate = htmlDocument.QuerySelector($"template#gameslist_config[data-profile-gameslist]");
+                string json = gamesListTemplate.GetAttribute("data-profile-gameslist").HtmlDecode();
+
+                SteamProfileGames steamProfileGames = Serialization.FromJson<SteamProfileGames>(json);
+                steamProfileGames?.RgGames?.ForEach(x =>
+                {
+                    ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
+                    if (x.PlaytimeForever > 0)
+                    {
+                        gameAchievements = GetAchievements(x.Appid.ToString(), accountInfos);
+                    }
+
+                    AccountGameInfos gameInfos = new AccountGameInfos
+                    {
+                        Id = x.Appid.ToString(),
+                        Name = x.Name,
+                        Link = string.Format(UrlApiGameDetails, x.Appid, CodeLang.GetSteamLang(Local)),
+                        IsCommun = !accountInfos.IsCurrent && CurrentGamesInfos.FirstOrDefault(y => y.Id == x.Appid.ToString()) != null,
+                        Achievements = gameAchievements,
+                        Playtime = x.PlaytimeForever
+                    };
+
+                    accountGameInfos.Add(gameInfos);
+                });
+
+                return accountGameInfos;
+            }
+            catch (WebException ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return null;
+            }
         }
 
         private ObservableCollection<GameAchievement> GetAchievementsByWeb(uint appId, AccountInfos accountInfos, ObservableCollection<GameAchievement> gameAchievements)
@@ -1240,9 +1276,9 @@ namespace CommonPluginsStores.Steam
                 ObservableCollection<AccountInfos> currentFriendsInfos = new ObservableCollection<AccountInfos>();
                 List<HttpCookie> cookies = GetStoredCookies();
                 string url = string.Format(UrlFriends, CurrentAccountInfos.UserId);
-                string resultWeb = Web.DownloadStringData(url, cookies).GetAwaiter().GetResult();
+                string reponse = Web.DownloadStringData(url, cookies).GetAwaiter().GetResult();
 
-                IHtmlDocument htmlDocument = new HtmlParser().Parse(resultWeb);
+                IHtmlDocument htmlDocument = new HtmlParser().Parse(reponse);
                 IHtmlCollection<IElement> elements = htmlDocument.QuerySelectorAll(".friend_block_v2");
                 foreach (IElement el in elements)
                 {

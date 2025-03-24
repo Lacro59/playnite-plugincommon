@@ -26,6 +26,7 @@ namespace CommonPluginsStores.Steam
         #region ISteamApps
         public static List<SteamApp> GetAppList()
         {
+            Thread.Sleep(100);
             try
             {
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("ISteamApps"))
@@ -54,6 +55,7 @@ namespace CommonPluginsStores.Steam
         #region ISteamUser
         public static List<SteamFriend> GetFriendList(string apiKey, ulong steamId)
         {
+            Thread.Sleep(100);
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -87,6 +89,7 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamPlayerSummaries> GetPlayerSummaries(string apiKey, List<ulong> steamIds)
         {
+            Thread.Sleep(100);
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -133,11 +136,15 @@ namespace CommonPluginsStores.Steam
         #region IPlayerService
         public static List<SteamOwnedGame> GetOwnedGames(string apiKey, ulong steamId)
         {
+            Thread.Sleep(100);
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
                 {
-                    ["steamId"] = steamId.ToString()
+                    ["steamId"] = steamId.ToString(),
+                    ["include_appinfo"] = "1",
+                    ["include_played_free_games"] = "1",
+                    ["include_extended_appinfo"] = "1"
                 };
 
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("IPlayerService", apiKey))
@@ -149,6 +156,9 @@ namespace CommonPluginsStores.Steam
                         ownedGames.Add(new SteamOwnedGame
                         {
                             Appid = data["appid"].AsInteger(),
+                            Name = data["name"].AsString(),
+                            ImgIconUrl = data["img_icon_url"].AsString(),
+                            HasCommunityVisibleStats = data["has_community_visible_stats"].AsBoolean(),
                             PlaytimeDeckForever = data["playtime_deck_forever"].AsInteger(),
                             PlaytimeDisconnected = data["playtime_disconnected"].AsInteger(),
                             PlaytimeForever = data["playtime_forever"].AsInteger(),
@@ -156,7 +166,12 @@ namespace CommonPluginsStores.Steam
                             PlaytimeLinuxForever = data["playtime_linux_forever"].AsInteger(),
                             PlaytimeMacForever = data["playtime_mac_forever"].AsInteger(),
                             PlaytimeWindowsForever = data["playtime_windows_forever"].AsInteger(),
-                            RtimeLastPlayed = data["rtime_last_played"].AsInteger() == 0 ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(data["rtime_last_played"].AsInteger()).ToLocalTime()
+                            RtimeLastPlayed = data["rtime_last_played"].AsInteger() == 0 ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(data["rtime_last_played"].AsInteger()).ToLocalTime(),
+                            CapsuleFilename = data["capsule_filename"].AsString(),
+                            HasWorkshop = data["has_workshop"].AsBoolean(),
+                            HasMarket = data["has_market"].AsBoolean(),
+                            HasDlc = data["has_dlc"].AsBoolean(),
+                            HasLeaderboards = data["has_leaderboards"].AsBoolean()
                         });
                     }
                     return ownedGames;
@@ -177,6 +192,7 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamAchievements> GetGameAchievements(uint appId, string language)
         {
+            Thread.Sleep(100);
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -251,6 +267,7 @@ namespace CommonPluginsStores.Steam
 
         public static SteamSchema GetSchemaForGame(string apiKey, uint appId, string language)
         {
+            Thread.Sleep(100);
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -297,6 +314,7 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamStats> GetUserStatsForGame(string apiKey, uint appId, ulong steamId)
         {
+            Thread.Sleep(100);
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -335,6 +353,7 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamPlayerAchievement> GetPlayerAchievements(string apiKey, uint appId, ulong steamId, string language)
         {
+            Thread.Sleep(100);
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -393,6 +412,7 @@ namespace CommonPluginsStores.Steam
 
         public static bool CheckGameIsPrivate(string apiKey, uint appId, ulong steamId)
         {
+            Thread.Sleep(100);
             try
             {
                 Logger.Info($"CheckGameIsPrivate({appId})");
