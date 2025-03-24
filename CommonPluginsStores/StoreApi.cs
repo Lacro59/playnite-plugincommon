@@ -243,7 +243,16 @@ namespace CommonPluginsStores
                         Thread.Sleep(200);
                     });
 
-                    return GetWebCookies(deleteCookies);
+                    List<HttpCookie> httpCookies = CookiesDomains?.Count > 0
+                        ? webView.GetCookies()?.Where(x => CookiesDomains.Any(y => y.Contains(x?.Domain, StringComparison.OrdinalIgnoreCase)))?.ToList() ?? new List<HttpCookie>()
+                        : webView.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName, StringComparison.OrdinalIgnoreCase) ?? false)?.ToList() ?? new List<HttpCookie>();
+
+                    if (deleteCookies)
+                    {
+                        CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
+                    }
+
+                    return httpCookies;
                 }
             }
             catch (Exception ex)

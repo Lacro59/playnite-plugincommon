@@ -164,8 +164,9 @@ namespace CommonPluginsStores.Steam
                     {
                         string url = string.Format(UrlRefreshToken, CurrentAccountInfos.Link);
                         Thread.Sleep(250);
-                        _ = SetStoredCookies(GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, "https://steamcommunity.com/my", UrlStore }, true));
-                        _ = SetStoredCookies(GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, "https://steamcommunity.com/my", UrlStore }, true));
+                        GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore });
+                        Thread.Sleep(250);
+                        _ = SetStoredCookies(GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore }, true));
                         Thread.Sleep(250);
                         userData = GetUserData();
                     }
@@ -195,6 +196,7 @@ namespace CommonPluginsStores.Steam
                         Match idMatch = Regex.Match(source, @"g_steamID = ""(\d+)""");
                         if (idMatch.Success)
                         {
+
                             steamId = idMatch.Groups[1].Value;
                         }
                         else
