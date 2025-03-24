@@ -169,7 +169,8 @@
     <!-- CommonMenus -->
 
     <sys:String x:Key="LOCCommonViewNoData">查看没有插件数据的游戏</sys:String>
-    
+
+    <sys:String x:Key="LOCCommonAddManually">Add manually</sys:String>
     <sys:String x:Key="LOCCommonRefreshGameData">刷新数据</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">刷新所有数据</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">删除数据</sys:String>

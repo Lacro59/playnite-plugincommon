@@ -169,7 +169,8 @@ Soll das Verzeichnis geöffnet werden?</sys:String>
     <!-- CommonMenus -->
 
     <sys:String x:Key="LOCCommonViewNoData">Spiele ohne Plugindaten anzeigen</sys:String>
-    
+
+    <sys:String x:Key="LOCCommonAddManually">manuell hinzufügen</sys:String>
     <sys:String x:Key="LOCCommonRefreshGameData">Daten aktualisieren</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">Alle Daten aktualisieren</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">Daten löschen</sys:String>
