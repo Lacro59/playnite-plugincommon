@@ -355,17 +355,7 @@ namespace CommonPluginsStores.Gog
 
             try
             {
-                string url = string.Empty;
-                if (accountInfos.IsCurrent)
-                {
-                    url = string.Format(UrlApiGamePlayUserAchievements, id, accountInfos.UserId);
-                }
-                else
-                {
-                    // TODO Works ?
-                    url = string.Format(UrlApiGamePlayFriendAchievements, id, accountInfos.UserId);
-                }
-
+                string url = string.Format(UrlApiGamePlayUserAchievements, id, accountInfos.UserId);
                 string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Local).ToLower());
                 string reponse = Web.DownloadStringData(url, AuthToken?.Token, urlLang).GetAwaiter().GetResult();
 
