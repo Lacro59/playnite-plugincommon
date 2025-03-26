@@ -298,10 +298,10 @@ namespace CommonPluginsStores.Gog
                                 isCommun = CurrentGamesInfos?.Where(y => y.Id.IsEqual(id))?.Count() != 0;
                             }
 
-                            long playtime = 0;
+                            int playtime = 0;
                             foreach (dynamic data in (dynamic)x.Stats)
                             {
-                                long.TryParse(((dynamic)x.Stats)[data.Path]["playtime"].ToString(), out playtime);
+                                int.TryParse(((dynamic)x.Stats)[data.Path]["playtime"].ToString(), out playtime);
                                 playtime *= 60;
 
                                 if (playtime != 0)

@@ -10,10 +10,11 @@ namespace CommonPluginsStores.Models
     public class AccountGameInfos : BasicAccountGameInfos
     {
         public bool IsCommun { get; set; }
-        public long Playtime { get; set; }
+        public int Playtime { get; set; }
 
-        [DontSerialize]
-        public int AchievementsUnlocked { get => Achievements?.Where(y => y.DateUnlocked != default)?.Count() ?? 0; }
+        public int AchievementsUnlocked => Achievements?.Where(y => y.DateUnlocked != default)?.Count() ?? 0;
         public ObservableCollection<GameAchievement> Achievements { get; set; }
+
+        public DateTime LastCall => DateTime.Now;
     }
 }

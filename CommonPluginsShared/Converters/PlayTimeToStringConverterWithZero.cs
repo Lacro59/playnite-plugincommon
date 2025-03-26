@@ -25,7 +25,7 @@ namespace CommonPluginsShared.Converters
                 string.Format(ResourceProvider.GetString("LOCPlayedMinutes"), 0);
             }
 
-            var seconds = (value is long) ? ulong.Parse(((long)value).ToString()) : (ulong)value;
+            var seconds = (value is long) ? ulong.Parse(((long)value).ToString()) : (value is int) ? ulong.Parse(((int)value).ToString()) : (ulong)value;
             if (seconds == 0)
             {
                 string.Format(ResourceProvider.GetString("LOCPlayedMinutes"), 0);

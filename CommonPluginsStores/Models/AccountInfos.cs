@@ -16,14 +16,16 @@ namespace CommonPluginsStores.Models
         public DateTime? DateAdded { get; set; }
 
 
-        public bool IsCurrent { get; set; }
+        public bool IsCurrent { get; set; } = false;
         [DontSerialize]
-        public bool IsPrivate { get; set; }
+        public bool IsPrivate { get; set; } = true;
 
         private AccountStatus accountStatus = AccountStatus.Checking;
         [DontSerialize]
         public AccountStatus AccountStatus { get => accountStatus; set => SetValue(ref accountStatus, value); }
 
         public string ApiKey { get; set; }
+
+        public DateTime LastCall => DateTime.Now;
     }
 }

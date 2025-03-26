@@ -17,6 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicDlcData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicEntitledOfferItems.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicFriendsSummary.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicPlayerAchievementResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicWishlistData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicPlayerProfileAchievementsByProductIdResponse.cs" />

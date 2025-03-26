@@ -10,6 +10,6 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary.Models
     {
         public string accountId;
         public string artifactId;
-        public ulong totalTime;
+        public int totalTime;
     }
 }

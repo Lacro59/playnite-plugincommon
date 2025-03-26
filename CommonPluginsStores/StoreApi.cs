@@ -7,7 +7,6 @@ using CommonPluginsShared.Models;
 using CommonPluginsStores.Models;
 using Playnite.SDK;
 using Playnite.SDK.Data;
-using Playnite.SDK.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -43,6 +42,10 @@ namespace CommonPluginsStores
         {
             get
             {
+                if (_currentFriendsInfos?.FirstOrDefault()?.LastCall.AddMinutes(30) < DateTime.Now)
+                {
+                    _currentFriendsInfos = null;
+                }
                 _currentFriendsInfos = _currentFriendsInfos ?? GetCurrentFriendsInfos();
                 return _currentFriendsInfos;
             }
@@ -55,6 +58,10 @@ namespace CommonPluginsStores
         {
             get
             {
+                if (_currentGamesInfos?.FirstOrDefault()?.LastCall.AddMinutes(30) < DateTime.Now)
+                {
+                    _currentGamesInfos = null;
+                }
                 _currentGamesInfos = _currentGamesInfos ?? GetAccountGamesInfos(CurrentAccountInfos);
                 return _currentGamesInfos;
             }
