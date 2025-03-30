@@ -4,9 +4,9 @@
     <sys:String x:Key="LOCCommonYear">年</sys:String>
     <sys:String x:Key="LOCCommonMonth">Month</sys:String>
     <sys:String x:Key="LOCCommonMonths">Month(s)</sys:String>
-    <sys:String x:Key="LOCCommonDateData">数据日</sys:String>
+    <sys:String x:Key="LOCCommonDateData">数据日期</sys:String>
     
-    <sys:String x:Key="LOCCommonStartDate">Start date</sys:String>
+    <sys:String x:Key="LOCCommonStartDate">起始日期</sys:String>
     <sys:String x:Key="LOCCommonLastUpdate">最近更新</sys:String>
 
     <sys:String x:Key="LOCCommonAddFolder">添加文件夹</sys:String>
@@ -48,9 +48,9 @@
     
     <!-- Common Stores -->
 
-    <sys:String x:Key="LOCCommonAuthenticateLabel">身份验</sys:String>
-    <sys:String x:Key="LOCCommonNotLoggedIn">需要身份验</sys:String>
-    <sys:String x:Key="LOCCommonLoggedIn">用户已通过身份验</sys:String>
+    <sys:String x:Key="LOCCommonAuthenticateLabel">身份验证</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedIn">需要身份验证</sys:String>
+    <sys:String x:Key="LOCCommonLoggedIn">用户已通过身份验证</sys:String>
     <sys:String x:Key="LOCCommonAccountName">账户名称</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">正在检查身份验证状态…</sys:String>
     <sys:String x:Key="LOCCommonPrivateChecking">Checking private status…</sys:String>
@@ -103,7 +103,7 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">默认的游戏列表排序</sys:String>
 
-    <sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated (only new)</sys:String>
+    <sys:String x:Key="LOCCommonAutoImport">更新库时自动导入数据 (仅新添加)</sys:String>
     <sys:String x:Key="LOCCommonAutoImportOnInstalled">Automatically import for installed games</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">在控制中隐藏图表选项</sys:String>
@@ -170,7 +170,7 @@
 
     <sys:String x:Key="LOCCommonViewNoData">查看没有插件数据的游戏</sys:String>
 
-    <sys:String x:Key="LOCCommonAddManually">Add manually</sys:String>
+    <sys:String x:Key="LOCCommonAddManually">手动添加</sys:String>
     <sys:String x:Key="LOCCommonRefreshGameData">刷新数据</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">刷新所有数据</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">删除数据</sys:String>
