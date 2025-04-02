@@ -164,7 +164,7 @@ namespace CommonPluginsStores.Steam
                     {
                         string url = string.Format(UrlRefreshToken, CurrentAccountInfos.Link);
                         Thread.Sleep(250);
-                        GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore });
+                        _ = GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore });
                         Thread.Sleep(250);
                         _ = SetStoredCookies(GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore }, true));
                         Thread.Sleep(250);
