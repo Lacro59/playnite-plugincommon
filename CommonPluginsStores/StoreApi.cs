@@ -100,6 +100,9 @@ namespace CommonPluginsStores
         internal string Local { get; set; } = "en_US";
 
         internal string PathStoresData { get; }
+        internal string PathAppsData { get; }
+        internal string PathAchievementsData { get; }
+
         internal string FileUser { get; }
         internal string FileCookies { get; }
         internal string FileGamesDlcsOwned { get; }
@@ -117,7 +120,10 @@ namespace CommonPluginsStores
             ClientName = clientName;
             ClientNameLog = clientName.RemoveWhiteSpace();
 
-            PathStoresData = Path.Combine(PlaynitePaths.ExtensionsDataPath, "StoresData"); 
+            PathStoresData = Path.Combine(PlaynitePaths.ExtensionsDataPath, "StoresData");
+            PathAppsData = Path.Combine(PathStoresData, ClientNameLog, "Apps");
+            PathAchievementsData = Path.Combine(PathStoresData, ClientNameLog, "Achievements");
+
             FileUser = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_User.dat"));
             FileCookies = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_Cookies.dat"));
             FileGamesDlcsOwned = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_GamesDlcsOwned.json"));
@@ -342,11 +348,13 @@ namespace CommonPluginsStores
 
 
         #region Current user
+
         /// <summary>
         /// Get current user info.
         /// </summary>
         /// <returns></returns>
         protected abstract AccountInfos GetCurrentAccountInfos();
+
 
         /// <summary>
         /// Get current user's friends info.
@@ -423,6 +431,11 @@ namespace CommonPluginsStores
             return null;
         }
 
+        public virtual Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsShema(string id)
+        {
+            return null;
+        }
+
         /// <summary>
         /// Get dlc informations for a game.
         /// </summary>
@@ -439,30 +452,7 @@ namespace CommonPluginsStores
         #region Games owned
         private ObservableCollection<GameDlcOwned> LoadGamesDlcsOwned(bool onlyNow = true)
         {
-            if (File.Exists(FileGamesDlcsOwned))
-            {
-                try
-                {
-                    DateTime dateLastWrite = File.GetLastWriteTime(FileGamesDlcsOwned);
-                    if (onlyNow && dateLastWrite.AddMinutes(5) <= DateTime.Now)
-                    {
-                        return null;
-                    }
-
-                    if (!onlyNow)
-                    {
-                        ShowNotificationOldData(dateLastWrite);
-                    }
-
-                    return Serialization.FromJsonFile<ObservableCollection<GameDlcOwned>>(FileGamesDlcsOwned);
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, true, PluginName);
-                }
-            }
-
-            return null;
+            return LoadData<ObservableCollection<GameDlcOwned>>(FileGamesDlcsOwned, (onlyNow ? 0 : 5));
         }
 
         private bool SaveGamesDlcsOwned(ObservableCollection<GameDlcOwned> gamesDlcsOwned)
@@ -538,6 +528,51 @@ namespace CommonPluginsStores
                 gamerScore = 30;
             }
             return gamerScore;
+        }
+
+
+        internal T LoadData<T>(string filePath, int minutes) where T : class
+        {
+            if (filePath.IsNullOrEmpty())
+            {
+                Logger.Warn($"filePath is empty");
+                return null;
+            }
+
+            if (!File.Exists(filePath))
+            {
+                Logger.Warn($"File not found: {filePath}");
+                return null;
+            }
+
+            try
+            {
+                DateTime dateLastWrite = File.GetLastWriteTime(filePath);
+
+                if (minutes > 0 && dateLastWrite.AddMinutes(minutes) <= DateTime.Now)
+                {
+                    return null;
+                }
+
+                if (minutes == 0)
+                {
+                    ShowNotificationOldData(dateLastWrite);
+                }
+
+                return Serialization.FromJsonFile<T>(filePath);
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return null;
+            }
+        }
+
+
+        public void PurgeCache()
+        {
+            FileSystem.DeleteDirectory(PathAppsData);
+            FileSystem.DeleteDirectory(PathAchievementsData);
         }
     }
 

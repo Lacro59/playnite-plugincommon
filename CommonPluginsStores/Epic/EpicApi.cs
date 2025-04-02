@@ -64,14 +64,12 @@ namespace CommonPluginsStores.Epic
 
         #region Paths
         private string TokensPath { get; }
-        private string CatalogItemPath { get; }
         #endregion
 
 
         public EpicApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "Epic")
         {
             TokensPath = Path.Combine(PathStoresData, "Epic_Tokens.dat");
-            CatalogItemPath = Path.Combine(PathStoresData, "catalogcache");
 
             CookiesDomains = new List<string> { ".epicgames.com" };
 
@@ -300,7 +298,7 @@ namespace CommonPluginsStores.Epic
                     try
                     {
                         string cacheFile = CommonPlayniteShared.Common.Paths.GetSafePathName($"{gameAsset.@namespace}_{gameAsset.catalogItemId}_{gameAsset.buildVersion}.json");
-                        cacheFile = Path.Combine(CatalogItemPath, cacheFile);
+                        cacheFile = Path.Combine(PathAppsData, cacheFile);
                         CatalogItem catalogItem = GetCatalogItem(gameAsset.@namespace, gameAsset.catalogItemId, cacheFile);
                         if (catalogItem?.categories?.Any(a => a.path == "applications") != true)
                         {
@@ -387,35 +385,15 @@ namespace CommonPluginsStores.Epic
             try
             {
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
-
-                string url = string.Empty;
-                string response = string.Empty;
-                string localLang = CodeLang.GetEpicLang(Local);
-                string localLangShort = CodeLang.GetEpicLangCountry(Local);
-
-                // Get Achievement game schema
-                EpicAchievementResponse epicAchievementResponse = QueryAchievement(id, localLangShort).GetAwaiter().GetResult();
-                string productId = epicAchievementResponse.Data?.Achievement?.ProductAchievementsRecordBySandbox?.ProductId;
-                epicAchievementResponse?.Data?.Achievement?.ProductAchievementsRecordBySandbox?.Achievements?.ForEach(x =>
-                {
-                    GameAchievement gameAchievement = new GameAchievement
-                    {
-                        Id = x.Achievement.Name,
-                        Name = x.Achievement.UnlockedDisplayName,
-                        Description = x.Achievement.UnlockedDescription,
-                        UrlUnlocked = x.Achievement.UnlockedIconLink,
-                        UrlLocked = x.Achievement.LockedIconLink,
-                        DateUnlocked = default,
-                        Percent = x.Achievement.Rarity.Percent,
-                        GamerScore = x.Achievement.XP
-                    };
-                    gameAchievements.Add(gameAchievement);
-                });
-
-                if (gameAchievements?.Count() == 0)
+                Tuple<string, ObservableCollection<GameAchievement>> data = GetAchievementsShema(id);
+                
+                if (data?.Item2?.Count() == 0)
                 {
                     return gameAchievements;
                 }
+
+                string productId = data.Item1;
+                gameAchievements = data.Item2;
 
                 if (!accountInfos.IsPrivate && !StoreSettings.UseAuth)
                 {
@@ -582,6 +560,39 @@ namespace CommonPluginsStores.Epic
             return null;
         }
 
+        public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsShema(string id)
+        {
+            string cachePath = Path.Combine(PathAchievementsData, id + ".json");
+            Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
+
+            if (data?.Item2 == null)
+            {
+                ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
+                EpicAchievementResponse epicAchievementResponse = QueryAchievement(id).GetAwaiter().GetResult();
+                string productId = epicAchievementResponse.Data?.Achievement?.ProductAchievementsRecordBySandbox?.ProductId;
+                epicAchievementResponse?.Data?.Achievement?.ProductAchievementsRecordBySandbox?.Achievements?.ForEach(x =>
+                {
+                    GameAchievement gameAchievement = new GameAchievement
+                    {
+                        Id = x.Achievement.Name,
+                        Name = x.Achievement.UnlockedDisplayName,
+                        Description = x.Achievement.UnlockedDescription,
+                        UrlUnlocked = x.Achievement.UnlockedIconLink,
+                        UrlLocked = x.Achievement.LockedIconLink,
+                        DateUnlocked = default,
+                        Percent = x.Achievement.Rarity.Percent,
+                        GamerScore = x.Achievement.XP
+                    };
+                    gameAchievements.Add(gameAchievement);
+                });
+
+                data = new Tuple<string, ObservableCollection<GameAchievement>>(productId, gameAchievements);
+                FileSystem.WriteStringToFile(cachePath, Serialization.ToJson(data));
+            }
+
+            return data;
+        }
+
         /// <summary>
         /// Get dlc informations for a game.
         /// </summary>
@@ -730,6 +741,12 @@ namespace CommonPluginsStores.Epic
 
                     account = GetEpicAccount();
                 }
+
+                if (CurrentAccountInfos.Pseudo.IsNullOrEmpty() && account.Id == tokens.account_id)
+                {
+                    CurrentAccountInfos.Pseudo = account?.DisplayName;
+                    CurrentAccountInfos.Link = string.Format(UrlAccountProfile, account.Id);
+                }
                 return account != null && account.Id == tokens.account_id;
             }
             catch
@@ -744,6 +761,11 @@ namespace CommonPluginsStores.Epic
                     }
 
                     EpicAccountResponse account = GetAccountInfo(tokens.account_id);
+                    if (CurrentAccountInfos.Pseudo.IsNullOrEmpty() && account.Id == tokens.account_id)
+                    {
+                        CurrentAccountInfos.Pseudo = account?.DisplayName;
+                        CurrentAccountInfos.Link = string.Format(UrlAccountProfile, account.Id);
+                    }
                     return account.Id == tokens.account_id;
                 }
                 catch (Exception ex)
@@ -1034,15 +1056,22 @@ namespace CommonPluginsStores.Epic
         {
             try
             {
-                QueryAddonsByNamespace query = new QueryAddonsByNamespace();
-                query.variables.epic_namespace = epic_namespace;
-                query.variables.locale = CodeLang.GetEpicLang(Local);
-                query.variables.country = CodeLang.GetOriginLangCountry(Local);
-                StringContent content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
-                HttpClient httpClient = new HttpClient();
-                HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content);
-                string str = await response.Content.ReadAsStringAsync();
-                EpicAddonsByNamespace data = Serialization.FromJson<EpicAddonsByNamespace>(str);
+                string cachePath = Path.Combine(PathAppsData, epic_namespace + ".json");
+                EpicAddonsByNamespace data = LoadData<EpicAddonsByNamespace>(cachePath, 1440);
+
+                if (data == null)
+                {
+                    QueryAddonsByNamespace query = new QueryAddonsByNamespace();
+                    query.variables.epic_namespace = epic_namespace;
+                    query.variables.locale = CodeLang.GetEpicLang(Local);
+                    query.variables.country = CodeLang.GetOriginLangCountry(Local);
+                    StringContent content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
+                    HttpClient httpClient = new HttpClient();
+                    HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content);
+                    string str = await response.Content.ReadAsStringAsync();
+                    data = Serialization.FromJson<EpicAddonsByNamespace>(str);
+                }
+
                 return data;
             }
             catch (Exception ex)
@@ -1095,11 +1124,11 @@ namespace CommonPluginsStores.Epic
             }
         }
 
-        private async Task<EpicAchievementResponse> QueryAchievement(string sandboxId, string locale)
+        private async Task<EpicAchievementResponse> QueryAchievement(string sandboxId)
         {
             try
             {
-                string queryParams = $"?operationName=Achievement&variables={{\"sandboxId\":\"{sandboxId}\",\"locale\":\"es-ES\"}}&extensions={{\"persistedQuery\":{{\"version\":1,\"sha256Hash\":\"9284d2fe200e351d1496feda728db23bb52bfd379b236fc3ceca746c1f1b33f2\"}}}}";
+                string queryParams = $"?operationName=Achievement&variables={{\"sandboxId\":\"{sandboxId}\",\"locale\":\"{CodeLang.GetEpicLang(Local)}\"}}&extensions={{\"persistedQuery\":{{\"version\":1,\"sha256Hash\":\"9284d2fe200e351d1496feda728db23bb52bfd379b236fc3ceca746c1f1b33f2\"}}}}";
                 string response = await Web.DownloadStringData(UrlGraphQL + queryParams);
                 _ = Serialization.TryFromJson(response, out EpicAchievementResponse data);
                 return data;
@@ -1181,18 +1210,7 @@ namespace CommonPluginsStores.Epic
 
         public CatalogItem GetCatalogItem(string nameSpace, string id, string cachePath)
         {
-            Dictionary<string, CatalogItem> result = null;
-            if (!cachePath.IsNullOrEmpty() && FileSystem.FileExists(cachePath))
-            {
-                try
-                {
-                    result = Serialization.FromJson<Dictionary<string, CatalogItem>>(FileSystem.ReadStringFromFile(cachePath));
-                }
-                catch (Exception e)
-                {
-                    Logger.Error(e, "Failed to load Epic catalog cache.");
-                }
-            }
+            Dictionary<string, CatalogItem> result = LoadData<Dictionary<string, CatalogItem>>(cachePath, -1);
 
             if (result == null)
             {

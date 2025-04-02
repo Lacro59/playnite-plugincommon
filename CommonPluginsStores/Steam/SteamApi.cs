@@ -351,11 +351,15 @@ namespace CommonPluginsStores.Steam
                     return new ObservableCollection<GameAchievement>();
                 }
 
-                ObservableCollection<GameAchievement> gameAchievements = GetAchievementsSchema(appId);
-                if (gameAchievements == null || gameAchievements.Count() == 0)
+                ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
+                Tuple<string, ObservableCollection<GameAchievement>> data = GetAchievementsShema(id);
+
+                if (data?.Item2?.Count() == 0)
                 {
                     return gameAchievements;
                 }
+
+                gameAchievements = data.Item2;
 
                 gameAchievements = StoreSettings.UseAuth || accountInfos.IsPrivate || !StoreSettings.UseApi || accountInfos.ApiKey.IsNullOrEmpty()
                     ? GetAchievementsByWeb(appId, accountInfos, gameAchievements)
@@ -442,77 +446,55 @@ namespace CommonPluginsStores.Steam
         /// <returns></returns>
         public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
         {
-            return GetGameInfos(id, accountInfos, 1);
+            return GetGameInfos(id, accountInfos);
         }
 
-        private GameInfos GetGameInfos(string id, AccountInfos accountInfos, int retryCount, bool minimalInfos = false)
+        private GameInfos GetGameInfos(string id, AccountInfos accountInfos, bool minimalInfos = false)
         {
             try
             {
-                Thread.Sleep(1000); // Prevent http 429
-                string url = string.Format(UrlApiGameDetails, id, CodeLang.GetSteamLang(Local));
-                string webData = Web.DownloadStringData(url).GetAwaiter().GetResult();
-
-                if (Serialization.TryFromJson(webData, out Dictionary<string, StoreAppDetailsResult> parsedData))
+                StoreAppDetailsResult storeAppDetailsResult = GetAppDetails(uint.Parse(id), 1);
+                if (storeAppDetailsResult?.data == null)
                 {
-                    StoreAppDetailsResult storeAppDetailsResult = parsedData[id];
-                    if (storeAppDetailsResult?.data == null)
-                    {
-                        return null;
-                    }
-
-                    string format = "d MMM, yyyy";
-                    CultureInfo culture = CultureInfo.InvariantCulture;
-                    string dateString = storeAppDetailsResult?.data?.release_date?.date;
-                    DateTime? released = null;
-                    if (DateTime.TryParseExact(dateString, format, culture, DateTimeStyles.None, out DateTime releasedDate))
-                    {
-                        released = releasedDate;
-                    }
-
-                    GameInfos gameInfos = new GameInfos
-                    {
-                        Id = storeAppDetailsResult?.data.steam_appid.ToString(),
-                        Name = storeAppDetailsResult?.data.name,
-                        Link = string.Format(UrlSteamGameLocalised, id, CodeLang.GetSteamLang(Local)),
-                        Image = storeAppDetailsResult?.data.header_image,
-                        Description = ParseDescription(storeAppDetailsResult?.data.about_the_game),
-                        Languages = storeAppDetailsResult?.data.supported_languages,
-                        Released = released
-                    };
-
-                    // DLC
-                    List<uint> dlcsIdSteam = storeAppDetailsResult?.data.dlc ?? new List<uint>();
-                    List<uint> dlcsIdSteamDb = new List<uint>(); // GetDlcFromSteamDb(storeAppDetailsResult?.data.steam_appid ?? 0);
-                    List<uint> dlcsId = dlcsIdSteam.Union(dlcsIdSteamDb).Distinct().OrderBy(x => x).ToList();
-
-                    if (dlcsId.Count > 0 && !minimalInfos)
-                    {
-                        ObservableCollection<DlcInfos> Dlcs = GetDlcInfos(dlcsId, accountInfos);
-                        gameInfos.Dlcs = Dlcs;
-                    }
-                    else if(dlcsId.Count > 0)
-                    {
-                        gameInfos.Dlcs = dlcsId.Select(x => new DlcInfos { Id = x.ToString() }).ToObservable();
-                    }
-
-                    return gameInfos;
-                }
-                else
-                {
-                    if (webData.Length < 25 && retryCount < 11)
-                    {
-                        Thread.Sleep(20000 * retryCount);
-                        Logger.Warn($"Api limit for Steam with {id} - {retryCount}");
-                        retryCount++;
-                        return GetGameInfos(id, accountInfos, retryCount);
-                    }
-                    else if (retryCount == 10)
-                    {
-                        Logger.Warn($"Api limit exced for Steam with {id}");
-                    }
                     return null;
                 }
+
+                string format = "d MMM, yyyy";
+                CultureInfo culture = CultureInfo.InvariantCulture;
+                string dateString = storeAppDetailsResult?.data?.release_date?.date;
+                DateTime? released = null;
+                if (DateTime.TryParseExact(dateString, format, culture, DateTimeStyles.None, out DateTime releasedDate))
+                {
+                    released = releasedDate;
+                }
+
+                GameInfos gameInfos = new GameInfos
+                {
+                    Id = storeAppDetailsResult?.data.steam_appid.ToString(),
+                    Name = storeAppDetailsResult?.data.name,
+                    Link = string.Format(UrlSteamGameLocalised, id, CodeLang.GetSteamLang(Local)),
+                    Image = storeAppDetailsResult?.data.header_image,
+                    Description = ParseDescription(storeAppDetailsResult?.data.about_the_game),
+                    Languages = storeAppDetailsResult?.data.supported_languages,
+                    Released = released
+                };
+
+                // DLC
+                List<uint> dlcsIdSteam = storeAppDetailsResult?.data.dlc ?? new List<uint>();
+                List<uint> dlcsIdSteamDb = new List<uint>(); // GetDlcFromSteamDb(storeAppDetailsResult?.data.steam_appid ?? 0);
+                List<uint> dlcsId = dlcsIdSteam.Union(dlcsIdSteamDb).Distinct().OrderBy(x => x).ToList();
+
+                if (dlcsId.Count > 0 && !minimalInfos)
+                {
+                    ObservableCollection<DlcInfos> Dlcs = GetDlcInfos(dlcsId, accountInfos);
+                    gameInfos.Dlcs = Dlcs;
+                }
+                else if (dlcsId.Count > 0)
+                {
+                    gameInfos.Dlcs = dlcsId.Select(x => new DlcInfos { Id = x.ToString() }).ToObservable();
+                }
+
+                return gameInfos;
             }
             catch (Exception ex)
             {
@@ -522,51 +504,61 @@ namespace CommonPluginsStores.Steam
             return null;
         }
 
+        public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsShema(string id)
+        {
+            string cachePath = Path.Combine(PathAchievementsData, id + ".json");
+            Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
+
+            if (data?.Item2 == null)
+            {
+                ObservableCollection<GameAchievement> gameAchievements = GetAchievementsSchema(uint.Parse(id));
+
+                data = new Tuple<string, ObservableCollection<GameAchievement>>(id, gameAchievements);
+                FileSystem.WriteStringToFile(cachePath, Serialization.ToJson(data));
+            }
+
+            return data;
+        }
+
         public override ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos)
         {
             GameInfos gameInfos = GetGameInfos(id, accountInfos);
             return gameInfos?.Dlcs ?? new ObservableCollection<DlcInfos>();
         }
 
-        public ObservableCollection<DlcInfos> GetDlcInfos(List<uint> dlcs, AccountInfos accountInfos)
+        public ObservableCollection<DlcInfos> GetDlcInfos(List<uint> ids, AccountInfos accountInfos)
         {
             try
             {
-                ObservableCollection<DlcInfos> Dlcs = new ObservableCollection<DlcInfos>();
-                dlcs.ForEach(x =>
+                ObservableCollection<DlcInfos> dlcs = new ObservableCollection<DlcInfos>();
+                ids.ForEach(x =>
                 {
-                    string url = string.Format(UrlApiGameDetails, x, CodeLang.GetSteamLang(Local));
-                    string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
-
-                    if (Serialization.TryFromJson(response, out Dictionary<string, StoreAppDetailsResult> parsedData))
+                    StoreAppDetailsResult storeAppDetailsResult = GetAppDetails(x, 1);
+                    if (storeAppDetailsResult?.data != null)
                     {
-                        StoreAppDetailsResult storeAppDetailsResult = parsedData[x.ToString()];
-                        if (storeAppDetailsResult?.data != null)
+                        bool isOwned = false;
+                        if (accountInfos != null && accountInfos.IsCurrent)
                         {
-                            bool isOwned = false;
-                            if (accountInfos != null && accountInfos.IsCurrent)
-                            {
-                                isOwned = IsDlcOwned(storeAppDetailsResult?.data.steam_appid.ToString());
-                            }
-
-                            DlcInfos dlc = new DlcInfos
-                            {
-                                Id = storeAppDetailsResult.data.steam_appid.ToString(),
-                                Name = storeAppDetailsResult.data.name,
-                                Description = ParseDescription(storeAppDetailsResult?.data.about_the_game),
-                                Image = storeAppDetailsResult.data.header_image,
-                                Link = string.Format(UrlSteamGameLocalised, storeAppDetailsResult.data.steam_appid.ToString(), CodeLang.GetSteamLang(Local)),
-                                IsOwned = isOwned,
-                                Price = storeAppDetailsResult.data.is_free ? "0" : storeAppDetailsResult.data.price_overview?.final_formatted,
-                                PriceBase = storeAppDetailsResult.data.is_free ? "0" : storeAppDetailsResult.data.price_overview?.initial_formatted
-                            };
-
-                            Dlcs.Add(dlc);
+                            isOwned = IsDlcOwned(storeAppDetailsResult?.data.steam_appid.ToString());
                         }
+
+                        DlcInfos dlc = new DlcInfos
+                        {
+                            Id = storeAppDetailsResult.data.steam_appid.ToString(),
+                            Name = storeAppDetailsResult.data.name,
+                            Description = ParseDescription(storeAppDetailsResult?.data.about_the_game),
+                            Image = storeAppDetailsResult.data.header_image,
+                            Link = string.Format(UrlSteamGameLocalised, storeAppDetailsResult.data.steam_appid.ToString(), CodeLang.GetSteamLang(Local)),
+                            IsOwned = isOwned,
+                            Price = storeAppDetailsResult.data.is_free ? "0" : storeAppDetailsResult.data.price_overview?.final_formatted,
+                            PriceBase = storeAppDetailsResult.data.is_free ? "0" : storeAppDetailsResult.data.price_overview?.initial_formatted
+                        };
+
+                        dlcs.Add(dlc);
                     }
                 });
 
-                return Dlcs;
+                return dlcs;
             }
             catch (Exception ex)
             {
@@ -909,6 +901,43 @@ namespace CommonPluginsStores.Steam
         #endregion
 
         #region Steam Api
+        public StoreAppDetailsResult GetAppDetails(uint appId, int retryCount)
+        {
+            string cachePath = Path.Combine(PathAppsData, appId + ".json");
+            StoreAppDetailsResult storeAppDetailsResult = LoadData<StoreAppDetailsResult>(cachePath, 1440);
+
+            if (storeAppDetailsResult == null)
+            {
+                Thread.Sleep(1000); // Prevent http 429
+                string url = string.Format(UrlApiGameDetails, appId, CodeLang.GetSteamLang(Local));
+                string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
+
+                if (Serialization.TryFromJson(response, out Dictionary<string, StoreAppDetailsResult> parsedData))
+                {
+                    storeAppDetailsResult = parsedData[appId.ToString()];
+                    FileSystem.WriteStringToFile(cachePath, Serialization.ToJson(storeAppDetailsResult));
+                }
+                else
+                {
+                    if (response.Length < 25 && retryCount < 11)
+                    {
+                        Thread.Sleep(20000 * retryCount);
+                        Logger.Warn($"Api limit for Steam with {appId} - {retryCount}");
+                        retryCount++;
+                        return GetAppDetails(appId, retryCount);
+                    }
+                    else if (retryCount == 10)
+                    {
+                        Logger.Warn($"Api limit exced for Steam with {appId}");
+                    }
+                    return null;
+                }
+            }
+
+            return storeAppDetailsResult;
+        }
+
+
         /// <summary>
         /// Get game achievements schema with hidden description & percent & without stats
         /// </summary>
@@ -933,7 +962,7 @@ namespace CommonPluginsStores.Steam
                 }).ToObservable();
             }
 
-            return gameAchievements;
+            return gameAchievements ?? new ObservableCollection<GameAchievement>();
         }
 
         public List<GenericItemOption> GetSearchGame(string searchTerm)
@@ -951,7 +980,7 @@ namespace CommonPluginsStores.Steam
                 }
 
                 results = steamSearch?.Items
-                    ?.Select(x => new GenericItemOption { Name = x.Name, Description = x.Id.ToString() + $" - {GetGameInfos(x.Id.ToString(), null, 1, true)?.Dlcs?.Count() ?? 0} DLC" })
+                    ?.Select(x => new GenericItemOption { Name = x.Name, Description = x.Id.ToString() + $" - {GetGameInfos(x.Id.ToString(), null, true)?.Dlcs?.Count() ?? 0} DLC" })
                     ?.ToList() ?? new List<GenericItemOption>();
             }
             catch (Exception ex)
