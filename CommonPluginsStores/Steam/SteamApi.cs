@@ -1030,7 +1030,7 @@ namespace CommonPluginsStores.Steam
                     {
                         Id = x.Appid.ToString(),
                         Name = x.Name,
-                        Link = string.Format(UrlApiGameDetails, x.Appid, CodeLang.GetSteamLang(Local)),
+                        Link = string.Format(UrlSteamGame, x.Appid),
                         IsCommun = !accountInfos.IsCurrent && CurrentGamesInfos.FirstOrDefault(y => y.Id == x.Appid.ToString()) != null,
                         Achievements = gameAchievements,
                         Playtime = x.PlaytimeForever
@@ -1170,7 +1170,7 @@ namespace CommonPluginsStores.Steam
                     {
                         Id = x.Appid.ToString(),
                         Name = x.Name,
-                        Link = string.Format(UrlApiGameDetails, x.Appid, CodeLang.GetSteamLang(Local)),
+                        Link = string.Format(UrlSteamGame, x.Appid),
                         IsCommun = !accountInfos.IsCurrent && CurrentGamesInfos.FirstOrDefault(y => y.Id == x.Appid.ToString()) != null,
                         Achievements = gameAchievements,
                         Playtime = x.PlaytimeForever
