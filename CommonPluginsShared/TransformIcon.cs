@@ -3,167 +3,167 @@
     public class TransformIcon
     {
         #region font
-        private static string steam = "\ue906";                  
-        private static string gogGalaxy = "\ue903";              
-        private static string gog = "\uea35";                    
-        private static string battleNET = "\ue900";              
-        private static string origin = "\ue904";                 
-        private static string ea = "\uea72";                 
-        private static string xbox = "\ue908";                   
-        private static string uplay = "\ue907";                  
-        private static string epic = "\ue902";                   
-        private static string playnite = "\ue905";               
-        private static string bethesda = "\ue901";               
-        private static string humble = "\ue909";                 
-        private static string twitch = "\ue90a";                 
-        private static string itchio = "\ue90b";                 
-        private static string indiegala = "\ue911";              
-        private static string amazonGame = "\uea55";
-        private static string android = "\uea5b";        
-        private static string psn = "\uea5c";        
-        private static string riot = "\uea6c";        
-		private static string goggames = "\ue9f1";
-		private static string legacygames = "\uea70";
+        private static string steam => "\ue906";
+        private static string gogGalaxy => "\ue903";
+        private static string gog => "\uea35";
+        private static string battleNET => "\ue900";
+        private static string origin => "\ue904";
+        private static string ea => "\uea72";
+        private static string xbox => "\ue908";
+        private static string uplay => "\ue907";
+        private static string epic => "\ue902";
+        private static string playnite => "\ue905";
+        private static string bethesda => "\ue901";
+        private static string humble => "\ue909";
+        private static string twitch => "\ue90a";
+        private static string itchio => "\ue90b";
+        private static string indiegala => "\ue911";
+        private static string amazonGame => "\uea55";
+        private static string android => "\uea5b";
+        private static string psn => "\uea5c";
+        private static string riot => "\uea6c";
+        private static string goggames => "\ue9f1";
+        private static string legacygames => "\uea70";
 
-        private static string retroachievements = "\ue910";      
-        private static string rpcs3 = "\uea37";                  
+        private static string retroachievements => "\ue910";
+        private static string rpcs3 => "\uea37";
 
-        private static string statistics = "\ue90c";             
-        private static string howlongtobeat = "\ue90d";          
-        private static string successstory = "\uea33";           
-        private static string gameactivity = "\ue90f";           
-        private static string checklocalizations = "\uea2c";     
-        private static string screenshotsvisualizer = "\uea38";  
+        private static string statistics => "\ue90c";
+        private static string howlongtobeat => "\ue90d";
+        private static string successstory => "\uea33";
+        private static string gameactivity => "\ue90f";
+        private static string checklocalizations => "\uea2c";
+        private static string screenshotsvisualizer => "\uea38";
 
-        private static string gameHacked = "\uea36";             
-        private static string manualAchievements = "\uea54";
+        private static string gameHacked => "\uea36";
+        private static string manualAchievements => "\uea54";
 
-        private static string amazonLuna = "\uea5f";
-        private static string jastUSA = "\uea5e";
+        private static string amazonLuna => "\uea5f";
+        private static string jastUSA => "\uea5e";
         #endregion
 
         #region retrogaming
-        private static string amstrad_cpc = "\ueaae";
-        private static string apple_ii = "\ueab1";
-        private static string apple_iigs = "\ueab2";
-        private static string atari_2600 = "\ueab3";
-        private static string atari_5200 = "\ueab4";
-        private static string atari_7800 = "\ueab5";
-        private static string atari_800 = "\uea9b";
-        private static string atari_jaguar = "\ueab6";
-        private static string atari_lynx = "\ueab7";
-        private static string atari_st = "\ueab8";
-        private static string bandai_wonderswan = "\ueaba";
-        private static string bandai_wonderswan_color = "\ueab9";
-        private static string capcom_cp_system_i = "\ueabb";
-        private static string capcom_cp_system_ii = "\ueabc";
-        private static string capcom_cp_system_iii = "\ueabd";
-        private static string coleco_colecovision = "\ueabe";
-        private static string colecovision = "\ueabe";
-        private static string commodore_64 = "\ueabf";
-        private static string commodore_amiga = "\ueac0";
-        private static string commodore_amiga_cd32 = "\ueac1";
-        private static string commodore_plus4 = "\ueac2";
-        private static string commodore_vic20 = "\ueac3";
-        private static string gce_vectrex = "\ueac6";
-        private static string handheld_electronic_game = "\uea73";
-        private static string mame = "\uea7a";
-        private static string mame_2000 = "\uea74";
-        private static string mame_2003 = "\uea75";
-        private static string mame_2003_plus = "\uea76";
-        private static string mame_2010 = "\uea77";
-        private static string mame_2015 = "\uea78";
-        private static string mame_2016 = "\uea79";
-        private static string microsoft_xbox = "\uea7d";
-        private static string microsoft_xbox_360 = "\uea7b";
-        private static string microsoft_xbox_one = "\uea7c";
-        private static string microsoft_xbox_series = "\uea7d";
-        private static string nec_pc_engine_supergrafx = "\uea80";
-        private static string nec_pc_9801 = "\ueac7";
-        private static string nec_pc_fx = "\uea81";
-        private static string nec_turbografx_16 = "\uea7e";
-        private static string nec_turbografx_cd = "\uea7f";
-        private static string nintendo_3ds = "\uea8a";
-        //private static string nintendo_new_3ds = "\uea89";
-        private static string nintendo_64 = "\uea8b";
-        private static string nintendo_ds = "\uea8c";
-        private static string nintendo_dsi = "\uea8d";
-        private static string nintendo_entertainment_system = "\uea8e";
-        private static string nintendo_family_computer_disk_system = "\ueac8";
-        private static string nintendo_game_boy = "\uea87";
-        private static string nintendo_game_boy_advance = "\uea85";
-        private static string nintendo_game_boy_color = "\uea86";
-        private static string nintendo_gamecube = "\uea88";
-        private static string nintendo_satellaview = "\ueac9";
-        private static string nintendo_snes = "\uea8f";
-        private static string nintendo_sufami_turbo = "\ueaca";
-        private static string nintendo_switch = "\uea90";
-        private static string nintendo_virtual_boy = "\uea91";
-        private static string nintendo_wii = "\uea93";
-        private static string nintendo_wii_u = "\uea92";
-        private static string pc_engine_supergrafx = "\uea80";
-        private static string phillips_videopac = "\ueacc";
-        private static string sega_32x = "\uea95";
-        private static string sega_cd = "\uea9a";
-        private static string sega_dreamcast = "\uea96";
-        private static string sega_game_gear = "\uea97";
-        private static string sega_genesis = "\uea99";
-        private static string sega_master_system = "\uea98";
-        private static string sega_saturn = "\uea9c";
-        private static string sega_sg_1000 = "\uea9d";
-        private static string sharp_x68000 = "\uea9e";
-        private static string sinclair_zx_81 = "\uea9f";
-        private static string sinclair_zx_spectrum = "\ueaa1";
-        private static string sinclair_zx_spectrum_3 = "\ueaa0";
-        private static string snk_neo_geo = "\ueaa4";
-        private static string snk_neo_geo_cd = "\ueaa2";
-        private static string snk_neo_geo_pocket = "\ueaa3";
-        private static string snk_neo_geo_pocket_color = "\ueacb";
-        private static string sony_playstation = "\ueaaa";
-        private static string sony_playstation_2 = "\ueaa5";
-        private static string sony_playstation_3 = "\ueaa6";
-        private static string sony_playstation_4 = "\ueaa7";
-        private static string sony_playstation_vita = "\ueaa9";
-        private static string sony_psp = "\ueaa8";
-        private static string super_nintendo_entertainment_system = "\uea8f";
-        private static string uzebox = "\ueaab";
-        private static string wonderswan = "\ueaba";
-        private static string wonderswan_color = "\ueab9";
+        private static string amstrad_cpc => "\ueaae";
+        private static string apple_ii => "\ueab1";
+        private static string apple_iigs => "\ueab2";
+        private static string atari_2600 => "\ueab3";
+        private static string atari_5200 => "\ueab4";
+        private static string atari_7800 => "\ueab5";
+        private static string atari_800 => "\uea9b";
+        private static string atari_jaguar => "\ueab6";
+        private static string atari_lynx => "\ueab7";
+        private static string atari_st => "\ueab8";
+        private static string bandai_wonderswan => "\ueaba";
+        private static string bandai_wonderswan_color => "\ueab9";
+        private static string capcom_cp_system_i => "\ueabb";
+        private static string capcom_cp_system_ii => "\ueabc";
+        private static string capcom_cp_system_iii => "\ueabd";
+        private static string coleco_colecovision => "\ueabe";
+        private static string colecovision => "\ueabe";
+        private static string commodore_64 => "\ueabf";
+        private static string commodore_amiga => "\ueac0";
+        private static string commodore_amiga_cd32 => "\ueac1";
+        private static string commodore_plus4 => "\ueac2";
+        private static string commodore_vic20 => "\ueac3";
+        private static string gce_vectrex => "\ueac6";
+        private static string handheld_electronic_game => "\uea73";
+        private static string mame => "\uea7a";
+        private static string mame_2000 => "\uea74";
+        private static string mame_2003 => "\uea75";
+        private static string mame_2003_plus => "\uea76";
+        private static string mame_2010 => "\uea77";
+        private static string mame_2015 => "\uea78";
+        private static string mame_2016 => "\uea79";
+        private static string microsoft_xbox => "\uea7d";
+        private static string microsoft_xbox_360 => "\uea7b";
+        private static string microsoft_xbox_one => "\uea7c";
+        private static string microsoft_xbox_series => "\uea7d";
+        private static string nec_pc_engine_supergrafx => "\uea80";
+        private static string nec_pc_9801 => "\ueac7";
+        private static string nec_pc_fx => "\uea81";
+        private static string nec_turbografx_16 => "\uea7e";
+        private static string nec_turbografx_cd => "\uea7f";
+        private static string nintendo_3ds => "\uea8a";
+        //private static string nintendo_new_3ds => "\uea89";
+        private static string nintendo_64 => "\uea8b";
+        private static string nintendo_ds => "\uea8c";
+        private static string nintendo_dsi => "\uea8d";
+        private static string nintendo_entertainment_system => "\uea8e";
+        private static string nintendo_family_computer_disk_system => "\ueac8";
+        private static string nintendo_game_boy => "\uea87";
+        private static string nintendo_game_boy_advance => "\uea85";
+        private static string nintendo_game_boy_color => "\uea86";
+        private static string nintendo_gamecube => "\uea88";
+        private static string nintendo_satellaview => "\ueac9";
+        private static string nintendo_snes => "\uea8f";
+        private static string nintendo_sufami_turbo => "\ueaca";
+        private static string nintendo_switch => "\uea90";
+        private static string nintendo_virtual_boy => "\uea91";
+        private static string nintendo_wii => "\uea93";
+        private static string nintendo_wii_u => "\uea92";
+        private static string pc_engine_supergrafx => "\uea80";
+        private static string phillips_videopac => "\ueacc";
+        private static string sega_32x => "\uea95";
+        private static string sega_cd => "\uea9a";
+        private static string sega_dreamcast => "\uea96";
+        private static string sega_game_gear => "\uea97";
+        private static string sega_genesis => "\uea99";
+        private static string sega_master_system => "\uea98";
+        private static string sega_saturn => "\uea9c";
+        private static string sega_sg_1000 => "\uea9d";
+        private static string sharp_x68000 => "\uea9e";
+        private static string sinclair_zx_81 => "\uea9f";
+        private static string sinclair_zx_spectrum => "\ueaa1";
+        private static string sinclair_zx_spectrum_3 => "\ueaa0";
+        private static string snk_neo_geo => "\ueaa4";
+        private static string snk_neo_geo_cd => "\ueaa2";
+        private static string snk_neo_geo_pocket => "\ueaa3";
+        private static string snk_neo_geo_pocket_color => "\ueacb";
+        private static string sony_playstation => "\ueaaa";
+        private static string sony_playstation_2 => "\ueaa5";
+        private static string sony_playstation_3 => "\ueaa6";
+        private static string sony_playstation_4 => "\ueaa7";
+        private static string sony_playstation_vita => "\ueaa9";
+        private static string sony_psp => "\ueaa8";
+        private static string super_nintendo_entertainment_system => "\uea8f";
+        private static string uzebox => "\ueaab";
+        private static string wonderswan => "\ueaba";
+        private static string wonderswan_color => "\ueab9";
 
-        //private static string psp = "\uea46";                    
-        //private static string dreamcast = "\uea3c";              
-        private static string dos = "\uea3b";                    
-        //private static string commodore64 = "\uea3a";            
-        //private static string ds = "\uea39";                     
-        //private static string gameboy = "\uea3d";                
-        //private static string gameboyadvance = "\uea3f";         
-        //private static string gamecube = "\uea40";               
-        //private static string megadrive = "\uea41";              
-        //private static string nintendo = "\uea42";               
-        //private static string nintendo64 = "\uea43";             
-        //private static string playstation = "\uea44";            
-        //private static string playstation4 = "\uea45";           
-        //private static string supernintendo = "\uea47";          
-        //private static string nintendoswitch = "\uea48";         
-        //private static string wii = "\uea49";                    
-        //private static string mame = "\uea4a";
-        //private static string wiiu = "\uea5e";
-        //private static string famicomdisksystem = "\uea6e";
-        //private static string wonderswan = "\uea6f";
+        //private static string psp => "\uea46";                    
+        //private static string dreamcast => "\uea3c";              
+        private static string dos => "\uea3b";
+        //private static string commodore64 => "\uea3a";            
+        //private static string ds => "\uea39";                     
+        //private static string gameboy => "\uea3d";                
+        //private static string gameboyadvance => "\uea3f";         
+        //private static string gamecube => "\uea40";               
+        //private static string megadrive => "\uea41";              
+        //private static string nintendo => "\uea42";               
+        //private static string nintendo64 => "\uea43";             
+        //private static string playstation => "\uea44";            
+        //private static string playstation4 => "\uea45";           
+        //private static string supernintendo => "\uea47";          
+        //private static string nintendoswitch => "\uea48";         
+        //private static string wii => "\uea49";                    
+        //private static string mame => "\uea4a";
+        //private static string wiiu => "\uea5e";
+        //private static string famicomdisksystem => "\uea6e";
+        //private static string wonderswan => "\uea6f";
         #endregion
 
 
         /// <summary>
         /// Get icon from name for common "font.ttf"
         /// </summary>
-        /// <param name="Name"></param>
-        /// <param name="ReturnEmpty"></param>
+        /// <param name="name"></param>
+        /// <param name="returnEmpty"></param>
         /// <returns></returns>
-        public static string Get(string Name, bool ReturnEmpty = false)
+        public static string Get(string name, bool returnEmpty = false, bool returnDefault = true)
         {
             string stringReturn = string.Empty;
 
-            switch (Name?.ToLower())
+            switch (name?.ToLower())
             {
                 #region plugin
                 case "howlongtobeat":
@@ -222,11 +222,11 @@
                     stringReturn = steam;
                     break;
                 case "gog":
-				    stringReturn = gog;
+                    stringReturn = gog;
                     break;
-				case "gog-games":
-					stringReturn = goggames;
-					break;
+                case "gog-games":
+                    stringReturn = goggames;
+                    break;
                 case "goggalaxy":
                     stringReturn = gogGalaxy;
                     break;
@@ -241,9 +241,9 @@
                     stringReturn = ea;
                     break;
                 case "microsoft store":
-				case "xbox":
-				case "xbox game pass":
-				stringReturn = xbox;
+                case "xbox":
+                case "xbox game pass":
+                    stringReturn = xbox;
                     break;
                 case "uplay":
                 case "ubisoft connect":
@@ -252,7 +252,7 @@
                 case "epic":
                     stringReturn = epic;
                     break;
-				case "bethesda":
+                case "bethesda":
                     stringReturn = bethesda;
                     break;
                 case "humble":
@@ -643,9 +643,13 @@
                 #endregion
 
                 default:
-                    if (!ReturnEmpty)
+                    if (!returnEmpty)
                     {
-                        stringReturn = Name;
+                        stringReturn = name;
+                    }
+                    if (returnDefault)
+                    {
+                        stringReturn = playnite;
                     }
                     break;
             }
