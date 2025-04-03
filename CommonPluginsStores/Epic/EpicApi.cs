@@ -72,13 +72,6 @@ namespace CommonPluginsStores.Epic
             TokensPath = Path.Combine(PathStoresData, "Epic_Tokens.dat");
 
             CookiesDomains = new List<string> { ".epicgames.com" };
-
-            OauthResponse tokens = LoadTokens();
-            AuthToken = new StoreToken
-            {
-                Token = tokens.access_token,
-                Type = tokens.token_type
-            };
         }
 
         #region Cookies
@@ -141,11 +134,6 @@ namespace CommonPluginsStores.Epic
             if (isLogged)
             {
                 OauthResponse tokens = LoadTokens();
-                AuthToken = new StoreToken
-                {
-                    Token = tokens.access_token,
-                    Type = tokens.token_type
-                };
             }
             else
             {
@@ -655,11 +643,19 @@ namespace CommonPluginsStores.Epic
             {
                 try
                 {
-                    return Serialization.FromJson<OauthResponse>(
+                    OauthResponse tokens = Serialization.FromJson<OauthResponse>(
                         Encryption.DecryptFromFile(
                             TokensPath,
                             Encoding.UTF8,
                             WindowsIdentity.GetCurrent().User.Value));
+
+                    AuthToken = new StoreToken
+                    {
+                        Token = tokens.access_token,
+                        Type = tokens.token_type
+                    };
+
+                    return tokens;
                 }
                 catch (Exception ex)
                 {
