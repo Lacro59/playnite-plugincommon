@@ -9,8 +9,9 @@
     <sys:String x:Key="LOCCommonYears">{0} years</sys:String>
     
     <sys:String x:Key="LOCCommonYearLabel">Year</sys:String>
+    <sys:String x:Key="LOCCommonYearsLabel">Years</sys:String>
     <sys:String x:Key="LOCCommonMonthLabel">Month</sys:String>
-    <sys:String x:Key="LOCCommonMonthsLabel">Month(s)</sys:String>
+    <sys:String x:Key="LOCCommonMonthsLabel">Months</sys:String>
     
     <sys:String x:Key="LOCCommonDateData">数据日期</sys:String>
     
