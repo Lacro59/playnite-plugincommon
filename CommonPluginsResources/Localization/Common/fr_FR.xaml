@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
     
-    <sys:String x:Key="LOCCommonDay">{0} day</sys:String>
-    <sys:String x:Key="LOCCommonDays">{0} days</sys:String>
-    <sys:String x:Key="LOCCommonMonth">{0} month</sys:String>
-    <sys:String x:Key="LOCCommonMonths">{0} months</sys:String>
-    <sys:String x:Key="LOCCommonYear">{0} year</sys:String>
-    <sys:String x:Key="LOCCommonYears">{0} years</sys:String>
+    <sys:String x:Key="LOCCommonDay">{0} jour</sys:String>
+    <sys:String x:Key="LOCCommonDays">{0} jours</sys:String>
+    <sys:String x:Key="LOCCommonMonth">{0} mois</sys:String>
+    <sys:String x:Key="LOCCommonMonths">{0} mois</sys:String>
+    <sys:String x:Key="LOCCommonYear">{0} an</sys:String>
+    <sys:String x:Key="LOCCommonYears">{0} ans</sys:String>
     
-    <sys:String x:Key="LOCCommonYearLabel">Year</sys:String>
-    <sys:String x:Key="LOCCommonMonthLabel">Month</sys:String>
-    <sys:String x:Key="LOCCommonMonthsLabel">Month(s)</sys:String>
+    <sys:String x:Key="LOCCommonYearLabel">Année</sys:String>
+    <sys:String x:Key="LOCCommonMonthLabel">Mois</sys:String>
+    <sys:String x:Key="LOCCommonMonthsLabel">Mois</sys:String>
     
     <sys:String x:Key="LOCCommonDateData">Date des données</sys:String>
     
