@@ -1,9 +1,17 @@
 ﻿<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
-
-    <sys:String x:Key="LOCCommonYear">Year</sys:String>
-    <sys:String x:Key="LOCCommonMonth">Month</sys:String>
-    <sys:String x:Key="LOCCommonMonths">Month(s)</sys:String>
+    
+    <sys:String x:Key="LOCCommonDay">{0} day</sys:String>
+    <sys:String x:Key="LOCCommonDays">{0} days</sys:String>
+    <sys:String x:Key="LOCCommonMonth">{0} month</sys:String>
+    <sys:String x:Key="LOCCommonMonths">{0} months</sys:String>
+    <sys:String x:Key="LOCCommonYear">{0} year</sys:String>
+    <sys:String x:Key="LOCCommonYears">{0} years</sys:String>
+    
+    <sys:String x:Key="LOCCommonYearLabel">Year</sys:String>
+    <sys:String x:Key="LOCCommonMonthLabel">Month</sys:String>
+    <sys:String x:Key="LOCCommonMonthsLabel">Month(s)</sys:String>
+    
     <sys:String x:Key="LOCCommonDateData">Date of data</sys:String>
     
     <sys:String x:Key="LOCCommonStartDate">Start date</sys:String>
@@ -48,10 +56,10 @@
     
     <!-- Common Stores -->
 
-    <sys:String x:Key="LOCCommonAuthenticateLabel">Authenticate</sys:String>
-    <sys:String x:Key="LOCCommonNotLoggedIn">Requires authentication</sys:String>
-    <sys:String x:Key="LOCCommonLoggedIn">User is authenticated</sys:String>
-    <sys:String x:Key="LOCCommonAccountName">Account Name</sys:String>
+    <sys:String x:Key="LOCCommonAuthenticateLabel">驗證帳戶</sys:String>
+    <sys:String x:Key="LOCCommonNotLoggedIn">需要驗證</sys:String>
+    <sys:String x:Key="LOCCommonLoggedIn">帳戶已驗證</sys:String>
+    <sys:String x:Key="LOCCommonAccountName">帳戶名稱</sys:String>
     <sys:String x:Key="LOCCommonLoginChecking">Checking authentication status…</sys:String>
     <sys:String x:Key="LOCCommonPrivateChecking">Checking private status…</sys:String>
     <sys:String x:Key="LOCCommonNotLoggedInError">Failed to authenticate user</sys:String>
@@ -131,7 +139,7 @@ Do you want to open the directory?</sys:String>
     <sys:String x:Key="LOCCommonIntegrationFullScreen">Fullscreen</sys:String>
     <sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Enable fullscreen integration</sys:String>
 
-    <sys:String x:Key="LOCCommonIntegration">Appearance</sys:String>
+    <sys:String x:Key="LOCCommonIntegration">外觀</sys:String>
     <sys:String x:Key="LOCCommonIntegrationInCustomTheme">Enable custom theme integration (Only if integrated in custom theme)</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonHeader">Display the plugin button in window title bar</sys:String>
     <sys:String x:Key="LOCCommonIntegrationButtonSide">Display the plugin button in the side bar</sys:String>
@@ -170,12 +178,12 @@ Do you want to open the directory?</sys:String>
 
     <sys:String x:Key="LOCCommonViewNoData">View games without plugin data</sys:String>
 
-    <sys:String x:Key="LOCCommonAddManually">Add manually</sys:String>
-    <sys:String x:Key="LOCCommonRefreshGameData">Refresh data</sys:String>
-    <sys:String x:Key="LOCCommonRefreshAllData">Refresh all data</sys:String>
-    <sys:String x:Key="LOCCommonDeleteGameData">Delete data</sys:String>
+    <sys:String x:Key="LOCCommonAddManually">手動添加</sys:String>
+    <sys:String x:Key="LOCCommonRefreshGameData">刷新數據</sys:String>
+    <sys:String x:Key="LOCCommonRefreshAllData">刷新全部數據</sys:String>
+    <sys:String x:Key="LOCCommonDeleteGameData">刪除數據</sys:String>
 
-    <sys:String x:Key="LOCCommonSelectGames">Select games</sys:String>
+    <sys:String x:Key="LOCCommonSelectGames">選擇遊戲</sys:String>
     <sys:String x:Key="LOCCommonAddAllTags">Add tag for all games</sys:String>
     <sys:String x:Key="LOCCommonAddTPlugin">Add plugin tag...</sys:String>
     <sys:String x:Key="LOCCommonSelectData">Download data for selected games</sys:String>
@@ -228,7 +236,7 @@ Please check the plugin settings.</sys:String>
     <sys:String x:Key="LOCCommonSortByScore">Sort by score</sys:String>
 
 
-    <sys:String x:Key="LOCCommonMisc">Misc</sys:String>
+    <sys:String x:Key="LOCCommonMisc">其他</sys:String>
     <sys:String x:Key="LOCCommonSelectVariable">Select variable</sys:String>
 
 
