@@ -76,7 +76,7 @@
             <StackPanel Grid.Row="4" Grid.Column="4" Name="Part_MonthSelect" IsEnabled="False" HorizontalAlignment="Left" Orientation="Horizontal">
                 <TextBlock Text="{DynamicResource LOCCommonSince}" Style="{DynamicResource BaseTextBlockStyle}" VerticalAlignment="Center"  />
                 <playnitecontrols:NumericBox x:Name="PART_Months" Width="30" Margin="10,0,10,0" LongValue="1" MinLongValue="1" />
-                <TextBlock Text="{DynamicResource LOCCommonMonths}" Style="{DynamicResource BaseTextBlockStyle}" VerticalAlignment="Center" />
+                <TextBlock Text="{DynamicResource LOCCommonMonthsLabel}" Style="{DynamicResource BaseTextBlockStyle}" VerticalAlignment="Center" />
             </StackPanel>
             
             <StackPanel Grid.Row="6" Grid.ColumnSpan="5" HorizontalAlignment="Right" Orientation="Horizontal">
