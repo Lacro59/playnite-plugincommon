@@ -248,39 +248,39 @@ namespace CommonPluginsStores.Origin
                     new HttpHeader { Key = "AuthToken", Value =  AuthToken.Token },
                     new HttpHeader { Key = "Accept", Value = "application/json" }
                 };
-                string Url = string.Format(UrlApi3UserGames, CurrentAccountInfos.UserId, accountInfos.UserId);
-                string WebData = Web.DownloadStringData(Url, httpHeaders).GetAwaiter().GetResult();
-                _ = Serialization.TryFromJson(WebData, out ProductInfosResponse productInfosResponse);
+                string url = string.Format(UrlApi3UserGames, CurrentAccountInfos.UserId, accountInfos.UserId);
+                string response = Web.DownloadStringData(url, httpHeaders).GetAwaiter().GetResult();
+                _ = Serialization.TryFromJson(response, out ProductInfosResponse productInfosResponse);
 
                 ObservableCollection<AccountGameInfos> accountGamesInfos = new ObservableCollection<AccountGameInfos>();
                 productInfosResponse?.productInfos?.ForEach(x => 
                 {
-                    string Id = x.productId;
-                    string Name = x.displayProductName;
+                    string id = x.productId;
+                    string name = x.displayProductName;
 
-                    bool IsCommun = false;
+                    bool isCommun = false;
                     if (!accountInfos.IsCurrent)
                     {
-                        IsCommun = CurrentGamesInfos?.Where(y => y.Id.IsEqual(Id))?.Count() != 0;
+                        isCommun = CurrentGamesInfos?.Where(y => y.Id.IsEqual(id))?.Count() != 0;
                     }
 
-                    GameInfos gameInfos = GetGameInfos(Id, accountInfos);
-                    string Link = gameInfos?.Link;
+                    GameInfos gameInfos = GetGameInfos(id, accountInfos);
+                    string link = gameInfos?.Link;
 
                     string achId = x?.softwares?.softwareList?.First().achievementSetOverride;
-                    ObservableCollection<GameAchievement> Achievements = null;
+                    ObservableCollection<GameAchievement> achievements = null;
                     if (!achId.IsNullOrEmpty())
                     {
-                        Achievements = GetAchievements(achId, accountInfos);
+                        achievements = GetAchievements(achId, accountInfos);
                     }
 
                     AccountGameInfos accountGameInfos = new AccountGameInfos
                     {
-                        Id = Id,
-                        Name = Name,
-                        Link = Link,
-                        IsCommun = IsCommun,
-                        Achievements = Achievements,
+                        Id = id,
+                        Name = name,
+                        Link = link,
+                        IsCommun = isCommun,
+                        Achievements = achievements,
                         Playtime = 0
                     };
                     accountGamesInfos.Add(accountGameInfos);
