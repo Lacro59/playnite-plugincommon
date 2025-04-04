@@ -382,7 +382,7 @@ namespace CommonPluginsShared.Collections
             Refresh(ids, ResourceProvider.GetString("LOCCommonProcessing"));
         }
 
-        public void Refresh(IEnumerable<Guid> ids, string message)
+        public virtual void Refresh(IEnumerable<Guid> ids, string message)
         {
             GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {message}")
             {
