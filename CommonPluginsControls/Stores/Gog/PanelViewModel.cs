@@ -32,5 +32,11 @@ namespace CommonPluginsControls.Stores.Gog
             OnPropertyChanged(nameof(AuthStatus));
             OnPropertyChanged(nameof(User));
         });
+
+        public void ResetIsUserLoggedIn()
+        {
+            StoreApi.ResetIsUserLoggedIn();
+            OnPropertyChanged(nameof(AuthStatus));
+        }
     }
 }

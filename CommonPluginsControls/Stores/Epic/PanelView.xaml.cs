@@ -85,6 +85,7 @@ namespace CommonPluginsControls.Stores.Epic
         private void PART_IsPrivate_Click(object sender, RoutedEventArgs e)
         {
             UseAuth = PanelViewModel.UseAuth;
+            PanelViewModel.ResetIsUserLoggedIn();
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)

@@ -39,5 +39,11 @@ namespace CommonPluginsControls.Stores.Epic
             OnPropertyChanged(nameof(AuthStatus));
             OnPropertyChanged(nameof(User));
         });
+
+        public void ResetIsUserLoggedIn()
+        {
+            StoreApi.ResetIsUserLoggedIn();
+            OnPropertyChanged(nameof(AuthStatus));
+        }
     }
 }

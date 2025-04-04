@@ -363,7 +363,7 @@ namespace CommonPluginsStores.Steam
                 }
 
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
-                Tuple<string, ObservableCollection<GameAchievement>> data = GetAchievementsShema(id);
+                Tuple<string, ObservableCollection<GameAchievement>> data = GetAchievementsSchema(id);
 
                 if (data?.Item2?.Count() == 0)
                 {
@@ -515,7 +515,7 @@ namespace CommonPluginsStores.Steam
             return null;
         }
 
-        public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsShema(string id)
+        public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
         {
             string cachePath = Path.Combine(PathAchievementsData, id + ".json");
             Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
@@ -954,7 +954,7 @@ namespace CommonPluginsStores.Steam
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        public ObservableCollection<GameAchievement> GetAchievementsSchema(uint appId)
+        private ObservableCollection<GameAchievement> GetAchievementsSchema(uint appId)
         {
             ObservableCollection<GameAchievement> gameAchievements = null;
             if (appId > 0)

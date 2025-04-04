@@ -431,7 +431,7 @@ namespace CommonPluginsStores
             return null;
         }
 
-        public virtual Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsShema(string id)
+        public virtual Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
         {
             return null;
         }

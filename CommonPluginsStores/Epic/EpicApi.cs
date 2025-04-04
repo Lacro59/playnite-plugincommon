@@ -368,7 +368,7 @@ namespace CommonPluginsStores.Epic
             try
             {
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
-                Tuple<string, ObservableCollection<GameAchievement>> data = GetAchievementsShema(id);
+                Tuple<string, ObservableCollection<GameAchievement>> data = GetAchievementsSchema(id);
                 
                 if (data?.Item2?.Count() == 0)
                 {
@@ -543,7 +543,7 @@ namespace CommonPluginsStores.Epic
             return null;
         }
 
-        public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsShema(string id)
+        public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
         {
             string cachePath = Path.Combine(PathAchievementsData, id + ".json");
             Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
