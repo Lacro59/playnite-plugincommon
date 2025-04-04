@@ -164,9 +164,18 @@ namespace CommonPluginsStores.Steam
                     {
                         string url = string.Format(UrlRefreshToken, CurrentAccountInfos.Link);
                         Thread.Sleep(250);
-                        _ = GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore });
-                        Thread.Sleep(250);
-                        _ = SetStoredCookies(GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore }, true));
+                        List<HttpCookie> cookies = GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore }, true);
+                        if (cookies?.Where(x => x.Name.IsEqual("steamDidLoginRefresh"))?.Count() > 0)
+                        {
+                            Thread.Sleep(250);
+                            cookies = GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore }, true);
+                        }
+                        if (cookies?.Where(x => x.Name.IsEqual("steamDidLoginRefresh"))?.Count() > 0)
+                        {
+                            Thread.Sleep(250);
+                            cookies = GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore }, true);
+                        }
+                        _ = SetStoredCookies(cookies);
                         Thread.Sleep(250);
                         userData = GetUserData();
                     }
@@ -214,8 +223,9 @@ namespace CommonPluginsStores.Steam
                             string jsonDataString = Tools.GetJsonInString(source, @"(?<=g_rgProfileData[ ]=[ ])");
                             RgProfileData rgProfileData = Serialization.FromJson<RgProfileData>(jsonDataString);
 
-                            CurrentAccountInfos = new AccountInfos
+                            AccountInfos accountInfos = new AccountInfos
                             {
+                                ApiKey = CurrentAccountInfos?.ApiKey,
                                 UserId = rgProfileData.SteamId.ToString(),
                                 Avatar = string.Format(UrlAvatarFul, steamId),
                                 Pseudo = rgProfileData.PersonaName,
@@ -223,6 +233,7 @@ namespace CommonPluginsStores.Steam
                                 IsPrivate = true,
                                 IsCurrent = true
                             };
+                            CurrentAccountInfos = accountInfos;
                             SaveCurrentUser();
                             _ = GetCurrentAccountInfos();
 
@@ -246,10 +257,10 @@ namespace CommonPluginsStores.Steam
                 return false;
             }
 
-            string SteamId = CurrentAccountInfos.UserId;
-            string SteamUser = CurrentAccountInfos.Pseudo;
+            string steamId = CurrentAccountInfos.UserId;
+            string steamUser = CurrentAccountInfos.Pseudo;
 
-            return !SteamId.IsNullOrEmpty() && !SteamUser.IsNullOrEmpty();
+            return !steamId.IsNullOrEmpty() && !steamUser.IsNullOrEmpty();
         }
         #endregion
 
@@ -852,8 +863,8 @@ namespace CommonPluginsStores.Steam
             try
             {
                 List<HttpCookie> cookies = GetStoredCookies();
-                string resultWeb = Web.DownloadStringData(UrlUserData, cookies, Web.UserAgent, true).GetAwaiter().GetResult();
-                if (Serialization.TryFromJson(resultWeb, out SteamUserData userData, out Exception ex) && userData?.RgOwnedApps?.Count > 0)
+                string result = Web.DownloadStringData(UrlUserData, cookies, Web.UserAgent, true).GetAwaiter().GetResult();
+                if (Serialization.TryFromJson(result, out SteamUserData userData, out Exception ex) && userData?.RgOwnedApps?.Count > 0)
                 {
                     SaveUserData(userData);
                 }
