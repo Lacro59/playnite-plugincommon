@@ -153,17 +153,11 @@ namespace CommonPluginsStores.Epic
                 OauthResponse tokens = LoadTokens();
                 if (tokens != null)
                 {
-                    AuthToken = new StoreToken
-                    {
-                        Token = tokens.access_token,
-                        Type = tokens.token_type
-                    };
-
-                    EpicAccountResponse epicAccountResponse = GetAccountInfo(tokens.account_id);
-                    CurrentAccountInfos = new AccountInfos
+                    //EpicAccountResponse epicAccountResponse = GetAccountInfo(tokens.account_id);
+                    AccountInfos accountInfos = new AccountInfos
                     {
                         UserId = tokens.account_id,
-                        Pseudo = epicAccountResponse?.DisplayName,
+                        Pseudo = tokens.account_id == CurrentAccountInfos.UserId ? CurrentAccountInfos.Pseudo : string.Empty, //epicAccountResponse?.DisplayName,
                         Link = string.Format(UrlAccountProfile, tokens.account_id),
                         IsPrivate = true,
                         IsCurrent = true
@@ -190,15 +184,16 @@ namespace CommonPluginsStores.Epic
                 OauthResponse tokens = LoadTokens();
                 if (tokens != null)
                 {
-                    EpicAccountResponse epicAccountResponse = GetAccountInfo(tokens.account_id);
-                    CurrentAccountInfos = new AccountInfos
+                    //EpicAccountResponse epicAccountResponse = GetAccountInfo(tokens.account_id);
+                    AccountInfos accountInfos = new AccountInfos
                     {
                         UserId = tokens.account_id,
-                        Pseudo = epicAccountResponse?.DisplayName,
+                        Pseudo = tokens.account_id == CurrentAccountInfos.UserId ? CurrentAccountInfos.Pseudo : string.Empty, //epicAccountResponse?.DisplayName,
                         Link = string.Format(UrlAccountProfile, tokens.account_id),
                         IsPrivate = true,
                         IsCurrent = true
                     };
+                    CurrentAccountInfos = accountInfos;
                     SaveCurrentUser();
                     _ = GetCurrentAccountInfos();
 
