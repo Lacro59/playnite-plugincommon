@@ -342,7 +342,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
             return titles;
         }
 
-        public async Task<List<TrophyTitleMobile>> GetTrohpiesMobile()
+        public async Task<List<TrophyTitleMobile>> GetTrophiesMobile()
         {
             var titles = new List<TrophyTitleMobile>();
 
@@ -368,7 +368,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
         }
 
 
-        public async Task<List<TrophyTitlesWithIdsMobile.TrophyTitleWithIdsMobile>> GetTrohpiesWithIdsMobile(string[] titleIdsArray)
+        public async Task<List<TrophyTitlesWithIdsMobile.TrophyTitleWithIdsMobile>> GetTrophiesWithIdsMobile(string[] titleIdsArray)
         {
             var titles = new List<TrophyTitlesWithIdsMobile.TrophyTitleWithIdsMobile>();
 
