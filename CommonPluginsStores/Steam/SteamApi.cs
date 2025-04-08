@@ -163,13 +163,34 @@ namespace CommonPluginsStores.Steam
                     if (!isLogged)
                     {
                         string url = string.Format(UrlRefreshToken, CurrentAccountInfos.Link);
+
                         Thread.Sleep(250);
                         List<HttpCookie> cookies = GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore }, true);
+                        _ = SetStoredCookies(cookies);
+                        userData = GetUserData();
+                        isLogged = userData?.RgOwnedApps?.Count > 0;
+
+                        if (!isLogged)
+                        {
+                            Thread.Sleep(250);
+                            cookies = GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore }, true);
+                            _ = SetStoredCookies(cookies);
+                            userData = GetUserData();
+                            isLogged = userData?.RgOwnedApps?.Count > 0;
+                        }
+
                         if (cookies?.Where(x => x.Name.IsEqual("steamDidLoginRefresh"))?.Count() > 0)
                         {
                             Thread.Sleep(250);
                             cookies = GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore }, true);
                         }
+                        _ = SetStoredCookies(cookies);
+                        if (cookies?.Where(x => x.Name.IsEqual("steamDidLoginRefresh"))?.Count() > 0)
+                        {
+                            Thread.Sleep(250);
+                            cookies = GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore }, true);
+                        }
+                        _ = SetStoredCookies(cookies);
                         if (cookies?.Where(x => x.Name.IsEqual("steamDidLoginRefresh"))?.Count() > 0)
                         {
                             Thread.Sleep(250);
