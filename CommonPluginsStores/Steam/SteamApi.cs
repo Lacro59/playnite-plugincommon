@@ -179,29 +179,17 @@ namespace CommonPluginsStores.Steam
                             isLogged = userData?.RgOwnedApps?.Count > 0;
                         }
 
-                        if (cookies?.Where(x => x.Name.IsEqual("steamDidLoginRefresh"))?.Count() > 0)
+                        if (!isLogged)
                         {
                             Thread.Sleep(250);
                             cookies = GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore }, true);
+                            _ = SetStoredCookies(cookies);
+                            userData = GetUserData();
+                            isLogged = userData?.RgOwnedApps?.Count > 0;
                         }
-                        _ = SetStoredCookies(cookies);
-                        if (cookies?.Where(x => x.Name.IsEqual("steamDidLoginRefresh"))?.Count() > 0)
-                        {
-                            Thread.Sleep(250);
-                            cookies = GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore }, true);
-                        }
-                        _ = SetStoredCookies(cookies);
-                        if (cookies?.Where(x => x.Name.IsEqual("steamDidLoginRefresh"))?.Count() > 0)
-                        {
-                            Thread.Sleep(250);
-                            cookies = GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore }, true);
-                        }
-                        _ = SetStoredCookies(cookies);
-                        Thread.Sleep(250);
-                        userData = GetUserData();
                     }
                 }
-                return userData?.RgOwnedApps?.Count > 0;
+                return isLogged;
             }
 
             Task<bool> withId = IsProfilePublic(string.Format(UrlProfileById, CurrentAccountInfos.UserId), GetStoredCookies());
