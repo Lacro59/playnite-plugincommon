@@ -418,7 +418,7 @@ namespace CommonPluginsStores.Gog
                 string jsonDataString = Tools.GetJsonInString(response, "(?<=window.profilesData.achievements\\s=\\s)");
 
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
-                if (Serialization.TryFromJson(jsonDataString, out dynamic data))
+                if (!jsonDataString.IsNullOrEmpty() && Serialization.TryFromJson(jsonDataString, out dynamic data))
                 {
                     foreach(dynamic ach in data)
                     {
@@ -446,7 +446,7 @@ namespace CommonPluginsStores.Gog
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, $"Error remove {id} in {ClientName} wishlist", true, PluginName);
+                Common.LogError(ex, false, $"Error on GetAchievementsPublic({id}) with {accountInfos.Pseudo} in {ClientName}", true, PluginName);
             }
 
             return null;
