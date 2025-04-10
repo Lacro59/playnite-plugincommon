@@ -48,7 +48,7 @@ namespace CommonPluginsShared.Extensions
 
         public static string RemoveWhiteSpace(this string text)
         {
-            return Regex.Replace(text, @"s", "");
+            return Regex.Replace(text, @"\s+", "");
         }
 
 

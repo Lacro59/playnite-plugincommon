@@ -26,6 +26,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\Query\QueryEntitledOfferItems.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\Query\QueryPlayerAchievement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\Query\QueryPlayerProfileAchievementsByProductId.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameJolt\GameJoltApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameJolt\Models\TrophiesGame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameJolt\Models\TrophiesOverwiew.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameJolt\Models\User.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gog\GogApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\AccountBasicResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\Achievements.cs" />

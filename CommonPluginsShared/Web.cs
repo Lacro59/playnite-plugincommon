@@ -514,7 +514,7 @@ namespace CommonPluginsShared
             var response = string.Empty;
 
             HttpClientHandler handler = new HttpClientHandler();
-            if (Cookies.Count > 0)
+            if (Cookies?.Count > 0)
             {
                 handler.CookieContainer = Cookies;
             }

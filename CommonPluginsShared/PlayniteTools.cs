@@ -62,7 +62,9 @@ namespace CommonPluginsShared
             IsThereAnyDeal,
             CheckLocalizations,
             NintendoLibrary,
-            PlayerActivities
+            PlayerActivities,
+
+            GameJoltLibrary
         }
 
         private static readonly Dictionary<Guid, ExternalPlugin> PluginsById = new Dictionary<Guid, ExternalPlugin>
@@ -95,7 +97,9 @@ namespace CommonPluginsShared
             { new Guid("7D5CBEE9-3C86-4389-AC7B-9ABE3DA4C9CD"), ExternalPlugin.IsThereAnyDeal },
             { new Guid("7CE83CFE-7894-4AD9-957D-7249C0FB3E7D"), ExternalPlugin.CheckLocalizations },
             { new Guid("E4AC81CB-1B1A-4EC9-8639-9A9633989A72"), ExternalPlugin.NintendoLibrary },
-            { new Guid("3DBE2EE4-D6C9-4C09-B377-7A086369603E"), ExternalPlugin.PlayerActivities }
+            { new Guid("3DBE2EE4-D6C9-4C09-B377-7A086369603E"), ExternalPlugin.PlayerActivities },
+
+            { new Guid("555D58FD-A000-401B-972C-9230BED81AED"), ExternalPlugin.GameJoltLibrary }
         };
 
         public static ExternalPlugin GetPluginType(Guid PluginId)
