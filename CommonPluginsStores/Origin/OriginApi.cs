@@ -330,7 +330,7 @@ namespace CommonPluginsStores.Origin
                         Description = (string)item.Value["desc"],
                         UrlUnlocked = (string)item.Value["icons"]["208"],
                         UrlLocked = string.Empty,
-                        DateUnlocked = ((string)item.Value["state"]["a_st"] == "ACTIVE") ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds((int)item.Value["u"]).ToLocalTime(),
+                        DateUnlocked = ((string)item.Value["state"]["a_st"] == "ACTIVE") ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds((int)item.Value["u"]),
                         Percent = (float)item.Value["achievedPercentage"] == 0 ? 100 : (float)item.Value["achievedPercentage"],
                         GamerScore = (float)item.Value["xp"]
                     };
@@ -386,7 +386,7 @@ namespace CommonPluginsStores.Origin
                             DateTime? Added = null;
                             if (int.TryParse(item.addedAt.ToString().Substring(0, 10), out int int_addedAt))
                             {
-                                Added = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(int_addedAt).ToUniversalTime();
+                                Added = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(int_addedAt);
                             }
 
                             if (gameInfos != null)

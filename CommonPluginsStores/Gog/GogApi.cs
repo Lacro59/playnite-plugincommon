@@ -433,7 +433,7 @@ namespace CommonPluginsStores.Gog
                             Description = achItem.Description,
                             UrlUnlocked = achItem.ImageUrlUnlocked2,
                             UrlLocked = achItem.ImageUrlLocked2,
-                            DateUnlocked = !(bool)stats[accountInfos.UserId]["isUnlocked"] ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds((int)stats[accountInfos.UserId]["unlockDate"]).ToUniversalTime(),
+                            DateUnlocked = !(bool)stats[accountInfos.UserId]["isUnlocked"] ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds((int)stats[accountInfos.UserId]["unlockDate"]),
                             Percent = (float)achItem.Rarity,
                             GamerScore = CalcGamerScore((float)achItem.Rarity),
                             IsHidden = !achItem.Visible

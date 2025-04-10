@@ -165,7 +165,7 @@ namespace CommonPluginsStores.Steam
                         string url = string.Format(UrlRefreshToken, CurrentAccountInfos.Link);
 
                         Thread.Sleep(250);
-                        List<HttpCookie> cookies = GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore }, true);
+                        List<HttpCookie> cookies = GetNewWebCookies(new List<string> { url, "https://steamcommunity.com/my", UrlStore }, true);
                         _ = SetStoredCookies(cookies);
                         userData = GetUserData();
                         isLogged = userData?.RgOwnedApps?.Count > 0;
@@ -173,7 +173,7 @@ namespace CommonPluginsStores.Steam
                         if (!isLogged)
                         {
                             Thread.Sleep(250);
-                            cookies = GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore }, true);
+                            cookies = GetNewWebCookies(new List<string> { url, "https://steamcommunity.com/my", UrlStore }, true);
                             _ = SetStoredCookies(cookies);
                             userData = GetUserData();
                             isLogged = userData?.RgOwnedApps?.Count > 0;
@@ -182,7 +182,7 @@ namespace CommonPluginsStores.Steam
                         if (!isLogged)
                         {
                             Thread.Sleep(250);
-                            cookies = GetNewWebCookies(new List<string> { "https://steamcommunity.com/my", url, UrlStore }, true);
+                            cookies = GetNewWebCookies(new List<string> { url, "https://steamcommunity.com/my", UrlStore }, true);
                             _ = SetStoredCookies(cookies);
                             userData = GetUserData();
                             isLogged = userData?.RgOwnedApps?.Count > 0;
@@ -1125,7 +1125,7 @@ namespace CommonPluginsStores.Steam
                             Name = steamApp?.Name ?? $"SteamApp? - {x.Appid}",
                             Link = string.Format(UrlSteamGame, x),
                             Released = null,
-                            Added = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(x.DateAdded).ToUniversalTime(),
+                            Added = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(x.DateAdded),
                             Image = string.Format("https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/{0}/header_292x136.jpg", x.Appid)
                         });
                     });

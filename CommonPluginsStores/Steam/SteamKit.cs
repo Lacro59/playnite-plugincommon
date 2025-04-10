@@ -73,7 +73,7 @@ namespace CommonPluginsStores.Steam
                         {
                             SteamId = data["steamid"].AsUnsignedLong(),
                             Relationship = data["relationship"].AsString(),
-                            FriendSince = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(data["friend_since"].AsInteger()).ToLocalTime(),
+                            FriendSince = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(data["friend_since"].AsInteger()),
                         });
                     }
                     return friendList;
@@ -110,7 +110,7 @@ namespace CommonPluginsStores.Steam
                             AvatarHash = data["avatarhash"].AsString(),
                             AvatarMedium = data["avatarmedium"].AsString(),
                             CommunityVisibilityState = data["communityvisibilitystate"].AsInteger(),
-                            LastLogoff = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(data["lastlogoff"].AsInteger()).ToLocalTime(),
+                            LastLogoff = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(data["lastlogoff"].AsInteger()),
                             LocCountryCode = data["loccountrycode"].AsString(),
                             PersonaName = data["personaname"].AsString(),
                             PersonaState = data["personastate"].AsInteger(),
@@ -119,7 +119,7 @@ namespace CommonPluginsStores.Steam
                             ProfileState = data["profilestate"].AsInteger(),
                             ProfileUrl = data["profileurl"].AsString(),
                             SteamId = data["steamid"].AsString(),
-                            TimeCreated = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(data["timecreated"].AsInteger()).ToLocalTime()
+                            TimeCreated = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(data["timecreated"].AsInteger())
                         });
                     }
                     return friendList;
@@ -166,7 +166,7 @@ namespace CommonPluginsStores.Steam
                             PlaytimeLinuxForever = data["playtime_linux_forever"].AsInteger(),
                             PlaytimeMacForever = data["playtime_mac_forever"].AsInteger(),
                             PlaytimeWindowsForever = data["playtime_windows_forever"].AsInteger(),
-                            RtimeLastPlayed = data["rtime_last_played"].AsInteger() == 0 ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(data["rtime_last_played"].AsInteger()).ToLocalTime(),
+                            RtimeLastPlayed = data["rtime_last_played"].AsInteger() == 0 ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(data["rtime_last_played"].AsInteger()),
                             CapsuleFilename = data["capsule_filename"].AsString(),
                             HasWorkshop = data["has_workshop"].AsBoolean(),
                             HasMarket = data["has_market"].AsBoolean(),
@@ -381,7 +381,7 @@ namespace CommonPluginsStores.Steam
                         //            ApiName = dataApi["apiname"],
                         //            Description = dataApi["description"],
                         //            Name = dataApi["name"],
-                        //            UnlockTime = (int)dataApi["unlocktime"] == 0 ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds((int)dataApi["unlocktime"]).ToLocalTime()
+                        //            UnlockTime = (int)dataApi["unlocktime"] == 0 ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds((int)dataApi["unlocktime"])
                         //        });
                         //    }
                         //}
@@ -396,7 +396,7 @@ namespace CommonPluginsStores.Steam
                                 ApiName = data["apiname"].AsString(),
                                 Description = data["description"].AsString(),
                                 Name = data["name"].AsString(),
-                                UnlockTime = data["unlocktime"].AsInteger() == 0 ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(data["unlocktime"].AsInteger()).ToLocalTime()
+                                UnlockTime = data["unlocktime"].AsInteger() == 0 ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(data["unlocktime"].AsInteger())
                             });
                         }
                     }
