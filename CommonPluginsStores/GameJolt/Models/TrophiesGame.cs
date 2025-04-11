@@ -22,15 +22,6 @@ namespace CommonPluginsStores.GameJolt.Models
         public C C { get; set; }
     }
 
-    public class C
-    {
-        [SerializationPropertyName("eea")]
-        public bool Eea { get; set; }
-
-        [SerializationPropertyName("ads")]
-        public bool Ads { get; set; }
-    }
-
     public class Payload
     {
         [SerializationPropertyName("trophies")]

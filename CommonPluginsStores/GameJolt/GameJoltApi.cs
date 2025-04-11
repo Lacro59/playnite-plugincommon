@@ -4,6 +4,7 @@ using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Models;
 using CommonPluginsStores.GameJolt.Models;
 using CommonPluginsStores.Models;
+using Playnite.SDK;
 using Playnite.SDK.Data;
 using SuccessStory.Models;
 using System;
@@ -12,7 +13,9 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.GameJolt
@@ -22,26 +25,62 @@ namespace CommonPluginsStores.GameJolt
         #region urls
         private static string UrlBase => @"https://gamejolt.com";
         private static string UrlSiteApi => UrlBase + "/site-api";
+
+        private static string UrlProfil => UrlSiteApi + "/web/profile/{0}";
         private static string UrlTrophiesGame => UrlSiteApi + "/web/discover/games/trophies/{0}";
+        private static string UrlProfilTrophiesGame => UrlSiteApi + "/web/profile/trophies/game/{0}/{1}";
         private static string UrlTrophiesOverview => UrlSiteApi + "/web/profile/trophies/overview/{0}";
+
+        private static string UrlLogin => UrlBase + "/login";
         private static string UrlUserGameAchievements => UrlBase + "/{0}/trophies/game/{1}";
         #endregion
 
 
         public GameJoltApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "Game Jolt")
         {
+            CookiesDomains = new List<string> { "gamejolt.com", ".gamejolt.com" };
         }
 
         #region Configuration
         protected override bool GetIsUserLoggedIn()
         {
-            return true;
+            Profile profile = GetUser(CurrentAccountInfos?.Pseudo);
+            return profile?.User != null;
+        }
+
+        public override void Login()
+        {
+            try
+            {
+                ResetIsUserLoggedIn();
+                GameJoltLogin();
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, false, PluginName);
+            }
         }
         #endregion
 
         #region Current user
         protected override AccountInfos GetCurrentAccountInfos()
         {
+            AccountInfos accountInfos = LoadCurrentUser();
+            if (accountInfos != null)
+            {
+                Profile profile = GetUser(accountInfos.Pseudo);
+                profile = profile ?? GetUser(accountInfos.Pseudo);
+                accountInfos = new AccountInfos
+                {
+                    UserId = profile.Payload.User.Id.ToString(),
+                    Pseudo = profile.Payload.User.Username,
+                    Link = UrlBase + FormatUser(profile.Payload.User.Username),
+                    Avatar = profile.Payload.User.ImgAvatar,
+                    IsPrivate = true,
+                    IsCurrent = true
+                };
+                return accountInfos;
+            }
             return new AccountInfos { IsCurrent = true };
         }
         #endregion
@@ -66,16 +105,21 @@ namespace CommonPluginsStores.GameJolt
 
                 gameAchievements = data.Item2;
 
-                string url = string.Format(UrlTrophiesOverview, accountInfos.Pseudo);
-                string response = Web.DownloadStringData(url, null, Web.UserAgent).GetAwaiter().GetResult();
+                if (accountInfos?.Pseudo.IsNullOrEmpty() ?? true)
+                {
+                    return gameAchievements;
+                }
+
+                string url = string.Format(UrlProfilTrophiesGame, FormatUser(accountInfos.Pseudo), id);
+                string response = Web.DownloadStringData(url, GetStoredCookies(), Web.UserAgent).GetAwaiter().GetResult();
                 if (response.IsNullOrEmpty())
                 {
                     Thread.Sleep(1000);
-                    response = Web.DownloadStringData(url, null, Web.UserAgent).GetAwaiter().GetResult();
+                    response = Web.DownloadStringData(url, GetStoredCookies(), Web.UserAgent).GetAwaiter().GetResult();
                 }
-                _ = Serialization.TryFromJson(response, out TrophiesOverwiew trophiesOverwiew, out Exception ex);
+                _ = Serialization.TryFromJson(response, out ProfileTrophiesGame profileTrophiesGame, out Exception ex);
 
-                trophiesOverwiew?.Payload?.Trophies?
+                profileTrophiesGame?.Payload?.Trophies?
                     .Where(x => x?.GameId.ToString().IsEqual(id) ?? false)?
                     .ForEach(x =>
                     {
@@ -83,6 +127,7 @@ namespace CommonPluginsStores.GameJolt
                         if (item != null)
                         {
                             item.DateUnlocked = x.LoggedOn == null ? new DateTime(1982, 15, 12, 0, 0, 0, 0) : new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds((long)x.LoggedOn);
+                            item.UrlUnlocked = x.GameTrophy.ImgThumbnail;
                         }
                     });
 
@@ -102,7 +147,7 @@ namespace CommonPluginsStores.GameJolt
             {
                 GameName = name,
                 Name = ClientName,
-                Url = string.Format(UrlUserGameAchievements, accountInfos.Pseudo, id)
+                Url = string.Format(UrlUserGameAchievements, FormatUser(accountInfos.Pseudo), id)
             };
         }
         #endregion
@@ -116,11 +161,11 @@ namespace CommonPluginsStores.GameJolt
             if (data?.Item2 == null)
             {
                 string url = string.Format(UrlTrophiesGame, id);
-                string response = Web.DownloadStringData(url, null, Web.UserAgent).GetAwaiter().GetResult();
+                string response = Web.DownloadStringData(url, GetStoredCookies(), Web.UserAgent).GetAwaiter().GetResult();
                 if (response.IsNullOrEmpty())
                 {
                     Thread.Sleep(1000);
-                    response = Web.DownloadStringData(url, null, Web.UserAgent).GetAwaiter().GetResult();
+                    response = Web.DownloadStringData(url, GetStoredCookies(), Web.UserAgent).GetAwaiter().GetResult();
                 }
                 _ = Serialization.TryFromJson(response, out TrophiesGame trophiesGame);
 
@@ -132,6 +177,7 @@ namespace CommonPluginsStores.GameJolt
                         Name = x.Title,
                         Description = x.Description,
                         UrlUnlocked = x.ImgThumbnail,
+                        UrlLocked = x.ImgThumbnail,
                         Percent = 100,
                         GamerScore = x.Experience,
                         IsHidden = x.Secret
@@ -150,7 +196,94 @@ namespace CommonPluginsStores.GameJolt
         #endregion
 
         #region Game Jolt
+        private string FormatUser(string pseudo)
+        {
+            string user = pseudo;
+            if (!user?.StartsWith("@") ?? false)
+            {
+                user = "@" + user;
+            }
+            return user;
+        }
 
+        private void GameJoltLogin()
+        {
+            using (IWebView webView = API.Instance.WebViews.CreateView(new WebViewSettings
+            {
+                WindowWidth = 580,
+                WindowHeight = 700,
+                // This is needed otherwise captcha won't pass
+                UserAgent = @"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Vivaldi/5.5.2805.50"
+            }))
+            {
+                bool isRedirect = false;
+                webView.LoadingChanged += async (s, e) =>
+                {
+                    string url = webView.GetCurrentAddress();
+                    if (url.IsEqual(UrlBase) || url.IsEqual(UrlBase + "/"))
+                    {
+                        _ = await Task.Run(() =>
+                        {
+                            Thread.Sleep(3000);
+                            return true;
+                        });
+
+                        if (!isRedirect)
+                        {
+                            isRedirect = true;
+                            string src = webView.GetPageSource();
+
+                            Match match = Regex.Match(src, @"<div[^>]*class=""-username"">(.*?)<\/div>");
+                            if (match.Success && match.Groups.Count > 1)
+                            {
+                                string user = match.Groups[1].Value.Replace("Hey @", string.Empty, StringComparison.InvariantCultureIgnoreCase);
+                                Profile profile = GetUser(user);
+                                if (profile != null)
+                                {
+                                    CurrentAccountInfos = new AccountInfos
+                                    {
+                                        UserId = profile.Payload.User.Id.ToString(),
+                                        Pseudo = profile.Payload.User.Username,
+                                        Link = string.Format(UrlProfil, profile.Payload.User.Username),
+                                        Avatar = profile.Payload.User.ImgAvatar,
+                                        IsPrivate = true,
+                                        IsCurrent = true
+                                    };
+                                    SaveCurrentUser();
+                                    _ = GetCurrentAccountInfos();
+
+                                    Logger.Info($"{PluginName} logged");
+
+                                    webView.NavigateAndWait(CurrentAccountInfos.Link);
+
+                                    _ = SetStoredCookies(GetWebCookies(true));
+                                }
+                            }
+
+                            webView.Close();
+                        }
+                    }
+                };
+
+                CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
+                webView.Navigate(UrlLogin);
+                _ = webView.OpenDialog();
+            }
+        }
+
+        private Profile GetUser(string pseudo)
+        {
+            string url = string.Format(UrlProfil, FormatUser(pseudo));
+            string response = Web.DownloadStringData(url, GetStoredCookies(), Web.UserAgent).GetAwaiter().GetResult();
+            if (response.IsNullOrEmpty())
+            {
+                Thread.Sleep(1000);
+                response = Web.DownloadStringData(url, GetStoredCookies(), Web.UserAgent).GetAwaiter().GetResult();
+            }
+            _ = Serialization.TryFromJson(response, out Profile profile, out Exception ex);
+
+            return profile;
+        }
         #endregion
     }
 }

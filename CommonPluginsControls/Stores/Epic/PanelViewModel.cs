@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using CommonPluginsStores;
 using CommonPluginsStores.Models;
-using CommonPluginsStores.Steam;
-using CommonPluginsStores.Steam.Models;
 using Playnite.SDK;
 
 namespace CommonPluginsControls.Stores.Epic

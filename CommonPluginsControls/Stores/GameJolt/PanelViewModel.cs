@@ -9,7 +9,7 @@ using CommonPluginsStores;
 using CommonPluginsStores.Models;
 using Playnite.SDK;
 
-namespace CommonPluginsControls.Stores.Gog
+namespace CommonPluginsControls.Stores.GameJolt
 {
     public class PanelViewModel : ObservableObject
     {
