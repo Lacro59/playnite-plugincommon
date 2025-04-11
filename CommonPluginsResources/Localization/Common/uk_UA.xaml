@@ -67,6 +67,8 @@
 
     <sys:String x:Key="LOCCommonAccountConfiguration">Налаштування облікового запису</sys:String>
     <sys:String x:Key="LOCCommonIsPrivate">Приватний</sys:String>
+    <sys:String x:Key="LOCCommonUseAuthentication">Use authentication</sys:String>
+    <sys:String x:Key="LOCCommonUseAuthenticationOption">Use authentication (optional, for more information only)</sys:String>
     <sys:String x:Key="LOCCommonHasApiKey">Має API-ключ</sys:String>
     <sys:String x:Key="LOCCommonControlConfiguration">Керування конфігурацією</sys:String>
     <sys:String x:Key="LOCCommonGetAccountID">Отримати ID облікового запису</sys:String>
