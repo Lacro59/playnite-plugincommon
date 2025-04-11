@@ -67,6 +67,8 @@
 
     <sys:String x:Key="LOCCommonAccountConfiguration">账户配置</sys:String>
     <sys:String x:Key="LOCCommonIsPrivate">是私密的</sys:String>
+    <sys:String x:Key="LOCCommonUseAuthentication">Use authentication</sys:String>
+    <sys:String x:Key="LOCCommonUseAuthenticationOption">Use authentication (optional, for more information only)</sys:String>
     <sys:String x:Key="LOCCommonHasApiKey">有 api 密钥</sys:String>
     <sys:String x:Key="LOCCommonControlConfiguration">控制设置</sys:String>
     <sys:String x:Key="LOCCommonGetAccountID">获取账户 ID</sys:String>
