@@ -46,10 +46,10 @@
             <RadioButton Name="PART_AllGames" Grid.Column="0" Grid.Row="0" IsChecked="True" GroupName="RadioFilters">
                 <Label Content="{DynamicResource LOCQuickFilterAllGames}" />
             </RadioButton>
-            <RadioButton Name="PART_Filtred" Grid.Column="1" Grid.Row="0" IsChecked="True" GroupName="RadioFilters">
+            <RadioButton Name="PART_Filtred" Grid.Column="1" Grid.Row="0" IsChecked="false" GroupName="RadioFilters">
                 <Label Content="{DynamicResource LOCMetaGameSourceFiltered}" />
             </RadioButton>
-            <RadioButton Name="PART_Selected" Grid.Column="2" Grid.Row="0" IsChecked="True" GroupName="RadioFilters">
+            <RadioButton Name="PART_Selected" Grid.Column="2" Grid.Row="0" IsChecked="false" GroupName="RadioFilters">
                 <Label Content="{DynamicResource LOCMetaGameSourceSelected}" />
             </RadioButton>
             
