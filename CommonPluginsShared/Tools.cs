@@ -19,24 +19,22 @@ namespace CommonPluginsShared
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="Value"></param>
-        /// <param name="WithoutDouble"></param>
+        /// <param name="value"></param>
+        /// <param name="withoutDouble"></param>
         /// <returns></returns>
-        public static string SizeSuffix(double Value, bool WithoutDouble = false)
+        public static string SizeSuffix(double value, bool withoutDouble = false)
         {
             string[] SizeSuffixes = { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
 
-            if (Value < 0) { return "-" + SizeSuffix(-Value); }
-            if (Value == 0) { return "0" + CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator + "0 bytes"; }
+            if (value < 0) { return "-" + SizeSuffix(-value); }
+            if (value == 0) { return "0" + CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator + "0 bytes"; }
 
-            int mag = (int)Math.Log(Value, 1024);
-            decimal adjustedSize = (decimal)Value / (1L << (mag * 10));
+            int mag = (int)Math.Log(value, 1024);
+            decimal adjustedSize = (decimal)value / (1L << (mag * 10));
 
-            if (WithoutDouble)
-            {
-                return string.Format("{0} {1}", adjustedSize.ToString("0", CultureInfo.CurrentCulture), SizeSuffixes[mag]);
-            }
-            return string.Format("{0} {1}", adjustedSize.ToString("0.0", CultureInfo.CurrentCulture), SizeSuffixes[mag]);
+            return withoutDouble
+                ? string.Format("{0} {1}", adjustedSize.ToString("0", CultureInfo.CurrentCulture), SizeSuffixes[mag])
+                : string.Format("{0} {1}", adjustedSize.ToString("0.0", CultureInfo.CurrentCulture), SizeSuffixes[mag]);
         }
 
 
@@ -44,40 +42,40 @@ namespace CommonPluginsShared
         /// <summary>
         /// Get number week from a DateTime
         /// </summary>
-        /// <param name="Date"></param>
+        /// <param name="date"></param>
         /// <returns></returns>
-        public static int WeekOfYearISO8601(DateTime Date)
+        public static int WeekOfYearISO8601(DateTime date)
         {
-            var day = (int)CultureInfo.CurrentCulture.Calendar.GetDayOfWeek(Date);
-            return CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(Date.AddDays(4 - (day == 0 ? 7 : day)), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+            int day = (int)CultureInfo.CurrentCulture.Calendar.GetDayOfWeek(date);
+            return CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(date.AddDays(4 - (day == 0 ? 7 : day)), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
         }
 
         /// <summary>
         /// Get a Datetime from a week number
         /// </summary>
-        /// <param name="Year"></param>
-        /// <param name="Day"></param>
-        /// <param name="Week"></param>
+        /// <param name="year"></param>
+        /// <param name="day"></param>
+        /// <param name="week"></param>
         /// <returns></returns>
-        public static DateTime YearWeekDayToDateTime(int Year, DayOfWeek Day, int Week)
+        public static DateTime YearWeekDayToDateTime(int year, DayOfWeek day, int week)
         {
-            DateTime startOfYear = new DateTime(Year, 1, 1);
+            DateTime startOfYear = new DateTime(year, 1, 1);
 
             // The +7 and %7 stuff is to avoid negative numbers etc.
-            int daysToFirstCorrectDay = (((int)Day - (int)startOfYear.DayOfWeek) + 7) % 7;
+            int daysToFirstCorrectDay = ((int)day - (int)startOfYear.DayOfWeek + 7) % 7;
 
-            return startOfYear.AddDays(7 * (Week - 1) + daysToFirstCorrectDay);
+            return startOfYear.AddDays(7 * (week - 1) + daysToFirstCorrectDay);
         }
 
         /// <summary>
         /// Get week count from a year
         /// </summary>
-        /// <param name="Year"></param>
+        /// <param name="year"></param>
         /// <returns></returns>
-        public static int GetWeeksInYear(int Year)
+        public static int GetWeeksInYear(int year)
         {
             DateTimeFormatInfo dfi = DateTimeFormatInfo.CurrentInfo;
-            DateTime date1 = new DateTime(Year, 12, 31);
+            DateTime date1 = new DateTime(year, 12, 31);
             System.Globalization.Calendar cal = dfi.Calendar;
             return cal.GetWeekOfYear(date1, dfi.CalendarWeekRule, dfi.FirstDayOfWeek);
         }
@@ -98,10 +96,10 @@ namespace CommonPluginsShared
 
             for (int bx = 0, cx = 0; bx < bytes.Length; ++bx, ++cx)
             {
-                b = ((byte)(bytes[bx] >> 4));
+                b = (byte)(bytes[bx] >> 4);
                 c[cx] = (char)(b > 9 ? b + 0x37 + 0x20 : b + 0x30);
 
-                b = ((byte)(bytes[bx] & 0x0F));
+                b = (byte)(bytes[bx] & 0x0F);
                 c[++cx] = (char)(b > 9 ? b + 0x37 + 0x20 : b + 0x30);
             }
 
@@ -116,7 +114,9 @@ namespace CommonPluginsShared
         public static byte[] HexToBytes(string str)
         {
             if (str.Length == 0 || str.Length % 2 != 0)
+            {
                 return new byte[0];
+            }
 
             byte[] buffer = new byte[str.Length / 2];
             char c;
@@ -137,12 +137,9 @@ namespace CommonPluginsShared
 
         public static double GetElapsedSeconde(string value, string type)
         {
-            if (double.TryParse(value, out double time))
-            {
-                return GetElapsedSeconde(time, type);
-            }
-            return -1;
+            return double.TryParse(value, out double time) ? GetElapsedSeconde(time, type) : -1;
         }
+
         public static double GetElapsedSeconde(double value, string type)
         {
             switch (type.ToLower())
@@ -157,9 +154,12 @@ namespace CommonPluginsShared
 
                 case "s":
                     return value;
+
+                default:
+                    return -1;
             }
-            return -1;
         }
+
         public static double GetElapsedSeconde(string value)
         {
             if (value.Contains("h", StringComparison.InvariantCultureIgnoreCase))
@@ -176,6 +176,7 @@ namespace CommonPluginsShared
             }
             return -1;
         }
+
 
         [Obsolete]
         public static string GetJsonInString(string str, string strStart, string strEnd, string strPurge = "")
@@ -224,6 +225,7 @@ namespace CommonPluginsShared
             return string.Empty;
         }
 
+
         public static string FixCookieValue(string str)
         {
             if (string.IsNullOrEmpty(str))
@@ -239,29 +241,85 @@ namespace CommonPluginsShared
             return str;
         }
 
+
         public static List<string> FindFile(string path, string fileName, bool scanSubFolders)
         {
+            List<string> founds = new List<string>();
+
             try
             {
                 path = CommonPlayniteShared.Common.Paths.FixPathLength(path);
-                List<string> files = Directory.GetFiles(path).ToList();
-                List<string> founds = files.Where(x => Path.GetFileName(x).IsEqual(fileName))?.ToList();
+
+                // Search for files in the current directory
+                string[] files = Directory.GetFiles(path);
+                foreach (string file in files)
+                {
+                    if (Path.GetFileName(file).IsEqual(fileName))
+                    {
+                        founds.Add(file);
+                    }
+                }
+
+                // If enabled, search in subdirectories
                 if (scanSubFolders)
                 {
-                    List<string> dirs = Directory.GetDirectories(path).ToList();
-                    dirs.ForEach(x =>
+                    string[] subDirs = Directory.GetDirectories(path);
+                    foreach (string subDir in subDirs)
                     {
-                        List<string> foundsSub = FindFile(x, fileName, scanSubFolders);
-                        _ = founds.AddMissing(foundsSub);
-                    });
+                        try
+                        {
+                            List<string> subResults = FindFile(subDir, fileName, true);
+                            founds.AddRange(subResults.Where(x => !founds.Contains(x))); // Avoid duplicates
+                        }
+                        catch (UnauthorizedAccessException) { /* Skip directories we can't access */ }
+                        catch (PathTooLongException) { /* Skip directories with overly long paths */ }
+                    }
                 }
-                return founds;
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, false);
             }
-            return new List<string>();
+
+            return founds;
+        }
+
+        public static List<string> FindDirectory(string path, string directoryName, bool scanSubFolders)
+        {
+            List<string> founds = new List<string>();
+
+            try
+            {
+                path = CommonPlayniteShared.Common.Paths.FixPathLength(path);
+
+                // Search for matching directories in the current directory
+                string[] directories = Directory.GetDirectories(path);
+                foreach (string dir in directories)
+                {
+                    if (Path.GetFileName(dir).IsEqual(directoryName))
+                    {
+                        founds.Add(dir);
+                    }
+
+                    // If enabled, search recursively in subdirectories
+                    if (scanSubFolders)
+                    {
+                        try
+                        {
+                            List<string> subResults = FindDirectory(dir, directoryName, true);
+                            founds.AddRange(subResults.Where(x => !founds.Contains(x))); // Avoid duplicates
+                        }
+                        catch (UnauthorizedAccessException) { /* Skip inaccessible directories */ }
+                        catch (PathTooLongException) { /* Skip directories with overly long paths */ }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+            }
+
+            return founds;
         }
     }
 }
