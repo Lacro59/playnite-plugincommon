@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using CommonPluginsShared.Extensions;
+using System.Collections.Generic;
 
 namespace CommonPluginsShared
 {
@@ -7,14 +8,14 @@ namespace CommonPluginsShared
         /// <summary>
         /// String lang format for Steam
         /// </summary>
-        /// <param name="PlayniteLanguage"></param>
+        /// <param name="playniteLanguage"></param>
         /// <returns></returns>
         /// <remarks>https://partner.steamgames.com/doc/store/localization?#supported_languages</remarks>
-        public static string GetSteamLang(string PlayniteLanguage)
+        public static string GetSteamLang(string playniteLanguage)
         {
             string SteamLang = string.Empty;
 
-            switch (PlayniteLanguage)
+            switch (playniteLanguage)
             {
                 case "ar_SA":
                     SteamLang = "arabic";
@@ -108,104 +109,136 @@ namespace CommonPluginsShared
         /// <summary>
         /// String lang format for GOG
         /// </summary>
-        /// <param name="PlayniteLanguage"></param>
+        /// <param name="playniteLanguage"></param>
         /// <returns></returns>
-        public static string GetGogLang(string PlayniteLanguage)
+        public static string GetGogLang(string playniteLanguage)
         {
             // Only languages available
             string[] arrayLang = { "de", "en", "fr", "ru", "zh", "zh-Hans" };
 
-            PlayniteLanguage = PlayniteLanguage.Substring(0, 2).ToLower();
-            if (!arrayLang.ContainsString(PlayniteLanguage))
+            playniteLanguage = playniteLanguage.Substring(0, 2).ToLower();
+            if (!arrayLang.ContainsString(playniteLanguage))
             {
-                PlayniteLanguage = "en";
+                playniteLanguage = "en";
             }
 
-            return PlayniteLanguage;
+            return playniteLanguage;
         }
 
 
-        public static string GetGenshinLang(string PlayniteLanguage)
+        public static string GetGenshinLang(string playniteLanguage)
         {
             // Only languages available
             string[] arrayLang = { "chs", "cht", "de", "en", "es", "fr", "id", "jp", "kr", "pt", "ru", "th", "vi" };
 
-            PlayniteLanguage = PlayniteLanguage.Substring(0, 2).ToLower();
-            if (!arrayLang.ContainsString(PlayniteLanguage))
+            playniteLanguage = playniteLanguage.Substring(playniteLanguage.Length - 2).ToLower();
+            if (!arrayLang.ContainsString(playniteLanguage))
             {
-                PlayniteLanguage = "en";
+                playniteLanguage = "en";
             }
 
-            return PlayniteLanguage;
+            if (playniteLanguage.IsEqual("zh_CN"))
+            {
+                playniteLanguage = "chs";
+            }
+            if (playniteLanguage.IsEqual("zh_CN"))
+            {
+                playniteLanguage = "cht";
+            }
+
+            return playniteLanguage;
+        }
+
+        public static string GetWuWaLang(string playniteLanguage)
+        {
+            // Only languages available
+            string[] arrayLang = { "de", "en", "es", "fr", "ja", "ko", "zh-Hans", "zh-Hant" };
+
+            playniteLanguage = playniteLanguage.Substring(0, 2).ToLower();
+            if (!arrayLang.ContainsString(playniteLanguage))
+            {
+                playniteLanguage = "en";
+            }
+
+            if (playniteLanguage.IsEqual("zh_CN"))
+            {
+                playniteLanguage = "zh-Hans";
+            }
+            if (playniteLanguage.IsEqual("zh_CN"))
+            {
+                playniteLanguage = "zh-Hant";
+            }
+
+            return playniteLanguage;
         }
 
 
         /// <summary>
         /// String lang format for Origin
         /// </summary>
-        /// <param name="PlayniteLanguage"></param>
+        /// <param name="playniteLanguage"></param>
         /// <returns></returns>
-        public static string GetOriginLang(string PlayniteLanguage)
+        public static string GetOriginLang(string playniteLanguage)
         {
-            if (PlayniteLanguage == "english")
+            if (playniteLanguage == "english")
             {
-                PlayniteLanguage = "en_US";
+                playniteLanguage = "en_US";
             }
-            return PlayniteLanguage;
+            return playniteLanguage;
         }
 
         /// <summary>
         /// String lang country for Origin
         /// </summary>
-        /// <param name="PlayniteLanguage"></param>
+        /// <param name="playniteLanguage"></param>
         /// <returns></returns>
-        public static string GetOriginLangCountry(string PlayniteLanguage)
+        public static string GetOriginLangCountry(string playniteLanguage)
         {
-            return PlayniteLanguage.Substring((PlayniteLanguage.Length - 2));
+            return playniteLanguage.Substring(playniteLanguage.Length - 2);
         }
 
 
         /// <summary>
         /// String lang format for Epic Game
         /// </summary>
-        /// <param name="PlayniteLanguage"></param>
+        /// <param name="playniteLanguage"></param>
         /// <returns></returns>
-        public static string GetEpicLang(string PlayniteLanguage)
+        public static string GetEpicLang(string playniteLanguage)
         {
-            if (PlayniteLanguage == "english")
+            if (playniteLanguage == "english")
             {
-                PlayniteLanguage = "en_US";
+                playniteLanguage = "en_US";
             }
-            return PlayniteLanguage.Replace("_", "-");
+            return playniteLanguage.Replace("_", "-");
         }
 
         /// <summary>
         /// String lang country for Epic Game
         /// </summary>
-        /// <param name="PlayniteLanguage"></param>
+        /// <param name="playniteLanguage"></param>
         /// <returns></returns>
-        public static string GetEpicLangCountry(string PlayniteLanguage)
+        public static string GetEpicLangCountry(string playniteLanguage)
         {
-            if (PlayniteLanguage == "english")
+            if (playniteLanguage == "english")
             {
-                PlayniteLanguage = "en_US";
+                playniteLanguage = "en_US";
             }
-            return PlayniteLanguage.Substring(0, 2);
+            return playniteLanguage.Substring(0, 2);
         }
 
 
         /// <summary>
         /// String lang format for Xbox / Windows Store
         /// </summary>
-        /// <param name="PlayniteLanguage"></param>
+        /// <param name="playniteLanguage"></param>
         /// <returns></returns>
-        public static string GetXboxLang(string PlayniteLanguage)
+        public static string GetXboxLang(string playniteLanguage)
         {
-            if (PlayniteLanguage == "english")
+            if (playniteLanguage == "english")
             {
-                PlayniteLanguage = "en_US";
+                playniteLanguage = "en_US";
             }
-            return PlayniteLanguage.Replace("_", "-");
+            return playniteLanguage.Replace("_", "-");
         }
     }
 }
