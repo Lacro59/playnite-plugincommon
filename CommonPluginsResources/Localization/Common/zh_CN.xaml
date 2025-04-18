@@ -28,6 +28,8 @@
     <sys:String x:Key="LOCCommonExtractAllToCsv">提取所有插件数据到 CSV (耗时长)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">提取中...</sys:String>
 
+    <sys:String x:Key="LOCCommonImporting">Importing...</sys:String>
+
     <!-- Filters -->
 
     <sys:String x:Key="LOCCommonUsedFilteredGames">当前已使用筛选游戏</sys:String>
