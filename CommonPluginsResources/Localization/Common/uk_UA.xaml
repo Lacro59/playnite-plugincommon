@@ -28,6 +28,8 @@
     <sys:String x:Key="LOCCommonExtractAllToCsv">Видобути всі дані плагіну у CSV (дуже довго)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Видобування...</sys:String>
 
+    <sys:String x:Key="LOCCommonImporting">Importing...</sys:String>
+
     <!-- Filters -->
 
     <sys:String x:Key="LOCCommonUsedFilteredGames">Наразі використано відфільтрованих ігор</sys:String>
