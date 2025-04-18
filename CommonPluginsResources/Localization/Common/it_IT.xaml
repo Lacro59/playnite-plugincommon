@@ -28,6 +28,8 @@
     <sys:String x:Key="LOCCommonExtractAllToCsv">Estrai tutti i dati del plugin in CSV (molto lungo)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Estrazione in corso...</sys:String>
 
+    <sys:String x:Key="LOCCommonImporting">Importing...</sys:String>
+
     <!-- Filters -->
 
     <sys:String x:Key="LOCCommonUsedFilteredGames">Giochi attualmente filtrati usati</sys:String>
