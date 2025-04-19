@@ -28,7 +28,7 @@
     <sys:String x:Key="LOCCommonExtractAllToCsv">Wyodrębnij wszystkie dane wtyczki do CSV (bardzo długo)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Wyodrębnianie...</sys:String>
 
-    <sys:String x:Key="LOCCommonImporting">Importing...</sys:String>
+    <sys:String x:Key="LOCCommonImporting">Importowanie...</sys:String>
 
     <!-- Filters -->
 
