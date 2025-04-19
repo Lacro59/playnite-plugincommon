@@ -28,7 +28,7 @@
     <sys:String x:Key="LOCCommonExtractAllToCsv">Tüm eklenti verilerini CSV olarak ayıkla (çok uzun)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Ayıklanıyor...</sys:String>
 
-    <sys:String x:Key="LOCCommonImporting">Importing...</sys:String>
+    <sys:String x:Key="LOCCommonImporting">İçe aktarılıyor...</sys:String>
 
     <!-- Filters -->
 
