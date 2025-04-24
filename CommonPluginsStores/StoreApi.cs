@@ -452,7 +452,7 @@ namespace CommonPluginsStores
         #region Games owned
         private ObservableCollection<GameDlcOwned> LoadGamesDlcsOwned(bool onlyNow = true)
         {
-            return LoadData<ObservableCollection<GameDlcOwned>>(FileGamesDlcsOwned, (onlyNow ? 0 : 5));
+            return LoadData<ObservableCollection<GameDlcOwned>>(FileGamesDlcsOwned, onlyNow ? 5 : 0);
         }
 
         private bool SaveGamesDlcsOwned(ObservableCollection<GameDlcOwned> gamesDlcsOwned)
