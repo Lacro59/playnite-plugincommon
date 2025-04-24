@@ -6,7 +6,6 @@ using CommonPluginsStores.GameJolt.Models;
 using CommonPluginsStores.Models;
 using Playnite.SDK;
 using Playnite.SDK.Data;
-using SuccessStory.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
