@@ -253,7 +253,7 @@ namespace CommonPluginsStores
                     urls.ForEach(x =>
                     {
                         webView.NavigateAndWait(x);
-                        Thread.Sleep(200);
+                        Thread.Sleep(1000);
                     });
 
                     List<HttpCookie> httpCookies = CookiesDomains?.Count > 0
