@@ -247,7 +247,8 @@ namespace CommonPluginsStores
                     List<HttpCookie> oldCookies = GetStoredCookies();
                     oldCookies?.ForEach(x =>
                     {
-                        webView.SetCookies("https://" + x.Domain, x);
+                        string domain = x.Domain.StartsWith(".") ? x.Domain.Substring(1) : x.Domain;
+                        webView.SetCookies("https://" + domain, x);
                     });
 
                     urls.ForEach(x =>
