@@ -44,7 +44,7 @@ namespace CommonPluginsShared.Collections
         private bool _isLoaded = false;
         public bool IsLoaded { get => _isLoaded; set => SetValue(ref _isLoaded, value); }
 
-        public bool IsViewOpen = false;
+        public bool IsViewOpen { get; set; } = false;
 
         public bool TagMissing { get; set; } = false;
 
@@ -641,6 +641,12 @@ namespace CommonPluginsShared.Collections
         }
 
 
+        public Guid? AddNoDataTag()
+        {
+            return CheckTagExist($"{ResourceProvider.GetString("LOCNoData")}");
+        }
+
+
         public virtual void AddTag(Game game)
         {
             TItem item = Get(game, true);
@@ -931,6 +937,7 @@ namespace CommonPluginsShared.Collections
                         if (x.NewData?.Id != null)
                         {
                             Database.SetGameInfo<T>(x.NewData.Id);
+                            ActionAfterGames_ItemUpdated(x.OldData, x.NewData);
                         }
                     });
 
@@ -955,6 +962,11 @@ namespace CommonPluginsShared.Collections
             }
         }
 
+        public virtual void ActionAfterGames_ItemUpdated(Game gameOld, Game gameNew)
+        {
+        }
+
+
         private void Games_ItemCollectionChanged(object sender, ItemCollectionChangedEventArgs<Game> e)
         {
             try
@@ -970,10 +982,6 @@ namespace CommonPluginsShared.Collections
             }
         }
 
-        public Guid? AddNoDataTag()
-        {
-            return CheckTagExist($"{ResourceProvider.GetString("LOCNoData")}");
-        }
 
         public virtual void SetThemesResources(Game game)
         {
