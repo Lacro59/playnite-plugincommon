@@ -40,6 +40,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\Web\HttpDownloader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Xaml.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\NullIntNumericBox.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\ObjectToStringConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MenuHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Native\Psapi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ObservableObject.cs" />
