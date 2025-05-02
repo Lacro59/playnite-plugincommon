@@ -652,6 +652,28 @@ namespace CommonPluginsShared
         }
 
 
+        public static async Task<string> DownloadPageText(string url, List<HttpCookie> cookies = null, string userAgent = "")
+        {
+            WebViewSettings webViewSettings = new WebViewSettings
+            {
+                JavaScriptEnabled = true,
+                UserAgent = userAgent.IsNullOrEmpty() ? Web.UserAgent : userAgent
+            };
+
+            using (IWebView webView = API.Instance.WebViews.CreateOffscreenView(webViewSettings))
+            {
+                cookies?.ForEach(x =>
+                {
+                    string domain = x.Domain.StartsWith(".") ? x.Domain.Substring(1) : x.Domain;
+                    webView.SetCookies("https://" + domain, x);
+                });
+
+                webView.NavigateAndWait(url);
+                return await webView.GetPageTextAsync();
+            }
+        }
+
+
         public static async Task<string> DownloadStringDataWithUrlBefore(string url, string UrlBefore = "", string LangHeader = "")
         {
             using (var client = new HttpClient())
