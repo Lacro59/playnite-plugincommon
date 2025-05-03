@@ -9,8 +9,9 @@
     <sys:String x:Key="LOCCommonYears">{0} years</sys:String>
     
     <sys:String x:Key="LOCCommonYearLabel">Year</sys:String>
+    <sys:String x:Key="LOCCommonYearsLabel">Years</sys:String>
     <sys:String x:Key="LOCCommonMonthLabel">Month</sys:String>
-    <sys:String x:Key="LOCCommonMonthsLabel">Month(s)</sys:String>
+    <sys:String x:Key="LOCCommonMonthsLabel">Months</sys:String>
     
     <sys:String x:Key="LOCCommonDateData">数据日期</sys:String>
     
@@ -26,6 +27,8 @@
     <sys:String x:Key="LOCCommonExtractToCsv">将插件数据提取到 CSV</sys:String>
     <sys:String x:Key="LOCCommonExtractAllToCsv">提取所有插件数据到 CSV (耗时长)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">提取中...</sys:String>
+
+    <sys:String x:Key="LOCCommonImporting">Importing...</sys:String>
 
     <!-- Filters -->
 
@@ -66,6 +69,8 @@
 
     <sys:String x:Key="LOCCommonAccountConfiguration">账户配置</sys:String>
     <sys:String x:Key="LOCCommonIsPrivate">是私密的</sys:String>
+    <sys:String x:Key="LOCCommonUseAuthentication">Use authentication</sys:String>
+    <sys:String x:Key="LOCCommonUseAuthenticationOption">Use authentication (optional, for more information only)</sys:String>
     <sys:String x:Key="LOCCommonHasApiKey">有 api 密钥</sys:String>
     <sys:String x:Key="LOCCommonControlConfiguration">控制设置</sys:String>
     <sys:String x:Key="LOCCommonGetAccountID">获取账户 ID</sys:String>

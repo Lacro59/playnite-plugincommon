@@ -1,16 +1,17 @@
 ﻿<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
     
-    <sys:String x:Key="LOCCommonDay">{0} day</sys:String>
-    <sys:String x:Key="LOCCommonDays">{0} days</sys:String>
-    <sys:String x:Key="LOCCommonMonth">{0} month</sys:String>
-    <sys:String x:Key="LOCCommonMonths">{0} months</sys:String>
-    <sys:String x:Key="LOCCommonYear">{0} year</sys:String>
-    <sys:String x:Key="LOCCommonYears">{0} years</sys:String>
+    <sys:String x:Key="LOCCommonDay">{0} день</sys:String>
+    <sys:String x:Key="LOCCommonDays">{0} дні</sys:String>
+    <sys:String x:Key="LOCCommonMonth">{0} місяць</sys:String>
+    <sys:String x:Key="LOCCommonMonths">{0} місяці</sys:String>
+    <sys:String x:Key="LOCCommonYear">{0} рік</sys:String>
+    <sys:String x:Key="LOCCommonYears">{0} роки</sys:String>
     
-    <sys:String x:Key="LOCCommonYearLabel">Year</sys:String>
-    <sys:String x:Key="LOCCommonMonthLabel">Month</sys:String>
-    <sys:String x:Key="LOCCommonMonthsLabel">Month(s)</sys:String>
+    <sys:String x:Key="LOCCommonYearLabel">Рік</sys:String>
+    <sys:String x:Key="LOCCommonYearsLabel">Роки</sys:String>
+    <sys:String x:Key="LOCCommonMonthLabel">Місяць</sys:String>
+    <sys:String x:Key="LOCCommonMonthsLabel">Місяці</sys:String>
     
     <sys:String x:Key="LOCCommonDateData">Дата даних</sys:String>
     
@@ -27,6 +28,8 @@
     <sys:String x:Key="LOCCommonExtractAllToCsv">Видобути всі дані плагіну у CSV (дуже довго)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Видобування...</sys:String>
 
+    <sys:String x:Key="LOCCommonImporting">Імпортування...</sys:String>
+
     <!-- Filters -->
 
     <sys:String x:Key="LOCCommonUsedFilteredGames">Наразі використано відфільтрованих ігор</sys:String>
@@ -35,10 +38,10 @@
 
     <!-- Update -->
 
-    <sys:String x:Key="LOCCommonUpdate">Update</sys:String>
-    <sys:String x:Key="LOCCommonUpdateOnStart">Update on application startup</sys:String>
-    <sys:String x:Key="LOCCommonUpdateEvery">Update on</sys:String>
-    <sys:String x:Key="LOCCommonHours">Hours</sys:String>
+    <sys:String x:Key="LOCCommonUpdate">Оновити</sys:String>
+    <sys:String x:Key="LOCCommonUpdateOnStart">Оновити при запуску програми</sys:String>
+    <sys:String x:Key="LOCCommonUpdateEvery">Оновити</sys:String>
+    <sys:String x:Key="LOCCommonHours">Години</sys:String>
 
     <!-- Transfer plugin data -->
 
@@ -66,6 +69,8 @@
 
     <sys:String x:Key="LOCCommonAccountConfiguration">Налаштування облікового запису</sys:String>
     <sys:String x:Key="LOCCommonIsPrivate">Приватний</sys:String>
+    <sys:String x:Key="LOCCommonUseAuthentication">Використовувати авторизацію</sys:String>
+    <sys:String x:Key="LOCCommonUseAuthenticationOption">Використовувати автентифікацію (необов'язково, для отримання додаткової інформації)</sys:String>
     <sys:String x:Key="LOCCommonHasApiKey">Має API-ключ</sys:String>
     <sys:String x:Key="LOCCommonControlConfiguration">Керування конфігурацією</sys:String>
     <sys:String x:Key="LOCCommonGetAccountID">Отримати ID облікового запису</sys:String>
@@ -178,7 +183,7 @@
 
     <sys:String x:Key="LOCCommonViewNoData">Показати ігри без даних плагіну</sys:String>
 
-    <sys:String x:Key="LOCCommonAddManually">Add manually</sys:String>
+    <sys:String x:Key="LOCCommonAddManually">Додати вручну</sys:String>
     <sys:String x:Key="LOCCommonRefreshGameData">Оновити дані</sys:String>
     <sys:String x:Key="LOCCommonRefreshAllData">Оновити всі дані</sys:String>
     <sys:String x:Key="LOCCommonDeleteGameData">Видалити дані</sys:String>

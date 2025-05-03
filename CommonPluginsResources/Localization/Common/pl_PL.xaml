@@ -1,16 +1,17 @@
 ﻿<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
     
-    <sys:String x:Key="LOCCommonDay">{0} day</sys:String>
-    <sys:String x:Key="LOCCommonDays">{0} days</sys:String>
-    <sys:String x:Key="LOCCommonMonth">{0} month</sys:String>
-    <sys:String x:Key="LOCCommonMonths">{0} months</sys:String>
-    <sys:String x:Key="LOCCommonYear">{0} year</sys:String>
-    <sys:String x:Key="LOCCommonYears">{0} years</sys:String>
+    <sys:String x:Key="LOCCommonDay">{0} dzień</sys:String>
+    <sys:String x:Key="LOCCommonDays">{0} dni</sys:String>
+    <sys:String x:Key="LOCCommonMonth">{0} miesiąc</sys:String>
+    <sys:String x:Key="LOCCommonMonths">{0} miesięcy</sys:String>
+    <sys:String x:Key="LOCCommonYear">{0} rok</sys:String>
+    <sys:String x:Key="LOCCommonYears">{0} lat(a)</sys:String>
     
-    <sys:String x:Key="LOCCommonYearLabel">Year</sys:String>
-    <sys:String x:Key="LOCCommonMonthLabel">Month</sys:String>
-    <sys:String x:Key="LOCCommonMonthsLabel">Month(s)</sys:String>
+    <sys:String x:Key="LOCCommonYearLabel">Rok</sys:String>
+    <sys:String x:Key="LOCCommonYearsLabel">Lat(a)</sys:String>
+    <sys:String x:Key="LOCCommonMonthLabel">Miesiąc</sys:String>
+    <sys:String x:Key="LOCCommonMonthsLabel">Miesiące</sys:String>
     
     <sys:String x:Key="LOCCommonDateData">Data danych</sys:String>
     
@@ -26,6 +27,8 @@
     <sys:String x:Key="LOCCommonExtractToCsv">Wyodrębnij dane wtyczki do CSV</sys:String>
     <sys:String x:Key="LOCCommonExtractAllToCsv">Wyodrębnij wszystkie dane wtyczki do CSV (bardzo długo)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Wyodrębnianie...</sys:String>
+
+    <sys:String x:Key="LOCCommonImporting">Importowanie...</sys:String>
 
     <!-- Filters -->
 
@@ -66,6 +69,8 @@
 
     <sys:String x:Key="LOCCommonAccountConfiguration">Konfiguracja konta</sys:String>
     <sys:String x:Key="LOCCommonIsPrivate">Jest prywatny</sys:String>
+    <sys:String x:Key="LOCCommonUseAuthentication">Użyj uwierzytelniania</sys:String>
+    <sys:String x:Key="LOCCommonUseAuthenticationOption">Użyj uwierzytelniania (opcjonalnie, tylko dla większej ilości informacji)</sys:String>
     <sys:String x:Key="LOCCommonHasApiKey">Ma klucz API</sys:String>
     <sys:String x:Key="LOCCommonControlConfiguration">Konfiguracja sterowania</sys:String>
     <sys:String x:Key="LOCCommonGetAccountID">Uzyskaj ID konta</sys:String>

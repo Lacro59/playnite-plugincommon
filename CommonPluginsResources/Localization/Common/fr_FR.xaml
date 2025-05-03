@@ -9,6 +9,7 @@
     <sys:String x:Key="LOCCommonYears">{0} ans</sys:String>
     
     <sys:String x:Key="LOCCommonYearLabel">Année</sys:String>
+    <sys:String x:Key="LOCCommonYearsLabel">Années</sys:String>
     <sys:String x:Key="LOCCommonMonthLabel">Mois</sys:String>
     <sys:String x:Key="LOCCommonMonthsLabel">Mois</sys:String>
     
@@ -26,6 +27,8 @@
     <sys:String x:Key="LOCCommonExtractToCsv">Extraire les données du plugin en CSV</sys:String>
     <sys:String x:Key="LOCCommonExtractAllToCsv">Extraire toutes les données du plugin en CSV (très long)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Extraction en cours...</sys:String>
+
+    <sys:String x:Key="LOCCommonImporting">Importation en cours...</sys:String>
 
     <!-- Filters -->
 
@@ -66,6 +69,8 @@
 
     <sys:String x:Key="LOCCommonAccountConfiguration">Configuration du compte</sys:String>
     <sys:String x:Key="LOCCommonIsPrivate">Est privé</sys:String>
+    <sys:String x:Key="LOCCommonUseAuthentication"></sys:String>
+    <sys:String x:Key="LOCCommonUseAuthenticationOption">Utiliser l'authentification (optionnelle, pour plus d'informations seulement)</sys:String>
     <sys:String x:Key="LOCCommonHasApiKey">A une clé api</sys:String>
     <sys:String x:Key="LOCCommonControlConfiguration">Configuration du contrôle</sys:String>
     <sys:String x:Key="LOCCommonGetAccountID">Obtenir l'ID du compte</sys:String>
