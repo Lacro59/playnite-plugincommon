@@ -28,7 +28,7 @@
     <sys:String x:Key="LOCCommonExtractAllToCsv">Extraire toutes les données du plugin en CSV (très long)</sys:String>
     <sys:String x:Key="LOCCommonExtracting">Extraction en cours...</sys:String>
 
-    <sys:String x:Key="LOCCommonImporting">Importing...</sys:String>
+    <sys:String x:Key="LOCCommonImporting">Importation en cours...</sys:String>
 
     <!-- Filters -->
 
@@ -70,7 +70,7 @@
     <sys:String x:Key="LOCCommonAccountConfiguration">Configuration du compte</sys:String>
     <sys:String x:Key="LOCCommonIsPrivate">Est privé</sys:String>
     <sys:String x:Key="LOCCommonUseAuthentication"></sys:String>
-    <sys:String x:Key="LOCCommonUseAuthenticationOption">Use authentication (optional, for more information only)</sys:String>
+    <sys:String x:Key="LOCCommonUseAuthenticationOption">Utiliser l'authentification (optionnelle, pour plus d'informations seulement)</sys:String>
     <sys:String x:Key="LOCCommonHasApiKey">A une clé api</sys:String>
     <sys:String x:Key="LOCCommonControlConfiguration">Configuration du contrôle</sys:String>
     <sys:String x:Key="LOCCommonGetAccountID">Obtenir l'ID du compte</sys:String>
