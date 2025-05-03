@@ -1,244 +1,167 @@
 ﻿using CommonPluginsShared.Extensions;
+using System;
 using System.Collections.Generic;
 
 namespace CommonPluginsShared
 {
     public class CodeLang
     {
+        // Dictionary mapping Playnite languages to Steam language codes
+        private static Dictionary<string, string> SteamLangMap => new Dictionary<string, string>
+        {
+            { "ar_SA", "arabic" },
+            { "bg_BG", "bulgarian" },
+            { "cs_CZ", "czech" },
+            { "da_DK", "danish" },
+            { "de_DE", "german" },
+            { "el_GR", "greek" },
+            { "en_US", "english" },
+            { "es_419", "latam" },
+            { "es_ES", "spanish" },
+            { "fi_FI", "finnish" },
+            { "fr_FR", "french" },
+            { "hu_HU", "hungarian" },
+            { "id_ID", "indonesian" },
+            { "it_IT", "italian" },
+            { "ja_JP", "japanese" },
+            { "ko_KR", "koreana" },
+            { "nl_NL", "dutch" },
+            { "no_NO", "norwegian" },
+            { "pl_PL", "polish" },
+            { "pt_BR", "brazilian" },
+            { "pt_PT", "portuguese" },
+            { "ro_RO", "romanian" },
+            { "ru_RU", "russian" },
+            { "sv_SE", "swedish" },
+            { "th_TH", "thai" },
+            { "tr_TR", "turkish" },
+            { "uk_UA", "ukrainian" },
+            { "vi_VN", "vietnamese" },
+            { "zh_CN", "schinese" },
+            { "zh_TW", "tchinese" },
+        };
+
+
         /// <summary>
-        /// String lang format for Steam
+        /// Converts Playnite language to Steam language code.
         /// </summary>
-        /// <param name="playniteLanguage"></param>
-        /// <returns></returns>
-        /// <remarks>https://partner.steamgames.com/doc/store/localization?#supported_languages</remarks>
         public static string GetSteamLang(string playniteLanguage)
         {
-            string SteamLang = string.Empty;
-
-            switch (playniteLanguage)
-            {
-                case "ar_SA":
-                    SteamLang = "arabic";
-                    break;
-                case "ca_ES":
-                    SteamLang = "arabic";
-                    break;
-                case "cs_CZ":
-                    SteamLang = "czech";
-                    break;
-                case "de_DE":
-                    SteamLang = "german";
-                    break;
-                case "el_GR":
-                    SteamLang = "greek";
-                    break;
-                case "es_ES":
-                    SteamLang = "spanish";
-                    break;
-                case "fi_FI":
-                    SteamLang = "finnish";
-                    break;
-                case "fr_FR":
-                    SteamLang = "french";
-                    break;
-                case "he_IL":
-                    break;
-                case "hu_HU":
-                    SteamLang = "hungarian";
-                    break;
-                case "id_ID":
-                    SteamLang = "indonesian";
-                    break;
-                case "it_IT":
-                    SteamLang = "italian";
-                    break;
-                case "ja_JP":
-                    SteamLang = "japanese";
-                    break;
-                case "ko_KO":
-                    SteamLang = "koreana";
-                    break;
-                case "nl_NL":
-                    SteamLang = "dutch";
-                    break;
-                case "no_NO":
-                    SteamLang = "norwegian";
-                    break;
-                case "pl_PL":
-                    SteamLang = "polish";
-                    break;
-                case "pt_BR":
-                    SteamLang = "brazilian";
-                    break;
-                case "pt_PT":
-                    SteamLang = "portuguese";
-                    break;
-                case "ro_RO":
-                    SteamLang = "romanian";
-                    break;
-                case "ru_RU":
-                    SteamLang = "russian";
-                    break;
-                case "sv_SE":
-                    SteamLang = "swedish";
-                    break;
-                case "tr_TR":
-                    SteamLang = "turkish";
-                    break;
-                case "uk_UA":
-                    SteamLang = "ukrainian";
-                    break;
-                case "vi_VN":
-                    SteamLang = "vietnamese";
-                    break;
-                case "zh_CN":
-                    SteamLang = "schinese";
-                    break;
-                case "zh_TW":
-                    SteamLang = "tchinese";
-                    break;
-                default:
-                    SteamLang = "english";
-                    break;
-            }
-
-            return SteamLang;
+            return SteamLangMap.TryGetValue(playniteLanguage, out string steamLang) ? steamLang : "english";
         }
 
-
         /// <summary>
-        /// String lang format for GOG
+        /// Converts Playnite language to GOG language code.
         /// </summary>
-        /// <param name="playniteLanguage"></param>
-        /// <returns></returns>
         public static string GetGogLang(string playniteLanguage)
         {
-            // Only languages available
-            string[] arrayLang = { "de", "en", "fr", "ru", "zh", "zh-Hans" };
-
-            playniteLanguage = playniteLanguage.Substring(0, 2).ToLower();
-            if (!arrayLang.ContainsString(playniteLanguage))
-            {
-                playniteLanguage = "en";
-            }
-
-            return playniteLanguage;
+            string[] arrayLang = { "en-US", "de-DE", "fr-FR", "pl-PL", "ru-RU", "zh-Hans" };
+            return arrayLang.ContainsString(playniteLanguage, StringComparison.OrdinalIgnoreCase) ? playniteLanguage : "en-US";
         }
 
 
+        /// <summary>
+        /// Converts Playnite language to Genshin Impact language code.
+        /// </summary>
         public static string GetGenshinLang(string playniteLanguage)
         {
-            // Only languages available
+            if (playniteLanguage == "zh_CN")
+            {
+                return "chs";
+            }
+            if (playniteLanguage == "zh_TW")
+            {
+                return "cht";
+            }
+
+            string shortLang = GetShortLang(playniteLanguage);
             string[] arrayLang = { "chs", "cht", "de", "en", "es", "fr", "id", "jp", "kr", "pt", "ru", "th", "vi" };
-
-            playniteLanguage = playniteLanguage.Substring(playniteLanguage.Length - 2).ToLower();
-            if (!arrayLang.ContainsString(playniteLanguage))
-            {
-                playniteLanguage = "en";
-            }
-
-            if (playniteLanguage.IsEqual("zh_CN"))
-            {
-                playniteLanguage = "chs";
-            }
-            if (playniteLanguage.IsEqual("zh_CN"))
-            {
-                playniteLanguage = "cht";
-            }
-
-            return playniteLanguage;
+            return arrayLang.ContainsString(shortLang, StringComparison.OrdinalIgnoreCase) ? shortLang : "en";
         }
 
+        /// <summary>
+        /// Converts Playnite language to Wuthering Waves language code.
+        /// </summary>
         public static string GetWuWaLang(string playniteLanguage)
         {
-            // Only languages available
+            if (playniteLanguage == "zh_CN")
+            {
+                return "zh-Hans";
+            }
+            if (playniteLanguage == "zh_TW")
+            {
+                return "zh-Hant";
+            }
+
+            string shortLang = GetShortLang(playniteLanguage);
             string[] arrayLang = { "de", "en", "es", "fr", "ja", "ko", "zh-Hans", "zh-Hant" };
-
-            playniteLanguage = playniteLanguage.Substring(0, 2).ToLower();
-            if (!arrayLang.ContainsString(playniteLanguage))
-            {
-                playniteLanguage = "en";
-            }
-
-            if (playniteLanguage.IsEqual("zh_CN"))
-            {
-                playniteLanguage = "zh-Hans";
-            }
-            if (playniteLanguage.IsEqual("zh_CN"))
-            {
-                playniteLanguage = "zh-Hant";
-            }
-
-            return playniteLanguage;
+            return arrayLang.ContainsString(shortLang, StringComparison.OrdinalIgnoreCase) ? shortLang : "en";
         }
 
 
         /// <summary>
-        /// String lang format for Origin
+        /// Converts Playnite language to Origin language code.
         /// </summary>
-        /// <param name="playniteLanguage"></param>
-        /// <returns></returns>
         public static string GetOriginLang(string playniteLanguage)
         {
-            if (playniteLanguage == "english")
-            {
-                playniteLanguage = "en_US";
-            }
-            return playniteLanguage;
+            return NormalizeEnglish(playniteLanguage);
         }
 
         /// <summary>
-        /// String lang country for Origin
+        /// Extracts country part for Origin language.
         /// </summary>
-        /// <param name="playniteLanguage"></param>
-        /// <returns></returns>
         public static string GetOriginLangCountry(string playniteLanguage)
         {
+            playniteLanguage = NormalizeEnglish(playniteLanguage);
             return playniteLanguage.Substring(playniteLanguage.Length - 2);
         }
 
 
         /// <summary>
-        /// String lang format for Epic Game
+        /// Converts Playnite language to Epic Games language code.
         /// </summary>
-        /// <param name="playniteLanguage"></param>
-        /// <returns></returns>
         public static string GetEpicLang(string playniteLanguage)
         {
-            if (playniteLanguage == "english")
-            {
-                playniteLanguage = "en_US";
-            }
+            playniteLanguage = NormalizeEnglish(playniteLanguage);
             return playniteLanguage.Replace("_", "-");
         }
 
         /// <summary>
-        /// String lang country for Epic Game
+        /// Extracts country part for Epic Games language.
         /// </summary>
-        /// <param name="playniteLanguage"></param>
-        /// <returns></returns>
         public static string GetEpicLangCountry(string playniteLanguage)
         {
-            if (playniteLanguage == "english")
-            {
-                playniteLanguage = "en_US";
-            }
+            playniteLanguage = NormalizeEnglish(playniteLanguage);
             return playniteLanguage.Substring(0, 2);
         }
 
 
         /// <summary>
-        /// String lang format for Xbox / Windows Store
+        /// Converts Playnite language to Xbox language code.
         /// </summary>
-        /// <param name="playniteLanguage"></param>
-        /// <returns></returns>
         public static string GetXboxLang(string playniteLanguage)
         {
-            if (playniteLanguage == "english")
-            {
-                playniteLanguage = "en_US";
-            }
+            playniteLanguage = NormalizeEnglish(playniteLanguage);
             return playniteLanguage.Replace("_", "-");
+        }
+
+
+
+        /// <summary>
+        /// Normalizes 'english' to 'en_US'.
+        /// </summary>
+        private static string NormalizeEnglish(string lang)
+        {
+            return lang == "english" ? "en_US" : lang;
+        }
+
+        /// <summary>
+        /// Helper method to extract short language part (before underscore).
+        /// </summary>
+        private static string GetShortLang(string playniteLanguage)
+        {
+            string[] parts = playniteLanguage.Split('_');
+            return parts[0].ToLower();
         }
     }
 }
