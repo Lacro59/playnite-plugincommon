@@ -33,9 +33,9 @@ namespace CommonPluginsShared
         public static string UserAgent = $"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0 Playnite/{API.Instance.ApplicationInfo.ApplicationVersion.ToString(2)}";
 
 
-        private static string StrWebUserAgentType(WebUserAgentType UserAgentType)
+        private static string StrWebUserAgentType(WebUserAgentType userAgentType)
         {
-            switch (UserAgentType)
+            switch (userAgentType)
             {
                 case WebUserAgentType.Request:
                     return "request";
@@ -49,14 +49,14 @@ namespace CommonPluginsShared
         /// <summary>
         /// Download file image and resize in icon format (64x64).
         /// </summary>
-        /// <param name="ImageFileName"></param>
+        /// <param name="imageFileName"></param>
         /// <param name="url"></param>
-        /// <param name="ImagesCachePath"></param>
-        /// <param name="PluginName"></param>
+        /// <param name="imagesCachePath"></param>
+        /// <param name="pluginName"></param>
         /// <returns></returns>
-        public static Task<bool> DownloadFileImage(string ImageFileName, string url, string ImagesCachePath, string PluginName)
+        public static Task<bool> DownloadFileImage(string imageFileName, string url, string imagesCachePath, string pluginName)
         {
-            string PathImageFileName = Path.Combine(ImagesCachePath, PluginName.ToLower(), ImageFileName);
+            string PathImageFileName = Path.Combine(imagesCachePath, pluginName.ToLower(), imageFileName);
 
             if (!StringExtensions.IsHttpUrl(url))
             {
@@ -160,14 +160,14 @@ namespace CommonPluginsShared
             }
         }
 
-        public static async Task<Stream> DownloadFileStream(string url, List<HttpCookie> Cookies)
+        public static async Task<Stream> DownloadFileStream(string url, List<HttpCookie> cookies)
         {
             HttpClientHandler handler = new HttpClientHandler();
-            if (Cookies != null)
+            if (cookies != null)
             {
                 CookieContainer cookieContainer = new CookieContainer();
 
-                foreach (var cookie in Cookies)
+                foreach (var cookie in cookies)
                 {
                     Cookie c = new Cookie();
                     c.Name = cookie.Name;
@@ -350,9 +350,9 @@ namespace CommonPluginsShared
         /// Download string data with a specific UserAgent.
         /// </summary>
         /// <param name="url"></param>
-        /// <param name="UserAgentType"></param>
+        /// <param name="userAgentType"></param>
         /// <returns></returns>
-        public static async Task<string> DownloadStringData(string url, WebUserAgentType UserAgentType)
+        public static async Task<string> DownloadStringData(string url, WebUserAgentType userAgentType)
         {
             using (var client = new HttpClient())
             {
@@ -366,7 +366,7 @@ namespace CommonPluginsShared
                 try
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
-                    client.DefaultRequestHeaders.UserAgent.TryParseAdd(StrWebUserAgentType(UserAgentType));
+                    client.DefaultRequestHeaders.UserAgent.TryParseAdd(StrWebUserAgentType(userAgentType));
                     response = await client.SendAsync(request).ConfigureAwait(false);
                 }
                 catch (Exception ex)
@@ -509,25 +509,25 @@ namespace CommonPluginsShared
             return string.Empty;
         }
         
-        public static async Task<string> DownloadStringData(string url, CookieContainer Cookies = null, string UserAgent = "")
+        public static async Task<string> DownloadStringData(string url, CookieContainer cookies = null, string userAgent = "")
         {
             var response = string.Empty;
 
             HttpClientHandler handler = new HttpClientHandler();
-            if (Cookies?.Count > 0)
+            if (cookies?.Count > 0)
             {
-                handler.CookieContainer = Cookies;
+                handler.CookieContainer = cookies;
             }
 
             using (var client = new HttpClient(handler))
             {
-                if (UserAgent.IsNullOrEmpty())
+                if (userAgent.IsNullOrEmpty())
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                 }
                 else
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+                    client.DefaultRequestHeaders.Add("User-Agent", userAgent);
                 }
 
                 HttpResponseMessage result;
@@ -552,20 +552,22 @@ namespace CommonPluginsShared
             return response;
         }
 
-        public static async Task<string> DownloadStringData(string url, List<HttpHeader> HttpHeaders = null, List<HttpCookie> Cookies = null)
+        public static async Task<string> DownloadStringData(string url, List<HttpHeader> httpHeaders = null, List<HttpCookie> cookies = null)
         {
             HttpClientHandler handler = new HttpClientHandler();
-            if (Cookies != null)
+            if (cookies != null)
             {
                 CookieContainer cookieContainer = new CookieContainer();
 
-                foreach (var cookie in Cookies)
+                foreach (var cookie in cookies)
                 {
-                    Cookie c = new Cookie();
-                    c.Name = cookie.Name;
-                    c.Value = Tools.FixCookieValue(cookie.Value);
-                    c.Domain = cookie.Domain;
-                    c.Path = cookie.Path;
+                    Cookie c = new Cookie
+                    {
+                        Name = cookie.Name,
+                        Value = Tools.FixCookieValue(cookie.Value),
+                        Domain = cookie.Domain,
+                        Path = cookie.Path
+                    };
 
                     try
                     {
@@ -591,9 +593,9 @@ namespace CommonPluginsShared
             {
                 client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
 
-                if (HttpHeaders != null)
+                if (httpHeaders != null)
                 {
-                    HttpHeaders.ForEach(x => 
+                    httpHeaders.ForEach(x => 
                     {
                         client.DefaultRequestHeaders.Add(x.Key, x.Value);
                     });
@@ -626,22 +628,22 @@ namespace CommonPluginsShared
         /// </summary>
         /// <param name="url"></param>
         /// <param name="token"></param>
-        /// <param name="UrlBefore"></param>
+        /// <param name="urlBefore"></param>
         /// <returns></returns>
-        public static async Task<string> DownloadStringData(string url, string token, string UrlBefore = "", string LangHeader = "")
+        public static async Task<string> DownloadStringData(string url, string token, string urlBefore = "", string langHeader = "")
         {
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
 
-                if (!LangHeader.IsNullOrEmpty())
+                if (!langHeader.IsNullOrEmpty())
                 {
-                    client.DefaultRequestHeaders.Add("Accept-Language", LangHeader);
+                    client.DefaultRequestHeaders.Add("Accept-Language", langHeader);
                 }
 
-                if (!UrlBefore.IsNullOrEmpty())
+                if (!urlBefore.IsNullOrEmpty())
                 {
-                    await client.GetStringAsync(UrlBefore).ConfigureAwait(false);
+                    await client.GetStringAsync(urlBefore).ConfigureAwait(false);
                 }
 
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
@@ -674,20 +676,20 @@ namespace CommonPluginsShared
         }
 
 
-        public static async Task<string> DownloadStringDataWithUrlBefore(string url, string UrlBefore = "", string LangHeader = "")
+        public static async Task<string> DownloadStringDataWithUrlBefore(string url, string urlBefore = "", string langHeader = "")
         {
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
 
-                if (!LangHeader.IsNullOrEmpty())
+                if (!langHeader.IsNullOrEmpty())
                 {
-                    client.DefaultRequestHeaders.Add("Accept-Language", LangHeader);
+                    client.DefaultRequestHeaders.Add("Accept-Language", langHeader);
                 }
 
-                if (!UrlBefore.IsNullOrEmpty())
+                if (!urlBefore.IsNullOrEmpty())
                 {
-                    await client.GetStringAsync(UrlBefore).ConfigureAwait(false);
+                    await client.GetStringAsync(urlBefore).ConfigureAwait(false);
                 }
                 
                 string result = await client.GetStringAsync(url).ConfigureAwait(false);
@@ -816,16 +818,16 @@ namespace CommonPluginsShared
             return response;
         }
 
-        public static async Task<string> PostStringDataCookies(string url, FormUrlEncodedContent formContent, List<HttpCookie> Cookies = null)
+        public static async Task<string> PostStringDataCookies(string url, FormUrlEncodedContent formContent, List<HttpCookie> cookies = null)
         {
             var response = string.Empty;
 
             HttpClientHandler handler = new HttpClientHandler();
-            if (Cookies != null)
+            if (cookies != null)
             {
                 CookieContainer cookieContainer = new CookieContainer();
 
-                foreach (HttpCookie cookie in Cookies)
+                foreach (HttpCookie cookie in cookies)
                 {
                     Cookie c = new Cookie
                     {
