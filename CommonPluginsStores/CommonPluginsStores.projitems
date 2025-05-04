@@ -59,10 +59,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\ProfileUserFriends.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\UserData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\WishlistResult.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IStoreApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\BasicGameInfos.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\DlcInfos.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Interfaces\IStoreApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\AccountGameInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\AccountWishlist.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\BasicAccountGameInfos.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Enumerations\AccountStatus.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Enumerations\AuthStatus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\GameAchievement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\GameInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\GameDlcOwned.cs" />
@@ -82,7 +86,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\UsersInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PCGamingWiki\PCGamingWikiApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteTools.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PsnApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Psn\Models\PsnApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Psn\Models\PsnAddOnProducts.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Psn\PsnApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\ExtensionsAchievements.cs" />
@@ -109,8 +113,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)Steam\SteamApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\SteamKit.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StoreApi.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UbisoftAPI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\StoreSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Uplay\UplayAPI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Xbox\Models\Wishlists.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Xbox\XboxApi.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Models\Interfaces\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Uplay\" />
   </ItemGroup>
 </Project>

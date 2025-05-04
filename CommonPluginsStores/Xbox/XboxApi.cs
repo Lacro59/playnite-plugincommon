@@ -13,11 +13,11 @@ namespace CommonPluginsStores.Xbox
 {
     public class XboxApi : StoreApi
     {
-        #region Url
+        #region Urls
         private static string UrlBase => @"https://www.microsoft.com";
         #endregion
 
-        #region Url API
+        #region Urls API
         private static string UrlApiWishlist => UrlBase + @"/msstoreapiprod/api/wishlist/details?locale={0}";
         private static string UrlApiWishlistShared => UrlApiWishlist + @"&wishlistId={1}";
         #endregion
@@ -128,19 +128,19 @@ namespace CommonPluginsStores.Xbox
                 {
                     ObservableCollection<AccountWishlist> data = new ObservableCollection<AccountWishlist>();
                     string wishlistId = accountInfos.Link.Split('=')[1];
-                    string response = Web.DownloadStringData(string.Format(UrlApiWishlistShared, CodeLang.GetEpicLang(Local), wishlistId)).GetAwaiter().GetResult();
+                    string response = Web.DownloadStringData(string.Format(UrlApiWishlistShared, CodeLang.GetEpicLang(Locale), wishlistId)).GetAwaiter().GetResult();
                     _ = Serialization.TryFromJson(response, out Wishlists wishlists);
 
-                    foreach (Product product in wishlists.products)
+                    foreach (Product product in wishlists.Products)
                     {
                         data.Add(new AccountWishlist
                         {
-                            Id = product.id,
-                            Name = product.title,
-                            Link = product.pdpUri,
+                            Id = product.Id,
+                            Name = product.Title,
+                            Link = product.PdpUri,
                             Released = null,
                             Added = null,
-                            Image = "https:" + product.image.baseUri
+                            Image = "https:" + product.Image.BaseUri
                         });
                     }
 
@@ -194,7 +194,7 @@ namespace CommonPluginsStores.Xbox
         }
         #endregion
 
-        #region Games owned
+        #region Game owned
         internal override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
         {
             if (!IsUserLoggedIn)

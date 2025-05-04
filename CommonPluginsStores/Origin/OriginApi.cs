@@ -311,7 +311,7 @@ namespace CommonPluginsStores.Origin
                     new HttpHeader { Key = "AuthToken", Value =  AuthToken.Token },
                     new HttpHeader { Key = "Accept", Value = "application/json" }
                 };
-                string url = string.Format(UrlAchievements, accountInfos.ClientId, id, CodeLang.GetOriginLang(Local));
+                string url = string.Format(UrlAchievements, accountInfos.ClientId, id, CodeLang.GetOriginLang(Locale));
                 string response = Web.DownloadStringData(url, httpHeaders).GetAwaiter().GetResult();
                 Serialization.TryFromJson(response, out dynamic originAchievements);
 
@@ -354,7 +354,7 @@ namespace CommonPluginsStores.Origin
             {
                 GameName = name,
                 Name = ClientName,
-                Url = $"{UrlBase}/{CodeLang.GetEpicLang(Local)}/game-library/ogd/{id}/achievements"
+                Url = $"{UrlBase}/{CodeLang.GetEpicLang(Locale)}/game-library/ogd/{id}/achievements"
             };
         }
         
@@ -538,7 +538,7 @@ namespace CommonPluginsStores.Origin
             {
                 try
                 {
-                    PriceData priceData = GetPrice(dlcs.Select(x => x.Id).ToList(), Local, LocalCurrency);
+                    PriceData priceData = GetPrice(dlcs.Select(x => x.Id).ToList(), Locale, LocalCurrency);
                     if (priceData?.Price?.offer != null)
                     {
                         foreach (Offer offer in priceData.Price.offer)
@@ -699,12 +699,12 @@ namespace CommonPluginsStores.Origin
 
         public Models.GameStoreDataResponse GetStoreData(string id)
         {
-            string cachePath = Path.Combine(PathAppsData, id + ".json");
+            string cachePath = Path.Combine(PathAppsData, $"{id}.json");
             Models.GameStoreDataResponse gameStoreDataResponse = LoadData<Models.GameStoreDataResponse>(cachePath, 1440);
 
             if (gameStoreDataResponse == null)
             {
-                string url = string.Format(UrlApi2GameInfo, id, CodeLang.GetOriginLang(Local), CodeLang.GetOriginLangCountry(Local));
+                string url = string.Format(UrlApi2GameInfo, id, CodeLang.GetOriginLang(Locale), CodeLang.GetOriginLangCountry(Locale));
                 string response = Encoding.UTF8.GetString(HttpDownloader.DownloadData(url));
                 Serialization.TryFromJson(response, out gameStoreDataResponse);
             }
@@ -728,7 +728,7 @@ namespace CommonPluginsStores.Origin
                 }
                 else
                 {
-                    Url = string.Format(UrlApi3AppsList, CodeLang.GetOriginLangCountry(Local), CodeLang.GetOriginLang(Local));
+                    Url = string.Format(UrlApi3AppsList, CodeLang.GetOriginLangCountry(Locale), CodeLang.GetOriginLang(Locale));
                 }
 
                 string WebData = Web.DownloadStringDataWithGz(Url).GetAwaiter().GetResult();

@@ -26,6 +26,7 @@ using System.Net.Http;
 using System.Threading;
 using CommonPluginsStores.Steam.Models.SteamKit;
 using Playnite.SDK.Models;
+using CommonPluginsStores.Models.Enumerations;
 
 namespace CommonPluginsStores.Steam
 {
@@ -486,7 +487,7 @@ namespace CommonPluginsStores.Steam
                 {
                     Id = storeAppDetailsResult?.data.steam_appid.ToString(),
                     Name = storeAppDetailsResult?.data.name,
-                    Link = string.Format(UrlSteamGameLocalised, id, CodeLang.GetSteamLang(Local)),
+                    Link = string.Format(UrlSteamGameLocalised, id, CodeLang.GetSteamLang(Locale)),
                     Image = storeAppDetailsResult?.data.header_image,
                     Description = ParseDescription(storeAppDetailsResult?.data.about_the_game),
                     Languages = storeAppDetailsResult?.data.supported_languages,
@@ -520,7 +521,7 @@ namespace CommonPluginsStores.Steam
 
         public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
         {
-            string cachePath = Path.Combine(PathAchievementsData, id + ".json");
+            string cachePath = Path.Combine(PathAchievementsData, $"{id}.json");
             Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
 
             if (data?.Item2 == null)
@@ -567,7 +568,7 @@ namespace CommonPluginsStores.Steam
                             Name = storeAppDetailsResult.data.name,
                             Description = ParseDescription(storeAppDetailsResult?.data.about_the_game),
                             Image = storeAppDetailsResult.data.header_image,
-                            Link = string.Format(UrlSteamGameLocalised, storeAppDetailsResult.data.steam_appid.ToString(), CodeLang.GetSteamLang(Local)),
+                            Link = string.Format(UrlSteamGameLocalised, storeAppDetailsResult.data.steam_appid.ToString(), CodeLang.GetSteamLang(Locale)),
                             IsOwned = isOwned,
                             Price = storeAppDetailsResult.data.is_free ? "0" : storeAppDetailsResult.data.price_overview?.final_formatted,
                             PriceBase = storeAppDetailsResult.data.is_free ? "0" : storeAppDetailsResult.data.price_overview?.initial_formatted
@@ -707,12 +708,12 @@ namespace CommonPluginsStores.Steam
         /// Get AccountID for a SteamId
         /// </summary>
         /// <returns></returns>
-        public static uint GetAccountId(ulong SteamId)
+        public static uint GetAccountId(ulong steamId)
         {
             try
             {
                 SteamID steamID = new SteamID();
-                steamID.SetFromUInt64(SteamId);
+                steamID.SetFromUInt64(steamId);
                 return steamID.AccountID;
             }
             catch (Exception ex)
@@ -933,13 +934,13 @@ namespace CommonPluginsStores.Steam
         #region Steam Api
         public StoreAppDetailsResult GetAppDetails(uint appId, int retryCount)
         {
-            string cachePath = Path.Combine(PathAppsData, appId + ".json");
+            string cachePath = Path.Combine(PathAppsData, $"{appId}.json");
             StoreAppDetailsResult storeAppDetailsResult = LoadData<StoreAppDetailsResult>(cachePath, 1440);
 
             if (storeAppDetailsResult == null)
             {
                 Thread.Sleep(1000); // Prevent http 429
-                string url = string.Format(UrlApiGameDetails, appId, CodeLang.GetSteamLang(Local));
+                string url = string.Format(UrlApiGameDetails, appId, CodeLang.GetSteamLang(Locale));
                 string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
 
                 if (Serialization.TryFromJson(response, out Dictionary<string, StoreAppDetailsResult> parsedData))
@@ -978,7 +979,7 @@ namespace CommonPluginsStores.Steam
             ObservableCollection<GameAchievement> gameAchievements = null;
             if (appId > 0)
             {
-                List<Models.SteamKit.SteamAchievements> steamAchievements = SteamKit.GetGameAchievements(appId, CodeLang.GetSteamLang(Local));
+                List<Models.SteamKit.SteamAchievements> steamAchievements = SteamKit.GetGameAchievements(appId, CodeLang.GetSteamLang(Locale));
                 gameAchievements = steamAchievements?.Select(x => new GameAchievement
                 {
                     Id = x.InternalName,
@@ -1098,7 +1099,7 @@ namespace CommonPluginsStores.Steam
             Logger.Info($"GetAchievementsByApi()");
             if (appId > 0 && ulong.TryParse(accountInfos.UserId, out ulong steamId) && !CurrentAccountInfos.ApiKey.IsNullOrEmpty())
             {
-                List<SteamPlayerAchievement> steamPlayerAchievements = SteamKit.GetPlayerAchievements(CurrentAccountInfos.ApiKey, appId, steamId, CodeLang.GetSteamLang(Local));
+                List<SteamPlayerAchievement> steamPlayerAchievements = SteamKit.GetPlayerAchievements(CurrentAccountInfos.ApiKey, appId, steamId, CodeLang.GetSteamLang(Locale));
                 steamPlayerAchievements?.ForEach(x =>
                 {
                     // Some achievements don't have a valid unlock time, use fallback date instead
@@ -1299,7 +1300,7 @@ namespace CommonPluginsStores.Steam
                                     }
                                     else
                                     {
-                                        if (!CodeLang.GetSteamLang(Local).IsEqual(lang))
+                                        if (!CodeLang.GetSteamLang(Locale).IsEqual(lang))
                                         {
                                             needLocalized = true;
                                         }
@@ -1311,7 +1312,7 @@ namespace CommonPluginsStores.Steam
 
                         if (needLocalized)
                         {
-                            lang = CodeLang.GetSteamLang(Local);
+                            lang = CodeLang.GetSteamLang(Locale);
                         }
                     }
                     else if (response.IndexOf("The specified profile could not be found") > -1)

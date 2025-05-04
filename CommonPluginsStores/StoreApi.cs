@@ -4,6 +4,7 @@ using CommonPluginsShared;
 using CommonPluginsShared.Converters;
 using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Models;
+using CommonPluginsStores.Interfaces;
 using CommonPluginsStores.Models;
 using Playnite.SDK;
 using Playnite.SDK.Data;
@@ -97,7 +98,7 @@ namespace CommonPluginsStores
         internal string PluginName { get; }
         internal string ClientName { get; }
         internal string ClientNameLog { get; }
-        internal string Local { get; set; } = "en_US";
+        internal string Locale { get; set; } = "en_US";
 
         internal string PathStoresData { get; }
         internal string PathAppsData { get; }
@@ -289,10 +290,10 @@ namespace CommonPluginsStores
         /// <summary>
         /// Set data language.
         /// </summary>
-        /// <param name="local">ISO 15897</param>
-        public void SetLanguage(string local)
+        /// <param name="locale">ISO 15897</param>
+        public void SetLanguage(string locale)
         {
-            Local = local;
+            Locale = locale;
         }
 
         public void SetForceAuth(bool forceAuth)
@@ -575,20 +576,5 @@ namespace CommonPluginsStores
             FileSystem.DeleteDirectory(PathAppsData);
             FileSystem.DeleteDirectory(PathAchievementsData);
         }
-    }
-
-
-    public class StoreSettings
-    {
-        public bool UseApi { get; set; } = false;
-
-        private bool _useAuth;
-        public bool UseAuth
-        {
-            get => ForceAuth || _useAuth;
-            set => _useAuth = value;
-        }
-
-        public bool ForceAuth { get; set; } = false;
     }
 }

@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CommonPluginsStores
+namespace CommonPluginsStores.Psn.Models
 {
-    public class PsnApi
-    {
-    }
+    //public class PsnApi
+    //{
+    //}
 
 
     public class Trophies

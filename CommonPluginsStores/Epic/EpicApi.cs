@@ -7,6 +7,7 @@ using CommonPluginsShared.Models;
 using CommonPluginsStores.Epic.Models;
 using CommonPluginsStores.Epic.Models.Query;
 using CommonPluginsStores.Models;
+using CommonPluginsStores.Models.Enumerations;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
@@ -31,7 +32,7 @@ namespace CommonPluginsStores.Epic
     // https://github.com/pepeizq/pepeizqs-deals-web/blob/master/pepeizqs%20deals%20web/APIs/EpicGames/Juego.cs
     public class EpicApi : StoreApi
     {
-        #region Url
+        #region Urls
         private string UrlBase => @"https://www.epicgames.com";
         private string UrlStore => UrlBase + @"/store/{0}/p/{1}";
         private string UrlAchievements => UrlBase + @"/store/{0}/achievements/{1}";
@@ -77,7 +78,7 @@ namespace CommonPluginsStores.Epic
         #region Cookies
         internal override List<HttpCookie> GetWebCookies(bool deleteCookies = false)
         {
-            string localLangShort = CodeLang.GetEpicLangCountry(Local);
+            string localLangShort = CodeLang.GetEpicLangCountry(Locale);
             List<HttpCookie> httpCookies = new List<HttpCookie>
             {
                 new HttpCookie
@@ -423,7 +424,7 @@ namespace CommonPluginsStores.Epic
         /// <returns></returns>
         public override SourceLink GetAchievementsSourceLink(string name, string id, AccountInfos accountInfos)
         {
-            string LocalLang = CodeLang.GetEpicLang(Local);
+            string LocalLang = CodeLang.GetEpicLang(Locale);
             string Url = string.Format(UrlAchievements, LocalLang, id);
 
             return new SourceLink
@@ -472,7 +473,7 @@ namespace CommonPluginsStores.Epic
                                     {
                                         Id = Id,
                                         Name = Name,
-                                        Link = Link.IsNullOrEmpty() ? string.Empty : string.Format(UrlStore, CodeLang.GetEpicLang(Local), Link),
+                                        Link = Link.IsNullOrEmpty() ? string.Empty : string.Format(UrlStore, CodeLang.GetEpicLang(Locale), Link),
                                         Released = Released,
                                         Added = Added,
                                         Image = Image
@@ -545,7 +546,7 @@ namespace CommonPluginsStores.Epic
 
         public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
         {
-            string cachePath = Path.Combine(PathAchievementsData, id + ".json");
+            string cachePath = Path.Combine(PathAchievementsData, $"{id}.json");
             Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
 
             if (data?.Item2 == null)
@@ -586,7 +587,7 @@ namespace CommonPluginsStores.Epic
         {
             try
             {
-                string LocalLang = CodeLang.GetEpicLang(Local);
+                string LocalLang = CodeLang.GetEpicLang(Locale);
                 ObservableCollection<DlcInfos> Dlcs = new ObservableCollection<DlcInfos>();
 
                 // List DLC
@@ -1047,15 +1048,15 @@ namespace CommonPluginsStores.Epic
         {
             try
             {
-                string cachePath = Path.Combine(PathAppsData, epic_namespace + ".json");
+                string cachePath = Path.Combine(PathAppsData, $"{epic_namespace}.json");
                 EpicAddonsByNamespace data = LoadData<EpicAddonsByNamespace>(cachePath, 1440);
 
                 if (data == null)
                 {
                     QueryAddonsByNamespace query = new QueryAddonsByNamespace();
                     query.variables.epic_namespace = epic_namespace;
-                    query.variables.locale = CodeLang.GetEpicLang(Local);
-                    query.variables.country = CodeLang.GetOriginLangCountry(Local);
+                    query.variables.locale = CodeLang.GetEpicLang(Locale);
+                    query.variables.country = CodeLang.GetOriginLangCountry(Locale);
                     StringContent content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
                     HttpClient httpClient = new HttpClient();
                     HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content);
@@ -1119,7 +1120,7 @@ namespace CommonPluginsStores.Epic
         {
             try
             {
-                string queryParams = $"?operationName=Achievement&variables={{\"sandboxId\":\"{sandboxId}\",\"locale\":\"{CodeLang.GetEpicLang(Local)}\"}}&extensions={{\"persistedQuery\":{{\"version\":1,\"sha256Hash\":\"9284d2fe200e351d1496feda728db23bb52bfd379b236fc3ceca746c1f1b33f2\"}}}}";
+                string queryParams = $"?operationName=Achievement&variables={{\"sandboxId\":\"{sandboxId}\",\"locale\":\"{CodeLang.GetEpicLang(Locale)}\"}}&extensions={{\"persistedQuery\":{{\"version\":1,\"sha256Hash\":\"9284d2fe200e351d1496feda728db23bb52bfd379b236fc3ceca746c1f1b33f2\"}}}}";
                 string response = await Web.DownloadStringData(UrlGraphQL + queryParams);
                 _ = Serialization.TryFromJson(response, out EpicAchievementResponse data);
                 return data;
@@ -1205,7 +1206,7 @@ namespace CommonPluginsStores.Epic
 
             if (result == null)
             {
-                string url = string.Format("/catalog/api/shared/bulk/items?id={0}&country={1}&locale={2}&includeMainGameDetails=true", id, CodeLang.GetEpicLangCountry(Local), CodeLang.GetEpicLang(Local));
+                string url = string.Format("/catalog/api/shared/bulk/items?id={0}&country={1}&locale={2}&includeMainGameDetails=true", id, CodeLang.GetEpicLangCountry(Locale), CodeLang.GetEpicLang(Locale));
                 Tuple<string, Dictionary<string, CatalogItem>> catalogResponse = InvokeRequest<Dictionary<string, CatalogItem>>(UrlApiCatalog + url).GetAwaiter().GetResult();
                 result = catalogResponse.Item2;
                 FileSystem.WriteStringToFile(cachePath, catalogResponse.Item1);

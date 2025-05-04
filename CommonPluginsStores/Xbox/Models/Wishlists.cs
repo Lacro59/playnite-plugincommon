@@ -1,67 +1,129 @@
-﻿using System;
+﻿using Playnite.SDK.Data;
+using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace CommonPluginsStores.Xbox.Models
 {
     public class Disclaimer
     {
-        public bool hasDisclaimer { get; set; }
-        public string text { get; set; }
+        [SerializationPropertyName("hasDisclaimer")]
+        public bool HasDisclaimer { get; set; }
+
+        [SerializationPropertyName("text")]
+        public string Text { get; set; }
     }
 
     public class Image
     {
-        public double width { get; set; }
-        public double height { get; set; }
-        public string baseUri { get; set; }
-        public string system { get; set; }
-        public string alt { get; set; }
-        public string background { get; set; }
-        public string imagePosition { get; set; }
-        public string purpose { get; set; }
+        [SerializationPropertyName("width")]
+        public double Width { get; set; }
+
+        [SerializationPropertyName("height")]
+        public double Height { get; set; }
+
+        [SerializationPropertyName("baseUri")]
+        public string BaseUri { get; set; }
+
+        [SerializationPropertyName("system")]
+        public string System { get; set; }
+
+        [SerializationPropertyName("alt")]
+        public string Alt { get; set; }
+
+        [SerializationPropertyName("background")]
+        public string Background { get; set; }
+
+        [SerializationPropertyName("imagePosition")]
+        public string ImagePosition { get; set; }
+
+        [SerializationPropertyName("purpose")]
+        public string Purpose { get; set; }
     }
 
     public class Price
     {
-        public string taxLabel { get; set; }
-        public Disclaimer disclaimer { get; set; }
-        public bool hasAddOns { get; set; }
-        public string priceFormat { get; set; }
-        public string currency { get; set; }
-        public string currencySymbol { get; set; }
-        public string currentPrice { get; set; }
-        public double currentValue { get; set; }
-        public string fromText { get; set; }
+        [SerializationPropertyName("taxLabel")]
+        public string TaxLabel { get; set; }
+
+        [SerializationPropertyName("disclaimer")]
+        public Disclaimer Disclaimer { get; set; }
+
+        [SerializationPropertyName("hasAddOns")]
+        public bool HasAddOns { get; set; }
+
+        [SerializationPropertyName("priceFormat")]
+        public string PriceFormat { get; set; }
+
+        [SerializationPropertyName("currency")]
+        public string Currency { get; set; }
+
+        [SerializationPropertyName("currencySymbol")]
+        public string CurrencySymbol { get; set; }
+
+        [SerializationPropertyName("currentPrice")]
+        public string CurrentPrice { get; set; }
+
+        [SerializationPropertyName("currentValue")]
+        public double CurrentValue { get; set; }
+
+        [SerializationPropertyName("fromText")]
+        public string FromText { get; set; }
     }
 
     public class Product
     {
-        public string id { get; set; }
-        public string locale { get; set; }
-        public string title { get; set; }
-        public string description { get; set; }
-        public string pdpUri { get; set; }
-        public Price price { get; set; }
-        public Image image { get; set; }
-        public string productFamily { get; set; }
-        public string skuId { get; set; }
+        [SerializationPropertyName("id")]
+        public string Id { get; set; }
+
+        [SerializationPropertyName("locale")]
+        public string Locale { get; set; }
+
+        [SerializationPropertyName("title")]
+        public string Title { get; set; }
+
+        [SerializationPropertyName("description")]
+        public string Description { get; set; }
+
+        [SerializationPropertyName("pdpUri")]
+        public string PdpUri { get; set; }
+
+        [SerializationPropertyName("price")]
+        public Price Price { get; set; }
+
+        [SerializationPropertyName("image")]
+        public Image Image { get; set; }
+
+        [SerializationPropertyName("productFamily")]
+        public string ProductFamily { get; set; }
+
+        [SerializationPropertyName("skuId")]
+        public string SkuId { get; set; }
     }
 
     public class Wishlists
     {
-        public string name { get; set; }
-        public List<Product> products { get; set; }
-        public bool hasUnavailableProducts { get; set; }
-        public Settings settings { get; set; }
-        public string id { get; set; }
+        [SerializationPropertyName("name")]
+        public string Name { get; set; }
+
+        [SerializationPropertyName("products")]
+        public List<Product> Products { get; set; }
+
+        [SerializationPropertyName("hasUnavailableProducts")]
+        public bool HasUnavailableProducts { get; set; }
+
+        [SerializationPropertyName("settings")]
+        public Settings Settings { get; set; }
+
+        [SerializationPropertyName("id")]
+        public string Id { get; set; }
     }
 
     public class Settings
     {
-        public bool notificationOptIn { get; set; }
-        public string visibility { get; set; }
+        [SerializationPropertyName("notificationOptIn")]
+        public bool NotificationOptIn { get; set; }
+
+        [SerializationPropertyName("visibility")]
+        public string Visibility { get; set; }
     }
-
-
 }

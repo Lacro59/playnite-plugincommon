@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using CommonPluginsStores;
 using CommonPluginsStores.Epic;
+using CommonPluginsStores.Interfaces;
 
 namespace CommonPluginsControls.Stores.Epic
 {

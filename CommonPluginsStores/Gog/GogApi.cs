@@ -8,6 +8,7 @@ using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Models;
 using CommonPluginsStores.Gog.Models;
 using CommonPluginsStores.Models;
+using CommonPluginsStores.Models.Enumerations;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
@@ -28,7 +29,7 @@ namespace CommonPluginsStores.Gog
     // https://gogapidocs.readthedocs.io/en/latest/
     public class GogApi : StoreApi
     {
-        #region Url
+        #region Urls
         private static string UrlAccountInfo => @"https://menu.gog.com/v1/account/basic";
 
         private static string UrlBase => @"https://www.gog.com";
@@ -47,7 +48,7 @@ namespace CommonPluginsStores.Gog
         private static string UrlGogGame => UrlBase + @"/game/{0}";
         #endregion
 
-        #region Url API
+        #region Urls API
         private static string UrlApiGamePlay => @"https://gameplay.gog.com";
         private static string UrlApi => @"https://api.gog.com";
         private static string UrlEmbed => @"https://embed.gog.com";
@@ -356,7 +357,7 @@ namespace CommonPluginsStores.Gog
             try
             {
                 string url = string.Format(UrlApiGamePlayUserAchievements, id, accountInfos.UserId);
-                string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Local).ToLower());
+                string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Locale).ToLower());
                 string reponse = Web.DownloadStringData(url, AuthToken?.Token, urlLang).GetAwaiter().GetResult();
 
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
@@ -413,7 +414,7 @@ namespace CommonPluginsStores.Gog
             try
             {
                 string url = string.Format(UrlUserGameAchievements, accountInfos.Pseudo, id, accountInfos.UserId);
-                string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Local).ToLower());
+                string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Locale).ToLower());
                 string response = Web.DownloadStringDataWithUrlBefore(url, urlLang).GetAwaiter().GetResult();
                 string jsonDataString = Tools.GetJsonInString(response, "(?<=window.profilesData.achievements\\s=\\s)");
 
@@ -696,7 +697,7 @@ namespace CommonPluginsStores.Gog
             {
                 try
                 {
-                    PriceData priceData = GetPrice(dlcs.Select(x => x.Id).ToList(), Local, LocalCurrency);
+                    PriceData priceData = GetPrice(dlcs.Select(x => x.Id).ToList(), Locale, LocalCurrency);
                     string dataObjString = Serialization.ToJson(priceData?.DataObj["_embedded"]);
                     _ = Serialization.TryFromJson(dataObjString, out PriceResult priceResult, out Exception ex);
                     if (ex != null)
@@ -827,12 +828,12 @@ namespace CommonPluginsStores.Gog
 
         public ProductApiDetail GetProductDetail(string id)
         {
-            string cachePath = Path.Combine(PathAppsData, id + ".json");
+            string cachePath = Path.Combine(PathAppsData, $"{id}.json");
             ProductApiDetail productApiDetail = LoadData<ProductApiDetail>(cachePath, 1440);
 
             if (productApiDetail == null)
             {
-                string response = Web.DownloadStringData(string.Format(UrlApiGameInfo, id, CodeLang.GetGogLang(Local).ToLower())).GetAwaiter().GetResult();
+                string response = Web.DownloadStringData(string.Format(UrlApiGameInfo, id, CodeLang.GetGogLang(Locale).ToLower())).GetAwaiter().GetResult();
                 if (!response.Contains("<!DOCTYPE html>", StringComparison.InvariantCultureIgnoreCase))
                 {
                     _ = Serialization.TryFromJson(response, out productApiDetail, out Exception ex);

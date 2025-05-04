@@ -22,7 +22,7 @@ namespace CommonPluginsStores.PCGamingWiki
         internal ExternalPlugin PluginLibrary { get; }
 
 
-        #region Url
+        #region Urls
         private string UrlBase => @"https://pcgamingwiki.com";
         private string UrlWithSteamId => UrlBase + @"/api/appid.php?appid={0}";
         private string UrlPCGamingWikiSearch => UrlBase + @"/w/index.php?search=";

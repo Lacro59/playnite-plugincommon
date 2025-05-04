@@ -138,7 +138,7 @@ namespace CommonPluginsStores.Psn
 
         public override SourceLink GetAchievementsSourceLink(string name, string id, AccountInfos accountInfos)
         {
-            string langUrl = CodeLang.GetEpicLang(Local);
+            string langUrl = CodeLang.GetEpicLang(Locale);
             return new SourceLink
             {
                 GameName = name,

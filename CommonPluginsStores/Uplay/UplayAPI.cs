@@ -9,12 +9,12 @@ using System.IO;
 
 namespace CommonPluginsStores
 {
-    public class UbisoftAPI
+    public class UplayAPI
     {
-        private static ILogger logger => LogManager.GetLogger();
+        private static ILogger Logger => LogManager.GetLogger();
 
 
-        public UbisoftAPI()
+        public UplayAPI()
         {
         }
 
@@ -34,10 +34,10 @@ namespace CommonPluginsStores
 
         public string GetScreeshotsPath()
         {
-            string ConfigPath = Path.Combine(Environment.GetEnvironmentVariable("AppData"), "..", "Local", "Ubisoft Game Launcher", "settings.yaml");
-            if (File.Exists(ConfigPath))
+            string configPath = Path.Combine(Environment.GetEnvironmentVariable("AppData"), "..", "Local", "Ubisoft Game Launcher", "settings.yaml");
+            if (File.Exists(configPath))
             {
-                dynamic SettingsData = Serialization.FromYamlFile<dynamic>(ConfigPath);
+                dynamic SettingsData = Serialization.FromYamlFile<dynamic>(configPath);
                 return ((string)SettingsData["misc"]["screenshot_root_path"]).Replace('/', Path.DirectorySeparatorChar);
             }
 

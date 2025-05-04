@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CommonPluginsControls.Stores.Steam" 
              xmlns:stores="clr-namespace:CommonPluginsStores" 
+             xmlns:enumerations="clr-namespace:CommonPluginsStores.Models.Enumerations" 
              xmlns:pcmd="clr-namespace:CommonPluginsShared" 
              xmlns:converters="clr-namespace:CommonPlayniteShared.Converters"
              d:DataContext="{d:DesignInstance Type=local:PanelViewModel, IsDesignTimeCreatable=True}"
@@ -75,8 +76,8 @@
                             <DockPanel Margin="0,10,0,0" Visibility="{Binding ElementName=PART_IsPrivate, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <DockPanel.Tag>
                                     <PriorityBinding>
-                                        <Binding Path="User.AccountStatus" IsAsync="True" FallbackValue="{x:Static stores:AccountStatus.Checking}" />
-                                        <Binding Source="{x:Static stores:AccountStatus.Checking}" />
+                                        <Binding Path="User.AccountStatus" IsAsync="True" FallbackValue="{x:Static enumerations:AccountStatus.Checking}" />
+                                        <Binding Source="{x:Static enumerations:AccountStatus.Checking}" />
                                     </PriorityBinding>
                                 </DockPanel.Tag>
 
@@ -86,23 +87,23 @@
                                     <TextBlock.Tag>
                                         <PriorityBinding>
                                             <Binding Path="AuthStatus" IsAsync="True" />
-                                            <Binding Source="{x:Static stores:AuthStatus.Checking}" />
+                                            <Binding Source="{x:Static enumerations:AuthStatus.Checking}" />
                                         </PriorityBinding>
                                     </TextBlock.Tag>
 
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
                                             <Style.Triggers>
-                                                <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.Checking}">
+                                                <Trigger Property="Tag" Value="{x:Static enumerations:AuthStatus.Checking}">
                                                     <Setter Property="Text" Value="{DynamicResource LOCCommonLoginChecking}" />
                                                 </Trigger>
-                                                <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.Ok}">
+                                                <Trigger Property="Tag" Value="{x:Static enumerations:AuthStatus.Ok}">
                                                     <Setter Property="Text" Value="{DynamicResource LOCCommonLoggedIn}" />
                                                 </Trigger>
-                                                <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.AuthRequired}">
+                                                <Trigger Property="Tag" Value="{x:Static enumerations:AuthStatus.AuthRequired}">
                                                     <Setter Property="Text" Value="{DynamicResource LOCCommonNotLoggedIn}" />
                                                 </Trigger>
-                                                <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.Failed}">
+                                                <Trigger Property="Tag" Value="{x:Static enumerations:AuthStatus.Failed}">
                                                     <Setter Property="Text" Value="{DynamicResource LOCCommonNotLoggedInError}" />
                                                 </Trigger>
                                             </Style.Triggers>

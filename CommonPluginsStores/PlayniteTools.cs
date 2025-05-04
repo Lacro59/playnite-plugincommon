@@ -79,16 +79,16 @@ namespace CommonPluginsStores
             // Ubisoft Connect
             if (result.Contains("{Ubisoft"))
             {
-                UbisoftAPI ubisoftAPI = null;
+                UplayAPI ubisoftAPI = null;
 
                 if (UbisoftInstallDir == "null")
                 {
-                    ubisoftAPI = ubisoftAPI ?? new UbisoftAPI();
+                    ubisoftAPI = ubisoftAPI ?? new UplayAPI();
                     UbisoftInstallDir = ubisoftAPI.GetInstallationPath();
                 }
                 if (UbisoftScreenshotsDir == "null")
                 {
-                    ubisoftAPI = ubisoftAPI ?? new UbisoftAPI();
+                    ubisoftAPI = ubisoftAPI ?? new UplayAPI();
                     UbisoftScreenshotsDir = ubisoftAPI.GetScreeshotsPath();
                 }
 

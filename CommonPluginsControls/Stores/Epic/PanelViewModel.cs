@@ -6,7 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using CommonPluginsStores;
+using CommonPluginsStores.Interfaces;
 using CommonPluginsStores.Models;
+using CommonPluginsStores.Models.Enumerations;
 using Playnite.SDK;
 
 namespace CommonPluginsControls.Stores.Epic

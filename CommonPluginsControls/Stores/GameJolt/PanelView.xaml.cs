@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using CommonPluginsStores;
 using CommonPluginsStores.GameJolt;
+using CommonPluginsStores.Interfaces;
 
 namespace CommonPluginsControls.Stores.GameJolt
 {

@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CommonPluginsControls.Stores.Steam" 
              xmlns:stores="clr-namespace:CommonPluginsStores" 
+             xmlns:enumerations="clr-namespace:CommonPluginsStores.Models.Enumerations" 
              xmlns:pcmd="clr-namespace:CommonPluginsShared" 
              xmlns:converters="clr-namespace:CommonPlayniteShared.Converters"
              d:DataContext="{d:DesignInstance Type=local:PanelViewModel, IsDesignTimeCreatable=True}"
@@ -54,8 +55,8 @@
                         <TextBlock Grid.Column="6">
                             <TextBlock.Tag>
                                 <PriorityBinding>
-                                    <Binding Path="User.AccountStatus" IsAsync="True" FallbackValue="{x:Static stores:AccountStatus.Checking}" />
-                                    <Binding Source="{x:Static stores:AccountStatus.Checking}" />
+                                    <Binding Path="User.AccountStatus" IsAsync="True" FallbackValue="{x:Static enumerations:AccountStatus.Checking}" />
+                                    <Binding Source="{x:Static enumerations:AccountStatus.Checking}" />
                                 </PriorityBinding>
                             </TextBlock.Tag>
 
@@ -63,13 +64,13 @@
                                 <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
                                     <Setter Property="Visibility" Value="{Binding User.Pseudo, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}" />
                                     <Style.Triggers>
-                                        <Trigger Property="Tag" Value="{x:Static stores:AccountStatus.Private}">
+                                        <Trigger Property="Tag" Value="{x:Static enumerations:AccountStatus.Private}">
                                             <Setter Property="Text" Value="{DynamicResource LOCSteamPrivateAccount}" />
                                         </Trigger>
-                                        <Trigger Property="Tag" Value="{x:Static stores:AccountStatus.Public}">
+                                        <Trigger Property="Tag" Value="{x:Static enumerations:AccountStatus.Public}">
                                             <Setter Property="Text" Value="{DynamicResource LOCSteamPublicAccount}" />
                                         </Trigger>
-                                        <Trigger Property="Tag" Value="{x:Static stores:AccountStatus.Checking}">
+                                        <Trigger Property="Tag" Value="{x:Static enumerations:AccountStatus.Checking}">
                                             <Setter Property="Text" Value="{DynamicResource LOCCommonPrivateChecking}" />
                                         </Trigger>
                                     </Style.Triggers>
@@ -102,8 +103,8 @@
 
                                 <StackPanel.Tag>
                                     <PriorityBinding>
-                                        <Binding Path="User.AccountStatus" IsAsync="True" FallbackValue="{x:Static stores:AccountStatus.Checking}" />
-                                        <Binding Source="{x:Static stores:AccountStatus.Checking}" />
+                                        <Binding Path="User.AccountStatus" IsAsync="True" FallbackValue="{x:Static enumerations:AccountStatus.Checking}" />
+                                        <Binding Source="{x:Static enumerations:AccountStatus.Checking}" />
                                     </PriorityBinding>
                                 </StackPanel.Tag>
 
@@ -111,7 +112,7 @@
                                     <Style TargetType="StackPanel">
                                         <Setter Property="IsEnabled" Value="False" />
                                         <Style.Triggers>
-                                            <Trigger Property="Tag" Value="{x:Static stores:AccountStatus.Private}">
+                                            <Trigger Property="Tag" Value="{x:Static enumerations:AccountStatus.Private}">
                                                 <Setter Property="IsEnabled" Value="True" />
                                             </Trigger>
                                         </Style.Triggers>
@@ -124,26 +125,26 @@
                                     <TextBlock.Tag>
                                         <PriorityBinding>
                                             <Binding Path="AuthStatus" IsAsync="True" />
-                                            <Binding Source="{x:Static stores:AuthStatus.Checking}" />
+                                            <Binding Source="{x:Static enumerations:AuthStatus.Checking}" />
                                         </PriorityBinding>
                                     </TextBlock.Tag>
 
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
                                             <Style.Triggers>
-                                                <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.Checking}">
+                                                <Trigger Property="Tag" Value="{x:Static enumerations:AuthStatus.Checking}">
                                                     <Setter Property="Text" Value="{DynamicResource LOCCommonLoginChecking}" />
                                                 </Trigger>
-                                                <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.Ok}">
+                                                <Trigger Property="Tag" Value="{x:Static enumerations:AuthStatus.Ok}">
                                                     <Setter Property="Text" Value="{DynamicResource LOCCommonLoggedIn}" />
                                                 </Trigger>
-                                                <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.AuthRequired}">
+                                                <Trigger Property="Tag" Value="{x:Static enumerations:AuthStatus.AuthRequired}">
                                                     <Setter Property="Text" Value="{DynamicResource LOCCommonNotLoggedIn}" />
                                                 </Trigger>
-                                                <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.PrivateAccount}">
+                                                <Trigger Property="Tag" Value="{x:Static enumerations:AuthStatus.PrivateAccount}">
                                                     <Setter Property="Text" Value="{DynamicResource LOCSteamRequiresApiKey}" />
                                                 </Trigger>
-                                                <Trigger Property="Tag" Value="{x:Static stores:AuthStatus.Failed}">
+                                                <Trigger Property="Tag" Value="{x:Static enumerations:AuthStatus.Failed}">
                                                     <Setter Property="Text" Value="{DynamicResource LOCCommonNotLoggedInError}" />
                                                 </Trigger>
                                             </Style.Triggers>

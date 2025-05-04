@@ -21,7 +21,7 @@ namespace CommonPluginsStores.GameJolt
 {
     public class GameJoltApi : StoreApi
     {
-        #region urls
+        #region Urls
         private static string UrlBase => @"https://gamejolt.com";
         private static string UrlSiteApi => UrlBase + "/site-api";
 
@@ -154,7 +154,7 @@ namespace CommonPluginsStores.GameJolt
         #region Game
         public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
         {
-            string cachePath = Path.Combine(PathAchievementsData, id + ".json");
+            string cachePath = Path.Combine(PathAchievementsData, $"{id}.json");
             Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
 
             if (data?.Item2 == null)

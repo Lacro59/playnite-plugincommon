@@ -1,11 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace CommonPluginsStores.Models
 {
-    public class GameDlcOwned
+    /// <summary>
+    /// Represents a downloadable content (DLC) owned by the user.
+    /// </summary>
+    public class GameDlcOwned : ObservableObject
     {
-        public string Id { get; set; }
+        private string _id;
+
+        /// <summary>
+        /// Gets or sets the unique identifier for the DLC.
+        /// </summary>
+        public string Id { get => _id; set => _id = value; }
     }
 }

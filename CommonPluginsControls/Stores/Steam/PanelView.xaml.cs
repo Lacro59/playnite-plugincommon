@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using CommonPluginsStores;
+using CommonPluginsStores.Interfaces;
 using CommonPluginsStores.Steam;
 
 namespace CommonPluginsControls.Stores.Steam
