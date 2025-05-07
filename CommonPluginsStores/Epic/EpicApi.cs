@@ -559,8 +559,8 @@ namespace CommonPluginsStores.Epic
                     GameAchievement gameAchievement = new GameAchievement
                     {
                         Id = x.Achievement.Name,
-                        Name = x.Achievement.UnlockedDisplayName,
-                        Description = x.Achievement.UnlockedDescription,
+                        Name = x.Achievement.UnlockedDisplayName.Trim(),
+                        Description = x.Achievement.UnlockedDescription.Trim(),
                         UrlUnlocked = x.Achievement.UnlockedIconLink,
                         UrlLocked = x.Achievement.LockedIconLink,
                         DateUnlocked = default,

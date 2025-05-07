@@ -326,8 +326,8 @@ namespace CommonPluginsStores.Origin
                 {
                     GameAchievement gameAchievement = new GameAchievement
                     {
-                        Name = (string)item.Value["name"],
-                        Description = (string)item.Value["desc"],
+                        Name = ((string)item.Value["name"]).Trim(),
+                        Description = ((string)item.Value["desc"]).Trim(),
                         UrlUnlocked = (string)item.Value["icons"]["208"],
                         UrlLocked = string.Empty,
                         DateUnlocked = ((string)item.Value["state"]["a_st"] == "ACTIVE") ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds((int)item.Value["u"]),

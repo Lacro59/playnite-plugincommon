@@ -173,8 +173,8 @@ namespace CommonPluginsStores.GameJolt
                     .Select(x => new GameAchievement
                     {
                         Id = x.Id.ToString(),
-                        Name = x.Title,
-                        Description = x.Description,
+                        Name = x.Title.Trim(),
+                        Description = x.Description.Trim(),
                         UrlUnlocked = x.ImgThumbnail,
                         UrlLocked = x.ImgThumbnail,
                         Percent = 100,

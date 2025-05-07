@@ -983,8 +983,8 @@ namespace CommonPluginsStores.Steam
                 gameAchievements = steamAchievements?.Select(x => new GameAchievement
                 {
                     Id = x.InternalName,
-                    Name = x.LocalizedName,
-                    Description = x.LocalizedDesc,
+                    Name = x.LocalizedName.Trim(),
+                    Description = x.LocalizedDesc.Trim(),
                     UrlUnlocked = x.Icon,
                     UrlLocked = x.IconGray,
                     DateUnlocked = default,
@@ -1251,8 +1251,8 @@ namespace CommonPluginsStores.Steam
                         foreach (IElement el in elements)
                         {
                             string urlUnlocked = el.QuerySelector(".achieveImgHolder img")?.GetAttribute("src") ?? string.Empty;
-                            string name = el.QuerySelector(".achieveTxtHolder h3").InnerHtml;
-                            string description = el.QuerySelector(".achieveTxtHolder h5").InnerHtml;
+                            string name = el.QuerySelector(".achieveTxtHolder h3").InnerHtml.Trim();
+                            string description = el.QuerySelector(".achieveTxtHolder h5").InnerHtml.Trim();
 
                             DateTime dateUnlocked = default;
 

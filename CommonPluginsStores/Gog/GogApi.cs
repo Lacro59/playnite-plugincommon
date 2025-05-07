@@ -370,8 +370,8 @@ namespace CommonPluginsStores.Gog
                         GameAchievement gameAchievement = new GameAchievement
                         {
                             Id = x.AchievementKey,
-                            Name = x.Name,
-                            Description = x.Description,
+                            Name = x.Name.Trim(),
+                            Description = x.Description.Trim(),
                             UrlUnlocked = x.ImageUrlUnlocked,
                             UrlLocked = x.ImageUrlLocked,
                             DateUnlocked = x.DateUnlocked == null ? default : (DateTime)x.DateUnlocked,
@@ -432,8 +432,8 @@ namespace CommonPluginsStores.Gog
                         GameAchievement gameAchievement = new GameAchievement
                         {
                             Id = achItem.Id,
-                            Name = achItem.Name,
-                            Description = achItem.Description,
+                            Name = achItem.Name.Trim(),
+                            Description = achItem.Description.Trim(),
                             UrlUnlocked = achItem.ImageUrlUnlocked2,
                             UrlLocked = achItem.ImageUrlLocked2,
                             DateUnlocked = !(bool)stats[accountInfos.UserId]["isUnlocked"] ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds((int)stats[accountInfos.UserId]["unlockDate"]),
