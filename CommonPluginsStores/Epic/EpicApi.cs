@@ -699,9 +699,16 @@ namespace CommonPluginsStores.Epic
         {
             try
             {
-                string url = string.Format(UrlAccountProfile, accountInfos.UserId);
-                string response = await Web.DownloadStringData(url);
-                return !response.Contains("private-view-text");
+                WebViewSettings webViewSettings = new WebViewSettings
+                {
+                    JavaScriptEnabled = true
+                };
+                using (IWebView webView = API.Instance.WebViews.CreateOffscreenView(webViewSettings))
+                {
+                    string url = string.Format(UrlAccountProfile, accountInfos.UserId);
+                    webView.NavigateAndWait(url);
+                    return !webView.GetPageSource().Contains("private-view-text");
+                }
             }
             catch (Exception ex)
             {
