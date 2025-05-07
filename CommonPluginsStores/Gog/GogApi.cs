@@ -33,6 +33,7 @@ namespace CommonPluginsStores.Gog
         private static string UrlAccountInfo => @"https://menu.gog.com/v1/account/basic";
 
         private static string UrlBase => @"https://www.gog.com";
+        private static string UrlImage => @"https://images.gog.com";
 
         private static string UrlLogin => UrlBase + @"/account/";
 
@@ -51,20 +52,22 @@ namespace CommonPluginsStores.Gog
         #region Urls API
         private static string UrlApiGamePlay => @"https://gameplay.gog.com";
         private static string UrlApi => @"https://api.gog.com";
-        private static string UrlEmbed => @"https://embed.gog.com";
+        private static string UrlApiEmbed => @"https://embed.gog.com";
+        private static string UrlApiUsers => @"https://users.gog.com";
 
         private static string UrlApiGamePlayUserAchievements => UrlApiGamePlay + @"/clients/{0}/users/{1}/achievements";
         private static string UrlApiGamePlayFriendAchievements => UrlApiGamePlay + @"/clients/{0}/users/{1}/friends_achievements_unlock_progresses";
 
         private static string UrlApiGameInfo => UrlApi + @"/products/{0}?expand=description&locale={1}";
-
         private static string UrlApiPrice => UrlApi + @"/products/prices?ids={0}&countryCode={1}&currency={2}";
 
-        private static string UrlApiWishlist => UrlEmbed + @"/user/wishlist.json";
-        private static string UrlApiRemoveWishlist => UrlEmbed + @"/user/wishlist/remove/{0}";
+        private static string UrlApiWishlist => UrlApiEmbed + @"/user/wishlist.json";
+        private static string UrlApiRemoveWishlist => UrlApiEmbed + @"/user/wishlist/remove/{0}";
 
-        private static string UrlFriends => UrlEmbed + @"/users/info/{0}?expand=friendStatus";
-        private static string UrlUserOwned => UrlEmbed + @"/user/data/games";
+        private static string UrlFriends => UrlApiEmbed + @"/users/info/{0}?expand=friendStatus";
+        private static string UrlUserOwned => UrlApiEmbed + @"/user/data/games";
+
+        private static string UrlUserInfoByGalaxyUserId => UrlApiUsers + @"/users/{0}";
         #endregion
 
         private string FileUserDataOwned { get; }
@@ -78,7 +81,7 @@ namespace CommonPluginsStores.Gog
             {
                 if (!_accountBasic?.IsLoggedIn ?? true)
                 {
-                    _accountBasic = GetAccountInfo();
+                    _accountBasic = GetAccountByAuthInfo();
                 }
                 return _accountBasic;
             }
@@ -195,13 +198,12 @@ namespace CommonPluginsStores.Gog
                 _ = Task.Run(() =>
                 {
                     Thread.Sleep(1000);
+                    ProfileUserGalaxy profileUserGalaxy = GetAccountInfoByGalaxyUserId(long.Parse(CurrentAccountInfos.UserId));
 
-                    string reponse = Web.DownloadStringData(string.Format(UrlUser, accountInfos.Pseudo), GetStoredCookies()).GetAwaiter().GetResult();
-                    string jsonDataString = Tools.GetJsonInString(reponse, @"window.profilesData.currentUser[ ]?=[ ]?");
-                    _ = Serialization.TryFromJson(jsonDataString, out ProfileUser profileUser);
+                    CurrentAccountInfos.Avatar = $"{UrlImage}/{profileUserGalaxy.Avatar.GogImageId}.jpg";
+                    CurrentAccountInfos.Pseudo = profileUserGalaxy.Username;
 
-                    CurrentAccountInfos.Avatar = profileUser?.Avatar ?? CurrentAccountInfos.Avatar;
-                    CurrentAccountInfos.IsPrivate = !CheckIsPublic(accountInfos).GetAwaiter().GetResult();
+                    CurrentAccountInfos.IsPrivate = !CheckIsPublic(CurrentAccountInfos).GetAwaiter().GetResult();
                     CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
                 });
                 return accountInfos;
@@ -239,7 +241,7 @@ namespace CommonPluginsStores.Gog
                 {
                     _ = DateTime.TryParse(x.DateAccepted.Date, out DateTime DateAdded);
                     string userId = x.User.Id;
-                    string avatar = x.User.Avatar.Replace("\\", string.Empty);
+                    string avatar = x.User.Avatar.Replace("\\", string.Empty) + (x.User.Avatar.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ? string.Empty : ".jpg");
                     string pseudo = x.User.Username;
                     string link = string.Format(UrlUserFriends, pseudo);
 
@@ -414,7 +416,7 @@ namespace CommonPluginsStores.Gog
             try
             {
                 string url = string.Format(UrlUserGameAchievements, accountInfos.Pseudo, id, accountInfos.UserId);
-                string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Locale).ToLower());
+                string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Locale));
                 string response = Web.DownloadStringDataWithUrlBefore(url, urlLang).GetAwaiter().GetResult();
                 string jsonDataString = Tools.GetJsonInString(response, "(?<=window.profilesData.achievements\\s=\\s)");
 
@@ -818,11 +820,26 @@ namespace CommonPluginsStores.Gog
             }
         }
 
-        private AccountBasicResponse GetAccountInfo()
+        private AccountBasicResponse GetAccountByAuthInfo()
         {
             string response = Web.DownloadStringData(UrlAccountInfo, GetStoredCookies()).GetAwaiter().GetResult();
             _ = Serialization.TryFromJson(response, out AccountBasicResponse accountBasicResponse);
             return accountBasicResponse;
+        }
+
+        private ProfileUser GetAccountInfoByPseudo(string pseudo)
+        {
+            string reponse = Web.DownloadStringData(string.Format(UrlUser, pseudo), GetStoredCookies()).GetAwaiter().GetResult();
+            string jsonDataString = Tools.GetJsonInString(reponse, @"window.profilesData.currentUser[ ]?=[ ]?");
+            _ = Serialization.TryFromJson(jsonDataString, out ProfileUser profileUser);
+            return profileUser;
+        }
+
+        private ProfileUserGalaxy GetAccountInfoByGalaxyUserId(long galaxyUserId)
+        {
+            string reponse = Web.DownloadStringData(string.Format(UrlUserInfoByGalaxyUserId, galaxyUserId), GetStoredCookies()).GetAwaiter().GetResult();
+            _ = Serialization.TryFromJson(reponse, out ProfileUserGalaxy profileUserGalaxy);
+            return profileUserGalaxy;
         }
 
 

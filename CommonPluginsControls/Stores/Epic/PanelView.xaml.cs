@@ -95,6 +95,7 @@ namespace CommonPluginsControls.Stores.Epic
             {
                 PanelViewModel.User.Link = null;
                 PanelViewModel.User.Avatar = null;
+                PanelViewModel.User.Pseudo = null;
             }
         }
 

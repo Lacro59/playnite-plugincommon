@@ -94,6 +94,7 @@ namespace CommonPluginsControls.Stores.Gog
             {
                 PanelViewModel.User.Link = null;
                 PanelViewModel.User.Avatar = null;
+                PanelViewModel.User.Pseudo = null;
             }
         }
 

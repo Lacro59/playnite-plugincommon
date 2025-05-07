@@ -56,6 +56,7 @@ namespace CommonPluginsShared
         public static string GetGogLang(string playniteLanguage)
         {
             string[] arrayLang = { "en-US", "de-DE", "fr-FR", "pl-PL", "ru-RU", "zh-Hans" };
+            playniteLanguage = playniteLanguage.Replace("_", "-");
             return arrayLang.ContainsString(playniteLanguage, StringComparison.OrdinalIgnoreCase) ? playniteLanguage : "en-US";
         }
 
