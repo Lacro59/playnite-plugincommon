@@ -30,6 +30,7 @@ namespace CommonPluginsShared.Collections
 
         public bool GameExist => API.Instance.Database.Games.Get(Id) != null;
 
+        [DontSerialize]
         public RelayCommand<Guid> GoToGame => Commands.GoToGame;
 
         #region Game data
