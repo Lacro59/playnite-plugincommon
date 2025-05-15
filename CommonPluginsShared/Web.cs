@@ -30,7 +30,7 @@ namespace CommonPluginsShared
     {
         private static ILogger Logger => LogManager.GetLogger();
 
-        public static string UserAgent = $"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0 Playnite/{API.Instance.ApplicationInfo.ApplicationVersion.ToString(2)}";
+        public static string UserAgent => $"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0 Playnite/{API.Instance.ApplicationInfo.ApplicationVersion.ToString(2)}";
 
 
         private static string StrWebUserAgentType(WebUserAgentType userAgentType)
@@ -624,34 +624,52 @@ namespace CommonPluginsShared
         }
 
         /// <summary>
-        /// Download string data with a bearer token.
+        /// Downloads string data from a URL using an optional token and language header.
+        /// Optionally performs a pre-request to another URL before the main call.
         /// </summary>
-        /// <param name="url"></param>
-        /// <param name="token"></param>
-        /// <param name="urlBefore"></param>
-        /// <returns></returns>
+        /// <param name="url">The URL to fetch the data from.</param>
+        /// <param name="token">The Bearer token for Authorization header.</param>
+        /// <param name="urlBefore">An optional URL to call before the main request (e.g., for session setup).</param>
+        /// <param name="langHeader">Optional Accept-Language header value (e.g., "en-US").</param>
+        /// <returns>The response content as a string.</returns>
         public static async Task<string> DownloadStringData(string url, string token, string urlBefore = "", string langHeader = "")
         {
             using (var client = new HttpClient())
             {
+                // Set the user agent for the request
                 client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
 
-                if (!langHeader.IsNullOrEmpty())
+                // Add Accept-Language header if provided
+                if (!langHeader.IsNullOrWhiteSpace())
                 {
                     client.DefaultRequestHeaders.Add("Accept-Language", langHeader);
                 }
 
-                if (!urlBefore.IsNullOrEmpty())
+                // Make an optional preliminary request if specified
+                if (!urlBefore.IsNullOrWhiteSpace())
                 {
-                    await client.GetStringAsync(urlBefore).ConfigureAwait(false);
+                    try
+                    {
+                        await client.GetStringAsync(urlBefore).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Warn(ex, $"Pre-request to {urlBefore} failed.");
+                    }
                 }
 
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-                string result = await client.GetStringAsync(url).ConfigureAwait(false);
+                // Add the Authorization header
+                if (!token.IsNullOrWhiteSpace())
+                {
+                    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+                }
 
+                // Perform the main request
+                string result = await client.GetStringAsync(url).ConfigureAwait(false);
                 return result;
             }
         }
+
 
 
         public static async Task<string> DownloadPageText(string url, List<HttpCookie> cookies = null, string userAgent = "")
