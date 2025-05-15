@@ -533,6 +533,25 @@ namespace CommonPluginsStores
         }
 
 
+        public static float CalcGamerScore(string value)
+        {
+            float gamerScore = 15;
+            if (value.IsEqual("epic"))
+            {
+                gamerScore = 180;
+            }
+            else if (value.IsEqual("rare"))
+            {
+                gamerScore = 90;
+            }
+            else if (value.IsEqual("uncommon"))
+            {
+                gamerScore = 30;
+            }
+            return gamerScore;
+        }
+
+
         internal T LoadData<T>(string filePath, int minutes) where T : class
         {
             if (filePath.IsNullOrEmpty())
