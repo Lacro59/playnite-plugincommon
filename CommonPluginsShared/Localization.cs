@@ -3,8 +3,8 @@ using System;
 using System.IO;
 using System.Windows;
 using CommonPlayniteShared.Common;
-using System.Threading.Tasks;
-using System.Threading;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace CommonPluginsShared
 {
@@ -12,107 +12,86 @@ namespace CommonPluginsShared
     {
         private static ILogger Logger => LogManager.GetLogger();
 
-
         /// <summary>
-        /// Load common localization
+        /// Load plugin localization resources from XAML files.
         /// </summary>
-        /// <param name="pluginFolder"></param>
-        /// <param name="language"></param>
-        /// <param name="DefaultLoad"></param>
-        internal static void SetPluginLanguage(string pluginFolder, string language, bool DefaultLoad = false)
+        /// <param name="pluginFolder">Plugin directory path</param>
+        /// <param name="language">Language code (e.g., "en", "fr")</param>
+        /// <param name="defaultLoad">If true, load default localization (used in debug mode)</param>
+        internal static void SetPluginLanguage(string pluginFolder, string language, bool defaultLoad = false)
         {
             var dictionaries = Application.Current.Resources.MergedDictionaries;
 
-            // Load default for missing
-            if (!DefaultLoad)
-            {
 #if DEBUG
-                // Force development localization
+            // In development mode, force loading LocSource if not defaultLoad
+            if (!defaultLoad)
+            {
                 SetPluginLanguage(pluginFolder, "LocSource", true);
-#endif
             }
 
-#if DEBUG
-            if (DefaultLoad)
+            // Load plugin-specific localization (not "Common") only if defaultLoad is requested
+            if (defaultLoad)
             {
-                // Load default localization 
-                var langFile = Path.Combine(pluginFolder, "localization\\" + language + ".xaml");
-
-                if (File.Exists(langFile))
-                {
-                    ResourceDictionary res = null;
-                    try
-                    {
-                        res = Xaml.FromFile<ResourceDictionary>(langFile);
-                        res.Source = new Uri(langFile, UriKind.Absolute);
-
-                        foreach (var key in res.Keys)
-                        {
-                            if (res[key] is string locString && locString.IsNullOrEmpty())
-                            {
-                                res.Remove(key);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, false, $"Failed to integrate localization file {langFile}");
-                        return;
-                    }
-
-                    dictionaries.Add(res);
-                }
-                else
-                {
-                    Logger.Warn($"File {langFile} not found");
-                }
+                string pluginLangFile = Path.Combine(pluginFolder, $"localization\\{language}.xaml");
+                LoadResourceDictionary(pluginLangFile, dictionaries, logAs: "Plugin");
             }
 #endif
 
-            // Load common localization 
-            var langFileCommon = Path.Combine(pluginFolder, "localization\\Common\\" + language + ".xaml");
+            // Always try to load common localization
+            string commonLangFile = Path.Combine(pluginFolder, $"localization\\Common\\{language}.xaml");
+            LoadResourceDictionary(commonLangFile, dictionaries, "Common");
+        }
 
-            if (File.Exists(langFileCommon))
+        /// <summary>
+        /// Load a localization resource dictionary if file exists and has changed.
+        /// </summary>
+        /// <param name="filePath">Full path to the XAML localization file</param>
+        /// <param name="dictionaries">The merged dictionaries collection to update</param>
+        /// <param name="logAs">Prefix to use for logging/tracking resource name</param>
+        private static void LoadResourceDictionary(string filePath, Collection<ResourceDictionary> dictionaries, string logAs)
+        {
+            if (!File.Exists(filePath))
             {
-                DateTime LastDate = default;
-                string FileName = "Common_" + Path.GetFileName(langFileCommon);
-                if (ResourceProvider.GetResource(FileName) != null)
-                {
-                    LastDate = (DateTime)ResourceProvider.GetResource(FileName);
-                }
-
-                DateTime lastModified = File.GetLastWriteTime(langFileCommon);
-                if (lastModified > LastDate)
-                {
-                    Application.Current.Resources.Remove(FileName);
-                    Application.Current.Resources.Add(FileName, lastModified);
-
-                    ResourceDictionary res = null;
-                    try
-                    {
-                        res = Xaml.FromFile<ResourceDictionary>(langFileCommon);
-                        res.Source = new Uri(langFileCommon, UriKind.Absolute);
-
-                        foreach (var key in res.Keys)
-                        {
-                            if (res[key] is string locString && locString.IsNullOrEmpty())
-                            {
-                                res.Remove(key);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, false, $"Failed to integrate localization file {langFileCommon}");
-                        return;
-                    }
-
-                    dictionaries.Add(res);
-                }
+                Logger.Warn($"[{logAs}] Localization file not found: {filePath}");
+                return;
             }
-            else
+
+            string fileKey = $"{logAs}_{Path.GetFileName(filePath)}";
+            DateTime lastKnownDate = ResourceProvider.GetResource(fileKey) as DateTime? ?? default;
+            DateTime fileModifiedDate = File.GetLastWriteTime(filePath);
+
+            if (fileModifiedDate <= lastKnownDate)
+                return;
+
+            try
             {
-                Logger.Warn($"File {langFileCommon} not found");
+                var res = Xaml.FromFile<ResourceDictionary>(filePath);
+                res.Source = new Uri(filePath, UriKind.Absolute);
+
+                // Remove empty string entries
+                foreach (var key in res.Keys.Cast<object>().ToList())
+                {
+                    if (res[key] is string s && s.IsNullOrEmpty())
+                    {
+                        res.Remove(key);
+                    }
+                }
+
+                // Replace existing dictionary if same source
+                var existing = dictionaries.FirstOrDefault(d => d.Source != null && d.Source.OriginalString.Equals(filePath, StringComparison.OrdinalIgnoreCase));
+                if (existing != null)
+                {
+                    dictionaries.Remove(existing);
+                }
+
+                dictionaries.Add(res);
+
+                Application.Current.Resources.Remove(fileKey);
+                Application.Current.Resources.Add(fileKey, fileModifiedDate);
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, $"Failed to load {logAs} localization file: {filePath}");
             }
         }
     }
