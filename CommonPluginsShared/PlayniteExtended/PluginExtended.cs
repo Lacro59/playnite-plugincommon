@@ -128,7 +128,6 @@ namespace CommonPluginsShared.PlayniteExtended
         {
             // Set the common resourses & event
             Common.Load(PluginFolder, PlayniteApi.ApplicationSettings.Language);
-            Common.SetEvent();
         }
     }
 }
