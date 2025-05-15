@@ -695,6 +695,14 @@ namespace CommonPluginsStores.Epic
             return null;
         }
 
+        /// <summary>
+        /// Checks if the account profile is public by navigating to the profile page and inspecting the HTML content.
+        /// </summary>
+        /// <param name="accountInfos">The account information containing the user ID of the profile to check.</param>
+        /// <returns>
+        /// Returns true if the profile is public (i.e., the page does not contain "private-view-text").
+        /// Returns false if the profile is private or if an error occurs during the operation.
+        /// </returns>
         public async Task<bool> CheckIsPublic(AccountInfos accountInfos)
         {
             try
@@ -703,11 +711,16 @@ namespace CommonPluginsStores.Epic
                 {
                     JavaScriptEnabled = true
                 };
+
                 using (IWebView webView = API.Instance.WebViews.CreateOffscreenView(webViewSettings))
                 {
                     string url = string.Format(UrlAccountProfile, accountInfos.UserId);
                     webView.NavigateAndWait(url);
-                    return !webView.GetPageSource().Contains("private-view-text");
+                    string source = await webView.GetPageSourceAsync();
+
+                    // Check if the page source contains the "private-view-text" string to determine if the profile is private.
+                    // If the profile is private, the method will return false, otherwise it will return true.
+                    return !source.Contains("private-view-text");
                 }
             }
             catch (Exception ex)
