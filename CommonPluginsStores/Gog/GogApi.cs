@@ -356,14 +356,15 @@ namespace CommonPluginsStores.Gog
                 return null;
             }
 
+            string url = string.Format(UrlApiGamePlayUserAchievements, id, accountInfos.UserId);
+
             try
             {
-                string url = string.Format(UrlApiGamePlayUserAchievements, id, accountInfos.UserId);
                 string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Locale).ToLower());
-                string reponse = Web.DownloadStringData(url, AuthToken?.Token, urlLang).GetAwaiter().GetResult();
+                string response = Web.DownloadStringData(url, AuthToken?.Token, urlLang).GetAwaiter().GetResult();
 
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
-                if (!reponse.IsNullOrEmpty() && Serialization.TryFromJson(reponse, out Achievements achievements) && achievements?.TotalCount > 0)
+                if (!response.IsNullOrEmpty() && Serialization.TryFromJson(response, out Achievements achievements) && achievements?.TotalCount > 0)
                 {
                     achievements.Items.ForEach(x =>
                     {
@@ -376,7 +377,7 @@ namespace CommonPluginsStores.Gog
                             UrlLocked = x.ImageUrlLocked,
                             DateUnlocked = x.DateUnlocked == null ? default : (DateTime)x.DateUnlocked,
                             Percent = (float)x.Rarity,
-                            GamerScore = CalcGamerScore((float)x.Rarity),
+                            GamerScore = CalcGamerScore(x.RarityLevelSlug),
                             IsHidden = !x.Visible
                         };
                         gameAchievements.Add(gameAchievement);
@@ -404,7 +405,7 @@ namespace CommonPluginsStores.Gog
                 }
                 else
                 {
-                    Common.LogError(ex, false, true, PluginName);
+                    Common.LogError(ex, false, $"Error with {url}", true, PluginName);
                 }
             }
 
