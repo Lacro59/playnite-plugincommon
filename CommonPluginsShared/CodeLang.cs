@@ -1,13 +1,12 @@
-﻿using CommonPluginsShared.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace CommonPluginsShared
 {
     public class CodeLang
     {
-        // Dictionary mapping Playnite languages to Steam language codes
-        private static Dictionary<string, string> SteamLangMap => new Dictionary<string, string>
+        // Static dictionary mapping Playnite language codes to Steam language codes
+        private static readonly Dictionary<string, string> _steamLangMap = new Dictionary<string, string>
         {
             { "ar_SA", "arabic" },
             { "bg_BG", "bulgarian" },
@@ -41,17 +40,28 @@ namespace CommonPluginsShared
             { "zh_TW", "tchinese" },
         };
 
+        private static Dictionary<string, string> SteamLangMap => _steamLangMap;
+
+        // -------------------------
+        // Steam
+        // -------------------------
 
         /// <summary>
         /// Converts Playnite language to Steam language code.
+        /// Defaults to "english" if no match is found.
         /// </summary>
         public static string GetSteamLang(string playniteLanguage)
         {
             return SteamLangMap.TryGetValue(playniteLanguage, out string steamLang) ? steamLang : "english";
         }
 
+        // -------------------------
+        // GOG
+        // -------------------------
+
         /// <summary>
         /// Converts Playnite language to GOG language code.
+        /// Defaults to "en-US" if unsupported.
         /// </summary>
         public static string GetGogLang(string playniteLanguage)
         {
@@ -60,19 +70,20 @@ namespace CommonPluginsShared
             return arrayLang.ContainsString(playniteLanguage, StringComparison.OrdinalIgnoreCase) ? playniteLanguage : "en-US";
         }
 
+        // -------------------------
+        // Genshin Impact
+        // -------------------------
 
         /// <summary>
         /// Converts Playnite language to Genshin Impact language code.
+        /// Defaults to "en" if unsupported.
         /// </summary>
         public static string GetGenshinLang(string playniteLanguage)
         {
-            if (playniteLanguage == "zh_CN")
+            switch (playniteLanguage)
             {
-                return "chs";
-            }
-            if (playniteLanguage == "zh_TW")
-            {
-                return "cht";
+                case "zh_CN": return "chs";
+                case "zh_TW": return "cht";
             }
 
             string shortLang = GetShortLang(playniteLanguage);
@@ -80,25 +91,27 @@ namespace CommonPluginsShared
             return arrayLang.ContainsString(shortLang, StringComparison.OrdinalIgnoreCase) ? shortLang : "en";
         }
 
+        // -------------------------
+        // Wuthering Waves
+        // -------------------------
+
         /// <summary>
         /// Converts Playnite language to Wuthering Waves language code.
+        /// Defaults to "en" if unsupported.
         /// </summary>
         public static string GetWuWaLang(string playniteLanguage)
         {
-            if (playniteLanguage == "zh_CN")
-            {
-                return "zh-Hans";
-            }
-            if (playniteLanguage == "zh_TW")
-            {
-                return "zh-Hant";
-            }
+            if (playniteLanguage == "zh_CN") return "zh-Hans";
+            if (playniteLanguage == "zh_TW") return "zh-Hant";
 
             string shortLang = GetShortLang(playniteLanguage);
             string[] arrayLang = { "de", "en", "es", "fr", "ja", "ko", "zh-Hans", "zh-Hant" };
             return arrayLang.ContainsString(shortLang, StringComparison.OrdinalIgnoreCase) ? shortLang : "en";
         }
 
+        // -------------------------
+        // Origin
+        // -------------------------
 
         /// <summary>
         /// Converts Playnite language to Origin language code.
@@ -109,17 +122,22 @@ namespace CommonPluginsShared
         }
 
         /// <summary>
-        /// Extracts country part for Origin language.
+        /// Extracts country code from Origin language.
+        /// Returns last two characters.
         /// </summary>
         public static string GetOriginLangCountry(string playniteLanguage)
         {
             playniteLanguage = NormalizeEnglish(playniteLanguage);
-            return playniteLanguage.Substring(playniteLanguage.Length - 2);
+            return playniteLanguage.Length >= 2 ? playniteLanguage.Substring(playniteLanguage.Length - 2) : "US";
         }
 
+        // -------------------------
+        // Epic Games
+        // -------------------------
 
         /// <summary>
         /// Converts Playnite language to Epic Games language code.
+        /// Replaces "_" with "-".
         /// </summary>
         public static string GetEpicLang(string playniteLanguage)
         {
@@ -128,14 +146,17 @@ namespace CommonPluginsShared
         }
 
         /// <summary>
-        /// Extracts country part for Epic Games language.
+        /// Extracts language part for Epic Games (first 2 letters).
         /// </summary>
         public static string GetEpicLangCountry(string playniteLanguage)
         {
             playniteLanguage = NormalizeEnglish(playniteLanguage);
-            return playniteLanguage.Substring(0, 2);
+            return playniteLanguage.Length >= 2 ? playniteLanguage.Substring(0, 2) : "en";
         }
 
+        // -------------------------
+        // Xbox
+        // -------------------------
 
         /// <summary>
         /// Converts Playnite language to Xbox language code.
@@ -146,10 +167,12 @@ namespace CommonPluginsShared
             return playniteLanguage.Replace("_", "-");
         }
 
-
+        // -------------------------
+        // Helpers
+        // -------------------------
 
         /// <summary>
-        /// Normalizes 'english' to 'en_US'.
+        /// Normalize English to standard Playnite code "en_US".
         /// </summary>
         private static string NormalizeEnglish(string lang)
         {
@@ -157,7 +180,7 @@ namespace CommonPluginsShared
         }
 
         /// <summary>
-        /// Helper method to extract short language part (before underscore).
+        /// Returns the short part of the language code (e.g., "en" from "en_US").
         /// </summary>
         private static string GetShortLang(string playniteLanguage)
         {
