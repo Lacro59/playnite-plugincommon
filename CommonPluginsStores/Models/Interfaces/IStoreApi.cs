@@ -1,9 +1,4 @@
-﻿using CommonPluginsStores.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CommonPluginsStores.Interfaces
+﻿namespace CommonPluginsStores.Models.Interfaces
 {
     /// <summary>
     /// Represents the API contract for a store plugin.
@@ -57,5 +52,4 @@ namespace CommonPluginsStores.Interfaces
         /// </summary>
         void SaveCurrentUser();
     }
-
 }

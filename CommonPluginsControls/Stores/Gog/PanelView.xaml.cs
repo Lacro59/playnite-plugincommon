@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using CommonPluginsStores;
 using CommonPluginsStores.Gog;
-using CommonPluginsStores.Interfaces;
+using CommonPluginsStores.Models.Interfaces;
 
 namespace CommonPluginsControls.Stores.Gog
 {
