@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Playnite.SDK;
+using System;
 using System.Collections.Generic;
 
 namespace CommonPluginsShared
 {
     public class CodeLang
     {
+        private static ILogger Logger => LogManager.GetLogger();
+
         // Static dictionary mapping Playnite language codes to Steam language codes
         private static readonly Dictionary<string, string> _steamLangMap = new Dictionary<string, string>
         {
@@ -52,6 +55,7 @@ namespace CommonPluginsShared
         /// </summary>
         public static string GetSteamLang(string playniteLanguage)
         {
+            playniteLanguage = Normalize(playniteLanguage);
             return SteamLangMap.TryGetValue(playniteLanguage, out string steamLang) ? steamLang : "english";
         }
 
@@ -65,6 +69,7 @@ namespace CommonPluginsShared
         /// </summary>
         public static string GetGogLang(string playniteLanguage)
         {
+            playniteLanguage = Normalize(playniteLanguage);
             string[] arrayLang = { "en-US", "de-DE", "fr-FR", "pl-PL", "ru-RU", "zh-Hans" };
             playniteLanguage = playniteLanguage.Replace("_", "-");
             return arrayLang.ContainsString(playniteLanguage, StringComparison.OrdinalIgnoreCase) ? playniteLanguage : "en-US";
@@ -80,6 +85,7 @@ namespace CommonPluginsShared
         /// </summary>
         public static string GetGenshinLang(string playniteLanguage)
         {
+            playniteLanguage = Normalize(playniteLanguage);
             switch (playniteLanguage)
             {
                 case "zh_CN": return "chs";
@@ -101,6 +107,8 @@ namespace CommonPluginsShared
         /// </summary>
         public static string GetWuWaLang(string playniteLanguage)
         {
+            playniteLanguage = Normalize(playniteLanguage);
+
             if (playniteLanguage == "zh_CN") return "zh-Hans";
             if (playniteLanguage == "zh_TW") return "zh-Hant";
 
@@ -118,7 +126,7 @@ namespace CommonPluginsShared
         /// </summary>
         public static string GetOriginLang(string playniteLanguage)
         {
-            return NormalizeEnglish(playniteLanguage);
+            return Normalize(playniteLanguage);
         }
 
         /// <summary>
@@ -127,7 +135,7 @@ namespace CommonPluginsShared
         /// </summary>
         public static string GetOriginLangCountry(string playniteLanguage)
         {
-            playniteLanguage = NormalizeEnglish(playniteLanguage);
+            playniteLanguage = Normalize(playniteLanguage);
             return playniteLanguage.Length >= 2 ? playniteLanguage.Substring(playniteLanguage.Length - 2) : "US";
         }
 
@@ -141,7 +149,7 @@ namespace CommonPluginsShared
         /// </summary>
         public static string GetEpicLang(string playniteLanguage)
         {
-            playniteLanguage = NormalizeEnglish(playniteLanguage);
+            playniteLanguage = Normalize(playniteLanguage);
             return playniteLanguage.Replace("_", "-");
         }
 
@@ -150,7 +158,7 @@ namespace CommonPluginsShared
         /// </summary>
         public static string GetEpicLangCountry(string playniteLanguage)
         {
-            playniteLanguage = NormalizeEnglish(playniteLanguage);
+            playniteLanguage = Normalize(playniteLanguage);
             return playniteLanguage.Length >= 2 ? playniteLanguage.Substring(0, 2) : "en";
         }
 
@@ -163,7 +171,7 @@ namespace CommonPluginsShared
         /// </summary>
         public static string GetXboxLang(string playniteLanguage)
         {
-            playniteLanguage = NormalizeEnglish(playniteLanguage);
+            playniteLanguage = Normalize(playniteLanguage);
             return playniteLanguage.Replace("_", "-");
         }
 
@@ -172,10 +180,15 @@ namespace CommonPluginsShared
         // -------------------------
 
         /// <summary>
-        /// Normalize English to standard Playnite code "en_US".
+        /// Normalize lang to standard Playnite code "en_US".
         /// </summary>
-        private static string NormalizeEnglish(string lang)
+        private static string Normalize(string lang)
         {
+            if (lang.IsNullOrEmpty())
+            {
+                Logger.Warn($"lang is null or empty");
+                return "en_US";
+            }
             return lang == "english" ? "en_US" : lang;
         }
 
