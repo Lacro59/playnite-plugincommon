@@ -4,11 +4,15 @@ using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Management;
 using System.Text;
 
 namespace CommonPluginsShared
 {
+    /// <summary>
+    /// Represents the local system configuration and manages saving/loading of configurations.
+    /// </summary>
     public class LocalSystem
     {
         private static ILogger Logger => LogManager.GetLogger();
@@ -18,302 +22,217 @@ namespace CommonPluginsShared
         private List<SystemConfiguration> Configurations { get; set; } = new List<SystemConfiguration>();
 
 
+        /// <summary>
+        /// Constructs LocalSystem and loads or adds the current configuration.
+        /// </summary>
+        /// <param name="ConfigurationsPath">Path to configuration JSON file.</param>
+        /// <param name="WithDiskInfos">Include disk info.</param>
         public LocalSystem(string ConfigurationsPath, bool WithDiskInfos = true)
         {
             SystemConfiguration = GetPcInfo(WithDiskInfos);
 
             if (File.Exists(ConfigurationsPath))
             {
-                if (!Serialization.TryFromJsonFile(ConfigurationsPath, out List<SystemConfiguration> Conf))
+                if (!Serialization.TryFromJsonFile(ConfigurationsPath, out List<SystemConfiguration> conf))
                 {
-                    Logger.Warn($"Failed to load {ConfigurationsPath}");
-                    Configurations = new List<SystemConfiguration>();
+                    Logger.Warn(string.Format("Failed to load {0}", ConfigurationsPath));
                 }
                 else
                 {
-                    Configurations = Conf;
-                }
-
-                if (Configurations == null)
-                {
-                    Configurations = new List<SystemConfiguration>();
+                    Configurations = conf ?? new List<SystemConfiguration>();
                 }
             }
 
-            IdConfiguration = Configurations?.FindIndex(x => 
-                    x.Cpu == SystemConfiguration.Cpu && 
-                    x.Name == SystemConfiguration.Name && 
-                    x.GpuName == SystemConfiguration.GpuName && 
-                    x.RamUsage == SystemConfiguration.RamUsage
-            ) ?? -1;
+            IdConfiguration = Configurations.FindIndex(x =>
+                x.Cpu == SystemConfiguration.Cpu &&
+                x.Name == SystemConfiguration.Name &&
+                x.GpuName == SystemConfiguration.GpuName &&
+                x.RamUsage == SystemConfiguration.RamUsage);
+
+            bool updated = false;
 
             if (IdConfiguration == -1)
             {
                 Configurations.Add(SystemConfiguration);
-                FileSystem.WriteStringToFileSafe(ConfigurationsPath, Serialization.ToJson(Configurations));
-
                 IdConfiguration = Configurations.Count - 1;
+                updated = true;
             }
-            // TODO Temp
             else
             {
-                Configurations[IdConfiguration].CurrentHorizontalResolution = SystemConfiguration.CurrentHorizontalResolution;
-                Configurations[IdConfiguration].CurrentVerticalResolution = SystemConfiguration.CurrentVerticalResolution;
+                var config = Configurations[IdConfiguration];
+                config.CurrentHorizontalResolution = SystemConfiguration.CurrentHorizontalResolution;
+                config.CurrentVerticalResolution = SystemConfiguration.CurrentVerticalResolution;
+                updated = true;
+            }
+
+            if (updated)
+            {
                 FileSystem.WriteStringToFileSafe(ConfigurationsPath, Serialization.ToJson(Configurations));
             }
         }
 
-
-        private bool CallIsNvidia(string GpuName)
-        {
-            return !GpuName.IsNullOrEmpty() && (GpuName.ToLower().IndexOf("nvidia") > -1 || GpuName.ToLower().IndexOf("geforce") > -1 || GpuName.ToLower().IndexOf("gtx") > -1 || GpuName.ToLower().IndexOf("rtx") > -1);
-        }
-        private bool CallIsAmd(string GpuName)
-        {
-            return !GpuName.IsNullOrEmpty() && (GpuName.ToLower().IndexOf("amd") > -1 || GpuName.ToLower().IndexOf("radeon") > -1 || GpuName.ToLower().IndexOf("ati ") > -1 || GpuName.ToLower().IndexOf("rx ") > -1);
-        }
-        private bool CallIsIntel(string GpuName)
-        {
-            return !GpuName.IsNullOrEmpty() && GpuName.ToLower().IndexOf("intel") > -1;
-        }
-        private bool IsNotIntegrated(string GpuName)
-        {
-            return !GpuName.IsNullOrEmpty() && GpuName.ToLower().IndexOf("graphics") == -1;
-        }
-
+        /// <summary>
+        /// Gets the current system configuration.
+        /// </summary>
+        public SystemConfiguration GetSystemConfiguration() => SystemConfiguration;
 
         /// <summary>
-        /// Get actual system configuration
+        /// Gets the list of saved configurations.
         /// </summary>
-        /// <returns></returns>
-        public SystemConfiguration GetSystemConfiguration()
-        {
-            return SystemConfiguration;
-        }
+        public List<SystemConfiguration> GetConfigurations() => Configurations;
 
         /// <summary>
-        /// Get configurations list saved
+        /// Gets the index of the current configuration in the list.
         /// </summary>
-        /// <returns></returns>
-        public List<SystemConfiguration> GetConfigurations()
+        public int GetIdConfiguration() => IdConfiguration;
+
+
+        private bool CallIsNvidia(string name) => ContainsIgnoreCase(name, "nvidia", "geforce", "gtx", "rtx");
+        private bool CallIsAmd(string name) => ContainsIgnoreCase(name, "amd", "radeon", "ati ", "rx ");
+        private bool CallIsIntel(string name) => ContainsIgnoreCase(name, "intel");
+        private bool IsNotIntegrated(string name) => !ContainsIgnoreCase(name, "graphics");
+
+        private bool ContainsIgnoreCase(string source, params string[] values)
         {
-            return Configurations;
+            if (string.IsNullOrEmpty(source)) return false;
+            foreach (var val in values)
+            {
+                if (source.IndexOf(val, StringComparison.OrdinalIgnoreCase) >= 0)
+                    return true;
+            }
+            return false;
         }
 
         /// <summary>
-        /// Get Id in configuration list for actual system configuration
+        /// Retrieves the current PC hardware and OS information as a <see cref="SystemConfiguration"/> object.
+        /// Optionally includes disk information.
         /// </summary>
-        /// <returns></returns>
-        public int GetIdConfiguration()
+        /// <param name="withDiskInfos">If true, includes information about physical disks.</param>
+        /// <returns>
+        /// A <see cref="SystemConfiguration"/> object containing details about the machine name, OS, CPU, GPU, RAM, 
+        /// screen resolution, and optionally disk information. If an error occurs, returns a partially filled object.
+        /// </returns>
+        private SystemConfiguration GetPcInfo(bool withDiskInfos = true)
         {
-            return IdConfiguration;
-        }
-
-
-        private SystemConfiguration GetPcInfo(bool WithDiskInfos = true)
-        {
-            SystemConfiguration systemConfiguration = new SystemConfiguration();
-
+            var systemConfiguration = new SystemConfiguration();
             try
             {
-                string Name = Environment.MachineName;
+                systemConfiguration.Name = Environment.MachineName;
+                systemConfiguration.Disks = withDiskInfos ? GetInfoDisks() : new List<SystemDisk>();
 
-                #region Disks infos
-                List<SystemDisk> Disks = new List<SystemDisk>();
-                if (WithDiskInfos)
+                foreach (var os in SafeQueryWMI("select * from Win32_OperatingSystem"))
                 {
-                    Disks = GetInfoDisks();
+                    systemConfiguration.Os = os["Name"]?.ToString().Split('|')[0].Trim();
+                    break;
                 }
-                #endregion
 
-                #region System informations
-                string Os = string.Empty;
-                string Cpu = string.Empty;
-                uint CpuMaxClockSpeed = 0;
-                string GpuName = string.Empty;
-                long GpuRam = 0;
-                uint CurrentHorizontalResolution = 0;
-                uint CurrentVerticalResolution = 0;
-                long Ram = 0;
-
-                // OS
-                try
+                foreach (var cpu in SafeQueryWMI("select * from Win32_Processor"))
                 {
-                    ManagementObjectSearcher myOperativeSystemObject = new ManagementObjectSearcher("select * from Win32_OperatingSystem");
-                    foreach (ManagementObject obj in myOperativeSystemObject.Get())
+                    systemConfiguration.Cpu = cpu["Name"]?.ToString().Trim();
+                    uint.TryParse(cpu["MaxClockSpeed"]?.ToString(), out uint speed);
+                    systemConfiguration.CpuMaxClockSpeed = speed;
+                    break;
+                }
+
+                foreach (var gpu in SafeQueryWMI("select * from Win32_VideoController"))
+                {
+                    var gpuName = gpu["Name"]?.ToString().Trim();
+                    if (string.IsNullOrEmpty(gpuName)) continue;
+
+                    systemConfiguration.GpuName = gpuName;
+
+                    if (long.TryParse(gpu["AdapterRAM"]?.ToString(), out long gpuRam))
                     {
-                        Os = obj["Name"]?.ToString().Split('|')[0];
-                        Common.LogDebug(true, $"Os: {Os}");
+                        systemConfiguration.GpuRam = gpuRam;
                     }
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, "Error on Win32_OperatingSystem");
-                }
 
-                // CPU
-                try
-                {
-                    ManagementObjectSearcher myProcessorObject = new ManagementObjectSearcher("select * from Win32_Processor");
-                    foreach (ManagementObject obj in myProcessorObject.Get())
+                    if (uint.TryParse(gpu["CurrentHorizontalResolution"]?.ToString(), out uint resX))
                     {
-                        Cpu = obj["Name"]?.ToString();
-                        Common.LogDebug(true, $"Cpu: {Cpu}");
-
-                        if (obj["MaxClockSpeed"] != null)
-                        {
-                            uint.TryParse(obj["MaxClockSpeed"].ToString(), out CpuMaxClockSpeed);
-                        }
+                        systemConfiguration.CurrentHorizontalResolution = resX;
                     }
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, "Error on Win32_Processor");
-                }
 
-                // GPU
-                try
-                {
-                    ManagementObjectSearcher myVideoObject = new ManagementObjectSearcher("select * from Win32_VideoController");
-                    foreach (ManagementObject obj in myVideoObject.Get())
+                    if (uint.TryParse(gpu["CurrentVerticalResolution"]?.ToString(), out uint resY))
                     {
-                        GpuName = obj["Name"]?.ToString();
-                        Common.LogDebug(true, $"Gpu: {GpuName}");
-
-                        if (obj["AdapterRAM"] != null)
-                        {
-                            long.TryParse(obj["AdapterRAM"].ToString(), out GpuRam);
-                        }
-
-                        if (obj["CurrentHorizontalResolution"] != null)
-                        {
-                            uint.TryParse(obj["CurrentHorizontalResolution"].ToString(), out CurrentHorizontalResolution);
-                        }
-
-                        if (obj["CurrentVerticalResolution"] != null)
-                        {
-                            uint.TryParse(obj["CurrentVerticalResolution"].ToString(), out CurrentVerticalResolution);
-                        }
-
-                        // Keep only external graphic card
-                        if ((CallIsNvidia(GpuName) || CallIsAmd(GpuName) || CallIsIntel(GpuName)) && IsNotIntegrated(GpuName))
-                        {
-                            break;
-                        }
+                        systemConfiguration.CurrentVerticalResolution = resY;
                     }
+
+                    if ((CallIsNvidia(gpuName) || CallIsAmd(gpuName) || CallIsIntel(gpuName)) && IsNotIntegrated(gpuName))
+                        break;
                 }
-                catch (Exception ex)
+
+                foreach (var sys in SafeQueryWMI("select * from Win32_ComputerSystem"))
                 {
-                    Common.LogError(ex, false, "Error on Win32_VideoController");
+                    double.TryParse(sys["TotalPhysicalMemory"]?.ToString(), out double totalRam);
+                    totalRam = Math.Ceiling(totalRam / 1024 / 1024 / 1024);
+                    systemConfiguration.Ram = (long)(totalRam * 1024 * 1024 * 1024);
+                    break;
                 }
 
-                // RAM
-                try
-                {
-                    ManagementObjectSearcher myComputerSystemObject = new ManagementObjectSearcher("select * from Win32_ComputerSystem");
-                    foreach (ManagementObject obj in myComputerSystemObject.Get())
-                    {
-                        double TempRam = 0;
-
-                        if (obj["TotalPhysicalMemory"] != null)
-                        {
-                            double.TryParse(obj["TotalPhysicalMemory"].ToString(), out TempRam);
-                        }
-
-                        TempRam = Math.Ceiling(TempRam / 1024 / 1024 / 1024);
-                        Ram = (long)(TempRam * 1024 * 1024 * 1024);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, "Error on Win32_ComputerSystem");
-                }
-                #endregion
-
-                systemConfiguration.Name = Name?.Trim();
-                systemConfiguration.Os = Os?.Trim();
-                systemConfiguration.Cpu = Cpu?.Trim();
-                systemConfiguration.CpuMaxClockSpeed = CpuMaxClockSpeed;
-                systemConfiguration.GpuName = GpuName?.Trim();
-                systemConfiguration.GpuRam = GpuRam;
-                systemConfiguration.CurrentHorizontalResolution = CurrentHorizontalResolution;
-                systemConfiguration.CurrentVerticalResolution = CurrentVerticalResolution;
-                systemConfiguration.Ram = Ram;
-                systemConfiguration.RamUsage = Tools.SizeSuffix(Ram, true);
-                systemConfiguration.Disks = Disks;
+                systemConfiguration.RamUsage = Tools.SizeSuffix(systemConfiguration.Ram, true);
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, false);
             }
-
             return systemConfiguration;
         }
 
+        /// <summary>
+        /// Retrieves information about all fixed physical disks on the system.
+        /// </summary>
+        /// <returns>
+        /// A list of <see cref="SystemDisk"/> objects, each containing the disk name, drive letter, free space, and formatted free space usage.
+        /// </returns>
         private List<SystemDisk> GetInfoDisks()
         {
-            List<SystemDisk> Disks = new List<SystemDisk>();
-            DriveInfo[] allDrives = DriveInfo.GetDrives();
-
-            foreach (DriveInfo d in allDrives)
+            var disks = new List<SystemDisk>();
+            foreach (var d in DriveInfo.GetDrives().Where(d => d.DriveType == DriveType.Fixed))
             {
-                if (d.DriveType == DriveType.Fixed)
+                try
                 {
-                    string VolumeLabel = string.Empty;
-                    try
+                    disks.Add(new SystemDisk
                     {
-                        VolumeLabel = d.VolumeLabel;
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Warn($"Error on VolumeLabel - {ex.Message.Trim()}");
-                    }
-
-                    string Name = string.Empty;
-                    try
-                    {
-                        Name = d.Name;
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Warn($"Error on Name - {ex.Message.Trim()}");
-                    }
-
-                    long FreeSpace = 0;
-                    try
-                    {
-                        FreeSpace = d.TotalFreeSpace;
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Warn($"Error on TotalFreeSpace - {ex.Message.Trim()}");
-                    }
-
-                    string FreeSpaceUsage = string.Empty;
-                    try
-                    {
-                        FreeSpaceUsage = Tools.SizeSuffix(d.TotalFreeSpace);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Warn($"Error on FreeSpaceUsage - {ex.Message.Trim()}");
-                    }
-
-                    Disks.Add(new SystemDisk
-                    {
-                        Name = VolumeLabel,
-                        Drive = Name,
-                        FreeSpace = FreeSpace,
-                        FreeSpaceUsage = FreeSpaceUsage
+                        Name = d.VolumeLabel,
+                        Drive = d.Name,
+                        FreeSpace = d.TotalFreeSpace,
+                        FreeSpaceUsage = Tools.SizeSuffix(d.TotalFreeSpace)
                     });
                 }
+                catch (Exception ex)
+                {
+                    Logger.Warn("Failed to get disk info: " + ex.Message);
+                }
             }
+            return disks;
+        }
 
-            return Disks;
+        /// <summary>
+        /// Executes a WMI query and returns the resulting collection of <see cref="ManagementObject"/>.
+        /// Handles exceptions and logs warnings if the query fails.
+        /// </summary>
+        /// <param name="query">The WMI query string to execute.</param>
+        /// <returns>
+        /// An enumerable collection of <see cref="ManagementObject"/>. Returns an empty collection if the query fails.
+        /// </returns>
+        private IEnumerable<ManagementObject> SafeQueryWMI(string query)
+        {
+            try
+            {
+                var searcher = new ManagementObjectSearcher(query);
+                return searcher.Get().Cast<ManagementObject>();
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn("WMI query failed: " + query + " - " + ex.Message);
+                return Enumerable.Empty<ManagementObject>();
+            }
         }
     }
 
 
+    /// <summary>
+    /// Represents a system configuration including hardware and disk information.
+    /// </summary>
     public class SystemConfiguration
     {
         public string Name { get; set; }
@@ -330,6 +249,9 @@ namespace CommonPluginsShared
     }
 
 
+    /// <summary>
+    /// Represents a physical disk with free space information.
+    /// </summary>
     public class SystemDisk
     {
         public string Name { get; set; }
