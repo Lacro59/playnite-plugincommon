@@ -256,7 +256,6 @@ namespace CommonPluginsShared.Collections
 
             newItem.Id = game.Id;
             newItem.Name = game.Name;
-            newItem.Game = game;
             newItem.IsSaved = false;
 
             return newItem;
