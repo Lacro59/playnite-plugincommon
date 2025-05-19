@@ -1,10 +1,7 @@
 ﻿using CommonPluginsShared.Collections;
-using Playnite.SDK;
 using Playnite.SDK.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CommonPluginsShared.Interfaces
@@ -17,7 +14,6 @@ namespace CommonPluginsShared.Interfaces
 
         Task<bool> InitializeDatabase();
 
-
         PluginDataBaseGameBase Get(Game game, bool onlyCache = false, bool force = false);
         PluginDataBaseGameBase Get(Guid id, bool onlyCache = false, bool force = false);
 
@@ -26,17 +22,15 @@ namespace CommonPluginsShared.Interfaces
 
         PluginDataBaseGameBase MergeData(Guid fromId, Guid toId);
 
-
         bool Remove(Game game);
         bool Remove(Guid id);
 
         void AddOrUpdate(PluginDataBaseGameBase item);
 
-
         void Refresh(Guid id);
         void Refresh(IEnumerable<Guid> ids);
 
-        [Obsolete("Used Refresh(ids)")]
+        [Obsolete("Use Refresh(ids)")]
         void RefreshWithNoData(IEnumerable<Guid> ids);
 
         IEnumerable<Game> GetGamesWithNoData();
