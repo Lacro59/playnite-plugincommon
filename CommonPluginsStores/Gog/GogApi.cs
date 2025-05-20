@@ -138,7 +138,7 @@ namespace CommonPluginsStores.Gog
                     SaveCurrentUser();
                     _ = GetCurrentAccountInfos();
 
-                    Logger.Info($"{PluginName} logged");
+                    Logger.Info($"{ClientName} logged");
                 }
             }
             else
@@ -170,7 +170,7 @@ namespace CommonPluginsStores.Gog
                     SaveCurrentUser();
                     _ = GetCurrentAccountInfos();
 
-                    Logger.Info($"{PluginName} logged");
+                    Logger.Info($"{ClientName} logged");
                 }
             }
             catch (Exception ex)
@@ -290,8 +290,18 @@ namespace CommonPluginsStores.Gog
                             break;
                         }
 
-                        profileGames?.Embedded?.Items?.ForEach(x =>
+                        if (profileGames.Embedded?.Items == null)
                         {
+                            break;
+                        }
+
+                        foreach (var x in profileGames.Embedded.Items)
+                        {
+                            if (x?.Game == null)
+                            {
+                                continue;
+                            }
+
                             string id = x.Game.Id;
                             string name = x.Game.Title;
 
@@ -302,18 +312,24 @@ namespace CommonPluginsStores.Gog
                             }
 
                             int playtime = 0;
-                            foreach (dynamic data in (dynamic)x.Stats)
+                            if (x.Stats != null)
                             {
-                                int.TryParse(((dynamic)x.Stats)[data.Path]["playtime"].ToString(), out playtime);
-                                playtime *= 60;
-
-                                if (playtime != 0)
+                                foreach (dynamic data in (dynamic)x.Stats)
                                 {
-                                    break;
+                                    if (((dynamic)x.Stats)[data.Path]["playtime"] != null)
+                                    {
+                                        int.TryParse(((dynamic)x.Stats)[data.Path]["playtime"].ToString(), out playtime);
+                                        playtime *= 60;
+
+                                        if (playtime != 0)
+                                        {
+                                            break;
+                                        }
+                                    }
                                 }
                             }
 
-                            string link = UrlBase + x.Game.Url.Replace("\\", string.Empty);
+                            string link = UrlBase + x.Game.Url?.Replace("\\", string.Empty);
                             ObservableCollection<GameAchievement> Achievements = GetAchievements(id, accountInfos);
 
                             AccountGameInfos accountGameInfos = new AccountGameInfos
@@ -326,7 +342,7 @@ namespace CommonPluginsStores.Gog
                                 Playtime = playtime
                             };
                             accountGamesInfos.Add(accountGameInfos);
-                        });
+                        }
                     }
                     catch (Exception ex)
                     {

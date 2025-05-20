@@ -251,7 +251,7 @@ namespace CommonPluginsStores.GameJolt
                                     SaveCurrentUser();
                                     _ = GetCurrentAccountInfos();
 
-                                    Logger.Info($"{PluginName} logged");
+                                    Logger.Info($"{ClientName} logged");
 
                                     webView.NavigateAndWait(CurrentAccountInfos.Link);
 

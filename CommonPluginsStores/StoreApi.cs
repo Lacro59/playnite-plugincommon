@@ -26,6 +26,7 @@ namespace CommonPluginsStores
         internal static ILogger Logger => LogManager.GetLogger();
 
         #region Account data
+
         protected AccountInfos _currentAccountInfos;
         public AccountInfos CurrentAccountInfos
         {
@@ -79,6 +80,7 @@ namespace CommonPluginsStores
                 return currentGamesDlcsOwned;
             }
         }
+
         #endregion
 
         public StoreSettings StoreSettings { get; set; } = new StoreSettings();
@@ -121,10 +123,11 @@ namespace CommonPluginsStores
             ClientName = clientName;
             ClientNameLog = clientName.RemoveWhiteSpace();
 
-            PathStoresData = Path.Combine(PlaynitePaths.ExtensionsDataPath, "StoresData");
-            PathAppsData = Path.Combine(PathStoresData, ClientNameLog, "Apps");
-            PathAchievementsData = Path.Combine(PathStoresData, ClientNameLog, "Achievements");
+            string pathCacheData = Path.Combine(PlaynitePaths.DataCachePath, "StoresData");
+            PathAppsData = Path.Combine(pathCacheData, ClientNameLog, "Apps");
+            PathAchievementsData = Path.Combine(pathCacheData, ClientNameLog, "Achievements");
 
+            PathStoresData = Path.Combine(PlaynitePaths.ExtensionsDataPath, "StoresData");
             FileUser = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_User.dat"));
             FileCookies = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_Cookies.dat"));
             FileGamesDlcsOwned = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_GamesDlcsOwned.json"));
@@ -140,7 +143,7 @@ namespace CommonPluginsStores
         /// <returns></returns>
         internal virtual List<HttpCookie> GetStoredCookies()
         {
-            string InfoMessage = $"No stored cookies for {ClientName}";
+            string message = $"No stored cookies for {ClientName}";
             List<HttpCookie> storedCookies = new List<HttpCookie>();
 
             if (File.Exists(FileCookies))
@@ -156,7 +159,7 @@ namespace CommonPluginsStores
                     IEnumerable<HttpCookie> findExpired = storedCookies.Where(x => x.Expires != null && (DateTime)x.Expires <= DateTime.Now);
                     if (findExpired?.Count() > 0)
                     {
-                        InfoMessage = $"Expired cookies for {ClientName}";
+                        message = $"Expired cookies for {ClientName}";
                     }
                     else
                     {
@@ -169,7 +172,7 @@ namespace CommonPluginsStores
                 }
             }
 
-            Logger.Warn(InfoMessage);
+            Logger.Warn(message);
             return storedCookies;
         }
 
@@ -562,7 +565,7 @@ namespace CommonPluginsStores
 
             if (!File.Exists(filePath))
             {
-                Logger.Warn($"File not found: {filePath}");
+                //Logger.Warn($"File not found: {filePath}");
                 return null;
             }
 

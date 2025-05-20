@@ -246,7 +246,7 @@ namespace CommonPluginsStores.Steam
                             SaveCurrentUser();
                             _ = GetCurrentAccountInfos();
 
-                            Logger.Info($"{PluginName} logged");
+                            Logger.Info($"{ClientName} logged");
 
                             webView.Close();
                         }
@@ -341,7 +341,7 @@ namespace CommonPluginsStores.Steam
         #endregion
 
         #region User details
-        // TODO
+
         public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
         {
             try
@@ -449,6 +449,7 @@ namespace CommonPluginsStores.Steam
 
             return false;
         }
+
         #endregion
 
 

@@ -22,6 +22,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using YamlDotNet.Core.Tokens;
 using static CommonPlayniteShared.PluginLibrary.EpicLibrary.Models.WebStoreModels.QuerySearchResponse.Data.CatalogItem.SearchStore;
 using static CommonPluginsShared.PlayniteTools;
 
@@ -150,24 +151,7 @@ namespace CommonPluginsStores.Epic
             {
                 ResetIsUserLoggedIn();
                 EpicLogin();
-
-                OauthResponse tokens = LoadTokens();
-                if (tokens != null)
-                {
-                    //EpicAccountResponse epicAccountResponse = GetAccountInfo(tokens.account_id);
-                    AccountInfos accountInfos = new AccountInfos
-                    {
-                        UserId = tokens.account_id,
-                        Pseudo = tokens.account_id == CurrentAccountInfos.UserId ? CurrentAccountInfos.Pseudo : string.Empty, //epicAccountResponse?.DisplayName,
-                        Link = string.Format(UrlAccountProfile, tokens.account_id),
-                        IsPrivate = true,
-                        IsCurrent = true
-                    };
-                    SaveCurrentUser();
-                    _ = GetCurrentAccountInfos();
-
-                    Logger.Info($"{PluginName} logged");
-                }
+                SetUserAfterLogin();
             }
             catch (Exception ex)
             {
@@ -181,29 +165,33 @@ namespace CommonPluginsStores.Epic
             {
                 ResetIsUserLoggedIn();
                 EpicLoginAlternative();
-
-                OauthResponse tokens = LoadTokens();
-                if (tokens != null)
-                {
-                    //EpicAccountResponse epicAccountResponse = GetAccountInfo(tokens.account_id);
-                    AccountInfos accountInfos = new AccountInfos
-                    {
-                        UserId = tokens.account_id,
-                        Pseudo = tokens.account_id == CurrentAccountInfos.UserId ? CurrentAccountInfos.Pseudo : string.Empty, //epicAccountResponse?.DisplayName,
-                        Link = string.Format(UrlAccountProfile, tokens.account_id),
-                        IsPrivate = true,
-                        IsCurrent = true
-                    };
-                    CurrentAccountInfos = accountInfos;
-                    SaveCurrentUser();
-                    _ = GetCurrentAccountInfos();
-
-                    Logger.Info($"{PluginName} logged");
-                }
+                SetUserAfterLogin();
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, false, false, PluginName);
+            }
+        }
+
+        private void SetUserAfterLogin()
+        {
+            OauthResponse tokens = LoadTokens();
+            if (tokens != null)
+            {
+                AccountInfos accountInfos = new AccountInfos
+                {
+                    UserId = tokens.account_id,
+                    Pseudo = tokens.account_id == CurrentAccountInfos.UserId ? CurrentAccountInfos.Pseudo : string.Empty,
+                    Link = string.Format(UrlAccountProfile, tokens.account_id),
+                    IsPrivate = true,
+                    IsCurrent = true
+                };
+                CurrentAccountInfos = accountInfos;
+
+                SaveCurrentUser();
+                _ = GetCurrentAccountInfos();
+
+                Logger.Info($"{ClientName} logged");
             }
         }
         #endregion
@@ -214,11 +202,19 @@ namespace CommonPluginsStores.Epic
             AccountInfos accountInfos = LoadCurrentUser();
             if (accountInfos != null)
             {
-                _ = Task.Run(() =>
+                _ = Task.Run(async () =>
                 {
                     Thread.Sleep(1000);
                     CurrentAccountInfos.IsPrivate = !CheckIsPublic(accountInfos).GetAwaiter().GetResult();
                     CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
+
+                    if (CurrentAccountInfos.Pseudo.IsNullOrEmpty())
+                    {
+                        OauthResponse tokens = LoadTokens();
+                        EpicAccountResponse epicAccountResponse = await GetAccountInfo(tokens.account_id);
+                        CurrentAccountInfos.Pseudo = epicAccountResponse?.DisplayName;
+                        SaveCurrentUser();
+                    }
                 });
                 return accountInfos;
             }
@@ -236,11 +232,11 @@ namespace CommonPluginsStores.Epic
             {
                 ObservableCollection<AccountInfos> accountsInfos = new ObservableCollection<AccountInfos>();
 
-                EpicFriendsSummary epicFriendsSummary = GetFriendsSummary();
-                epicFriendsSummary.Friends.ForEach(x =>
+                EpicFriendsSummary epicFriendsSummary = GetFriendsSummary().GetAwaiter().GetResult();
+                var tasks = epicFriendsSummary.Friends.Select(async x =>
                 {
-                    EpicAccountResponse epicAccountResponsea = GetAccountInfo(x.AccountId);
-                    AccountInfos userInfos = new AccountInfos
+                    EpicAccountResponse epicAccountResponsea = await GetAccountInfo(x.AccountId);
+                    return new AccountInfos
                     {
                         DateAdded = null,
                         UserId = x.AccountId,
@@ -248,8 +244,13 @@ namespace CommonPluginsStores.Epic
                         Pseudo = epicAccountResponsea.DisplayName,
                         Link = string.Format(UrlAccountProfile, x.AccountId)
                     };
+                }).ToList();
+
+                var results = Task.WhenAll(tasks).GetAwaiter().GetResult();
+                foreach (var userInfos in results)
+                {
                     accountsInfos.Add(userInfos);
-                });
+                }
 
                 return accountsInfos;
             }
@@ -689,9 +690,8 @@ namespace CommonPluginsStores.Epic
             OauthResponse tokens = LoadTokens();
             if (tokens != null)
             {
-                return GetAccountInfo(tokens.account_id);
+                return GetAccountInfo(tokens.account_id).GetAwaiter().GetResult();
             }
-
             return null;
         }
 
@@ -741,7 +741,7 @@ namespace CommonPluginsStores.Epic
 
             try
             {
-                EpicAccountResponse account = GetAccountInfo(tokens.account_id);
+                EpicAccountResponse account = GetAccountInfo(tokens.account_id).GetAwaiter().GetResult();
                 if (account == null)
                 {
                     RenewTokens(tokens.refresh_token);
@@ -772,7 +772,7 @@ namespace CommonPluginsStores.Epic
                         return false;
                     }
 
-                    EpicAccountResponse account = GetAccountInfo(tokens.account_id);
+                    EpicAccountResponse account = GetAccountInfo(tokens.account_id).GetAwaiter().GetResult()    ;
                     if (CurrentAccountInfos.Pseudo.IsNullOrEmpty() && account.Id == tokens.account_id)
                     {
                         CurrentAccountInfos.Pseudo = account?.DisplayName;
@@ -1208,16 +1208,18 @@ namespace CommonPluginsStores.Epic
             return InvokeRequest<List<Asset>>(UrlAsset).GetAwaiter().GetResult().Item2;
         }
 
-        public EpicFriendsSummary GetFriendsSummary()
+        public async Task<EpicFriendsSummary> GetFriendsSummary()
         {
             string url = string.Format(UrlFriendsSummary, CurrentAccountInfos.UserId);
-            return InvokeRequest<EpicFriendsSummary>(url).GetAwaiter().GetResult().Item2;
+            Tuple<string, EpicFriendsSummary> data = await InvokeRequest<EpicFriendsSummary>(url);
+            return data.Item2;
         }
 
-        public EpicAccountResponse GetAccountInfo(string id)
+        public async Task<EpicAccountResponse> GetAccountInfo(string id)
         {
             string url = string.Format(UrlAccount, id);
-            return InvokeRequest<EpicAccountResponse>(url).GetAwaiter().GetResult().Item2;
+            Tuple<string, EpicAccountResponse> data = await InvokeRequest<EpicAccountResponse>(url);
+            return data.Item2;
         }
 
         public CatalogItem GetCatalogItem(string nameSpace, string id, string cachePath)
