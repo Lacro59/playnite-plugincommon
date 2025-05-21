@@ -126,6 +126,9 @@ namespace CommonPluginsShared.Collections
                 // Populate or refresh internal game information
                 Database.SetGameInfo<T>();
 
+                // Delete game deleted in Playnite
+                DeleteDataWithDeletedGame();
+
                 stopWatch.Stop();
 
                 // Log the elapsed time and number of items loaded

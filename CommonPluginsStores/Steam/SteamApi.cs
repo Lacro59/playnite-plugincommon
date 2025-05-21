@@ -278,7 +278,7 @@ namespace CommonPluginsStores.Steam
         protected override AccountInfos GetCurrentAccountInfos()
         {
             AccountInfos accountInfos = LoadCurrentUser();
-            if (accountInfos != null)
+            if (!accountInfos?.UserId?.IsNullOrEmpty() ?? false)
             {
                 _ = Task.Run(() =>
                 {
@@ -821,9 +821,8 @@ namespace CommonPluginsStores.Steam
 
         public async Task<bool> CheckIsPublic(AccountInfos accountInfos)
         {
-            return accountInfos == null || accountInfos.UserId.IsNullOrEmpty() || accountInfos.UserId == "0" || accountInfos.Pseudo.IsNullOrEmpty()
-                ? false
-                : await CheckIsPublic(new Models.SteamUser { SteamId = ulong.Parse(accountInfos.UserId), PersonaName = accountInfos.Pseudo });
+            accountInfos.AccountStatus = AccountStatus.Checking;
+            return accountInfos != null && !accountInfos.UserId.IsNullOrEmpty() && accountInfos.UserId != "0" && !accountInfos.Pseudo.IsNullOrEmpty() && await CheckIsPublic(new Models.SteamUser { SteamId = ulong.Parse(accountInfos.UserId), PersonaName = accountInfos.Pseudo });
         }
 
         private async Task<bool> IsProfilePublic(string profilePageUrl)

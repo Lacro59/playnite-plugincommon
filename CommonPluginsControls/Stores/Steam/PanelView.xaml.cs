@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using CommonPluginsStores;
 using CommonPluginsStores.Models.Interfaces;
 using CommonPluginsStores.Steam;
 
@@ -14,7 +13,9 @@ namespace CommonPluginsControls.Stores.Steam
         private PanelViewModel PanelViewModel { get; set; } = new PanelViewModel();
         private bool IsStarted { get; set; } = false;
 
+
         #region Properties
+
         public bool UseApi
         {
             get => (bool)GetValue(UseApiProperty);
@@ -97,7 +98,9 @@ namespace CommonPluginsControls.Stores.Steam
                 obj.PanelViewModel.StoreApi = (IStoreApi)e.NewValue;
             }
         }
+
         #endregion
+
 
         public PanelView()
         {

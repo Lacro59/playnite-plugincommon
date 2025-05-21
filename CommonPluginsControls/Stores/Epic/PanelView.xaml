@@ -131,6 +131,9 @@
                                                 <Trigger Property="Tag" Value="{x:Static enumerations:AuthStatus.Failed}">
                                                     <Setter Property="Text" Value="{DynamicResource LOCCommonNotLoggedInError}" />
                                                 </Trigger>
+                                                <Trigger Property="Tag" Value="{x:Static enumerations:AccountStatus.Unknown}">
+                                                    <Setter Property="Text" Value="" />
+                                                </Trigger>
                                             </Style.Triggers>
                                         </Style>
                                     </TextBlock.Style>

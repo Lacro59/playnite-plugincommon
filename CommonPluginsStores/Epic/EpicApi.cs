@@ -200,7 +200,7 @@ namespace CommonPluginsStores.Epic
         protected override AccountInfos GetCurrentAccountInfos()
         {
             AccountInfos accountInfos = LoadCurrentUser();
-            if (accountInfos != null)
+            if (!accountInfos?.UserId?.IsNullOrEmpty() ?? false)
             {
                 _ = Task.Run(async () =>
                 {
@@ -707,6 +707,8 @@ namespace CommonPluginsStores.Epic
         {
             try
             {
+                accountInfos.AccountStatus = AccountStatus.Checking;
+
                 WebViewSettings webViewSettings = new WebViewSettings
                 {
                     JavaScriptEnabled = true

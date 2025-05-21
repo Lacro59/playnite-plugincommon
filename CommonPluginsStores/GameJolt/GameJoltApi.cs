@@ -65,7 +65,7 @@ namespace CommonPluginsStores.GameJolt
         protected override AccountInfos GetCurrentAccountInfos()
         {
             AccountInfos accountInfos = LoadCurrentUser();
-            if (accountInfos != null)
+            if (!accountInfos?.Pseudo?.IsNullOrEmpty() ?? false)
             {
                 Profile profile = GetUser(accountInfos.Pseudo);
                 profile = profile ?? GetUser(accountInfos.Pseudo);

@@ -116,7 +116,7 @@ namespace CommonPluginsStores.Origin
                     new HttpHeader { Key = "Authorization", Value = AuthToken.Type + " " + AuthToken.Token }
                 };
                 string response = Web.DownloadStringData(UrlAccountIdentity, httpHeaders).GetAwaiter().GetResult();
-                Serialization.TryFromJson(response, out accountInfoResponse);
+                _ = Serialization.TryFromJson(response, out accountInfoResponse);
             }
             else
             {

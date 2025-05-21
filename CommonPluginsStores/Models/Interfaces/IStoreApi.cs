@@ -40,7 +40,10 @@
         /// Performs an alternative login procedure.
         /// </summary>
         void LoginAlternative();
+    }
 
+    internal interface IStoreApiInternal
+    {
         /// <summary>
         /// Loads the current user information.
         /// </summary>

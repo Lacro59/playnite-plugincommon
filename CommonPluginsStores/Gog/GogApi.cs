@@ -193,7 +193,7 @@ namespace CommonPluginsStores.Gog
         protected override AccountInfos GetCurrentAccountInfos()
         {
             AccountInfos accountInfos = LoadCurrentUser();
-            if (accountInfos != null)
+            if (!accountInfos?.UserId?.IsNullOrEmpty() ?? false)
             {
                 _ = Task.Run(() =>
                 {
@@ -780,6 +780,7 @@ namespace CommonPluginsStores.Gog
         {
             try
             {
+                accountInfos.AccountStatus = AccountStatus.Checking;
                 string url = string.Format(UrlUser, accountInfos.Pseudo);
                 string response = await Web.DownloadStringData(url);
                 return !response.Contains("hook-test=\"isPrivate\"");

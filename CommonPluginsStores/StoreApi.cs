@@ -3,9 +3,11 @@ using CommonPlayniteShared.Common;
 using CommonPluginsShared;
 using CommonPluginsShared.Converters;
 using CommonPluginsShared.Extensions;
+using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.Models;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Interfaces;
+using CommonPluginsStores.Steam;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
@@ -21,7 +23,7 @@ using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores
 {
-    public abstract class StoreApi : ObservableObject, IStoreApi
+    public abstract class StoreApi : ObservableObject, IStoreApi, IStoreApiInternal
     {
         internal static ILogger Logger => LogManager.GetLogger();
 
@@ -314,7 +316,9 @@ namespace CommonPluginsStores
             throw new NotImplementedException();
         }
 
-        public AccountInfos LoadCurrentUser()
+        AccountInfos IStoreApiInternal.LoadCurrentUser() => LoadCurrentUser();
+
+        protected AccountInfos LoadCurrentUser()
         {
             if (FileSystem.FileExists(FileUser))
             {
@@ -337,7 +341,9 @@ namespace CommonPluginsStores
             return null;
         }
 
-        public virtual void SaveCurrentUser()
+        void IStoreApiInternal.SaveCurrentUser() => SaveCurrentUser();
+
+        protected void SaveCurrentUser()
         {
             if (CurrentAccountInfos != null)
             {
@@ -347,6 +353,28 @@ namespace CommonPluginsStores
                     Serialization.ToJson(CurrentAccountInfos),
                     Encoding.UTF8,
                     WindowsIdentity.GetCurrent().User.Value);
+            }
+        }
+
+
+        public virtual void Intialization(StoreSettings storeSettings, bool loadUser)
+        {
+            SetLanguage(API.Instance.ApplicationSettings.Language);
+            StoreSettings = storeSettings;
+            if (loadUser)
+            {
+                _ = CurrentAccountInfos;
+            }
+        }
+
+        public virtual void SaveSettings(StoreSettings storeSettings, bool saveUser) 
+        {
+            StoreSettings = storeSettings;
+            if (saveUser)
+            {
+                SaveCurrentUser();
+                CurrentAccountInfos = null;
+                _ = CurrentAccountInfos;
             }
         }
         #endregion
