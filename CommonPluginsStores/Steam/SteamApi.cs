@@ -32,7 +32,8 @@ namespace CommonPluginsStores.Steam
 {
     public class SteamApi : StoreApi
     {
-        #region Url
+        #region Urls
+
         private static string SteamDbDlc => "https://steamdb.info/app/{0}/dlc/";
         private static string SteamDbExtensionAchievements => "https://steamdb.info/api/ExtensionGetAchievements/?appid={0}";
 
@@ -65,8 +66,10 @@ namespace CommonPluginsStores.Steam
         private static string UrlSteamGame => UrlStore + @"/app/{0}";
         private static string UrlSteamGameLocalised => UrlStore + @"/app/{0}/?l={1}";
 
-        private static string UrlSteamGameSearch = UrlStore + @"/api/storesearch/?term={0}&cc={1}&l={1}";
+        private static string UrlSteamGameSearch => UrlStore + @"/api/storesearch/?term={0}&cc={1}&l={1}";
+
         #endregion
+
 
         protected List<SteamApp> steamApps;
         internal List<SteamApp> SteamApps
@@ -100,7 +103,9 @@ namespace CommonPluginsStores.Steam
 
         private SteamUserData UserData => LoadUserData() ?? GetUserData() ?? LoadUserData(false);
 
+
         #region Paths
+
         private string AppsListPath { get; }
         private string FileUserData { get; }
 
@@ -120,6 +125,7 @@ namespace CommonPluginsStores.Steam
         }
 
         public string LoginUsersPath { get; }
+
         #endregion
 
 
