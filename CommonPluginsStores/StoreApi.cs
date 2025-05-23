@@ -3,11 +3,9 @@ using CommonPlayniteShared.Common;
 using CommonPluginsShared;
 using CommonPluginsShared.Converters;
 using CommonPluginsShared.Extensions;
-using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.Models;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Interfaces;
-using CommonPluginsStores.Steam;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
@@ -16,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Principal;
 using System.Text;
 using System.Threading;
@@ -26,6 +25,7 @@ namespace CommonPluginsStores
     public abstract class StoreApi : ObservableObject, IStoreApi, IStoreApiInternal
     {
         internal static ILogger Logger => LogManager.GetLogger();
+
 
         #region Account data
 
@@ -85,6 +85,9 @@ namespace CommonPluginsStores
 
         #endregion
 
+
+        #region Properties
+
         public StoreSettings StoreSettings { get; set; } = new StoreSettings();
 
         protected bool? isUserLoggedIn;
@@ -114,8 +117,12 @@ namespace CommonPluginsStores
 
         internal List<string> CookiesDomains { get; set; }
 
+        internal CookiesTools CookiesTools { get; }
+
         internal StoreToken AuthToken { get; set; }
         internal ExternalPlugin PluginLibrary { get; }
+
+        #endregion
 
 
         public StoreApi(string pluginName, ExternalPlugin pluginLibrary, string clientName)
@@ -134,157 +141,43 @@ namespace CommonPluginsStores
             FileCookies = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_Cookies.dat"));
             FileGamesDlcsOwned = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_GamesDlcsOwned.json"));
 
+            CookiesTools = new CookiesTools(
+                PluginName,
+                ClientName,
+                FileCookies,
+                CookiesDomains);
+
             FileSystem.CreateDirectory(PathStoresData);
         }
 
 
         #region Cookies
+
         /// <summary>
         /// Read the last identified cookies stored.
         /// </summary>
         /// <returns></returns>
-        internal virtual List<HttpCookie> GetStoredCookies()
-        {
-            string message = $"No stored cookies for {ClientName}";
-            List<HttpCookie> storedCookies = new List<HttpCookie>();
-
-            if (File.Exists(FileCookies))
-            {
-                try
-                {
-                    storedCookies = Serialization.FromJson<List<HttpCookie>>(
-                        Encryption.DecryptFromFile(
-                            FileCookies,
-                            Encoding.UTF8,
-                            WindowsIdentity.GetCurrent().User.Value));
-
-                    IEnumerable<HttpCookie> findExpired = storedCookies.Where(x => x.Expires != null && (DateTime)x.Expires <= DateTime.Now);
-                    if (findExpired?.Count() > 0)
-                    {
-                        message = $"Expired cookies for {ClientName}";
-                    }
-                    else
-                    {
-                        return storedCookies;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, $"Failed to load saved cookies for {ClientName}");
-                }
-            }
-
-            Logger.Warn(message);
-            return storedCookies;
-        }
+        internal virtual List<HttpCookie> GetStoredCookies() => CookiesTools.GetStoredCookies();
 
         /// <summary>
         /// Save the last identified cookies stored.
         /// </summary>
         /// <param name="httpCookies"></param>
-        internal virtual bool SetStoredCookies(List<HttpCookie> httpCookies)
-        {
-            try
-            {
-                if (httpCookies?.Count() > 0)
-                {
-                    FileSystem.CreateDirectory(Path.GetDirectoryName(FileCookies));
-                    Encryption.EncryptToFile(
-                        FileCookies,
-                        Serialization.ToJson(httpCookies),
-                        Encoding.UTF8,
-                        WindowsIdentity.GetCurrent().User.Value);
-                    return true;
-                }
-                else
-                {
-                    Logger.Warn($"No cookies saved for {PluginName}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, "Failed to save cookies");
-            }
-
-            return false;
-        }
+        internal virtual bool SetStoredCookies(List<HttpCookie> httpCookies) => CookiesTools.SetStoredCookies(httpCookies);
 
         /// <summary>
         /// Get cookies in WebView or another method.
         /// </summary>
         /// <returns></returns>
-        internal virtual List<HttpCookie> GetWebCookies(bool deleteCookies = false)
-        {
-            try
-            {
-                using (IWebView webView = API.Instance.WebViews.CreateOffscreenView())
-                {
-                    List<HttpCookie> httpCookies = CookiesDomains?.Count > 0
-                        ? webView.GetCookies()?.Where(x => CookiesDomains.Any(y => y.Contains(x?.Domain, StringComparison.OrdinalIgnoreCase)))?.ToList() ?? new List<HttpCookie>()
-                        : webView.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName, StringComparison.OrdinalIgnoreCase) ?? false)?.ToList() ?? new List<HttpCookie>();
+        internal virtual List<HttpCookie> GetWebCookies(bool deleteCookies = false, IWebView webView = null) => CookiesTools.GetWebCookies(deleteCookies, webView);
 
-                    if (deleteCookies)
-                    {
-                        CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
-                    }
+        internal virtual List<HttpCookie> GetNewWebCookies(List<string> urls, bool deleteCookies = false, IWebView webView = null) => CookiesTools.GetNewWebCookies(urls, deleteCookies, webView);
 
-                    return httpCookies;
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, false, PluginName);
-                return new List<HttpCookie>();
-            }
-        }
-
-        internal virtual List<HttpCookie> GetNewWebCookies(List<string> urls, bool deleteCookies = false)
-        {
-            try
-            {
-                WebViewSettings webViewSettings = new WebViewSettings
-                {
-                    JavaScriptEnabled = true,
-                    UserAgent = Web.UserAgent
-                };
-
-                using (IWebView webView = API.Instance.WebViews.CreateOffscreenView(webViewSettings))
-                {
-                    List<HttpCookie> oldCookies = GetStoredCookies();
-                    oldCookies?.ForEach(x =>
-                    {
-                        string domain = x.Domain.StartsWith(".") ? x.Domain.Substring(1) : x.Domain;
-                        webView.SetCookies("https://" + domain, x);
-                    });
-
-                    urls.ForEach(x =>
-                    {
-                        webView.NavigateAndWait(x);
-                        Thread.Sleep(1000);
-                    });
-
-                    List<HttpCookie> httpCookies = CookiesDomains?.Count > 0
-                        ? webView.GetCookies()?.Where(x => CookiesDomains.Any(y => y.Contains(x?.Domain, StringComparison.OrdinalIgnoreCase)))?.ToList() ?? new List<HttpCookie>()
-                        : webView.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName, StringComparison.OrdinalIgnoreCase) ?? false)?.ToList() ?? new List<HttpCookie>();
-
-                    if (deleteCookies)
-                    {
-                        CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
-                    }
-
-                    return httpCookies;
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, false, PluginName);
-                return new List<HttpCookie>();
-            }
-        }
         #endregion
 
 
         #region Configuration
+
         public void ResetIsUserLoggedIn()
         {
             isUserLoggedIn = null;
@@ -377,6 +270,7 @@ namespace CommonPluginsStores
                 _ = CurrentAccountInfos;
             }
         }
+
         #endregion
 
 
@@ -563,7 +457,6 @@ namespace CommonPluginsStores
             return gamerScore;
         }
 
-
         public static float CalcGamerScore(string value)
         {
             float gamerScore = 15;
@@ -619,7 +512,6 @@ namespace CommonPluginsStores
                 return null;
             }
         }
-
 
         public void PurgeCache()
         {

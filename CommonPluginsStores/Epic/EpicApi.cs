@@ -77,7 +77,7 @@ namespace CommonPluginsStores.Epic
         }
 
         #region Cookies
-        internal override List<HttpCookie> GetWebCookies(bool deleteCookies = false)
+        internal override List<HttpCookie> GetWebCookies(bool deleteCookies = false, IWebView webView = null)
         {
             string localLangShort = CodeLang.GetEpicLangCountry(Locale);
             List<HttpCookie> httpCookies = new List<HttpCookie>
