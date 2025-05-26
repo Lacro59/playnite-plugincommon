@@ -3,7 +3,6 @@ using CommonPluginsShared.Extensions;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Steam.Models;
 using Microsoft.Win32;
-using Playnite.SDK;
 using Playnite.SDK.Data;
 using SteamKit2;
 using System;
@@ -27,6 +26,7 @@ using System.Threading;
 using CommonPluginsStores.Steam.Models.SteamKit;
 using Playnite.SDK.Models;
 using CommonPluginsStores.Models.Enumerations;
+using Playnite.SDK;
 
 namespace CommonPluginsStores.Steam
 {
@@ -70,38 +70,37 @@ namespace CommonPluginsStores.Steam
 
         #endregion
 
-
-        protected List<SteamApp> steamApps;
-        internal List<SteamApp> SteamApps
+        private List<SteamApp> _steamApps;
+        protected List<SteamApp> SteamApps
         {
             get
             {
-                if (steamApps == null)
+                if (_steamApps == null)
                 {
                     // From cache if exists & not expired
                     if (File.Exists(AppsListPath) && File.GetLastWriteTime(AppsListPath).AddDays(3) > DateTime.Now)
                     {
                         Common.LogDebug(true, "GetSteamAppListFromCache");
-                        _ = Serialization.TryFromJsonFile(AppsListPath, out steamApps);
+                        _ = Serialization.TryFromJsonFile(AppsListPath, out _steamApps);
                     }
                     // From web
                     else
                     {
                         Common.LogDebug(true, "GetSteamAppsListFromWeb");
-                        steamApps = SteamKit.GetAppList();
-                        if (steamApps?.Count > 0)
+                        _steamApps = SteamKit.GetAppList();
+                        if (_steamApps?.Count > 0)
                         {
-                            FileSystem.WriteStringToFileSafe(AppsListPath, Serialization.ToJson(steamApps));
+                            FileSystem.WriteStringToFileSafe(AppsListPath, Serialization.ToJson(_steamApps));
                         }
                     }
                 }
-                return steamApps;
+                return _steamApps;
             }
 
-            set => steamApps = value;
+            set => _steamApps = value;
         }
 
-        private SteamUserData UserData => LoadUserData() ?? GetUserData() ?? LoadUserData(false);
+        private SteamUserData UserData => LoadData<SteamUserData>(FileUserData, 10) ?? GetUserData() ?? LoadData<SteamUserData>(FileUserData, 0);
 
 
         #region Paths
@@ -109,25 +108,24 @@ namespace CommonPluginsStores.Steam
         private string AppsListPath { get; }
         private string FileUserData { get; }
 
-        private string installationPath;
+        private string _installationPath;
         public string InstallationPath
         {
             get
             {
-                if (installationPath == null)
+                if (_installationPath == null)
                 {
-                    installationPath = GetInstallationPath();
+                    _installationPath = GetInstallationPath();
                 }
-                return installationPath;
+                return _installationPath;
             }
 
-            set => SetValue(ref installationPath, value);
+            set => SetValue(ref _installationPath, value);
         }
 
         public string LoginUsersPath { get; }
 
         #endregion
-
 
         public SteamApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "Steam")
         {
@@ -147,8 +145,8 @@ namespace CommonPluginsStores.Steam
             };
         }
 
-
         #region Configuration
+
         protected override bool GetIsUserLoggedIn()
         {
             if (CurrentAccountInfos == null)
@@ -277,10 +275,11 @@ namespace CommonPluginsStores.Steam
 
             return !steamId.IsNullOrEmpty() && !steamUser.IsNullOrEmpty();
         }
+
         #endregion
 
-
         #region Current user
+
         protected override AccountInfos GetCurrentAccountInfos()
         {
             AccountInfos accountInfos = LoadCurrentUser();
@@ -344,6 +343,7 @@ namespace CommonPluginsStores.Steam
 
             return null;
         }
+
         #endregion
 
         #region User details
@@ -403,7 +403,6 @@ namespace CommonPluginsStores.Steam
             return null;
         }
 
-
         public override ObservableCollection<AccountWishlist> GetWishlist(AccountInfos accountInfos)
         {
             ObservableCollection<AccountWishlist> accountWishlists = new ObservableCollection<AccountWishlist>();
@@ -456,10 +455,11 @@ namespace CommonPluginsStores.Steam
             return false;
         }
 
+
         #endregion
 
-
         #region Game
+
         /// <summary>
         /// Get game informations.
         /// </summary>
@@ -594,10 +594,12 @@ namespace CommonPluginsStores.Steam
 
             return null;
         }
+
         #endregion
 
         #region Games owned
-        internal override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
+
+        protected override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
         {
             if (!IsUserLoggedIn)
             {
@@ -619,10 +621,11 @@ namespace CommonPluginsStores.Steam
                 return null;
             }
         }
+
         #endregion
 
-
         #region Steam
+
         /// <summary>
         /// Get AppId from Steam store with a game.
         /// </summary>
@@ -710,7 +713,6 @@ namespace CommonPluginsStores.Steam
             return title;
         }
 
-
         /// <summary>
         /// Get AccountID for a SteamId
         /// </summary>
@@ -729,7 +731,6 @@ namespace CommonPluginsStores.Steam
             }
             return 0;
         }
-
 
         /// <summary>
         /// Get the Steam installation path.
@@ -774,7 +775,6 @@ namespace CommonPluginsStores.Steam
             Logger.Warn($"No {ClientName} screenshots folder found");
             return string.Empty;
         }
-
 
         /// <summary>
         /// Get the list of all users defined in local.
@@ -855,35 +855,6 @@ namespace CommonPluginsStores.Steam
             return false;
         }
 
-
-        private SteamUserData LoadUserData(bool onlyNow = true)
-        {
-            if (File.Exists(FileUserData))
-            {
-                try
-                {
-                    DateTime dateLastWrite = File.GetLastWriteTime(FileUserData);
-                    if (onlyNow && dateLastWrite.AddMinutes(10) <= DateTime.Now)
-                    {
-                        return null;
-                    }
-
-                    if (!onlyNow)
-                    {
-                        ShowNotificationOldData(dateLastWrite);
-                    }
-
-                    return Serialization.FromJsonFile<SteamUserData>(FileUserData);
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, true, PluginName);
-                }
-            }
-
-            return null;
-        }
-
         private SteamUserData GetUserData()
         {
             try
@@ -921,12 +892,10 @@ namespace CommonPluginsStores.Steam
             File.WriteAllText(FileUserData, Serialization.ToJson(userData));
         }
 
-
-        internal string ParseDescription(string description)
+        private string ParseDescription(string description)
         {
             return description.Replace("%CDN_HOST_MEDIA_SSL%", "steamcdn-a.akamaihd.net");
         }
-
 
 
         public bool CheckGameIsPrivate(uint appId, AccountInfos accountInfos)
@@ -935,9 +904,11 @@ namespace CommonPluginsStores.Steam
                 ? CheckGameIsPrivateByWeb(appId, accountInfos)
                 : SteamKit.CheckGameIsPrivate(accountInfos.ApiKey, appId, ulong.Parse(accountInfos.UserId));
         }
+
         #endregion
 
         #region Steam Api
+
         public StoreAppDetailsResult GetAppDetails(uint appId, int retryCount)
         {
             string cachePath = Path.Combine(PathAppsData, $"{appId}.json");
@@ -973,7 +944,6 @@ namespace CommonPluginsStores.Steam
 
             return storeAppDetailsResult;
         }
-
 
         /// <summary>
         /// Get game achievements schema with hidden description & percent & without stats
@@ -1027,9 +997,11 @@ namespace CommonPluginsStores.Steam
 
             return results;
         }
+
         #endregion
 
         #region Steam Api with api key
+
         private ObservableCollection<AccountInfos> GetPlayerSummaries(List<ulong> steamIds)
         {
             ObservableCollection<AccountInfos> playerSummaries = null;
@@ -1155,9 +1127,11 @@ namespace CommonPluginsStores.Steam
                 return null;
             }
         }
+
         #endregion
 
-        #region Steam Web        
+        #region Steam Web     
+        
         private bool CheckGameIsPrivateByWeb(uint appId, AccountInfos accountInfos)
         {
             Logger.Info($"CheckGameIsPrivateByWeb({appId})");
@@ -1399,8 +1373,8 @@ namespace CommonPluginsStores.Steam
                 return null;
             }
         }
-        #endregion
 
+        #endregion
 
         private List<uint> GetDlcFromSteamDb(uint appId)
         {

@@ -22,7 +22,6 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using YamlDotNet.Core.Tokens;
 using static CommonPlayniteShared.PluginLibrary.EpicLibrary.Models.WebStoreModels.QuerySearchResponse.Data.CatalogItem.SearchStore;
 using static CommonPluginsShared.PlayniteTools;
 
@@ -34,6 +33,7 @@ namespace CommonPluginsStores.Epic
     public class EpicApi : StoreApi
     {
         #region Urls
+
         private string UrlBase => @"https://www.epicgames.com";
         private string UrlStore => UrlBase + @"/store/{0}/p/{1}";
         private string UrlAchievements => UrlBase + @"/store/{0}/achievements/{1}";
@@ -60,14 +60,16 @@ namespace CommonPluginsStores.Epic
         private string UrlAsset => UrlApiLauncherBase + @"/launcher/api/public/assets/Windows?label=Live";
 
         private string UrlApiCatalog => @"https://catalog-public-service-prod06.ol.epicgames.com";
+        
         #endregion
 
         private static string AuthEncodedString => "MzRhMDJjZjhmNDQxNGUyOWIxNTkyMTg3NmRhMzZmOWE6ZGFhZmJjY2M3Mzc3NDUwMzlkZmZlNTNkOTRmYzc2Y2Y=";
 
         #region Paths
-        private string TokensPath { get; }
-        #endregion
 
+        private string TokensPath { get; }
+
+        #endregion
 
         public EpicApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "Epic")
         {
@@ -77,7 +79,8 @@ namespace CommonPluginsStores.Epic
         }
 
         #region Cookies
-        internal override List<HttpCookie> GetWebCookies(bool deleteCookies = false, IWebView webView = null)
+
+        protected override List<HttpCookie> GetWebCookies(bool deleteCookies = false, IWebView webView = null)
         {
             string localLangShort = CodeLang.GetEpicLangCountry(Locale);
             List<HttpCookie> httpCookies = new List<HttpCookie>
@@ -117,9 +120,11 @@ namespace CommonPluginsStores.Epic
             };
             return httpCookies;
         }
+
         #endregion
 
         #region Configuration
+
         protected override bool GetIsUserLoggedIn()
         {
             if (CurrentAccountInfos == null)
@@ -194,9 +199,11 @@ namespace CommonPluginsStores.Epic
                 Logger.Info($"{ClientName} logged");
             }
         }
+
         #endregion
 
         #region Current user
+
         protected override AccountInfos GetCurrentAccountInfos()
         {
             AccountInfos accountInfos = LoadCurrentUser();
@@ -261,9 +268,11 @@ namespace CommonPluginsStores.Epic
 
             return null;
         }
+
         #endregion
 
         #region User details
+
         public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
         {
             if (!IsUserLoggedIn || !accountInfos.IsCurrent)
@@ -415,7 +424,6 @@ namespace CommonPluginsStores.Epic
             return null;
         }
 
-
         /// <summary>
         /// Get achievements SourceLink.
         /// </summary>
@@ -527,9 +535,11 @@ namespace CommonPluginsStores.Epic
 
             return false;
         }
+
         #endregion
 
         #region Game
+
         // TODO
         public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
         {
@@ -631,9 +641,11 @@ namespace CommonPluginsStores.Epic
 
             return null;
         }
+
         #endregion
 
         #region Epic
+
         private OauthResponse LoadTokens()
         {
             if (File.Exists(TokensPath))
@@ -884,7 +896,6 @@ namespace CommonPluginsStores.Epic
             }
         }
 
-
         public string GetProducSlug(Game game)
         {
             string productSlug = string.Empty;
@@ -978,7 +989,6 @@ namespace CommonPluginsStores.Epic
             return ProductSlug;
         }
 
-
         private string GetNameSpace(string name)
         {
             return GetNameSpace(name, string.Empty);
@@ -1050,7 +1060,6 @@ namespace CommonPluginsStores.Epic
             return productSlug.IsNullOrEmpty() ? GetNameSpace(normalizedEpicName) : GetNameSpace(normalizedEpicName, productSlug);
         }
 
-
         private bool DlcIsOwned(string productNameSpace, string id)
         {
             try
@@ -1064,7 +1073,6 @@ namespace CommonPluginsStores.Epic
                 return false;
             }
         }
-
 
         private async Task<EpicAddonsByNamespace> QueryAddonsByNamespace(string epic_namespace)
         {
@@ -1198,7 +1206,6 @@ namespace CommonPluginsStores.Epic
             }
         }
 
-
         public List<PlaytimeItem> GetPlaytimeItems()
         {
             string formattedPlaytimeUrl = string.Format(UrlPlaytimeAll, CurrentAccountInfos.UserId);
@@ -1240,6 +1247,7 @@ namespace CommonPluginsStores.Epic
                 ? catalogItem
                 : throw new Exception($"Epic catalog item for {id} {nameSpace} not found.");
         }
+
         #endregion
 
         private async Task<Tuple<string, T>> InvokeRequest<T>(string url) where T : class

@@ -47,7 +47,6 @@ namespace CommonPluginsStores.Gog
 
         #endregion
 
-
         #region Urls API
 
         private static string UrlApiGamePlay => @"https://gameplay.gog.com";
@@ -71,7 +70,6 @@ namespace CommonPluginsStores.Gog
 
         #endregion
 
-
         private string FileUserDataOwned { get; }
 
         private UserDataOwned UserDataOwned => LoadUserDataOwned() ?? GetUserDataOwnedData() ?? LoadUserDataOwned(false);
@@ -91,16 +89,13 @@ namespace CommonPluginsStores.Gog
             set => _accountBasic = value;
         }
 
-
         private static StoreCurrency LocalCurrency { get; set; } = new StoreCurrency { country = "US", currency = "USD", symbol = "$" };
-
 
         public GogApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "GOG")
         {
             FileUserDataOwned = Path.Combine(PathStoresData, "GOG_UserDataOwned.json");
             CookiesDomains = new List<string> { "gog.com", ".gog.com" };
         }
-
 
         #region Configuration
 
@@ -194,7 +189,6 @@ namespace CommonPluginsStores.Gog
 
         #endregion
 
-
         #region Current user
 
         protected override AccountInfos GetCurrentAccountInfos()
@@ -274,7 +268,6 @@ namespace CommonPluginsStores.Gog
         }
 
         #endregion
-
 
         #region User details
 
@@ -619,7 +612,6 @@ namespace CommonPluginsStores.Gog
 
         #endregion
 
-
         #region Game
 
         public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
@@ -764,10 +756,9 @@ namespace CommonPluginsStores.Gog
 
         #endregion
 
-
         #region Games owned
 
-        internal override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
+        protected override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
         {
             if (!IsUserLoggedIn)
             {
@@ -791,7 +782,6 @@ namespace CommonPluginsStores.Gog
         }
 
         #endregion
-
 
         #region GOG
 
@@ -879,7 +869,6 @@ namespace CommonPluginsStores.Gog
             return profileUserGalaxy;
         }
 
-
         public ProductApiDetail GetProductDetail(string id)
         {
             string cachePath = Path.Combine(PathAppsData, $"{id}.json");
@@ -902,7 +891,6 @@ namespace CommonPluginsStores.Gog
 
             return productApiDetail;
         }
-
 
         private UserDataOwned LoadUserDataOwned(bool onlyNow = true)
         {
@@ -1067,7 +1055,6 @@ namespace CommonPluginsStores.Gog
         }
 
         #endregion
-
 
         private void ManageException (string message, Exception ex, bool is404)
         {
