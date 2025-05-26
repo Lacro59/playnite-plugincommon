@@ -73,11 +73,5 @@ namespace CommonPluginsStores.Models
         /// Gets or sets the API key associated with this account.
         /// </summary>
         public string ApiKey { get; set; }
-
-        /// <summary>
-        /// Gets or sets the time of the last API call or action.
-        /// </summary>
-        [DontSerialize]
-        public DateTime LastCall => DateTime.Now;
     }
 }

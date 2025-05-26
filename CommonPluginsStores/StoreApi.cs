@@ -1,4 +1,5 @@
-﻿using CommonPlayniteShared;
+﻿using Ardalis.GuardClauses;
+using CommonPlayniteShared;
 using CommonPlayniteShared.Common;
 using CommonPluginsShared;
 using CommonPluginsShared.Converters;
@@ -16,21 +17,11 @@ using System.IO;
 using System.Linq;
 using System.Security.Principal;
 using System.Text;
+using System.Threading.Tasks;
 using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores
 {
-    public static class StoreApiConstants
-    {
-        public const int DEFAULT_CACHE_MINUTES = 30;
-        public const int GAMES_DLC_CACHE_MINUTES = 5;
-        public const float DEFAULT_GAMER_SCORE = 15f;
-        public const float EPIC_GAMER_SCORE = 180f;
-        public const float RARE_GAMER_SCORE = 90f;
-        public const float UNCOMMON_GAMER_SCORE = 30f;
-    }
-
-
     /// <summary>
     /// Abstract base class for store API implementations.
     /// Provides common functionality for managing user accounts, games, achievements, and DLC data.
@@ -39,9 +30,16 @@ namespace CommonPluginsStores
     {
         protected static ILogger Logger => LogManager.GetLogger();
 
-        #region Account data
+        private readonly SmartCache<AccountInfos> _accountCache;
+        private readonly SmartCache<ObservableCollection<AccountInfos>> _friendsCache;
+        private readonly SmartCache<ObservableCollection<AccountGameInfos>> _gamesCache;
+        private readonly SmartCache<ObservableCollection<GameDlcOwned>> _dlcsCache;
 
-        private AccountInfos _currentAccountInfos;
+        private Lazy<AccountInfos> _lazyAccount;
+        private readonly Lazy<ObservableCollection<AccountInfos>> _lazyFriends;
+        private readonly Lazy<ObservableCollection<AccountGameInfos>> _lazyGames;
+
+        #region Account data
 
         /// <summary>
         /// Get the current account information for the user.
@@ -49,57 +47,22 @@ namespace CommonPluginsStores
         /// </summary>
         public AccountInfos CurrentAccountInfos
         {
-            get
-            {
-                // Lazy load account info if not already loaded
-                _currentAccountInfos = _currentAccountInfos ?? GetCurrentAccountInfos();
-                return _currentAccountInfos;
-            }
-
-            set => SetValue(ref _currentAccountInfos, value);
+            get => _lazyAccount.Value;
+            set => SetValue(ref _lazyAccount, new Lazy<AccountInfos>(() => value), nameof(CurrentAccountInfos));
         }
-
-        private ObservableCollection<AccountInfos> _currentFriendsInfos;
 
         /// <summary>
         /// Gets or sets the current friends list.
         /// Data is refreshed every 30 minutes.
         /// </summary>
-        public ObservableCollection<AccountInfos> CurrentFriendsInfos
-        {
-            get
-            {
-                if (_currentFriendsInfos?.FirstOrDefault()?.LastCall.AddMinutes(30) < DateTime.Now)
-                {
-                    _currentFriendsInfos = null;
-                }
-                _currentFriendsInfos = _currentFriendsInfos ?? GetCurrentFriendsInfos();
-                return _currentFriendsInfos;
-            }
-
-            set => SetValue(ref _currentFriendsInfos, value);
-        }
-
-        private ObservableCollection<AccountGameInfos> _currentGamesInfos;
+        /// 
+        public ObservableCollection<AccountInfos> CurrentFriendsInfos => _lazyFriends.Value;
 
         /// <summary>
         /// Gets or sets the current games list.
         /// Data is refreshed every 30 minutes.
         /// </summary>
-        public ObservableCollection<AccountGameInfos> CurrentGamesInfos
-        {
-            get
-            {
-                if (_currentGamesInfos?.FirstOrDefault()?.LastCall.AddMinutes(30) < DateTime.Now)
-                {
-                    _currentGamesInfos = null;
-                }
-                _currentGamesInfos = _currentGamesInfos ?? GetAccountGamesInfos(CurrentAccountInfos);
-                return _currentGamesInfos;
-            }
-
-            set => SetValue(ref _currentGamesInfos, value);
-        }
+        public ObservableCollection<AccountGameInfos> CurrentGamesInfos => _lazyGames.Value;
 
         /// <summary>
         /// Gets the list of currently owned DLCs for all games.
@@ -108,9 +71,11 @@ namespace CommonPluginsStores
         {
             get
             {
-                ObservableCollection<GameDlcOwned> currentGamesDlcsOwned = LoadGamesDlcsOwned() ?? GetGamesDlcsOwned() ?? LoadGamesDlcsOwned(false);
-                _ = SaveGamesDlcsOwned(currentGamesDlcsOwned);
-                return currentGamesDlcsOwned;
+                return _dlcsCache.GetOrSet(
+                    "current_account",
+                    () => LoadGamesDlcsOwned() ?? GetGamesDlcsOwned() ?? LoadGamesDlcsOwned(false),
+                    TimeSpan.FromMinutes(5)
+                );
             }
         }
 
@@ -220,10 +185,24 @@ namespace CommonPluginsStores
         /// <param name="clientName">The display name of the client</param>
         public StoreApi(string pluginName, ExternalPlugin pluginLibrary, string clientName)
         {
+            Guard.Against.NullOrWhiteSpace(pluginName, nameof(pluginName));
+            Guard.Against.Null(pluginLibrary, nameof(pluginLibrary));
+            Guard.Against.EnumOutOfRange(pluginLibrary, nameof(pluginLibrary));
+            Guard.Against.NullOrWhiteSpace(clientName, nameof(clientName));
+
             PluginName = pluginName;
             PluginLibrary = pluginLibrary;
             ClientName = clientName;
             ClientNameLog = clientName.RemoveWhiteSpace();
+
+            _accountCache = new SmartCache<AccountInfos>();
+            _friendsCache = new SmartCache<ObservableCollection<AccountInfos>>();
+            _gamesCache = new SmartCache<ObservableCollection<AccountGameInfos>>();
+            _dlcsCache = new SmartCache<ObservableCollection<GameDlcOwned>>();
+
+            _lazyAccount = new Lazy<AccountInfos>(() => _accountCache.GetOrSet("current_account", GetCurrentAccountInfos, TimeSpan.FromHours(24)));
+            _lazyFriends = new Lazy<ObservableCollection<AccountInfos>>(() => _friendsCache.GetOrSet("current_friends", GetCurrentFriendsInfos, TimeSpan.FromMinutes(30)));
+            _lazyGames = new Lazy<ObservableCollection<AccountGameInfos>>(() => _gamesCache.GetOrSet("current_games", () => GetAccountGamesInfos(CurrentAccountInfos), TimeSpan.FromMinutes(30)));
 
             string pathCacheData = Path.Combine(PlaynitePaths.DataCachePath, "StoresData");
             PathAppsData = Path.Combine(pathCacheData, ClientNameLog, "Apps");
@@ -410,7 +389,7 @@ namespace CommonPluginsStores
             if (saveUser)
             {
                 SaveCurrentUser();
-                CurrentAccountInfos = null;
+                ClearCache();
                 _ = CurrentAccountInfos;
             }
         }
@@ -426,25 +405,24 @@ namespace CommonPluginsStores
         /// <returns>Current account information</returns>
         protected abstract AccountInfos GetCurrentAccountInfos();
 
+        public async Task<AccountInfos> GetCurrentAccountInfosAsync()
+        {
+            return await Task.Run(() => GetCurrentAccountInfos());
+        }
+
         /// <summary>
         /// Get current user's friends info.
         /// Override in derived classes if friends functionality is supported.
         /// </summary>
         /// <returns>Collection of friends' account information or null</returns>
-        protected virtual ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
-        {
-            return null;
-        }
+        protected virtual ObservableCollection<AccountInfos> GetCurrentFriendsInfos() => null;
 
         /// <summary>
         /// Get all game's owned for current user.
         /// Override in derived classes if game ownership tracking is supported.
         /// </summary>
         /// <returns>Collection of owned games or null</returns>
-        protected virtual ObservableCollection<GameDlcOwned> GetGamesOwned()
-        {
-            return null;
-        }
+        protected virtual ObservableCollection<GameDlcOwned> GetGamesOwned() => null;
 
         #endregion
 
@@ -458,6 +436,12 @@ namespace CommonPluginsStores
         /// <returns>Collection of user's game information</returns>
         public abstract ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos);
 
+        public async Task<ObservableCollection<AccountGameInfos>> GetAccountGamesInfosAsync(AccountInfos accountInfos)
+        {
+            Guard.Against.Null(accountInfos, nameof(accountInfos));
+            return await Task.Run(() => GetAccountGamesInfos(accountInfos));
+        }
+
         /// <summary>
         /// Get a list of a game's achievements with a user's possessions.
         /// Override in derived classes if achievements are supported.
@@ -465,9 +449,13 @@ namespace CommonPluginsStores
         /// <param name="id">Game identifier</param>
         /// <param name="accountInfos">Account information</param>
         /// <returns>Collection of game achievements or null</returns>
-        public virtual ObservableCollection<GameAchievement> GetAchievements(string id, AccountInfos accountInfos)
+        public virtual ObservableCollection<GameAchievement> GetAchievements(string id, AccountInfos accountInfos) => null;
+
+        public async Task<ObservableCollection<GameAchievement>> GetAchievementsAsync(string id, AccountInfos accountInfos)
         {
-            return null;
+            Guard.Against.NullOrWhiteSpace(id, nameof(id));
+            Guard.Against.Null(accountInfos, nameof(accountInfos));
+            return await Task.Run(() => GetAchievements(id, accountInfos));
         }
 
         /// <summary>
@@ -478,10 +466,7 @@ namespace CommonPluginsStores
         /// <param name="id">Game identifier</param>
         /// <param name="accountInfos">Account information</param>
         /// <returns>Source link for achievements or null</returns>
-        public virtual SourceLink GetAchievementsSourceLink(string name, string id, AccountInfos accountInfos)
-        {
-            return null;
-        }
+        public virtual SourceLink GetAchievementsSourceLink(string name, string id, AccountInfos accountInfos) => null;
 
         /// <summary>
         /// Gets the user's wishlist.
@@ -489,10 +474,7 @@ namespace CommonPluginsStores
         /// </summary>
         /// <param name="accountInfos">Account information</param>
         /// <returns>Collection of wishlist items or null</returns>
-        public virtual ObservableCollection<AccountWishlist> GetWishlist(AccountInfos accountInfos)
-        {
-            return null;
-        }
+        public virtual ObservableCollection<AccountWishlist> GetWishlist(AccountInfos accountInfos) => null;
 
         /// <summary>
         /// Removes an item from the user's wishlist.
@@ -500,10 +482,7 @@ namespace CommonPluginsStores
         /// </summary>
         /// <param name="id">Item identifier to remove</param>
         /// <returns>True if removal was successful, false otherwise</returns>
-        public virtual bool RemoveWishlist(string id)
-        {
-            return false;
-        }
+        public virtual bool RemoveWishlist(string id) => false;
 
         #endregion
 
@@ -516,10 +495,7 @@ namespace CommonPluginsStores
         /// <param name="id">Game identifier</param>
         /// <param name="accountInfos">Account information</param>
         /// <returns>Game information object or null</returns>
-        public virtual GameInfos GetGameInfos(string id, AccountInfos accountInfos)
-        {
-            return null;
-        }
+        public virtual GameInfos GetGameInfos(string id, AccountInfos accountInfos) => null;
 
         /// <summary>
         /// Gets the achievements schema for a game.
@@ -527,10 +503,7 @@ namespace CommonPluginsStores
         /// </summary>
         /// <param name="id">Game identifier</param>
         /// <returns>Tuple containing schema identifier and achievements collection, or null</returns>
-        public virtual Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
-        {
-            return null;
-        }
+        public virtual Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id) => null;
 
         /// <summary>
         /// Get dlc informations for a game.
@@ -539,9 +512,13 @@ namespace CommonPluginsStores
         /// <param name="id">Game identifier</param>
         /// <param name="accountInfos">Account information</param>
         /// <returns>Collection of DLC information or null</returns>
-        public virtual ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos)
+        public virtual ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos) => null;
+
+        public async Task<ObservableCollection<DlcInfos>> GetDlcInfosAsync(string id, AccountInfos accountInfos)
         {
-            return null;
+            Guard.Against.NullOrWhiteSpace(id, nameof(id));
+            Guard.Against.Null(accountInfos, nameof(accountInfos));
+            return await Task.Run(() => GetDlcInfos(id, accountInfos));
         }
 
         #endregion
@@ -583,9 +560,11 @@ namespace CommonPluginsStores
         /// Override in derived classes if ownership tracking is supported.
         /// </summary>
         /// <returns>Collection of owned games and DLC or null</returns>
-        protected virtual ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
+        protected virtual ObservableCollection<GameDlcOwned> GetGamesDlcsOwned() => null;
+
+        public async Task<ObservableCollection<GameDlcOwned>> GetGamesDlcsOwnedAsync()
         {
-            return null;
+            return await Task.Run(() => GetGamesDlcsOwned());
         }
 
         /// <summary>
@@ -686,15 +665,10 @@ namespace CommonPluginsStores
         /// <returns>Loaded data of type T or null if loading fails or data is too old</returns>
         protected T LoadData<T>(string filePath, int minutes) where T : class
         {
-            if (filePath.IsNullOrEmpty())
-            {
-                Logger.Warn($"filePath is empty");
-                return null;
-            }
+            Guard.Against.NullOrWhiteSpace(filePath, nameof(filePath));
 
             if (!File.Exists(filePath))
             {
-                //Logger.Warn($"File not found: {filePath}");
                 return null;
             }
 
@@ -721,6 +695,39 @@ namespace CommonPluginsStores
             }
         }
 
+        protected async Task<T> LoadDataAsync<T>(string filePath, int minutes) where T : class
+        {
+            Guard.Against.NullOrWhiteSpace(filePath, nameof(filePath));
+
+            if (!File.Exists(filePath))
+            {
+                return null;
+            }
+
+            try
+            {
+                var fileInfo = new FileInfo(filePath);
+                DateTime dateLastWrite = fileInfo.LastWriteTime;
+
+                if (minutes > 0 && dateLastWrite.AddMinutes(minutes) <= DateTime.Now)
+                {
+                    return null;
+                }
+
+                if (minutes == 0)
+                {
+                    ShowNotificationOldData(dateLastWrite);
+                }
+
+                return await Task.Run(() => Serialization.FromJsonFile<T>(filePath));
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return null;
+            }
+        }
+
         /// <summary>
         /// Purges all cached data including apps and achievements.
         /// </summary>
@@ -728,6 +735,14 @@ namespace CommonPluginsStores
         {
             FileSystem.DeleteDirectory(PathAppsData);
             FileSystem.DeleteDirectory(PathAchievementsData);
+        }
+
+        public void ClearCache()
+        {
+            _accountCache.Clear();
+            _friendsCache.Clear();
+            _gamesCache.Clear();
+            _dlcsCache.Clear();
         }
     }
 }
