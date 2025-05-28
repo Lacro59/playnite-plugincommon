@@ -3,7 +3,6 @@ using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using CommonPlayniteShared.Common;
 using CommonPluginsShared;
-using CommonPluginsShared.Converters;
 using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Models;
 using CommonPluginsStores.Gog.Models;
@@ -14,11 +13,8 @@ using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Security.Principal;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,6 +26,7 @@ namespace CommonPluginsStores.Gog
     public class GogApi : StoreApi
     {
         #region Urls
+
         private static string UrlAccountInfo => @"https://menu.gog.com/v1/account/basic";
 
         private static string UrlBase => @"https://www.gog.com";
@@ -47,9 +44,11 @@ namespace CommonPluginsStores.Gog
 
         private static string UrlGogLang => UrlBase + @"/user/changeLanguage/{0}";
         private static string UrlGogGame => UrlBase + @"/game/{0}";
+
         #endregion
 
         #region Urls API
+
         private static string UrlApiGamePlay => @"https://gameplay.gog.com";
         private static string UrlApi => @"https://api.gog.com";
         private static string UrlApiEmbed => @"https://embed.gog.com";
@@ -68,6 +67,7 @@ namespace CommonPluginsStores.Gog
         private static string UrlUserOwned => UrlApiEmbed + @"/user/data/games";
 
         private static string UrlUserInfoByGalaxyUserId => UrlApiUsers + @"/users/{0}";
+
         #endregion
 
         private string FileUserDataOwned { get; }
@@ -89,9 +89,7 @@ namespace CommonPluginsStores.Gog
             set => _accountBasic = value;
         }
 
-
         private static StoreCurrency LocalCurrency { get; set; } = new StoreCurrency { country = "US", currency = "USD", symbol = "$" };
-
 
         public GogApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "GOG")
         {
@@ -100,6 +98,7 @@ namespace CommonPluginsStores.Gog
         }
 
         #region Configuration
+
         protected override bool GetIsUserLoggedIn()
         {
             if (CurrentAccountInfos == null)
@@ -187,9 +186,11 @@ namespace CommonPluginsStores.Gog
         {
             LocalCurrency = currency;
         }
+
         #endregion
 
         #region Current user
+
         protected override AccountInfos GetCurrentAccountInfos()
         {
             AccountInfos accountInfos = LoadCurrentUser();
@@ -265,9 +266,11 @@ namespace CommonPluginsStores.Gog
 
             return null;
         }
+
         #endregion
 
         #region User details
+
         public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
         {
             if (!IsUserLoggedIn)
@@ -606,9 +609,11 @@ namespace CommonPluginsStores.Gog
 
             return false;
         }
+
         #endregion
 
         #region Game
+
         public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
         {
             try
@@ -748,10 +753,12 @@ namespace CommonPluginsStores.Gog
 
             return dlcs;
         }
+
         #endregion
 
         #region Games owned
-        internal override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
+
+        protected override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
         {
             if (!IsUserLoggedIn)
             {
@@ -773,9 +780,11 @@ namespace CommonPluginsStores.Gog
                 return null;
             }
         }
+
         #endregion
 
         #region GOG
+
         public async Task<bool> CheckIsPublic(AccountInfos accountInfos)
         {
             try
@@ -860,7 +869,6 @@ namespace CommonPluginsStores.Gog
             return profileUserGalaxy;
         }
 
-
         public ProductApiDetail GetProductDetail(string id)
         {
             string cachePath = Path.Combine(PathAppsData, $"{id}.json");
@@ -883,7 +891,6 @@ namespace CommonPluginsStores.Gog
 
             return productApiDetail;
         }
-
 
         private UserDataOwned LoadUserDataOwned(bool onlyNow = true)
         {
@@ -1046,8 +1053,8 @@ namespace CommonPluginsStores.Gog
             _= document.Body.RemoveChild(firstChild);
             return document.Body.InnerHtml;
         }
-        #endregion
 
+        #endregion
 
         private void ManageException (string message, Exception ex, bool is404)
         {

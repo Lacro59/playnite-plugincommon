@@ -5,19 +5,14 @@ using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Models;
 using CommonPluginsStores.Models;
-using CommonPluginsStores.Origin.Models;
 using CommonPluginsStores.Psn.Models;
-using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Text.RegularExpressions;
 using static CommonPluginsShared.PlayniteTools;
 
@@ -25,22 +20,23 @@ namespace CommonPluginsStores.Psn
 {
     public class PsnApi : StoreApi
     {
-        #region Url
+        #region Urls
+
         private static string UrlGraphql => "https://web.np.playstation.com/api/graphql/v1";
         private static string UrlGetAddOnProductsByProductId => UrlGraphql + "/op?operationName=getAddOnProductsByProductId&variables={0}";
 
         private static string UrlStore => "https://store.playstation.com";
-        private static string UrlGameStore => UrlStore + "/product/{0}/";        
+        private static string UrlGameStore => UrlStore + "/product/{0}/";
         #endregion
 
-        protected static readonly Lazy<PSNClient> _psnClient = new Lazy<PSNClient>(() => new PSNClient(PsnDataPath));
-        internal static PSNClient PsnClient => _psnClient.Value;
-
+        private static readonly Lazy<PSNClient> _psnClient = new Lazy<PSNClient>(() => new PSNClient(PsnDataPath));
+        private static PSNClient PsnClient => _psnClient.Value;
 
         #region Paths
-        private static string PsnDataPath { get; set; }
-        #endregion
 
+        private static string PsnDataPath { get; set; }
+
+        #endregion
 
         public PsnApi(string PluginName) : base(PluginName, ExternalPlugin.PSNLibrary, "PSN")
         {
@@ -48,15 +44,18 @@ namespace CommonPluginsStores.Psn
         }
 
         #region Configuration
+
         protected override bool GetIsUserLoggedIn()
         {
             PsnClient.CheckAuthentication().GetAwaiter().GetResult();
             bool isLogged = PsnClient.GetIsUserLoggedIn().GetAwaiter().GetResult();
             return isLogged;
         }
+
         #endregion
 
         #region Current user
+
         protected override AccountInfos GetCurrentAccountInfos()
         {
             if (!IsUserLoggedIn)
@@ -94,9 +93,11 @@ namespace CommonPluginsStores.Psn
 
             return null;
         }
+
         #endregion
 
         #region User details
+
         public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
         {
             if (!IsUserLoggedIn)
@@ -180,9 +181,11 @@ namespace CommonPluginsStores.Psn
 
             return false;
         }
+
         #endregion
 
         #region Game
+
         public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
         {
             try
@@ -292,11 +295,13 @@ namespace CommonPluginsStores.Psn
             }
 
             return productId;
-        } 
+        }
+
         #endregion
 
         #region Games owned
-        internal override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
+
+        protected override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
         {
             if (!IsUserLoggedIn)
             {
@@ -314,6 +319,7 @@ namespace CommonPluginsStores.Psn
 
             return null;
         }
+
         #endregion
 
         #region PSN

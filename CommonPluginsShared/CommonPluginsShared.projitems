@@ -46,6 +46,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\TwoBooleanToVisibilityConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\ValueOperationConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\VisibilityZeroConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CookiesTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CumulsErrors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\DateTimeExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\ListExtensions.cs" />
@@ -65,6 +66,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SmartCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IDataContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginDatabase.cs" />

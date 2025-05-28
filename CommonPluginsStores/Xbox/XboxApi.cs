@@ -4,9 +4,7 @@ using CommonPluginsStores.Models;
 using CommonPluginsStores.Xbox.Models;
 using Playnite.SDK.Data;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.Xbox
@@ -14,14 +12,17 @@ namespace CommonPluginsStores.Xbox
     public class XboxApi : StoreApi
     {
         #region Urls
+
         private static string UrlBase => @"https://www.microsoft.com";
+
         #endregion
 
         #region Urls API
+
         private static string UrlApiWishlist => UrlBase + @"/msstoreapiprod/api/wishlist/details?locale={0}";
         private static string UrlApiWishlistShared => UrlApiWishlist + @"&wishlistId={1}";
-        #endregion
 
+        #endregion
 
         public XboxApi(string PluginName) : base(PluginName, ExternalPlugin.XboxLibrary, "Xbox")
         {
@@ -29,13 +30,16 @@ namespace CommonPluginsStores.Xbox
         }
 
         #region Configuration
+
         protected override bool GetIsUserLoggedIn()
         {
             return false;
         }
+
         #endregion
 
         #region Current user
+
         protected override AccountInfos GetCurrentAccountInfos()
         {
             if (!IsUserLoggedIn)
@@ -73,9 +77,11 @@ namespace CommonPluginsStores.Xbox
 
             return null;
         }
+
         #endregion
 
         #region User details
+
         public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
         {
             if (!IsUserLoggedIn)
@@ -95,7 +101,7 @@ namespace CommonPluginsStores.Xbox
             return null;
         }
 
-        public override ObservableCollection<GameAchievement> GetAchievements(string Id, AccountInfos accountInfos)
+        public override ObservableCollection<GameAchievement> GetAchievements(string id, AccountInfos accountInfos)
         {
             if (!IsUserLoggedIn)
             {
@@ -115,7 +121,7 @@ namespace CommonPluginsStores.Xbox
             return null;
         }
 
-        public override SourceLink GetAchievementsSourceLink(string Name, string Id, AccountInfos accountInfos)
+        public override SourceLink GetAchievementsSourceLink(string name, string id, AccountInfos accountInfos)
         {
             return null;
         }
@@ -155,7 +161,7 @@ namespace CommonPluginsStores.Xbox
             return null;
         }
 
-        public override bool RemoveWishlist(string Id)
+        public override bool RemoveWishlist(string id)
         {
             if (IsUserLoggedIn)
             {
@@ -165,16 +171,18 @@ namespace CommonPluginsStores.Xbox
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false, $"Error remove {Id} in {ClientName} wishlist", true, PluginName);
+                    Common.LogError(ex, false, $"Error remove {id} in {ClientName} wishlist", true, PluginName);
                 }
             }
 
             return false;
         }
+
         #endregion
 
         #region Game
-        public override GameInfos GetGameInfos(string Id, AccountInfos accountInfos)
+
+        public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
         {
             try
             {
@@ -188,14 +196,16 @@ namespace CommonPluginsStores.Xbox
             return null;
         }
 
-        public override ObservableCollection<DlcInfos> GetDlcInfos(string Id, AccountInfos accountInfos)
+        public override ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos)
         {
             return null;
         }
+
         #endregion
 
         #region Game owned
-        internal override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
+
+        protected override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
         {
             if (!IsUserLoggedIn)
             {
@@ -213,6 +223,7 @@ namespace CommonPluginsStores.Xbox
                 return null;
             }
         }
+
         #endregion
 
         #region Xbox
