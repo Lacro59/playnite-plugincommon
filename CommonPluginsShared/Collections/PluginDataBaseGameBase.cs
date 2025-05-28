@@ -12,6 +12,7 @@ namespace CommonPluginsShared.Collections
     public class PluginDataBaseGameBase : DatabaseObject
     {
         #region Data
+
         /// <summary>
         /// Gets or sets the date and time when the data was last refreshed.
         /// </summary>
@@ -40,8 +41,8 @@ namespace CommonPluginsShared.Collections
         /// </summary>
         [DontSerialize]
         public virtual ulong Count => 0;
-        #endregion
 
+        #endregion
 
         /// <summary>
         /// Indicates whether the referenced Playnite game exists in the database.
@@ -53,7 +54,6 @@ namespace CommonPluginsShared.Collections
         /// </summary>
         [DontSerialize]
         public RelayCommand<Guid> GoToGame => Commands.GoToGame;
-
 
         #region Game data
 

@@ -1,24 +1,36 @@
 ﻿using CommonPluginsShared.Collections;
 using CommonPluginsShared.Interfaces;
-using Playnite.SDK;
 using Playnite.SDK.Models;
-using System;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
 namespace CommonPluginsShared.Controls
 {
+    /// <summary>
+    /// Extended user control base class that integrates with a plugin database.
+    /// Automatically handles data retrieval and UI updates based on the current game context.
+    /// </summary>
     public class PluginUserControlExtend : PluginUserControlExtendBase
     {
-        internal virtual IPluginDatabase pluginDatabase { get; }
+        /// <summary>
+        /// The plugin's database interface for accessing game-specific data.
+        /// </summary>
+        protected virtual IPluginDatabase pluginDatabase { get; }
 
-
-        public virtual void SetData(Game newContext, PluginDataBaseGameBase PluginGameData)
+        /// <summary>
+        /// Sets the control data using the provided game and associated plugin data.
+        /// This method should be overridden by derived classes to implement custom logic.
+        /// </summary>
+        /// <param name="newContext">The current selected game context.</param>
+        /// <param name="pluginGameData">The plugin-specific data associated with the game.</param>
+        public virtual void SetData(Game newContext, PluginDataBaseGameBase pluginGameData)
         {
         }
 
+        /// <summary>
+        /// Updates the control's content asynchronously using game context and plugin data.
+        /// </summary>
         public override async Task UpdateDataAsync()
         {
             UpdateDataTimer.Stop();
@@ -42,7 +54,10 @@ namespace CommonPluginsShared.Controls
                 return;
             }
 
-            await Task.Run(() => Application.Current.Dispatcher?.Invoke(() => SetData(GameContext, PluginGameData), DispatcherPriority.Render));
+            await Application.Current.Dispatcher?.InvokeAsync(
+                () => SetData(GameContext, PluginGameData),
+                DispatcherPriority.Render
+            );
         }
     }
 }

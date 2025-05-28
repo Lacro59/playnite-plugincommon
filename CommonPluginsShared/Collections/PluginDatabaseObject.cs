@@ -52,6 +52,9 @@ namespace CommonPluginsShared.Collections
         private IEnumerable<Guid> PreviousIds { get; set; } = new List<Guid>();
 
 
+
+
+
         /// <summary>
         /// Constructor for PluginDatabaseObject.
         /// </summary>
@@ -470,10 +473,7 @@ namespace CommonPluginsShared.Collections
         /// Refreshes data for a game.
         /// </summary>
         /// <param name="game">Game to refresh.</param>
-        public void Refresh(Game game)
-        {
-            Refresh(game.Id);
-        }
+        public void Refresh(Game game) => Refresh(game.Id);
 
         /// <summary>
         /// Refreshes data for a game ID.
@@ -585,10 +585,7 @@ namespace CommonPluginsShared.Collections
         }
 
         [Obsolete("Used Refresh(ids)")]
-        public virtual void RefreshWithNoData(IEnumerable<Guid> ids)
-        {
-            Refresh(ids);
-        }
+        public virtual void RefreshWithNoData(IEnumerable<Guid> ids) => Refresh(ids);
 
         /// <summary>
         /// Refreshes data for installed games.
@@ -651,20 +648,14 @@ namespace CommonPluginsShared.Collections
         /// <param name="fromId">Source game ID.</param>
         /// <param name="toId">Destination game ID.</param>
         /// <returns>Merged item.</returns>
-        public virtual PluginDataBaseGameBase MergeData(Guid fromId, Guid toId)
-        {
-            return null;
-        }
+        public virtual PluginDataBaseGameBase MergeData(Guid fromId, Guid toId) => null;
 
         /// <summary>
         /// Removes a game from the database.
         /// </summary>
         /// <param name="game">Game to remove.</param>
         /// <returns>True if the game was removed successfully.</returns>
-        public virtual bool Remove(Game game)
-        {
-            return Remove(game.Id);
-        }
+        public virtual bool Remove(Game game) => Remove(game.Id);
 
         /// <summary>
         /// Removes a game from the database by ID.
@@ -711,40 +702,28 @@ namespace CommonPluginsShared.Collections
         /// </summary>
         /// <param name="id">Item ID.</param>
         /// <returns>Item from the cache.</returns>
-        public virtual TItem GetOnlyCache(Guid id)
-        {
-            return Database?.Get(id);
-        }
+        public virtual TItem GetOnlyCache(Guid id) => Database?.Get(id);
 
         /// <summary>
         /// Gets an item from the cache by game.
         /// </summary>
         /// <param name="game">Game.</param>
         /// <returns>Item from the cache.</returns>
-        public virtual TItem GetOnlyCache(Game game)
-        {
-            return Database?.Get(game.Id);
-        }
+        public virtual TItem GetOnlyCache(Game game) => Database?.Get(game.Id);
 
         /// <summary>
         /// Gets a clone of an item by ID.
         /// </summary>
         /// <param name="id">Item ID.</param>
         /// <returns>Cloned item.</returns>
-        public virtual TItem GetClone(Guid id)
-        {
-            return Serialization.GetClone(Get(id, true, false));
-        }
+        public virtual TItem GetClone(Guid id) => Serialization.GetClone(Get(id, true, false));
 
         /// <summary>
         /// Gets a clone of an item by game.
         /// </summary>
         /// <param name="game">Game.</param>
         /// <returns>Cloned item.</returns>
-        public virtual TItem GetClone(Game game)
-        {
-            return Serialization.GetClone(Get(game, true, false));
-        }
+        public virtual TItem GetClone(Game game) => Serialization.GetClone(Get(game, true, false));
 
         /// <summary>
         /// Gets an item by ID.
@@ -762,10 +741,7 @@ namespace CommonPluginsShared.Collections
         /// <param name="onlyCache">Whether to use only cache.</param>
         /// <param name="force">Whether to force refresh.</param>
         /// <returns>Item.</returns>
-        public virtual TItem Get(Game game, bool onlyCache = false, bool force = false)
-        {
-            return Get(game.Id, onlyCache, force);
-        }
+        public virtual TItem Get(Game game, bool onlyCache = false, bool force = false) => Get(game.Id, onlyCache, force);
 
         /// <summary>
         /// Gets an item by game.
@@ -774,10 +750,7 @@ namespace CommonPluginsShared.Collections
         /// <param name="onlyCache">Whether to use only cache.</param>
         /// <param name="force">Whether to force refresh.</param>
         /// <returns>Item.</returns>
-        PluginDataBaseGameBase IPluginDatabase.Get(Game game, bool onlyCache, bool force)
-        {
-            return Get(game, onlyCache, force);
-        }
+        PluginDataBaseGameBase IPluginDatabase.Get(Game game, bool onlyCache, bool force) => Get(game, onlyCache, force);
 
         /// <summary>
         /// Gets an item by ID.
@@ -786,62 +759,43 @@ namespace CommonPluginsShared.Collections
         /// <param name="onlyCache">Whether to use only cache.</param>
         /// <param name="force">Whether to force refresh.</param>
         /// <returns>Item.</returns>
-        PluginDataBaseGameBase IPluginDatabase.Get(Guid id, bool onlyCache, bool force)
-        {
-            return Get(id, onlyCache, force);
-        }
+        PluginDataBaseGameBase IPluginDatabase.Get(Guid id, bool onlyCache, bool force) => Get(id, onlyCache, force);
 
         /// <summary>
         /// Gets a clone of an item by game.
         /// </summary>
         /// <param name="game">Game.</param>
         /// <returns>Cloned item.</returns>
-        PluginDataBaseGameBase IPluginDatabase.GetClone(Game game)
-        {
-            return GetClone(game);
-        }
+        PluginDataBaseGameBase IPluginDatabase.GetClone(Game game) => GetClone(game);
 
         /// <summary>
         /// Gets a clone of an item by ID.
         /// </summary>
         /// <param name="id">Item ID.</param>
         /// <returns>Cloned item.</returns>
-        PluginDataBaseGameBase IPluginDatabase.GetClone(Guid id)
-        {
-            return GetClone(id);
-        }
+        PluginDataBaseGameBase IPluginDatabase.GetClone(Guid id) => GetClone(id);
 
         /// <summary>
         /// Adds or updates an item in the database.
         /// </summary>
         /// <param name="item">Item to add or update.</param>
-        void IPluginDatabase.AddOrUpdate(PluginDataBaseGameBase item)
-        {
-            AddOrUpdate((TItem)item);
-        }
+        void IPluginDatabase.AddOrUpdate(PluginDataBaseGameBase item) => AddOrUpdate((TItem)item);
 
         /// <summary>
         /// Gets an item from the web by ID.
         /// </summary>
         /// <param name="id">Item ID.</param>
         /// <returns>Item from the web.</returns>
-        public virtual TItem GetWeb(Guid dd)
-        {
-            return null;
-        }
+        public virtual TItem GetWeb(Guid dd) => null;
 
         /// <summary>
         /// Gets an item from the web by game.
         /// </summary>
         /// <param name="game">Game.</param>
         /// <returns>Item from the web.</returns>
-        public virtual TItem GetWeb(Game game)
-        {
-            return GetWeb(game.Id);
-        }
+        public virtual TItem GetWeb(Game game) => GetWeb(game.Id);
 
         #endregion
-
 
         #region Tag System
 
@@ -1168,8 +1122,6 @@ namespace CommonPluginsShared.Collections
 
         #endregion
 
-
-
         #region Utility Methods
 
         /// <summary>
@@ -1282,7 +1234,6 @@ namespace CommonPluginsShared.Collections
         }
 
         #endregion
-
 
         #region Data Extraction
 
