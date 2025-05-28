@@ -55,6 +55,9 @@ namespace CommonPluginsStores.Models
             get
             {
                 if (_dateUnlocked.HasValue && _dateUnlocked.Value == DateTime.MinValue)
+                {
+                    return null;
+                }
                 return _dateUnlocked?.ToLocalTime();
             }
             set
