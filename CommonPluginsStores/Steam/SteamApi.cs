@@ -1,32 +1,32 @@
-﻿using CommonPluginsShared;
-using CommonPluginsShared.Extensions;
-using CommonPluginsStores.Models;
-using CommonPluginsStores.Steam.Models;
-using Microsoft.Win32;
-using Playnite.SDK.Data;
-using SteamKit2;
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
+﻿using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
-using AngleSharp.Dom;
 using CommonPlayniteShared.Common;
-using System.Threading.Tasks;
-using System.Globalization;
-using System.Windows.Media;
-using System.Text.RegularExpressions;
 using CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared;
-using System.Net;
-using static CommonPluginsShared.PlayniteTools;
-using System.Net.Http;
-using System.Threading;
-using CommonPluginsStores.Steam.Models.SteamKit;
-using Playnite.SDK.Models;
+using CommonPluginsShared;
+using CommonPluginsShared.Extensions;
+using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Enumerations;
+using CommonPluginsStores.Steam.Models;
+using CommonPluginsStores.Steam.Models.SteamKit;
+using Microsoft.Win32;
 using Playnite.SDK;
+using Playnite.SDK.Data;
+using Playnite.SDK.Models;
+using SteamKit2;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Media;
+using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.Steam
 {
@@ -56,6 +56,7 @@ namespace CommonPluginsStores.Steam
         private static string UrlProfileByName => UrlSteamCommunity + @"/id/{0}";
         private static string UrlFriends => UrlSteamCommunity + @"/profiles/{0}/friends";
         private static string UrlProfileGamesById => UrlProfileById + @"/games/?tab=all";
+        private static string UrlProfilById => UrlProfileById + @"/stats/{1}?tab=achievements&l={2}";
 
         private static string UrlAccount => UrlStore + @"/account";
         private static string UrlUserData => UrlStore + @"/dynamicstore/userdata/";
@@ -1316,9 +1317,9 @@ namespace CommonPluginsStores.Steam
                 ObservableCollection<AccountInfos> currentFriendsInfos = new ObservableCollection<AccountInfos>();
                 List<HttpCookie> cookies = GetStoredCookies();
                 string url = string.Format(UrlFriends, CurrentAccountInfos.UserId);
-                string reponse = Web.DownloadStringData(url, cookies).GetAwaiter().GetResult();
+                string response = Web.DownloadStringData(url, cookies).GetAwaiter().GetResult();
 
-                IHtmlDocument htmlDocument = new HtmlParser().Parse(reponse);
+                IHtmlDocument htmlDocument = new HtmlParser().Parse(response);
                 IHtmlCollection<IElement> elements = htmlDocument.QuerySelectorAll(".friend_block_v2");
                 foreach (IElement el in elements)
                 {
@@ -1372,6 +1373,62 @@ namespace CommonPluginsStores.Steam
                 Common.LogError(ex, false, true, PluginName);
                 return null;
             }
+        }
+
+        public ObservableCollection<AchievementProgression> GetProgressionByWeb(uint appId, AccountInfos accountInfos)
+        {
+            Logger.Info($"GetProgressionByWeb()");
+            ObservableCollection<AchievementProgression> achievementsProgression = new ObservableCollection<AchievementProgression>();
+
+            try
+            {
+                // Schema achievements
+                ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
+                Tuple<string, ObservableCollection<GameAchievement>> data = GetAchievementsSchema(appId.ToString());
+
+                if (data?.Item2?.Count() == 0)
+                {
+                    return achievementsProgression;
+                }
+
+                gameAchievements = data.Item2;
+
+                // Progression achievements
+                string url = string.Format(UrlProfilById, accountInfos.UserId, appId, "english");
+                string response = Web.DownloadStringData(url, GetWebCookies(), Web.UserAgent, true).GetAwaiter().GetResult();
+
+                IHtmlDocument htmlDocument = new HtmlParser().Parse(response);
+                IHtmlCollection<IElement> elements = htmlDocument.QuerySelectorAll("#personalAchieve div.achieveRow");
+                foreach (IElement el in elements)
+                {
+                    string name = el.QuerySelector("div.achieveTxt h3").InnerHtml.Trim();
+                    string progress = el.QuerySelector("div.achievementProgressBar .progressText")?.InnerHtml.Trim();
+                    string id = gameAchievements.FirstOrDefault(x => x.Name.IsEqual(name))?.Id;
+
+                    if (!id.IsNullOrEmpty())
+                    {
+                        if (!progress.IsNullOrEmpty())
+                        {
+                            achievementsProgression.Add(new AchievementProgression
+                            {
+                                Id = id,
+                                Value = double.Parse(progress.Split('/')[0].Trim(), CultureInfo.InvariantCulture),
+                                Max = double.Parse(progress.Split('/')[1].Trim(), CultureInfo.InvariantCulture)
+                            });
+                        }
+                    }
+                    else
+                    {
+                        Logger.Warn($"Achievement \"{name}\" not found in game schema for {appId}");
+                    }
+                }
+            }
+            catch (WebException ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+            }
+
+            return achievementsProgression;
         }
 
         #endregion
