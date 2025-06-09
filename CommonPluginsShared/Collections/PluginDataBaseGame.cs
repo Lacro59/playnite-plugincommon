@@ -37,7 +37,9 @@ namespace CommonPluginsShared.Collections
             get
             {
                 if (!_hasData.HasValue)
+                {
                     _hasData = Items != null && Items.Count > 0;
+                }
                 return _hasData.Value;
             }
         }
@@ -52,7 +54,9 @@ namespace CommonPluginsShared.Collections
             get
             {
                 if (!_count.HasValue)
+                {
                     _count = Items?.Count ?? 0;
+                }
                 return (ulong)_count.Value;
             }
         }
@@ -73,7 +77,6 @@ namespace CommonPluginsShared.Collections
 
         protected virtual void RefreshCachedValues()
         {
-
         }
     }
 }
