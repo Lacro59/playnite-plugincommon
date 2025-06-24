@@ -1075,7 +1075,7 @@ namespace CommonPluginsStores.Steam
 
         private ObservableCollection<GameAchievement> GetAchievementsByApi(uint appId, AccountInfos accountInfos, ObservableCollection<GameAchievement> gameAchievements)
         {
-            Logger.Info($"GetAchievementsByApi()");
+            Logger.Info($"GetAchievementsByApi({appId})");
             if (appId > 0 && ulong.TryParse(accountInfos.UserId, out ulong steamId) && !CurrentAccountInfos.ApiKey.IsNullOrEmpty())
             {
                 List<SteamPlayerAchievement> steamPlayerAchievements = SteamKit.GetPlayerAchievements(CurrentAccountInfos.ApiKey, appId, steamId, CodeLang.GetSteamLang(Locale));
@@ -1132,7 +1132,7 @@ namespace CommonPluginsStores.Steam
         #endregion
 
         #region Steam Web     
-        
+
         private bool CheckGameIsPrivateByWeb(uint appId, AccountInfos accountInfos)
         {
             Logger.Info($"CheckGameIsPrivateByWeb({appId})");
@@ -1202,7 +1202,7 @@ namespace CommonPluginsStores.Steam
 
         private ObservableCollection<GameAchievement> GetAchievementsByWeb(uint appId, AccountInfos accountInfos, ObservableCollection<GameAchievement> gameAchievements)
         {
-            Logger.Info($"GetAchievementsByWeb()");
+            Logger.Info($"GetAchievementsByWeb({appId})");
             string lang = "english";
             bool needLocalized = false;
             DateTime[] unlockedDates = null;
