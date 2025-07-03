@@ -211,18 +211,26 @@ namespace CommonPluginsStores.Epic
             {
                 _ = Task.Run(async () =>
                 {
-                    Thread.Sleep(1000);
-                    CurrentAccountInfos.IsPrivate = !CheckIsPublic(accountInfos).GetAwaiter().GetResult();
-                    CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
-
-                    if (CurrentAccountInfos.Pseudo.IsNullOrEmpty())
+                    try
                     {
-                        OauthResponse tokens = LoadTokens();
-                        EpicAccountResponse epicAccountResponse = await GetAccountInfo(tokens.account_id);
-                        CurrentAccountInfos.Pseudo = epicAccountResponse?.DisplayName;
-                        SaveCurrentUser();
+                        await Task.Delay(1000);
+                        CurrentAccountInfos.IsPrivate = !await CheckIsPublic(accountInfos);
+                        CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
+
+                        if (CurrentAccountInfos.Pseudo.IsNullOrEmpty())
+                        {
+                            OauthResponse tokens = LoadTokens();
+                            EpicAccountResponse epicAccountResponse = await GetAccountInfo(tokens.account_id);
+                            CurrentAccountInfos.Pseudo = epicAccountResponse?.DisplayName;
+                            SaveCurrentUser();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, true, PluginName);
                     }
                 });
+
                 return accountInfos;
             }
             return new AccountInfos { IsCurrent = true };
