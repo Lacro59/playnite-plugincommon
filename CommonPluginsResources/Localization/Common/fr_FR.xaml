@@ -69,7 +69,7 @@
 
     <sys:String x:Key="LOCCommonAccountConfiguration">Configuration du compte</sys:String>
     <sys:String x:Key="LOCCommonIsPrivate">Est privé</sys:String>
-    <sys:String x:Key="LOCCommonUseAuthentication"></sys:String>
+    <sys:String x:Key="LOCCommonUseAuthentication">Utiliser l'authentification</sys:String>
     <sys:String x:Key="LOCCommonUseAuthenticationOption">Utiliser l'authentification (optionnelle, pour plus d'informations seulement)</sys:String>
     <sys:String x:Key="LOCCommonHasApiKey">A une clé api</sys:String>
     <sys:String x:Key="LOCCommonControlConfiguration">Configuration du contrôle</sys:String>
