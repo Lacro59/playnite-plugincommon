@@ -84,6 +84,12 @@ namespace CommonPluginsShared
         /// <summary>
         /// Clears all items from the cache.
         /// </summary>
-        public void Clear() => _cache.Clear();
+        public void Clear()
+        {
+            lock (_lockObject)
+            {
+                _cache.Clear();
+            }
+        }
     }
 }
