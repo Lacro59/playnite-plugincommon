@@ -368,7 +368,7 @@ namespace CommonPluginsStores
         /// </summary>
         /// <param name="storeSettings">Store configuration settings</param>
         /// <param name="loadUser">Whether to load user data during initialization</param>
-        public virtual void Intialization(StoreSettings storeSettings, bool loadUser)
+        public virtual void Initialization(StoreSettings storeSettings, bool loadUser)
         {
             SetLanguage(API.Instance.ApplicationSettings.Language);
             StoreSettings = storeSettings;
