@@ -786,7 +786,7 @@ namespace CommonPluginsShared.Collections
         /// </summary>
         /// <param name="id">Item ID.</param>
         /// <returns>Item from the web.</returns>
-        public virtual TItem GetWeb(Guid dd) => null;
+        public virtual TItem GetWeb(Guid id) => null;
 
         /// <summary>
         /// Gets an item from the web by game.
