@@ -185,10 +185,10 @@ namespace CommonPluginsStores
         /// <param name="clientName">The display name of the client</param>
         public StoreApi(string pluginName, ExternalPlugin pluginLibrary, string clientName)
         {
-            Guard.Against.NullOrWhiteSpace(pluginName, nameof(pluginName));
-            Guard.Against.Null(pluginLibrary, nameof(pluginLibrary));
-            Guard.Against.EnumOutOfRange(pluginLibrary, nameof(pluginLibrary));
-            Guard.Against.NullOrWhiteSpace(clientName, nameof(clientName));
+            _ = Guard.Against.NullOrWhiteSpace(pluginName, nameof(pluginName));
+            _ = Guard.Against.Null(pluginLibrary, nameof(pluginLibrary));
+            _ = Guard.Against.EnumOutOfRange(pluginLibrary, nameof(pluginLibrary));
+            _ = Guard.Against.NullOrWhiteSpace(clientName, nameof(clientName));
 
             PluginName = pluginName;
             PluginLibrary = pluginLibrary;
