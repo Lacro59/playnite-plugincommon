@@ -32,6 +32,8 @@ namespace CommonPluginsShared.Controls
         /// </summary>
         protected DispatcherTimer UpdateDataTimer { get; set; }
 
+        protected Game CurrentGame { get; set; }
+
         #region Properties
 
         /// <summary>
@@ -177,6 +179,7 @@ namespace CommonPluginsShared.Controls
         /// </summary>
         public override void GameContextChanged(Game oldContext, Game newContext)
         {
+            CurrentGame = newContext;
             UpdateDataTimer.Stop();
 
             Visibility = Visibility.Collapsed;
@@ -281,8 +284,7 @@ namespace CommonPluginsShared.Controls
                 return;
             }
 
-            Game contextGame = GameContext;
-            if (contextGame is null || GameContext.Id != contextGame.Id)
+            if (CurrentGame is null || GameContext.Id != CurrentGame.Id)
             {
                 return;
             }

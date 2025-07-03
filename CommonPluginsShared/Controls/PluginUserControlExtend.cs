@@ -41,14 +41,13 @@ namespace CommonPluginsShared.Controls
                 return;
             }
 
-            Game contextGame = GameContext;
-            if (GameContext is null || GameContext.Id != contextGame.Id)
+            if (GameContext is null || GameContext.Id != CurrentGame.Id)
             {
                 return;
             }
 
             PluginDataBaseGameBase PluginGameData = pluginDatabase.Get(GameContext, true);
-            if (GameContext is null || GameContext.Id != contextGame.Id || (!PluginGameData?.HasData ?? true))
+            if (GameContext is null || GameContext.Id != CurrentGame.Id || (!PluginGameData?.HasData ?? true))
             {
                 Visibility = AlwaysShow ? Visibility.Visible : Visibility.Collapsed;
                 return;
