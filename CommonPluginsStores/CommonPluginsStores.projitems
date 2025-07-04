@@ -60,6 +60,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\ProfileUserFriends.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\UserData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Gog\Models\WishlistResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\AchievementProgression.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\BasicGameInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\DlcInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Interfaces\IStoreApi.cs" />

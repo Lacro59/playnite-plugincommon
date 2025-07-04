@@ -1,13 +1,15 @@
-﻿using Playnite.SDK;
-using CommonPlayniteShared.Common;
+﻿using CommonPlayniteShared.Common;
+using CommonPluginsShared.Models;
+using Playnite.SDK;
+using Playnite.SDK.Data;
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Web.UI;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
-using CommonPluginsShared.Models;
-using Playnite.SDK.Data;
 
 namespace CommonPluginsShared
 {
@@ -196,5 +198,28 @@ namespace CommonPluginsShared
         }
 
         #endregion
+
+        public static void AddTextIcoFontResource(string key, string text)
+        {
+            if (Application.Current.Resources.Contains(key))
+            {
+                return;
+            }
+
+            Application.Current.Resources.Add(key, new TextBlock
+            {
+                Text = text,
+                FontSize = 16,
+                FontFamily = ResourceProvider.GetResource("FontIcoFont") as FontFamily
+            });
+        }
+
+        public static void AddTextIcoFontResource(Dictionary<string, string> iconsResourcesToAdd)
+        {
+            foreach (var iconResource in iconsResourcesToAdd)
+            {
+                AddTextIcoFontResource(iconResource.Key, iconResource.Value);
+            }
+        }
     }
 }

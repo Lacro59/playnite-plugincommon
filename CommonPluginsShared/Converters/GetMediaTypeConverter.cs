@@ -1,38 +1,35 @@
-﻿using Playnite.SDK;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Windows.Data;
 
 namespace CommonPluginsShared.Converters
 {
     public class GetMediaTypeConverter : IValueConverter
     {
+        private static readonly HashSet<string> VideoExtensions = new HashSet<string>
+        {
+            ".mkv", ".mp4", ".avi", ".webm"
+        };
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             try
             {
-                if (value is string)
+                var strValue = value as string;
+                if (!string.IsNullOrEmpty(strValue))
                 {
-                    if (System.IO.Path.GetExtension((string)value).ToLower().Contains("mkv"))
+                    var ext = System.IO.Path.GetExtension(strValue)?.ToLowerInvariant();
+                    if (string.IsNullOrEmpty(ext))
                     {
-                        return "\ueb13";
-                    }
-                    if (System.IO.Path.GetExtension((string)value).ToLower().Contains("mp4"))
-                    {
-                        return "\ueb13";
-                    }
-                    if (System.IO.Path.GetExtension((string)value).ToLower().Contains("avi"))
-                    {
-                        return "\ueb13";
-                    }
-                    if (System.IO.Path.GetExtension((string)value).ToLower().Contains("webm"))
-                    {
-                        return "\ueb13";
+                        return "\ueb16";
                     }
 
-                    if (System.IO.Path.GetExtension((string)value).ToLower().Contains("webp"))
+                    if (VideoExtensions.Contains(ext))
+                    {
+                        return "\ueb13";
+                    }
+                    if (ext == ".webp")
                     {
                         return "\ueb16 \ueb13";
                     }

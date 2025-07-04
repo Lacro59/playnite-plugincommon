@@ -64,7 +64,10 @@ namespace CommonPluginsShared
             NintendoLibrary,
             PlayerActivities,
 
-            GameJoltLibrary
+            GameJoltLibrary,
+
+            ScreenshotsVisualizer,
+            HowLongToBeat
         }
 
         private static readonly Dictionary<Guid, ExternalPlugin> PluginsById = new Dictionary<Guid, ExternalPlugin>
@@ -99,7 +102,10 @@ namespace CommonPluginsShared
             { new Guid("E4AC81CB-1B1A-4EC9-8639-9A9633989A72"), ExternalPlugin.NintendoLibrary },
             { new Guid("3DBE2EE4-D6C9-4C09-B377-7A086369603E"), ExternalPlugin.PlayerActivities },
 
-            { new Guid("555D58FD-A000-401B-972C-9230BED81AED"), ExternalPlugin.GameJoltLibrary }
+            { new Guid("555D58FD-A000-401B-972C-9230BED81AED"), ExternalPlugin.GameJoltLibrary },
+
+            { new Guid("C6C8276F-91BF-48E5-A1D1-4BEE0B493488"), ExternalPlugin.ScreenshotsVisualizer },
+            { new Guid("E08CD51F-9C9A-4EE3-A094-FDE03B55492F"), ExternalPlugin.HowLongToBeat }
         };
 
         public static ExternalPlugin GetPluginType(Guid PluginId)

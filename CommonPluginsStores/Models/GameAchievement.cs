@@ -43,12 +43,35 @@ namespace CommonPluginsStores.Models
         /// </summary>
         public string UrlLocked { get => _urlLocked; set => _urlLocked = value; }
 
-        private DateTime _dateUnlocked;
+        private DateTime? _dateUnlocked;
 
         /// <summary>
-        /// Gets or sets the date when the achievement was unlocked.
+        /// Gets or sets the date and time when the achievement was unlocked.
+        /// Converts to local time when reading, and ensures UTC storage when setting.
+        /// If the provided value is DateTime.MinValue, it is treated as null.
         /// </summary>
-        public DateTime DateUnlocked { get => _dateUnlocked; set => _dateUnlocked = value; }
+        public DateTime? DateUnlocked
+        {
+            get
+            {
+                if (_dateUnlocked.HasValue && _dateUnlocked.Value == DateTime.MinValue)
+                {
+                    return null;
+                }
+                return _dateUnlocked?.ToLocalTime();
+            }
+            set
+            {
+                if (!value.HasValue || value.Value == default)
+                {
+                    _dateUnlocked = null;
+                }
+                else
+                {
+                    _dateUnlocked = value.Value.ToUniversalTime();
+                }
+            }
+        }
 
         private float _percent;
 

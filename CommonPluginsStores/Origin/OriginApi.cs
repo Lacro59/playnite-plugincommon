@@ -22,19 +22,22 @@ namespace CommonPluginsStores.Origin
 {
     public class OriginApi : StoreApi
     {
-        #region Url
-        private static string UrlBase               => @"https://www.ea.com";
-        private static string UrlAccountIdentity    => @"https://gateway.ea.com/proxy/identity/pids/me";
-        private static string UrlUserProfile        => UrlBase + @"/profile/user/{0}";
+        #region Urls
 
-        private static string UrlUserFriends        => @"https://friends.gs.ea.com/friends/2/users/{0}/friends?names=true";
-        private static string UrlAchievements       => @"https://achievements.gameservices.ea.com/achievements/personas/{0}/{1}/all?lang={2}&metadata=true&fullset=true";
-        private static string UrlStoreGame          => UrlBase + @"/games{0}";
+        private static string UrlBase => @"https://www.ea.com";
+        private static string UrlAccountIdentity => @"https://gateway.ea.com/proxy/identity/pids/me";
+        private static string UrlUserProfile => UrlBase + @"/profile/user/{0}";
 
-        private static string UrlDataCurrency       => @"https://data3.origin.com/defaults/web-defaults/localization/currency.json";
+        private static string UrlUserFriends => @"https://friends.gs.ea.com/friends/2/users/{0}/friends?names=true";
+        private static string UrlAchievements => @"https://achievements.gameservices.ea.com/achievements/personas/{0}/{1}/all?lang={2}&metadata=true&fullset=true";
+        private static string UrlStoreGame => UrlBase + @"/games{0}";
+
+        private static string UrlDataCurrency => @"https://data3.origin.com/defaults/web-defaults/localization/currency.json";
+
         #endregion
 
-        #region Url API
+        #region Urls API
+
         private static string UrlApi1 => @"https://api1.origin.com";
         private static string UrlApi2 => @"https://api2.origin.com";
         private static string UrlApi3 => @"https://api3.origin.com";
@@ -50,20 +53,18 @@ namespace CommonPluginsStores.Origin
 
         private static string UrlApi3UserGames => UrlApi3 + @"/atom/users/{0}/other/{1}/games";
         private static string UrlApi3AppsList => UrlApi3 + @"/supercat/{0}/{1}/supercat-PCWIN_MAC-{0}-{1}.json.gz";
+
         #endregion
 
-
-        protected static readonly Lazy<OriginAccountClient> _originAPI = new Lazy<OriginAccountClient>(() => new OriginAccountClient(API.Instance.WebViews.CreateOffscreenView()));
-        internal static OriginAccountClient OriginAPI => _originAPI.Value;
-
+        private static readonly Lazy<OriginAccountClient> _originAPI = new Lazy<OriginAccountClient>(() => new OriginAccountClient(API.Instance.WebViews.CreateOffscreenView()));
+        private static OriginAccountClient OriginAPI => _originAPI.Value;
 
         private Models.AccountInfoResponse accountInfoResponse;
 
         private static StoreCurrency LocalCurrency { get; set; } = new StoreCurrency { country = "US", currency = "USD", symbol = "$" };
 
-
-        protected List<CommonPlayniteShared.PluginLibrary.OriginLibrary.Models.GameStoreDataResponse> _appsList;
-        internal List<CommonPlayniteShared.PluginLibrary.OriginLibrary.Models.GameStoreDataResponse> AppsList
+        private List<CommonPlayniteShared.PluginLibrary.OriginLibrary.Models.GameStoreDataResponse> _appsList;
+        private List<CommonPlayniteShared.PluginLibrary.OriginLibrary.Models.GameStoreDataResponse> AppsList
         {
             get
             {
@@ -89,9 +90,10 @@ namespace CommonPluginsStores.Origin
         }
 
         #region Paths
-        private readonly string AppsListPath;
-        #endregion
 
+        private string AppsListPath { get; }
+
+        #endregion
 
         public OriginApi(string pluginName) : base(pluginName, ExternalPlugin.OriginLibrary, "EA")
         {
@@ -99,6 +101,7 @@ namespace CommonPluginsStores.Origin
         }
 
         #region Configuration
+
         protected override bool GetIsUserLoggedIn()
         {
             bool isLogged = OriginAPI.GetIsUserLoggedIn();
@@ -116,7 +119,7 @@ namespace CommonPluginsStores.Origin
                     new HttpHeader { Key = "Authorization", Value = AuthToken.Type + " " + AuthToken.Token }
                 };
                 string response = Web.DownloadStringData(UrlAccountIdentity, httpHeaders).GetAwaiter().GetResult();
-                Serialization.TryFromJson(response, out accountInfoResponse);
+                _ = Serialization.TryFromJson(response, out accountInfoResponse);
             }
             else
             {
@@ -134,9 +137,11 @@ namespace CommonPluginsStores.Origin
         {
             LocalCurrency = currency;
         }
+
         #endregion
 
         #region Current user
+
         protected override AccountInfos GetCurrentAccountInfos()
         {
             if (!IsUserLoggedIn)
@@ -231,9 +236,11 @@ namespace CommonPluginsStores.Origin
 
             return null;
         }
+
         #endregion
 
         #region User details
+
         public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
         {
             if (!IsUserLoggedIn)
@@ -441,9 +448,11 @@ namespace CommonPluginsStores.Origin
 
             return false;
         }
+
         #endregion
 
         #region Game
+
         public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
         {
             try
@@ -563,10 +572,12 @@ namespace CommonPluginsStores.Origin
 
             return dlcs;
         }
+
         #endregion
 
         #region Games owned
-        internal override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
+
+        protected override ObservableCollection<GameDlcOwned> GetGamesDlcsOwned()
         {
             if (!IsUserLoggedIn)
             {
@@ -591,9 +602,11 @@ namespace CommonPluginsStores.Origin
                 return null;
             }
         }
+
         #endregion
 
         #region Origin
+
         /// <summary>
         /// Get UserId encoded.
         /// </summary>
@@ -879,6 +892,7 @@ namespace CommonPluginsStores.Origin
                 new StoreCurrency { country = "VN", currency = "VND", symbol = "₫" }
             };
         }
+
         #endregion
     }
 }

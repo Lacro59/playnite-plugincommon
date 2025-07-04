@@ -8,6 +8,7 @@ namespace CommonPluginsStores.Models.Enumerations
     {
         Checking,
         Private,
-        Public
+        Public,
+        Unknown
     }
 }

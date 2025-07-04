@@ -69,10 +69,12 @@ namespace CommonPluginsShared
         /// </summary>
         public static string GetGogLang(string playniteLanguage)
         {
-            playniteLanguage = Normalize(playniteLanguage);
-            string[] arrayLang = { "en-US", "de-DE", "fr-FR", "pl-PL", "ru-RU", "zh-Hans" };
-            playniteLanguage = playniteLanguage.Replace("_", "-");
-            return arrayLang.ContainsString(playniteLanguage, StringComparison.OrdinalIgnoreCase) ? playniteLanguage : "en-US";
+            if (playniteLanguage == "zh_CN") return "zh-Hans";
+            if (playniteLanguage == "zh_TW") return "zh-Hant";
+
+            string shortLang = GetShortLang(playniteLanguage);
+            string[] arrayLang = { "de", "en", "es", "fr", "ja", "ko", "zh-Hans", "zh-Hant" };
+            return arrayLang.ContainsString(shortLang, StringComparison.OrdinalIgnoreCase) ? shortLang : "en";
         }
 
         // -------------------------
@@ -197,6 +199,7 @@ namespace CommonPluginsShared
         /// </summary>
         private static string GetShortLang(string playniteLanguage)
         {
+            playniteLanguage = Normalize(playniteLanguage);
             string[] parts = playniteLanguage.Split('_');
             return parts[0].ToLower();
         }

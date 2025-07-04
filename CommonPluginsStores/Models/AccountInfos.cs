@@ -61,7 +61,7 @@ namespace CommonPluginsStores.Models
         [DontSerialize]
         public bool IsPrivate { get; set; } = true;
 
-        private AccountStatus _accountStatus = AccountStatus.Checking;
+        private AccountStatus _accountStatus = AccountStatus.Unknown;
 
         /// <summary>
         /// Gets or sets the current account status.
@@ -72,13 +72,6 @@ namespace CommonPluginsStores.Models
         /// <summary>
         /// Gets or sets the API key associated with this account.
         /// </summary>
-        [DontSerialize]
         public string ApiKey { get; set; }
-
-        /// <summary>
-        /// Gets or sets the time of the last API call or action.
-        /// </summary>
-        [DontSerialize]
-        public DateTime LastCall => DateTime.Now;
     }
 }

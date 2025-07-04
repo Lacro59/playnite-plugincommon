@@ -11,19 +11,40 @@ using System.Windows.Threading;
 
 namespace CommonPluginsShared.Controls
 {
+    /// <summary>
+    /// Extended base class for plugin user controls that supports dynamic updates,
+    /// game context tracking, and plugin settings integration.
+    /// </summary>
     public class PluginUserControlExtendBase : PluginUserControl
     {
-        internal static ILogger Logger => LogManager.GetLogger();
+        /// <summary>
+        /// Shared logger instance.
+        /// </summary>
+        protected static ILogger Logger => LogManager.GetLogger();
 
-        internal virtual IDataContext controlDataContext { get; set; }
-        internal DispatcherTimer UpdateDataTimer { get; set; }
+        /// <summary>
+        /// Reference to the plugin's internal data context.
+        /// </summary>
+        protected virtual IDataContext controlDataContext { get; set; }
 
+        /// <summary>
+        /// Dispatcher timer to periodically update control data.
+        /// </summary>
+        protected DispatcherTimer UpdateDataTimer { get; set; }
+
+        protected Game CurrentGame { get; set; }
 
         #region Properties
+
+        /// <summary>
+        /// Determines whether the control should always be displayed.
+        /// </summary>
         public static readonly DependencyProperty AlwaysShowProperty;
         public bool AlwaysShow { get; set; } = false;
 
-
+        /// <summary>
+        /// Delay in milliseconds between updates.
+        /// </summary>
         public int Delay
         {
             get => (int)GetValue(DelayProperty);
@@ -45,10 +66,14 @@ namespace CommonPluginsShared.Controls
             }
         }
 
-
+        /// <summary>
+        /// The desktop view that was active when the control was created.
+        /// </summary>
         public DesktopView ActiveViewAtCreation { get; set; }
 
-
+        /// <summary>
+        /// Indicates whether the control must be displayed.
+        /// </summary>
         public bool MustDisplay
         {
             get => (bool)GetValue(MustDisplayProperty);
@@ -86,7 +111,9 @@ namespace CommonPluginsShared.Controls
             }
         }
 
-
+        /// <summary>
+        /// Indicates whether the control should ignore plugin settings and always update.
+        /// </summary>
         public bool IgnoreSettings
         {
             get => (bool)GetValue(IgnoreSettingsProperty);
@@ -99,7 +126,19 @@ namespace CommonPluginsShared.Controls
             typeof(PluginUserControlExtendBase),
             new FrameworkPropertyMetadata(false, SettingsPropertyChangedCallback));
 
+        private static void SettingsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (sender is PluginUserControlExtendBase obj && e.NewValue != e.OldValue)
+            {
+                obj.PluginSettings_PropertyChanged(null, null);
+            }
+        }
 
+        #endregion
+
+        /// <summary>
+        /// Constructor initializing the update timer and setting the initial view.
+        /// </summary>
         public PluginUserControlExtendBase()
         {
             if (API.Instance?.ApplicationInfo?.Mode == ApplicationMode.Desktop)
@@ -114,18 +153,12 @@ namespace CommonPluginsShared.Controls
             UpdateDataTimer.Tick += new EventHandler(UpdateDataEvent);
         }
 
-        private static void SettingsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (sender is PluginUserControlExtendBase obj && e.NewValue != e.OldValue)
-            {
-                obj.PluginSettings_PropertyChanged(null, null);
-            }
-        }
-        #endregion
+        #region Property Change Handling
 
-        #region OnPropertyChange
-        // When a control properties is changed
-        internal static void ControlsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        /// <summary>
+        /// Called when a dependency property changes.
+        /// </summary>
+        protected static void ControlsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
             if (sender is PluginUserControlExtendBase obj && e.NewValue != e.OldValue)
             {
@@ -133,23 +166,27 @@ namespace CommonPluginsShared.Controls
             }
         }
 
-        // When plugin settings is updated
-        internal virtual void PluginSettings_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        /// <summary>
+        /// Called when plugin settings are updated.
+        /// </summary>
+        protected virtual void PluginSettings_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            // Publish changes for the currently displayed game
             GameContextChanged(null, GameContext);
         }
 
-        // When game selection is changed
+        /// <summary>
+        /// Called when the selected game changes.
+        /// </summary>
         public override void GameContextChanged(Game oldContext, Game newContext)
         {
+            CurrentGame = newContext;
             UpdateDataTimer.Stop();
 
             Visibility = Visibility.Collapsed;
             SetDefaultDataContext();
             MustDisplay = AlwaysShow ? AlwaysShow : controlDataContext.IsActivated;
 
-            if (!controlDataContext.IsActivated || newContext is null || !MustDisplay)
+            if (!(controlDataContext?.IsActivated ?? false) || newContext is null || !MustDisplay)
             {
                 return;
             }
@@ -157,8 +194,10 @@ namespace CommonPluginsShared.Controls
             RestartTimer();
         }
 
-        // When plugin database is udpated
-        internal virtual void Database_ItemUpdated<TItem>(object sender, ItemUpdatedEventArgs<TItem> e) where TItem : DatabaseObject
+        /// <summary>
+        /// Called when the plugin database item is updated.
+        /// </summary>
+        protected virtual void Database_ItemUpdated<TItem>(object sender, ItemUpdatedEventArgs<TItem> e) where TItem : DatabaseObject
         {
             _ = Application.Current.Dispatcher?.BeginInvoke(DispatcherPriority.Render, (Action)delegate
             {
@@ -167,21 +206,18 @@ namespace CommonPluginsShared.Controls
                     return;
                 }
 
-                // Publish changes for the currently displayed game if updated
                 ItemUpdateEvent<TItem> ActualItem = e.UpdatedItems.Find(x => x.NewData.Id == GameContext.Id);
-                if (ActualItem != null)
+                if (ActualItem != null && ActualItem.NewData.Id != Guid.Empty)
                 {
-                    Guid Id = ActualItem.NewData.Id;
-                    if (Id != null)
-                    {
-                        GameContextChanged(null, GameContext);
-                    }
+                    GameContextChanged(null, GameContext);
                 }
             });
         }
-        
-        // When plugin database is udpated
-        internal virtual void Database_ItemCollectionChanged<TItem>(object sender, ItemCollectionChangedEventArgs<TItem> e) where TItem : DatabaseObject
+
+        /// <summary>
+        /// Called when the plugin database collection is changed.
+        /// </summary>
+        protected virtual void Database_ItemCollectionChanged<TItem>(object sender, ItemCollectionChangedEventArgs<TItem> e) where TItem : DatabaseObject
         {
             _ = Application.Current.Dispatcher?.BeginInvoke(DispatcherPriority.Render, (Action)delegate
             {
@@ -194,45 +230,50 @@ namespace CommonPluginsShared.Controls
             });
         }
 
-        // When game is updated
-        internal virtual void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e)
+        /// <summary>
+        /// Called when a game is updated.
+        /// </summary>
+        protected virtual void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e)
         {
             _ = Application.Current.Dispatcher?.BeginInvoke(DispatcherPriority.Render, (Action)delegate
             {
-                // Publish changes for the currently displayed game if updated
                 if (GameContext == null)
                 {
                     return;
                 }
 
                 ItemUpdateEvent<Game> ActualItem = e.UpdatedItems.Find(x => x.NewData.Id == GameContext.Id);
-                if (ActualItem != null)
+                if (ActualItem?.NewData != null)
                 {
-                    Game newContext = ActualItem.NewData;
-                    if (newContext != null)
-                    {
-                        GameContextChanged(null, newContext);
-                    }
+                    GameContextChanged(null, ActualItem.NewData);
                 }
             });
         }
+
         #endregion
 
-
+        /// <summary>
+        /// Sets a default data context. Can be overridden by derived classes.
+        /// </summary>
         public virtual void SetDefaultDataContext()
         {
         }
 
+        /// <summary>
+        /// Sets the control data based on the current game context.
+        /// </summary>
         public virtual void SetData(Game newContext)
         {
         }
 
+        /// <summary>
+        /// Called when the update timer ticks.
+        /// </summary>
+        private async void UpdateDataEvent(object sender, EventArgs e) => await UpdateDataAsync();
 
-        private async void UpdateDataEvent(object sender, EventArgs e)
-        {
-            await UpdateDataAsync();
-        }
-
+        /// <summary>
+        /// Updates the control's content asynchronously based on the current game.
+        /// </summary>
         public virtual async Task UpdateDataAsync()
         {
             UpdateDataTimer.Stop();
@@ -243,20 +284,17 @@ namespace CommonPluginsShared.Controls
                 return;
             }
 
-            Game contextGame = GameContext;
-            if (GameContext is null || GameContext.Id != contextGame.Id)
+            if (CurrentGame is null || GameContext.Id != CurrentGame.Id)
             {
                 return;
             }
 
-            if (GameContext is null || GameContext.Id != contextGame.Id)
-            {
-                return;
-            }
-
-            await Task.Run(() => Application.Current.Dispatcher?.Invoke(() => SetData(GameContext), DispatcherPriority.Render));
+            await Application.Current.Dispatcher?.InvokeAsync(() => SetData(GameContext), DispatcherPriority.Render);
         }
 
+        /// <summary>
+        /// Restarts the update timer.
+        /// </summary>
         public void RestartTimer()
         {
             UpdateDataTimer.Stop();

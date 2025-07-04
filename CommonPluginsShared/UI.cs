@@ -6,7 +6,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Playnite.SDK;
-using Playnite.SDK.Models;
 using Playnite.SDK.Data;
 
 namespace CommonPluginsShared
@@ -16,59 +15,58 @@ namespace CommonPluginsShared
         private static ILogger Logger => LogManager.GetLogger();
 
 
-        public bool AddResources(List<ResourcesList> ResourcesList)
+        /// <summary>
+        /// Adds or updates global WPF resources.
+        /// </summary>
+        /// <param name="ResourcesList">A list of resource key-value pairs to add or update in the application resources.</param>
+        /// <returns>True if all resources were added or updated without fatal errors.</returns>
+        public bool AddResources(List<ResourcesList> resourcesList)
         {
-            Common.LogDebug(true, $"AddResources() - {Serialization.ToJson(ResourcesList)}");
-
-            string ItemKey = string.Empty;
-
-            foreach (ResourcesList item in ResourcesList)
+            Common.LogDebug(true, $"AddResources() - {Serialization.ToJson(resourcesList)}");
+            foreach (ResourcesList item in resourcesList)
             {
-                ItemKey = item.Key;
-
+                string itemKey = item.Key;
                 try
                 {
-                    try
+                    if (!Application.Current.Resources.Contains(item.Key))
                     {
                         Application.Current.Resources.Add(item.Key, item.Value);
                     }
-                    catch
+                    else
                     {
-                        Type TypeActual = Application.Current.Resources[ItemKey].GetType();
-                        Type TypeNew = item.Value.GetType();
+                        // Safe replacement of existing resource
+                        var existing = Application.Current.Resources[item.Key];
+                        var incoming = item.Value;
 
-                        if (TypeActual != TypeNew)
+                        if (existing.GetType() != incoming.GetType())
                         {
-                            if ((TypeActual.Name == "SolidColorBrush" || TypeActual.Name == "LinearGradientBrush")
-                                && (TypeNew.Name == "SolidColorBrush" || TypeNew.Name == "LinearGradientBrush"))
+                            bool isBrushType = existing is Brush && incoming is Brush;
+
+                            if (!isBrushType)
                             {
-                            }
-                            else
-                            {
-                                Logger.Warn($"Different type for {ItemKey}");
+                                Logger.Warn($"Different type for {item.Key}");
                                 continue;
                             }
                         }
 
-                        Application.Current.Resources[ItemKey] = item.Value;
+                        Application.Current.Resources[item.Key] = item.Value;
                     }
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error($"Error in AddResources({ItemKey})");
-                    Common.LogError(ex, true, $"Error in AddResources({ItemKey})");
+                    Common.LogError(ex, true, $"Error in AddResources({itemKey})");
                 }
             }
             return true;
         }
-        
+
 
         /// <summary>
-        /// Gel all controls in depObj
+        /// Recursively finds all visual children of a specified type from a DependencyObject.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="depObj"></param>
-        /// <returns></returns>
+        /// <typeparam name="T">The type of children to search for.</typeparam>
+        /// <param name="depObj">The root DependencyObject to search from.</param>
+        /// <returns>An enumerable of all found children of type T.</returns>
         public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
         {
             if (depObj != null)
@@ -90,59 +88,53 @@ namespace CommonPluginsShared
         }
 
         /// <summary>
-        /// Get control's parent by type
+        /// Recursively finds a parent of a specified type in the visual tree.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="child"></param>
-        /// <remarks>https://www.infragistics.com/community/blogs/b/blagunas/posts/find-the-parent-control-of-a-specific-type-in-wpf-and-silverlight</remarks>
-        /// <returns></returns>
+        /// <typeparam name="T">The type of the parent to find.</typeparam>
+        /// <param name="child">The starting element.</param>
+        /// <returns>The first parent of type T, or null if not found.</returns>
         public static T FindParent<T>(DependencyObject child) where T : DependencyObject
         {
-            //get parent item
             DependencyObject parentObject = VisualTreeHelper.GetParent(child);
-
-            //we've reached the end of the tree
-            if (parentObject == null) return null;
-
-            //check if the parent matches the type we're looking for
-            if (parentObject is T parent)
+            if (parentObject == null)
             {
-                return parent;
+                return null;
             }
-            else
-            {
-                return FindParent<T>(parentObject);
-            }
+
+            return parentObject is T parent ? parent : FindParent<T>(parentObject);
         }
 
+        /// <summary>
+        /// Obsolete: Use FindParent<T> instead.
+        /// </summary>
         [Obsolete("Use UI.FindParent<T>", true)]
         public static T GetAncestorOfType<T>(FrameworkElement child) where T : FrameworkElement
         {
             var parent = VisualTreeHelper.GetParent(child);
-            if (parent != null && !(parent is T))
-            {
-                return (T)GetAncestorOfType<T>((FrameworkElement)parent);
-            }
-            return (T)parent;
+            return parent != null && !(parent is T) ? GetAncestorOfType<T>((FrameworkElement)parent) : (T)parent;
         }
 
-
-        private static FrameworkElement SearchElementByNameInExtander(object control, string ElementName)
+        /// <summary>
+        /// Searches for a FrameworkElement by name within nested Expanders or TabItems.
+        /// </summary>
+        /// <param name="control">The starting control to search from.</param>
+        /// <param name="elementName">The name of the element to find.</param>
+        /// <returns>The element if found, otherwise null.</returns>
+        private static FrameworkElement SearchElementByNameInExtander(object control, string elementName)
         {
             if (control is FrameworkElement)
             {
-                if (((FrameworkElement)control).Name == ElementName)
+                if (((FrameworkElement)control).Name == elementName)
                 {
                     return (FrameworkElement)control;
                 }
-
 
                 var children = LogicalTreeHelper.GetChildren((FrameworkElement)control);
                 foreach (object child in children)
                 {
                     if (child is FrameworkElement)
                     {
-                        if (((FrameworkElement)child).Name == ElementName)
+                        if (((FrameworkElement)child).Name == elementName)
                         {
                             return (FrameworkElement)child;
                         }
@@ -156,12 +148,12 @@ namespace CommonPluginsShared
 
                                 if (subItem.ToString().ToLower().Contains("expander"))
                                 {
-                                    tmp = SearchElementByNameInExtander(((Expander)subItem).Content, ElementName);
+                                    tmp = SearchElementByNameInExtander(((Expander)subItem).Content, elementName);
                                 }
 
                                 if (subItem.ToString().ToLower().Contains("tabitem"))
                                 {
-                                    tmp = SearchElementByNameInExtander(((TabItem)subItem).Content, ElementName);
+                                    tmp = SearchElementByNameInExtander(((TabItem)subItem).Content, elementName);
                                 }
 
                                 if (tmp != null)
@@ -171,7 +163,7 @@ namespace CommonPluginsShared
                             }
                             else
                             {
-                                var tmp = SearchElementByNameInExtander(child, ElementName);
+                                var tmp = SearchElementByNameInExtander(child, elementName);
                                 if (tmp != null)
                                 {
                                     return tmp;
@@ -184,182 +176,151 @@ namespace CommonPluginsShared
             return null;
         }
 
-        public static FrameworkElement SearchElementByName(string ElementName, bool MustVisible = false, bool ParentMustVisible = false, int counter = 1)
+        /// <summary>
+        /// Searches for a FrameworkElement by name in the main window.
+        /// </summary>
+        /// <param name="elementName">The name of the element to find.</param>
+        /// <param name="mustVisible">If true, element must be visible.</param>
+        /// <param name="parentMustVisible">If true, element's parent must also be visible.</param>
+        /// <param name="counter">The index of the matching element if multiple exist.</param>
+        /// <returns>The matching FrameworkElement if found, otherwise null.</returns>
+        public static FrameworkElement SearchElementByName(string elementName, bool mustVisible = false, bool parentMustVisible = false, int counter = 1)
         {
-            return SearchElementByName(ElementName, Application.Current.MainWindow, MustVisible, ParentMustVisible, counter);
+            return SearchElementByName(elementName, Application.Current.MainWindow, mustVisible, parentMustVisible, counter);
         }
 
-        public static FrameworkElement SearchElementByName(string ElementName, DependencyObject dpObj, bool MustVisible = false, bool ParentMustVisible = false, int counter = 1)
+        /// <summary>
+        /// Searches for a FrameworkElement by name starting from a specific DependencyObject.
+        /// </summary>
+        /// <param name="elementName">The name of the element to search for.</param>
+        /// <param name="dpObj">The root DependencyObject to search from.</param>
+        /// <param name="mustVisible">If true, the element must be visible.</param>
+        /// <param name="parentMustVisible">If true, the parent of the element must be visible.</param>
+        /// <param name="counter">The number of occurrences to skip before returning the result.</param>
+        /// <returns>The matching element or null if not found.</returns>
+        public static FrameworkElement SearchElementByName(string elementName, DependencyObject dpObj, bool mustVisible = false, bool parentMustVisible = false, int counter = 1)
         {
-            FrameworkElement ElementFound = null;
-
+            FrameworkElement elementFound = null;
             int count = 0;
 
-            if (ElementFound == null)
+            foreach (FrameworkElement el in FindVisualChildren<FrameworkElement>(dpObj))
             {
-                foreach (FrameworkElement el in UI.FindVisualChildren<FrameworkElement>(dpObj))
+                if (el is Expander || el is TabItem)
                 {
-                    if (el.ToString().ToLower().Contains("expander") || el.ToString().ToLower().Contains("tabitem"))
+                    FrameworkElement tmpEl = null;
+
+                    if (el is Expander)
                     {
-                        FrameworkElement tmpEl = null;
+                        tmpEl = SearchElementByNameInExtander(((Expander)el).Content, elementName);
+                    }
 
-                        if (el.ToString().ToLower().Contains("expander"))
-                        {
-                            tmpEl = SearchElementByNameInExtander(((Expander)el).Content, ElementName);
-                        }
+                    if (el is TabItem)
+                    {
+                        tmpEl = SearchElementByNameInExtander(((TabItem)el).Content, elementName);
+                    }
 
-                        if (el.ToString().ToLower().Contains("tabitem"))
+                    if (tmpEl != null && tmpEl.Name == elementName)
+                    {
+                        if (!mustVisible || tmpEl.IsVisible)
                         {
-                            tmpEl = SearchElementByNameInExtander(((TabItem)el).Content, ElementName);
-                        }
-
-                        if (tmpEl != null)
-                        {
-                            if (tmpEl.Name == ElementName)
+                            if (!parentMustVisible || ((FrameworkElement)el.Parent).IsVisible)
                             {
-                                if (!MustVisible)
-                                {
-                                    if (!ParentMustVisible)
-                                    {
-                                        ElementFound = tmpEl;
-                                        break;
-                                    }
-                                    else if (((FrameworkElement)el.Parent).IsVisible)
-                                    {
-                                        ElementFound = tmpEl;
-                                        break;
-                                    }
-                                }
-                                else if (tmpEl.IsVisible)
-                                {
-                                    if (!ParentMustVisible)
-                                    {
-                                        ElementFound = tmpEl;
-                                        break;
-                                    }
-                                    else if (((FrameworkElement)el.Parent).IsVisible)
-                                    {
-                                        ElementFound = tmpEl;
-                                        break;
-                                    }
-                                }
+                                elementFound = tmpEl;
+                                break;
                             }
                         }
                     }
-                    else if (el.Name == ElementName)
-                    {
-                        count++;
+                }
+                else if (el.Name == elementName)
+                {
+                    count++;
+                    bool isVisible = !mustVisible || el.IsVisible;
+                    bool parentVisible = true;
 
-                        if (!MustVisible)
+                    if (parentMustVisible)
+                    {
+                        try
                         {
-                            if (!ParentMustVisible)
-                            {
-                                if (count == counter)
-                                {
-                                    ElementFound = el;
-                                    break;
-                                }
-                            }
-                            else if (((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)el.Parent).Parent).Parent).Parent).Parent).IsVisible)
-                            {
-                                if (count == counter)
-                                {
-                                    ElementFound = el;
-                                    break;
-                                }
-                            }
+                            parentVisible = ((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)el.Parent).Parent).Parent).Parent).Parent).IsVisible;
                         }
-                        else if (el.IsVisible)
-                        {
-                            if (!ParentMustVisible)
-                            {
-                                if (count == counter)
-                                {
-                                    ElementFound = el;
-                                    break;
-                                }
-                            }
-                            else if (((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)el.Parent).Parent).Parent).Parent).Parent).IsVisible)
-                            {
-                                if (count == counter)
-                                {
-                                    ElementFound = el;
-                                    break;
-                                }
-                            }
-                        }
+                        catch { parentVisible = false; }
+                    }
+
+                    if (isVisible && parentVisible && count == counter)
+                    {
+                        elementFound = el;
+                        break;
                     }
                 }
             }
 
-            return ElementFound;
+            return elementFound;
         }
 
-
-        public static void SetControlSize(FrameworkElement ControlElement)
+        /// <summary>
+        /// Set control size based on its parent container, with optional fallback dimensions.
+        /// </summary>
+        public static void SetControlSize(FrameworkElement controlElement)
         {
-            SetControlSize(ControlElement, 0, 0);
+            SetControlSize(controlElement, 0, 0);
         }
 
-        public static void SetControlSize(FrameworkElement ControlElement, double DefaultHeight, double DefaultWidth)
+        /// <summary>
+        /// Sets the size of a control based on its parent, or uses fallback dimensions.
+        /// </summary>
+        /// <param name="controlElement">The control to resize.</param>
+        /// <param name="defaultHeight">Fallback height if parent height is unavailable.</param>
+        /// <param name="defaultWidth">Fallback width if parent width is unavailable.</param>
+        public static void SetControlSize(FrameworkElement controlElement, double defaultHeight, double defaultWidth)
         {
             try
             {
-                UserControl ControlParent = UI.FindParent<UserControl>(ControlElement);
-                FrameworkElement ControlContener = (FrameworkElement)ControlParent.Parent;
+                UserControl controlParent = FindParent<UserControl>(controlElement);
+                FrameworkElement controlContener = (FrameworkElement)controlParent.Parent;
 
-                Common.LogDebug(true, $"SetControlSize({ControlElement.Name}) - parent.name: {ControlContener.Name} - parent.Height: {ControlContener.Height} - parent.Width: {ControlContener.Width} - parent.MaxHeight: {ControlContener.MaxHeight} - parent.MaxWidth: {ControlContener.MaxWidth}");
+                Common.LogDebug(true, $"SetControlSize({controlElement.Name}) - parent.name: {controlContener.Name} - parent.Height: {controlContener.Height} - parent.Width: {controlContener.Width} - parent.MaxHeight: {controlContener.MaxHeight} - parent.MaxWidth: {controlContener.MaxWidth}");
 
                 // Set Height
-                if (!double.IsNaN(ControlContener.Height))
+                if (!double.IsNaN(controlContener.Height))
                 {
-                    ControlElement.Height = ControlContener.Height;
+                    controlElement.Height = controlContener.Height;
                 }
-                else if (DefaultHeight != 0)
+                else if (defaultHeight != 0)
                 {
-                    ControlElement.Height = DefaultHeight;
-                }
-                // Control with MaxHeight
-                if (!double.IsNaN(ControlContener.MaxHeight))
-                {
-                    if (ControlElement.Height > ControlContener.MaxHeight)
-                    {
-                        ControlElement.Height = ControlContener.MaxHeight;
-                    }
+                    controlElement.Height = defaultHeight;
                 }
 
+                if (!double.IsNaN(controlContener.MaxHeight) && controlElement.Height > controlContener.MaxHeight)
+                {
+                    controlElement.Height = controlContener.MaxHeight;
+                }
 
                 // Set Width
-                if (!double.IsNaN(ControlContener.Width))
+                if (!double.IsNaN(controlContener.Width))
                 {
-                    ControlElement.Width = ControlContener.Width;
+                    controlElement.Width = controlContener.Width;
                 }
-                else if (DefaultWidth != 0)
+                else if (defaultWidth != 0)
                 {
-                    ControlElement.Width = DefaultWidth;
+                    controlElement.Width = defaultWidth;
                 }
-                // Control with MaxWidth
-                if (!double.IsNaN(ControlContener.MaxWidth))
+
+                if (!double.IsNaN(controlContener.MaxWidth) && controlElement.Width > controlContener.MaxWidth)
                 {
-                    if (ControlElement.Width > ControlContener.MaxWidth)
-                    {
-                        ControlElement.Width = ControlContener.MaxWidth;
-                    }
+                    controlElement.Width = controlContener.MaxWidth;
                 }
             }
             catch
             {
-
+                // Silently ignore errors
             }
         }
 
-
         /// <summary>
-        /// 
+        /// Redirects mouse wheel scroll events to the parent container if the scroll boundary is reached.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        /// <remarks>https://stackoverflow.com/questions/1585462/bubbling-scroll-events-from-a-listview-to-its-parent</remarks>
+        /// <param name="sender">The element that raised the event.</param>
+        /// <param name="e">The mouse wheel event arguments.</param>
         public static void HandlePreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (!e.Handled)
@@ -385,7 +346,9 @@ namespace CommonPluginsShared
         }
     }
 
-
+    /// <summary>
+    /// Represents a key-value pair for application resources.
+    /// </summary>
     public class ResourcesList
     {
         public string Key { get; set; }

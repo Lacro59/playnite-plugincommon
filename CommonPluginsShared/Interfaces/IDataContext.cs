@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CommonPluginsShared.Interfaces
+﻿namespace CommonPluginsShared.Interfaces
 {
     public interface IDataContext
     {

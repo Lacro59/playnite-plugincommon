@@ -10,6 +10,7 @@ namespace CommonPluginsStores.Models.Enumerations
         Checking,
         AuthRequired,
         PrivateAccount,
-        Failed
+        Failed,
+        Unknown
     }
 }
