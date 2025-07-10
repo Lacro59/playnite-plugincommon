@@ -1167,6 +1167,13 @@ namespace CommonPluginsStores.Steam
 
                 IHtmlDocument htmlDocument = new HtmlParser().Parse(response);
                 IElement gamesListTemplate = htmlDocument.QuerySelector($"template#gameslist_config[data-profile-gameslist]");
+
+                if (gamesListTemplate == null)
+                {
+                    Logger.Warn($"No games list found for {accountInfos.Pseudo} ({accountInfos.UserId})");
+                    return accountGameInfos;
+                }
+
                 string json = gamesListTemplate.GetAttribute("data-profile-gameslist").HtmlDecode();
 
                 SteamProfileGames steamProfileGames = Serialization.FromJson<SteamProfileGames>(json);
