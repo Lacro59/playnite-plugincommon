@@ -40,7 +40,7 @@ namespace CommonPluginsStores.Epic
         private string UrlLogin => UrlBase + @"/id/login";
         private string UrlAuthCode => UrlBase + @"/id/api/redirect?clientId=34a02cf8f4414e29b15921876da36f9a&responseType=code";
 
-        private string UrlGraphQL => @"https://graphql.epicgames.com/graphql";
+        private string UrlGraphQL => @"https://store.epicgames.com/graphql";
 
         private string UrlApiServiceBase => @"https://account-public-service-prod03.ol.epicgames.com";
         private string UrlAccountAuth => UrlApiServiceBase + @"/account/api/oauth/token";
