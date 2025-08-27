@@ -403,7 +403,15 @@ namespace CommonPluginsStores
         /// Must be implemented by derived classes.
         /// </summary>
         /// <returns>Current account information</returns>
-        protected abstract AccountInfos GetCurrentAccountInfos();
+        protected virtual AccountInfos GetCurrentAccountInfos()
+        {
+            AccountInfos accountInfos = LoadCurrentUser();
+            if (!accountInfos?.UserId?.IsNullOrEmpty() ?? false)
+            {
+                return accountInfos;
+            }
+            return new AccountInfos { IsCurrent = true };
+        }
 
         public async Task<AccountInfos> GetCurrentAccountInfosAsync()
         {
@@ -466,7 +474,12 @@ namespace CommonPluginsStores
         /// <param name="id">Game identifier</param>
         /// <param name="accountInfos">Account information</param>
         /// <returns>Source link for achievements or null</returns>
-        public virtual SourceLink GetAchievementsSourceLink(string name, string id, AccountInfos accountInfos) => null;
+        public virtual SourceLink GetAchievementsSourceLink(string name, string id, AccountInfos accountInfos) => new SourceLink
+        {
+            GameName = name,
+            Name = ClientName,
+            Url = string.Empty
+        };
 
         /// <summary>
         /// Gets the user's wishlist.

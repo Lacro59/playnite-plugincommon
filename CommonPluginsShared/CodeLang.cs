@@ -126,7 +126,7 @@ namespace CommonPluginsShared
         /// <summary>
         /// Converts Playnite language to Origin language code.
         /// </summary>
-        public static string GetOriginLang(string playniteLanguage)
+        public static string GetEaLang(string playniteLanguage)
         {
             return Normalize(playniteLanguage);
         }
@@ -135,7 +135,7 @@ namespace CommonPluginsShared
         /// Extracts country code from Origin language.
         /// Returns last two characters.
         /// </summary>
-        public static string GetOriginLangCountry(string playniteLanguage)
+        public static string GetEaLangCountry(string playniteLanguage)
         {
             playniteLanguage = Normalize(playniteLanguage);
             return playniteLanguage.Length >= 2 ? playniteLanguage.Substring(playniteLanguage.Length - 2) : "US";

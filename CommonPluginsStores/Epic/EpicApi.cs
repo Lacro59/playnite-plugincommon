@@ -566,7 +566,7 @@ namespace CommonPluginsStores.Epic
         public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
         {
             string cachePath = Path.Combine(PathAchievementsData, $"{id}.json");
-            Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
+            Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 10);
 
             if (data?.Item2 == null)
             {
@@ -606,8 +606,8 @@ namespace CommonPluginsStores.Epic
         {
             try
             {
-                string LocalLang = CodeLang.GetEpicLang(Locale);
-                ObservableCollection<DlcInfos> Dlcs = new ObservableCollection<DlcInfos>();
+                string localLang = CodeLang.GetEpicLang(Locale);
+                ObservableCollection<DlcInfos> dlcs = new ObservableCollection<DlcInfos>();
 
                 // List DLC
                 EpicAddonsByNamespace dataDLC = QueryAddonsByNamespace(id).GetAwaiter().GetResult();
@@ -631,16 +631,16 @@ namespace CommonPluginsStores.Epic
                         Name = el.title,
                         Description = el.description,
                         Image = el.keyImages?.Find(x => x.type.IsEqual("OfferImageWide"))?.url?.Replace("\u002F", "/"),
-                        Link = string.Format(UrlStore, LocalLang, el.urlSlug),
+                        Link = string.Format(UrlStore, localLang, el.urlSlug),
                         IsOwned = IsOwned,
                         Price = el.price?.totalPrice?.fmtPrice?.discountPrice,
                         PriceBase = el.price?.totalPrice?.fmtPrice?.originalPrice,
                     };
 
-                    Dlcs.Add(dlc);
+                    dlcs.Add(dlc);
                 }
 
-                return Dlcs;
+                return dlcs;
             }
             catch (Exception ex)
             {
@@ -1094,7 +1094,7 @@ namespace CommonPluginsStores.Epic
                     QueryAddonsByNamespace query = new QueryAddonsByNamespace();
                     query.variables.epic_namespace = epic_namespace;
                     query.variables.locale = CodeLang.GetEpicLang(Locale);
-                    query.variables.country = CodeLang.GetOriginLangCountry(Locale);
+                    query.variables.country = CodeLang.GetEaLangCountry(Locale);
                     StringContent content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
                     HttpClient httpClient = new HttpClient();
                     HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content);
