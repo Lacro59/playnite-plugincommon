@@ -1,4 +1,5 @@
-﻿using CommonPlayniteShared.Common.Web;
+﻿using CommonPlayniteShared.Common;
+using CommonPlayniteShared.Common.Web;
 using CommonPlayniteShared.PluginLibrary.OriginLibrary.Models;
 using CommonPlayniteShared.PluginLibrary.OriginLibrary.Services;
 using CommonPluginsShared;
@@ -24,16 +25,15 @@ using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.Ea
 {
+    /// <summary>
+    /// Based on https://github.com/BellezaEmporium/galaxy-integration-ead
+    /// </summary>
     public class EaApi : StoreApi
     {
         #region Urls API
 
         private static string UrlDropApi => @"https://drop-api.ea.com";
         private static string UrlGameData => UrlDropApi + @"/game/{0}?locale={1}";
-
-        private static string UrlApi3 => @"https://api3.origin.com";
-
-        private static string UrlApi3AppsList => UrlApi3 + @"/supercat/{0}/{1}/supercat-PCWIN_MAC-{0}-{1}.json.gz";
 
         #endregion
 
@@ -51,7 +51,9 @@ namespace CommonPluginsStores.Ea
 
         public EaApi(string pluginName) : base(pluginName, ExternalPlugin.OriginLibrary, "EA")
         {
+            // TODO TEMP
             AppsListPath = Path.Combine(PathStoresData, "EA_AppsList.json");
+            FileSystem.DeleteFile(AppsListPath);
 
             PathOwnedGameProductsCache = Path.Combine(PathStoresData, "EA_OwnedGameProducts.json");
         }
