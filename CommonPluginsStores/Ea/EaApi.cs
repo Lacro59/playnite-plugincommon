@@ -176,7 +176,7 @@ namespace CommonPluginsStores.Ea
                                 isCommun = CurrentGamesInfos?.Where(y => y.Id.IsEqual(id))?.Count() != 0;
                             }
 
-                            ObservableCollection<GameAchievement> achievements = achievements = GetAchievements(id, accountInfos);
+                            ObservableCollection<GameAchievement> achievements = GetAchievements(id, accountInfos);
                             ResponseRecentGames responseRecentGames = GetRecentGames(new List<string> { x.Product.GameSlug }).GetAwaiter().GetResult();
 
                             AccountGameInfos accountGameInfos = new AccountGameInfos
