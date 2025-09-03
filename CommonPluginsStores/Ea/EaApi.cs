@@ -2,6 +2,7 @@
 using CommonPlayniteShared.Common.Web;
 using CommonPlayniteShared.PluginLibrary.OriginLibrary.Models;
 using CommonPlayniteShared.PluginLibrary.OriginLibrary.Services;
+using CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared;
 using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Models;
@@ -351,6 +352,7 @@ namespace CommonPluginsStores.Ea
                 string url = string.Format(UrlGameData, gameSlug, CodeLang.GetEaLangCountry(Locale));
                 string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
                 Serialization.TryFromJson(response, out gameStoreDataResponse);
+                SaveData(cachePath, gameStoreDataResponse);
             }
 
             return gameStoreDataResponse;
@@ -385,6 +387,7 @@ namespace CommonPluginsStores.Ea
             QueryOwnedGameProducts query = new QueryOwnedGameProducts();
             query.variables.locale = CodeLang.GetEaLangCountry(Locale);
             data = await GetGraphQl<ResponseOwnedGameProducts>(UrlGraphQL, query);
+            SaveData(PathOwnedGameProductsCache, data);
             return data;
         }
 
@@ -402,6 +405,7 @@ namespace CommonPluginsStores.Ea
             query.variables.playerPsd = playerPsd;
             query.variables.locale = CodeLang.GetEaLangCountry(Locale);
             data = await GetGraphQl<ResponseAchievements>(UrlGraphQL, query);
+            SaveData(cachePath, data);
             return data;
         }
 
