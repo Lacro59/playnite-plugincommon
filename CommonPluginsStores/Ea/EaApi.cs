@@ -294,6 +294,8 @@ namespace CommonPluginsStores.Ea
                         Price = x.Price?.DisplayTotalWithDiscount,
                         Released = x.ReleaseDate != null && x.ReleaseDate != string.Empty && DateTime.TryParse(x.ReleaseDate, out DateTime dt) ? dt : (DateTime?)null
                     };
+
+                    Dlcs.Add(dlcInfos);
                 });
                 gameInfos.Dlcs = Dlcs;
 
