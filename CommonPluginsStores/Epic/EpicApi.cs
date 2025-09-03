@@ -590,7 +590,7 @@ namespace CommonPluginsStores.Epic
                 });
 
                 data = new Tuple<string, ObservableCollection<GameAchievement>>(productId, gameAchievements);
-                FileSystem.WriteStringToFile(cachePath, Serialization.ToJson(data));
+                SaveData(cachePath, Serialization.ToJson(data));
             }
 
             return data;
@@ -1248,7 +1248,7 @@ namespace CommonPluginsStores.Epic
                 string url = string.Format("/catalog/api/shared/bulk/items?id={0}&country={1}&locale={2}&includeMainGameDetails=true", id, CodeLang.GetEpicLangCountry(Locale), CodeLang.GetEpicLang(Locale));
                 Tuple<string, Dictionary<string, CatalogItem>> catalogResponse = InvokeRequest<Dictionary<string, CatalogItem>>(UrlApiCatalog + url).GetAwaiter().GetResult();
                 result = catalogResponse.Item2;
-                FileSystem.WriteStringToFile(cachePath, catalogResponse.Item1);
+                SaveData(cachePath, catalogResponse.Item1);
             }
 
             return result.TryGetValue(id, out CatalogItem catalogItem)
