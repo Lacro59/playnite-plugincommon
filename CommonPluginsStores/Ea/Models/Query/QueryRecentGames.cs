@@ -8,7 +8,7 @@ namespace CommonPluginsStores.Ea.Models.Query
     {
         public class Variables
         {
-            public List<string> gameSlugs;
+            public List<string> gameSlugs = new List<string>();
         }
 
         public Variables variables = new Variables();
