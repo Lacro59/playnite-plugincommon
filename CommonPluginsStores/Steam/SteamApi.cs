@@ -539,7 +539,7 @@ namespace CommonPluginsStores.Steam
                     x.GamerScore = CalcGamerScore(x.Percent);
                 });
 
-                FileSystem.WriteStringToFile(cachePath, Serialization.ToJson(data));
+                SaveData(cachePath, data);
             }
 
             return data;
@@ -921,7 +921,7 @@ namespace CommonPluginsStores.Steam
                 if (Serialization.TryFromJson(response, out Dictionary<string, StoreAppDetailsResult> parsedData))
                 {
                     storeAppDetailsResult = parsedData[appId.ToString()];
-                    FileSystem.WriteStringToFile(cachePath, Serialization.ToJson(storeAppDetailsResult));
+                    SaveData(cachePath, storeAppDetailsResult);
                 }
                 else
                 {
