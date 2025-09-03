@@ -885,7 +885,7 @@ namespace CommonPluginsStores.Gog
                         ManageException($"No data for {id}", ex, response.Contains("404"));
                     }
 
-                    FileSystem.WriteStringToFile(cachePath, Serialization.ToJson(productApiDetail));
+                    SaveData(cachePath, productApiDetail);
                 }
             }
 
