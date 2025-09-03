@@ -249,6 +249,7 @@ namespace CommonPluginsStores.Ea
         #region Game
 
         /// <summary>
+        /// <summary>
         /// Get game informations.
         /// Override in derived classes if detailed game information is supported.
         /// </summary>
