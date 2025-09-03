@@ -352,7 +352,7 @@ namespace CommonPluginsStores.Ea
 
             if (gameStoreDataResponse == null)
             {
-                string url = string.Format(UrlGameData, gameSlug, CodeLang.GetEaLangCountry(Locale));
+                string url = string.Format(UrlGameData, gameSlug, CodeLang.GetCountryFromLast(Locale));
                 string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
                 Serialization.TryFromJson(response, out gameStoreDataResponse);
                 SaveData(cachePath, gameStoreDataResponse);
@@ -388,7 +388,7 @@ namespace CommonPluginsStores.Ea
             }
 
             QueryOwnedGameProducts query = new QueryOwnedGameProducts();
-            query.variables.locale = CodeLang.GetEaLangCountry(Locale);
+            query.variables.locale = CodeLang.GetCountryFromLast(Locale);
             data = await GetGraphQl<ResponseOwnedGameProducts>(UrlGraphQL, query);
             SaveData(PathOwnedGameProductsCache, data);
             return data;
@@ -406,7 +406,7 @@ namespace CommonPluginsStores.Ea
             QueryAchievements query = new QueryAchievements();
             query.variables.offerId = offerId;
             query.variables.playerPsd = playerPsd;
-            query.variables.locale = CodeLang.GetEaLangCountry(Locale);
+            query.variables.locale = CodeLang.GetCountryFromLast(Locale);
             data = await GetGraphQl<ResponseAchievements>(UrlGraphQL, query);
             SaveData(cachePath, data);
             return data;

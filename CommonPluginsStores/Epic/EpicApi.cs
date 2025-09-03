@@ -82,7 +82,7 @@ namespace CommonPluginsStores.Epic
 
         protected override List<HttpCookie> GetWebCookies(bool deleteCookies = false, IWebView webView = null)
         {
-            string localLangShort = CodeLang.GetEpicLangCountry(Locale);
+            string localLangShort = CodeLang.GetCountryFromFirst(Locale);
             List<HttpCookie> httpCookies = new List<HttpCookie>
             {
                 new HttpCookie
@@ -1094,7 +1094,7 @@ namespace CommonPluginsStores.Epic
                     QueryAddonsByNamespace query = new QueryAddonsByNamespace();
                     query.variables.epic_namespace = epic_namespace;
                     query.variables.locale = CodeLang.GetEpicLang(Locale);
-                    query.variables.country = CodeLang.GetEaLangCountry(Locale);
+                    query.variables.country = CodeLang.GetCountryFromLast(Locale);
                     StringContent content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
                     HttpClient httpClient = new HttpClient();
                     HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content);
@@ -1245,7 +1245,7 @@ namespace CommonPluginsStores.Epic
 
             if (result == null)
             {
-                string url = string.Format("/catalog/api/shared/bulk/items?id={0}&country={1}&locale={2}&includeMainGameDetails=true", id, CodeLang.GetEpicLangCountry(Locale), CodeLang.GetEpicLang(Locale));
+                string url = string.Format("/catalog/api/shared/bulk/items?id={0}&country={1}&locale={2}&includeMainGameDetails=true", id, CodeLang.GetCountryFromFirst(Locale), CodeLang.GetEpicLang(Locale));
                 Tuple<string, Dictionary<string, CatalogItem>> catalogResponse = InvokeRequest<Dictionary<string, CatalogItem>>(UrlApiCatalog + url).GetAwaiter().GetResult();
                 result = catalogResponse.Item2;
                 SaveData(cachePath, catalogResponse.Item1);

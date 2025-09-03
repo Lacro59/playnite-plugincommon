@@ -40,7 +40,7 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary.Services
 
         public async Task<WebStoreModels.ProductResponse> GetProductInfo(string productSlug, string PlayniteLanguage = "en-US")
         {
-            string EpicLangCountry = CodeLang.GetEpicLangCountry(PlayniteLanguage);
+            string EpicLangCountry = CodeLang.GetCountryFromFirst(PlayniteLanguage);
             if (PlayniteLanguage == "es_ES" || PlayniteLanguage == "zh_TW")
             {
                 EpicLangCountry = CodeLang.GetEpicLang(PlayniteLanguage);

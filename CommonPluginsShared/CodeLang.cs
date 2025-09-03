@@ -45,6 +45,27 @@ namespace CommonPluginsShared
 
         private static Dictionary<string, string> SteamLangMap => _steamLangMap;
 
+
+        /// <summary>
+        /// Extracts country.
+        /// Returns first two characters.
+        /// </summary>
+        public static string GetCountryFromFirst(string playniteLanguage)
+        {
+            playniteLanguage = Normalize(playniteLanguage);
+            return playniteLanguage.Length >= 2 ? playniteLanguage.Substring(0, 2) : "en";
+        }
+
+        /// <summary>
+        /// Extracts country.
+        /// Returns last two characters.
+        /// </summary>
+        public static string GetCountryFromLast(string playniteLanguage)
+        {
+            playniteLanguage = Normalize(playniteLanguage);
+            return playniteLanguage.Length >= 2 ? playniteLanguage.Substring(playniteLanguage.Length - 2) : "US";
+        }
+
         // -------------------------
         // Steam
         // -------------------------
@@ -131,16 +152,6 @@ namespace CommonPluginsShared
             return Normalize(playniteLanguage);
         }
 
-        /// <summary>
-        /// Extracts country code from Origin language.
-        /// Returns last two characters.
-        /// </summary>
-        public static string GetEaLangCountry(string playniteLanguage)
-        {
-            playniteLanguage = Normalize(playniteLanguage);
-            return playniteLanguage.Length >= 2 ? playniteLanguage.Substring(playniteLanguage.Length - 2) : "US";
-        }
-
         // -------------------------
         // Epic Games
         // -------------------------
@@ -153,15 +164,6 @@ namespace CommonPluginsShared
         {
             playniteLanguage = Normalize(playniteLanguage);
             return playniteLanguage.Replace("_", "-");
-        }
-
-        /// <summary>
-        /// Extracts language part for Epic Games (first 2 letters).
-        /// </summary>
-        public static string GetEpicLangCountry(string playniteLanguage)
-        {
-            playniteLanguage = Normalize(playniteLanguage);
-            return playniteLanguage.Length >= 2 ? playniteLanguage.Substring(0, 2) : "en";
         }
 
         // -------------------------
