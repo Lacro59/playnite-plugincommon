@@ -741,6 +741,27 @@ namespace CommonPluginsStores
             }
         }
 
+        protected bool SaveData<T>(string filePath, T data) where T : class
+        {
+            Guard.Against.NullOrWhiteSpace(filePath, nameof(filePath));
+            try
+            {
+                if (data == null)
+                {
+                    return false;
+                }
+
+                FileSystem.PrepareSaveFile(filePath);
+                File.WriteAllText(filePath, Serialization.ToJson(data));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return false;
+            }
+        }
+
         /// <summary>
         /// Purges all cached data including apps and achievements.
         /// </summary>
