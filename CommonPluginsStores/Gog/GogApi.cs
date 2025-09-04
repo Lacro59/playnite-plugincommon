@@ -72,6 +72,8 @@ namespace CommonPluginsStores.Gog
 
         private string FileUserDataOwned { get; }
 
+        private StoreCurrency LocalCurrency { get; set; } = new StoreCurrency { country = "US", currency = "USD", symbol = "$" };
+
         private UserDataOwned UserDataOwned => LoadUserDataOwned() ?? GetUserDataOwnedData() ?? LoadUserDataOwned(false);
 
         private AccountBasicResponse _accountBasic;
@@ -89,8 +91,6 @@ namespace CommonPluginsStores.Gog
             set => _accountBasic = value;
         }
 
-        private static StoreCurrency LocalCurrency { get; set; } = new StoreCurrency { country = "US", currency = "USD", symbol = "$" };
-
         public GogApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "GOG")
         {
             FileUserDataOwned = Path.Combine(PathStoresData, "GOG_UserDataOwned.json");
@@ -99,6 +99,26 @@ namespace CommonPluginsStores.Gog
 
         #region Configuration
 
+        /// <summary>
+        /// Set currency.
+        /// </summary>
+        /// <param name="currency"></param>
+        public void SetCurrency(StoreCurrency currency)
+        {
+            if (currency == null)
+            {
+                Logger.Warn("SetCurrency called with null; falling back to USD.");
+                LocalCurrency = new StoreCurrency { country = "US", currency = "USD", symbol = "$" };
+                return;
+            }
+            // Defensive copy + normalization
+            LocalCurrency = new StoreCurrency
+            {
+                country  = (currency.country  ?? "US").ToUpperInvariant(),
+                currency = (currency.currency ?? "USD").ToUpperInvariant(),
+                symbol   = currency.symbol ?? "$"
+            };
+        }
         protected override bool GetIsUserLoggedIn()
         {
             if (CurrentAccountInfos == null)
@@ -176,15 +196,6 @@ namespace CommonPluginsStores.Gog
             {
                 Common.LogError(ex, false, false, PluginName);
             }
-        }
-
-        /// <summary>
-        /// Set currency.
-        /// </summary>
-        /// <param name="currency"></param>
-        public void SetCurrency(StoreCurrency currency)
-        {
-            LocalCurrency = currency;
         }
 
         #endregion
@@ -885,7 +896,7 @@ namespace CommonPluginsStores.Gog
                         ManageException($"No data for {id}", ex, response.Contains("404"));
                     }
 
-                    FileSystem.WriteStringToFile(cachePath, Serialization.ToJson(productApiDetail));
+                    SaveData(cachePath, productApiDetail);
                 }
             }
 

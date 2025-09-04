@@ -40,7 +40,7 @@ namespace CommonPluginsStores.Epic
         private string UrlLogin => UrlBase + @"/id/login";
         private string UrlAuthCode => UrlBase + @"/id/api/redirect?clientId=34a02cf8f4414e29b15921876da36f9a&responseType=code";
 
-        private string UrlGraphQL => @"https://graphql.epicgames.com/graphql";
+        private string UrlGraphQL => @"https://store.epicgames.com/graphql";
 
         private string UrlApiServiceBase => @"https://account-public-service-prod03.ol.epicgames.com";
         private string UrlAccountAuth => UrlApiServiceBase + @"/account/api/oauth/token";
@@ -82,7 +82,7 @@ namespace CommonPluginsStores.Epic
 
         protected override List<HttpCookie> GetWebCookies(bool deleteCookies = false, IWebView webView = null)
         {
-            string localLangShort = CodeLang.GetEpicLangCountry(Locale);
+            string localLangShort = CodeLang.GetCountryFromFirst(Locale);
             List<HttpCookie> httpCookies = new List<HttpCookie>
             {
                 new HttpCookie
@@ -566,7 +566,7 @@ namespace CommonPluginsStores.Epic
         public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
         {
             string cachePath = Path.Combine(PathAchievementsData, $"{id}.json");
-            Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
+            Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 10);
 
             if (data?.Item2 == null)
             {
@@ -590,7 +590,7 @@ namespace CommonPluginsStores.Epic
                 });
 
                 data = new Tuple<string, ObservableCollection<GameAchievement>>(productId, gameAchievements);
-                FileSystem.WriteStringToFile(cachePath, Serialization.ToJson(data));
+                SaveData(cachePath, data);
             }
 
             return data;
@@ -606,8 +606,8 @@ namespace CommonPluginsStores.Epic
         {
             try
             {
-                string LocalLang = CodeLang.GetEpicLang(Locale);
-                ObservableCollection<DlcInfos> Dlcs = new ObservableCollection<DlcInfos>();
+                string localLang = CodeLang.GetEpicLang(Locale);
+                ObservableCollection<DlcInfos> dlcs = new ObservableCollection<DlcInfos>();
 
                 // List DLC
                 EpicAddonsByNamespace dataDLC = QueryAddonsByNamespace(id).GetAwaiter().GetResult();
@@ -631,16 +631,16 @@ namespace CommonPluginsStores.Epic
                         Name = el.title,
                         Description = el.description,
                         Image = el.keyImages?.Find(x => x.type.IsEqual("OfferImageWide"))?.url?.Replace("\u002F", "/"),
-                        Link = string.Format(UrlStore, LocalLang, el.urlSlug),
+                        Link = string.Format(UrlStore, localLang, el.urlSlug),
                         IsOwned = IsOwned,
                         Price = el.price?.totalPrice?.fmtPrice?.discountPrice,
                         PriceBase = el.price?.totalPrice?.fmtPrice?.originalPrice,
                     };
 
-                    Dlcs.Add(dlc);
+                    dlcs.Add(dlc);
                 }
 
-                return Dlcs;
+                return dlcs;
             }
             catch (Exception ex)
             {
@@ -1094,7 +1094,7 @@ namespace CommonPluginsStores.Epic
                     QueryAddonsByNamespace query = new QueryAddonsByNamespace();
                     query.variables.epic_namespace = epic_namespace;
                     query.variables.locale = CodeLang.GetEpicLang(Locale);
-                    query.variables.country = CodeLang.GetOriginLangCountry(Locale);
+                    query.variables.country = CodeLang.GetCountryFromLast(Locale);
                     StringContent content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
                     HttpClient httpClient = new HttpClient();
                     HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content);
@@ -1245,10 +1245,10 @@ namespace CommonPluginsStores.Epic
 
             if (result == null)
             {
-                string url = string.Format("/catalog/api/shared/bulk/items?id={0}&country={1}&locale={2}&includeMainGameDetails=true", id, CodeLang.GetEpicLangCountry(Locale), CodeLang.GetEpicLang(Locale));
+                string url = string.Format("/catalog/api/shared/bulk/items?id={0}&country={1}&locale={2}&includeMainGameDetails=true", id, CodeLang.GetCountryFromLast(Locale), CodeLang.GetEpicLang(Locale));
                 Tuple<string, Dictionary<string, CatalogItem>> catalogResponse = InvokeRequest<Dictionary<string, CatalogItem>>(UrlApiCatalog + url).GetAwaiter().GetResult();
                 result = catalogResponse.Item2;
-                FileSystem.WriteStringToFile(cachePath, catalogResponse.Item1);
+                SaveData(cachePath, result);
             }
 
             return result.TryGetValue(id, out CatalogItem catalogItem)

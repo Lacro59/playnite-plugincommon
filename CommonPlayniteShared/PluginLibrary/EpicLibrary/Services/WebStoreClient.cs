@@ -15,7 +15,7 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary.Services
     {
         private HttpClient httpClient = new HttpClient();
 
-        public const string GraphQLEndpoint = @"https://graphql.epicgames.com/graphql";
+        public const string GraphQLEndpoint = @"https://store.epicgames.com/graphql";
         public const string ProductUrlBase = @"https://store-content.ak.epicgames.com/api/{1}/content/products/{0}";//public const string ProductUrlBase = @"https://store-content.ak.epicgames.com/api/en-US/content/products/{0}";
 
         public WebStoreClient()
@@ -40,7 +40,7 @@ namespace CommonPlayniteShared.PluginLibrary.EpicLibrary.Services
 
         public async Task<WebStoreModels.ProductResponse> GetProductInfo(string productSlug, string PlayniteLanguage = "en-US")
         {
-            string EpicLangCountry = CodeLang.GetEpicLangCountry(PlayniteLanguage);
+            string EpicLangCountry = CodeLang.GetCountryFromFirst(PlayniteLanguage);
             if (PlayniteLanguage == "es_ES" || PlayniteLanguage == "zh_TW")
             {
                 EpicLangCountry = CodeLang.GetEpicLang(PlayniteLanguage);

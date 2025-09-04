@@ -9,6 +9,14 @@
     <Import_RootNamespace>CommonPluginsStores</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\QueryRecentGames.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\QueryAchievements.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\QueryOwnedGameProducts.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\QueryFriends.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\ResponseRecentGames.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\ResponseAchievements.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\ResponseFriends.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\ResponseOwnedGameProducts.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\EpicApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicAccountResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\EpicAchievementResponse.cs" />
@@ -73,19 +81,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\GameInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\GameDlcOwned.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\StoreCurrency.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\AccountInfoResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\AvatarResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\Encoded.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\FriendsResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\GameStoreDataResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\PriceData.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\PriceResult.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\ProductInfosResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\GameStoreDataResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\StoreToken.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\AccountInfos.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\Wishlists.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Origin\OriginApi.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Origin\Models\UsersInfos.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\QueryIdentity.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\ResponseIdentity.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\EaApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PCGamingWiki\PCGamingWikiApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Psn\Models\PsnApi.cs" />

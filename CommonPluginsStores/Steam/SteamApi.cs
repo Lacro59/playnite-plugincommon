@@ -103,7 +103,6 @@ namespace CommonPluginsStores.Steam
 
         private SteamUserData UserData => LoadData<SteamUserData>(FileUserData, 10) ?? GetUserData() ?? LoadData<SteamUserData>(FileUserData, 0);
 
-
         #region Paths
 
         private string AppsListPath { get; }
@@ -263,7 +262,6 @@ namespace CommonPluginsStores.Steam
                 _ = webView.OpenDialog();
             }
         }
-
         public bool IsConfigured()
         {
             if (CurrentAccountInfos == null)
@@ -456,7 +454,6 @@ namespace CommonPluginsStores.Steam
             return false;
         }
 
-
         #endregion
 
         #region Game
@@ -530,7 +527,7 @@ namespace CommonPluginsStores.Steam
         public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
         {
             string cachePath = Path.Combine(PathAchievementsData, $"{id}.json");
-            Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
+            Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 10);
 
             if (data?.Item2 == null)
             {
@@ -542,7 +539,7 @@ namespace CommonPluginsStores.Steam
                     x.GamerScore = CalcGamerScore(x.Percent);
                 });
 
-                FileSystem.WriteStringToFile(cachePath, Serialization.ToJson(data));
+                SaveData(cachePath, data);
             }
 
             return data;
@@ -924,7 +921,7 @@ namespace CommonPluginsStores.Steam
                 if (Serialization.TryFromJson(response, out Dictionary<string, StoreAppDetailsResult> parsedData))
                 {
                     storeAppDetailsResult = parsedData[appId.ToString()];
-                    FileSystem.WriteStringToFile(cachePath, Serialization.ToJson(storeAppDetailsResult));
+                    SaveData(cachePath, storeAppDetailsResult);
                 }
                 else
                 {
@@ -1167,9 +1164,16 @@ namespace CommonPluginsStores.Steam
 
                 IHtmlDocument htmlDocument = new HtmlParser().Parse(response);
                 IElement gamesListTemplate = htmlDocument.QuerySelector($"template#gameslist_config[data-profile-gameslist]");
+
+                if (gamesListTemplate == null)
+                {
+                    Logger.Warn($"No games list found for {accountInfos.Pseudo} ({accountInfos.UserId})");
+                    return accountGameInfos;
+                }
+
                 string json = gamesListTemplate.GetAttribute("data-profile-gameslist").HtmlDecode();
 
-                SteamProfileGames steamProfileGames = Serialization.FromJson<SteamProfileGames>(json);
+                _ = Serialization.TryFromJson<SteamProfileGames>(json, out SteamProfileGames steamProfileGames);
                 steamProfileGames?.RgGames?.ForEach(x =>
                 {
                     ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
@@ -1196,6 +1200,7 @@ namespace CommonPluginsStores.Steam
             catch (WebException ex)
             {
                 Common.LogError(ex, false, true, PluginName);
+                IsUserLoggedIn = false;
                 return null;
             }
         }
@@ -1305,6 +1310,7 @@ namespace CommonPluginsStores.Steam
             catch (WebException ex)
             {
                 Common.LogError(ex, false, true, PluginName);
+                IsUserLoggedIn = false;
             }
 
             return gameAchievements;
@@ -1341,6 +1347,7 @@ namespace CommonPluginsStores.Steam
             catch (WebException ex)
             {
                 Common.LogError(ex, false, true, PluginName);
+                IsUserLoggedIn = false;
                 return null;
             }
         }
@@ -1371,6 +1378,7 @@ namespace CommonPluginsStores.Steam
             catch (WebException ex)
             {
                 Common.LogError(ex, false, true, PluginName);
+                IsUserLoggedIn = false;
                 return null;
             }
         }
@@ -1426,6 +1434,7 @@ namespace CommonPluginsStores.Steam
             catch (WebException ex)
             {
                 Common.LogError(ex, false, true, PluginName);
+                IsUserLoggedIn = false;
             }
 
             return achievementsProgression;
