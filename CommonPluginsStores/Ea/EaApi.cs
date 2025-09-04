@@ -119,7 +119,6 @@ CurrentAccountInfos = new AccountInfos
                     string clientId = x.Player.Psd;
                     string avatar = x.Player?.Avatar?.Medium?.Path ?? string.Empty;
                     string pseudo = x.Player.DisplayName;
-                    string pseudo = x.Player.DisplayName;
                     string link = string.Empty;
                     DateTime? dateAdded = null;
 
