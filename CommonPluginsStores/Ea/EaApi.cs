@@ -73,17 +73,17 @@ namespace CommonPluginsStores.Ea
                     Type = accessToken.token_type
                 };
 
-                ResponseIdentity responseIdentity = GetIdentity().GetAwaiter().GetResult();
-                CurrentAccountInfos = new AccountInfos
-                {
-                    UserId = responseIdentity.Data.Me.Player.Pd,
-                    ClientId = responseIdentity.Data.Me.Player.Psd,
-                    Pseudo = responseIdentity.Data.Me.Player.DisplayName,
-                    Link = string.Empty,
-                    Avatar = responseIdentity.Data.Me.Player.Avatar.Medium.Path,
-                    IsPrivate = true,
-                    IsCurrent = true
-                };
+ResponseIdentity responseIdentity = GetIdentity().GetAwaiter().GetResult();
+CurrentAccountInfos = new AccountInfos
+{
+    UserId    = responseIdentity.Data.Me.Player.Pd,
+    ClientId  = responseIdentity.Data.Me.Player.Psd,
+    Pseudo    = responseIdentity.Data.Me.Player.DisplayName,
+    Link      = string.Empty,
+    Avatar    = responseIdentity?.Data?.Me?.Player?.Avatar?.Medium?.Path ?? string.Empty,
+    IsPrivate = true,
+    IsCurrent = true
+};
                 SaveCurrentUser();
                 _ = GetCurrentAccountInfos();
 
