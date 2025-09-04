@@ -590,7 +590,7 @@ namespace CommonPluginsStores.Epic
                 });
 
                 data = new Tuple<string, ObservableCollection<GameAchievement>>(productId, gameAchievements);
-                SaveData(cachePath, Serialization.ToJson(data));
+                SaveData(cachePath, data);
             }
 
             return data;
