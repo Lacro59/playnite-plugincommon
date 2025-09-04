@@ -752,7 +752,14 @@ namespace CommonPluginsStores
                 }
 
                 FileSystem.PrepareSaveFile(filePath);
-                File.WriteAllText(filePath, Serialization.ToJson(data));
+                if (data is string s)
+                {
+                    File.WriteAllText(filePath, s);
+                }
+                else
+                {
+                    File.WriteAllText(filePath, Serialization.ToJson(data));
+                }
                 return true;
             }
             catch (Exception ex)
