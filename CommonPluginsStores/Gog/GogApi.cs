@@ -105,9 +105,20 @@ namespace CommonPluginsStores.Gog
         /// <param name="currency"></param>
         public void SetCurrency(StoreCurrency currency)
         {
-            LocalCurrency = currency;
+            if (currency == null)
+            {
+                Logger.Warn("SetCurrency called with null; falling back to USD.");
+                LocalCurrency = new StoreCurrency { country = "US", currency = "USD", symbol = "$" };
+                return;
+            }
+            // Defensive copy + normalization
+            LocalCurrency = new StoreCurrency
+            {
+                country  = (currency.country  ?? "US").ToUpperInvariant(),
+                currency = (currency.currency ?? "USD").ToUpperInvariant(),
+                symbol   = currency.symbol ?? "$"
+            };
         }
-
         protected override bool GetIsUserLoggedIn()
         {
             if (CurrentAccountInfos == null)
