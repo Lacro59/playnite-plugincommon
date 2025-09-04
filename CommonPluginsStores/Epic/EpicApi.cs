@@ -1245,10 +1245,10 @@ namespace CommonPluginsStores.Epic
 
             if (result == null)
             {
-                string url = string.Format("/catalog/api/shared/bulk/items?id={0}&country={1}&locale={2}&includeMainGameDetails=true", id, CodeLang.GetCountryFromFirst(Locale), CodeLang.GetEpicLang(Locale));
+                string url = string.Format("/catalog/api/shared/bulk/items?id={0}&country={1}&locale={2}&includeMainGameDetails=true", id, CodeLang.GetCountryFromLast(Locale), CodeLang.GetEpicLang(Locale));
                 Tuple<string, Dictionary<string, CatalogItem>> catalogResponse = InvokeRequest<Dictionary<string, CatalogItem>>(UrlApiCatalog + url).GetAwaiter().GetResult();
                 result = catalogResponse.Item2;
-                SaveData(cachePath, catalogResponse.Item1);
+                SaveData(cachePath, result);
             }
 
             return result.TryGetValue(id, out CatalogItem catalogItem)
