@@ -20,6 +20,7 @@ using System.Net;
 using System.Net.Http;
 using System.Security.Principal;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using static CommonPlayniteShared.PluginLibrary.EpicLibrary.Models.WebStoreModels.QuerySearchResponse.Data.CatalogItem.SearchStore;
@@ -29,12 +30,14 @@ namespace CommonPluginsStores.Epic
 {
     // https://gist.github.com/woctezuma/8ca464a276b15d7dfad475fd6b6cbee9
     // https://github.com/nmrugg/UE4Launcher/blob/master/libs/epicApi.js
+    // https://github.com/Tectors/EpicGraphQL
     // https://github.com/pepeizq/pepeizqs-deals-web/blob/master/pepeizqs%20deals%20web/APIs/EpicGames/Juego.cs
+    // https://github.com/ramazanismayilov/epicGames-api
     public class EpicApi : StoreApi
     {
         #region Urls
 
-        private string UrlBase => @"https://www.epicgames.com";
+        private static string UrlBase => @"https://www.epicgames.com";
         private string UrlStore => UrlBase + @"/store/{0}/p/{1}";
         private string UrlAchievements => UrlBase + @"/store/{0}/achievements/{1}";
         private string UrlLogin => UrlBase + @"/id/login";
@@ -48,7 +51,7 @@ namespace CommonPluginsStores.Epic
         private string UrlStoreEpic => @"https://store.epicgames.com";
         private string UrlAccountProfile => UrlStoreEpic + @"/u/{0}";
         private string UrlAccountLinkFriends => UrlStoreEpic + @"/u/{0}/friends";
-        private string UrlAccountAchievementss => UrlStoreEpic + @"/{0}/u/{1}/details/{2}";
+        private string UrlAccountAchievements => UrlStoreEpic + @"/{0}/u/{1}/details/{2}";
 
         private string UrlApiFriendBase => @"https://friends-public-service-prod.ol.epicgames.com";
         private string UrlFriendsSummary => UrlApiFriendBase + @"/friends/api/v1/{0}/summary";
@@ -65,6 +68,9 @@ namespace CommonPluginsStores.Epic
 
         private static string AuthEncodedString => "MzRhMDJjZjhmNDQxNGUyOWIxNTkyMTg3NmRhMzZmOWE6ZGFhZmJjY2M3Mzc3NDUwMzlkZmZlNTNkOTRmYzc2Y2Y=";
 
+        private string _sha256Hash;
+        private string Sha256Hash => _sha256Hash.IsNullOrEmpty() ? GetSha256Hash() : _sha256Hash;
+
         #region Paths
 
         private string TokensPath { get; }
@@ -74,8 +80,7 @@ namespace CommonPluginsStores.Epic
         public EpicApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "Epic")
         {
             TokensPath = Path.Combine(PathStoresData, "Epic_Tokens.dat");
-
-            CookiesDomains = new List<string> { ".epicgames.com" };
+            CookiesDomains = new List<string> { ".epicgames.com", ".store.epicgames.com" };
         }
 
         #region Cookies
@@ -83,11 +88,11 @@ namespace CommonPluginsStores.Epic
         protected override List<HttpCookie> GetWebCookies(bool deleteCookies = false, IWebView webView = null)
         {
             string localLangShort = CodeLang.GetCountryFromFirst(Locale);
-            List<HttpCookie> httpCookies = new List<HttpCookie>
+            List<HttpCookie> httpCookies_old = new List<HttpCookie>
             {
                 new HttpCookie
                 {
-                    Domain = ".www.epicgames.com",
+                    Domain = ".epicgames.com",
                     Name = "EPIC_LOCALE_COOKIE",
                     Value = localLangShort,
                     Creation = DateTime.Now,
@@ -95,7 +100,7 @@ namespace CommonPluginsStores.Epic
                 },
                 new HttpCookie
                 {
-                    Domain = ".www.epicgames.com",
+                    Domain = ".epicgames.com",
                     Name = "EPIC_EG1",
                     Value = AuthToken?.Token ?? string.Empty,
                     Creation = DateTime.Now,
@@ -103,7 +108,7 @@ namespace CommonPluginsStores.Epic
                 },
                 new HttpCookie
                 {
-                    Domain = "store.epicgames.com",
+                    Domain = ".store.epicgames.com",
                     Name = "EPIC_LOCALE_COOKIE",
                     Value = localLangShort,
                     Creation = DateTime.Now,
@@ -111,13 +116,261 @@ namespace CommonPluginsStores.Epic
                 },
                 new HttpCookie
                 {
-                    Domain = "store.epicgames.com",
+                    Domain = ".store.epicgames.com",
                     Name = "EPIC_EG1",
                     Value = AuthToken?.Token ?? string.Empty,
                     Creation = DateTime.Now,
                     LastAccess = DateTime.Now
                 }
             };
+
+
+            OauthResponse tokens = LoadTokens();
+            List<HttpCookie> httpCookies = new List<HttpCookie>
+            {
+                //new HttpCookie
+                //{
+                //    Domain = ".store.epicgames.com",
+                //    Name = "__cf_bm",
+                //    Value = "", // Remplacer par la valeur si disponible
+                //    Path = "/",
+                //    Expires = tokens.expires_at,
+                //    Creation = DateTime.Now,
+                //    LastAccess = DateTime.Now,
+                //    HttpOnly = true,
+                //    Secure = false,
+                //    SameSite = CookieSameSite.NoRestriction,
+                //    Priority = CookiePriority.Medium
+                //},
+                //new HttpCookie
+                //{
+                //    Domain = ".static.assets.epicgames.com",
+                //    Name = "__cf_bm",
+                //    Value = "", // Remplacer par la valeur si disponible
+                //    Path = "/",
+                //    Expires = tokens.expires_at,
+                //    Creation = DateTime.Now,
+                //    LastAccess = DateTime.Now,
+                //    HttpOnly = true,
+                //    Secure = false,
+                //    SameSite = CookieSameSite.NoRestriction,
+                //    Priority = CookiePriority.Medium
+                //},
+                //new HttpCookie
+                //{
+                //    Domain = ".epicgames.com",
+                //    Name = "_tald",
+                //    Value = "", // Remplacer par la valeur si disponible
+                //    Path = "/",
+                //    Expires = tokens.expires_at,
+                //    Creation = DateTime.Now,
+                //    LastAccess = DateTime.Now,
+                //    HttpOnly = false,
+                //    Secure = false,
+                //    SameSite = CookieSameSite.NoRestriction,
+                //    Priority = CookiePriority.Medium
+                //},
+                //new HttpCookie
+                //{
+                //    Domain = ".store.epicgames.com",
+                //    Name = "cx-clearance",
+                //    Value = "", // Remplacer par la valeur si disponible
+                //    Path = "/",
+                //    Expires = tokens.expires_at,
+                //    Creation = DateTime.Now,
+                //    LastAccess = DateTime.Now,
+                //    HttpOnly = false,
+                //    Secure = false,
+                //    SameSite = CookieSameSite.NoRestriction,
+                //    Priority = CookiePriority.Medium
+                //},
+                //new HttpCookie
+                //{
+                //    Domain = ".epicgames.com",
+                //    Name = "dfpfpt",
+                //    Value = "", // Remplacer par la valeur si disponible
+                //    Path = "/",
+                //    Expires = tokens.expires_at,
+                //    Creation = DateTime.Now,
+                //    LastAccess = DateTime.Now,
+                //    HttpOnly = false,
+                //    Secure = true,
+                //    SameSite = CookieSameSite.NoRestriction,
+                //    Priority = CookiePriority.Medium
+                //},
+                //new HttpCookie
+                //{
+                //    Domain = ".epicgames.com",
+                //    Name = "EPIC_BEARER_TOKEN",
+                //    Value = "", // Remplacer par la valeur si disponible
+                //    Path = "/",
+                //    Expires = tokens.expires_at,
+                //    Creation = DateTime.Now,
+                //    LastAccess = DateTime.Now,
+                //    HttpOnly = true,
+                //    Secure = false,
+                //    SameSite = CookieSameSite.NoRestriction,
+                //    Priority = CookiePriority.Medium
+                //},
+                //new HttpCookie
+                //{
+                //    Domain = ".unrealsengine.com",
+                //    Name = "EPIC_DEVICE",
+                //    Value = "", // Remplacer par la valeur si disponible
+                //    Path = "/",
+                //    Expires = tokens.expires_at,
+                //    Creation = DateTime.Now,
+                //    LastAccess = DateTime.Now,
+                //    HttpOnly = false,
+                //    Secure = true,
+                //    SameSite = CookieSameSite.NoRestriction,
+                //    Priority = CookiePriority.Medium
+                //},
+                //new HttpCookie
+                //{
+                //    Domain = ".epicgames.com",
+                //    Name = "EPIC_DEVICE",
+                //    Value = "", // Remplacer par la valeur si disponible
+                //    Path = "/",
+                //    Expires = tokens.expires_at,
+                //    Creation = DateTime.Now,
+                //    LastAccess = DateTime.Now,
+                //    HttpOnly = true,
+                //    Secure = false,
+                //    SameSite = CookieSameSite.NoRestriction,
+                //    Priority = CookiePriority.Medium
+                //},
+                //new HttpCookie
+                //{
+                //    Domain = ".store.epicgames.com",
+                //    Name = "EPIC_EG1",
+                //    Value = "", // Remplacer par la valeur si disponible
+                //    Path = "/",
+                //    Expires = tokens.expires_at,
+                //    Creation = DateTime.Now,
+                //    LastAccess = DateTime.Now,
+                //    HttpOnly = false,
+                //    Secure = false,
+                //    SameSite = CookieSameSite.LaxMode,
+                //    Priority = CookiePriority.Medium
+                //},
+                //new HttpCookie
+                //{
+                //    Domain = ".unrealengine.com",
+                //    Name = "EPIC_SSO_RM",
+                //    Value = "", // Remplacer par la valeur si disponible
+                //    Path = "/",
+                //    Expires = tokens.expires_at,
+                //    Creation = DateTime.Now,
+                //    LastAccess = DateTime.Now,
+                //    HttpOnly = false,
+                //    Secure = true,
+                //    SameSite = CookieSameSite.NoRestriction,
+                //    Priority = CookiePriority.Medium
+                //},
+                //new HttpCookie
+                //{
+                //    Domain = ".epicgames.com",
+                //    Name = "EPIC_SSO_RM",
+                //    Value = "", // Remplacer par la valeur si disponible
+                //    Path = "/",
+                //    Expires = tokens.expires_at,
+                //    Creation = DateTime.Now,
+                //    LastAccess = DateTime.Now,
+                //    HttpOnly = true,
+                //    Secure = false,
+                //    SameSite = CookieSameSite.NoRestriction,
+                //    Priority = CookiePriority.Medium
+                //},
+                //new HttpCookie
+                //{
+                //    Domain = ".epicgames.com",
+                //    Name = "EpicOptanonConsent",
+                //    Value = "", // Remplacer par la valeur si disponible
+                //    Path = "/",
+                //    Expires = tokens.expires_at,
+                //    Creation = DateTime.Now,
+                //    LastAccess = DateTime.Now,
+                //    HttpOnly = false,
+                //    Secure = false,
+                //    SameSite = CookieSameSite.LaxMode,
+                //    Priority = CookiePriority.Medium
+                //},
+                //new HttpCookie
+                //{
+                //    Domain = ".store.epicgames.com",
+                //    Name = "OptanonConsent",
+                //    Value = "", // Remplacer par la valeur si disponible
+                //    Path = "/",
+                //    Expires = tokens.expires_at,
+                //    Creation = DateTime.Now,
+                //    LastAccess = DateTime.Now,
+                //    HttpOnly = false,
+                //    Secure = false,
+                //    SameSite = CookieSameSite.LaxMode,
+                //    Priority = CookiePriority.Medium
+                //},
+                //new HttpCookie
+                //{
+                //    Domain = ".epicgames.com",
+                //    Name = "OptanonConsent",
+                //    Value = "", // Remplacer par la valeur si disponible
+                //    Path = "/",
+                //    Expires = tokens.expires_at,
+                //    Creation = DateTime.Now,
+                //    LastAccess = DateTime.Now,
+                //    HttpOnly = false,
+                //    Secure = false,
+                //    SameSite = CookieSameSite.LaxMode,
+                //    Priority = CookiePriority.Medium
+                //},
+                new HttpCookie
+                {
+                    Domain = ".store.epicgames.com",
+                    Name = "REFRESH_EPIC_EG1",
+                    Value = tokens.refresh_token,
+                    Path = "/",
+                    Expires = tokens.refresh_expires_at,
+                    Creation = DateTime.Now,
+                    LastAccess = DateTime.Now,
+                    HttpOnly = false,
+                    Secure = true,
+                    SameSite = CookieSameSite.NoRestriction,
+                    Priority = CookiePriority.Medium
+                },
+                new HttpCookie
+                {
+                    Domain = ".store.epicgames.com",
+                    Name = "refreshTokenExpires",
+                    Value = tokens.refresh_expires_at.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fff").Replace(":", "%3A")+ "Z",
+                    Path = "/",
+                    Expires = tokens.refresh_expires_at,
+                    Creation = DateTime.Now,
+                    LastAccess = DateTime.Now,
+                    HttpOnly = false,
+                    Secure = false,
+                    SameSite = CookieSameSite.NoRestriction,
+                    Priority = CookiePriority.Medium
+                },
+                new HttpCookie
+                {
+                    Domain = ".store.epicgames.com",
+                    Name = "storeTokenExpires",
+                    Value = tokens.refresh_expires_at.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fff").Replace(":", "%3A")+ "Z",
+                    Path = "/",
+                    Expires = tokens.refresh_expires_at,
+                    Creation = DateTime.Now,
+                    LastAccess = DateTime.Now,
+                    HttpOnly = false,
+                    Secure = false,
+                    SameSite = CookieSameSite.NoRestriction,
+                    Priority = CookiePriority.Medium
+                }
+            };
+
+
+
+
             return httpCookies;
         }
 
@@ -140,7 +393,7 @@ namespace CommonPluginsStores.Epic
             bool isLogged = CheckIsUserLoggedIn();
             if (isLogged)
             {
-                OauthResponse tokens = LoadTokens();
+                _ = LoadTokens();
             }
             else
             {
@@ -195,6 +448,7 @@ namespace CommonPluginsStores.Epic
 
                 SaveCurrentUser();
                 _ = GetCurrentAccountInfos();
+                SetStoredCookies(GetWebCookies());
 
                 Logger.Info($"{ClientName} logged");
             }
@@ -339,6 +593,10 @@ namespace CommonPluginsStores.Epic
                             isCommun = CurrentGamesInfos?.Where(y => y.Id.IsEqual(gameAsset.appName))?.Count() != 0;
                         }
 
+                        string normalizedEpicName = PlayniteTools.NormalizeGameName(catalogItem.title.RemoveTrademarks().Replace("'", "").Replace(",", ""));
+                        string productSlug = GetProductSlug(normalizedEpicName);
+
+
                         ObservableCollection<GameAchievement> achievements = GetAchievements(gameAsset.@namespace, accountInfos);
 
                         AccountGameInfos agi = new AccountGameInfos
@@ -399,6 +657,13 @@ namespace CommonPluginsStores.Epic
 
                 if (!accountInfos.IsPrivate && !StoreSettings.UseAuth)
                 {
+                    GetPublicPlayerAchievements(accountInfos, "");
+
+
+
+                }
+                else
+                {
                     EpicPlayerProfileAchievementsByProductIdResponse playerProfileAchievementsByProductId = QueryPlayerProfileAchievementsByProductId(accountInfos.UserId, productId).GetAwaiter().GetResult();
                     playerProfileAchievementsByProductId?.Data?.PlayerProfile?.PlayerProfile2?.ProductAchievements?.Data?.PlayerAchievements?.ForEach(x =>
                     {
@@ -406,18 +671,6 @@ namespace CommonPluginsStores.Epic
                         if (owned != null)
                         {
                             owned.DateUnlocked = x?.PlayerAchievement.UnlockDate ?? default;
-                        }
-                    });
-                }
-                else
-                {
-                    EpicPlayerAchievementResponse epicPlayerAchievementResponse = QueryPlayerAchievement(accountInfos.UserId, id).GetAwaiter().GetResult();
-                    epicPlayerAchievementResponse?.Data?.PlayerAchievement?.PlayerAchievementGameRecordsBySandbox?.Records?.FirstOrDefault().PlayerAchievements.ForEach(x =>
-                    {
-                        GameAchievement owned = gameAchievements.Where(y => y.Id.IsEqual(x.PlayerAchievement.AchievementName))?.FirstOrDefault();
-                        if (owned != null)
-                        {
-                            owned.DateUnlocked = x.PlayerAchievement?.UnlockDate ?? default;
                         }
                     });
                 }
@@ -522,18 +775,18 @@ namespace CommonPluginsStores.Epic
             {
                 try
                 {
-                    string EpicOfferId = id.Split('|')[0];
-                    string EpicNamespace = id.Split('|')[1];
+                    string epicOfferId = id.Split('|')[0];
+                    string epicNamespace = id.Split('|')[1];
 
                     string query = @"mutation removeFromWishlistMutation($namespace: String!, $offerId: String!, $operation: RemoveOperation!) { Wishlist { removeFromWishlist(namespace: $namespace, offerId: $offerId, operation: $operation) { success } } }";
                     dynamic variables = new
                     {
-                        @namespace = EpicNamespace,
-                        offerId = EpicOfferId,
+                        @namespace = epicNamespace,
+                        offerId = epicOfferId,
                         operation = "REMOVE"
                     };
-                    string ResultWeb = QueryWishList(query, variables).GetAwaiter().GetResult();
-                    return ResultWeb.IndexOf("\"success\":true") > -1;
+                    string response = QueryWishList(query, variables).GetAwaiter().GetResult();
+                    return response.IndexOf("\"success\":true") > -1;
                 }
                 catch (Exception ex)
                 {
@@ -810,6 +1063,7 @@ namespace CommonPluginsStores.Epic
             }
         }
 
+        // TODO Don't work (captcha issue)
         private void EpicLogin()
         {
             bool loggedIn = false;
@@ -820,7 +1074,8 @@ namespace CommonPluginsStores.Epic
                 WindowWidth = 580,
                 WindowHeight = 700,
                 // This is needed otherwise captcha won't pass
-                UserAgent = Web.UserAgent
+                UserAgent = Web.UserAgent,
+                JavaScriptEnabled = true
             }))
             {
                 webView.LoadingChanged += async (s, e) =>
@@ -937,10 +1192,24 @@ namespace CommonPluginsStores.Epic
                 return "death-stranding";
             }
 
-            string ProductSlug = string.Empty;
+            string productSlug = string.Empty;
 
             try
             {
+                var variables = new
+                {
+                    locale = "en-US",
+                    country = "US",
+                    allowCountries = "US",
+                    sortDir = "DESC",
+                    category = "games/edition/base|bundles/games|editors",
+                    keywords = name
+                };
+                var data = InvokeGraphQLRequest<dynamic>("primarySearchAutocomplete", variables).GetAwaiter().GetResult();
+
+
+
+
                 using (WebStoreClient client = new WebStoreClient())
                 {
                     List<SearchStoreElement> catalogs = client.QuerySearch(name).GetAwaiter().GetResult();
@@ -959,7 +1228,7 @@ namespace CommonPluginsStores.Epic
                             catalog.productSlug = mapping.pageSlug;
                         }
 
-                        ProductSlug = catalog?.productSlug?.Replace("/home", string.Empty);
+                        productSlug = catalog?.productSlug?.Replace("/home", string.Empty);
                     }
                 }
             }
@@ -968,12 +1237,12 @@ namespace CommonPluginsStores.Epic
                 Common.LogError(ex, false, true, PluginName);
             }
 
-            return ProductSlug;
+            return productSlug;
         }
 
         private string GetProductSlugByUrl(string url, string gameName)
         {
-            string ProductSlug = string.Empty;
+            string productSlug = string.Empty;
 
             if (url.Contains("store.epicgames.com", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -984,7 +1253,7 @@ namespace CommonPluginsStores.Epic
                     {
                         if (slug.ContainsInvariantCulture(gameName.ToLower(), System.Globalization.CompareOptions.IgnoreSymbols))
                         {
-                            ProductSlug = slug;
+                            productSlug = slug;
                         }
                     }
                 }
@@ -994,7 +1263,7 @@ namespace CommonPluginsStores.Epic
                 }
             }
 
-            return ProductSlug;
+            return productSlug;
         }
 
         private string GetNameSpace(string name)
@@ -1082,6 +1351,7 @@ namespace CommonPluginsStores.Epic
             }
         }
 
+        // TODO Request must have js enabled
         private async Task<EpicAddonsByNamespace> QueryAddonsByNamespace(string epic_namespace)
         {
             try
@@ -1111,6 +1381,7 @@ namespace CommonPluginsStores.Epic
             }
         }
 
+        // TODO Request must have js enabled
         private async Task<EpicEntitledOfferItems> QueryEntitledOfferItems(string productNameSpace, string offerId)
         {
             try
@@ -1130,6 +1401,7 @@ namespace CommonPluginsStores.Epic
             }
         }
 
+        // TODO Request must have js enabled
         public async Task<string> QueryWishList(string query, dynamic variables)
         {
             try
@@ -1159,7 +1431,19 @@ namespace CommonPluginsStores.Epic
             try
             {
                 string queryParams = $"?operationName=Achievement&variables={{\"sandboxId\":\"{sandboxId}\",\"locale\":\"{CodeLang.GetEpicLang(Locale)}\"}}&extensions={{\"persistedQuery\":{{\"version\":1,\"sha256Hash\":\"9284d2fe200e351d1496feda728db23bb52bfd379b236fc3ceca746c1f1b33f2\"}}}}";
-                string response = await Web.DownloadStringData(UrlGraphQL + queryParams);
+                string response = string.Empty;
+
+                WebViewSettings settings = new WebViewSettings
+                {
+                    JavaScriptEnabled = true,
+                    UserAgent = Web.UserAgent
+                };
+                using (var webClient = API.Instance.WebViews.CreateOffscreenView(settings))
+                {
+                    webClient.NavigateAndWait(UrlGraphQL + queryParams);
+                    response = await webClient.GetPageTextAsync();
+                }
+
                 _ = Serialization.TryFromJson(response, out EpicAchievementResponse data);
                 return data;
             }
@@ -1170,6 +1454,7 @@ namespace CommonPluginsStores.Epic
             }
         }
 
+        // TODO Request must have js enabled
         private async Task<EpicPlayerAchievementResponse> QueryPlayerAchievement(string epicAccountId, string sandboxId)
         {
             try
@@ -1195,16 +1480,13 @@ namespace CommonPluginsStores.Epic
             }
         }
 
+        // TODO Request must have js enabled
         private async Task<EpicPlayerProfileAchievementsByProductIdResponse> QueryPlayerProfileAchievementsByProductId(string epicAccountId, string productId)
         {
             try
             {
-                QueryPlayerProfileAchievementsByProductId query = new QueryPlayerProfileAchievementsByProductId();
-                query.variables.epicAccountId = epicAccountId;
-                query.variables.productId = productId;
-                StringContent content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
-                string str = await Web.PostStringData(UrlGraphQL, content);
-                EpicPlayerProfileAchievementsByProductIdResponse data = Serialization.FromJson<EpicPlayerProfileAchievementsByProductIdResponse>(str.Replace("\"unlockDate\":\"N/A\",", string.Empty));
+                var variables = new { epicAccountId, productId };
+                var data = await InvokeGraphQLRequest<EpicPlayerProfileAchievementsByProductIdResponse>("playerProfileAchievementsByProductId", variables);
                 return data;
             }
             catch (Exception ex)
@@ -1258,6 +1540,64 @@ namespace CommonPluginsStores.Epic
 
         #endregion
 
+        #region Public Profile
+
+        private void GetPublicPlayerAchievements(AccountInfos accountInfos, string gameSlug)
+        {
+            try
+            {
+                string response = string.Empty;
+                WebViewSettings settings = new WebViewSettings
+                {
+                    JavaScriptEnabled = true,
+                    UserAgent = Web.UserAgent
+                };
+                using (IWebView webView = API.Instance.WebViews.CreateOffscreenView(settings))
+                {
+                    string url = string.Format(UrlAccountAchievements, CodeLang.GetCountryFromFirst(Locale), accountInfos.UserId, gameSlug);
+                    webView.NavigateAndWait(url);
+                    Thread.Sleep(2000);
+                    response = webView.GetPageSource();
+                }
+
+                string jsonDataString = Tools.GetJsonInString(response, "window.__REACT_QUERY_INITIAL_QUERIES__[ ]?=[ ]?");
+                _ = Serialization.TryFromJson(jsonDataString, out object data);
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+            }
+
+            return;
+        }
+
+        #endregion
+
+
+        private string GetSha256Hash()
+        {
+            try
+            {
+                string regex = @"""queryHash"".*?\\""([a-z0-9]{64})\\""";
+                string response = string.Empty;
+
+                using (var webView = CreateWebView())
+                {
+                    webView.NavigateAndWait(UrlBase);
+                    response = webView.GetPageSource();
+                    CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
+                }
+                _sha256Hash = Regex.Match(response, regex).Groups[1].Value;
+
+                return _sha256Hash;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return null;
+            }
+        }
+
         private async Task<Tuple<string, T>> InvokeRequest<T>(string url) where T : class
         {
             if (!(AuthToken?.Type?.IsNullOrEmpty() ?? true) && !(AuthToken?.Token?.IsNullOrEmpty() ?? true) )
@@ -1289,6 +1629,58 @@ namespace CommonPluginsStores.Epic
                 }
             }
             return new Tuple<string, T>(string.Empty, null);
+        }
+
+        private async Task<T> InvokeGraphQLRequest<T>(string operationName, object variables) where T : class
+        {
+            try
+            {
+                string variablesJson = Serialization.ToJson(variables);
+                string queryParams = $"?operationName={operationName}&variables={variablesJson}&extensions={{\"persistedQuery\":{{\"version\":1,\"sha256Hash\":\"{Sha256Hash}\"}}}}";
+                string response = string.Empty;
+
+                string tt = UrlGraphQL + queryParams;
+                using (var webView = CreateWebView())
+                {
+                    webView.NavigateAndWait(UrlGraphQL + queryParams);
+                    response = await webView.GetPageTextAsync();
+                    CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
+                }
+
+                if (Serialization.TryFromJson(response, out T data))
+                {
+                    return data;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return null;
+            }
+        }
+
+        private IWebView CreateWebView()
+        {
+            WebViewSettings settings = new WebViewSettings
+            {
+                JavaScriptEnabled = true,
+                UserAgent = Web.UserAgent
+            };
+            IWebView webView = API.Instance.WebViews.CreateOffscreenView(settings);
+            GetStoredCookies()?.ForEach(x =>
+            {
+                HttpCookie httpCookie = new HttpCookie
+                {
+                    Domain = x.Domain,
+                    Value = x.Value,
+                    Name = x.Name,
+                    Path = "/"
+                };
+                webView.SetCookies(UrlBase, httpCookie);
+            });
+            return webView;
         }
     }
 }

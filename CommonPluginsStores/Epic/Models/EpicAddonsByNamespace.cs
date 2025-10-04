@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CommonPluginsStores.Epic.Models
 {
-    class EpicAddonsByNamespace
+    public class EpicAddonsByNamespace
     {
         public Data data { get; set; }
         public Extensions extensions { get; set; }
