@@ -978,6 +978,12 @@ namespace CommonPluginsStores.Epic
         /// </returns>
         public async Task<bool> CheckIsPublic(AccountInfos accountInfos)
         {
+            if (accountInfos == null || accountInfos.UserId.IsNullOrEmpty())
+            {
+                Logger.Info($"[EpicApi] CheckIsPublic: accountInfos or UserId is null.");
+                return false;
+            }
+
             try
             {
                 accountInfos.AccountStatus = AccountStatus.Checking;
