@@ -43,6 +43,11 @@ namespace CommonPluginsStores.GameJolt
         #region Configuration
         protected override bool GetIsUserLoggedIn()
         {
+            if (CurrentAccountInfos?.Pseudo?.IsNullOrEmpty() ?? true)
+            {
+                return false;
+            }
+
             Profile profile = GetUser(CurrentAccountInfos?.Pseudo);
             return profile?.User != null;
         }
@@ -110,13 +115,23 @@ namespace CommonPluginsStores.GameJolt
                 }
 
                 string url = string.Format(UrlProfilTrophiesGame, FormatUser(accountInfos.Pseudo), id);
-                string response = Web.DownloadStringData(url, GetStoredCookies(), Web.UserAgent).GetAwaiter().GetResult();
+                var jsonData = Web.DownloadJsonDataWebView(url, GetStoredCookies(), true, CookiesDomains).GetAwaiter().GetResult();
+                string response = jsonData.Item1;
+
                 if (response.IsNullOrEmpty())
                 {
                     Thread.Sleep(1000);
-                    response = Web.DownloadStringData(url, GetStoredCookies(), Web.UserAgent).GetAwaiter().GetResult();
+                    jsonData = Web.DownloadJsonDataWebView(url, GetStoredCookies(), true, CookiesDomains).GetAwaiter().GetResult();
+                    response = jsonData.Item1;
                 }
                 _ = Serialization.TryFromJson(response, out ProfileTrophiesGame profileTrophiesGame, out Exception ex);
+                if (ex != null)
+                {
+                    Common.LogError(ex, false, true, PluginName);
+                    return null;
+                }
+
+                SetStoredCookies(jsonData.Item2);
 
                 profileTrophiesGame?.Payload?.Trophies?
                     .Where(x => x?.GameId.ToString().IsEqual(id) ?? false)?
@@ -157,16 +172,26 @@ namespace CommonPluginsStores.GameJolt
             string cachePath = Path.Combine(PathAchievementsData, $"{id}.json");
             Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
 
-            if (data?.Item2 == null)
+            if (data?.Item2?.Count == 0)
             {
                 string url = string.Format(UrlTrophiesGame, id);
-                string response = Web.DownloadStringData(url, GetStoredCookies(), Web.UserAgent).GetAwaiter().GetResult();
+                var jsonData = Web.DownloadJsonDataWebView(url, GetStoredCookies(), true, CookiesDomains).GetAwaiter().GetResult();
+                string response = jsonData.Item1;
+
                 if (response.IsNullOrEmpty())
                 {
                     Thread.Sleep(1000);
-                    response = Web.DownloadStringData(url, GetStoredCookies(), Web.UserAgent).GetAwaiter().GetResult();
+                    jsonData = Web.DownloadJsonDataWebView(url, GetStoredCookies(), true, CookiesDomains).GetAwaiter().GetResult();
+                    response = jsonData.Item1;
                 }
-                _ = Serialization.TryFromJson(response, out TrophiesGame trophiesGame);
+                _ = Serialization.TryFromJson(response, out TrophiesGame trophiesGame, out Exception ex);
+                if (ex != null)
+                {
+                    Common.LogError(ex, false, true, PluginName);
+                    return null;
+                }
+
+                SetStoredCookies(jsonData.Item2);
 
                 ObservableCollection<GameAchievement> gameAchievements = trophiesGame?.Payload?.Trophies?
                     .Where(x => x?.GameId.ToString().IsEqual(id) ?? false)?
@@ -212,7 +237,7 @@ namespace CommonPluginsStores.GameJolt
                 WindowWidth = 580,
                 WindowHeight = 700,
                 // This is needed otherwise captcha won't pass
-                UserAgent = @"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Vivaldi/5.5.2805.50"
+                UserAgent = Web.UserAgent
             }))
             {
                 bool isRedirect = false;
@@ -235,6 +260,8 @@ namespace CommonPluginsStores.GameJolt
                             Match match = Regex.Match(src, @"<div[^>]*class=""-username"">(.*?)<\/div>");
                             if (match.Success && match.Groups.Count > 1)
                             {
+                                _ = SetStoredCookies(GetWebCookies(true));
+
                                 string user = match.Groups[1].Value.Replace("Hey @", string.Empty, StringComparison.InvariantCultureIgnoreCase);
                                 Profile profile = GetUser(user);
                                 if (profile != null)
@@ -248,14 +275,13 @@ namespace CommonPluginsStores.GameJolt
                                         IsPrivate = true,
                                         IsCurrent = true
                                     };
+
                                     SaveCurrentUser();
                                     _ = GetCurrentAccountInfos();
 
                                     Logger.Info($"{ClientName} logged");
 
                                     webView.NavigateAndWait(CurrentAccountInfos.Link);
-
-                                    _ = SetStoredCookies(GetWebCookies(true));
                                 }
                             }
 
@@ -273,14 +299,16 @@ namespace CommonPluginsStores.GameJolt
         private Profile GetUser(string pseudo)
         {
             string url = string.Format(UrlProfil, FormatUser(pseudo));
-            string response = Web.DownloadStringData(url, GetStoredCookies(), Web.UserAgent).GetAwaiter().GetResult();
-            if (response.IsNullOrEmpty())
-            {
-                Thread.Sleep(1000);
-                response = Web.DownloadStringData(url, GetStoredCookies(), Web.UserAgent).GetAwaiter().GetResult();
-            }
-            _ = Serialization.TryFromJson(response, out Profile profile, out Exception ex);
+            var data = Web.DownloadJsonDataWebView(url, GetStoredCookies(), true, CookiesDomains).GetAwaiter().GetResult();
 
+            _ = Serialization.TryFromJson(data.Item1, out Profile profile, out Exception ex);
+            if (ex != null)
+            {
+                Common.LogError(ex, false, true, PluginName);
+                return null;
+            }
+
+            SetStoredCookies(data.Item2);
             return profile;
         }
         #endregion

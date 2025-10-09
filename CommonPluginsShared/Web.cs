@@ -1,4 +1,5 @@
 ﻿using CommonPlayniteShared;
+using CommonPluginsShared.Extensions;
 using Playnite.SDK;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CommonPluginsShared
@@ -58,7 +60,7 @@ namespace CommonPluginsShared
         {
             string PathImageFileName = Path.Combine(imagesCachePath, pluginName.ToLower(), imageFileName);
 
-            if (!StringExtensions.IsHttpUrl(url))
+            if (!System.StringExtensions.IsHttpUrl(url))
             {
                 return Task.FromResult(false);
             }
@@ -897,6 +899,76 @@ namespace CommonPluginsShared
             }
 
             return response;
+        }
+
+
+
+        public static async Task<Tuple<string, List<HttpCookie>>> DownloadJsonDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true)
+        {
+            WebViewSettings webViewSettings = new WebViewSettings
+            {
+                UserAgent = UserAgent,
+                JavaScriptEnabled = javaScriptEnabled
+            };
+
+            using (IWebView webViewOffscreen = API.Instance.WebViews.CreateOffscreenView(webViewSettings))
+            {
+                try
+                {
+                    // 1. Set cookies
+                    cookies?.ForEach(cookie => webViewOffscreen.SetCookies(url, cookie));
+
+                    // 2. Prepare asynchronous wait
+                    using (var loadingCompleted = new ManualResetEventSlim(false))
+                    {
+                        webViewOffscreen.LoadingChanged += (s, e) =>
+                        {
+                            if (!e.IsLoading)
+                            {
+                                loadingCompleted.Set();
+                            }
+                        };
+
+                        // 3. Navigate and wait for page to be fully loaded
+                        webViewOffscreen.Navigate(url);
+                        TimeSpan waitTimeout = TimeSpan.FromSeconds(30);
+                        if (!loadingCompleted.Wait(waitTimeout))
+                        {
+                            Logger.Error($"Timeout {waitTimeout.TotalSeconds} seconds for {url}.");
+                            return new Tuple<string, List<HttpCookie>>(string.Empty, null);
+                        }
+                    }
+
+                    // 4. Get content
+                    string data = await webViewOffscreen.GetPageTextAsync();
+
+                    // 5. Get cookies
+                    List<HttpCookie> refreshedCookies = null;
+                    if (getCookies)
+                    {
+                        refreshedCookies = webViewOffscreen.GetCookies();
+                        if (domains?.Count > 0)
+                        {
+                            refreshedCookies = refreshedCookies
+                                .Where(c => domains.Any(d => c.Domain.IsEqual(d)))
+                                .ToList();
+                        }
+                    }
+
+                    return new Tuple<string, List<HttpCookie>>(data, refreshedCookies);
+                }
+                finally
+                {
+                    // 6. Delete cookies for domains
+                    if (deleteDomainsCookies && domains?.Count > 0)
+                    {
+                        foreach (var domain in domains)
+                        {
+                            webViewOffscreen.DeleteDomainCookies(domain);
+                        }
+                    }
+                }
+            }
         }
     }
 }
