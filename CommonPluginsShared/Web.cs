@@ -902,8 +902,7 @@ namespace CommonPluginsShared
         }
 
 
-
-        public static async Task<Tuple<string, List<HttpCookie>>> DownloadJsonDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true)
+        private static async Task<Tuple<string, List<HttpCookie>>> DownloadWebView(bool getSource, string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true)
         {
             WebViewSettings webViewSettings = new WebViewSettings
             {
@@ -940,7 +939,7 @@ namespace CommonPluginsShared
                     }
 
                     // 4. Get content
-                    string data = await webViewOffscreen.GetPageTextAsync();
+                    string data = getSource ? await webViewOffscreen.GetPageSourceAsync() : await webViewOffscreen.GetPageTextAsync();
 
                     // 5. Get cookies
                     List<HttpCookie> refreshedCookies = null;
@@ -969,6 +968,16 @@ namespace CommonPluginsShared
                     }
                 }
             }
+        }
+
+        public static async Task<Tuple<string, List<HttpCookie>>> DownloadJsonDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true)
+        {
+            return await DownloadWebView(false, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled);
+        }
+
+        public static async Task<Tuple<string, List<HttpCookie>>> DownloadSourceDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true)
+        {
+            return await DownloadWebView(true, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled);
         }
     }
 }
