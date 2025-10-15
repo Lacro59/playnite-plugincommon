@@ -560,6 +560,12 @@ namespace CommonPluginsShared.Collections
             }, globalProgressOptions);
         }
 
+        public virtual void RefreshAll()
+        {
+            var ids = Database.Where(x => x.HasData).Select(x => x.Id);
+            Refresh(ids);
+        }
+
         /// <summary>
         /// Refreshes data for a game ID without a loader.
         /// </summary>
