@@ -154,8 +154,9 @@ namespace CommonPluginsStores.Gog
                         IsPrivate = true,
                         IsCurrent = true
                     };
+
                     SaveCurrentUser();
-                    _ = GetCurrentAccountInfos();
+                    //_ = GetCurrentAccountInfos();
 
                     Logger.Info($"{ClientName} logged");
                 }

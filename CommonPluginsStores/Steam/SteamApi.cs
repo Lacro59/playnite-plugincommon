@@ -246,9 +246,10 @@ namespace CommonPluginsStores.Steam
                                 IsPrivate = true,
                                 IsCurrent = true
                             };
+                            
                             CurrentAccountInfos = accountInfos;
                             SaveCurrentUser();
-                            _ = GetCurrentAccountInfos();
+                            //_ = GetCurrentAccountInfos();
 
                             Logger.Info($"{ClientName} logged");
 

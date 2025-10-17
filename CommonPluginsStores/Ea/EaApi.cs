@@ -86,7 +86,7 @@ namespace CommonPluginsStores.Ea
                 };
 
                 SaveCurrentUser();
-                _ = GetCurrentAccountInfos();
+                //_ = GetCurrentAccountInfos();
 
                 Logger.Info($"{ClientName} logged");
             }
