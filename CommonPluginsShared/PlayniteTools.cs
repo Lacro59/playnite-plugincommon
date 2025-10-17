@@ -19,6 +19,9 @@ using System.Windows;
 
 namespace CommonPluginsShared
 {
+    /// <summary>
+    /// Provides utility methods for interacting with Playnite plugins, emulators, game sources, and environment variables.
+    /// </summary>
     public class PlayniteTools
     {
         private static ILogger Logger => LogManager.GetLogger();
@@ -30,6 +33,10 @@ namespace CommonPluginsShared
 
 
         #region External plugin
+
+        /// <summary>
+        /// Enum representing known external plugins and libraries.
+        /// </summary>
         public enum ExternalPlugin
         {
             None,
@@ -70,6 +77,9 @@ namespace CommonPluginsShared
             HowLongToBeat
         }
 
+        /// <summary>
+        /// Dictionary mapping plugin GUIDs to their corresponding ExternalPlugin enum value.
+        /// </summary>
         private static readonly Dictionary<Guid, ExternalPlugin> PluginsById = new Dictionary<Guid, ExternalPlugin>
         {
             { new Guid("E3C26A3D-D695-4CB7-A769-5FF7612C7EDD"), ExternalPlugin.BattleNetLibrary },
@@ -108,23 +118,37 @@ namespace CommonPluginsShared
             { new Guid("E08CD51F-9C9A-4EE3-A094-FDE03B55492F"), ExternalPlugin.HowLongToBeat }
         };
 
-        public static ExternalPlugin GetPluginType(Guid PluginId)
+        /// <summary>
+        /// Gets the ExternalPlugin type for a given plugin GUID.
+        /// </summary>
+        /// <param name="pluginId">The plugin GUID.</param>
+        /// <returns>The corresponding ExternalPlugin enum value.</returns>
+        public static ExternalPlugin GetPluginType(Guid pluginId)
         {
-            _ = PluginsById.TryGetValue(PluginId, out ExternalPlugin PluginSource);
-            return PluginSource;
+            _ = PluginsById.TryGetValue(pluginId, out ExternalPlugin pluginSource);
+            return pluginSource;
         }
 
+        /// <summary>
+        /// Gets the GUID for a given ExternalPlugin enum value.
+        /// </summary>
+        /// <param name="externalPlugin">The ExternalPlugin value.</param>
+        /// <returns>The corresponding plugin GUID.</returns>
         public static Guid GetPluginId(ExternalPlugin externalPlugin)
         {
             return PluginsById.FirstOrDefault(x => x.Value == externalPlugin).Key;
         }
 
         [Obsolete]
-        public static bool IsDisabledPlaynitePlugins(string PluginName)
+        public static bool IsDisabledPlaynitePlugins(string pluginName)
         {
-            return DisabledPlugins?.Contains(PluginName) ?? false;
+            return DisabledPlugins?.Contains(pluginName) ?? false;
         }
 
+        /// <summary>
+        /// Retrieves the set of disabled plugin names from Playnite's configuration.
+        /// </summary>
+        /// <returns>A HashSet of disabled plugin names.</returns>
         private static HashSet<string> GetDisabledPlugins()
         {
             try
@@ -157,6 +181,11 @@ namespace CommonPluginsShared
             }
         }
 
+        /// <summary>
+        /// Checks if a Playnite plugin is enabled by its GUID.
+        /// </summary>
+        /// <param name="id">The plugin GUID.</param>
+        /// <returns>True if the plugin is enabled, otherwise false.</returns>
         public static bool IsEnabledPlaynitePlugin(Guid id)
         {
             try
@@ -171,14 +200,15 @@ namespace CommonPluginsShared
 
             return false;
         }
+
         #endregion
 
-
         #region Emulators
+
         /// <summary>
-        /// Get configured emulators list
+        /// Gets the list of configured emulators from the Playnite database.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List of Emulator objects.</returns>
         public static List<Emulator> GetListEmulators()
         {
             if (ListEmulators == null)
@@ -193,6 +223,11 @@ namespace CommonPluginsShared
             return ListEmulators;
         }
 
+        /// <summary>
+        /// Gets the emulator associated with a given game, if any.
+        /// </summary>
+        /// <param name="game">The game object.</param>
+        /// <returns>The associated Emulator, or null if none.</returns>
         public static Emulator GetGameEmulator(Game game)
         {
             if (!game.GameActions.HasItems())
@@ -218,21 +253,21 @@ namespace CommonPluginsShared
         }
 
         /// <summary>
-        /// Check if the game used an emulator
+        /// Checks if a game (by ID) uses an emulator.
         /// </summary>
-        /// <param name="Id"></param>
-        /// <returns></returns>
-        public static bool IsGameEmulated(Guid Id)
+        /// <param name="id">The game GUID.</param>
+        /// <returns>True if the game is emulated, otherwise false.</returns>
+        public static bool IsGameEmulated(Guid id)
         {
-            Game game = API.Instance.Database.Games.Get(Id);
+            Game game = API.Instance.Database.Games.Get(id);
             return IsGameEmulated(game);
         }
 
         /// <summary>
-        /// Check if the game used an emulator
+        /// Checks if a game uses an emulator.
         /// </summary>
-        /// <param name="game"></param>
-        /// <returns></returns>
+        /// <param name="game">The game object.</param>
+        /// <returns>True if the game is emulated, otherwise false.</returns>
         // TODO can be better
         public static bool IsGameEmulated(Game game)
         {
@@ -246,10 +281,10 @@ namespace CommonPluginsShared
         }
 
         /// <summary>
-        /// Check if a game used RPCS3 emulator
+        /// Checks if a game uses the RPCS3 emulator.
         /// </summary>
-        /// <param name="game"></param>
-        /// <returns></returns>
+        /// <param name="game">The game object.</param>
+        /// <returns>True if the game uses RPCS3, otherwise false.</returns>
         public static bool GameUseRpcs3(Game game)
         {
             if (game?.GameActions == null)
@@ -288,6 +323,11 @@ namespace CommonPluginsShared
             return false;
         }
 
+        /// <summary>
+        /// Checks if a game uses the ScummVM emulator.
+        /// </summary>
+        /// <param name="game">The game object.</param>
+        /// <returns>True if the game uses ScummVM, otherwise false.</returns>
         public static bool GameUseScummVM(Game game)
         {
             if (game?.GameActions == null)
@@ -326,6 +366,11 @@ namespace CommonPluginsShared
             return false;
         }
 
+        /// <summary>
+        /// Checks if a game uses the RetroArch emulator.
+        /// </summary>
+        /// <param name="game">The game object.</param>
+        /// <returns>True if the game uses RetroArch, otherwise false.</returns>
         public static bool GameUseRetroArch(Game game)
         {
             if (game?.GameActions == null)
@@ -363,28 +408,30 @@ namespace CommonPluginsShared
 
             return false;
         }
+
         #endregion
 
 
         /// <summary>
-        /// Get file from cache
+        /// Gets a file path from the plugin's cache directory, optionally downloading it if missing.
         /// </summary>
-        /// <param name="FileName"></param>
-        /// <param name="PluginName"></param>
-        /// <returns></returns>
-        public static string GetCacheFile(string FileName, string PluginName, dynamic Options = null)
+        /// <param name="fileName">The file name.</param>
+        /// <param name="pluginName">The plugin name.</param>
+        /// <param name="options">Optional parameters for downloading if missing.</param>
+        /// <returns>The full path to the cached file, or empty string if not found.</returns>
+        public static string GetCacheFile(string fileName, string pluginName, dynamic options = null)
         {
-            PluginName = PluginName.ToLower();
-            FileName = CommonPlayniteShared.Common.Paths.GetSafePathName(FileName);
+            pluginName = pluginName.ToLower();
+            fileName = CommonPlayniteShared.Common.Paths.GetSafePathName(fileName);
 
             try
             {
-                if (!Directory.Exists(Path.Combine(PlaynitePaths.DataCachePath, PluginName)))
+                if (!Directory.Exists(Path.Combine(PlaynitePaths.DataCachePath, pluginName)))
                 {
-                    _ = Directory.CreateDirectory(Path.Combine(PlaynitePaths.DataCachePath, PluginName));
+                    _ = Directory.CreateDirectory(Path.Combine(PlaynitePaths.DataCachePath, pluginName));
                 }
 
-                string PathImageFileName = Path.Combine(PlaynitePaths.DataCachePath, PluginName, FileName);
+                string PathImageFileName = Path.Combine(PlaynitePaths.DataCachePath, pluginName, fileName);
 
                 if (File.Exists(PathImageFileName))
                 {
@@ -392,19 +439,19 @@ namespace CommonPluginsShared
                 }
                 else
                 {
-                    if (!FileName.IsNullOrEmpty() && Options?.CachedFileIfMissing ?? false)
+                    if (!fileName.IsNullOrEmpty() && options?.CachedFileIfMissing ?? false)
                     {
                         _ = Task.Run(() =>
                         {
-                            Common.LogDebug(true, $"DownloadFileImage is missing - {FileName}");
-                            Web.DownloadFileImage(FileName, Options.Url, PlaynitePaths.DataCachePath, PluginName).GetAwaiter().GetResult();
+                            Common.LogDebug(true, $"DownloadFileImage is missing - {fileName}");
+                            Web.DownloadFileImage(fileName, options.Url, PlaynitePaths.DataCachePath, pluginName).GetAwaiter().GetResult();
                         });
                     }
                 }
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, $"Error on GetCacheFile({FileName})");
+                Common.LogError(ex, false, $"Error on GetCacheFile({fileName})");
             }
 
             return string.Empty;
@@ -412,22 +459,23 @@ namespace CommonPluginsShared
 
 
         #region Game informations
+
         /// <summary>
-        /// Get normalized source name
+        /// Gets the normalized source name for a game by its GUID.
         /// </summary>
-        /// <param name="Id"></param>
-        /// <returns></returns>
-        public static string GetSourceName(Guid Id)
+        /// <param name="id">The game GUID.</param>
+        /// <returns>The normalized source name.</returns>
+        public static string GetSourceName(Guid id)
         {
-            Game game = API.Instance.Database.Games.Get(Id);
+            Game game = API.Instance.Database.Games.Get(id);
             return game == null ? "Playnite" : GetSourceName(game);
         }
 
         /// <summary>
-        /// Get normalized source name
+        /// Gets the normalized source name for a game.
         /// </summary>
-        /// <param name="game"></param>
-        /// <returns></returns>
+        /// <param name="game">The game object.</param>
+        /// <returns>The normalized source name.</returns>
         public static string GetSourceName(Game game)
         {
             string SourceName = "Playnite";
@@ -474,6 +522,11 @@ namespace CommonPluginsShared
 
         }
 
+        /// <summary>
+        /// Gets the source name or platform name for emulated games.
+        /// </summary>
+        /// <param name="game">The game object.</param>
+        /// <returns>The source or platform name.</returns>
         public static string GetSourceNameOrPlatformForEmulated(Game game)
         {
             string sourceName = GetSourceName(game);
@@ -485,6 +538,11 @@ namespace CommonPluginsShared
             return sourceName;
         }
 
+        /// <summary>
+        /// Gets the source name by plugin GUID.
+        /// </summary>
+        /// <param name="pluginId">The plugin GUID.</param>
+        /// <returns>The source name, or empty string if not found.</returns>
         public static string GetSourceByPluginId(Guid pluginId)
         {
             _ = PluginsById.TryGetValue(pluginId, out ExternalPlugin PluginSource);
@@ -538,6 +596,12 @@ namespace CommonPluginsShared
             }
         }
 
+        /// <summary>
+        /// Gets the source name by source ID or platform IDs.
+        /// </summary>
+        /// <param name="sourceId">The source GUID.</param>
+        /// <param name="platformsIds">List of platform GUIDs.</param>
+        /// <returns>The source or platform name.</returns>
         public static string GetSourceBySourceIdOrPlatformId(Guid sourceId, List<Guid> platformsIds)
         {
             string sourceName = "Playnite";
@@ -592,15 +656,14 @@ namespace CommonPluginsShared
             return sourceName;
         }
 
-
         /// <summary>
-        /// Get platform icon if defined
+        /// Gets the icon path for a platform, if defined.
         /// </summary>
-        /// <param name="PlatformName"></param>
-        /// <returns></returns>
-        public static string GetPlatformIcon(string PlatformName)
+        /// <param name="platformName">The platform name.</param>
+        /// <returns>The full path to the platform icon, or empty string if not found.</returns>
+        public static string GetPlatformIcon(string platformName)
         {
-            Platform PlatformFound = API.Instance.Database.Platforms?.Where(x => x.Name.IsEqual(PlatformName)).FirstOrDefault();
+            Platform PlatformFound = API.Instance.Database.Platforms?.Where(x => x.Name.IsEqual(platformName)).FirstOrDefault();
             return !(PlatformFound?.Icon).IsNullOrEmpty() ? API.Instance.Database.GetFullFilePath(PlatformFound.Icon) : string.Empty;
         }
 
@@ -608,12 +671,14 @@ namespace CommonPluginsShared
         private static Regex EditionInGameName = new Regex(@"\b(goty|game of the year|standard|deluxe|definitive|ultimate|platinum|gold|extended|complete|special|anniversary|enhanced)( edition)?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         /// <summary>
-        /// Remove all non-letter and non-number characters from a string, remove diacritics, make lowercase. For use when comparing game titles.
+        /// Removes all non-letter and non-number characters from a string, removes diacritics, and converts to lowercase.
+        /// Optionally removes edition keywords (e.g., "Game of the Year").
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="removeEditions">Remove "game of the year", "complete edition" and the like from the string too</param>
-        /// <returns></returns>
-        public static string NormalizeGameName(string name, bool removeEditions = false)
+        /// <param name="name">The game name.</param>
+        /// <param name="removeEditions">Whether to remove edition keywords.</param>
+        /// <param name="removeROM"></param>
+        /// <returns>The normalized game name.</returns>
+        public static string NormalizeGameName(string name, bool removeEditions = false, bool removeROM = false)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -626,6 +691,11 @@ namespace CommonPluginsShared
             if (removeEditions)
             {
                 newName = EditionInGameName.Replace(newName, string.Empty);
+            }
+
+            if (removeROM)
+            {
+                newName = ExtractGameNameFromROM(name);
             }
 
             MatchEvaluator matchEvaluator = (Match match) =>
@@ -644,6 +714,31 @@ namespace CommonPluginsShared
             return newName.ToLowerInvariant();
         }
 
+        /// <summary>
+        /// Extracts the base game name from a ROM filename or title by removing trailing metadata enclosed in
+        /// parentheses or square brackets (for example "Super Mario World (USA)", "Sonic [Proto]").
+        /// The method matches characters from the start of the input up to the first '(' or '[' and trims the result.
+        /// </summary>
+        /// <param name="input">ROM filename or title to parse (can include extension and metadata).</param>
+        /// <returns>
+        /// The trimmed game name without trailing parenthetical or bracketed annotations.
+        /// If no separator is found, the original input is returned.
+        /// </returns>
+        public static string ExtractGameNameFromROM(string input)
+        {
+            Match match = Regex.Match(input, @"^([^([]+)");
+            if (match.Success)
+            {
+                return match.Groups[1].Value.Trim();
+            }
+            return input;
+        }
+
+        /// <summary>
+        /// Removes edition keywords from a game name and converts to lowercase.
+        /// </summary>
+        /// <param name="name">The game name.</param>
+        /// <returns>The name without edition keywords.</returns>
         public static string RemoveGameEdition(string name)
         {
             if (string.IsNullOrEmpty(name))
@@ -657,9 +752,13 @@ namespace CommonPluginsShared
 
             return newName.ToLowerInvariant();
         }
+
         #endregion
 
 
+        /// <summary>
+        /// Sets the current Playnite theme information, falling back to default if necessary.
+        /// </summary>
         public static void SetThemeInformation()
         {
             string defaultThemeName = "Default";
@@ -689,12 +788,12 @@ namespace CommonPluginsShared
 
 
         /// <summary>
-        /// Remplace Playnite & Windows variables
+        /// Replaces Playnite and Windows environment variables in a string, without store-specific variables.
         /// </summary>
-        /// <param name="game"></param>
-        /// <param name="inputString"></param>
-        /// <param name="fixSeparators"></param>
-        /// <returns></returns>
+        /// <param name="game">The game object.</param>
+        /// <param name="inputString">The input string containing variables.</param>
+        /// <param name="fixSeparators">Whether to fix path separators.</param>
+        /// <returns>The expanded string.</returns>
         public static string StringExpandWithoutStore(Game game, string inputString, bool fixSeparators = false)
         {
             if (string.IsNullOrEmpty(inputString) || !inputString.Contains('{'))
@@ -786,6 +885,12 @@ namespace CommonPluginsShared
             return fixSeparators ? CommonPlayniteShared.Common.Paths.FixSeparators(result) : result;
         }
 
+        /// <summary>
+        /// Converts absolute paths to relative paths using known environment variables and cloud folders.
+        /// </summary>
+        /// <param name="game">The game object.</param>
+        /// <param name="inputString">The input path string.</param>
+        /// <returns>The relative path string.</returns>
         public static string PathToRelativeWithoutStores(Game game, string inputString)
         {
             if (string.IsNullOrEmpty(inputString))
@@ -866,6 +971,10 @@ namespace CommonPluginsShared
             return result;
         }
 
+        /// <summary>
+        /// Gets the OneDrive installation path from the Windows registry.
+        /// </summary>
+        /// <returns>The OneDrive folder path, or empty string if not found.</returns>
         private static string GetOneDriveInstallationPath()
         {
             using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\OneDrive"))
@@ -880,12 +989,16 @@ namespace CommonPluginsShared
         }
 
 
-        public static void CreateLogPackage(string PluginName)
+        /// <summary>
+        /// Creates a ZIP archive of Playnite log files for a given plugin and opens the cache directory.
+        /// </summary>
+        /// <param name="pluginName">The plugin name.</param>
+        public static void CreateLogPackage(string pluginName)
         {
-            MessageBoxResult response = API.Instance.Dialogs.ShowMessage(ResourceProvider.GetString("LOCCommonCreateLog"), PluginName, MessageBoxButton.YesNo);
+            MessageBoxResult response = API.Instance.Dialogs.ShowMessage(ResourceProvider.GetString("LOCCommonCreateLog"), pluginName, MessageBoxButton.YesNo);
             if (response == MessageBoxResult.Yes)
             {
-                string path = Path.Combine(PlaynitePaths.DataCachePath, PluginName + "_" + DateTime.Now.ToString("yyyy-MM-dd") + ".zip");
+                string path = Path.Combine(PlaynitePaths.DataCachePath, pluginName + "_" + DateTime.Now.ToString("yyyy-MM-dd") + ".zip");
 
                 FileSystem.DeleteFile(path);
                 using (FileStream zipToOpen = new FileStream(path, FileMode.Create))
@@ -911,6 +1024,10 @@ namespace CommonPluginsShared
         }
 
 
+        /// <summary>
+        /// Opens the settings view for a given external plugin, if available.
+        /// </summary>
+        /// <param name="externalPlugin">The ExternalPlugin enum value.</param>
         public static void ShowPluginSettings(ExternalPlugin externalPlugin)
         {
             try
