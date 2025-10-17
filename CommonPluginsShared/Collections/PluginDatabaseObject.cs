@@ -151,11 +151,10 @@ namespace CommonPluginsShared.Collections
             }
         }
 
-        internal virtual void LoadMoreData()
+        protected virtual void LoadMoreData()
         {
 
         }
-
         /// <summary>
         /// Clears the database.
         /// </summary>
