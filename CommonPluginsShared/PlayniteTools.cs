@@ -695,9 +695,8 @@ namespace CommonPluginsShared
 
             if (removeROM)
             {
-                newName = ExtractGameNameFromROM(name);
+                newName = ExtractGameNameFromROM(newName);
             }
-
             MatchEvaluator matchEvaluator = (Match match) =>
             {
                 if (match.Groups["middle"].Success) //if the match group is the last one in the regex (non-word characters, including whitespace, in the middle of a string)
