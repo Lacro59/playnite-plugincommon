@@ -664,7 +664,9 @@ namespace CommonPluginsShared
         public static string GetPlatformIcon(string platformName)
         {
             Platform PlatformFound = API.Instance.Database.Platforms?.Where(x => x.Name.IsEqual(platformName)).FirstOrDefault();
-            return !(PlatformFound?.Icon).IsNullOrEmpty() ? API.Instance.Database.GetFullFilePath(PlatformFound.Icon) : string.Empty;
+            return (PlatformFound?.Icon).IsNullOrEmpty()
+                ? string.Empty
+                : API.Instance.Database.GetFullFilePath(PlatformFound.Icon);
         }
 
         private static Regex NonWordCharactersAndTrimmableWhitespace = new Regex(@"(?<start>^[\W_]+)|(?<end>[\W_]+$)|(?<middle>[\W_]+)", RegexOptions.Compiled);
