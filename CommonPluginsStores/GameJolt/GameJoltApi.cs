@@ -172,7 +172,7 @@ namespace CommonPluginsStores.GameJolt
             string cachePath = Path.Combine(PathAchievementsData, $"{id}.json");
             Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
 
-            if (data?.Item2?.Count == 0)
+            if (data == null || !(data.Item2?.Any() ?? false))
             {
                 string url = string.Format(UrlTrophiesGame, id);
                 var jsonData = Web.DownloadJsonDataWebView(url, GetStoredCookies(), true, CookiesDomains).GetAwaiter().GetResult();
