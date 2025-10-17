@@ -447,7 +447,7 @@ namespace CommonPluginsStores.Epic
                 CurrentAccountInfos = accountInfos;
 
                 SaveCurrentUser();
-                _ = GetCurrentAccountInfos();
+                //_ = GetCurrentAccountInfos();
                 SetStoredCookies(GetWebCookies());
 
                 Logger.Info($"{ClientName} logged");

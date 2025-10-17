@@ -52,9 +52,6 @@ namespace CommonPluginsShared.Collections
         private IEnumerable<Guid> PreviousIds { get; set; } = new List<Guid>();
 
 
-
-
-
         /// <summary>
         /// Constructor for PluginDatabaseObject.
         /// </summary>
@@ -81,7 +78,6 @@ namespace CommonPluginsShared.Collections
             API.Instance.Database.Games.ItemUpdated += Games_ItemUpdated;
             API.Instance.Database.Games.ItemCollectionChanged += Games_ItemCollectionChanged;
         }
-
 
         #region Database Initialization and Management
 
@@ -132,6 +128,9 @@ namespace CommonPluginsShared.Collections
                 // Delete game deleted in Playnite
                 DeleteDataWithDeletedGame();
 
+                // Load additional data if necessary
+                LoadMoreData();
+
                 stopWatch.Stop();
 
                 // Log the elapsed time and number of items loaded
@@ -152,6 +151,10 @@ namespace CommonPluginsShared.Collections
             }
         }
 
+        protected virtual void LoadMoreData()
+        {
+
+        }
         /// <summary>
         /// Clears the database.
         /// </summary>
@@ -333,7 +336,6 @@ namespace CommonPluginsShared.Collections
         }
 
         #endregion
-
 
         #region Database Item Methods
 
@@ -558,6 +560,12 @@ namespace CommonPluginsShared.Collections
                 Database.EndBufferUpdate();
                 API.Instance.Database.EndBufferUpdate();
             }, globalProgressOptions);
+        }
+
+        public virtual void RefreshAll()
+        {
+            var ids = Database.Where(x => x.HasData).Select(x => x.Id);
+            Refresh(ids);
         }
 
         /// <summary>

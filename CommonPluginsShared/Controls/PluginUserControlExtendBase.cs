@@ -55,7 +55,7 @@ namespace CommonPluginsShared.Controls
             nameof(Delay),
             typeof(int),
             typeof(PluginUserControlExtendBase),
-            new FrameworkPropertyMetadata(200, DelayPropertyChangedCallback));
+            new FrameworkPropertyMetadata(10, DelayPropertyChangedCallback));
 
         private static void DelayPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {

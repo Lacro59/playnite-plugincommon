@@ -13,18 +13,24 @@ namespace CommonPluginsShared.Plugins
         public bool EnableTag { get; set; } = false;
 
         #region Automatic update when updating library
+
         public DateTime LastAutoLibUpdateAssetsDownload { get; set; } = DateTime.Now;
         public bool AutoImport { get; set; } = true;
+
         #endregion
 
         #region Automatic update when game is installed
+
         public bool AutoImportOnInstalled { get; set; } = false;
+
         #endregion
 
         #region Variables exposed for custom themes
+
         private bool _hasData = false;
         [DontSerialize]
         public bool HasData { get => _hasData; set => SetValue(ref _hasData, value); }
+
         #endregion
 
         [DontSerialize]
