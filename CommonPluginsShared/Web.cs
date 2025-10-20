@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,7 +33,7 @@ namespace CommonPluginsShared
     {
         private static ILogger Logger => LogManager.GetLogger();
 
-        public static string UserAgent => $"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0 Playnite/{API.Instance.ApplicationInfo.ApplicationVersion.ToString(2)}";
+        public static string UserAgent => $"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0";
 
 
         private static string StrWebUserAgentType(WebUserAgentType userAgentType)
@@ -167,27 +168,7 @@ namespace CommonPluginsShared
             HttpClientHandler handler = new HttpClientHandler();
             if (cookies != null)
             {
-                CookieContainer cookieContainer = new CookieContainer();
-
-                foreach (var cookie in cookies)
-                {
-                    Cookie c = new Cookie();
-                    c.Name = cookie.Name;
-                    c.Value = Tools.FixCookieValue(cookie.Value);
-                    c.Domain = cookie.Domain;
-                    c.Path = cookie.Path;
-
-                    try
-                    {
-                        cookieContainer.Add(c);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, true);
-                    }
-                }
-
-                handler.CookieContainer = cookieContainer;
+                handler.CookieContainer = CreateCookiesContainer(cookies);
             }
 
             using (var client = new HttpClient(handler))
@@ -407,27 +388,7 @@ namespace CommonPluginsShared
             HttpClientHandler handler = new HttpClientHandler();
             if (cookies != null)
             {
-                CookieContainer cookieContainer = new CookieContainer();
-
-                foreach (var cookie in cookies)
-                {
-                    Cookie c = new Cookie();
-                    c.Name = cookie.Name;
-                    c.Value = Tools.FixCookieValue(cookie.Value);
-                    c.Domain = cookie.Domain;
-                    c.Path = cookie.Path;
-
-                    try
-                    {
-                        cookieContainer.Add(c);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, true);
-                    }
-                }
-
-                handler.CookieContainer = cookieContainer;
+                handler.CookieContainer = CreateCookiesContainer(cookies);
             }
 
             var request = new HttpRequestMessage()
@@ -559,29 +520,7 @@ namespace CommonPluginsShared
             HttpClientHandler handler = new HttpClientHandler();
             if (cookies != null)
             {
-                CookieContainer cookieContainer = new CookieContainer();
-
-                foreach (var cookie in cookies)
-                {
-                    Cookie c = new Cookie
-                    {
-                        Name = cookie.Name,
-                        Value = Tools.FixCookieValue(cookie.Value),
-                        Domain = cookie.Domain,
-                        Path = cookie.Path
-                    };
-
-                    try
-                    {
-                        cookieContainer.Add(c);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, true);
-                    }
-                }
-
-                handler.CookieContainer = cookieContainer;
+                handler.CookieContainer = CreateCookiesContainer(cookies);
             }
 
             var request = new HttpRequestMessage()
@@ -760,7 +699,7 @@ namespace CommonPluginsShared
         /// <param name="url"></param>
         /// <param name="payload"></param>
         /// <returns></returns>
-        public static async Task<string> PostStringDataPayload(string url, string payload, List<HttpCookie> Cookies = null, List<KeyValuePair<string, string>> moreHeader = null)
+        public static async Task<string> PostStringDataPayload(string url, string payload, List<HttpCookie> cookies = null, List<KeyValuePair<string, string>> moreHeader = null)
         {
             //var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             //var settings = (SettingsSection)config.GetSection("system.net/settings");
@@ -772,38 +711,15 @@ namespace CommonPluginsShared
             var response = string.Empty;
 
             HttpClientHandler handler = new HttpClientHandler();
-            if (Cookies != null)
+            if (cookies != null)
             {
-                CookieContainer cookieContainer = new CookieContainer();
-
-                foreach (HttpCookie cookie in Cookies)
-                {
-                    Cookie c = new Cookie
-                    {
-                        Name = cookie.Name,
-                        Value = Tools.FixCookieValue(cookie.Value),
-                        Domain = cookie.Domain,
-                        Path = cookie.Path
-                    };
-
-                    try
-                    {
-                        cookieContainer.Add(c);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, true);
-                    }
-                }
-
-                handler.CookieContainer = cookieContainer;
+                handler.CookieContainer = CreateCookiesContainer(cookies);
             }
 
             using (var client = new HttpClient(handler))
             {
                 client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                 client.DefaultRequestHeaders.Add("accept", "application/json, text/javascript, */*; q=0.01");
-                client.DefaultRequestHeaders.Add("Vary", "Accept-Encoding");
 
                 moreHeader?.ForEach(x =>
                 {
@@ -822,7 +738,7 @@ namespace CommonPluginsShared
                     }
                     else
                     {
-                        Logger.Error($"Web error with status code {result.StatusCode.ToString()}");
+                        Logger.Error($"Web error with status code {result.StatusCode}");
                     }
                 }
                 catch (Exception ex)
@@ -845,29 +761,7 @@ namespace CommonPluginsShared
             HttpClientHandler handler = new HttpClientHandler();
             if (cookies != null)
             {
-                CookieContainer cookieContainer = new CookieContainer();
-
-                foreach (HttpCookie cookie in cookies)
-                {
-                    Cookie c = new Cookie
-                    {
-                        Name = cookie.Name,
-                        Value = Tools.FixCookieValue(cookie.Value),
-                        Domain = cookie.Domain,
-                        Path = cookie.Path
-                    };
-
-                    try
-                    {
-                        cookieContainer.Add(c);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, true);
-                    }
-                }
-
-                handler.CookieContainer = cookieContainer;
+                handler.CookieContainer = CreateCookiesContainer(cookies);
             }
 
             using (var client = new HttpClient(handler))
@@ -978,6 +872,72 @@ namespace CommonPluginsShared
         public static async Task<Tuple<string, List<HttpCookie>>> DownloadSourceDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true)
         {
             return await DownloadWebView(true, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled);
+        }
+
+
+        private static CookieContainer CreateCookiesContainer(List<HttpCookie> cookies)
+        {
+            CookieContainer cookieContainer = new CookieContainer
+            {
+                PerDomainCapacity = 100,
+                Capacity = 300,
+                MaxCookieSize = 4096 * 10
+            };
+
+            int addedCount = 0;
+            int skippedCount = 0;
+            int errorCount = 0;
+
+            var cookiesByDomain = cookies.GroupBy(c => c.Domain ?? "null");
+            Common.LogDebug(true, $"Cookies distribution: {string.Join(", ", cookiesByDomain.Select(g => $"{g.Key}={g.Count()}"))}");
+
+            foreach (HttpCookie cookie in cookies)
+            {
+                if (string.IsNullOrEmpty(cookie.Domain))
+                {
+                    Logger.Warn($"Cookie '{cookie.Name}' has no domain, skipping");
+                    skippedCount++;
+                    continue;
+                }
+
+                try
+                {
+                    string fixedValue = Tools.FixCookieValue(cookie.Value);
+
+                    Cookie c = new Cookie
+                    {
+                        Name = cookie.Name,
+                        Value = fixedValue,
+                        Domain = cookie.Domain,
+                        Path = cookie.Path ?? "/",
+                        Secure = cookie.Secure,
+                        HttpOnly = cookie.HttpOnly
+                    };
+
+                    if (cookie.Expires.HasValue)
+                    {
+                        c.Expires = cookie.Expires.Value;
+                    }
+
+                    cookieContainer.Add(c);
+                    addedCount++;
+                }
+                catch (CookieException ex)
+                {
+                    errorCount++;
+                    Logger.Error($"CookieException for '{cookie.Name}' on domain '{cookie.Domain}': {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    errorCount++;
+                    Common.LogError(ex, true, $"Failed to add cookie: {cookie.Name} - Domain: {cookie.Domain}");
+                }
+            }
+
+            Common.LogDebug(true, $"CookieContainer: {addedCount} added, {skippedCount} skipped, {errorCount} errors from {cookies.Count} total");
+            Common.LogDebug(true, $"Final container count: {cookieContainer.Count}");
+
+            return cookieContainer;
         }
     }
 }
