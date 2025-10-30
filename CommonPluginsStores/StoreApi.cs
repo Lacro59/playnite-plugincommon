@@ -4,11 +4,15 @@ using CommonPlayniteShared.Common;
 using CommonPluginsShared;
 using CommonPluginsShared.Converters;
 using CommonPluginsShared.Extensions;
+using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.Models;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Data;
+using Playnite.SDK.Plugins;
+using SuccessStory.Clients;
+using SuccessStory.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -601,6 +605,8 @@ namespace CommonPluginsStores
 
         #endregion
 
+        #region Notifications
+
         /// <summary>
         /// Shows a notification to the user about using old cached data.
         /// </summary>
@@ -622,6 +628,40 @@ namespace CommonPluginsStores
                 }
             ));
         }
+
+        public virtual void ShowNotificationUserNoAuthenticate()
+        {
+            string message = string.Format(ResourceProvider.GetString("LOCCommonStoresNoAuthenticate"), ClientName);
+            Logger.Warn($"{ClientName}: User is not authenticated");
+
+            API.Instance.Notifications.Add(new NotificationMessage(
+                $"{PluginName}-{ClientName.RemoveWhiteSpace()}-noauthenticate",
+                $"{PluginName}\r\n{message}",
+                NotificationType.Error,
+                () =>
+                {
+                    try
+                    {
+                        Plugin plugin = API.Instance.Addons.Plugins.Find(x => x.Id == CommonPluginsShared.PlayniteTools.GetPluginId(PluginLibrary));
+                        if (plugin != null)
+                        {
+                            _ = plugin.OpenSettingsView();
+                            foreach (GenericAchievements achievementProvider in SuccessStoryDatabase.AchievementProviders.Values)
+                            {
+                                achievementProvider.ResetCachedConfigurationValidationResult();
+                                achievementProvider.ResetCachedIsConnectedResult();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, true, PluginName);
+                    }
+                }
+            ));
+        }
+
+        #endregion
 
         /// <summary>
         /// Calculates gamer score based on achievement rarity percentage.
