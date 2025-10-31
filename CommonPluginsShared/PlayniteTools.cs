@@ -295,24 +295,23 @@ namespace CommonPluginsShared
             foreach (GameAction action in game.GameActions)
             {
                 Emulator emulator = API.Instance.Database.Emulators?.FirstOrDefault(e => e.Id == action?.EmulatorId);
-
                 if (emulator == null)
                 {
                     Logger.Warn($"No emulator found for {game.Name}");
                     return false;
                 }
 
-                string BuiltInConfigId = string.Empty;
+                string builtInConfigId = string.Empty;
                 if (emulator.BuiltInConfigId == null)
                 {
                     //logger.Warn($"No BuiltInConfigId found for {emulator.Name}");
                 }
                 else
                 {
-                    BuiltInConfigId = emulator.BuiltInConfigId;
+                    builtInConfigId = emulator.BuiltInConfigId;
                 }
 
-                if (BuiltInConfigId.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)
+                if (builtInConfigId.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)
                     || emulator.Name.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)
                     || (emulator.InstallDir == null ? false : emulator.InstallDir.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)))
                 {
@@ -338,24 +337,23 @@ namespace CommonPluginsShared
             foreach (GameAction action in game.GameActions)
             {
                 Emulator emulator = API.Instance.Database.Emulators?.FirstOrDefault(e => e.Id == action?.EmulatorId);
-
                 if (emulator == null)
                 {
                     Logger.Warn($"No emulator found for {game.Name}");
                     return false;
                 }
 
-                string BuiltInConfigId = string.Empty;
+                string builtInConfigId = string.Empty;
                 if (emulator.BuiltInConfigId == null)
                 {
                     Logger.Warn($"No BuiltInConfigId found for {emulator.Name}");
                 }
                 else
                 {
-                    BuiltInConfigId = emulator.BuiltInConfigId;
+                    builtInConfigId = emulator.BuiltInConfigId;
                 }
 
-                if (BuiltInConfigId.Contains("ScummVM", StringComparison.OrdinalIgnoreCase)
+                if (builtInConfigId.Contains("ScummVM", StringComparison.OrdinalIgnoreCase)
                     || emulator.Name.Contains("ScummVM", StringComparison.OrdinalIgnoreCase)
                     || emulator.InstallDir.Contains("ScummVM", StringComparison.OrdinalIgnoreCase))
                 {
@@ -381,24 +379,23 @@ namespace CommonPluginsShared
             foreach (GameAction action in game.GameActions)
             {
                 Emulator emulator = API.Instance.Database.Emulators?.FirstOrDefault(e => e.Id == action?.EmulatorId);
-
                 if (emulator == null)
                 {
                     Logger.Warn($"No emulator found for {game.Name}");
                     return false;
                 }
 
-                string BuiltInConfigId = string.Empty;
+                string builtInConfigId = string.Empty;
                 if (emulator.BuiltInConfigId == null)
                 {
                     Logger.Warn($"No BuiltInConfigId found for {emulator.Name}");
                 }
                 else
                 {
-                    BuiltInConfigId = emulator.BuiltInConfigId;
+                    builtInConfigId = emulator.BuiltInConfigId;
                 }
 
-                if (BuiltInConfigId.Contains("RetroArch", StringComparison.OrdinalIgnoreCase)
+                if (builtInConfigId.Contains("RetroArch", StringComparison.OrdinalIgnoreCase)
                     || emulator.Name.Contains("RetroArch", StringComparison.OrdinalIgnoreCase)
                     || emulator.InstallDir.Contains("RetroArch", StringComparison.OrdinalIgnoreCase))
                 {
@@ -1033,8 +1030,8 @@ namespace CommonPluginsShared
         {
             try
             {
-                Guid PluginId = GetPluginId(externalPlugin);
-                Plugin plugin = API.Instance.Addons.Plugins.FirstOrDefault(x => x.Id == PluginId);
+                Guid pluginId = GetPluginId(externalPlugin);
+                Plugin plugin = API.Instance.Addons.Plugins.FirstOrDefault(x => x.Id == pluginId);
                 if (plugin != null)
                 {
                     _ = plugin.OpenSettingsView();

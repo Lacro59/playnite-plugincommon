@@ -642,15 +642,11 @@ namespace CommonPluginsStores
                 {
                     try
                     {
-                        Plugin plugin = API.Instance.Addons.Plugins.Find(x => x.Id == CommonPluginsShared.PlayniteTools.GetPluginId(PluginLibrary));
-                        if (plugin != null)
+                        ShowPluginSettings(PluginLibrary);
+                        foreach (GenericAchievements achievementProvider in SuccessStoryDatabase.AchievementProviders.Values)
                         {
-                            _ = plugin.OpenSettingsView();
-                            foreach (GenericAchievements achievementProvider in SuccessStoryDatabase.AchievementProviders.Values)
-                            {
-                                achievementProvider.ResetCachedConfigurationValidationResult();
-                                achievementProvider.ResetCachedIsConnectedResult();
-                            }
+                            achievementProvider.ResetCachedConfigurationValidationResult();
+                            achievementProvider.ResetCachedIsConnectedResult();
                         }
                     }
                     catch (Exception ex)
