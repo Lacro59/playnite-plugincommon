@@ -1024,7 +1024,7 @@ namespace CommonPluginsStores.Epic
         private async Task<EpicAccountResponse> GetAccountInfo(string id)
         {
             string url = string.Format(UrlAccount, id);
-            Tuple<string, EpicAccountResponse> data = await InvokeRequest<EpicAccountResponse>(url);
+            Tuple<string, EpicAccountResponse> data = await InvokeRequest<EpicAccountResponse>(url, LoadTokens());
             return data.Item2;
         }
 
