@@ -5,7 +5,6 @@ using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Models;
 using CommonPluginsStores.Epic.Models;
 using CommonPluginsStores.Epic.Models.Query;
-using CommonPluginsStores.Epic.Models.Query.CommonPluginsStores.Epic.Models.Query;
 using CommonPluginsStores.Epic.Models.Response;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Enumerations;
