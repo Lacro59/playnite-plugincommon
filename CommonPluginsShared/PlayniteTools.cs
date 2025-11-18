@@ -74,7 +74,9 @@ namespace CommonPluginsShared
             GameJoltLibrary,
 
             ScreenshotsVisualizer,
-            HowLongToBeat
+            HowLongToBeat,
+
+            XCloud
         }
 
         /// <summary>
@@ -115,7 +117,9 @@ namespace CommonPluginsShared
             { new Guid("555D58FD-A000-401B-972C-9230BED81AED"), ExternalPlugin.GameJoltLibrary },
 
             { new Guid("C6C8276F-91BF-48E5-A1D1-4BEE0B493488"), ExternalPlugin.ScreenshotsVisualizer },
-            { new Guid("E08CD51F-9C9A-4EE3-A094-FDE03B55492F"), ExternalPlugin.HowLongToBeat }
+            { new Guid("E08CD51F-9C9A-4EE3-A094-FDE03B55492F"), ExternalPlugin.HowLongToBeat },
+            
+            { new Guid("5BEFAF7A-A0AF-4CE2-992C-BC048D94E71B"), ExternalPlugin.XCloud }
         };
 
         /// <summary>
