@@ -27,7 +27,11 @@ namespace CommonPluginsShared.Controls
         /// <summary>
         /// Gets or sets whether the ListView should stretch to fill the available height.
         /// </summary>
-        public bool HeightStretch { get; set; }
+        public bool HeightStretch
+        {
+            get => (bool)GetValue(HeightStretchProperty);
+            set => SetValue(HeightStretchProperty, value);
+        }
 
         #endregion
 
@@ -41,7 +45,11 @@ namespace CommonPluginsShared.Controls
         /// <summary>
         /// Gets or sets whether the ListView should stretch to fill the available width.
         /// </summary>
-        public bool WidthStretch { get; set; }
+        public bool WidthStretch
+        {
+            get => (bool)GetValue(WidthStretchProperty);
+            set => SetValue(WidthStretchProperty, value);
+        }
 
         #endregion
 
@@ -72,8 +80,7 @@ namespace CommonPluginsShared.Controls
         /// <param name="e">Event arguments containing old and new values.</param>
         private static void BubblingScrollEventsChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            ListViewExtend obj = sender as ListViewExtend;
-            if (obj != null && e.NewValue != e.OldValue)
+            if (sender is ListViewExtend obj && e.NewValue != e.OldValue)
             {
                 if ((bool)e.NewValue)
                 {
@@ -98,7 +105,11 @@ namespace CommonPluginsShared.Controls
         /// <summary>
         /// Gets or sets whether column order should be saved.
         /// </summary>
-        public bool SaveColumn { get; set; }
+        public bool SaveColumn
+        {
+            get => (bool)GetValue(SaveColumnProperty);
+            set => SetValue(SaveColumnProperty, value);
+        }
 
         /// <summary>
         /// Dependency property for SaveColumnFilePath.
@@ -108,7 +119,11 @@ namespace CommonPluginsShared.Controls
         /// <summary>
         /// Gets or sets the file path where column order is saved.
         /// </summary>
-        public string SaveColumnFilePath { get; set; }
+        public string SaveColumnFilePath
+        {
+            get => (string)GetValue(SaveColumnFilePathProperty);
+            set => SetValue(SaveColumnFilePathProperty, value);
+        }
 
         #endregion
 
@@ -577,9 +592,8 @@ namespace CommonPluginsShared.Controls
             if (headerClicked is GridViewColumnHeaderExtend headerExtend)
             {
                 int refIndex = headerExtend.RefIndex;
-                if (refIndex != -1)
+                if (refIndex != -1 && refIndex >= 0 && this.View is GridView gridView && refIndex < gridView.Columns.Count)
                 {
-                    GridView gridView = this.View as GridView;
                     GridViewColumn gridViewColumn = gridView.Columns[refIndex];
                     headerClicked = gridViewColumn.Header as GridViewColumnHeader;
                 }
