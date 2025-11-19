@@ -7,12 +7,12 @@ namespace CommonPluginsStores.Epic.Models.Response
     public class PlaytimeItem
     {
         [SerializationPropertyName("accountId")]
-        public string AccountId;
+        public string AccountId { get; set; }
 
         [SerializationPropertyName("artifactId")]
-        public string ArtifactId;
+        public string ArtifactId { get; set; }
 
         [SerializationPropertyName("totalTime")]
-        public int TotalTime;
+        public int TotalTime { get; set; }
     }
 }
