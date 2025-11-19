@@ -5,7 +5,6 @@ using CommonPlayniteShared.Common;
 using CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared;
 using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
-using CommonPluginsShared.Plugins;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Enumerations;
 using CommonPluginsStores.Steam.Models;
@@ -677,6 +676,10 @@ namespace CommonPluginsStores.Steam
                                             .OrderByDescending(x => x.MatchPercent)
                                             .ToList();
                         return fuzzList.First().MatchPercent >= 90 ? fuzzList.First().Data.Key : 0;
+                    }
+                    else
+                    {
+                        return found.First().Key;
                     }
                 }
             }
