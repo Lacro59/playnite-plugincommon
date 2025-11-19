@@ -446,42 +446,42 @@ namespace CommonPluginsStores.Epic
             {
                 try
                 {
-                    var WishlistResponse = QueryWishList().GetAwaiter().GetResult();
-                    if (WishlistResponse?.Data?.Wishlist?.WishlistItems?.Elements != null)
+                    var wishlistResponse = QueryWishList().GetAwaiter().GetResult();
+                    if (wishlistResponse?.Data?.Wishlist?.WishlistItems?.Elements != null)
                     {
                         ObservableCollection<AccountWishlist> data = new ObservableCollection<AccountWishlist>();
 
-                        foreach (var gameWishlist in WishlistResponse.Data.Wishlist.WishlistItems.Elements)
+                        foreach (var gameWishlist in wishlistResponse.Data.Wishlist.WishlistItems.Elements)
                         {
-                            string Id = string.Empty;
-                            string Name = string.Empty;
-                            DateTime? Released = null;
-                            DateTime? Added = null;
-                            string Image = string.Empty;
-                            string Link = string.Empty;
+                            string id = string.Empty;
+                            string name = string.Empty;
+                            DateTime? released = null;
+                            DateTime? added = null;
+                            string image = string.Empty;
+                            string link = string.Empty;
 
                             try
                             {
-                                Id = gameWishlist.OfferId + "|" + gameWishlist.Namespace;
-                                Name = WebUtility.HtmlDecode(gameWishlist.Offer.Title);
-                                Image = gameWishlist.Offer.KeyImages?.FirstOrDefault(x => x.Type.IsEqual("Thumbnail"))?.Url;
-                                Released = gameWishlist.Offer.EffectiveDate.ToUniversalTime();
-                                Added = gameWishlist.Created.ToUniversalTime();
-                                Link = gameWishlist.Offer?.CatalogNs?.Mappings?.FirstOrDefault()?.PageSlug;
+                                id = gameWishlist.OfferId + "|" + gameWishlist.Namespace;
+                                name = WebUtility.HtmlDecode(gameWishlist.Offer.Title);
+                                image = gameWishlist.Offer.KeyImages?.FirstOrDefault(x => x.Type.IsEqual("Thumbnail"))?.Url;
+                                released = gameWishlist.Offer.EffectiveDate.ToUniversalTime();
+                                added = gameWishlist.Created.ToUniversalTime();
+                                link = gameWishlist.Offer?.CatalogNs?.Mappings?.FirstOrDefault()?.PageSlug;
 
                                 data.Add(new AccountWishlist
                                 {
-                                    Id = Id,
-                                    Name = Name,
-                                    Link = Link.IsNullOrEmpty() ? string.Empty : string.Format(UrlStore, CodeLang.GetEpicLang(Locale), Link),
-                                    Released = Released,
-                                    Added = Added,
-                                    Image = Image
+                                    Id = id,
+                                    Name = name,
+                                    Link = link.IsNullOrEmpty() ? string.Empty : string.Format(UrlStore, CodeLang.GetEpicLang(Locale), link),
+                                    Released = released,
+                                    Added = added,
+                                    Image = image
                                 });
                             }
                             catch (Exception ex)
                             {
-                                Common.LogError(ex, true, $"Error in parse {ClientName} wishlist - {Name}");
+                                Common.LogError(ex, true, $"Error in parse {ClientName} wishlist - {name}");
                             }
                         }
 
