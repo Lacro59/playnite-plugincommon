@@ -80,6 +80,12 @@ namespace CommonPluginsStores.Epic
         protected override List<HttpCookie> GetWebCookies(bool deleteCookies = false, IWebView webView = null)
         {
             OauthResponse tokens = LoadTokens();
+            if (tokens == null)
+            {
+                Logger.Warn("GetWebCookies called but no tokens are available.");
+                return new List<HttpCookie>();
+            }
+
             List<HttpCookie> httpCookies = new List<HttpCookie>
             {
                 new HttpCookie
@@ -396,17 +402,17 @@ namespace CommonPluginsStores.Epic
                 playerProfileAchievementsByProductId?.Data?.PlayerProfile?.PlayerProfileInfo?.ProductAchievements?.Data?.PlayerAchievements?.ForEach(x =>
                 {
                     GameAchievement owned = gameAchievements.Where(y => y.Id.IsEqual(x.PlayerAchievement.AchievementName))?.FirstOrDefault();
-                    if (owned != null && x.PlayerAchievement.Unlocked)
+                    if (owned == null)
+                    {
+                        Logger.Warn($"Achievement not found: {x.PlayerAchievement.AchievementName} for productId: {productId}");
+                    }
+                    else if (x.PlayerAchievement.Unlocked)
                     {
                         owned.DateUnlocked = DateTime.ParseExact(
                             x.PlayerAchievement.UnlockDate,
                             "yyyy-MM-ddTHH:mm:ss.fffK",
                             CultureInfo.InvariantCulture,
                             DateTimeStyles.AdjustToUniversal);
-                    }
-                    else
-                    {
-                        Logger.Warn($"Achievement not found: {x.PlayerAchievement.AchievementName} for productId: {productId}");
                     }
                 });
 
