@@ -17,48 +17,48 @@ namespace CommonPluginsShared.Controls
     /// </summary>
     public class ListViewExtend : ListView
     {
-        #region HeightStretch
+		#region HeightStretch
 
-        /// <summary>
-        /// Dependency property for HeightStretch.
-        /// </summary>
-        public static readonly DependencyProperty HeightStretchProperty;
+		/// <summary>
+		/// Dependency property for HeightStretch.
+		/// </summary>
+		public static readonly DependencyProperty HeightStretchProperty;
 
-        /// <summary>
-        /// Gets or sets whether the ListView should stretch to fill the available height.
-        /// </summary>
-        public bool HeightStretch
-        {
-            get => (bool)GetValue(HeightStretchProperty);
-            set => SetValue(HeightStretchProperty, value);
-        }
+		/// <summary>
+		/// Gets or sets whether the ListView should stretch to fill the available height.
+		/// </summary>
+		public bool HeightStretch
+		{
+			get => HeightStretchProperty == null || (bool)GetValue(HeightStretchProperty);
+			set => SetValue(HeightStretchProperty, value);
+		}
 
-        #endregion
+		#endregion
 
-        #region WidthStretch
+		#region WidthStretch
 
-        /// <summary>
-        /// Dependency property for WidthStretch.
-        /// </summary>
-        public static readonly DependencyProperty WidthStretchProperty;
+		/// <summary>
+		/// Dependency property for WidthStretch.
+		/// </summary>
+		public static readonly DependencyProperty WidthStretchProperty;
 
-        /// <summary>
-        /// Gets or sets whether the ListView should stretch to fill the available width.
-        /// </summary>
-        public bool WidthStretch
-        {
-            get => (bool)GetValue(WidthStretchProperty);
-            set => SetValue(WidthStretchProperty, value);
-        }
+		/// <summary>
+		/// Gets or sets whether the ListView should stretch to fill the available width.
+		/// </summary>
+		public bool WidthStretch
+		{
+			get => WidthStretchProperty == null || (bool)GetValue(WidthStretchProperty);
+			set => SetValue(WidthStretchProperty, value);
+		}
 
-        #endregion
+		#endregion
 
-        #region BubblingScrollEvents
+		#region BubblingScrollEvents
 
-        /// <summary>
-        /// Gets or sets whether scroll events should bubble up to parent controls.
-        /// </summary>
-        public bool BubblingScrollEvents
+		/// <summary>
+		/// Gets or sets whether scroll events should bubble up to parent controls.
+		/// </summary>
+		public bool BubblingScrollEvents
         {
             get => (bool)GetValue(BubblingScrollEventsProperty);
             set => SetValue(BubblingScrollEventsProperty, value);

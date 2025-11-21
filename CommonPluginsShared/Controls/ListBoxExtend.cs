@@ -19,7 +19,7 @@ namespace CommonPluginsShared.Controls
         /// </summary>
         public bool HeightStretch
         {
-            get => (bool)GetValue(HeightStretchProperty);
+            get => HeightStretchProperty == null || (bool)GetValue(HeightStretchProperty);
             set => SetValue(HeightStretchProperty, value);
         }
 
@@ -37,7 +37,7 @@ namespace CommonPluginsShared.Controls
         /// </summary>
         public bool WidthStretch
         {
-            get => (bool)GetValue(WidthStretchProperty);
+            get => WidthStretchProperty == null || (bool)GetValue(WidthStretchProperty);
             set => SetValue(WidthStretchProperty, value);
         }
 
