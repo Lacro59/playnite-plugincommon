@@ -80,7 +80,10 @@ namespace CommonPluginsShared
         /// </summary>
         /// <param name="imgStream">The image stream.</param>
         /// <returns>An <see cref="ImageProperty"/> object, or null if an error occurs.</returns>
-        public static ImageProperty GetImageProperty(Stream imgStream)
+        /// <param name="image">The image object.</param>
+        /// <returns>An <see cref="ImageProperty"/> object, or null if an error occurs.</returns>
+        public static ImageProperty GetImageProperty(Image image)
+        {
         {
             try
             {
