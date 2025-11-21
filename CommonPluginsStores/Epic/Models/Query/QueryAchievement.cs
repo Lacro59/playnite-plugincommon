@@ -91,10 +91,10 @@ namespace CommonPluginsStores.Epic.Models.Query
             public string SandboxId { get; set; }
 
             [SerializationPropertyName("totalAchievements")]
-            public int TotalAchievements { get; set; }
+            public int? TotalAchievements { get; set; }
 
             [SerializationPropertyName("totalProductXP")]
-            public int TotalProductXP { get; set; }
+            public int? TotalProductXP { get; set; }
 
             [SerializationPropertyName("achievementSets")]
             public List<AchievementSet> AchievementSets { get; set; }

@@ -390,7 +390,7 @@ namespace CommonPluginsStores.Epic
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
                 Tuple<string, ObservableCollection<GameAchievement>> data = GetAchievementsSchema(id);
                 
-                if (data?.Item2?.Count() == 0)
+                if (data?.Item2 == null || data.Item2.Count() == 0)
                 {
                     return gameAchievements;
                 }
@@ -594,8 +594,8 @@ namespace CommonPluginsStores.Epic
             string cacheFile = Path.Combine(PathAchievementsData, $"{@namespace}.json");
             Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cacheFile, 1440);
 
-            if (data?.Item2 == null)
-            {
+			if (data?.Item2 == null || data.Item2.Count() == 0)
+			{
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
                 var achievementResponse = QueryAchievement(@namespace).GetAwaiter().GetResult();
                 string productId = achievementResponse.Data?.Achievement?.ProductAchievementsRecordBySandbox?.ProductId;
