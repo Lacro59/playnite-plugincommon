@@ -752,22 +752,14 @@ namespace CommonPluginsStores.Epic
             {
                 accountInfos.AccountStatus = AccountStatus.Checking;
 
-                WebViewSettings webViewSettings = new WebViewSettings
-                {
-                    JavaScriptEnabled = true
-                };
+				string url = string.Format(UrlAccountProfile, accountInfos.UserId);
+                var pageSource = await Web.DownloadSourceDataWebView(url);
+				string source = pageSource.Item1;
 
-                using (IWebView webView = API.Instance.WebViews.CreateOffscreenView(webViewSettings))
-                {
-                    string url = string.Format(UrlAccountProfile, accountInfos.UserId);
-                    webView.NavigateAndWait(url);
-                    string source = await webView.GetPageSourceAsync();
-
-                    // Check if the page source contains the "private-view-text" string to determine if the profile is private.
-                    // If the profile is private, the method will return false, otherwise it will return true.
-                    return !source.Contains("private-view-text");
-                }
-            }
+				// Check if the page source contains the "private-view-text" string to determine if the profile is private.
+				// If the profile is private, the method will return false, otherwise it will return true.
+				return !source.Contains("private-view-text");
+			}
             catch (Exception ex)
             {
                 Common.LogError(ex, false, true, PluginName);

@@ -1471,45 +1471,37 @@ namespace CommonPluginsStores.Steam
 
         private List<uint> GetDlcFromSteamDb(uint appId)
         {
-            List<uint> Dlcs = new List<uint>();
+            List<uint> dlcs = new List<uint>();
             if (appId == 0)
             {
-                return Dlcs;
+                return dlcs;
             }
 
             try
             {
-                WebViewSettings settings = new WebViewSettings
-                {
-                    UserAgent = Web.UserAgent
-                };
+                var pageSource = Web.DownloadSourceDataWebView(string.Format(SteamDbDlc, appId)).GetAwaiter().GetResult();
+                string data = pageSource.Item1;
 
-                using (IWebView WebViewOffScreen = API.Instance.WebViews.CreateOffscreenView(settings))
-                {
-                    WebViewOffScreen.NavigateAndWait(string.Format(SteamDbDlc, appId));
-                    string data = WebViewOffScreen.GetPageSource();
-
-                    IHtmlDocument htmlDocument = new HtmlParser().Parse(data);
-                    IHtmlCollection<IElement> SectionDlcs = htmlDocument.QuerySelectorAll("#dlc tr.app");
-                    if (SectionDlcs != null)
-                    {
-                        foreach (IElement el in SectionDlcs)
-                        {
-                            string DlcIdString = el.QuerySelector("td a")?.InnerHtml;
-                            if (uint.TryParse(DlcIdString, out uint DlcId))
-                            {
-                                Dlcs.Add(DlcId);
-                            }
-                        }
-                    }
-                }
-            }
+				IHtmlDocument htmlDocument = new HtmlParser().Parse(data);
+				IHtmlCollection<IElement> sectionDlcs = htmlDocument.QuerySelectorAll("#dlc tr.app");
+				if (sectionDlcs != null)
+				{
+					foreach (IElement el in sectionDlcs)
+					{
+						string dlcIdString = el.QuerySelector("td a")?.InnerHtml;
+						if (uint.TryParse(dlcIdString, out uint DlcId))
+						{
+							dlcs.Add(DlcId);
+						}
+					}
+				}
+			}
             catch (Exception ex)
             {
                 Common.LogError(ex, false, true, PluginName);
             }
 
-            return Dlcs;
+            return dlcs;
         }
 
         private ObservableCollection<GameAchievement> SetExtensionsAchievementsFromSteamDb(uint appId, ObservableCollection<GameAchievement> gameAchievements)
@@ -1525,7 +1517,7 @@ namespace CommonPluginsStores.Steam
                         Logger.Warn($"No success in ExtensionsAchievements for {appId}");
                     }
 
-                    int CategoryOrder = 1;
+                    int categoryOrder = 1;
                     extensionsAchievementse?.Data?.ForEach(x =>
                     {
                         gameAchievements?.ForEach(y =>
@@ -1535,11 +1527,11 @@ namespace CommonPluginsStores.Steam
                                 int id = (x.DlcAppId != null && x.DlcAppId != 0) ? (int)x.DlcAppId : (int)appId;
                                 y.CategoryIcon = string.Format(UrlCapsuleSteam, id);
                                 y.Category = x.Name.IsNullOrEmpty() ? x.DlcAppName : x.Name;
-                                y.CategoryOrder = CategoryOrder;
+                                y.CategoryOrder = categoryOrder;
                                 y.CategoryDlc = !x.DlcAppName.IsNullOrEmpty();
                             }
                         });
-                        CategoryOrder++;
+                        categoryOrder++;
                     });
                 }
                 else
