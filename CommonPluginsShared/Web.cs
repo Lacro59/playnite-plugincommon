@@ -796,11 +796,11 @@ namespace CommonPluginsShared
         }
 
 
-        private static async Task<Tuple<string, List<HttpCookie>>> DownloadWebView(bool getSource, string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true)
+        private static async Task<Tuple<string, List<HttpCookie>>> DownloadWebView(bool getSource, string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string userAgent = "")
         {
             WebViewSettings webViewSettings = new WebViewSettings
             {
-                UserAgent = UserAgent,
+                UserAgent = userAgent.IsNullOrEmpty() ? UserAgent : userAgent,
                 JavaScriptEnabled = javaScriptEnabled
             };
 
@@ -864,14 +864,14 @@ namespace CommonPluginsShared
             }
         }
 
-        public static async Task<Tuple<string, List<HttpCookie>>> DownloadJsonDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true)
+        public static async Task<Tuple<string, List<HttpCookie>>> DownloadJsonDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string userAgent = "")
         {
-            return await DownloadWebView(false, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled);
+            return await DownloadWebView(false, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, userAgent);
         }
 
-        public static async Task<Tuple<string, List<HttpCookie>>> DownloadSourceDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true)
+        public static async Task<Tuple<string, List<HttpCookie>>> DownloadSourceDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string userAgent = "")
         {
-            return await DownloadWebView(true, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled);
+            return await DownloadWebView(true, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, userAgent);
         }
 
 

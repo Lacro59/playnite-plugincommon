@@ -1,23 +1,92 @@
-﻿using System;
+﻿using Playnite.SDK.Data;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace CommonPluginsStores.Epic.Models.Query
 {
-    public class QueryAddonsByNamespace
+    public class QueryGetAddonsByNamespace
     {
-        public class Variables
-        {
-            public string locale = "en-US";
-            public string country = "US";
-            public string epic_namespace = "";
-            public string sortBy = "releaseDate";
-            public string sortDir = "asc";
-            public string categories = "addons|digitalextras";
-            public int count = 50;
-        }
+        public string OperationName { get; set; } = "getAddonsByNamespace";
+        public string Query { get; set; } = @"
+            query getAddonsByNamespace($Categories: String!, $Count: Int!, $Country: String!, $Locale: String!, $Namespace: String!, $SortBy: String!, $SortDir: String!) {
+                Catalog {
+                    catalogOffers(namespace: $Namespace, locale: $Locale, params: {
+                        category: $Categories,
+                        count: $Count,
+                        country: $Country,
+                        sortBy: $SortBy,
+                        sortDir: $SortDir
+                    }) {
+                        elements {
+                            countriesBlacklist
+                            customAttributes {
+                                key
+                                value
+                            }
+                            description
+                            developer
+                            effectiveDate
+                            id
+                            isFeatured
+                            keyImages {
+                                type
+                                url
+                            }
+                            lastModifiedDate
+                            longDescription
+                            namespace
+                            offerType
+                            productSlug
+                            releaseDate
+                            status
+                            technicalDetails
+                            title
+                            urlSlug
+                            price(country: $Country) {
+                                totalPrice {
+                                    discountPrice
+                                    originalPrice
+                                    voucherDiscount
+                                    discount
+                                    currencyCode
+                                    currencyInfo {
+                                        decimals
+                                    }
+                                    fmtPrice(locale: $Locale) {
+                                        originalPrice
+                                        discountPrice
+                                        intermediatePrice
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }";
+        public AddonsByNamespaceVariables Variables { get; set; } = new AddonsByNamespaceVariables();
+    }
 
-        public Variables variables = new Variables();
-        public string query = @"query getAddonsByNamespace($categories: String!, $count: Int!, $country: String!, $locale: String!, $epic_namespace: String!, $sortBy: String!, $sortDir: String!) {    Catalog {        catalogOffers(namespace: $epic_namespace, locale: $locale, params: {            category: $categories,            count: $count,            country: $country,            sortBy: $sortBy,            sortDir: $sortDir        }) {            elements {                countriesBlacklist                customAttributes {                    key                    value                }                description                developer                effectiveDate                id                isFeatured                keyImages {                    type                    url                }                lastModifiedDate                longDescription                namespace                offerType                productSlug                releaseDate                status                technicalDetails                title                urlSlug                price(country: $country) {                    totalPrice {                        discountPrice                        originalPrice                        voucherDiscount                        discount                        currencyCode                        currencyInfo {                            decimals                        }                        fmtPrice(locale: $locale) {                            originalPrice                            discountPrice                            intermediatePrice                        }                    }                }            }        }    }}";
+    public class AddonsByNamespaceVariables
+    {
+        public string Categories { get; set; }
+        public int Count { get; set; }
+        public string Country { get; set; }
+        public string Locale { get; set; }
+        public string Namespace { get; set; }
+        public string SortBy { get; set; }
+        public string SortDir { get; set; }
+    }
+
+    public class AddonsByNamespaceResponse
+    {
+        [SerializationPropertyName("data")]
+        public CatalogData Data { get; set; }
+
+        public class CatalogData
+        {
+            [SerializationPropertyName("Catalog")]
+            public Catalog Catalog { get; set; }
+        }
     }
 }

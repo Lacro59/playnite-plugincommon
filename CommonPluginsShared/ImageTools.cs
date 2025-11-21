@@ -70,19 +70,19 @@ namespace CommonPluginsShared
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, $"Error on GetImapeProperty({srcPath})");
+                Common.LogError(ex, false, $"Error on GetImageProperty({srcPath})");
                 return null;
             }
         }
 
-        /// <summary>
-        /// Gets the width and height of an image from a stream.
-        /// </summary>
-        /// <param name="imgStream">The image stream.</param>
-        /// <returns>An <see cref="ImageProperty"/> object, or null if an error occurs.</returns>
-        public static ImageProperty GetImapeProperty(Stream imgStream)
-        {
-            try
+		/// <summary>
+		/// Gets the width and height of an image from a stream.
+		/// </summary>
+		/// <param name="imgStream">The image stream.</param>
+		/// <returns>An <see cref="ImageProperty"/> object, or null if an error occurs.</returns>
+		public static ImageProperty GetImageProperty(Stream imgStream)
+		{
+			try
             {
                 using (Image image = Image.FromStream(imgStream))
                 {
@@ -105,7 +105,7 @@ namespace CommonPluginsShared
         /// </summary>
         /// <param name="image">The image object.</param>
         /// <returns>An <see cref="ImageProperty"/> object, or null if an error occurs.</returns>
-        public static ImageProperty GetImapeProperty(Image image)
+        public static ImageProperty GetImageProperty(Image image)
         {
             try
             {
@@ -320,32 +320,32 @@ namespace CommonPluginsShared
         /// <summary>
         /// Converts a <see cref="BitmapImage"/> to a <see cref="FormatConvertedBitmap"/> with optional color transformation.
         /// </summary>
-        /// <param name="IconImage">The source bitmap image.</param>
+        /// <param name="iconImage">The source bitmap image.</param>
         /// <param name="imageColor">The color transformation to apply.</param>
         /// <returns>A <see cref="FormatConvertedBitmap"/> object, or null if the source is null or an error occurs.</returns>
-        public static FormatConvertedBitmap ConvertBitmapImage(BitmapImage IconImage, ImageColor imageColor = ImageColor.None)
+        public static FormatConvertedBitmap ConvertBitmapImage(BitmapImage iconImage, ImageColor imageColor = ImageColor.None)
         {
-            if (IconImage is null)
+            if (iconImage is null)
             {
                 return null;
             }
 
 
-            FormatConvertedBitmap ConvertBitmapSource = new FormatConvertedBitmap();
+            FormatConvertedBitmap convertBitmapSource = new FormatConvertedBitmap();
 
             try
             {
-                ConvertBitmapSource.BeginInit();
-                ConvertBitmapSource.Source = IconImage;
+                convertBitmapSource.BeginInit();
+                convertBitmapSource.Source = iconImage;
 
                 switch (imageColor)
                 {
                     case ImageColor.Gray:
-                        ConvertBitmapSource.DestinationFormat = PixelFormats.Gray32Float;
+                        convertBitmapSource.DestinationFormat = PixelFormats.Gray32Float;
                         break;
 
                     case ImageColor.Black:
-                        ConvertBitmapSource.Source = IconImage;
+                        convertBitmapSource.Source = iconImage;
                         break;
 
                     case ImageColor.None:
@@ -355,15 +355,15 @@ namespace CommonPluginsShared
                         break;
                 }
 
-                ConvertBitmapSource.EndInit();
-                ConvertBitmapSource.Freeze();
+                convertBitmapSource.EndInit();
+                convertBitmapSource.Freeze();
             }
             catch (Exception ex)
             {
                 Common.LogError(ex, false);
             }
 
-            return ConvertBitmapSource;
+            return convertBitmapSource;
         }
 
         /// <summary>
