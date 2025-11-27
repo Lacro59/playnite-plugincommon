@@ -251,11 +251,10 @@ namespace CommonPluginsStores.Epic
 
                         if (CurrentAccountInfos.Pseudo.IsNullOrEmpty())
                         {
-                            OauthResponse tokens = LoadTokens();
-                            EpicAccountResponse epicAccountResponse = await GetAccountInfo(tokens.account_id);
-                            CurrentAccountInfos.Pseudo = epicAccountResponse?.DisplayName;
-                            SaveCurrentUser();
-                        }
+							EpicAccountResponse epicAccountResponse = await GetAccountInfo(accountInfos.UserId);
+							CurrentAccountInfos.Pseudo = epicAccountResponse?.DisplayName;
+							SaveCurrentUser();
+						}
                     }
                     catch (Exception ex)
                     {
