@@ -592,11 +592,15 @@ namespace CommonPluginsShared.Controls
             if (headerClicked is GridViewColumnHeaderExtend headerExtend)
             {
                 int refIndex = headerExtend.RefIndex;
-                if (refIndex != -1 && refIndex >= 0 && this.View is GridView gridView && refIndex < gridView.Columns.Count)
-                {
+				if (refIndex >= 0 && this.View is GridView gridView && refIndex < gridView.Columns.Count)
+				{
                     GridViewColumn gridViewColumn = gridView.Columns[refIndex];
-                    headerClicked = gridViewColumn.Header as GridViewColumnHeader;
-                }
+                    if (!(gridViewColumn.Header is GridViewColumnHeader mappedHeader))
+                    {
+                        return;
+                    }
+                    headerClicked = mappedHeader;
+				}
             }
 
             // Handle case where content is already a StackPanel
