@@ -1243,12 +1243,13 @@ namespace CommonPluginsStores.Epic
                     httpClient.DefaultRequestHeaders.Clear();
                     httpClient.DefaultRequestHeaders.Add("User-Agent", UserAgent);
 
-                    if (CurrentAccountInfos.IsPrivate || StoreSettings.UseAuth)
-                    {
-                        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + AuthToken.Token);
-                    }
+					bool needsAuth = (CurrentAccountInfos?.IsPrivate ?? false) || StoreSettings.UseAuth;
+					if (needsAuth && AuthToken != null && !AuthToken.Token.IsNullOrEmpty())
+					{
+						httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + AuthToken.Token);
+					}
 
-                    HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content);
+					HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content);
                     string str = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode)
