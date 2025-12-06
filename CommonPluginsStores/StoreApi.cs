@@ -9,6 +9,8 @@ using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Data;
+using SuccessStory.Clients;
+using SuccessStory.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -413,7 +415,11 @@ namespace CommonPluginsStores
             return new AccountInfos { IsCurrent = true };
         }
 
-        public async Task<AccountInfos> GetCurrentAccountInfosAsync()
+		/// <summary>
+		/// Asynchronously retrieves the current user's account information.
+		/// </summary>
+		/// <returns>Task that returns the current account information</returns>
+		public async Task<AccountInfos> GetCurrentAccountInfosAsync()
         {
             return await Task.Run(() => GetCurrentAccountInfos());
         }
@@ -444,7 +450,12 @@ namespace CommonPluginsStores
         /// <returns>Collection of user's game information</returns>
         public abstract ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos);
 
-        public async Task<ObservableCollection<AccountGameInfos>> GetAccountGamesInfosAsync(AccountInfos accountInfos)
+		/// <summary>
+		/// Asynchronously retrieves the user's games list.
+		/// </summary>
+		/// <param name="accountInfos">Account information for the user</param>
+		/// <returns>Task that returns a collection of user's game information</returns>
+		public async Task<ObservableCollection<AccountGameInfos>> GetAccountGamesInfosAsync(AccountInfos accountInfos)
         {
             Guard.Against.Null(accountInfos, nameof(accountInfos));
             return await Task.Run(() => GetAccountGamesInfos(accountInfos));
@@ -459,7 +470,13 @@ namespace CommonPluginsStores
         /// <returns>Collection of game achievements or null</returns>
         public virtual ObservableCollection<GameAchievement> GetAchievements(string id, AccountInfos accountInfos) => null;
 
-        public async Task<ObservableCollection<GameAchievement>> GetAchievementsAsync(string id, AccountInfos accountInfos)
+		/// <summary>
+		/// Asynchronously retrieves a list of a game's achievements with a user's possessions.
+		/// </summary>
+		/// <param name="id">Game identifier</param>
+		/// <param name="accountInfos">Account information</param>
+		/// <returns>Task that returns a collection of game achievements or null</returns>
+		public async Task<ObservableCollection<GameAchievement>> GetAchievementsAsync(string id, AccountInfos accountInfos)
         {
             Guard.Against.NullOrWhiteSpace(id, nameof(id));
             Guard.Against.Null(accountInfos, nameof(accountInfos));
@@ -527,7 +544,13 @@ namespace CommonPluginsStores
         /// <returns>Collection of DLC information or null</returns>
         public virtual ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos) => null;
 
-        public async Task<ObservableCollection<DlcInfos>> GetDlcInfosAsync(string id, AccountInfos accountInfos)
+		/// <summary>
+		/// Asynchronously retrieves DLC information for a game.
+		/// </summary>
+		/// <param name="id">Game identifier</param>
+		/// <param name="accountInfos">Account information</param>
+		/// <returns>Task that returns a collection of DLC information or null</returns>
+		public async Task<ObservableCollection<DlcInfos>> GetDlcInfosAsync(string id, AccountInfos accountInfos)
         {
             Guard.Against.NullOrWhiteSpace(id, nameof(id));
             Guard.Against.Null(accountInfos, nameof(accountInfos));
@@ -575,7 +598,11 @@ namespace CommonPluginsStores
         /// <returns>Collection of owned games and DLC or null</returns>
         protected virtual ObservableCollection<GameDlcOwned> GetGamesDlcsOwned() => null;
 
-        public async Task<ObservableCollection<GameDlcOwned>> GetGamesDlcsOwnedAsync()
+		/// <summary>
+		/// Asynchronously retrieves the current list of owned games and DLC from the store.
+		/// </summary>
+		/// <returns>Task that returns a collection of owned games and DLC or null</returns>
+		public async Task<ObservableCollection<GameDlcOwned>> GetGamesDlcsOwnedAsync()
         {
             return await Task.Run(() => GetGamesDlcsOwned());
         }
@@ -601,6 +628,8 @@ namespace CommonPluginsStores
 
         #endregion
 
+        #region Notifications
+
         /// <summary>
         /// Shows a notification to the user about using old cached data.
         /// </summary>
@@ -622,6 +651,39 @@ namespace CommonPluginsStores
                 }
             ));
         }
+
+		/// <summary>
+		/// Shows a notification to the user indicating no authentication has been performed.
+		/// </summary>
+		public virtual void ShowNotificationUserNoAuthenticate()
+        {
+            string message = string.Format(ResourceProvider.GetString("LOCCommonStoresNoAuthenticate"), ClientName);
+            Logger.Warn($"{ClientName}: User is not authenticated");
+
+            API.Instance.Notifications.Add(new NotificationMessage(
+                $"{PluginName}-{ClientName.RemoveWhiteSpace()}-noauthenticate",
+                $"{PluginName}\r\n{message}",
+                NotificationType.Error,
+                () =>
+                {
+                    try
+                    {
+                        ShowPluginSettings(PluginLibrary);
+                        foreach (GenericAchievements achievementProvider in SuccessStoryDatabase.AchievementProviders.Values)
+                        {
+                            achievementProvider.ResetCachedConfigurationValidationResult();
+                            achievementProvider.ResetCachedIsConnectedResult();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, true, PluginName);
+                    }
+                }
+            ));
+        }
+
+        #endregion
 
         /// <summary>
         /// Calculates gamer score based on achievement rarity percentage.
@@ -708,7 +770,14 @@ namespace CommonPluginsStores
             }
         }
 
-        protected async Task<T> LoadDataAsync<T>(string filePath, int minutes) where T : class
+		/// <summary>
+		/// Asynchronously loads data from file with optional age validation.
+		/// </summary>
+		/// <typeparam name="T">Type of data to load</typeparam>
+		/// <param name="filePath">Path to the data file</param>
+		/// <param name="minutes">Maximum age in minutes (0 to ignore age, positive to validate freshness)</param>
+		/// <returns>Task that returns loaded data of type T or null if loading fails or data is too old</returns>
+		protected async Task<T> LoadDataAsync<T>(string filePath, int minutes) where T : class
         {
             Guard.Against.NullOrWhiteSpace(filePath, nameof(filePath));
 
@@ -741,7 +810,14 @@ namespace CommonPluginsStores
             }
         }
 
-        protected bool SaveData<T>(string filePath, T data) where T : class
+		/// <summary>
+		/// Saves data to file in JSON format or as raw text.
+		/// </summary>
+		/// <typeparam name="T">Type of data to save</typeparam>
+		/// <param name="filePath">Path to the data file</param>
+		/// <param name="data">Data object to save</param>
+		/// <returns>True if save was successful, false otherwise</returns>
+		protected bool SaveData<T>(string filePath, T data) where T : class
         {
             Guard.Against.NullOrWhiteSpace(filePath, nameof(filePath));
             try
@@ -778,7 +854,10 @@ namespace CommonPluginsStores
             FileSystem.DeleteDirectory(PathAchievementsData);
         }
 
-        public void ClearCache()
+		/// <summary>
+		/// Clears all in-memory cache collections.
+		/// </summary>
+		public void ClearCache()
         {
             _accountCache.Clear();
             _friendsCache.Clear();

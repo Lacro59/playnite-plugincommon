@@ -6,6 +6,7 @@ using SteamKit2;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -24,6 +25,7 @@ namespace CommonPluginsStores.Steam
 
 
         #region ISteamApps
+
         public static List<SteamApp> GetAppList()
         {
             Thread.Sleep(100);
@@ -50,9 +52,57 @@ namespace CommonPluginsStores.Steam
                 return null;
             }
         }
+
+        #endregion
+
+
+        #region IStoreService
+
+        public static List<SteamApp> GetAppList(string apiKey, uint last_appid = 0)
+        {
+            Thread.Sleep(100);
+            try
+            {
+                Dictionary<string, string> args = new Dictionary<string, string>
+                {
+                    ["include_dlc"] = "true",
+                    ["max_results"] = "50000",
+                    ["last_appid"] = last_appid.ToString()
+                };
+
+                using (WebAPI.Interface steamInterface = WebAPI.GetInterface("IStoreService", apiKey))
+                {
+                    List<SteamApp> appList = new List<SteamApp>();
+                    KeyValue results = steamInterface.Call("GetAppList", 1, args);
+                    foreach (KeyValue data in results?.Children?.FirstOrDefault()?.Children)
+                    {
+                        appList.Add(new SteamApp
+                        {
+                            AppId = data["appid"].AsUnsignedInteger(),
+                            Name = data["name"].AsString()
+                        });
+                    }
+
+                    uint.TryParse(results?.Children?.Where(x => x.Name == "last_appid").FirstOrDefault()?.Value, out last_appid);
+                    if (last_appid != 0)
+                    {
+                        appList.AddRange(GetAppList(apiKey, last_appid));
+                    }
+
+                    return appList;
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                return null;
+            }
+        }
+
         #endregion
 
         #region ISteamUser
+
         public static List<SteamFriend> GetFriendList(string apiKey, ulong steamId)
         {
             Thread.Sleep(100);
@@ -131,9 +181,11 @@ namespace CommonPluginsStores.Steam
                 return null;
             }
         }
+
         #endregion
 
         #region IPlayerService
+
         public static List<SteamOwnedGame> GetOwnedGames(string apiKey, ulong steamId)
         {
             Thread.Sleep(100);
@@ -257,9 +309,11 @@ namespace CommonPluginsStores.Steam
                 return null;
             }
         }
+
         #endregion
 
         #region ISteamUserStats
+
         public static SteamSchema GetSchemaForGame(string apiKey, uint appId)
         {
             return GetSchemaForGame(apiKey, appId, "english");
@@ -435,6 +489,7 @@ namespace CommonPluginsStores.Steam
                 return ex.Message.Contains("403");
             }
         }
+
         #endregion
     }
 }

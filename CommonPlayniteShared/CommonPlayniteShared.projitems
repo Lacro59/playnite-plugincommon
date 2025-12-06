@@ -44,7 +44,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)MenuHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Native\Psapi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ObservableObject.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Services\EpicAccountClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\NintendoLibrary\Models\NintendoModels.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\NintendoLibrary\Services\NintendoAccountClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\PSNLibrary\Services\PSNClient.cs" />
@@ -81,15 +80,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Native\Winnt.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Native\Winuser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\BattleNetLibrary\Models\BattleNetApiStatus.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\EpicLauncher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Models\AccountResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Models\AssetsResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Models\CatalogResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Models\ErrorResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Models\LauncherInstalled.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Models\OauthResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Models\PlaytimesResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Services\WebStoreClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Models\ProductApiDetail.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Models\Order.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\HumbleLibrary\Models\UserHome.cs" />
@@ -99,7 +93,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\XboxLibrary\Services\XboxAccountClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Settings\PlaynitePaths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Settings\PlayniteSettings.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\EpicLibrary\Models\WebStoreModels.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Gog.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Models\AccountBasicResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Models\GetOwnedGamesResult.cs" />

@@ -382,7 +382,7 @@ namespace CommonPluginsStores.Ea
         private async Task<ResponseOwnedGameProducts> GetOwnedGameProducts()
         {
             ResponseOwnedGameProducts data = LoadData<ResponseOwnedGameProducts>(PathOwnedGameProductsCache, 10);
-            if (data?.Data?.Me?.OwnedGameProducts?.Items?.Count > 0)
+            if (data?.Data?.Me?.OwnedGameProducts?.Items != null && data?.Data?.Me?.OwnedGameProducts?.Items?.Count > 0)
             {
                 return data;
             }
@@ -398,7 +398,7 @@ namespace CommonPluginsStores.Ea
         {
             string cachePath = Path.Combine(PathAchievementsData, $"{offerId}-{playerPsd}.json");
             ResponseAchievements data = LoadData<ResponseAchievements>(cachePath, 10);
-            if (data?.Data?.Achievements?.FirstOrDefault()?.AchievementsData?.Count > 0)
+            if (data?.Data?.Achievements?.FirstOrDefault()?.AchievementsData != null && data?.Data?.Achievements?.FirstOrDefault()?.AchievementsData?.Count > 0)
             {
                 return data;
             }

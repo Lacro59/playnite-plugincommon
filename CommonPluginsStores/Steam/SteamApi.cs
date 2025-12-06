@@ -9,6 +9,7 @@ using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Enumerations;
 using CommonPluginsStores.Steam.Models;
 using CommonPluginsStores.Steam.Models.SteamKit;
+using FuzzySharp;
 using Microsoft.Win32;
 using Playnite.SDK;
 using Playnite.SDK.Data;
@@ -72,7 +73,13 @@ namespace CommonPluginsStores.Steam
         #endregion
 
         private List<SteamApp> _steamApps;
-        protected List<SteamApp> SteamApps
+
+		/// <summary>
+		/// Cached list of all Steam applications.
+		/// Automatically loads from cache if available and not expired (3 days),
+		/// otherwise fetches from Steam API and caches the result.
+		/// </summary>
+		protected List<SteamApp> SteamApps
         {
             get
             {
@@ -88,7 +95,16 @@ namespace CommonPluginsStores.Steam
                     else
                     {
                         Common.LogDebug(true, "GetSteamAppsListFromWeb");
-                        _steamApps = SteamKit.GetAppList();
+
+                        if (CurrentAccountInfos == null || CurrentAccountInfos.ApiKey.IsNullOrEmpty())
+                        {
+                            _steamApps = SteamKit.GetAppList();
+                        }
+                        else
+                        {
+                            _steamApps = SteamKit.GetAppList(CurrentAccountInfos.ApiKey);
+                        }
+
                         if (_steamApps?.Count > 0)
                         {
                             FileSystem.WriteStringToFileSafe(AppsListPath, Serialization.ToJson(_steamApps));
@@ -101,7 +117,12 @@ namespace CommonPluginsStores.Steam
             set => _steamApps = value;
         }
 
-        private SteamUserData UserData => LoadData<SteamUserData>(FileUserData, 10) ?? GetUserData() ?? LoadData<SteamUserData>(FileUserData, 0);
+		/// <summary>
+		/// Gets Steam user data including owned games and wishlist.
+		/// Uses cached data if available and not expired (10 minutes),
+		/// otherwise fetches fresh data from Steam.
+		/// </summary>
+		private SteamUserData UserData => LoadData<SteamUserData>(FileUserData, 10) ?? GetUserData() ?? LoadData<SteamUserData>(FileUserData, 0);
 
         #region Paths
 
@@ -109,7 +130,12 @@ namespace CommonPluginsStores.Steam
         private string FileUserData { get; }
 
         private string _installationPath;
-        public string InstallationPath
+
+		/// <summary>
+		/// Gets or sets the Steam installation directory path.
+		/// Automatically detects the path from registry if not already set.
+		/// </summary>
+		public string InstallationPath
         {
             get
             {
@@ -125,9 +151,14 @@ namespace CommonPluginsStores.Steam
 
         public string LoginUsersPath { get; }
 
-        #endregion
+		#endregion
 
-        public SteamApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "Steam")
+		/// <summary>
+		/// Initializes a new instance of the SteamApi class.
+		/// </summary>
+		/// <param name="pluginName">Name of the plugin using this API</param>
+		/// <param name="pluginLibrary">Reference to the external plugin library</param>
+		public SteamApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "Steam")
         {
             AppsListPath = Path.Combine(PathStoresData, "Steam_AppsList.json");
             FileUserData = Path.Combine(PathStoresData, "Steam_UserData.json");
@@ -145,9 +176,14 @@ namespace CommonPluginsStores.Steam
             };
         }
 
-        #region Configuration
+		#region Configuration
 
-        protected override bool GetIsUserLoggedIn()
+		/// <summary>
+		/// Checks if the user is currently logged in to Steam.
+		/// Attempts multiple verification methods including token refresh if initial check fails.
+		/// </summary>
+		/// <returns>True if user is authenticated and logged in, false otherwise</returns>
+		protected override bool GetIsUserLoggedIn()
         {
             if (CurrentAccountInfos == null)
             {
@@ -204,7 +240,11 @@ namespace CommonPluginsStores.Steam
             return withId.Result || withPersona.Result;
         }
 
-        public override void Login()
+		/// <summary>
+		/// Opens a web view for Steam login and captures authentication credentials.
+		/// Saves the authenticated user information and cookies upon successful login.
+		/// </summary>
+		public override void Login()
         {
             ResetIsUserLoggedIn();
             string steamId = string.Empty;
@@ -263,7 +303,12 @@ namespace CommonPluginsStores.Steam
                 _ = webView.OpenDialog();
             }
         }
-        public bool IsConfigured()
+
+		/// <summary>
+		/// Checks if Steam API is properly configured with required user credentials.
+		/// </summary>
+		/// <returns>True if both Steam ID and username are configured, false otherwise</returns>
+		public bool IsConfigured()
         {
             if (CurrentAccountInfos == null)
             {
@@ -276,11 +321,16 @@ namespace CommonPluginsStores.Steam
             return !steamId.IsNullOrEmpty() && !steamUser.IsNullOrEmpty();
         }
 
-        #endregion
+		#endregion
 
-        #region Current user
+		#region Current user
 
-        protected override AccountInfos GetCurrentAccountInfos()
+		/// <summary>
+		/// Gets the current authenticated user's account information.
+		/// Automatically fetches updated profile data including avatar, username, and privacy status.
+		/// </summary>
+		/// <returns>AccountInfos object with current user details, or a new empty AccountInfos if not logged in</returns>
+		protected override AccountInfos GetCurrentAccountInfos()
         {
             AccountInfos accountInfos = LoadCurrentUser();
             if (!accountInfos?.UserId?.IsNullOrEmpty() ?? false)
@@ -323,7 +373,12 @@ namespace CommonPluginsStores.Steam
             return new AccountInfos { IsCurrent = true };
         }
 
-        protected override ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
+		/// <summary>
+		/// Gets the list of friends for the current user.
+		/// Uses web scraping or API methods depending on authentication state and privacy settings.
+		/// </summary>
+		/// <returns>Collection of AccountInfos for each friend, or null on error</returns>
+		protected override ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
         {
             try
             {
@@ -344,11 +399,17 @@ namespace CommonPluginsStores.Steam
             return null;
         }
 
-        #endregion
+		#endregion
 
-        #region User details
+		#region User details
 
-        public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
+		/// <summary>
+		/// Gets detailed game information for a specific user account.
+		/// Includes game names, playtime, achievements, and ownership status.
+		/// </summary>
+		/// <param name="accountInfos">The account to fetch game information for</param>
+		/// <returns>Collection of AccountGameInfos for each game owned by the user</returns>
+		public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
         {
             try
             {
@@ -368,7 +429,14 @@ namespace CommonPluginsStores.Steam
             return null;
         }
 
-        public override ObservableCollection<GameAchievement> GetAchievements(string id, AccountInfos accountInfos)
+		/// <summary>
+		/// Gets achievement data for a specific game and user.
+		/// Includes unlock status, dates, descriptions, and rarity percentages.
+		/// </summary>
+		/// <param name="id">Steam App ID of the game</param>
+		/// <param name="accountInfos">Account to fetch achievements for</param>
+		/// <returns>Collection of GameAchievement objects with unlock data</returns>
+		public override ObservableCollection<GameAchievement> GetAchievements(string id, AccountInfos accountInfos)
         {
             try
             {
@@ -403,7 +471,12 @@ namespace CommonPluginsStores.Steam
             return null;
         }
 
-        public override ObservableCollection<AccountWishlist> GetWishlist(AccountInfos accountInfos)
+		/// <summary>
+		/// Gets the user's Steam wishlist.
+		/// </summary>
+		/// <param name="accountInfos">Account to fetch wishlist for</param>
+		/// <returns>Collection of AccountWishlist items with game details and dates added</returns>
+		public override ObservableCollection<AccountWishlist> GetWishlist(AccountInfos accountInfos)
         {
             ObservableCollection<AccountWishlist> accountWishlists = new ObservableCollection<AccountWishlist>();
             if (accountInfos != null)
@@ -416,7 +489,13 @@ namespace CommonPluginsStores.Steam
             return accountWishlists;
         }
 
-        public override bool RemoveWishlist(string id)
+		/// <summary>
+		/// Removes a game from the current user's Steam wishlist.
+		/// Requires authenticated session with valid cookies.
+		/// </summary>
+		/// <param name="id">Steam App ID to remove from wishlist</param>
+		/// <returns>True if successfully removed, false otherwise</returns>
+		public override bool RemoveWishlist(string id)
         {
             if (IsUserLoggedIn)
             {
@@ -455,22 +534,30 @@ namespace CommonPluginsStores.Steam
             return false;
         }
 
-        #endregion
+		#endregion
 
-        #region Game
+		#region Game
 
-        /// <summary>
-        /// Get game informations.
-        /// </summary>
-        /// <param name="id">appId</param>
-        /// <param name="accountInfos"></param>
-        /// <returns></returns>
-        public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
+		/// <summary>
+		/// Gets comprehensive information about a specific Steam game.
+		/// Includes name, description, release date, languages, and DLC list.
+		/// </summary>
+		/// <param name="id">Steam App ID</param>
+		/// <param name="accountInfos">Account information for ownership checks</param>
+		/// <returns>GameInfos object with game details</returns>
+		public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
         {
             return GetGameInfos(id, accountInfos);
         }
 
-        private GameInfos GetGameInfos(string id, AccountInfos accountInfos, bool minimalInfos = false)
+		/// <summary>
+		/// Internal method to get game information with optional minimal info mode.
+		/// </summary>
+		/// <param name="id">Steam App ID</param>
+		/// <param name="accountInfos">Account information for ownership checks</param>
+		/// <param name="minimalInfos">If true, returns only basic info without detailed DLC data</param>
+		/// <returns>GameInfos object with game details</returns>
+		private GameInfos GetGameInfos(string id, AccountInfos accountInfos, bool minimalInfos = false)
         {
             try
             {
@@ -525,7 +612,13 @@ namespace CommonPluginsStores.Steam
             return null;
         }
 
-        public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
+		/// <summary>
+		/// Gets the achievement schema for a game, including names, descriptions, and unlock percentages.
+		/// Uses caching to minimize API calls (10 minute cache).
+		/// </summary>
+		/// <param name="id">Steam App ID</param>
+		/// <returns>Tuple containing the app ID and collection of achievement definitions</returns>
+		public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
         {
             string cachePath = Path.Combine(PathAchievementsData, $"{id}.json");
             Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 10);
@@ -546,13 +639,25 @@ namespace CommonPluginsStores.Steam
             return data;
         }
 
-        public override ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos)
+		/// <summary>
+		/// Gets DLC information for a specific game.
+		/// </summary>
+		/// <param name="id">Steam App ID of the base game</param>
+		/// <param name="accountInfos">Account information for ownership checks</param>
+		/// <returns>Collection of DlcInfos objects</returns>
+		public override ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos)
         {
             GameInfos gameInfos = GetGameInfos(id, accountInfos);
             return gameInfos?.Dlcs ?? new ObservableCollection<DlcInfos>();
         }
 
-        public ObservableCollection<DlcInfos> GetDlcInfos(List<uint> ids, AccountInfos accountInfos)
+		/// <summary>
+		/// Gets detailed information for multiple DLCs.
+		/// </summary>
+		/// <param name="ids">List of Steam App IDs for DLCs</param>
+		/// <param name="accountInfos">Account information for ownership checks</param>
+		/// <returns>Collection of DlcInfos with names, descriptions, prices, and ownership status</returns>
+		public ObservableCollection<DlcInfos> GetDlcInfos(List<uint> ids, AccountInfos accountInfos)
         {
             try
             {
@@ -640,25 +745,47 @@ namespace CommonPluginsStores.Steam
 
             if (SteamApps == null)
             {
-                Logger.Warn("SteamApps is empty");
-                return 0;
+                Logger.Warn("SteamApps is empty - Use Steam search");
+
+                var search = GetSearchGame(game.Name, true);
+                var fuzzList = search.Select(x => new { MatchPercent = Fuzz.Ratio(game.Name.ToLower(), x.Name.ToLower()), Data = x })
+                    .OrderByDescending(x => x.MatchPercent)
+                    .ToList();
+
+				if (fuzzList.Count == 0)
+				{
+					return 0;
+				}
+
+				string best = fuzzList.First().MatchPercent >= 90 ? fuzzList.First().Data.Description : "0";
+				return uint.Parse(best);
             }
-
-            SteamApps.Sort((x, y) => x.AppId.CompareTo(y.AppId));
-            List<uint> found = SteamApps.FindAll(x => x.Name.IsEqual(game.Name, true)).Select(x => x.AppId).Distinct().ToList();
-
-            if (found != null && found.Count > 0)
+            else
             {
-                if (found.Count > 1)
-                {
-                    Logger.Warn($"Found {found.Count} SteamAppId data for {game.Name}: " + string.Join(", ", found));
-                    return 0;
-                }
+                SteamApps.Sort((x, y) => x.AppId.CompareTo(y.AppId));
+                Dictionary<uint, string> found = SteamApps.FindAll(x => x.Name.IsEqual(game.Name, true))
+                                    .Select(x => new { x.AppId, x.Name })
+                                    .Distinct()
+                                    .ToDictionary(x => x.AppId, x => x.Name);
 
-                Common.LogDebug(true, $"Found SteamAppId data for {game.Name} - {Serialization.ToJson(found)}");
-                return found.First();
+                if (found != null && found.Count > 0)
+                {
+                    if (found.Count > 1)
+                    {
+                        Logger.Warn($"Found {found.Count} SteamAppId data for {game.Name}: " + string.Join(", ", found));
+                        var fuzzList = found.Select(x => new { MatchPercent = Fuzz.Ratio(game.Name.ToLower(), x.Value.ToLower()), Data = x })
+                                            .OrderByDescending(x => x.MatchPercent)
+                                            .ToList();
+                        return fuzzList.First().MatchPercent >= 90 ? fuzzList.First().Data.Key : 0;
+                    }
+                    else
+                    {
+                        return found.First().Key;
+                    }
+                }
             }
 
+            Logger.Warn($"Steam appId not found for {game.Name}");
             return 0;
         }
 
@@ -691,25 +818,29 @@ namespace CommonPluginsStores.Steam
             SteamApp found = SteamApps?.Find(x => x.AppId == appId);
             if (found != null)
             {
-                Common.LogDebug(true, $"Found {ClientName} data for {appId} - {Serialization.ToJson(found)}");
                 return found.Name;
             }
             else
             {
-                Logger.Warn($"Not found {ClientName} data for {appId}");
+                Logger.Warn($"Not found with SteamApps - Use Steam app url");
+
+                string url = string.Format(UrlSteamGameLocalised, appId, CodeLang.GetSteamLang(Locale));
+                string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
+
+                HtmlParser parser = new HtmlParser();
+                IHtmlDocument htmlDocument = parser.Parse(response);
+                var element = htmlDocument.QuerySelector("span[itemprop='name']");
+
+                if (element != null)
+                {
+                    return element.InnerHtml;
+                }
+                else
+                {
+                    Logger.Warn($"Not found {ClientName} data for {appId}");
+                }
             }
             return string.Empty;
-        }
-
-        // Only have achievements
-        public string GetGameNameByWeb(uint appId)
-        {
-            string url = UrlSteamCommunity + $"/stats/{appId}/achievements";
-            string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
-
-            IHtmlDocument htmlDoc = new HtmlParser().Parse(response);
-            string title = htmlDoc.QuerySelector("div.profile_small_header_texture h1")?.InnerHtml;
-            return title;
         }
 
         /// <summary>
@@ -971,7 +1102,7 @@ namespace CommonPluginsStores.Steam
             return gameAchievements ?? new ObservableCollection<GameAchievement>();
         }
 
-        public List<GenericItemOption> GetSearchGame(string searchTerm)
+        public List<GenericItemOption> GetSearchGame(string searchTerm, bool noDlcs = false)
         {
             List<GenericItemOption> results = new List<GenericItemOption>();
 
@@ -986,7 +1117,7 @@ namespace CommonPluginsStores.Steam
                 }
 
                 results = steamSearch?.Items
-                    ?.Select(x => new GenericItemOption { Name = x.Name, Description = x.Id.ToString() + $" - {GetGameInfos(x.Id.ToString(), null, true)?.Dlcs?.Count() ?? 0} DLC" })
+                    ?.Select(x => new GenericItemOption { Name = x.Name, Description = x.Id.ToString() + (noDlcs ? string.Empty : $" - {GetGameInfos(x.Id.ToString(), null, true)?.Dlcs?.Count() ?? 0} DLC") })
                     ?.ToList() ?? new List<GenericItemOption>();
             }
             catch (Exception ex)
@@ -1104,13 +1235,10 @@ namespace CommonPluginsStores.Steam
 
                     steamWishlistApi.Response.Items.ForEach(x =>
                     {
-                        SteamApp steamApp = SteamApps.FirstOrDefault(y => y.AppId == x.Appid);
-                        //GameInfos gameInfos = steamApp != null ? null : GetGameInfos(x.Appid.ToString(), null);
-
                         accountWishlists.Add(new AccountWishlist
                         {
                             Id = x.Appid.ToString(),
-                            Name = steamApp?.Name ?? $"SteamApp? - {x.Appid}",
+                            Name = GetGameName(x.Appid),
                             Link = string.Format(UrlSteamGame, x),
                             Released = null,
                             Added = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(x.DateAdded),
@@ -1362,11 +1490,10 @@ namespace CommonPluginsStores.Steam
                 ObservableCollection<AccountWishlist> accountWishlists = new ObservableCollection<AccountWishlist>();
                 UserData?.RgWishlist?.ForEach(x =>
                 {
-                    SteamApp steamApp = SteamApps.FirstOrDefault(y => y.AppId == x);
                     accountWishlists.Add(new AccountWishlist
                     {
                         Id = x.ToString(),
-                        Name = steamApp?.Name ?? $"SteamApp? - {x}",
+                        Name = GetGameName(x),
                         Link = string.Format(UrlSteamGame, x),
                         Released = null,
                         Added = null,
@@ -1445,45 +1572,37 @@ namespace CommonPluginsStores.Steam
 
         private List<uint> GetDlcFromSteamDb(uint appId)
         {
-            List<uint> Dlcs = new List<uint>();
+            List<uint> dlcs = new List<uint>();
             if (appId == 0)
             {
-                return Dlcs;
+                return dlcs;
             }
 
             try
             {
-                WebViewSettings settings = new WebViewSettings
-                {
-                    UserAgent = Web.UserAgent
-                };
+                var pageSource = Web.DownloadSourceDataWebView(string.Format(SteamDbDlc, appId)).GetAwaiter().GetResult();
+                string data = pageSource.Item1;
 
-                using (IWebView WebViewOffScreen = API.Instance.WebViews.CreateOffscreenView(settings))
-                {
-                    WebViewOffScreen.NavigateAndWait(string.Format(SteamDbDlc, appId));
-                    string data = WebViewOffScreen.GetPageSource();
-
-                    IHtmlDocument htmlDocument = new HtmlParser().Parse(data);
-                    IHtmlCollection<IElement> SectionDlcs = htmlDocument.QuerySelectorAll("#dlc tr.app");
-                    if (SectionDlcs != null)
-                    {
-                        foreach (IElement el in SectionDlcs)
-                        {
-                            string DlcIdString = el.QuerySelector("td a")?.InnerHtml;
-                            if (uint.TryParse(DlcIdString, out uint DlcId))
-                            {
-                                Dlcs.Add(DlcId);
-                            }
-                        }
-                    }
-                }
-            }
+				IHtmlDocument htmlDocument = new HtmlParser().Parse(data);
+				IHtmlCollection<IElement> sectionDlcs = htmlDocument.QuerySelectorAll("#dlc tr.app");
+				if (sectionDlcs != null)
+				{
+					foreach (IElement el in sectionDlcs)
+					{
+						string dlcIdString = el.QuerySelector("td a")?.InnerHtml;
+						if (uint.TryParse(dlcIdString, out uint DlcId))
+						{
+							dlcs.Add(DlcId);
+						}
+					}
+				}
+			}
             catch (Exception ex)
             {
                 Common.LogError(ex, false, true, PluginName);
             }
 
-            return Dlcs;
+            return dlcs;
         }
 
         private ObservableCollection<GameAchievement> SetExtensionsAchievementsFromSteamDb(uint appId, ObservableCollection<GameAchievement> gameAchievements)
@@ -1499,7 +1618,7 @@ namespace CommonPluginsStores.Steam
                         Logger.Warn($"No success in ExtensionsAchievements for {appId}");
                     }
 
-                    int CategoryOrder = 1;
+                    int categoryOrder = 1;
                     extensionsAchievementse?.Data?.ForEach(x =>
                     {
                         gameAchievements?.ForEach(y =>
@@ -1509,11 +1628,11 @@ namespace CommonPluginsStores.Steam
                                 int id = (x.DlcAppId != null && x.DlcAppId != 0) ? (int)x.DlcAppId : (int)appId;
                                 y.CategoryIcon = string.Format(UrlCapsuleSteam, id);
                                 y.Category = x.Name.IsNullOrEmpty() ? x.DlcAppName : x.Name;
-                                y.CategoryOrder = CategoryOrder;
+                                y.CategoryOrder = categoryOrder;
                                 y.CategoryDlc = !x.DlcAppName.IsNullOrEmpty();
                             }
                         });
-                        CategoryOrder++;
+                        categoryOrder++;
                     });
                 }
                 else

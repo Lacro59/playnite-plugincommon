@@ -70,7 +70,7 @@ namespace CommonPluginsStores.Steam.Models
     public class Item
     {
         [SerializationPropertyName("appid")]
-        public int Appid { get; set; }
+        public uint Appid { get; set; }
 
         [SerializationPropertyName("priority")]
         public int Priority { get; set; }
