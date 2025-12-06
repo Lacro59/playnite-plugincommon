@@ -73,7 +73,13 @@ namespace CommonPluginsStores.Steam
         #endregion
 
         private List<SteamApp> _steamApps;
-        protected List<SteamApp> SteamApps
+
+		/// <summary>
+		/// Cached list of all Steam applications.
+		/// Automatically loads from cache if available and not expired (3 days),
+		/// otherwise fetches from Steam API and caches the result.
+		/// </summary>
+		protected List<SteamApp> SteamApps
         {
             get
             {
@@ -111,7 +117,12 @@ namespace CommonPluginsStores.Steam
             set => _steamApps = value;
         }
 
-        private SteamUserData UserData => LoadData<SteamUserData>(FileUserData, 10) ?? GetUserData() ?? LoadData<SteamUserData>(FileUserData, 0);
+		/// <summary>
+		/// Gets Steam user data including owned games and wishlist.
+		/// Uses cached data if available and not expired (10 minutes),
+		/// otherwise fetches fresh data from Steam.
+		/// </summary>
+		private SteamUserData UserData => LoadData<SteamUserData>(FileUserData, 10) ?? GetUserData() ?? LoadData<SteamUserData>(FileUserData, 0);
 
         #region Paths
 
@@ -119,7 +130,12 @@ namespace CommonPluginsStores.Steam
         private string FileUserData { get; }
 
         private string _installationPath;
-        public string InstallationPath
+
+		/// <summary>
+		/// Gets or sets the Steam installation directory path.
+		/// Automatically detects the path from registry if not already set.
+		/// </summary>
+		public string InstallationPath
         {
             get
             {
@@ -135,9 +151,14 @@ namespace CommonPluginsStores.Steam
 
         public string LoginUsersPath { get; }
 
-        #endregion
+		#endregion
 
-        public SteamApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "Steam")
+		/// <summary>
+		/// Initializes a new instance of the SteamApi class.
+		/// </summary>
+		/// <param name="pluginName">Name of the plugin using this API</param>
+		/// <param name="pluginLibrary">Reference to the external plugin library</param>
+		public SteamApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "Steam")
         {
             AppsListPath = Path.Combine(PathStoresData, "Steam_AppsList.json");
             FileUserData = Path.Combine(PathStoresData, "Steam_UserData.json");
@@ -155,9 +176,14 @@ namespace CommonPluginsStores.Steam
             };
         }
 
-        #region Configuration
+		#region Configuration
 
-        protected override bool GetIsUserLoggedIn()
+		/// <summary>
+		/// Checks if the user is currently logged in to Steam.
+		/// Attempts multiple verification methods including token refresh if initial check fails.
+		/// </summary>
+		/// <returns>True if user is authenticated and logged in, false otherwise</returns>
+		protected override bool GetIsUserLoggedIn()
         {
             if (CurrentAccountInfos == null)
             {
@@ -214,7 +240,11 @@ namespace CommonPluginsStores.Steam
             return withId.Result || withPersona.Result;
         }
 
-        public override void Login()
+		/// <summary>
+		/// Opens a web view for Steam login and captures authentication credentials.
+		/// Saves the authenticated user information and cookies upon successful login.
+		/// </summary>
+		public override void Login()
         {
             ResetIsUserLoggedIn();
             string steamId = string.Empty;
@@ -273,7 +303,12 @@ namespace CommonPluginsStores.Steam
                 _ = webView.OpenDialog();
             }
         }
-        public bool IsConfigured()
+
+		/// <summary>
+		/// Checks if Steam API is properly configured with required user credentials.
+		/// </summary>
+		/// <returns>True if both Steam ID and username are configured, false otherwise</returns>
+		public bool IsConfigured()
         {
             if (CurrentAccountInfos == null)
             {
@@ -286,11 +321,16 @@ namespace CommonPluginsStores.Steam
             return !steamId.IsNullOrEmpty() && !steamUser.IsNullOrEmpty();
         }
 
-        #endregion
+		#endregion
 
-        #region Current user
+		#region Current user
 
-        protected override AccountInfos GetCurrentAccountInfos()
+		/// <summary>
+		/// Gets the current authenticated user's account information.
+		/// Automatically fetches updated profile data including avatar, username, and privacy status.
+		/// </summary>
+		/// <returns>AccountInfos object with current user details, or a new empty AccountInfos if not logged in</returns>
+		protected override AccountInfos GetCurrentAccountInfos()
         {
             AccountInfos accountInfos = LoadCurrentUser();
             if (!accountInfos?.UserId?.IsNullOrEmpty() ?? false)
@@ -333,7 +373,12 @@ namespace CommonPluginsStores.Steam
             return new AccountInfos { IsCurrent = true };
         }
 
-        protected override ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
+		/// <summary>
+		/// Gets the list of friends for the current user.
+		/// Uses web scraping or API methods depending on authentication state and privacy settings.
+		/// </summary>
+		/// <returns>Collection of AccountInfos for each friend, or null on error</returns>
+		protected override ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
         {
             try
             {
@@ -354,11 +399,17 @@ namespace CommonPluginsStores.Steam
             return null;
         }
 
-        #endregion
+		#endregion
 
-        #region User details
+		#region User details
 
-        public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
+		/// <summary>
+		/// Gets detailed game information for a specific user account.
+		/// Includes game names, playtime, achievements, and ownership status.
+		/// </summary>
+		/// <param name="accountInfos">The account to fetch game information for</param>
+		/// <returns>Collection of AccountGameInfos for each game owned by the user</returns>
+		public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
         {
             try
             {
@@ -378,7 +429,14 @@ namespace CommonPluginsStores.Steam
             return null;
         }
 
-        public override ObservableCollection<GameAchievement> GetAchievements(string id, AccountInfos accountInfos)
+		/// <summary>
+		/// Gets achievement data for a specific game and user.
+		/// Includes unlock status, dates, descriptions, and rarity percentages.
+		/// </summary>
+		/// <param name="id">Steam App ID of the game</param>
+		/// <param name="accountInfos">Account to fetch achievements for</param>
+		/// <returns>Collection of GameAchievement objects with unlock data</returns>
+		public override ObservableCollection<GameAchievement> GetAchievements(string id, AccountInfos accountInfos)
         {
             try
             {
@@ -413,7 +471,12 @@ namespace CommonPluginsStores.Steam
             return null;
         }
 
-        public override ObservableCollection<AccountWishlist> GetWishlist(AccountInfos accountInfos)
+		/// <summary>
+		/// Gets the user's Steam wishlist.
+		/// </summary>
+		/// <param name="accountInfos">Account to fetch wishlist for</param>
+		/// <returns>Collection of AccountWishlist items with game details and dates added</returns>
+		public override ObservableCollection<AccountWishlist> GetWishlist(AccountInfos accountInfos)
         {
             ObservableCollection<AccountWishlist> accountWishlists = new ObservableCollection<AccountWishlist>();
             if (accountInfos != null)
@@ -426,7 +489,13 @@ namespace CommonPluginsStores.Steam
             return accountWishlists;
         }
 
-        public override bool RemoveWishlist(string id)
+		/// <summary>
+		/// Removes a game from the current user's Steam wishlist.
+		/// Requires authenticated session with valid cookies.
+		/// </summary>
+		/// <param name="id">Steam App ID to remove from wishlist</param>
+		/// <returns>True if successfully removed, false otherwise</returns>
+		public override bool RemoveWishlist(string id)
         {
             if (IsUserLoggedIn)
             {
@@ -465,22 +534,30 @@ namespace CommonPluginsStores.Steam
             return false;
         }
 
-        #endregion
+		#endregion
 
-        #region Game
+		#region Game
 
-        /// <summary>
-        /// Get game informations.
-        /// </summary>
-        /// <param name="id">appId</param>
-        /// <param name="accountInfos"></param>
-        /// <returns></returns>
-        public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
+		/// <summary>
+		/// Gets comprehensive information about a specific Steam game.
+		/// Includes name, description, release date, languages, and DLC list.
+		/// </summary>
+		/// <param name="id">Steam App ID</param>
+		/// <param name="accountInfos">Account information for ownership checks</param>
+		/// <returns>GameInfos object with game details</returns>
+		public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
         {
             return GetGameInfos(id, accountInfos);
         }
 
-        private GameInfos GetGameInfos(string id, AccountInfos accountInfos, bool minimalInfos = false)
+		/// <summary>
+		/// Internal method to get game information with optional minimal info mode.
+		/// </summary>
+		/// <param name="id">Steam App ID</param>
+		/// <param name="accountInfos">Account information for ownership checks</param>
+		/// <param name="minimalInfos">If true, returns only basic info without detailed DLC data</param>
+		/// <returns>GameInfos object with game details</returns>
+		private GameInfos GetGameInfos(string id, AccountInfos accountInfos, bool minimalInfos = false)
         {
             try
             {
@@ -535,7 +612,13 @@ namespace CommonPluginsStores.Steam
             return null;
         }
 
-        public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
+		/// <summary>
+		/// Gets the achievement schema for a game, including names, descriptions, and unlock percentages.
+		/// Uses caching to minimize API calls (10 minute cache).
+		/// </summary>
+		/// <param name="id">Steam App ID</param>
+		/// <returns>Tuple containing the app ID and collection of achievement definitions</returns>
+		public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
         {
             string cachePath = Path.Combine(PathAchievementsData, $"{id}.json");
             Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 10);
@@ -556,13 +639,25 @@ namespace CommonPluginsStores.Steam
             return data;
         }
 
-        public override ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos)
+		/// <summary>
+		/// Gets DLC information for a specific game.
+		/// </summary>
+		/// <param name="id">Steam App ID of the base game</param>
+		/// <param name="accountInfos">Account information for ownership checks</param>
+		/// <returns>Collection of DlcInfos objects</returns>
+		public override ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos)
         {
             GameInfos gameInfos = GetGameInfos(id, accountInfos);
             return gameInfos?.Dlcs ?? new ObservableCollection<DlcInfos>();
         }
 
-        public ObservableCollection<DlcInfos> GetDlcInfos(List<uint> ids, AccountInfos accountInfos)
+		/// <summary>
+		/// Gets detailed information for multiple DLCs.
+		/// </summary>
+		/// <param name="ids">List of Steam App IDs for DLCs</param>
+		/// <param name="accountInfos">Account information for ownership checks</param>
+		/// <returns>Collection of DlcInfos with names, descriptions, prices, and ownership status</returns>
+		public ObservableCollection<DlcInfos> GetDlcInfos(List<uint> ids, AccountInfos accountInfos)
         {
             try
             {
@@ -656,8 +751,14 @@ namespace CommonPluginsStores.Steam
                 var fuzzList = search.Select(x => new { MatchPercent = Fuzz.Ratio(game.Name.ToLower(), x.Name.ToLower()), Data = x })
                     .OrderByDescending(x => x.MatchPercent)
                     .ToList();
-                string best = fuzzList.First().MatchPercent >= 90 ? fuzzList.First().Data.Description : "0";
-                return uint.Parse(best);
+
+				if (fuzzList.Count == 0)
+				{
+					return 0;
+				}
+
+				string best = fuzzList.First().MatchPercent >= 90 ? fuzzList.First().Data.Description : "0";
+				return uint.Parse(best);
             }
             else
             {
