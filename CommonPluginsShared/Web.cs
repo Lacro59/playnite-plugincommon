@@ -36,17 +36,18 @@ namespace CommonPluginsShared
         public static string UserAgent => $"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0";
 
         private static readonly HttpClient SharedClient;
+        private static readonly HttpClientHandler SharedHandler;
 
         static Web()
         {
             try
             {
-                var handler = new HttpClientHandler
+                SharedHandler = new HttpClientHandler
                 {
                     AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
                 };
 
-                SharedClient = new HttpClient(handler, disposeHandler: false)
+                SharedClient = new HttpClient(SharedHandler, disposeHandler: true)
                 {
                     Timeout = TimeSpan.FromSeconds(60)
                 };
@@ -57,6 +58,7 @@ namespace CommonPluginsShared
                 // Fallback: if static client creation fails, leave SharedClient null and methods will create per-call clients
                 Common.LogError(ex, false, "Failed to create shared HttpClient");
                 SharedClient = null;
+                SharedHandler = null;
             }
         }
 
@@ -309,6 +311,8 @@ namespace CommonPluginsShared
         /// <returns></returns>
         public static async Task<string> DownloadStringData(string url)
         {
+            const int MAX_REDIRECTS = 10;
+
             // Prefer using a shared HttpClient for connection reuse and higher parallelism. Fall back to per-call if unavailable.
             if (SharedClient != null)
             {
@@ -348,7 +352,7 @@ namespace CommonPluginsShared
                                 Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
 
                                 // response disposed here by using; perform recursive call afterwards
-                                return await DownloadStringData(redirectUri.ToString());
+                                return await DownloadStringData(redirectUri.ToString()).ConfigureAwait(false);
                             }
                             else
                             {
@@ -404,7 +408,7 @@ namespace CommonPluginsShared
                                     Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
 
                                     // response disposed here by using; perform recursive call afterwards
-                                    return await DownloadStringData(redirectUri.ToString());
+                                    return await DownloadStringData(redirectUri.ToString()).ConfigureAwait(false);
                                 }
                                 else
                                 {
