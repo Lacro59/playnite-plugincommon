@@ -73,7 +73,7 @@ namespace CommonPluginsShared
             return string.Empty;
         }
 
-
+        
         /// <summary>
         /// Download file image and resize in icon format (64x64).
         /// </summary>
@@ -312,45 +312,49 @@ namespace CommonPluginsShared
             // Prefer using a shared HttpClient for connection reuse and higher parallelism. Fall back to per-call if unavailable.
             if (SharedClient != null)
             {
-                var request = new HttpRequestMessage()
+                using (var request = new HttpRequestMessage()
                 {
                     RequestUri = new Uri(url),
                     Method = HttpMethod.Get
-                };
-
-                HttpResponseMessage response = null;
-                try
+                })
                 {
-                    response = await SharedClient.SendAsync(request).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, $"Error on download {url}");
-                    return string.Empty;
-                }
-
-                if (response == null)
-                {
-                    return string.Empty;
-                }
-
-                int statusCode = (int)response.StatusCode;
-
-                // Handle redirects similarly to previous logic
-                if (statusCode >= 300 && statusCode <= 399)
-                {
-                    var redirectUri = response.Headers.Location;
-                    if (!redirectUri.IsAbsoluteUri)
+                    HttpResponseMessage response = null;
+                    try
                     {
-                        redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
-                    }
+                        using (response = await SharedClient.SendAsync(request).ConfigureAwait(false))
+                        {
+                            if (response == null)
+                            {
+                                return string.Empty;
+                            }
 
-                    Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
-                    return await DownloadStringData(redirectUri.ToString());
-                }
-                else
-                {
-                    return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            int statusCode = (int)response.StatusCode;
+
+                            // Handle redirects similarly to previous logic
+                            if (statusCode >= 300 && statusCode <= 399)
+                            {
+                                var redirectUri = response.Headers.Location;
+                                if (!redirectUri.IsAbsoluteUri)
+                                {
+                                    redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
+                                }
+
+                                Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
+
+                                // response disposed here by using; perform recursive call afterwards
+                                return await DownloadStringData(redirectUri.ToString());
+                            }
+                            else
+                            {
+                                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, $"Error on download {url}");
+                        return string.Empty;
+                    }
                 }
             }
             else
@@ -358,46 +362,49 @@ namespace CommonPluginsShared
                 // Fallback behaviour: create a per-call HttpClient as before
                 using (HttpClient client = new HttpClient())
                 {
-                    HttpRequestMessage request = new HttpRequestMessage()
+                    using (var request = new HttpRequestMessage()
                     {
                         RequestUri = new Uri(url),
                         Method = HttpMethod.Get
-                    };
-
-                    HttpResponseMessage response;
-                    try
+                    })
                     {
-                        client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
-                        response = await client.SendAsync(request).ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, false, $"Error on download {url}");
-                        return string.Empty;
-                    }
-
-                    if (response == null)
-                    {
-                        return string.Empty;
-                    }
-
-                    int statusCode = (int)response.StatusCode;
-
-                    if (statusCode >= 300 && statusCode <= 399)
-                    {
-                        var redirectUri = response.Headers.Location;
-                        if (!redirectUri.IsAbsoluteUri)
+                        HttpResponseMessage response = null;
+                        try
                         {
-                            redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
+                            client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
+                            using (response = await client.SendAsync(request).ConfigureAwait(false))
+                            {
+                                if (response == null)
+                                {
+                                    return string.Empty;
+                                }
+
+                                int statusCode = (int)response.StatusCode;
+
+                                if (statusCode >= 300 && statusCode <= 399)
+                                {
+                                    var redirectUri = response.Headers.Location;
+                                    if (!redirectUri.IsAbsoluteUri)
+                                    {
+                                        redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
+                                    }
+
+                                    Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
+
+                                    // response disposed here by using; perform recursive call afterwards
+                                    return await DownloadStringData(redirectUri.ToString());
+                                }
+                                else
+                                {
+                                    return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                                }
+                            }
                         }
-
-                        Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
-
-                        return await DownloadStringData(redirectUri.ToString());
-                    }
-                    else
-                    {
-                        return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        catch (Exception ex)
+                        {
+                            Common.LogError(ex, false, $"Error on download {url}");
+                            return string.Empty;
+                        }
                     }
                 }
             }
@@ -1018,21 +1025,24 @@ namespace CommonPluginsShared
         {
             try
             {
-                var content = new StringContent(payload ?? string.Empty, Encoding.UTF8, "application/json");
-
-                var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };
-                if (headers != null)
+                using (var content = new StringContent(payload ?? string.Empty, Encoding.UTF8, "application/json"))
+                using (var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = content })
                 {
-                    foreach (var header in headers)
+                    if (headers != null)
                     {
-                        request.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                        foreach (var header in headers)
+                        {
+                            request.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                        }
+                    }
+
+                    using (var response = await client.SendAsync(request).ConfigureAwait(false))
+                    {
+                        var body = response != null ? await response.Content.ReadAsStringAsync().ConfigureAwait(false) : string.Empty;
+                        var retry = response?.Headers?.RetryAfter?.ToString();
+                        return Tuple.Create(body, response != null ? (int)response.StatusCode : 0, retry);
                     }
                 }
-
-                var response = await client.SendAsync(request).ConfigureAwait(false);
-                var body = response != null ? await response.Content.ReadAsStringAsync().ConfigureAwait(false) : string.Empty;
-                var retry = response?.Headers?.RetryAfter?.ToString();
-                return Tuple.Create(body, response != null ? (int)response.StatusCode : 0, retry);
             }
             catch (Exception ex)
             {
@@ -1051,13 +1061,6 @@ namespace CommonPluginsShared
                 using (var client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
-                    if (headers != null)
-                    {
-                        foreach (var h in headers)
-                        {
-                            client.DefaultRequestHeaders.TryAddWithoutValidation(h.Key, h.Value);
-                        }
-                    }
                     return await PostJsonWithClient(client, url, payload, headers).ConfigureAwait(false);
                 }
             }
