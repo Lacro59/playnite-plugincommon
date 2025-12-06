@@ -334,6 +334,12 @@ namespace CommonPluginsShared
                             if (statusCode >= 300 && statusCode <= 399)
                             {
                                 var redirectUri = response.Headers.Location;
+                                if (redirectUri == null)
+                                {
+                                    Logger.Warn($"DownloadStringData() redirect response missing Location header for {url}");
+                                    return string.Empty;
+                                }
+
                                 if (!redirectUri.IsAbsoluteUri)
                                 {
                                     redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
@@ -384,6 +390,12 @@ namespace CommonPluginsShared
                                 if (statusCode >= 300 && statusCode <= 399)
                                 {
                                     var redirectUri = response.Headers.Location;
+                                    if (redirectUri == null)
+                                    {
+                                        Logger.Warn($"DownloadStringData() redirect response missing Location header for {url}");
+                                        return string.Empty;
+                                    }
+
                                     if (!redirectUri.IsAbsoluteUri)
                                     {
                                         redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
