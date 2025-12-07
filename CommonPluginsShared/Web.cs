@@ -75,7 +75,7 @@ namespace CommonPluginsShared
             return string.Empty;
         }
 
-        
+
         /// <summary>
         /// Download file image and resize in icon format (64x64).
         /// </summary>
@@ -98,8 +98,8 @@ namespace CommonPluginsShared
                 try
                 {
                     var cachedFile = HttpFileCache.GetWebFile(url);
-        
-                    
+
+
                     if (string.IsNullOrEmpty(cachedFile))
                     {
                         //logger.Warn("Web file not found: " + url);
@@ -246,7 +246,7 @@ namespace CommonPluginsShared
                         {
                             uri += "?" + urlParams[1];
                         }
-                        
+
                         return await DownloadStringDataKeepParam(uri);
                     }
                 }
@@ -311,7 +311,6 @@ namespace CommonPluginsShared
         /// <returns></returns>
         public static async Task<string> DownloadStringData(string url)
         {
-            const int MAX_REDIRECTS = 10;
 
             // Prefer using a shared HttpClient for connection reuse and higher parallelism. Fall back to per-call if unavailable.
             if (SharedClient != null)
@@ -522,7 +521,7 @@ namespace CommonPluginsShared
                             redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
                             urlNew = redirectUri.ToString();
                         }
-                        
+
                         if (keepParam)
                         {
                             var urlParams = url.Split('?').ToList();
@@ -568,7 +567,7 @@ namespace CommonPluginsShared
 
             return string.Empty;
         }
-        
+
         public static async Task<string> DownloadStringData(string url, CookieContainer cookies = null, string userAgent = "")
         {
             var response = string.Empty;
@@ -633,7 +632,7 @@ namespace CommonPluginsShared
 
                 if (httpHeaders != null)
                 {
-                    httpHeaders.ForEach(x => 
+                    httpHeaders.ForEach(x =>
                     {
                         client.DefaultRequestHeaders.Add(x.Key, x.Value);
                     });
@@ -747,7 +746,7 @@ namespace CommonPluginsShared
                 {
                     await client.GetStringAsync(urlBefore).ConfigureAwait(false);
                 }
-                
+
                 string result = await client.GetStringAsync(url).ConfigureAwait(false);
                 return result;
             }
