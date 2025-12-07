@@ -37,6 +37,7 @@ namespace CommonPluginsShared
 
         private static readonly HttpClient SharedClient;
         private static readonly HttpClientHandler SharedHandler;
+        private const int MaxRedirects = 5;
 
         static Web()
         {
@@ -309,8 +310,13 @@ namespace CommonPluginsShared
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public static async Task<string> DownloadStringData(string url)
+        public static async Task<string> DownloadStringData(string url, int redirectDepth = 0)
         {
+            if (redirectDepth >= MaxRedirects)
+            {
+                Logger.Warn($"Maximum redirect depth {MaxRedirects} reached for {url}");
+                return string.Empty;
+            }
 
             // Prefer using a shared HttpClient for connection reuse and higher parallelism. Fall back to per-call if unavailable.
             if (SharedClient != null)
@@ -351,7 +357,7 @@ namespace CommonPluginsShared
                                 Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
 
                                 // response disposed here by using; perform recursive call afterwards
-                                return await DownloadStringData(redirectUri.ToString()).ConfigureAwait(false);
+                                return await DownloadStringData(redirectUri.ToString(), redirectDepth + 1).ConfigureAwait(false);
                             }
                             else
                             {
@@ -407,7 +413,7 @@ namespace CommonPluginsShared
                                     Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
 
                                     // response disposed here by using; perform recursive call afterwards
-                                    return await DownloadStringData(redirectUri.ToString()).ConfigureAwait(false);
+                                    return await DownloadStringData(redirectUri.ToString(), redirectDepth + 1).ConfigureAwait(false);
                                 }
                                 else
                                 {
@@ -479,8 +485,13 @@ namespace CommonPluginsShared
         /// <param name="cookies"></param>
         /// <param name="userAgent"></param>
         /// <returns></returns>
-        public static async Task<string> DownloadStringData(string url, List<HttpCookie> cookies = null, string userAgent = "", bool keepParam = false)
+        public static async Task<string> DownloadStringData(string url, List<HttpCookie> cookies = null, string userAgent = "", bool keepParam = false, int redirectDepth = 0)
         {
+            if (redirectDepth >= MaxRedirects)
+            {
+                Logger.Warn($"Maximum redirect depth {MaxRedirects} reached for {url}");
+                return string.Empty;
+            }
             HttpClientHandler handler = new HttpClientHandler();
             if (cookies != null)
             {
@@ -543,7 +554,7 @@ namespace CommonPluginsShared
                         }
 
                         Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", urlNew));
-                        return await DownloadStringData(urlNew, cookies, userAgent);
+                        return await DownloadStringData(urlNew, cookies, userAgent, keepParam, redirectDepth + 1);
                     }
                     else
                     {
@@ -589,10 +600,9 @@ namespace CommonPluginsShared
                     client.DefaultRequestHeaders.Add("User-Agent", userAgent);
                 }
 
-                HttpResponseMessage result;
                 try
                 {
-                    result = await client.GetAsync(url).ConfigureAwait(false);
+                    using var result = await client.GetAsync(url).ConfigureAwait(false);
                     if (result.IsSuccessStatusCode)
                     {
                         response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -638,10 +648,9 @@ namespace CommonPluginsShared
                     });
                 }
 
-                HttpResponseMessage result;
                 try
                 {
-                    result = await client.GetAsync(url).ConfigureAwait(false);
+                    using var result = await client.GetAsync(url).ConfigureAwait(false);
                     if (result.IsSuccessStatusCode)
                     {
                         response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -910,21 +919,33 @@ namespace CommonPluginsShared
                     // 2. Prepare asynchronous wait
                     using (var loadingCompleted = new ManualResetEventSlim(false))
                     {
-                        webViewOffscreen.LoadingChanged += (s, e) =>
+                        EventHandler<Playnite.SDK.Events.WebViewLoadingChangedEventArgs> loadingHandler = (s, e) =>
                         {
                             if (!e.IsLoading)
                             {
-                                loadingCompleted.Set();
+                                try
+                                {
+                                    loadingCompleted.Set();
+                                }
+                                catch (ObjectDisposedException) { }
                             }
                         };
 
-                        // 3. Navigate and wait for page to be fully loaded
-                        webViewOffscreen.Navigate(url);
-                        TimeSpan waitTimeout = TimeSpan.FromSeconds(30);
-                        if (!loadingCompleted.Wait(waitTimeout))
+                        webViewOffscreen.LoadingChanged += loadingHandler;
+                        try
                         {
-                            Logger.Error($"Timeout {waitTimeout.TotalSeconds} seconds for {url}.");
-                            return new Tuple<string, List<HttpCookie>>(string.Empty, null);
+                            // 3. Navigate and wait for page to be fully loaded
+                            webViewOffscreen.Navigate(url);
+                            TimeSpan waitTimeout = TimeSpan.FromSeconds(30);
+                            if (!loadingCompleted.Wait(waitTimeout))
+                            {
+                                Logger.Error($"Timeout {waitTimeout.TotalSeconds} seconds for {url}.");
+                                return new Tuple<string, List<HttpCookie>>(string.Empty, null);
+                            }
+                        }
+                        finally
+                        {
+                            try { webViewOffscreen.LoadingChanged -= loadingHandler; } catch { }
                         }
                     }
 
