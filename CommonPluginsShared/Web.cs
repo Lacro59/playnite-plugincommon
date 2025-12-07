@@ -1,5 +1,6 @@
 ﻿using CommonPlayniteShared;
 using CommonPluginsShared.Extensions;
+using HowLongToBeat.Models.Vndb;
 using Playnite.SDK;
 using System;
 using System.Collections.Generic;
@@ -600,9 +601,10 @@ namespace CommonPluginsShared
                     client.DefaultRequestHeaders.Add("User-Agent", userAgent);
                 }
 
+                HttpResponseMessage result;
                 try
                 {
-                    using var result = await client.GetAsync(url).ConfigureAwait(false);
+                    result = await client.GetAsync(url).ConfigureAwait(false);
                     if (result.IsSuccessStatusCode)
                     {
                         response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -648,9 +650,10 @@ namespace CommonPluginsShared
                     });
                 }
 
+                HttpResponseMessage result;
                 try
                 {
-                    using var result = await client.GetAsync(url).ConfigureAwait(false);
+                    result = await client.GetAsync(url).ConfigureAwait(false);
                     if (result.IsSuccessStatusCode)
                     {
                         response = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
