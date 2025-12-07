@@ -1,6 +1,5 @@
 ﻿using CommonPlayniteShared;
 using CommonPluginsShared.Extensions;
-using HowLongToBeat.Models.Vndb;
 using Playnite.SDK;
 using System;
 using System.Collections.Generic;
@@ -333,37 +332,7 @@ namespace CommonPluginsShared
                     {
                         using (response = await SharedClient.SendAsync(request).ConfigureAwait(false))
                         {
-                            if (response == null)
-                            {
-                                return string.Empty;
-                            }
-
-                            int statusCode = (int)response.StatusCode;
-
-                            // Handle redirects similarly to previous logic
-                            if (statusCode >= 300 && statusCode <= 399)
-                            {
-                                var redirectUri = response.Headers.Location;
-                                if (redirectUri == null)
-                                {
-                                    Logger.Warn($"DownloadStringData() redirect response missing Location header for {url}");
-                                    return string.Empty;
-                                }
-
-                                if (!redirectUri.IsAbsoluteUri)
-                                {
-                                    redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
-                                }
-
-                                Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
-
-                                // response disposed here by using; perform recursive call afterwards
-                                return await DownloadStringData(redirectUri.ToString(), redirectDepth + 1).ConfigureAwait(false);
-                            }
-                            else
-                            {
-                                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            }
+                            return await ProcessDownloadStringResponse(response, request, redirectDepth).ConfigureAwait(false);
                         }
                     }
                     catch (Exception ex)
@@ -390,36 +359,7 @@ namespace CommonPluginsShared
                             client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                             using (response = await client.SendAsync(request).ConfigureAwait(false))
                             {
-                                if (response == null)
-                                {
-                                    return string.Empty;
-                                }
-
-                                int statusCode = (int)response.StatusCode;
-
-                                if (statusCode >= 300 && statusCode <= 399)
-                                {
-                                    var redirectUri = response.Headers.Location;
-                                    if (redirectUri == null)
-                                    {
-                                        Logger.Warn($"DownloadStringData() redirect response missing Location header for {url}");
-                                        return string.Empty;
-                                    }
-
-                                    if (!redirectUri.IsAbsoluteUri)
-                                    {
-                                        redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
-                                    }
-
-                                    Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
-
-                                    // response disposed here by using; perform recursive call afterwards
-                                    return await DownloadStringData(redirectUri.ToString(), redirectDepth + 1).ConfigureAwait(false);
-                                }
-                                else
-                                {
-                                    return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                                }
+                                return await ProcessDownloadStringResponse(response, request, redirectDepth).ConfigureAwait(false);
                             }
                         }
                         catch (Exception ex)
@@ -429,6 +369,41 @@ namespace CommonPluginsShared
                         }
                     }
                 }
+            }
+        }
+
+        private static async Task<string> ProcessDownloadStringResponse(HttpResponseMessage response, HttpRequestMessage request, int redirectDepth)
+        {
+            if (response == null)
+            {
+                return string.Empty;
+            }
+
+            int statusCode = (int)response.StatusCode;
+
+            // Handle redirects similarly to previous logic
+            if (statusCode >= 300 && statusCode <= 399)
+            {
+                var redirectUri = response.Headers.Location;
+                if (redirectUri == null)
+                {
+                    Logger.Warn($"DownloadStringData() redirect response missing Location header for {request?.RequestUri}");
+                    return string.Empty;
+                }
+
+                if (!redirectUri.IsAbsoluteUri)
+                {
+                    redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
+                }
+
+                Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
+
+                // perform recursive call afterwards with increased depth
+                return await DownloadStringData(redirectUri.ToString(), redirectDepth + 1).ConfigureAwait(false);
+            }
+            else
+            {
+                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
         }
 
@@ -948,7 +923,15 @@ namespace CommonPluginsShared
                         }
                         finally
                         {
-                            try { webViewOffscreen.LoadingChanged -= loadingHandler; } catch { }
+                            try 
+                            { 
+                                webViewOffscreen.LoadingChanged -= loadingHandler; 
+                            } 
+                            catch (Exception ex) 
+                            { 
+                                // Ignore exceptions during cleanup (webView may already be disposed)
+                                Common.LogDebug(true, $"Exception during event handler cleanup: {ex.Message}");
+                            }
                         }
                     }
 
