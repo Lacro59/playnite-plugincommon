@@ -390,8 +390,11 @@ namespace CommonPluginsShared.Controls
             {
                 try
                 {
-                    var (header, index) = FindGridViewColumnWithIndex(SortingDefaultDataName);
-                    if (header != null && index >= 0)
+					var result = FindGridViewColumnWithIndex(SortingDefaultDataName);
+					var header = result.Item1;
+					var index = result.Item2;
+
+					if (header != null && index >= 0)
                     {
                         ListSortDirection direction = SortingSortDirection;
                         Sort(SortingDefaultDataName, direction);
@@ -451,7 +454,7 @@ namespace CommonPluginsShared.Controls
         /// </summary>
         /// <param name="dataName">The data binding property name.</param>
         /// <returns>A tuple containing the header and its index, or (null, -1) if not found.</returns>
-        private (GridViewColumnHeader header, int index) FindGridViewColumnWithIndex(string dataName)
+        private Tuple<GridViewColumnHeader, int> FindGridViewColumnWithIndex(string dataName)
         {
             if (this.View != null && this.View is GridView)
             {
@@ -466,8 +469,8 @@ namespace CommonPluginsShared.Controls
                             string property = binding.Path.Path;
                             if (property == dataName)
                             {
-                                return (gridViewColumn.Header as GridViewColumnHeader, i);
-                            }
+								return Tuple.Create(gridViewColumn.Header as GridViewColumnHeader, i);
+							}
                         }
                     }
                 }
@@ -476,8 +479,8 @@ namespace CommonPluginsShared.Controls
                     Common.LogError(ex, false);
                 }
             }
-            return (null, -1);
-        }
+			return Tuple.Create<GridViewColumnHeader, int>(null, -1);
+		}
 
         /// <summary>
         /// Handles column header click events for sorting.
