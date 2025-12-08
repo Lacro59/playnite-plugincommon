@@ -304,13 +304,17 @@ namespace CommonPluginsShared
             }
         }
 
+		public static async Task<string> DownloadStringData(string url)
+        {
+            return await DownloadStringData(url, 0).ConfigureAwait(false);
+		}
 
-        /// <summary>
-        /// Download string data with manage redirect url.
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public static async Task<string> DownloadStringData(string url, int redirectDepth = 0)
+		/// <summary>
+		/// Download string data with manage redirect url.
+		/// </summary>
+		/// <param name="url"></param>
+		/// <returns></returns>
+		public static async Task<string> DownloadStringData(string url, int redirectDepth = 0)
         {
             if (redirectDepth >= MaxRedirects)
             {
