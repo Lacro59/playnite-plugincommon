@@ -35,6 +35,34 @@ namespace CommonPluginsShared
 
         public static string UserAgent => $"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0";
 
+        private static readonly HttpClient SharedClient;
+        private static readonly HttpClientHandler SharedHandler;
+        private const int MaxRedirects = 5;
+
+        static Web()
+        {
+            try
+            {
+                SharedHandler = new HttpClientHandler
+                {
+                    AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+                };
+
+                SharedClient = new HttpClient(SharedHandler, disposeHandler: true)
+                {
+                    Timeout = TimeSpan.FromSeconds(60)
+                };
+                SharedClient.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+            }
+            catch (Exception ex)
+            {
+                // Fallback: if static client creation fails, leave SharedClient null and methods will create per-call clients
+                Common.LogError(ex, false, "Failed to create shared HttpClient");
+                SharedClient = null;
+                SharedHandler = null;
+            }
+        }
+
 
         private static string StrWebUserAgentType(WebUserAgentType userAgentType)
         {
@@ -71,6 +99,8 @@ namespace CommonPluginsShared
                 try
                 {
                     var cachedFile = HttpFileCache.GetWebFile(url);
+
+
                     if (string.IsNullOrEmpty(cachedFile))
                     {
                         //logger.Warn("Web file not found: " + url);
@@ -217,7 +247,7 @@ namespace CommonPluginsShared
                         {
                             uri += "?" + urlParams[1];
                         }
-                        
+
                         return await DownloadStringDataKeepParam(uri);
                     }
                 }
@@ -280,52 +310,100 @@ namespace CommonPluginsShared
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public static async Task<string> DownloadStringData(string url)
+        public static async Task<string> DownloadStringData(string url, int redirectDepth = 0)
         {
-            using (HttpClient client = new HttpClient())
+            if (redirectDepth >= MaxRedirects)
             {
-                HttpRequestMessage request = new HttpRequestMessage()
+                Logger.Warn($"Maximum redirect depth {MaxRedirects} reached for {url}");
+                return string.Empty;
+            }
+
+            // Prefer using a shared HttpClient for connection reuse and higher parallelism. Fall back to per-call if unavailable.
+            if (SharedClient != null)
+            {
+                using (var request = new HttpRequestMessage()
                 {
                     RequestUri = new Uri(url),
                     Method = HttpMethod.Get
-                };
-
-                HttpResponseMessage response;
-                try
+                })
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
-                    response = await client.SendAsync(request).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, $"Error on download {url}");
-                    return string.Empty;
-                }
-
-                if (response == null)
-                {
-                    return string.Empty;
-                }
-
-                int statusCode = (int)response.StatusCode;
-
-                // We want to handle redirects ourselves so that we can determine the final redirect Location (via header)
-                if (statusCode >= 300 && statusCode <= 399)
-                {
-                    var redirectUri = response.Headers.Location;
-                    if (!redirectUri.IsAbsoluteUri)
+                    HttpResponseMessage response = null;
+                    try
                     {
-                        redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
+                        using (response = await SharedClient.SendAsync(request).ConfigureAwait(false))
+                        {
+                            return await ProcessDownloadStringResponse(response, request, redirectDepth).ConfigureAwait(false);
+                        }
                     }
-
-                    Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
-
-                    return await DownloadStringData(redirectUri.ToString());
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, $"Error on download {url}");
+                        return string.Empty;
+                    }
                 }
-                else
+            }
+            else
+            {
+                // Fallback behaviour: create a per-call HttpClient as before
+                using (HttpClient client = new HttpClient())
                 {
-                    return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    using (var request = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri(url),
+                        Method = HttpMethod.Get
+                    })
+                    {
+                        HttpResponseMessage response = null;
+                        try
+                        {
+                            client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
+                            using (response = await client.SendAsync(request).ConfigureAwait(false))
+                            {
+                                return await ProcessDownloadStringResponse(response, request, redirectDepth).ConfigureAwait(false);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Common.LogError(ex, false, $"Error on download {url}");
+                            return string.Empty;
+                        }
+                    }
                 }
+            }
+        }
+
+        private static async Task<string> ProcessDownloadStringResponse(HttpResponseMessage response, HttpRequestMessage request, int redirectDepth)
+        {
+            if (response == null)
+            {
+                return string.Empty;
+            }
+
+            int statusCode = (int)response.StatusCode;
+
+            // Handle redirects similarly to previous logic
+            if (statusCode >= 300 && statusCode <= 399)
+            {
+                var redirectUri = response.Headers.Location;
+                if (redirectUri == null)
+                {
+                    Logger.Warn($"DownloadStringData() redirect response missing Location header for {request?.RequestUri}");
+                    return string.Empty;
+                }
+
+                if (!redirectUri.IsAbsoluteUri)
+                {
+                    redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
+                }
+
+                Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
+
+                // perform recursive call afterwards with increased depth
+                return await DownloadStringData(redirectUri.ToString(), redirectDepth + 1).ConfigureAwait(false);
+            }
+            else
+            {
+                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
         }
 
@@ -383,8 +461,13 @@ namespace CommonPluginsShared
         /// <param name="cookies"></param>
         /// <param name="userAgent"></param>
         /// <returns></returns>
-        public static async Task<string> DownloadStringData(string url, List<HttpCookie> cookies = null, string userAgent = "", bool keepParam = false)
+        public static async Task<string> DownloadStringData(string url, List<HttpCookie> cookies = null, string userAgent = "", bool keepParam = false, int redirectDepth = 0)
         {
+            if (redirectDepth >= MaxRedirects)
+            {
+                Logger.Warn($"Maximum redirect depth {MaxRedirects} reached for {url}");
+                return string.Empty;
+            }
             HttpClientHandler handler = new HttpClientHandler();
             if (cookies != null)
             {
@@ -425,7 +508,7 @@ namespace CommonPluginsShared
                             redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
                             urlNew = redirectUri.ToString();
                         }
-                        
+
                         if (keepParam)
                         {
                             var urlParams = url.Split('?').ToList();
@@ -447,7 +530,7 @@ namespace CommonPluginsShared
                         }
 
                         Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", urlNew));
-                        return await DownloadStringData(urlNew, cookies, userAgent);
+                        return await DownloadStringData(urlNew, cookies, userAgent, keepParam, redirectDepth + 1);
                     }
                     else
                     {
@@ -471,7 +554,7 @@ namespace CommonPluginsShared
 
             return string.Empty;
         }
-        
+
         public static async Task<string> DownloadStringData(string url, CookieContainer cookies = null, string userAgent = "")
         {
             var response = string.Empty;
@@ -536,7 +619,7 @@ namespace CommonPluginsShared
 
                 if (httpHeaders != null)
                 {
-                    httpHeaders.ForEach(x => 
+                    httpHeaders.ForEach(x =>
                     {
                         client.DefaultRequestHeaders.Add(x.Key, x.Value);
                     });
@@ -650,7 +733,7 @@ namespace CommonPluginsShared
                 {
                     await client.GetStringAsync(urlBefore).ConfigureAwait(false);
                 }
-                
+
                 string result = await client.GetStringAsync(url).ConfigureAwait(false);
                 return result;
             }
@@ -796,11 +879,11 @@ namespace CommonPluginsShared
         }
 
 
-        private static async Task<Tuple<string, List<HttpCookie>>> DownloadWebView(bool getSource, string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string userAgent = "")
+        private static async Task<Tuple<string, List<HttpCookie>>> DownloadWebView(bool getSource, string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true)
         {
             WebViewSettings webViewSettings = new WebViewSettings
             {
-                UserAgent = userAgent.IsNullOrEmpty() ? UserAgent : userAgent,
+                UserAgent = UserAgent,
                 JavaScriptEnabled = javaScriptEnabled
             };
 
@@ -814,21 +897,41 @@ namespace CommonPluginsShared
                     // 2. Prepare asynchronous wait
                     using (var loadingCompleted = new ManualResetEventSlim(false))
                     {
-                        webViewOffscreen.LoadingChanged += (s, e) =>
+                        EventHandler<Playnite.SDK.Events.WebViewLoadingChangedEventArgs> loadingHandler = (s, e) =>
                         {
                             if (!e.IsLoading)
                             {
-                                loadingCompleted.Set();
+                                try
+                                {
+                                    loadingCompleted.Set();
+                                }
+                                catch (ObjectDisposedException) { }
                             }
                         };
 
-                        // 3. Navigate and wait for page to be fully loaded
-                        webViewOffscreen.Navigate(url);
-                        TimeSpan waitTimeout = TimeSpan.FromSeconds(30);
-                        if (!loadingCompleted.Wait(waitTimeout))
+                        webViewOffscreen.LoadingChanged += loadingHandler;
+                        try
                         {
-                            Logger.Error($"Timeout {waitTimeout.TotalSeconds} seconds for {url}.");
-                            return new Tuple<string, List<HttpCookie>>(string.Empty, null);
+                            // 3. Navigate and wait for page to be fully loaded
+                            webViewOffscreen.Navigate(url);
+                            TimeSpan waitTimeout = TimeSpan.FromSeconds(30);
+                            if (!loadingCompleted.Wait(waitTimeout))
+                            {
+                                Logger.Error($"Timeout {waitTimeout.TotalSeconds} seconds for {url}.");
+                                return new Tuple<string, List<HttpCookie>>(string.Empty, null);
+                            }
+                        }
+                        finally
+                        {
+                            try 
+                            { 
+                                webViewOffscreen.LoadingChanged -= loadingHandler; 
+                            } 
+                            catch (Exception ex) 
+                            { 
+                                // Ignore exceptions during cleanup (webView may already be disposed)
+                                Common.LogDebug(true, $"Exception during event handler cleanup: {ex.Message}");
+                            }
                         }
                     }
 
@@ -864,14 +967,14 @@ namespace CommonPluginsShared
             }
         }
 
-        public static async Task<Tuple<string, List<HttpCookie>>> DownloadJsonDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string userAgent = "")
+        public static async Task<Tuple<string, List<HttpCookie>>> DownloadJsonDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true)
         {
-            return await DownloadWebView(false, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, userAgent);
+            return await DownloadWebView(false, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled);
         }
 
-        public static async Task<Tuple<string, List<HttpCookie>>> DownloadSourceDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string userAgent = "")
+        public static async Task<Tuple<string, List<HttpCookie>>> DownloadSourceDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true)
         {
-            return await DownloadWebView(true, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, userAgent);
+            return await DownloadWebView(true, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled);
         }
 
 
@@ -938,6 +1041,53 @@ namespace CommonPluginsShared
             Common.LogDebug(true, $"Final container count: {cookieContainer.Count}");
 
             return cookieContainer;
+        }
+
+        private static async Task<Tuple<string, int, string>> PostJsonWithClient(HttpClient client, string url, string payload, List<HttpHeader> headers)
+        {
+            try
+            {
+                using (var content = new StringContent(payload ?? string.Empty, Encoding.UTF8, "application/json"))
+                using (var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = content })
+                {
+                    if (headers != null)
+                    {
+                        foreach (var header in headers)
+                        {
+                            request.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                        }
+                    }
+
+                    using (var response = await client.SendAsync(request).ConfigureAwait(false))
+                    {
+                        var body = response != null ? await response.Content.ReadAsStringAsync().ConfigureAwait(false) : string.Empty;
+                        var retry = response?.Headers?.RetryAfter?.ToString();
+                        return Tuple.Create(body, response != null ? (int)response.StatusCode : 0, retry);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, $"Error on PostJson {url}");
+                return Tuple.Create(string.Empty, 0, (string)null);
+            }
+        }
+
+        /// <summary>
+        /// Post a JSON payload using the shared HttpClient when available and return body, status code and Retry-After header.
+        /// </summary>
+        public static async Task<Tuple<string, int, string>> PostJsonWithSharedClientWithStatus(string url, string payload, List<HttpHeader> headers = null)
+        {
+            if (SharedClient == null)
+            {
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+                    return await PostJsonWithClient(client, url, payload, headers).ConfigureAwait(false);
+                }
+            }
+
+            return await PostJsonWithClient(SharedClient, url, payload, headers).ConfigureAwait(false);
         }
     }
 }
