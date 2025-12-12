@@ -56,7 +56,7 @@ namespace CommonPluginsShared
         // Initialization tracking
         private static readonly object InitLock = new object();
         private static Task _initializationTask = null;
-        private static Exception _initializationException = null;
+        private static volatile Exception _initializationException = null;
 
         private const int MaxRedirects = 5;
 
@@ -125,22 +125,12 @@ namespace CommonPluginsShared
         /// </summary>
         public static void InitializeAndWait(bool createInBackground = true)
         {
-            try
-            {
-                var t = InitializeAsync(createInBackground);
-                if (t != null)
-                {
-                    t.GetAwaiter().GetResult();
-                }
+            var t = InitializeAsync(createInBackground);
+            t.GetAwaiter().GetResult();
 
-                if (_initializationException != null)
-                {
-                    throw _initializationException;
-                }
-            }
-            finally
+            if (_initializationException != null)
             {
-                // no-op
+                throw _initializationException;
             }
         }
 
