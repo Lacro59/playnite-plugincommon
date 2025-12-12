@@ -53,6 +53,11 @@ namespace CommonPluginsShared
 
         private static HttpClient SharedClient => SharedClientLazy.IsValueCreated ? SharedClientLazy.Value : null;
 
+        // Initialization tracking
+        private static readonly object InitLock = new object();
+        private static Task _initializationTask = null;
+        private static Exception _initializationException = null;
+
         private const int MaxRedirects = 5;
 
         static Web()
@@ -61,37 +66,96 @@ namespace CommonPluginsShared
 
         public static bool IsInitialized => SharedClientLazy.IsValueCreated;
 
-        public static void Initialize(bool createInBackground = true)
+        /// <summary>
+        /// Initialize shared HttpClient. When <paramref name="createInBackground"/> is true this will kick off
+        /// background initialization and return a Task that can be awaited to observe completion and exceptions.
+        /// </summary>
+        public static Task InitializeAsync(bool createInBackground = true)
         {
-            if (SharedClientLazy.IsValueCreated)
+            lock (InitLock)
             {
-                return;
-            }
+                if (SharedClientLazy.IsValueCreated)
+                {
+                    return Task.CompletedTask;
+                }
 
-            if (createInBackground)
-            {
-                Task.Run(() =>
+                if (_initializationTask != null)
+                {
+                    return _initializationTask;
+                }
+
+                if (createInBackground)
+                {
+                    _initializationTask = Task.Run(() =>
+                    {
+                        // Accessing Value will run the factory and may throw; let the task capture the exception
+                        var _ = SharedClientLazy.Value;
+                    });
+
+                    // capture exception for quick synchronous checks if needed
+                    _initializationTask.ContinueWith(t =>
+                    {
+                        if (t.IsFaulted)
+                        {
+                            _initializationException = t.Exception?.GetBaseException();
+                        }
+                    }, TaskContinuationOptions.ExecuteSynchronously);
+
+                    return _initializationTask;
+                }
+                else
                 {
                     try
                     {
                         var _ = SharedClientLazy.Value;
+                        return Task.CompletedTask;
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        Common.LogError(ex, false, "Failed to create shared HttpClient in background");
+                        // propagate synchronous exception to caller
+                        throw;
                     }
-                });
+                }
             }
-            else
+        }
+
+        /// <summary>
+        /// Synchronous convenience method for callers that require blocking initialization.
+        /// This will wait for initialization to complete and will propagate exceptions.
+        /// </summary>
+        public static void InitializeAndWait(bool createInBackground = true)
+        {
+            try
             {
-                try
+                var t = InitializeAsync(createInBackground);
+                if (t != null)
                 {
-                    var _ = SharedClientLazy.Value;
+                    t.GetAwaiter().GetResult();
                 }
-                catch (Exception ex)
+
+                if (_initializationException != null)
                 {
-                    Common.LogError(ex, false, "Failed to create shared HttpClient");
+                    throw _initializationException;
                 }
+            }
+            finally
+            {
+                // no-op
+            }
+        }
+
+        // Backwards-compatible Initialize wrapper that preserves previous signature.
+        public static void Initialize(bool createInBackground = true)
+        {
+            // Fire-and-forget like before but store the task so callers can observe it via InitializeAsync if needed
+            try
+            {
+                _ = InitializeAsync(createInBackground);
+            }
+            catch (Exception ex)
+            {
+                // Preserve old behavior of logging while still allowing callers to use InitializeAsync/InitializeAndWait
+                Common.LogError(ex, false, "Failed to create shared HttpClient");
             }
         }
 
