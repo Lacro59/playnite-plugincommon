@@ -35,31 +35,63 @@ namespace CommonPluginsShared
 
         public static string UserAgent => $"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0";
 
-        private static readonly HttpClient SharedClient;
-        private static readonly HttpClientHandler SharedHandler;
+        private static readonly Lazy<HttpClient> SharedClientLazy = new Lazy<HttpClient>(() =>
+        {
+            var handler = new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
+
+            var client = new HttpClient(handler, disposeHandler: true)
+            {
+                Timeout = TimeSpan.FromSeconds(60)
+            };
+
+            client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+            return client;
+        }, true);
+
+        private static HttpClient SharedClient => SharedClientLazy.IsValueCreated ? SharedClientLazy.Value : null;
+
         private const int MaxRedirects = 5;
 
         static Web()
         {
-            try
-            {
-                SharedHandler = new HttpClientHandler
-                {
-                    AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
-                };
+        }
 
-                SharedClient = new HttpClient(SharedHandler, disposeHandler: true)
-                {
-                    Timeout = TimeSpan.FromSeconds(60)
-                };
-                SharedClient.DefaultRequestHeaders.Add("User-Agent", UserAgent);
-            }
-            catch (Exception ex)
+        public static bool IsInitialized => SharedClientLazy.IsValueCreated;
+
+        public static void Initialize(bool createInBackground = true)
+        {
+            if (SharedClientLazy.IsValueCreated)
             {
-                // Fallback: if static client creation fails, leave SharedClient null and methods will create per-call clients
-                Common.LogError(ex, false, "Failed to create shared HttpClient");
-                SharedClient = null;
-                SharedHandler = null;
+                return;
+            }
+
+            if (createInBackground)
+            {
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        var _ = SharedClientLazy.Value;
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, "Failed to create shared HttpClient in background");
+                    }
+                });
+            }
+            else
+            {
+                try
+                {
+                    var _ = SharedClientLazy.Value;
+                }
+                catch (Exception ex)
+                {
+                    Common.LogError(ex, false, "Failed to create shared HttpClient");
+                }
             }
         }
 
