@@ -20,6 +20,7 @@ using System.Linq;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores
@@ -166,10 +167,29 @@ namespace CommonPluginsStores
         /// </summary>
         protected CookiesTools CookiesTools { get; }
 
-        /// <summary>
-        /// Gets or sets the authentication token for API requests.
-        /// </summary>
-        protected StoreToken AuthToken { get; set; }
+        protected string FileToken { get; }
+
+        private StoreToken _authToken;
+
+		/// <summary>
+		/// Gets or sets the authentication token for API requests.
+		/// </summary>
+		protected StoreToken StoreToken 
+        {
+            get
+            {
+                if (_authToken == null)
+                {
+                    _authToken = GetStoredToken();
+				}
+                return _authToken;
+            }
+            set
+            {
+                _authToken = value;
+                _ = SetStoredToken(_authToken);
+			}
+        }
 
         /// <summary>
         /// Gets the external plugin instance reference.
@@ -213,6 +233,7 @@ namespace CommonPluginsStores
             PathStoresData = Path.Combine(PlaynitePaths.ExtensionsDataPath, "StoresData");
             FileUser = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_User.dat"));
             FileCookies = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_Cookies.dat"));
+            FileToken = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_Token.dat"));
             FileGamesDlcsOwned = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_GamesDlcsOwned.json"));
 
             CookiesTools = new CookiesTools(
@@ -230,14 +251,14 @@ namespace CommonPluginsStores
         /// Read the last identified cookies stored.
         /// </summary>
         /// <returns>List of stored HTTP cookies</returns>
-        protected virtual List<HttpCookie> GetStoredCookies() => CookiesTools.GetStoredCookies();
+        protected virtual List<Playnite.SDK.HttpCookie> GetStoredCookies() => CookiesTools.GetStoredCookies();
 
         /// <summary>
         /// Save the last identified cookies stored.
         /// </summary>
         /// <param name="httpCookies">The HTTP cookies to store</param>
         /// <returns>True if cookies were saved successfully</returns>
-        protected virtual bool SetStoredCookies(List<HttpCookie> httpCookies) => CookiesTools.SetStoredCookies(httpCookies);
+        protected virtual bool SetStoredCookies(List<Playnite.SDK.HttpCookie> httpCookies) => CookiesTools.SetStoredCookies(httpCookies);
 
         /// <summary>
         /// Get cookies in WebView or another method.
@@ -245,7 +266,7 @@ namespace CommonPluginsStores
         /// <param name="deleteCookies">Whether to delete cookies after retrieval</param>
         /// <param name="webView">Optional WebView instance to use</param>
         /// <returns>List of HTTP cookies from web source</returns>
-        protected virtual List<HttpCookie> GetWebCookies(bool deleteCookies = false, IWebView webView = null) => CookiesTools.GetWebCookies(deleteCookies, webView);
+        protected virtual List<Playnite.SDK.HttpCookie> GetWebCookies(bool deleteCookies = false, IWebView webView = null) => CookiesTools.GetWebCookies(deleteCookies, webView);
 
         /// <summary>
         /// Get new cookies from specific URLs.
@@ -254,16 +275,69 @@ namespace CommonPluginsStores
         /// <param name="deleteCookies">Whether to delete cookies after retrieval</param>
         /// <param name="webView">Optional WebView instance to use</param>
         /// <returns>List of new HTTP cookies</returns>
-        protected virtual List<HttpCookie> GetNewWebCookies(List<string> urls, bool deleteCookies = false, IWebView webView = null) => CookiesTools.GetNewWebCookies(urls, deleteCookies, webView);
+        protected virtual List<Playnite.SDK.HttpCookie> GetNewWebCookies(List<string> urls, bool deleteCookies = false, IWebView webView = null) => CookiesTools.GetNewWebCookies(urls, deleteCookies, webView);
 
-        #endregion
+		#endregion
 
-        #region Configuration
+		#region Token
 
-        /// <summary>
-        /// Resets the cached login status, forcing a re-check on next access.
-        /// </summary>
-        public void ResetIsUserLoggedIn()
+        protected virtual StoreToken GetStoredToken() 
+        {
+			if (File.Exists(FileToken))
+			{
+				try
+				{
+					return Serialization.FromJson<StoreToken>(
+						Encryption.DecryptFromFile(
+							FileToken,
+							Encoding.UTF8,
+							WindowsIdentity.GetCurrent().User.Value));
+				}
+				catch (Exception ex)
+				{
+					Common.LogError(ex, false, $"Failed to load saved token for {ClientName}");
+				}
+			}
+
+			Logger.Warn($"No stored token for {ClientName}");
+			return null;
+		}
+
+        protected virtual bool SetStoredToken(StoreToken token)
+		{
+			try
+			{
+				if (token != null)
+				{
+					FileSystem.CreateDirectory(Path.GetDirectoryName(FileToken));
+					Encryption.EncryptToFile(
+						FileToken,
+						Serialization.ToJson(token),
+						Encoding.UTF8,
+						WindowsIdentity.GetCurrent().User.Value);
+					return true;
+				}
+				else
+				{
+					Logger.Warn($"No token saved for {PluginName}");
+				}
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, "Failed to save token");
+			}
+
+			return false;
+		}
+
+		#endregion
+
+		#region Configuration
+
+		/// <summary>
+		/// Resets the cached login status, forcing a re-check on next access.
+		/// </summary>
+		public void ResetIsUserLoggedIn()
         {
             isUserLoggedIn = null;
         }

@@ -138,7 +138,7 @@ namespace CommonPluginsStores.Gog
 
                 string response = Web.DownloadStringData(UrlAccountInfo, GetStoredCookies()).GetAwaiter().GetResult();
                 _ = Serialization.TryFromJson(response, out AccountBasicResponse accountBasicResponse);
-                AuthToken = new StoreToken
+                StoreToken = new StoreToken
                 {
                     Token = accountBasicResponse.AccessToken
                 };
@@ -163,7 +163,7 @@ namespace CommonPluginsStores.Gog
             }
             else
             {
-                AuthToken = null;
+                StoreToken = null;
             }
 
             return isLogged;
@@ -392,7 +392,7 @@ namespace CommonPluginsStores.Gog
             try
             {
                 string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Locale).ToLower());
-                string response = Web.DownloadStringData(url, AuthToken?.Token, urlLang).GetAwaiter().GetResult();
+                string response = Web.DownloadStringData(url, StoreToken?.Token, urlLang).GetAwaiter().GetResult();
 
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
                 if (!response.IsNullOrEmpty() && Serialization.TryFromJson(response, out Achievements achievements) && achievements?.TotalCount > 0)
@@ -924,7 +924,7 @@ namespace CommonPluginsStores.Gog
         {
             try
             {
-                string data = Web.DownloadStringData(UrlUserOwned, AuthToken.Token).GetAwaiter().GetResult();
+                string data = Web.DownloadStringData(UrlUserOwned, StoreToken.Token).GetAwaiter().GetResult();
                 if (Serialization.TryFromJson(data, out UserDataOwned userDataOwned))
                 {
                     SaveUserDataOwned(userDataOwned);
