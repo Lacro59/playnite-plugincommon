@@ -16,6 +16,7 @@ using Playnite.SDK.Data;
 using Playnite.SDK.Events;
 using Playnite.SDK.Models;
 using SteamKit2;
+using SuccessStory.Models.ZenlessZoneZero;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -343,27 +344,44 @@ namespace CommonPluginsStores.Steam
         private async Task GetSteamProfil(IWebView webView)
         {
             string source = await webView.GetPageSourceAsync();
-			string jsonDataString = Tools.GetJsonInString(source, @"(?<=g_rgProfileData[ ]=[ ])");
-			RgProfileData rgProfileData = Serialization.FromJson<RgProfileData>(jsonDataString);
+			AccountInfos accountInfos = GetAccountInfosFromRgProfileData(source);
 
-            if (rgProfileData != null)
+			if (accountInfos != null)
             {
-                AccountInfos accountInfos = new AccountInfos
-                {
-                    ApiKey = CurrentAccountInfos?.ApiKey,
-                    UserId = rgProfileData.SteamId.ToString(),
-                    Avatar = string.Format(UrlAvatarFul, rgProfileData.SteamId.ToString()),
-                    Pseudo = rgProfileData.PersonaName,
-                    Link = rgProfileData.Url,
-                    IsPrivate = true,
-                    IsCurrent = true
-                };
-
                 CurrentAccountInfos = accountInfos;
                 SaveCurrentUser();
 
                 Logger.Info($"{ClientName} logged");
             }
+		}
+
+        private AccountInfos GetAccountInfosFromRgProfileData(string source)
+        {
+            AccountInfos accountInfos = null;
+			var match = Regex.Match(source, @"g_rgProfileData\s*=\s*(?<json>\{.*?\});");
+
+			string json = string.Empty;
+			if (match.Success)
+			{
+				json = match.Groups["json"].Value;
+			}
+
+			RgProfileData rgProfileData = Serialization.FromJson<RgProfileData>(json);
+			if (rgProfileData != null)
+			{
+				accountInfos = new AccountInfos
+				{
+					ApiKey = CurrentAccountInfos?.ApiKey,
+					UserId = rgProfileData.SteamId.ToString(),
+					Avatar = string.Format(UrlAvatarFul, rgProfileData.SteamId.ToString()),
+					Pseudo = rgProfileData.PersonaName,
+					Link = rgProfileData.Url,
+					IsPrivate = true,
+					IsCurrent = true
+				};
+			}
+
+            return accountInfos;
 		}
 
 		/// <summary>
@@ -404,20 +422,20 @@ namespace CommonPluginsStores.Steam
                     if (CurrentAccountInfos.ApiKey.IsNullOrEmpty())
                     {
                         string response = Web.DownloadStringData(string.Format(UrlProfileById, accountInfos.UserId), GetStoredCookies()).GetAwaiter().GetResult();
-                        string jsonDataString = Tools.GetJsonInString(response, @"(?<=g_rgProfileData[ ]=[ ])");
-                        if (jsonDataString.Length < 5)
+                        AccountInfos newAccountInfos = GetAccountInfosFromRgProfileData(response);
+
+                        if (newAccountInfos == null)
                         {
-                            response = Web.DownloadStringData(string.Format(UrlProfileByName, accountInfos.Pseudo), GetStoredCookies()).GetAwaiter().GetResult();
-                            jsonDataString = Tools.GetJsonInString(response, @"g_rgProfileData[ ]?=[ ]?");
-                        }
-                        _ = Serialization.TryFromJson(jsonDataString, out RgProfileData rgProfileData);
+							response = Web.DownloadStringData(string.Format(UrlProfileByName, accountInfos.Pseudo), GetStoredCookies()).GetAwaiter().GetResult();
+							newAccountInfos = GetAccountInfosFromRgProfileData(response);
+						}
 
-                        Match matches = Regex.Match(response, @"<link\srel=""image_src""\shref=""([^""]+)"">");
-                        string avatar = matches.Success ? matches.Groups[1].Value : string.Format(UrlAvatarFul, accountInfos.UserId);
-
-                        CurrentAccountInfos.Avatar = avatar;
-                        CurrentAccountInfos.Pseudo = rgProfileData?.PersonaName ?? CurrentAccountInfos.Pseudo;
-                        CurrentAccountInfos.Link = rgProfileData?.Url ?? CurrentAccountInfos.Link;
+                        if (newAccountInfos == null)
+						{
+							CurrentAccountInfos.Avatar = newAccountInfos.Avatar;
+                            CurrentAccountInfos.Pseudo = newAccountInfos.Pseudo;
+                            CurrentAccountInfos.Link = newAccountInfos.Link;
+						}
                     }
                     else if (ulong.TryParse(accountInfos.UserId, out ulong steamId))
                     {
