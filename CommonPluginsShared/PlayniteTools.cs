@@ -326,6 +326,43 @@ namespace CommonPluginsShared
             return false;
         }
 
+        public static bool GameUseShadPS4(Game game)
+        {
+            if (game?.GameActions == null)
+            {
+                return false;
+            }
+
+            foreach (GameAction action in game.GameActions)
+            {
+                Emulator emulator = API.Instance.Database.Emulators?.FirstOrDefault(e => e.Id == action?.EmulatorId);
+                if (emulator == null)
+                {
+                    Logger.Warn($"No emulator found for {game.Name}");
+                    return false;
+                }
+
+                string builtInConfigId = string.Empty;
+                if (emulator.BuiltInConfigId == null)
+                {
+                    //logger.Warn($"No BuiltInConfigId found for {emulator.Name}");
+                }
+                else
+                {
+                    builtInConfigId = emulator.BuiltInConfigId;
+                }
+
+                if (builtInConfigId.Contains("shadps4", StringComparison.OrdinalIgnoreCase)
+                    || emulator.Name.Contains("shadps4", StringComparison.OrdinalIgnoreCase)
+                    || (emulator.InstallDir == null ? false : emulator.InstallDir.Contains("shadps4", StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Checks if a game uses the ScummVM emulator.
         /// </summary>
