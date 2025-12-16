@@ -5,13 +5,7 @@ using System.Text;
 
 namespace CommonPluginsStores.Steam.Models
 {
-    public class SteamAchievements
-    {
-        [SerializationPropertyName("response")]
-        public AchievementsResponse Response { get; set; }
-    }
-
-    public class Achievement
+    public class SteamAchievement
     {
         [SerializationPropertyName("internal_name")]
         public string InternalName { get; set; }
@@ -29,9 +23,9 @@ namespace CommonPluginsStores.Steam.Models
         public string PlayerPercentUnlocked { get; set; }
     }
 
-    public class AchievementsResponse
+    public class SteamGameAchievements
     {
         [SerializationPropertyName("achievements")]
-        public List<Achievement> Achievements { get; set; }
+        public List<SteamAchievement> Achievements { get; set; }
     }
 }
