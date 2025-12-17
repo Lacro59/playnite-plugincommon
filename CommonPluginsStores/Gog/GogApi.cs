@@ -213,11 +213,18 @@ namespace CommonPluginsStores.Gog
                     Thread.Sleep(1000);
                     ProfileUserGalaxy profileUserGalaxy = GetAccountInfoByGalaxyUserId(long.Parse(CurrentAccountInfos.UserId));
 
-                    CurrentAccountInfos.Avatar = $"{UrlImage}/{profileUserGalaxy.Avatar.GogImageId}.jpg";
-                    CurrentAccountInfos.Pseudo = profileUserGalaxy.Username;
+                    if (profileUserGalaxy != null)
+                    {
+                        CurrentAccountInfos.Avatar = $"{UrlImage}/{profileUserGalaxy.Avatar.GogImageId}.jpg";
+                        CurrentAccountInfos.Pseudo = profileUserGalaxy.Username;
 
-                    CurrentAccountInfos.IsPrivate = !CheckIsPublic(CurrentAccountInfos).GetAwaiter().GetResult();
-                    CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
+                        CurrentAccountInfos.IsPrivate = !CheckIsPublic(CurrentAccountInfos).GetAwaiter().GetResult();
+                        CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
+                    }
+                    else
+                    {
+                        Logger.Warn($"No GOG profil found");
+                    }
                 });
                 return accountInfos;
             }
