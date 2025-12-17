@@ -389,7 +389,7 @@ namespace CommonPluginsShared.Collections
 
                 if (propertyInfo != null && (bool)propertyInfo.GetValue(Settings))
                 {
-                    Common.LogDebug(true, $"RemoveTag & AddTag for {itemToAdd.Name} with {itemToAdd.Id}");
+                    //Common.LogDebug(true, $"RemoveTag & AddTag for {itemToAdd.Name} with {itemToAdd.Id}");
                     RemoveTag(itemToAdd.Id);
                     AddTag(itemToAdd.Id);
                 }
@@ -431,7 +431,7 @@ namespace CommonPluginsShared.Collections
 
                 if (propertyInfo != null && (bool)propertyInfo.GetValue(Settings))
                 {
-                    Common.LogDebug(true, $"RemoveTag & AddTag for {itemToUpdate.Name} with {itemToUpdate.Id}");
+                    //Common.LogDebug(true, $"RemoveTag & AddTag for {itemToUpdate.Name} with {itemToUpdate.Id}");
                     RemoveTag(itemToUpdate.Id);
                     AddTag(itemToUpdate.Id);
                 }
