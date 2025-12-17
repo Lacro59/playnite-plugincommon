@@ -44,6 +44,7 @@ namespace CommonPluginsStores.Epic
 
         private string UrlStoreEpic => @"https://store.epicgames.com";
         private string UrlAccountProfile => UrlStoreEpic + @"/u/{0}";
+        private string UrlAccountProfileUS => UrlStoreEpic + @"/en-US/u/{0}";
         private string UrlAccountLinkFriends => UrlStoreEpic + @"/u/{0}/friends";
         private string UrlAccountAchievements => UrlStoreEpic + @"/{0}/u/{1}/details/{2}";
 
@@ -707,13 +708,12 @@ namespace CommonPluginsStores.Epic
             {
                 accountInfos.AccountStatus = AccountStatus.Checking;
 
-				string url = string.Format(UrlAccountProfile, accountInfos.UserId);
+				string url = string.Format(UrlAccountProfileUS, accountInfos.UserId);
                 var pageSource = await Web.DownloadSourceDataWebView(url);
 				string source = pageSource.Item1;
 
-				// Check if the page source contains the "private-view-text" string to determine if the profile is private.
 				// If the profile is private, the method will return false, otherwise it will return true.
-				return !source.Contains("private-view-text");
+				return !source.Contains("This profile is unavailable", StringComparison.OrdinalIgnoreCase);
 			}
             catch (Exception ex)
             {
