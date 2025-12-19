@@ -17,7 +17,7 @@ namespace CommonPluginsStores.Steam.Models
 	public class SteamGame
 	{
 		[SerializationPropertyName("appid")]
-		public int Appid { get; set; }
+		public uint AppId { get; set; }
 
 		[SerializationPropertyName("name")]
 		public string Name { get; set; }

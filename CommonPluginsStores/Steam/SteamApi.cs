@@ -1242,15 +1242,15 @@ namespace CommonPluginsStores.Steam
                     if (x.PlaytimeForever > 0)
                     {
                         // TODO "error": "Profile is not public"
-                        gameAchievements = GetAchievements(x.Appid.ToString(), accountInfos);
+                        gameAchievements = GetAchievements(x.AppId.ToString(), accountInfos);
                     }
 
                     AccountGameInfos gameInfos = new AccountGameInfos
                     {
-                        Id = x.Appid.ToString(),
+                        Id = x.AppId.ToString(),
                         Name = x.Name,
-                        Link = string.Format(UrlSteamGame, x.Appid),
-                        IsCommun = !accountInfos.IsCurrent && CurrentGamesInfos.FirstOrDefault(y => y.Id == x.Appid.ToString()) != null,
+                        Link = string.Format(UrlSteamGame, x.AppId),
+                        IsCommun = !accountInfos.IsCurrent && CurrentGamesInfos.FirstOrDefault(y => y.Id == x.AppId.ToString()) != null,
                         Achievements = gameAchievements,
                         Playtime = x.PlaytimeForever
                     };
@@ -1317,12 +1317,12 @@ namespace CommonPluginsStores.Steam
                     {
                         accountWishlists.Add(new AccountWishlist
                         {
-                            Id = x.Appid.ToString(),
-                            Name = GetGameName(x.Appid),
+                            Id = x.AppId.ToString(),
+                            Name = GetGameName(x.AppId),
                             Link = string.Format(UrlSteamGame, x),
                             Released = null,
                             Added = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(x.DateAdded),
-                            Image = string.Format("https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/{0}/header_292x136.jpg", x.Appid)
+                            Image = string.Format("https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/{0}/header_292x136.jpg", x.AppId)
                         });
                     });
                 }
@@ -1419,14 +1419,14 @@ namespace CommonPluginsStores.Steam
 				var steamOwnedGames = SteamApiServiceBase.Get<SteamOwnedGames>(UrlGetAppListApi, dic);
                 steamOwnedGames?.Games?.ForEach(x =>
                 {
-					ObservableCollection<GameAchievement> gameAchievements = GetAchievements(x.Appid.ToString(), accountInfos);
+					ObservableCollection<GameAchievement> gameAchievements = GetAchievements(x.AppId.ToString(), accountInfos);
 
 					accountGameInfos.Add(new AccountGameInfos
 					{
-						Id = x.Appid.ToString(),
+						Id = x.AppId.ToString(),
 						Name = x.Name,
-						Link = string.Format(UrlSteamGame, x.Appid),
-						IsCommun = !accountInfos.IsCurrent && CurrentGamesInfos.FirstOrDefault(y => y.Id == x.Appid.ToString()) != null,
+						Link = string.Format(UrlSteamGame, x.AppId),
+						IsCommun = !accountInfos.IsCurrent && CurrentGamesInfos.FirstOrDefault(y => y.Id == x.AppId.ToString()) != null,
 						Achievements = gameAchievements,
 						Playtime = x.PlaytimeForever
 					});

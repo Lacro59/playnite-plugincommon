@@ -206,7 +206,7 @@ namespace CommonPluginsStores.Steam
                     {
                         ownedGames.Add(new SteamGame
 						{
-                            Appid = data["appid"].AsInteger(),
+                            AppId = data["appid"].AsUnsignedInteger(),
                             Name = data["name"].AsString(),
                             ImgIconUrl = data["img_icon_url"].AsString(),
                             HasCommunityVisibleStats = data["has_community_visible_stats"].AsBoolean(),
