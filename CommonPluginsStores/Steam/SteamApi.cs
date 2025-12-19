@@ -16,7 +16,6 @@ using Playnite.SDK.Data;
 using Playnite.SDK.Events;
 using Playnite.SDK.Models;
 using SteamKit2;
-using SuccessStory.Models.ZenlessZoneZero;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -430,7 +429,7 @@ namespace CommonPluginsStores.Steam
 							newAccountInfos = GetAccountInfosFromRgProfileData(response);
 						}
 
-                        if (newAccountInfos == null)
+                        if (newAccountInfos != null)
 						{
 							CurrentAccountInfos.Avatar = newAccountInfos.Avatar;
                             CurrentAccountInfos.Pseudo = newAccountInfos.Pseudo;
