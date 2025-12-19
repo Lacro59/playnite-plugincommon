@@ -48,11 +48,12 @@ namespace CommonPluginsStores.Steam
 
         private static string UrlAvatarFul => @"https://avatars.akamai.steamstatic.com/{0}_full.jpg";
 
-        private static string UrlWishlistApi = UrlApi + @"/IWishlistService/GetWishlist/v1?steamid={0}&key={1}";
-        private static string UrlGetAppListApi = UrlApi + @"/IStoreService/GetAppList/v1";
+        private static string UrlWishlistApi => UrlApi + @"/IWishlistService/GetWishlist/v1?steamid={0}&key={1}";
+        private static string UrlGetAppListApi => UrlApi + @"/IStoreService/GetAppList/v1";
+        private static string UrlGetOwnedGamesApi => UrlApi + @"/IPlayerService/GetOwnedGames/v1";
 
 
-        private static string UrlRefreshToken = UrlLogin + @"/jwt/refresh?redir={0}";
+        private static string UrlRefreshToken => UrlLogin + @"/jwt/refresh?redir={0}";
 
         private static string UrlProfileLogin => UrlSteamCommunity + @"/login/home/?goto=";
         private static string UrlProfileById => UrlSteamCommunity + @"/profiles/{0}";
@@ -1422,7 +1423,7 @@ namespace CommonPluginsStores.Steam
                     { "include_extended_appinfo", "1" }
                 };
 
-				var steamOwnedGames = SteamApiServiceBase.Get<SteamOwnedGames>(UrlGetAppListApi, dic);
+				var steamOwnedGames = SteamApiServiceBase.Get<SteamOwnedGames>(UrlGetOwnedGamesApi, dic);
                 steamOwnedGames?.Games?.ForEach(x =>
                 {
 					ObservableCollection<GameAchievement> gameAchievements = GetAchievements(x.AppId.ToString(), accountInfos);
