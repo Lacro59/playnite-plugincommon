@@ -67,7 +67,7 @@ namespace CommonPluginsStores.Ea
             if (isLogged)
             {
                 AuthTokenResponse accessToken = OriginAPI.GetAccessToken();
-                AuthToken = new StoreToken
+                StoreToken = new StoreToken
                 { 
                     Token = accessToken.access_token,
                     Type = accessToken.token_type
@@ -92,7 +92,7 @@ namespace CommonPluginsStores.Ea
             }
             else
             {
-                AuthToken = null;
+                StoreToken = null;
             }
 
             return isLogged;
@@ -427,7 +427,7 @@ namespace CommonPluginsStores.Ea
             try
             {
                 StringContent content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
-                string response = await Web.PostStringData(url, AuthToken?.Token, content);
+                string response = await Web.PostStringData(url, StoreToken?.Token, content);
                 T data = Serialization.FromJson<T>(response);
                 return data;
             }

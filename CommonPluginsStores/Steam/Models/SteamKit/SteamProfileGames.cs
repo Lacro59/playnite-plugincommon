@@ -44,7 +44,7 @@ namespace CommonPluginsStores.Steam.Models.SteamKit
     public class AchievementProgress
     {
         [SerializationPropertyName("appid")]
-        public int Appid { get; set; }
+        public uint AppId { get; set; }
 
         [SerializationPropertyName("unlocked")]
         public int Unlocked { get; set; }
@@ -74,7 +74,7 @@ namespace CommonPluginsStores.Steam.Models.SteamKit
     public class RgGame
     {
         [SerializationPropertyName("appid")]
-        public int Appid { get; set; }
+        public uint AppId { get; set; }
 
         [SerializationPropertyName("name")]
         public string Name { get; set; }
@@ -131,7 +131,7 @@ namespace CommonPluginsStores.Steam.Models.SteamKit
     public class RgPerfectUnownedGame
     {
         [SerializationPropertyName("appid")]
-        public int Appid { get; set; }
+        public uint AppId { get; set; }
 
         [SerializationPropertyName("name")]
         public string Name { get; set; }

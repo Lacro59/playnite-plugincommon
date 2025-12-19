@@ -138,7 +138,7 @@ namespace CommonPluginsStores.Gog
 
                 string response = Web.DownloadStringData(UrlAccountInfo, GetStoredCookies()).GetAwaiter().GetResult();
                 _ = Serialization.TryFromJson(response, out AccountBasicResponse accountBasicResponse);
-                AuthToken = new StoreToken
+                StoreToken = new StoreToken
                 {
                     Token = accountBasicResponse.AccessToken
                 };
@@ -163,7 +163,7 @@ namespace CommonPluginsStores.Gog
             }
             else
             {
-                AuthToken = null;
+                StoreToken = null;
             }
 
             return isLogged;
@@ -213,11 +213,18 @@ namespace CommonPluginsStores.Gog
                     Thread.Sleep(1000);
                     ProfileUserGalaxy profileUserGalaxy = GetAccountInfoByGalaxyUserId(long.Parse(CurrentAccountInfos.UserId));
 
-                    CurrentAccountInfos.Avatar = $"{UrlImage}/{profileUserGalaxy.Avatar.GogImageId}.jpg";
-                    CurrentAccountInfos.Pseudo = profileUserGalaxy.Username;
+                    if (profileUserGalaxy != null)
+                    {
+                        CurrentAccountInfos.Avatar = $"{UrlImage}/{profileUserGalaxy.Avatar.GogImageId}.jpg";
+                        CurrentAccountInfos.Pseudo = profileUserGalaxy.Username;
 
-                    CurrentAccountInfos.IsPrivate = !CheckIsPublic(CurrentAccountInfos).GetAwaiter().GetResult();
-                    CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
+                        CurrentAccountInfos.IsPrivate = !CheckIsPublic(CurrentAccountInfos).GetAwaiter().GetResult();
+                        CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
+                    }
+                    else
+                    {
+                        Logger.Warn($"No GOG profil found");
+                    }
                 });
                 return accountInfos;
             }
@@ -392,7 +399,7 @@ namespace CommonPluginsStores.Gog
             try
             {
                 string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Locale).ToLower());
-                string response = Web.DownloadStringData(url, AuthToken?.Token, urlLang).GetAwaiter().GetResult();
+                string response = Web.DownloadStringData(url, StoreToken?.Token, urlLang).GetAwaiter().GetResult();
 
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
                 if (!response.IsNullOrEmpty() && Serialization.TryFromJson(response, out Achievements achievements) && achievements?.TotalCount > 0)
@@ -924,7 +931,7 @@ namespace CommonPluginsStores.Gog
         {
             try
             {
-                string data = Web.DownloadStringData(UrlUserOwned, AuthToken.Token).GetAwaiter().GetResult();
+                string data = Web.DownloadStringData(UrlUserOwned, StoreToken.Token).GetAwaiter().GetResult();
                 if (Serialization.TryFromJson(data, out UserDataOwned userDataOwned))
                 {
                     SaveUserDataOwned(userDataOwned);

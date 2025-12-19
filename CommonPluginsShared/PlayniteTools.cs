@@ -284,143 +284,125 @@ namespace CommonPluginsShared
             return game.GameActions.Where(x => x.IsPlayAction && ListEmulators.Any(y => y.Id == x?.EmulatorId)).Count() > 0;
         }
 
-        /// <summary>
-        /// Checks if a game uses the RPCS3 emulator.
-        /// </summary>
-        /// <param name="game">The game object.</param>
-        /// <returns>True if the game uses RPCS3, otherwise false.</returns>
-        public static bool GameUseRpcs3(Game game)
-        {
-            if (game?.GameActions == null)
-            {
-                return false;
-            }
+		/// <summary>
+		/// Checks if a game uses the RPCS3 emulator.
+		/// </summary>
+		/// <param name="game">The game object.</param>
+		/// <returns>True if the game uses RPCS3, otherwise false.</returns>
+		public static bool GameUseRpcs3(Game game)
+		{
+			return GameUsesEmulator(game, "rpcs3");
+		}
 
-            foreach (GameAction action in game.GameActions)
-            {
-                Emulator emulator = API.Instance.Database.Emulators?.FirstOrDefault(e => e.Id == action?.EmulatorId);
-                if (emulator == null)
-                {
-                    Logger.Warn($"No emulator found for {game.Name}");
-                    return false;
-                }
+		/// <summary>
+		/// Checks if a game uses the ShadPS4 emulator.
+		/// </summary>
+		/// <param name="game">The game object.</param>
+		/// <returns>True if the game uses ShadPS4, otherwise false.</returns>
+		public static bool GameUseShadPS4(Game game)
+		{
+			return GameUsesEmulator(game, "shadps4");
+		}
 
-                string builtInConfigId = string.Empty;
-                if (emulator.BuiltInConfigId == null)
-                {
-                    //logger.Warn($"No BuiltInConfigId found for {emulator.Name}");
-                }
-                else
-                {
-                    builtInConfigId = emulator.BuiltInConfigId;
-                }
+		/// <summary>
+		/// Checks if a game uses the Xenia (Xbox 360) emulator.
+		/// </summary>
+		/// <param name="game">The game object.</param>
+		/// <returns>True if the game uses Xenia, otherwise false.</returns>
+		public static bool GameUseXbox360(Game game)
+		{
+			return GameUsesEmulator(game, "xenia");
+		}
 
-                if (builtInConfigId.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)
-                    || emulator.Name.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)
-                    || (emulator.InstallDir == null ? false : emulator.InstallDir.Contains("rpcs3", StringComparison.OrdinalIgnoreCase)))
-                {
-                    return true;
-                }
-            }
+		/// <summary>
+		/// Checks if a game uses the ScummVM emulator.
+		/// </summary>
+		/// <param name="game">The game object.</param>
+		/// <returns>True if the game uses ScummVM, otherwise false.</returns>
+		public static bool GameUseScummVM(Game game)
+		{
+			return GameUsesEmulator(game, "ScummVM");
+		}
 
-            return false;
-        }
+		/// <summary>
+		/// Checks if a game uses the RetroArch emulator.
+		/// </summary>
+		/// <param name="game">The game object.</param>
+		/// <returns>True if the game uses RetroArch, otherwise false.</returns>
+		public static bool GameUseRetroArch(Game game)
+		{
+			return GameUsesEmulator(game, "RetroArch");
+		}
 
-        /// <summary>
-        /// Checks if a game uses the ScummVM emulator.
-        /// </summary>
-        /// <param name="game">The game object.</param>
-        /// <returns>True if the game uses ScummVM, otherwise false.</returns>
-        public static bool GameUseScummVM(Game game)
-        {
-            if (game?.GameActions == null)
-            {
-                return false;
-            }
+		/// <summary>
+		/// Checks if a game uses a specific emulator by name.
+		/// </summary>
+		/// <param name="game">The game object.</param>
+		/// <param name="emulatorName">The emulator name to search for.</param>
+		/// <returns>True if the game uses the specified emulator, otherwise false.</returns>
+		private static bool GameUsesEmulator(Game game, string emulatorName)
+		{
+			if (game?.GameActions == null)
+			{
+				return false;
+			}
 
-            foreach (GameAction action in game.GameActions)
-            {
-                Emulator emulator = API.Instance.Database.Emulators?.FirstOrDefault(e => e.Id == action?.EmulatorId);
-                if (emulator == null)
-                {
-                    Logger.Warn($"No emulator found for {game.Name}");
-                    return false;
-                }
+			var emulators = API.Instance.Database.Emulators;
+			if (emulators == null)
+			{
+				return false;
+			}
 
-                string builtInConfigId = string.Empty;
-                if (emulator.BuiltInConfigId == null)
-                {
-                    Logger.Warn($"No BuiltInConfigId found for {emulator.Name}");
-                }
-                else
-                {
-                    builtInConfigId = emulator.BuiltInConfigId;
-                }
+			foreach (GameAction action in game.GameActions)
+			{
+				if (action?.EmulatorId == null)
+				{
+					continue;
+				}
 
-                if (builtInConfigId.Contains("ScummVM", StringComparison.OrdinalIgnoreCase)
-                    || emulator.Name.Contains("ScummVM", StringComparison.OrdinalIgnoreCase)
-                    || emulator.InstallDir.Contains("ScummVM", StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-            }
+				Emulator emulator = emulators.FirstOrDefault(e => e.Id == action.EmulatorId);
+				if (emulator == null)
+				{
+					Logger.Warn($"No emulator found for {game.Name}");
+					continue;
+				}
 
-            return false;
-        }
+				if (EmulatorMatchesName(emulator, emulatorName))
+				{
+					return true;
+				}
+			}
 
-        /// <summary>
-        /// Checks if a game uses the RetroArch emulator.
-        /// </summary>
-        /// <param name="game">The game object.</param>
-        /// <returns>True if the game uses RetroArch, otherwise false.</returns>
-        public static bool GameUseRetroArch(Game game)
-        {
-            if (game?.GameActions == null)
-            {
-                return false;
-            }
+			return false;
+		}
 
-            foreach (GameAction action in game.GameActions)
-            {
-                Emulator emulator = API.Instance.Database.Emulators?.FirstOrDefault(e => e.Id == action?.EmulatorId);
-                if (emulator == null)
-                {
-                    Logger.Warn($"No emulator found for {game.Name}");
-                    return false;
-                }
+		/// <summary>
+		/// Checks if an emulator matches a given name in its BuiltInConfigId, Name, or InstallDir.
+		/// </summary>
+		/// <param name="emulator">The emulator to check.</param>
+		/// <param name="name">The name to search for.</param>
+		/// <returns>True if a match is found, otherwise false.</returns>
+		private static bool EmulatorMatchesName(Emulator emulator, string name)
+		{
+			return (emulator.BuiltInConfigId != null &&
+					emulator.BuiltInConfigId.IndexOf(name, StringComparison.OrdinalIgnoreCase) >= 0) ||
+				   (emulator.Name != null &&
+					emulator.Name.IndexOf(name, StringComparison.OrdinalIgnoreCase) >= 0) ||
+				   (emulator.InstallDir != null &&
+					emulator.InstallDir.IndexOf(name, StringComparison.OrdinalIgnoreCase) >= 0);
+		}
 
-                string builtInConfigId = string.Empty;
-                if (emulator.BuiltInConfigId == null)
-                {
-                    Logger.Warn($"No BuiltInConfigId found for {emulator.Name}");
-                }
-                else
-                {
-                    builtInConfigId = emulator.BuiltInConfigId;
-                }
-
-                if (builtInConfigId.Contains("RetroArch", StringComparison.OrdinalIgnoreCase)
-                    || emulator.Name.Contains("RetroArch", StringComparison.OrdinalIgnoreCase)
-                    || emulator.InstallDir.Contains("RetroArch", StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        #endregion
+		#endregion
 
 
-        /// <summary>
-        /// Gets a file path from the plugin's cache directory, optionally downloading it if missing.
-        /// </summary>
-        /// <param name="fileName">The file name.</param>
-        /// <param name="pluginName">The plugin name.</param>
-        /// <param name="options">Optional parameters for downloading if missing.</param>
-        /// <returns>The full path to the cached file, or empty string if not found.</returns>
-        public static string GetCacheFile(string fileName, string pluginName, dynamic options = null)
+		/// <summary>
+		/// Gets a file path from the plugin's cache directory, optionally downloading it if missing.
+		/// </summary>
+		/// <param name="fileName">The file name.</param>
+		/// <param name="pluginName">The plugin name.</param>
+		/// <param name="options">Optional parameters for downloading if missing.</param>
+		/// <returns>The full path to the cached file, or empty string if not found.</returns>
+		public static string GetCacheFile(string fileName, string pluginName, dynamic options = null)
         {
             pluginName = pluginName.ToLower();
             fileName = CommonPlayniteShared.Common.Paths.GetSafePathName(fileName);

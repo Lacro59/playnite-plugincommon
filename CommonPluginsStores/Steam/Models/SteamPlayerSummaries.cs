@@ -5,13 +5,7 @@ using System.Text;
 
 namespace CommonPluginsStores.Steam.Models
 {
-    public class SteamPlayerSummaries
-    {
-        [SerializationPropertyName("response")]
-        public PlayerResponse Response { get; set; }
-    }
-
-    public class Player
+    public class SteamPlayer
     {
         [SerializationPropertyName("steamid")]
         public ulong SteamId { get; set; }
@@ -45,9 +39,9 @@ namespace CommonPluginsStores.Steam.Models
         public string LocCountryCode { get; set; }
     }
 
-    public class PlayerResponse
+    public class SteamPlayerSummaries
     {
         [SerializationPropertyName("players")]
-        public List<Player> Players { get; set; }
+        public List<SteamPlayer> Players { get; set; }
     }
 }

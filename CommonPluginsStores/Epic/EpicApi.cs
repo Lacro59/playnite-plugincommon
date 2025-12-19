@@ -44,6 +44,7 @@ namespace CommonPluginsStores.Epic
 
         private string UrlStoreEpic => @"https://store.epicgames.com";
         private string UrlAccountProfile => UrlStoreEpic + @"/u/{0}";
+        private string UrlAccountProfileUS => UrlStoreEpic + @"/en-US/u/{0}";
         private string UrlAccountLinkFriends => UrlStoreEpic + @"/u/{0}/friends";
         private string UrlAccountAchievements => UrlStoreEpic + @"/{0}/u/{1}/details/{2}";
 
@@ -63,15 +64,9 @@ namespace CommonPluginsStores.Epic
         private static string UserAgent => @"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) EpicGamesLauncher";
         private static string AuthEncodedString => "MzRhMDJjZjhmNDQxNGUyOWIxNTkyMTg3NmRhMzZmOWE6ZGFhZmJjY2M3Mzc3NDUwMzlkZmZlNTNkOTRmYzc2Y2Y=";
 
-        #region Paths
-
-        private string TokensPath { get; }
-
-        #endregion
 
         public EpicApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "Epic")
         {
-            TokensPath = Path.Combine(PathStoresData, "Epic_Tokens.dat");
             CookiesDomains = new List<string> { ".epicgames.com", ".store.epicgames.com" };
         }
 
@@ -79,8 +74,7 @@ namespace CommonPluginsStores.Epic
 
         protected override List<HttpCookie> GetWebCookies(bool deleteCookies = false, IWebView webView = null)
         {
-            OauthResponse tokens = LoadTokens();
-            if (tokens == null)
+            if (StoreToken == null)
             {
                 Logger.Warn("GetWebCookies called but no tokens are available.");
                 return new List<HttpCookie>();
@@ -92,9 +86,9 @@ namespace CommonPluginsStores.Epic
                 {
                     Domain = ".store.epicgames.com",
                     Name = "EPIC_EG1",
-                    Value = tokens.access_token,
+                    Value = StoreToken.Token,
                     Path = "/",
-                    Expires = tokens.expires_at,
+                    Expires = StoreToken.ExpireAt,
                     Creation = DateTime.Now,
                     LastAccess = DateTime.Now,
                     HttpOnly = false,
@@ -106,9 +100,9 @@ namespace CommonPluginsStores.Epic
                 {
                     Domain = ".store.epicgames.com",
                     Name = "REFRESH_EPIC_EG1",
-                    Value = tokens.refresh_token,
+                    Value = StoreToken.RefreshToken,
                     Path = "/",
-                    Expires = tokens.refresh_expires_at,
+                    Expires = StoreToken.RefreshExpireAt,
                     Creation = DateTime.Now,
                     LastAccess = DateTime.Now,
                     HttpOnly = false,
@@ -120,9 +114,9 @@ namespace CommonPluginsStores.Epic
                 {
                     Domain = ".store.epicgames.com",
                     Name = "refreshTokenExpires",
-                    Value = tokens.refresh_expires_at.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fff").Replace(":", "%3A")+ "Z",
+                    Value = StoreToken.RefreshExpireAt?.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fff").Replace(":", "%3A")+ "Z",
                     Path = "/",
-                    Expires = tokens.refresh_expires_at,
+                    Expires = StoreToken.RefreshExpireAt,
                     Creation = DateTime.Now,
                     LastAccess = DateTime.Now,
                     HttpOnly = false,
@@ -134,9 +128,9 @@ namespace CommonPluginsStores.Epic
                 {
                     Domain = ".store.epicgames.com",
                     Name = "storeTokenExpires",
-                    Value = tokens.refresh_expires_at.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fff").Replace(":", "%3A")+ "Z",
+                    Value = StoreToken.RefreshExpireAt?.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fff").Replace(":", "%3A")+ "Z",
                     Path = "/",
-                    Expires = tokens.refresh_expires_at,
+                    Expires = StoreToken.RefreshExpireAt,
                     Creation = DateTime.Now,
                     LastAccess = DateTime.Now,
                     HttpOnly = false,
@@ -170,13 +164,9 @@ namespace CommonPluginsStores.Epic
             }
 
             bool isLogged = CheckIsUserLoggedIn();
-            if (isLogged)
+            if (!isLogged)
             {
-                _ = LoadTokens();
-            }
-            else
-            {
-                AuthToken = null;
+                StoreToken = null;
             }
 
             return isLogged;
@@ -212,14 +202,13 @@ namespace CommonPluginsStores.Epic
 
         private void SetUserAfterLogin()
         {
-            OauthResponse tokens = LoadTokens();
-            if (tokens != null)
+            if (StoreToken != null)
             {
                 AccountInfos accountInfos = new AccountInfos
                 {
-                    UserId = tokens.account_id,
-                    Pseudo = tokens.account_id == CurrentAccountInfos.UserId ? CurrentAccountInfos.Pseudo : string.Empty,
-                    Link = string.Format(UrlAccountProfile, tokens.account_id),
+                    UserId = StoreToken.AccountId,
+                    Pseudo = StoreToken.AccountId.IsEqual(CurrentAccountInfos.UserId) ? CurrentAccountInfos.Pseudo : string.Empty,
+                    Link = string.Format(UrlAccountProfile, StoreToken.AccountId),
                     IsPrivate = true,
                     IsCurrent = true
                 };
@@ -680,37 +669,10 @@ namespace CommonPluginsStores.Epic
 
         #region Epic
 
-        private OauthResponse LoadTokens()
-        {
-            if (System.IO.File.Exists(TokensPath))
-            {
-                try
-                {
-                    OauthResponse tokens = Serialization.FromJson<OauthResponse>(
-                        Encryption.DecryptFromFile(
-                            TokensPath,
-                            Encoding.UTF8,
-                            WindowsIdentity.GetCurrent().User.Value));
-
-                    AuthToken = new StoreToken
-                    {
-                        Token = tokens.access_token,
-                        Type = tokens.token_type
-                    };
-
-                    return tokens;
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, false, PluginName);
-                }
-            }
-
-            return null;
-        }
-
         private void AuthenticateUsingAuthCode(string authorizationCode)
         {
+            StoreToken = null;
+
             using (HttpClient httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Clear();
@@ -721,12 +683,7 @@ namespace CommonPluginsStores.Epic
                     content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
                     HttpResponseMessage response = httpClient.PostAsync(UrlAccountAuth, content).GetAwaiter().GetResult();
                     string respContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                    FileSystem.CreateDirectory(Path.GetDirectoryName(TokensPath));
-                    Encryption.EncryptToFile(
-                        TokensPath,
-                        respContent,
-                        Encoding.UTF8,
-                        WindowsIdentity.GetCurrent().User.Value);
+                    SetToken(respContent);
                 }
             }
         }
@@ -751,13 +708,12 @@ namespace CommonPluginsStores.Epic
             {
                 accountInfos.AccountStatus = AccountStatus.Checking;
 
-				string url = string.Format(UrlAccountProfile, accountInfos.UserId);
+				string url = string.Format(UrlAccountProfileUS, accountInfos.UserId);
                 var pageSource = await Web.DownloadSourceDataWebView(url);
 				string source = pageSource.Item1;
 
-				// Check if the page source contains the "private-view-text" string to determine if the profile is private.
 				// If the profile is private, the method will return false, otherwise it will return true.
-				return !source.Contains("private-view-text");
+				return !source.Contains("This profile is unavailable", StringComparison.OrdinalIgnoreCase);
 			}
             catch (Exception ex)
             {
@@ -769,20 +725,18 @@ namespace CommonPluginsStores.Epic
 
         private bool CheckIsUserLoggedIn()
         {
-            OauthResponse tokens = LoadTokens();
-            if (tokens == null)
+            if (StoreToken == null)
             {
                 return false;
             }
 
             try
             {
-                EpicAccountResponse account = GetAccountInfo(tokens.account_id).GetAwaiter().GetResult();
+                EpicAccountResponse account = GetAccountInfo(StoreToken.AccountId).GetAwaiter().GetResult();
                 if (account == null)
                 {
-                    RenewTokens(tokens.refresh_token);
-                    tokens = LoadTokens();
-                    if (tokens.account_id.IsNullOrEmpty() || tokens.access_token.IsNullOrEmpty())
+                    RenewTokens(StoreToken.RefreshToken);
+                    if (StoreToken == null || StoreToken.AccountId.IsNullOrEmpty() || StoreToken.Token.IsNullOrEmpty())
                     {
                         return false;
                     }
@@ -790,32 +744,33 @@ namespace CommonPluginsStores.Epic
                     account = GetEpicAccount();
                 }
 
-                if (CurrentAccountInfos.Pseudo.IsNullOrEmpty() && account.Id == tokens.account_id)
+                if (CurrentAccountInfos.Pseudo.IsNullOrEmpty() && account.Id.IsEqual(StoreToken.AccountId))
                 {
                     CurrentAccountInfos.Pseudo = account?.DisplayName;
                     CurrentAccountInfos.Link = string.Format(UrlAccountProfile, account.Id);
                 }
-                return account != null && account.Id == tokens.account_id;
+                return account != null && account.Id.IsEqual(StoreToken.AccountId);
             }
             catch
             {
                 try
                 {
-                    RenewTokens(tokens.refresh_token);
-                    tokens = LoadTokens();
-                    if (tokens.account_id.IsNullOrEmpty() || tokens.access_token.IsNullOrEmpty())
-                    {
-                        return false;
-                    }
+                    Logger.Warn("Retry CheckIsUserLoggedIn()");
 
-                    EpicAccountResponse account = GetAccountInfo(tokens.account_id).GetAwaiter().GetResult()    ;
-                    if (CurrentAccountInfos.Pseudo.IsNullOrEmpty() && account.Id == tokens.account_id)
+                    RenewTokens(StoreToken.RefreshToken);
+					if (StoreToken == null || StoreToken.AccountId.IsNullOrEmpty() || StoreToken.Token.IsNullOrEmpty())
+					{
+						return false;
+					}
+
+					EpicAccountResponse account = GetAccountInfo(StoreToken.AccountId).GetAwaiter().GetResult();
+                    if (CurrentAccountInfos.Pseudo.IsNullOrEmpty() && account.Id.IsEqual(StoreToken.AccountId))
                     {
                         CurrentAccountInfos.Pseudo = account?.DisplayName;
                         CurrentAccountInfos.Link = string.Format(UrlAccountProfile, account.Id);
                     }
-                    return account.Id == tokens.account_id;
-                }
+					return account != null && account.Id.IsEqual(StoreToken.AccountId);
+				}
                 catch (Exception ex)
                 {
                     Common.LogError(ex, false, "Failed to validation Epic authentication.", false, PluginName);
@@ -865,7 +820,6 @@ namespace CommonPluginsStores.Epic
                 return;
             }
 
-            FileSystem.DeleteFile(TokensPath);
             if (string.IsNullOrEmpty(authorizationCode))
             {
                 Logger.Error("Failed to get login exchange key for Epic account.");
@@ -903,23 +857,38 @@ namespace CommonPluginsStores.Epic
                     content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
                     HttpResponseMessage response = httpClient.PostAsync(UrlAccountAuth, content).GetAwaiter().GetResult();
                     string respContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                    FileSystem.CreateDirectory(Path.GetDirectoryName(TokensPath));
-                    Encryption.EncryptToFile(
-                        TokensPath,
-                        respContent,
-                        Encoding.UTF8,
-                        WindowsIdentity.GetCurrent().User.Value);
+                    SetToken(respContent);
                 }
             }
         }
 
+        private void SetToken(string respContent)
+        {
+			if (Serialization.TryFromJson(respContent, out OauthResponse oauthResponse, out Exception exception))
+			{
+				StoreToken = new StoreToken
+				{
+					AccountId = oauthResponse.account_id,
+					Type = oauthResponse.token_type,
+					Token = oauthResponse.access_token,
+					ExpireAt = oauthResponse.expires_at,
+					RefreshToken = oauthResponse.refresh_token,
+					RefreshExpireAt = oauthResponse.refresh_expires_at
+				};
+
+				SetStoredToken(StoreToken);
+			}
+			else if (exception != null)
+			{
+				Common.LogError(exception, false, false, PluginName);
+			}
+		}
 
         private EpicAccountResponse GetEpicAccount()
         {
-            OauthResponse tokens = LoadTokens();
-            if (tokens != null)
+            if (StoreToken != null)
             {
-                return GetAccountInfo(tokens.account_id).GetAwaiter().GetResult();
+                return GetAccountInfo(StoreToken.AccountId).GetAwaiter().GetResult();
             }
             return null;
         }
@@ -990,7 +959,7 @@ namespace CommonPluginsStores.Epic
             var result = LoadData<List<Asset>>(cacheFile, 10);
             if (result == null || result.Count() == 0)
             {
-                var response = InvokeRequest<LibraryItemsResponse>(UrlAsset, LoadTokens()).GetAwaiter().GetResult();
+                var response = InvokeRequest<LibraryItemsResponse>(UrlAsset, StoreToken).GetAwaiter().GetResult();
                 result = new List<Asset>();
                 result.AddRange(response.Item2.Records);
 
@@ -999,7 +968,7 @@ namespace CommonPluginsStores.Epic
                 {
                     response = InvokeRequest<LibraryItemsResponse>(
                         $"{UrlAsset}&cursor={nextCursor}",
-                        LoadTokens()).GetAwaiter().GetResult();
+						StoreToken).GetAwaiter().GetResult();
                     result.AddRange(response.Item2.Records);
                     nextCursor = response.Item2.ResponseMetadata.NextCursor;
                 }
@@ -1020,7 +989,7 @@ namespace CommonPluginsStores.Epic
         private async Task<EpicAccountResponse> GetAccountInfo(string id)
         {
             string url = string.Format(UrlAccount, id);
-            Tuple<string, EpicAccountResponse> data = await InvokeRequest<EpicAccountResponse>(url, LoadTokens());
+            Tuple<string, EpicAccountResponse> data = await InvokeRequest<EpicAccountResponse>(url, StoreToken);
             return data.Item2;
         }
 
@@ -1178,14 +1147,14 @@ namespace CommonPluginsStores.Epic
 
         #endregion
 
-        private async Task<Tuple<string, T>> InvokeRequest<T>(string url, OauthResponse tokens = null) where T : class
+        private async Task<Tuple<string, T>> InvokeRequest<T>(string url, StoreToken token = null) where T : class
         {
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Clear();
-                if (tokens != null)
+                if (token != null)
                 {
-                    httpClient.DefaultRequestHeaders.Add("Authorization", tokens.token_type + " " + tokens.access_token);
+                    httpClient.DefaultRequestHeaders.Add("Authorization", token.Type + " " + token.Token);
                 }
 
                 var response = await httpClient.GetAsync(url);
@@ -1244,9 +1213,9 @@ namespace CommonPluginsStores.Epic
                     httpClient.DefaultRequestHeaders.Add("User-Agent", UserAgent);
 
 					bool needsAuth = (CurrentAccountInfos?.IsPrivate ?? false) || StoreSettings.UseAuth;
-					if (needsAuth && AuthToken != null && !AuthToken.Token.IsNullOrEmpty())
+					if (needsAuth && StoreToken != null && !StoreToken.Token.IsNullOrEmpty())
 					{
-						httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + AuthToken.Token);
+						httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + StoreToken.Token);
 					}
 
 					HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content);

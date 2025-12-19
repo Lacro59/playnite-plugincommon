@@ -10,7 +10,7 @@ namespace CommonPluginsStores.Steam.Models
     public class SteamFriendsApps
     {
         [SerializationPropertyName("appid")]
-        public int AppId { get; set; }
+        public uint AppId { get; set; }
         [SerializationPropertyName("name")]
         public string Name { get; set; }
         [SerializationPropertyName("app_type")]
