@@ -370,7 +370,7 @@ namespace CommonPluginsStores.Steam
 			string avatar = string.Empty;
 			if (avatarMatch.Success)
 			{
-				avatar = profileDatamatch.Groups["avatar"].Value;
+				avatar = avatarMatch.Groups["avatar"].Value;
 			}
 
 			RgProfileData rgProfileData = Serialization.FromJson<RgProfileData>(json);
@@ -1427,7 +1427,13 @@ namespace CommonPluginsStores.Steam
 			{
 				ObservableCollection<AccountGameInfos> accountGameInfos = new ObservableCollection<AccountGameInfos>();
 
-                var dic = new Dictionary<string, string>
+				if (StoreToken?.Token.IsNullOrEmpty() ?? true)
+				{
+					Logger.Warn("StoreToken is not available for GetAccountGamesInfosByWeb");
+					return accountGameInfos;
+				}
+
+				var dic = new Dictionary<string, string>
                 {
                     { "access_token", StoreToken.Token },
                     { "steamId", accountInfos.UserId },
