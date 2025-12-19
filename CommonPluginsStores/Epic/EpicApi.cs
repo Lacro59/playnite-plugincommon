@@ -758,7 +758,7 @@ namespace CommonPluginsStores.Epic
                     Logger.Warn("Retry CheckIsUserLoggedIn()");
 
                     RenewTokens(StoreToken.RefreshToken);
-					if (StoreToken == null && (StoreToken.AccountId.IsNullOrEmpty() || StoreToken.Token.IsNullOrEmpty()))
+					if (StoreToken == null || StoreToken.AccountId.IsNullOrEmpty() || StoreToken.Token.IsNullOrEmpty())
 					{
 						return false;
 					}
