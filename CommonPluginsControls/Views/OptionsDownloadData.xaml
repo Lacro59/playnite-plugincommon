@@ -5,89 +5,167 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CommonPluginsControls.Controls" 
              xmlns:playnitecontrols="clr-namespace:CommonPluginsControls.PlayniteControls"
-             mc:Ignorable="d" Height="250" Width="850">
+             mc:Ignorable="d">
 
-    <DockPanel LastChildFill="True" Margin="10">
-        <Border BorderThickness="0,1,0,0" BorderBrush="{StaticResource NormalBorderBrush}"
-                    Margin="0,10,0,0" DockPanel.Dock="Bottom">
-            <DockPanel KeyboardNavigation.TabNavigation="Local" LastChildFill="False" Margin="0,5">
-                <Button TabIndex="1" Name="PART_BtClose" Content="{DynamicResource LOCCloseLabel}" 
-                            DockPanel.Dock="Right"
-                            Style="{StaticResource BottomButton}" Click="PART_BtClose_Click" />
+    <UserControl.Resources>
+        <!-- Local fallback resources so the control looks reasonable when host theme resources are not provided -->
+        <SolidColorBrush x:Key="NormalBorderBrush" Color="#444444" />
+        <!-- Background for the dialog so underlying fullscreen content doesn't show through -->
+        <SolidColorBrush x:Key="OptionsBackgroundBrush" Color="#CC111111" />
 
-                <Button TabIndex="0" Name="PART_BtDownload" Content="{DynamicResource LOCDownloadLabel}" 
-                            DockPanel.Dock="Right"
-                            Style="{StaticResource BottomButton}" Click="PART_BtDownload_Click" />
-            </DockPanel>
-        </Border>
+        <!-- Radio button style: larger indicator, clear spacing and visible checked state -->
+        <Style x:Key="OptionRadio" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="4,6" />
+            <Setter Property="Margin" Value="6,4" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Grid Width="18" Height="18" VerticalAlignment="Center">
+                                <Ellipse x:Name="Outer" Stroke="White" StrokeThickness="1.2" Fill="Transparent" />
+                                <Ellipse x:Name="Inner" Width="10" Height="10" Fill="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Grid>
+                            <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True" />
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Inner" Property="Fill" Value="White" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="#888888" />
+                                <Setter TargetName="Outer" Property="Stroke" Value="#888888" />
+                                <Setter TargetName="Inner" Property="Fill" Value="#666666" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- Ensure checkboxes also use readable foreground -->
+        <Style x:Key="OptionCheckBox" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="6,4" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <BulletDecorator Background="Transparent" VerticalAlignment="Center">
+                            <BulletDecorator.Bullet>
+                                <Grid>
+                                    <Border Width="16" Height="16" BorderBrush="White" BorderThickness="1" Background="Transparent" CornerRadius="2" x:Name="Box" />
+                                    <Path x:Name="CheckMark" Data="M2,8 L6,12 L14,4" Stroke="White" StrokeThickness="2" Visibility="Collapsed" Margin="0" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                </Grid>
+                            </BulletDecorator.Bullet>
+                            <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True" />
+                        </BulletDecorator>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="#888888" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-            <Label Content="{DynamicResource LOCFilters}" FontSize="18" />
-            <Separator />
-        </StackPanel>
+        <Style x:Key="BottomButton" TargetType="Button">
+            <Setter Property="Background" Value="#5A9BD5" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Padding" Value="8,6" />
+            <Setter Property="Margin" Value="6,0,0,0" />
+            <Setter Property="MinWidth" Value="80" />
+            <Setter Property="BorderBrush" Value="#2E6A9C" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
 
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width=".75*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width=".75*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="10" />
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="10" />
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="10" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+        <Style x:Key="BaseTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+    </UserControl.Resources>
 
-            <RadioButton Name="PART_AllGames" Grid.Column="0" Grid.Row="0" IsChecked="True" GroupName="RadioFilters">
-                <Label Content="{DynamicResource LOCQuickFilterAllGames}" />
-            </RadioButton>
-            <RadioButton Name="PART_Filtred" Grid.Column="1" Grid.Row="0" IsChecked="false" GroupName="RadioFilters">
-                <Label Content="{DynamicResource LOCMetaGameSourceFiltered}" />
-            </RadioButton>
-            <RadioButton Name="PART_Selected" Grid.Column="2" Grid.Row="0" IsChecked="false" GroupName="RadioFilters">
-                <Label Content="{DynamicResource LOCMetaGameSourceSelected}" />
-            </RadioButton>
-            
-            <RadioButton Name="PART_GamesInstalled" Checked="RadioButton_Checked" Grid.Column="0" Grid.Row="2" GroupName="RadioFilters">
-                <Label Content="{DynamicResource LOCGameIsGameInstalledTitle}" />
-            </RadioButton>
-            <RadioButton Name="PART_GamesNotInstalled" Checked="RadioButton_Checked" Grid.Column="1" Grid.Row="2" GroupName="RadioFilters">
-                <Label Content="{DynamicResource LOCGameIsUnInstalledTitle}" />
-            </RadioButton>
-            <RadioButton Name="PART_GamesFavorite" Checked="RadioButton_Checked" Grid.Column="2" Grid.Row="2" GroupName="RadioFilters">
-                <Label Content="{DynamicResource LOCQuickFilterFavorites}" />
-            </RadioButton>
+    <!-- Fullscreen overlay layer + centered opaque dialog to improve readability in fullscreen mode -->
+    <Grid Background="Transparent">
+        <!-- semi-opaque overlay that covers underlying content -->
+        <Rectangle Fill="{StaticResource OptionsBackgroundBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
 
-            <RadioButton Name="PART_OldData" Checked="RadioButton_Checked" Grid.Column="0" Grid.Row="4" GroupName="RadioFilters">
-                <Label Content="{DynamicResource LOCCommonOldData}" />
-            </RadioButton>
-            <RadioButton Name="PART_GamesRecentlyPlayed" Checked="RadioButton_Checked" Grid.Column="1" Grid.Row="4" GroupName="RadioFilters">
-                <Label Content="{DynamicResource LOCQuickFilterRecentlyPlayed}" />
-            </RadioButton>
-            <RadioButton Name="PART_GamesRecentlyAdded" Checked="RadioButton_Checked" Grid.Column="2" Grid.Row="4" GroupName="RadioFilters">
-                <Label Content="{DynamicResource LOCCommonRecentlyAdded}" />
-            </RadioButton>
+        <!-- centered dialog container with solid background for good contrast -->
+        <Border MaxWidth="850" MinHeight="250" Background="#FF1E1E1E" CornerRadius="4" Padding="10"
+                HorizontalAlignment="Center" VerticalAlignment="Center">
+            <DockPanel LastChildFill="True">
 
-            <StackPanel Grid.Row="4" Grid.Column="4" Name="Part_MonthSelect" IsEnabled="False" HorizontalAlignment="Left" Orientation="Horizontal">
-                <TextBlock Text="{DynamicResource LOCCommonSince}" Style="{DynamicResource BaseTextBlockStyle}" VerticalAlignment="Center"  />
-                <playnitecontrols:NumericBox x:Name="PART_Months" Width="30" Margin="10,0,10,0" LongValue="1" MinLongValue="1" />
-                <TextBlock Text="{DynamicResource LOCCommonMonthsLabel}" Style="{DynamicResource BaseTextBlockStyle}" VerticalAlignment="Center" />
-            </StackPanel>
-            
-            <StackPanel Grid.Row="6" Grid.ColumnSpan="5" HorizontalAlignment="Right" Orientation="Horizontal">
-                <CheckBox IsChecked="False" VerticalAlignment="Bottom"
-                          Name="PART_TagMissing"
-                          Content="{DynamicResource LOCCommonMissingData}" />
+                <Border BorderThickness="0,1,0,0" BorderBrush="{DynamicResource NormalBorderBrush}"
+                        Margin="0,10,0,0" DockPanel.Dock="Bottom">
+                    <DockPanel KeyboardNavigation.TabNavigation="Local" LastChildFill="False" Margin="0,5">
+                        <Button TabIndex="1" Name="PART_BtClose" Content="{DynamicResource LOCCloseLabel}" 
+                                DockPanel.Dock="Right"
+                                Style="{DynamicResource BottomButton}" Click="PART_BtClose_Click" FontSize="13" FontFamily="Segoe UI" />
 
-                <CheckBox IsChecked="True" VerticalAlignment="Bottom" Margin="20,0,0,0"
-                          Name="PART_OnlyMissing"
-                          Content="{DynamicResource LOCCommonOnlyMissing}" />
-            </StackPanel>
-        </Grid>
-    </DockPanel>
-</UserControl>
+                        <Button TabIndex="0" Name="PART_BtDownload" Content="{DynamicResource LOCDownloadLabel}" 
+                                DockPanel.Dock="Right"
+                                Style="{DynamicResource BottomButton}" Click="PART_BtDownload_Click" FontSize="13" FontFamily="Segoe UI" />
+                    </DockPanel>
+                </Border>
+
+                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+                    <Label Content="{DynamicResource LOCFilters}" FontSize="18" Foreground="White" />
+                    <Separator />
+                </StackPanel>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width=".75*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width=".75*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <RadioButton Style="{StaticResource OptionRadio}" Name="PART_AllGames" Grid.Column="0" Grid.Row="0" IsChecked="True" GroupName="RadioFilters" Content="{DynamicResource LOCQuickFilterAllGames}" />
+                    <RadioButton Style="{StaticResource OptionRadio}" Name="PART_Filtred" Grid.Column="1" Grid.Row="0" IsChecked="False" GroupName="RadioFilters" Content="{DynamicResource LOCMetaGameSourceFiltered}" />
+                    <RadioButton Style="{StaticResource OptionRadio}" Name="PART_Selected" Grid.Column="2" Grid.Row="0" IsChecked="False" GroupName="RadioFilters" Content="{DynamicResource LOCMetaGameSourceSelected}" />
+                    
+                    <RadioButton Style="{StaticResource OptionRadio}" Name="PART_GamesInstalled" Checked="RadioButton_Checked" Grid.Column="0" Grid.Row="2" GroupName="RadioFilters" Content="{DynamicResource LOCGameIsGameInstalledTitle}" />
+                    <RadioButton Style="{StaticResource OptionRadio}" Name="PART_GamesNotInstalled" Checked="RadioButton_Checked" Grid.Column="1" Grid.Row="2" GroupName="RadioFilters" Content="{DynamicResource LOCGameIsUnInstalledTitle}" />
+                    <RadioButton Style="{StaticResource OptionRadio}" Name="PART_GamesFavorite" Checked="RadioButton_Checked" Grid.Column="2" Grid.Row="2" GroupName="RadioFilters" Content="{DynamicResource LOCQuickFilterFavorites}" />
+
+                    <RadioButton Style="{StaticResource OptionRadio}" Name="PART_OldData" Checked="RadioButton_Checked" Grid.Column="0" Grid.Row="4" GroupName="RadioFilters" Content="{DynamicResource LOCCommonOldData}" />
+                    <RadioButton Style="{StaticResource OptionRadio}" Name="PART_GamesRecentlyPlayed" Checked="RadioButton_Checked" Grid.Column="1" Grid.Row="4" GroupName="RadioFilters" Content="{DynamicResource LOCQuickFilterRecentlyPlayed}" />
+                    <RadioButton Style="{StaticResource OptionRadio}" Name="PART_GamesRecentlyAdded" Checked="RadioButton_Checked" Grid.Column="2" Grid.Row="4" GroupName="RadioFilters" Content="{DynamicResource LOCCommonRecentlyAdded}" />
+
+                    <StackPanel Grid.Row="4" Grid.Column="3" Name="Part_MonthSelect" HorizontalAlignment="Left" Orientation="Horizontal">
+                        <TextBlock Text="{DynamicResource LOCCommonSince}" Style="{DynamicResource BaseTextBlockStyle}" VerticalAlignment="Center"  />
+                        <playnitecontrols:NumericBox x:Name="PART_Months" MinWidth="35" Height="22" Margin="10,0,10,0" LongValue="1" MinLongValue="1" HorizontalContentAlignment="Center" VerticalAlignment="Center" />
+                        <TextBlock Text="{DynamicResource LOCCommonMonthsLabel}" Style="{DynamicResource BaseTextBlockStyle}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Row="6" Grid.ColumnSpan="4" HorizontalAlignment="Right" Orientation="Horizontal">
+                        <CheckBox Style="{StaticResource OptionCheckBox}" IsChecked="False" VerticalAlignment="Bottom"
+                                  Name="PART_TagMissing"
+                                  Content="{DynamicResource LOCCommonMissingData}" />
+
+                        <CheckBox Style="{StaticResource OptionCheckBox}" IsChecked="True" VerticalAlignment="Bottom" Margin="20,0,0,0"
+                                  Name="PART_OnlyMissing"
+                                  Content="{DynamicResource LOCCommonOnlyMissing}" />
+                    </StackPanel>
+                 </Grid>
+             </DockPanel>
+         </Border>
+     </Grid>
+ </UserControl>

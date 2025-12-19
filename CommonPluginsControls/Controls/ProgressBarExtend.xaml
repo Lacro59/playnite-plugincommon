@@ -58,7 +58,7 @@
                                                     <TextBlock Width="{Binding MarginLeft, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                                     <TextBlock Text="{Binding TextValue, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue='empty text'}"                                                           
                                                                Grid.Column="1"
-                                                               Foreground="{DynamicResource TextBrush}"
+                                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                TextAlignment="Center" VerticalAlignment="Center" />
                                                     <TextBlock Width="{Binding MarginRight, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                                 </Grid>
@@ -117,7 +117,7 @@
                                                     <TextBlock Width="{Binding MarginLeft, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                                     <TextBlock Text="{Binding TextValue, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue='empty text'}"                                                           
                                                                Grid.Column="1"
-                                                               Foreground="{DynamicResource TextBrush}"
+                                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                TextAlignment="Center" VerticalAlignment="Center" />
                                                     <TextBlock Width="{Binding MarginRight, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                                 </Grid>
