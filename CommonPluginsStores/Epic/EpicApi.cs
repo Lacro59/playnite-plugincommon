@@ -866,7 +866,7 @@ namespace CommonPluginsStores.Epic
         {
 			if (Serialization.TryFromJson(respContent, out OauthResponse oauthResponse, out Exception exception))
 			{
-				StoreToken storeToken = new StoreToken
+				StoreToken = new StoreToken
 				{
 					AccountId = oauthResponse.account_id,
 					Type = oauthResponse.token_type,
@@ -876,7 +876,7 @@ namespace CommonPluginsStores.Epic
 					RefreshExpireAt = oauthResponse.refresh_expires_at
 				};
 
-				SetStoredToken(storeToken);
+				SetStoredToken(StoreToken);
 			}
 			else if (exception != null)
 			{
