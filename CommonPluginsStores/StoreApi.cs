@@ -169,7 +169,7 @@ namespace CommonPluginsStores
 
         protected string FileToken { get; }
 
-        private StoreToken _authToken;
+        private StoreToken _storeToken;
 
 		/// <summary>
 		/// Gets or sets the authentication token for API requests.
@@ -178,16 +178,16 @@ namespace CommonPluginsStores
         {
             get
             {
-                if (_authToken == null)
+                if (_storeToken == null)
                 {
-                    _authToken = GetStoredToken();
+                    _storeToken = GetStoredToken();
 				}
-                return _authToken;
+                return _storeToken;
             }
             set
             {
-                _authToken = value;
-                _ = SetStoredToken(_authToken);
+                _storeToken = value;
+                _ = SetStoredToken(_storeToken);
 			}
         }
 
