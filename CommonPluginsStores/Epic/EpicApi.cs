@@ -736,7 +736,7 @@ namespace CommonPluginsStores.Epic
                 if (account == null)
                 {
                     RenewTokens(StoreToken.RefreshToken);
-                    if (StoreToken == null && (StoreToken.AccountId.IsNullOrEmpty() || StoreToken.Token.IsNullOrEmpty()))
+                    if (StoreToken == null || StoreToken.AccountId.IsNullOrEmpty() || StoreToken.Token.IsNullOrEmpty())
                     {
                         return false;
                     }
