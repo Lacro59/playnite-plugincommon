@@ -358,12 +358,19 @@ namespace CommonPluginsStores.Steam
         private AccountInfos GetAccountInfosFromRgProfileData(string source)
         {
             AccountInfos accountInfos = null;
-			var match = Regex.Match(source, @"g_rgProfileData\s*=\s*(?<json>\{.*?\});");
+			var profileDatamatch = Regex.Match(source, @"g_rgProfileData\s*=\s*(?<json>\{.*?\});");
+			var avatarMatch = Regex.Match(source, @"<link rel=""image_src"" href=""(?<avatar>[^""]+)"">");
 
 			string json = string.Empty;
-			if (match.Success)
+			if (profileDatamatch.Success)
 			{
-				json = match.Groups["json"].Value;
+				json = profileDatamatch.Groups["json"].Value;
+			}
+
+			string avatar = string.Empty;
+			if (avatarMatch.Success)
+			{
+				avatar = profileDatamatch.Groups["avatar"].Value;
 			}
 
 			RgProfileData rgProfileData = Serialization.FromJson<RgProfileData>(json);
@@ -373,7 +380,7 @@ namespace CommonPluginsStores.Steam
 				{
 					ApiKey = CurrentAccountInfos?.ApiKey,
 					UserId = rgProfileData.SteamId.ToString(),
-					Avatar = string.Format(UrlAvatarFul, rgProfileData.SteamId.ToString()),
+					Avatar = avatar,
 					Pseudo = rgProfileData.PersonaName,
 					Link = rgProfileData.Url,
 					IsPrivate = true,
