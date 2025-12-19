@@ -1346,7 +1346,13 @@ namespace CommonPluginsStores.Steam
                 List<SteamApp> steamApps = new List<SteamApp>();
                 uint lastAppid = 0;
 
-                do
+				if (StoreToken?.Token.IsNullOrEmpty() ?? true)
+				{
+					Logger.Warn("StoreToken is not available for GetSteamAppsByWeb");
+					return steamApps;
+				}
+
+				do
                 {
                     var dic = new Dictionary<string, string>
                     {
