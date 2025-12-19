@@ -1338,44 +1338,51 @@ namespace CommonPluginsStores.Steam
 
         #region Steam Web     
 
-        private List<SteamApp> GetSteamAppsByWeb(uint lastAppid = 0)
+        private List<SteamApp> GetSteamAppsByWeb()
         {
             try
             {
                 List<SteamApp> steamApps = new List<SteamApp>();
+                uint lastAppid = 0;
 
-                var dic = new Dictionary<string, string>
+                do
                 {
-                    { "access_token", StoreToken.Token },
-                    { "include_dlc", "true" },
-                    { "max_results", "50000" }
-                };
-                if (lastAppid > 0)
-                {
-                    dic.Add("last_appid", lastAppid.ToString());
-				}             
+                    var dic = new Dictionary<string, string>
+                    {
+                        { "access_token", StoreToken.Token },
+                        { "include_dlc", "true" },
+                        { "max_results", "50000" }
+                    };
+                    if (lastAppid > 0)
+                    {
+                        dic.Add("last_appid", lastAppid.ToString());
+                    }
 
-				var getApps = SteamApiServiceBase.Get<SteamAppList>(UrlGetAppListApi, dic);
+                    var getApps = SteamApiServiceBase.Get<SteamAppList>(UrlGetAppListApi, dic);
 
-				steamApps = getApps?.Apps?.Select(x => new SteamApp
-				{
-					AppId = x.AppId,
-					Name = x.Name
-				}).ToList();
-
-                if (getApps?.Apps != null && getApps.HaveMoreResults)
-                {
-					steamApps.AddRange(GetSteamAppsByWeb(getApps.LastAppId));
-				}
+                    if (getApps?.Apps != null)
+                    {
+                        steamApps.AddRange(getApps.Apps.Select(x => new SteamApp
+                        {
+                            AppId = x.AppId,
+                            Name = x.Name
+                        }));
+                        lastAppid = getApps.HaveMoreResults ? getApps.LastAppId : 0;
+                    }
+                    else
+                    {
+                        lastAppid = 0;
+                    }
+                } while (lastAppid > 0);
 
                 return steamApps;
-			}
+            }
             catch (Exception ex)
             {
                 Common.LogError(ex, false, true, PluginName);
                 return null;
             }
-		}
+        }
 
 		private bool CheckGameIsPrivateByWeb(uint appId, AccountInfos accountInfos)
         {
