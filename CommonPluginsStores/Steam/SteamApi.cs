@@ -1665,7 +1665,7 @@ namespace CommonPluginsStores.Steam
 
                 // Progression achievements
                 string url = string.Format(UrlProfilById, accountInfos.UserId, appId, "english");
-                string response = Web.DownloadStringData(url, GetWebCookies(), Web.UserAgent, true).GetAwaiter().GetResult();
+                string response = Web.DownloadStringData(url, GetStoredCookies(), Web.UserAgent, true).GetAwaiter().GetResult();
 
                 IHtmlDocument htmlDocument = new HtmlParser().Parse(response);
                 IHtmlCollection<IElement> elements = htmlDocument.QuerySelectorAll("#personalAchieve div.achieveRow");
