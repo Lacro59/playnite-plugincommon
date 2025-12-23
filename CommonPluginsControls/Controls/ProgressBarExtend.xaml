@@ -48,7 +48,7 @@
                                                         </Rectangle.RenderTransform>
                                                     </Rectangle>
                                                 </Grid>
-                                                <Grid>
+                                                <Grid ClipToBounds="True">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="auto" />
                                                         <ColumnDefinition Width="*" />
@@ -59,6 +59,8 @@
                                                     <TextBlock Text="{Binding TextValue, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue='empty text'}"                                                           
                                                                Grid.Column="1"
                                                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                               TextWrapping="NoWrap"
+                                                               TextTrimming="CharacterEllipsis"
                                                                TextAlignment="Center" VerticalAlignment="Center" />
                                                     <TextBlock Width="{Binding MarginRight, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                                 </Grid>
@@ -107,7 +109,7 @@
                                                         </Rectangle.RenderTransform>
                                                     </Rectangle>
                                                 </Grid>
-                                                <Grid Grid.ColumnSpan="5">
+                                                <Grid Grid.ColumnSpan="5" ClipToBounds="True">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="auto" />
                                                         <ColumnDefinition Width="*" />
@@ -118,6 +120,8 @@
                                                     <TextBlock Text="{Binding TextValue, RelativeSource={RelativeSource AncestorType=UserControl}, FallbackValue='empty text'}"                                                           
                                                                Grid.Column="1"
                                                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                               TextWrapping="NoWrap"
+                                                               TextTrimming="CharacterEllipsis"
                                                                TextAlignment="Center" VerticalAlignment="Center" />
                                                     <TextBlock Width="{Binding MarginRight, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                                 </Grid>
@@ -165,7 +169,7 @@
                                                         </Rectangle.RenderTransform>
                                                     </Rectangle>
                                                 </Grid>
-                                                <Grid>
+                                                <Grid ClipToBounds="True">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="auto" />
                                                         <ColumnDefinition Width="*" />
@@ -177,6 +181,8 @@
                                                                Grid.Column="1"
                                                                Foreground="{DynamicResource TextBrush}"
                                                                Visibility="{Binding TextInsideVisibility, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                               TextWrapping="NoWrap"
+                                                               TextTrimming="CharacterEllipsis"
                                                                TextAlignment="Center" VerticalAlignment="Center" />
                                                     <TextBlock Width="{Binding MarginRight, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                                 </Grid>
