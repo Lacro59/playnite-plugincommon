@@ -368,7 +368,7 @@ namespace CommonPlayniteShared.Database
 
                 if (oldData == null)
                 {
-                   logger.Warn($"Item {itemToUpdate.Id} doesn't exists.");
+                   logger.Error($"Item {itemToUpdate.Id} doesn't exists.");
                    return;
                 }
 
@@ -418,7 +418,7 @@ namespace CommonPlayniteShared.Database
 
                     if (oldData == null)
                     {
-                        logger.Warn($"Item {item.Id} doesn't exists.");
+                        logger.Error($"Item {item.Id} doesn't exists.");
                         continue;
                     }
 
