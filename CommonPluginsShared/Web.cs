@@ -11,6 +11,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace CommonPluginsShared
 {
@@ -1000,15 +1002,68 @@ namespace CommonPluginsShared
                         };
 
                         webViewOffscreen.LoadingChanged += loadingHandler;
+
                         try
                         {
                             // 3. Navigate and wait for page to be fully loaded
                             webViewOffscreen.Navigate(url);
                             TimeSpan waitTimeout = TimeSpan.FromSeconds(30);
-                            if (!loadingCompleted.Wait(waitTimeout))
+
+                            if (Application.Current.Dispatcher.CheckAccess())
                             {
-                                Logger.Error($"Timeout {waitTimeout.TotalSeconds} seconds for {url}.");
-                                return new Tuple<string, List<HttpCookie>>(string.Empty, null);
+                                // We are on the UI thread, we must not block it with Wait()
+                                var frame = new DispatcherFrame();
+                                
+                                // This callback will close the frame when loading completes
+                                void OnLoadingCompleted(object state) 
+                                {
+                                    frame.Continue = false; 
+                                }
+                                                                
+                                var timer = new DispatcherTimer { Interval = waitTimeout };
+                                timer.Tick += (t, args) => 
+                                { 
+                                    Logger.Error($"Timeout {waitTimeout.TotalSeconds} seconds for {url} (UI Thread).");
+                                    timer.Stop(); 
+                                    frame.Continue = false; 
+                                };
+                                
+                                // Modify the handler to also stop the frame
+                                EventHandler<Playnite.SDK.Events.WebViewLoadingChangedEventArgs> uiLoadingHandler = (s, e) =>
+                                {
+                                    if (!e.IsLoading)
+                                    {
+                                        timer.Stop();
+                                        frame.Continue = false;
+                                    }
+                                };
+                                
+                                webViewOffscreen.LoadingChanged -= loadingHandler; // Remove the generic one to avoid confusion or double handling
+                                webViewOffscreen.LoadingChanged += uiLoadingHandler;
+                                
+                                timer.Start();
+                                Dispatcher.PushFrame(frame);
+                                
+                                webViewOffscreen.LoadingChanged -= uiLoadingHandler;
+                                
+                                if (timer.IsEnabled) // Timer didn't fire, so we finished successfully
+                                {
+                                    timer.Stop();
+                                }
+                                else 
+                                {
+                                    // Timer fired (timeout)
+                                    return new Tuple<string, List<HttpCookie>>(string.Empty, null);
+                                }
+                            }
+                            else
+                            {
+                                // Background thread, use Wait()
+                                if (!loadingCompleted.Wait(waitTimeout))
+                                {
+                                    Logger.Error($"Timeout {waitTimeout.TotalSeconds} seconds for {url}.");
+                                    return new Tuple<string, List<HttpCookie>>(string.Empty, null);
+                                }
                             }
                         }
                         finally
