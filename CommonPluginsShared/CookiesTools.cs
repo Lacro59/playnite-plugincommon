@@ -71,15 +71,8 @@ namespace CommonPluginsShared
                             Encoding.UTF8,
                             WindowsIdentity.GetCurrent().User.Value));
 
-                    bool hasExpired = storedCookies.Any(x => x.Expires != null && (DateTime)x.Expires <= DateTime.Now);
-                    if (hasExpired)
-                    {
-                        message = $"Expired cookies for {ClientName}";
-                    }
-                    else
-                    {
-                        return storedCookies;
-                    }
+                    storedCookies.RemoveAll(x => x.Expires != null && (DateTime)x.Expires <= DateTime.Now);
+                    return storedCookies;
                 }
                 catch (Exception ex)
                 {
