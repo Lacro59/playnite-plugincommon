@@ -1013,17 +1013,13 @@ namespace CommonPluginsShared
                             {
                                 // We are on the UI thread, we must not block it with Wait()
                                 var frame = new DispatcherFrame();
+                                bool timedOut = false;
                                 
-                                // This callback will close the frame when loading completes
-                                void OnLoadingCompleted(object state) 
-                                {
-                                    frame.Continue = false; 
-                                }
-                                                                
                                 var timer = new DispatcherTimer { Interval = waitTimeout };
                                 timer.Tick += (t, args) => 
                                 { 
                                     Logger.Error($"Timeout {waitTimeout.TotalSeconds} seconds for {url} (UI Thread).");
+                                    timedOut = true;
                                     timer.Stop(); 
                                     frame.Continue = false; 
                                 };
@@ -1038,7 +1034,8 @@ namespace CommonPluginsShared
                                     }
                                 };
                                 
-                                webViewOffscreen.LoadingChanged -= loadingHandler; // Remove the generic one to avoid confusion or double handling
+                                // Replace the generic handler with our UI-specific one
+                                webViewOffscreen.LoadingChanged -= loadingHandler; 
                                 webViewOffscreen.LoadingChanged += uiLoadingHandler;
                                 
                                 timer.Start();
@@ -1046,13 +1043,8 @@ namespace CommonPluginsShared
                                 
                                 webViewOffscreen.LoadingChanged -= uiLoadingHandler;
                                 
-                                if (timer.IsEnabled) // Timer didn't fire, so we finished successfully
+                                if (timedOut)
                                 {
-                                    timer.Stop();
-                                }
-                                else 
-                                {
-                                    // Timer fired (timeout)
                                     return new Tuple<string, List<HttpCookie>>(string.Empty, null);
                                 }
                             }
