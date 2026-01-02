@@ -368,7 +368,8 @@ namespace CommonPlayniteShared.Database
 
                 if (oldData == null)
                 {
-                    throw new Exception($"Item {oldData.Id} doesn't exists.");
+                   logger.Warn($"Item {itemToUpdate.Id} doesn't exists.");
+                   return;
                 }
 
                 if (isPersistent)
@@ -417,7 +418,8 @@ namespace CommonPlayniteShared.Database
 
                     if (oldData == null)
                     {
-                        throw new Exception($"Item {oldData.Id} doesn't exists.");
+                        logger.Warn($"Item {item.Id} doesn't exists.");
+                        continue;
                     }
 
                     if (isPersistent)

@@ -273,7 +273,7 @@ namespace CommonPluginsStores.Ea
                     Id2 = string.Empty,
                     Name = gameStoreDataResponse.Name,
                     Link = gameStoreDataResponse.Logo?.TargetUrl,
-                    Image = gameStoreDataResponse.HeroImage.Ar16X9,
+                    Image = gameStoreDataResponse.HeroImage?.Ar16X9,
                     Description = gameStoreDataResponse.ShortDescription
                 };
 
