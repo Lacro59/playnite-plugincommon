@@ -63,20 +63,28 @@ namespace CommonPluginsShared
 
             if (File.Exists(FileCookies))
             {
-                try
+                for (int i = 0; i < 5; i++)
                 {
-                    storedCookies = Serialization.FromJson<List<HttpCookie>>(
-                        Encryption.DecryptFromFile(
+                    try
+                    {
+                        var decrypted = Encryption.DecryptFromFile(
                             FileCookies,
                             Encoding.UTF8,
-                            WindowsIdentity.GetCurrent().User.Value));
+                            WindowsIdentity.GetCurrent().User.Value);
 
-                    storedCookies.RemoveAll(x => x.Expires != null && (DateTime)x.Expires <= DateTime.Now);
-                    return storedCookies;
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, $"Failed to load saved cookies for {ClientName}");
+                        storedCookies = Serialization.FromJson<List<HttpCookie>>(decrypted);
+
+                        storedCookies.RemoveAll(x => x.Expires != null && (DateTime)x.Expires <= DateTime.Now);
+                        return storedCookies;
+                    }
+                    catch (Exception ex)
+                    {
+                        if (i == 4)
+                        {
+                            Common.LogError(ex, false, $"Failed to load saved cookies for {ClientName}");
+                        }
+                        Thread.Sleep(500);
+                    }
                 }
             }
 
