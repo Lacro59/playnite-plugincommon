@@ -353,7 +353,7 @@ namespace CommonPluginsStores.Ea
             if (gameStoreDataResponse == null)
             {
                 string url = string.Format(UrlGameData, gameSlug, CodeLang.GetCountryFromLast(Locale));
-                string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
+                string response = Task.Run(async () => await Web.DownloadStringData(url)).GetAwaiter().GetResult();
                 Serialization.TryFromJson(response, out gameStoreDataResponse);
                 SaveData(cachePath, gameStoreDataResponse);
             }
