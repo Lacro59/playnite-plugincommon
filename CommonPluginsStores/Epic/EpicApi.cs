@@ -160,6 +160,15 @@ namespace CommonPluginsStores.Epic
 
             if (!CurrentAccountInfos.IsPrivate && !StoreSettings.UseAuth)
             {
+                if (StoreToken == null)
+                {
+                    StoreToken = GetStoredToken();
+                }
+
+                if (StoreToken != null)
+                {
+                    CheckIsUserLoggedIn();
+                }
                 return !CurrentAccountInfos.UserId.IsNullOrEmpty();
             }
 
@@ -586,6 +595,11 @@ namespace CommonPluginsStores.Epic
 			{
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
                 var achievementResponse = QueryAchievement(@namespace).GetAwaiter().GetResult();
+                if (achievementResponse == null)
+                {
+                    Logger.Warn($"EpicApi.GetAchievementsSchema: QueryAchievement returned null for {@namespace}");
+                    return new Tuple<string, ObservableCollection<GameAchievement>>(string.Empty, gameAchievements);
+                }
                 string productId = achievementResponse.Data?.Achievement?.ProductAchievementsRecordBySandbox?.ProductId;
                 achievementResponse?.Data?.Achievement?.ProductAchievementsRecordBySandbox?.Achievements?.ForEach(x =>
                 {
@@ -959,9 +973,28 @@ namespace CommonPluginsStores.Epic
             var result = LoadData<List<Asset>>(cacheFile, 10);
             if (result == null || result.Count() == 0)
             {
+                if (StoreToken == null)
+                {
+                    Logger.Warn("EpicApi.GetAssets: StoreToken is null, cannot fetch assets.");
+                    API.Instance.Notifications.Add(new NotificationMessage(
+                        "SuccessStory-Epic-NoToken",
+                        "SuccessStory: Epic integration requires authentication to fetch assets. Please go to SuccessStory settings and enable 'User is private' temporarily to login.",
+                        NotificationType.Error,
+                        () => CommonPlayniteShared.Common.ProcessStarter.StartUrl(UrlLogin)
+                    ));
+                    return result ?? new List<Asset>();
+                }
+
                 var response = InvokeRequest<LibraryItemsResponse>(UrlAsset, StoreToken).GetAwaiter().GetResult();
                 result = new List<Asset>();
-                result.AddRange(response.Item2.Records);
+                if (response.Item2?.Records != null)
+                {
+                    result.AddRange(response.Item2.Records);
+                }
+                else
+                {
+                    Logger.Warn("EpicApi.GetAssets: Records is null in response.");
+                }
 
                 string nextCursor = response.Item2.ResponseMetadata?.NextCursor;
                 while (nextCursor != null)
@@ -1005,6 +1038,12 @@ namespace CommonPluginsStores.Epic
                 Tuple<string, Dictionary<string, CatalogItem>> catalogResponse = InvokeRequest<Dictionary<string, CatalogItem>>(UrlApiCatalog + url).GetAwaiter().GetResult();
                 result = catalogResponse.Item2;
                 SaveData(cacheFile, result);
+            }
+
+            if (result == null)
+            {
+                Logger.Warn($"EpicApi.GetCatalogItem: Failed to retrieve catalog item for {nameSpace} {catalogItemId}");
+                return null;
             }
 
             return result.TryGetValue(catalogItemId, out CatalogItem catalogItem)

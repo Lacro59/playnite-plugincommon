@@ -58,10 +58,18 @@ namespace CommonPlayniteShared.PluginLibrary.Services.GogLibrary
 
         private static AccountBasicResponse GetAccountInfo(IWebView webView)
         {
-            webView.NavigateAndWait(@"https://menu.gog.com/v1/account/basic");
-            var stringInfo = webView.GetPageText();
-            var accountInfo = Serialization.FromJson<AccountBasicResponse>(stringInfo);
-            return accountInfo;
+            try
+            {
+                webView.NavigateAndWait(@"https://menu.gog.com/v1/account/basic");
+                var stringInfo = webView.GetPageText();
+                var accountInfo = Serialization.FromJson<AccountBasicResponse>(stringInfo);
+                return accountInfo;
+            }
+            catch (ObjectDisposedException ex)
+            {
+                LogManager.GetLogger().Warn(ex, "GogAccountClient: WebView was disposed during GetAccountInfo.");
+                return null;
+            }
         }
 
         public List<LibraryGameResponse> GetOwnedGames(AccountBasicResponse account)

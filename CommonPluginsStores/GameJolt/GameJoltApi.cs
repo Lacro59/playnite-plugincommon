@@ -140,7 +140,7 @@ namespace CommonPluginsStores.GameJolt
                         GameAchievement item = gameAchievements.FirstOrDefault(y => y.Id.IsEqual(x.GameTrophyId.ToString()));
                         if (item != null)
                         {
-                            item.DateUnlocked = x.LoggedOn == null ? new DateTime(1982, 15, 12, 0, 0, 0, 0) : new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds((long)x.LoggedOn);
+                            item.DateUnlocked = x.LoggedOn == null ? new DateTime(1982, 12, 15, 0, 0, 0, 0) : new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds((long)x.LoggedOn);
                             item.UrlUnlocked = x.GameTrophy.ImgThumbnail;
                         }
                     });

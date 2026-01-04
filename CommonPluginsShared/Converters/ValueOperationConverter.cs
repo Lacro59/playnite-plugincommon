@@ -16,7 +16,7 @@ namespace CommonPluginsShared.Converters
                     ? double.Parse(values[0].ToString()) - double.Parse(values[1].ToString())
                     : (object)(double.Parse(values[0].ToString()) + double.Parse(values[1].ToString()));
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"ValueOperationConverter error: {ex.Message}"); /* Conversion failed, return NaN */ }
 
             return double.NaN;
         }
