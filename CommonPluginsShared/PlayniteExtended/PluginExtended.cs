@@ -96,7 +96,10 @@ namespace CommonPluginsShared.PlayniteExtended
                 OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "cache");
                 FileSystem.DeleteDirectory(OldDirectory);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "Failed to clean old database directories");
+            }
         }
         #endregion
     }

@@ -161,6 +161,7 @@ namespace CommonPluginsShared
                 default:
                     break;
             }
+
             return string.Empty;
         }
 
