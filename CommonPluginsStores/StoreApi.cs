@@ -9,8 +9,6 @@ using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Data;
-using SuccessStory.Clients;
-using SuccessStory.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -743,11 +741,14 @@ namespace CommonPluginsStores
                     try
                     {
                         ShowPluginSettings(PluginLibrary);
+                        // TODO
+                        /*
                         foreach (GenericAchievements achievementProvider in SuccessStoryDatabase.AchievementProviders.Values)
                         {
                             achievementProvider.ResetCachedConfigurationValidationResult();
                             achievementProvider.ResetCachedIsConnectedResult();
                         }
+                        */
                     }
                     catch (Exception ex)
                     {
