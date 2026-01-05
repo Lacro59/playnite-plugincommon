@@ -7,12 +7,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Web.UI.WebControls;
 
 namespace CommonPluginsShared.PlayniteExtended
 {
     public abstract class PluginExtended<ISettings> : PlaynitePlugin<ISettings>
     {
-        public PluginExtended(IPlayniteAPI playniteAPI) : base(playniteAPI)
+        public PluginExtended(IPlayniteAPI playniteAPI, string pluginName) : base(playniteAPI, pluginName)
         {
         }
     }
@@ -23,7 +24,7 @@ namespace CommonPluginsShared.PlayniteExtended
         public static TPluginDatabase PluginDatabase { get; set; }
 
 
-        public PluginExtended(IPlayniteAPI playniteAPI) : base(playniteAPI)
+        public PluginExtended(IPlayniteAPI playniteAPI, string pluginName) : base(playniteAPI, pluginName)
         {
             TransfertOldDatabase();
             CleanOldDatabase();
@@ -106,17 +107,22 @@ namespace CommonPluginsShared.PlayniteExtended
     {
         internal static ILogger Logger => LogManager.GetLogger();
 
+
+        public string PluginName { get; }
+
         public ISettings PluginSettings { get; set; }
 
         public string PluginFolder { get; set; }
 
 
-        protected PlaynitePlugin(IPlayniteAPI playniteAPI) : base(playniteAPI)
+        protected PlaynitePlugin(IPlayniteAPI playniteAPI, string pluginName) : base(playniteAPI)
         {
             Properties = new GenericPluginProperties { HasSettings = true };
 
-            // Get plugin's settings 
-            PluginSettings = typeof(ISettings).CrateInstance<ISettings>(this);
+            PluginName = pluginName;
+
+			// Get plugin's settings 
+			PluginSettings = typeof(ISettings).CrateInstance<ISettings>(this);
 
             // Get plugin's location 
             PluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);

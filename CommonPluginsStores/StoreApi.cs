@@ -165,6 +165,8 @@ namespace CommonPluginsStores
         /// </summary>
         protected CookiesTools CookiesTools { get; }
 
+        protected FileDataTools FileDataTools { get; }
+
         protected string FileToken { get; }
 
         private StoreToken _storeToken;
@@ -239,6 +241,11 @@ namespace CommonPluginsStores
                 ClientName,
                 FileCookies,
                 CookiesDomains);
+
+            FileDataTools = new FileDataTools(PluginName, ClientName)
+            {
+                ShowNotificationOldDataHandler = ShowNotificationOldData
+            };
 
             FileSystem.CreateDirectory(PathStoresData);
         }
@@ -640,7 +647,7 @@ namespace CommonPluginsStores
         /// <returns>Collection of owned games and DLC or null</returns>
         private ObservableCollection<GameDlcOwned> LoadGamesDlcsOwned(bool onlyNow = true)
         {
-            return LoadData<ObservableCollection<GameDlcOwned>>(FileGamesDlcsOwned, onlyNow ? 5 : 0);
+            return FileDataTools.LoadData<ObservableCollection<GameDlcOwned>>(FileGamesDlcsOwned, onlyNow ? 5 : 0);
         }
 
         /// <summary>
@@ -650,17 +657,7 @@ namespace CommonPluginsStores
         /// <returns>True if save was successful, false otherwise</returns>
         private bool SaveGamesDlcsOwned(ObservableCollection<GameDlcOwned> gamesDlcsOwned)
         {
-            try
-            {
-                FileSystem.PrepareSaveFile(FileGamesDlcsOwned);
-                File.WriteAllText(FileGamesDlcsOwned, Serialization.ToJson(gamesDlcsOwned));
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-                return false;
-            }
+            return FileDataTools.SaveData(FileGamesDlcsOwned, gamesDlcsOwned);
         }
 
         /// <summary>
@@ -712,7 +709,7 @@ namespace CommonPluginsStores
             string formatedDateLastWrite = localDateTimeConverter.Convert(dateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
             Logger.Warn($"Use saved UserData - {formatedDateLastWrite}");
             API.Instance.Notifications.Add(new NotificationMessage(
-                $"{PluginName}-{ClientNameLog}-LoadGamesDlcsOwned",
+                $"{PluginName}-{ClientNameLog}-LoadFileData",
                 $"{PluginName}" + Environment.NewLine
                     + string.Format(ResourceProvider.GetString("LOCCommonNotificationOldData"), ClientName, formatedDateLastWrite),
                 NotificationType.Info,
@@ -804,120 +801,6 @@ namespace CommonPluginsStores
                 gamerScore = 30;
             }
             return gamerScore;
-        }
-
-        /// <summary>
-        /// Generic method to load data from file with optional age validation.
-        /// </summary>
-        /// <typeparam name="T">Type of data to load</typeparam>
-        /// <param name="filePath">Path to the data file</param>
-        /// <param name="minutes">Maximum age in minutes (0 to ignore age, positive to validate freshness)</param>
-        /// <returns>Loaded data of type T or null if loading fails or data is too old</returns>
-        protected T LoadData<T>(string filePath, int minutes) where T : class
-        {
-            Guard.Against.NullOrWhiteSpace(filePath, nameof(filePath));
-
-            if (!File.Exists(filePath))
-            {
-                return null;
-            }
-
-            try
-            {
-                DateTime dateLastWrite = File.GetLastWriteTime(filePath);
-
-                if (minutes > 0 && dateLastWrite.AddMinutes(minutes) <= DateTime.Now)
-                {
-                    return null;
-                }
-
-                if (minutes == 0)
-                {
-                    ShowNotificationOldData(dateLastWrite);
-                }
-
-                return Serialization.FromJsonFile<T>(filePath);
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-                return null;
-            }
-        }
-
-		/// <summary>
-		/// Asynchronously loads data from file with optional age validation.
-		/// </summary>
-		/// <typeparam name="T">Type of data to load</typeparam>
-		/// <param name="filePath">Path to the data file</param>
-		/// <param name="minutes">Maximum age in minutes (0 to ignore age, positive to validate freshness)</param>
-		/// <returns>Task that returns loaded data of type T or null if loading fails or data is too old</returns>
-		protected async Task<T> LoadDataAsync<T>(string filePath, int minutes) where T : class
-        {
-            Guard.Against.NullOrWhiteSpace(filePath, nameof(filePath));
-
-            if (!File.Exists(filePath))
-            {
-                return null;
-            }
-
-            try
-            {
-                var fileInfo = new FileInfo(filePath);
-                DateTime dateLastWrite = fileInfo.LastWriteTime;
-
-                if (minutes > 0 && dateLastWrite.AddMinutes(minutes) <= DateTime.Now)
-                {
-                    return null;
-                }
-
-                if (minutes == 0)
-                {
-                    ShowNotificationOldData(dateLastWrite);
-                }
-
-                return await Task.Run(() => Serialization.FromJsonFile<T>(filePath));
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-                return null;
-            }
-        }
-
-		/// <summary>
-		/// Saves data to file in JSON format or as raw text.
-		/// </summary>
-		/// <typeparam name="T">Type of data to save</typeparam>
-		/// <param name="filePath">Path to the data file</param>
-		/// <param name="data">Data object to save</param>
-		/// <returns>True if save was successful, false otherwise</returns>
-		protected bool SaveData<T>(string filePath, T data) where T : class
-        {
-            Guard.Against.NullOrWhiteSpace(filePath, nameof(filePath));
-            try
-            {
-                if (data == null)
-                {
-                    return false;
-                }
-
-                FileSystem.PrepareSaveFile(filePath);
-                if (data is string s)
-                {
-                    File.WriteAllText(filePath, s);
-                }
-                else
-                {
-                    File.WriteAllText(filePath, Serialization.ToJson(data));
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-                return false;
-            }
         }
 
         /// <summary>

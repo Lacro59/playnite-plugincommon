@@ -879,7 +879,7 @@ namespace CommonPluginsStores.Gog
         public ProductApiDetail GetProductDetail(string id)
         {
             string cachePath = Path.Combine(PathAppsData, $"{id}.json");
-            ProductApiDetail productApiDetail = LoadData<ProductApiDetail>(cachePath, 1440);
+            ProductApiDetail productApiDetail = FileDataTools.LoadData<ProductApiDetail>(cachePath, 1440);
 
             if (productApiDetail == null)
             {
@@ -892,7 +892,7 @@ namespace CommonPluginsStores.Gog
                         ManageException($"No data for {id}", ex, response.Contains("404"));
                     }
 
-                    SaveData(cachePath, productApiDetail);
+					FileDataTools.SaveData(cachePath, productApiDetail);
                 }
             }
 

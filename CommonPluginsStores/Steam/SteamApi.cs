@@ -134,7 +134,7 @@ namespace CommonPluginsStores.Steam
 		/// Uses cached data if available and not expired (10 minutes),
 		/// otherwise fetches fresh data from Steam.
 		/// </summary>
-		private SteamUserData UserData => LoadData<SteamUserData>(FileUserData, 10) ?? GetUserData() ?? LoadData<SteamUserData>(FileUserData, 0);
+		private SteamUserData UserData => FileDataTools.LoadData<SteamUserData>(FileUserData, 10) ?? GetUserData() ?? FileDataTools.LoadData<SteamUserData>(FileUserData, 0);
 
         #region Paths
 
@@ -708,7 +708,7 @@ namespace CommonPluginsStores.Steam
 		public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
         {
             string cachePath = Path.Combine(PathAchievementsData, $"{id}.json");
-            Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 10);
+            Tuple<string, ObservableCollection<GameAchievement>> data = FileDataTools.LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 10);
 
             if (data?.Item2 == null)
             {
@@ -720,7 +720,7 @@ namespace CommonPluginsStores.Steam
                     x.GamerScore = CalcGamerScore(x.Percent);
                 });
 
-                SaveData(cachePath, data);
+				FileDataTools.SaveData(cachePath, data);
             }
 
             return data;
@@ -1129,7 +1129,7 @@ namespace CommonPluginsStores.Steam
         public StoreAppDetailsResult GetAppDetails(uint appId, int retryCount)
         {
             string cachePath = Path.Combine(PathAppsData, $"{appId}.json");
-            StoreAppDetailsResult storeAppDetailsResult = LoadData<StoreAppDetailsResult>(cachePath, 1440);
+            StoreAppDetailsResult storeAppDetailsResult = FileDataTools.LoadData<StoreAppDetailsResult>(cachePath, 1440);
 
             if (storeAppDetailsResult == null)
             {
@@ -1140,7 +1140,7 @@ namespace CommonPluginsStores.Steam
                 if (Serialization.TryFromJson(response, out Dictionary<string, StoreAppDetailsResult> parsedData))
                 {
                     storeAppDetailsResult = parsedData[appId.ToString()];
-                    SaveData(cachePath, storeAppDetailsResult);
+					FileDataTools.SaveData(cachePath, storeAppDetailsResult);
                 }
                 else
                 {
