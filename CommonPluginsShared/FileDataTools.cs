@@ -384,9 +384,9 @@ namespace CommonPluginsShared
 			string formatedDateLastWrite = localDateTimeConverter.Convert(dateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
 			Logger.Warn($"Use saved UserData - {formatedDateLastWrite}");
 			API.Instance.Notifications.Add(new NotificationMessage(
-				$"{PluginName}-{ClientName.RemoveWhiteSpace()}-LoadFileData",
+				$"{PluginName}-{(ClientName.IsNullOrEmpty() ? PluginName.RemoveWhiteSpace() : ClientName.RemoveWhiteSpace())}-LoadFileData",
 				$"{PluginName}" + Environment.NewLine
-					+ string.Format(ResourceProvider.GetString("LOCCommonNotificationOldData"), ClientName, formatedDateLastWrite),
+					+ string.Format(ResourceProvider.GetString("LOCCommonNotificationOldData"), ClientName.IsNullOrEmpty() ? PluginName : ClientName, formatedDateLastWrite),
 				NotificationType.Info
 			));
 		}
