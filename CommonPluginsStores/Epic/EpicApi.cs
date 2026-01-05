@@ -1201,21 +1201,80 @@ namespace CommonPluginsStores.Epic
 
                 if (Serialization.TryFromJson<ErrorResponse>(str, out var error) && !string.IsNullOrEmpty(error.errorCode))
                 {
+                    // Handle authentication errors by attempting a single token refresh + retry.
+                    if (error.errorCode.IndexOf("authentication", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        error.errorCode.IndexOf("authentication_failed", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        Logger.Info($"[EpicApi] Authentication error detected ({error.errorCode}). Attempting token refresh.");
+
+                        try
+                        {
+                            // Try to refresh using provided token's refresh token or stored refresh token
+                            string refreshToken = token?.RefreshToken ?? StoreToken?.RefreshToken;
+                            if (!string.IsNullOrEmpty(refreshToken))
+                            {
+                                RenewTokens(refreshToken);
+
+                                if (StoreToken != null && !StoreToken.Token.IsNullOrEmpty())
+                                {
+                                    // Retry the request using the renewed StoreToken
+                                    using (var httpClient2 = new HttpClient())
+                                    {
+                                        httpClient2.DefaultRequestHeaders.Clear();
+                                        httpClient2.DefaultRequestHeaders.Add("Authorization", StoreToken.Type + " " + StoreToken.Token);
+
+                                        var retryResp = await httpClient2.GetAsync(url);
+                                        var retryStr = await retryResp.Content.ReadAsStringAsync();
+
+                                        if (Serialization.TryFromJson<ErrorResponse>(retryStr, out var retryError) && !string.IsNullOrEmpty(retryError.errorCode))
+                                        {
+                                            Logger.Error($"[EpicApi] Token refresh failed to resolve error: {retryError.errorCode}");
+                                            // Invalidate stored token to force re-auth
+                                            StoreToken = null;
+                                            SetStoredToken(null);
+                                            return null;
+                                        }
+
+                                        try
+                                        {
+                                            return new Tuple<string, T>(retryStr, Serialization.FromJson<T>(retryStr));
+                                        }
+                                        catch
+                                        {
+                                            Logger.Error(retryStr);
+                                            throw new Exception("Failed to get data from Epic service.");
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Common.LogError(ex, false, true, PluginName);
+                        }
+
+                        // If we reach here, token refresh didn't work — clear stored token and return null so callers can handle gracefully
+                        StoreToken = null;
+                        SetStoredToken(null);
+                        return null;
+                    }
+
+                    // Non-authentication error: preserve previous behavior and throw
                     throw new Exception(error.errorCode);
-                }
-                else
-                {
-                    try
-                    {
-                        return new Tuple<string, T>(str, Serialization.FromJson<T>(str));
-                    }
-                    catch
-                    {
-                        // For cases like #134, where the entire service is down and doesn't even return valid error messages.
-                        Logger.Error(str);
-                        throw new Exception("Failed to get data from Epic service.");
-                    }
-                }
+                 }
+                 else
+                 {
+                     try
+                     {
+                         return new Tuple<string, T>(str, Serialization.FromJson<T>(str));
+                     }
+                     catch
+                     {
+                         // For cases like #134, where the entire service is down and doesn't even return valid error messages.
+                         Logger.Error(str);
+                         throw new Exception("Failed to get data from Epic service.");
+                     }
+                 }
             }
         }
 
