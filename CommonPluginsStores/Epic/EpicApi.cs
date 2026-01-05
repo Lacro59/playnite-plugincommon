@@ -977,8 +977,8 @@ namespace CommonPluginsStores.Epic
                 {
                     Logger.Warn("EpicApi.GetAssets: StoreToken is null, cannot fetch assets.");
                     API.Instance.Notifications.Add(new NotificationMessage(
-                        "SuccessStory-Epic-NoToken",
-                        "SuccessStory: Epic integration requires authentication to fetch assets. Please go to SuccessStory settings and enable 'User is private' temporarily to login.",
+                        $"{PluginName}-Epic-NoToken",
+                        $"{PluginName}: Epic integration requires authentication to fetch assets. Please go to {PluginName} settings and enable 'User is private' temporarily to login.",
                         NotificationType.Error,
                         () => CommonPlayniteShared.Common.ProcessStarter.StartUrl(UrlLogin)
                     ));
@@ -1002,8 +1002,16 @@ namespace CommonPluginsStores.Epic
                     response = InvokeRequest<LibraryItemsResponse>(
                         $"{UrlAsset}&cursor={nextCursor}",
 						StoreToken).GetAwaiter().GetResult();
-                    result.AddRange(response.Item2.Records);
-                    nextCursor = response.Item2.ResponseMetadata.NextCursor;
+                    if (response.Item2?.Records != null)
+                    {
+                        result.AddRange(response.Item2.Records);
+                        nextCursor = response.Item2.ResponseMetadata?.NextCursor;
+                    }
+                    else
+                    {
+                        Logger.Warn("EpicApi.GetAssets: Records is null in paginated response; stopping pagination.");
+                        break;
+                    }
                 }
 
                 SaveData(cacheFile, result);
