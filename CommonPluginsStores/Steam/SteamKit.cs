@@ -33,17 +33,44 @@ namespace CommonPluginsStores.Steam
             {
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("ISteamApps"))
                 {
-                    List<SteamApp> appList = new List<SteamApp>();
-                    KeyValue results = steamInterface.Call("GetAppList", 2);
-                    foreach (KeyValue data in results["apps"].Children)
+                    KeyValue results = steamInterface.Call("GetAppList", 2, null);
+
+                    KeyValue applistNode = null;
+                    if (results != null)
                     {
-                        appList.Add(new SteamApp
-                        {
-                            AppId = data["appid"].AsUnsignedInteger(),
-                            Name = data["name"].AsString()
-                        });
+                        applistNode = results["applist"] ?? results.Children?.FirstOrDefault(x => x.Name == "applist");
                     }
-                    return appList;
+
+                    KeyValue appsNode = applistNode?["apps"] ?? applistNode?.Children?.FirstOrDefault(x => x.Name == "apps");
+
+                    var apps = new List<SteamApp>();
+                    if (appsNode?.Children != null)
+                    {
+                        foreach (KeyValue app in appsNode.Children)
+                        {
+                            // Each child node should contain 'appid' and 'name'
+                            try
+                            {
+                                var idToken = app["appid"];
+                                var nameToken = app["name"];
+                                if (idToken != null && nameToken != null)
+                                {
+                                    apps.Add(new SteamApp
+                                    {
+                                        AppId = idToken.AsUnsignedInteger(),
+                                        Name = nameToken.AsString()
+                                    });
+                                }
+                            }
+                            catch (Exception exApp)
+                            {
+                                // Skip malformed entries but log at debug level so we can investigate if it becomes an issue
+                                Logger.Debug($"Skipping malformed Steam app entry: {exApp.Message}");
+                            }
+                        }
+                    }
+
+                    return apps;
                 }
             }
             catch (Exception ex)
@@ -58,6 +85,7 @@ namespace CommonPluginsStores.Steam
         #region IStoreService
 
         public static List<SteamApp> GetAppList(string apiKey, uint last_appid = 0)
+
         {
             Thread.Sleep(100);
             try
@@ -456,5 +484,17 @@ namespace CommonPluginsStores.Steam
         }
 
         #endregion
+
+        private class SteamAppListResponse
+        {
+            [SerializationPropertyName("applist")]
+            public SteamAppListContainer Applist { get; set; }
+        }
+
+        private class SteamAppListContainer
+        {
+            [SerializationPropertyName("apps")]
+            public List<SteamApp> Apps { get; set; }
+        }
     }
 }
