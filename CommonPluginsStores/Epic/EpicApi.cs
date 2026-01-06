@@ -277,18 +277,23 @@ namespace CommonPluginsStores.Epic
                 ObservableCollection<AccountInfos> accountsInfos = new ObservableCollection<AccountInfos>();
 
                 EpicFriendsSummary epicFriendsSummary = GetFriendsSummary().GetAwaiter().GetResult();
-                var tasks = epicFriendsSummary.Friends.Select(async x =>
+                if (epicFriendsSummary == null || epicFriendsSummary.Friends == null)
                 {
-                    EpicAccountResponse epicAccountResponsea = await GetAccountInfo(x.AccountId);
-                    return new AccountInfos
-                    {
-                        DateAdded = null,
-                        UserId = x.AccountId,
-                        Avatar = string.Empty,
-                        Pseudo = epicAccountResponsea.DisplayName,
-                        Link = string.Format(UrlAccountProfile, x.AccountId)
-                    };
-                }).ToList();
+                    // No friends data available (possibly auth refresh failed); return empty list
+                    return new ObservableCollection<AccountInfos>();
+                }
+                var tasks = epicFriendsSummary.Friends.Select(async x =>
+                 {
+                     EpicAccountResponse epicAccountResponsea = await GetAccountInfo(x.AccountId);
+                     return new AccountInfos
+                     {
+                         DateAdded = null,
+                         UserId = x.AccountId,
+                         Avatar = string.Empty,
+                         Pseudo = epicAccountResponsea.DisplayName,
+                         Link = string.Format(UrlAccountProfile, x.AccountId)
+                     };
+                 }).ToList();
 
                 var results = Task.WhenAll(tasks).GetAwaiter().GetResult();
                 foreach (var userInfos in results)
@@ -962,7 +967,13 @@ namespace CommonPluginsStores.Epic
         public List<PlaytimeItem> GetPlaytimeItems()
         {
             string formattedPlaytimeUrl = string.Format(UrlPlaytimeAll, CurrentAccountInfos.UserId);
-            return InvokeRequest<List<PlaytimeItem>>(formattedPlaytimeUrl).GetAwaiter().GetResult().Item2;
+            var result = InvokeRequest<List<PlaytimeItem>>(formattedPlaytimeUrl).GetAwaiter().GetResult();
+            if (result == null || result.Item2 == null)
+            {
+                // Return empty list when no data or authentication refresh failed
+                return new List<PlaytimeItem>();
+            }
+            return result.Item2;
         }
 
         public List<Asset> GetAssets()
@@ -1024,14 +1035,14 @@ namespace CommonPluginsStores.Epic
         {
             string url = string.Format(UrlFriendsSummary, CurrentAccountInfos.UserId);
             Tuple<string, EpicFriendsSummary> data = await InvokeRequest<EpicFriendsSummary>(url);
-            return data.Item2;
+            return data?.Item2;
         }
 
         private async Task<EpicAccountResponse> GetAccountInfo(string id)
         {
             string url = string.Format(UrlAccount, id);
             Tuple<string, EpicAccountResponse> data = await InvokeRequest<EpicAccountResponse>(url, StoreToken);
-            return data.Item2;
+            return data?.Item2;
         }
 
         public CatalogItem GetCatalogItem(string nameSpace, string catalogItemId)
@@ -1324,7 +1335,8 @@ namespace CommonPluginsStores.Epic
                     bool needsAuth = (CurrentAccountInfos?.IsPrivate ?? false) || StoreSettings.UseAuth;
                     if (needsAuth && StoreToken != null && !StoreToken.Token.IsNullOrEmpty())
                     {
-                        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + StoreToken.Token);
+                        // Use the same token.Type format as other requests for consistency (e.g. "bearer" vs "Bearer")
+                        httpClient.DefaultRequestHeaders.Add("Authorization", StoreToken.Type + " " + StoreToken.Token);
                     }
 
                     HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content);
