@@ -998,16 +998,21 @@ namespace CommonPluginsStores.Epic
 
                 var response = InvokeRequest<LibraryItemsResponse>(UrlAsset, StoreToken).GetAwaiter().GetResult();
                 result = new List<Asset>();
-                if (response.Item2?.Records != null)
+
+                // If InvokeRequest failed (e.g. token refresh failed) it may return null — guard against that
+                if (response?.Item2?.Records != null)
                 {
                     result.AddRange(response.Item2.Records);
                 }
                 else
                 {
-                    Logger.Warn("EpicApi.GetAssets: Records is null in response.");
+                    Logger.Warn("EpicApi.GetAssets: Failed to fetch assets or no records returned.");
+                    // Nothing to paginate if initial response didn't contain records
+                    SaveData(cacheFile, result);
+                    return result;
                 }
 
-                string nextCursor = response.Item2.ResponseMetadata?.NextCursor;
+                string nextCursor = response?.Item2?.ResponseMetadata?.NextCursor;
                 while (nextCursor != null)
                 {
                     response = InvokeRequest<LibraryItemsResponse>(
@@ -1016,7 +1021,7 @@ namespace CommonPluginsStores.Epic
                     if (response.Item2?.Records != null)
                     {
                         result.AddRange(response.Item2.Records);
-                        nextCursor = response.Item2.ResponseMetadata?.NextCursor;
+                        nextCursor = response?.Item2?.ResponseMetadata?.NextCursor;
                     }
                     else
                     {
@@ -1221,8 +1226,7 @@ namespace CommonPluginsStores.Epic
                 if (Serialization.TryFromJson<ErrorResponse>(str, out var error) && !string.IsNullOrEmpty(error.errorCode))
                 {
                     // Handle authentication errors by attempting a single token refresh + retry.
-                    if (error.errorCode.IndexOf("authentication", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                        error.errorCode.IndexOf("authentication_failed", StringComparison.OrdinalIgnoreCase) >= 0)
+                    if (error.errorCode.IndexOf("authentication", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         // Try to refresh token and retry request
                         return await TryRefreshAndRetry<T>(url, token);
