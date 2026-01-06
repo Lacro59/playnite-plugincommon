@@ -1213,78 +1213,81 @@ namespace CommonPluginsStores.Epic
                     if (error.errorCode.IndexOf("authentication", StringComparison.OrdinalIgnoreCase) >= 0 ||
                         error.errorCode.IndexOf("authentication_failed", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
-                        Logger.Info($"[EpicApi] Authentication error detected ({error.errorCode}). Attempting token refresh.");
+                        // Try to refresh token and retry request
+                        return await TryRefreshAndRetry<T>(url, token);
+                     }
+ 
+                     // Non-authentication error: preserve previous behavior and throw
+                     throw new Exception(error.errorCode);
+                  }
+                  else
+                  {
+                      try
+                      {
+                          return new Tuple<string, T>(str, Serialization.FromJson<T>(str));
+                      }
+                      catch
+                      {
+                          // For cases like #134, where the entire service is down and doesn't even return valid error messages.
+                          Logger.Error(str);
+                          throw new Exception("Failed to get data from Epic service.");
+                      }
+                  }
+             }
+         }
 
-                        try
+        // Helper to attempt token refresh and retry the original request once
+        private async Task<Tuple<string, T>> TryRefreshAndRetry<T>(string url, StoreToken token = null) where T : class
+        {
+            Logger.Info($"[EpicApi] Authentication error detected. Attempting token refresh and retry.");
+            try
+            {
+                string refreshToken = token?.RefreshToken ?? StoreToken?.RefreshToken;
+                if (!string.IsNullOrEmpty(refreshToken))
+                {
+                    RenewTokens(refreshToken);
+
+                    if (StoreToken != null && !StoreToken.Token.IsNullOrEmpty())
+                    {
+                        using (var httpClient2 = new HttpClient())
                         {
-                            // Try to refresh using provided token's refresh token or stored refresh token
-                            string refreshToken = token?.RefreshToken ?? StoreToken?.RefreshToken;
-                            if (!string.IsNullOrEmpty(refreshToken))
+                            httpClient2.DefaultRequestHeaders.Clear();
+                            httpClient2.DefaultRequestHeaders.Add("Authorization", StoreToken.Type + " " + StoreToken.Token);
+
+                            var retryResp = await httpClient2.GetAsync(url);
+                            var retryStr = await retryResp.Content.ReadAsStringAsync();
+
+                            if (Serialization.TryFromJson<ErrorResponse>(retryStr, out var retryError) && !string.IsNullOrEmpty(retryError.errorCode))
                             {
-                                RenewTokens(refreshToken);
+                                Logger.Error($"[EpicApi] Token refresh failed to resolve error: {retryError.errorCode}");
+                                StoreToken = null;
+                                SetStoredToken(null);
+                                return null;
+                            }
 
-                                if (StoreToken != null && !StoreToken.Token.IsNullOrEmpty())
-                                {
-                                    // Retry the request using the renewed StoreToken
-                                    using (var httpClient2 = new HttpClient())
-                                    {
-                                        httpClient2.DefaultRequestHeaders.Clear();
-                                        httpClient2.DefaultRequestHeaders.Add("Authorization", StoreToken.Type + " " + StoreToken.Token);
-
-                                        var retryResp = await httpClient2.GetAsync(url);
-                                        var retryStr = await retryResp.Content.ReadAsStringAsync();
-
-                                        if (Serialization.TryFromJson<ErrorResponse>(retryStr, out var retryError) && !string.IsNullOrEmpty(retryError.errorCode))
-                                        {
-                                            Logger.Error($"[EpicApi] Token refresh failed to resolve error: {retryError.errorCode}");
-                                            // Invalidate stored token to force re-auth
-                                            StoreToken = null;
-                                            SetStoredToken(null);
-                                            return null;
-                                        }
-
-                                        try
-                                        {
-                                            return new Tuple<string, T>(retryStr, Serialization.FromJson<T>(retryStr));
-                                        }
-                                        catch
-                                        {
-                                            Logger.Error(retryStr);
-                                            throw new Exception("Failed to get data from Epic service.");
-                                        }
-                                    }
-                                }
+                            try
+                            {
+                                return new Tuple<string, T>(retryStr, Serialization.FromJson<T>(retryStr));
+                            }
+                            catch
+                            {
+                                Logger.Error(retryStr);
+                                throw new Exception("Failed to get data from Epic service.");
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            Common.LogError(ex, false, true, PluginName);
-                        }
-
-                        // If we reach here, token refresh didn't work — clear stored token and return null so callers can handle gracefully
-                        StoreToken = null;
-                        SetStoredToken(null);
-                        return null;
                     }
-
-                    // Non-authentication error: preserve previous behavior and throw
-                    throw new Exception(error.errorCode);
-                 }
-                 else
-                 {
-                     try
-                     {
-                         return new Tuple<string, T>(str, Serialization.FromJson<T>(str));
-                     }
-                     catch
-                     {
-                         // For cases like #134, where the entire service is down and doesn't even return valid error messages.
-                         Logger.Error(str);
-                         throw new Exception("Failed to get data from Epic service.");
-                     }
-                 }
+                }
             }
-        }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+            }
+
+            // If we reach here, token refresh didn't work — clear stored token and return null so callers can handle gracefully
+            StoreToken = null;
+            SetStoredToken(null);
+            return null;
+         }
 
         private async Task<T> QueryGraphQL<T>(object queryObject) where T : class
         {
@@ -1318,13 +1321,13 @@ namespace CommonPluginsStores.Epic
                     httpClient.DefaultRequestHeaders.Clear();
                     httpClient.DefaultRequestHeaders.Add("User-Agent", UserAgent);
 
-					bool needsAuth = (CurrentAccountInfos?.IsPrivate ?? false) || StoreSettings.UseAuth;
-					if (needsAuth && StoreToken != null && !StoreToken.Token.IsNullOrEmpty())
-					{
-						httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + StoreToken.Token);
-					}
+                    bool needsAuth = (CurrentAccountInfos?.IsPrivate ?? false) || StoreSettings.UseAuth;
+                    if (needsAuth && StoreToken != null && !StoreToken.Token.IsNullOrEmpty())
+                    {
+                        httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + StoreToken.Token);
+                    }
 
-					HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content);
+                    HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content);
                     string str = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode)
