@@ -284,15 +284,31 @@ namespace CommonPluginsStores.Epic
                 }
                 var tasks = epicFriendsSummary.Friends.Select(async x =>
                  {
-                     EpicAccountResponse epicAccountResponsea = await GetAccountInfo(x.AccountId);
-                     return new AccountInfos
+                     try
                      {
-                         DateAdded = null,
-                         UserId = x.AccountId,
-                         Avatar = string.Empty,
-                         Pseudo = epicAccountResponsea.DisplayName,
-                         Link = string.Format(UrlAccountProfile, x.AccountId)
-                     };
+                         EpicAccountResponse epicAccountResponsea = await GetAccountInfo(x.AccountId);
+                         string pseudo = epicAccountResponsea?.DisplayName ?? x.AccountId ?? string.Empty;
+                         return new AccountInfos
+                         {
+                             DateAdded = null,
+                             UserId = x.AccountId,
+                             Avatar = string.Empty,
+                             Pseudo = pseudo,
+                             Link = string.Format(UrlAccountProfile, x.AccountId)
+                         };
+                     }
+                     catch (Exception ex)
+                     {
+                         Common.LogError(ex, false, true, PluginName);
+                         return new AccountInfos
+                         {
+                             DateAdded = null,
+                             UserId = x.AccountId,
+                             Avatar = string.Empty,
+                             Pseudo = x.AccountId ?? string.Empty,
+                             Link = string.Format(UrlAccountProfile, x.AccountId)
+                         };
+                     }
                  }).ToList();
 
                 var results = Task.WhenAll(tasks).GetAwaiter().GetResult();
@@ -989,7 +1005,7 @@ namespace CommonPluginsStores.Epic
                     Logger.Warn("EpicApi.GetAssets: StoreToken is null, cannot fetch assets.");
                     API.Instance.Notifications.Add(new NotificationMessage(
                         $"{PluginName}-Epic-NoToken",
-                        $"{PluginName}: Epic integration requires authentication to fetch assets. Please go to {PluginName} settings and enable 'User is private' temporarily to login.",
+                        string.Format("{0}: Login required to fetch Epic assets.", PluginName),
                         NotificationType.Error,
                         () => CommonPlayniteShared.Common.ProcessStarter.StartUrl(UrlLogin)
                     ));

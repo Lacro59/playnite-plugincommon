@@ -701,16 +701,17 @@ namespace CommonPluginsShared
                 // Replace any non-letter/number characters with a single space
                 result = Regex.Replace(result, "[^\\p{L}\\p{Nd}]+", " ").Trim();
 
-                // Optionally remove edition suffixes (e.g. "Deluxe Edition", "Game of the Year", etc.) using EditionInGameName if available
-                if (removeEditions && EditionInGameName != null)
+                // Optionally remove edition suffixes (e.g. "Deluxe Edition", "Game of the Year", etc.)
+                if (removeEditions)
                 {
                     try
                     {
                         result = EditionInGameName.Replace(result, "").Trim();
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // ignore and continue
+                        // Log the exception to aid debugging unexpected patterns during normalization
+                        Logger.Warn($"NormalizeGameName: failed to remove edition tokens from '{name}' - {ex.Message}");
                     }
                 }
 
