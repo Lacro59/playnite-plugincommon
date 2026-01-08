@@ -16,6 +16,7 @@ using System.Diagnostics;
 using Microsoft.Win32;
 using Playnite.SDK.Plugins;
 using System.Windows;
+using System.Globalization;
 
 namespace CommonPluginsShared
 {
@@ -670,32 +671,65 @@ namespace CommonPluginsShared
                 return string.Empty;
             }
 
-            string newName = name;
-            newName = newName.Replace(" (CD)", string.Empty);
+            try
+            {
+                // Remove common trademark and copyright symbols that often break matching
+                string result = name.Replace("™", string.Empty)
+                                    .Replace("®", string.Empty)
+                                    .Replace("©", string.Empty)
+                                    .Replace("℠", string.Empty)
+                                    .Replace("™\uFE0F", string.Empty) // emoji-variant
+                                    .Trim();
 
-            if (removeEditions)
-            {
-                newName = EditionInGameName.Replace(newName, string.Empty);
-            }
-
-            if (removeROM)
-            {
-                newName = ExtractGameNameFromROM(newName);
-            }
-            MatchEvaluator matchEvaluator = (Match match) =>
-            {
-                if (match.Groups["middle"].Success) //if the match group is the last one in the regex (non-word characters, including whitespace, in the middle of a string)
+                // Normalize diacritics
+                string formD = result.Normalize(NormalizationForm.FormD);
+                var sb = new System.Text.StringBuilder();
+                foreach (char ch in formD)
                 {
-                    return " "; //replace (multiple) non-word character(s) in the middle of the string with a space
+                    var uc = CharUnicodeInfo.GetUnicodeCategory(ch);
+                    if (uc != UnicodeCategory.NonSpacingMark)
+                    {
+                        sb.Append(ch);
+                    }
                 }
-                else
-                {
-                    return string.Empty; //remove non-word characters (including white space) at the start and end of the string
-                }
-            };
-            newName = NonWordCharactersAndTrimmableWhitespace.Replace(newName, matchEvaluator).RemoveDiacritics();
+                result = sb.ToString();
 
-            return newName.ToLowerInvariant();
+                // Lowercase for consistent comparisons
+                result = result.ToLowerInvariant();
+
+                // Replace any non-letter/number characters with a single space
+                result = Regex.Replace(result, "[^\\p{L}\\p{Nd}]+", " ").Trim();
+
+                // Optionally remove edition suffixes (e.g. "Deluxe Edition", "Game of the Year", etc.) using EditionInGameName if available
+                if (removeEditions && EditionInGameName != null)
+                {
+                    try
+                    {
+                        result = EditionInGameName.Replace(result, "").Trim();
+                    }
+                    catch
+                    {
+                        // ignore and continue
+                    }
+                }
+
+                // Optionally remove ROM/file tokens
+                if (removeROM)
+                {
+                    result = Regex.Replace(result, "\\b(iso|bin|cue|rom|zip|7z)\\b", "", RegexOptions.IgnoreCase).Trim();
+                    result = Regex.Replace(result, "\\s+", " ").Trim();
+                }
+
+                // Final whitespace normalization
+                result = Regex.Replace(result, "\\s+", " ").Trim();
+
+                return result;
+            }
+            catch
+            {
+                // Fallback: return trimmed lower-case original
+                return name?.Trim().ToLowerInvariant() ?? string.Empty;
+            }
         }
 
         /// <summary>

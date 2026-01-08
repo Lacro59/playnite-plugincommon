@@ -1229,7 +1229,14 @@ namespace CommonPluginsStores.Epic
                     if (error.errorCode.IndexOf("authentication", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         // Try to refresh token and retry request
-                        return await TryRefreshAndRetry<T>(url, token);
+                        var retryResult = await TryRefreshAndRetry<T>(url, token);
+                        if (retryResult == null)
+                        {
+                            // Explicitly throw so callers receive a handled exception instead of later getting a null reference
+                            Logger.Error($"[EpicApi] Authentication refresh failed for request {url}");
+                            throw new Exception("Epic authentication refresh failed");
+                        }
+                        return retryResult;
                      }
  
                      // Non-authentication error: preserve previous behavior and throw
