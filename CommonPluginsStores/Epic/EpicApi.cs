@@ -21,6 +21,7 @@ using System.Net.Http;
 using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using static CommonPluginsShared.PlayniteTools;
 
@@ -28,6 +29,9 @@ namespace CommonPluginsStores.Epic
 {
     public class EpicApi : StoreApi
     {
+        // Semaphore to ensure only one token refresh is performed at a time
+        private readonly SemaphoreSlim tokenRefreshSemaphore = new SemaphoreSlim(1, 1);
+
         #region Urls
         
         private static string UrlBase => @"https://www.epicgames.com";
@@ -770,7 +774,27 @@ namespace CommonPluginsStores.Epic
                 EpicAccountResponse account = GetAccountInfo(StoreToken.AccountId).GetAwaiter().GetResult();
                 if (account == null)
                 {
-                    RenewTokens(StoreToken.RefreshToken);
+                    string refreshToken = StoreToken?.RefreshToken;
+                    if (string.IsNullOrEmpty(refreshToken))
+                    {
+                        return false;
+                    }
+
+                    // Ensure only one thread refreshes tokens at a time
+                    tokenRefreshSemaphore.Wait();
+                    try
+                    {
+                        // Another thread may have refreshed while we waited
+                        if (StoreToken == null || StoreToken.Token.IsNullOrEmpty() || StoreToken.RefreshToken != refreshToken)
+                        {
+                            RenewTokens(refreshToken);
+                        }
+                    }
+                    finally
+                    {
+                        tokenRefreshSemaphore.Release();
+                    }
+
                     if (StoreToken == null || StoreToken.AccountId.IsNullOrEmpty() || StoreToken.Token.IsNullOrEmpty())
                     {
                         return false;
@@ -792,13 +816,31 @@ namespace CommonPluginsStores.Epic
                 {
                     Logger.Warn("Retry CheckIsUserLoggedIn()");
 
-                    RenewTokens(StoreToken.RefreshToken);
-					if (StoreToken == null || StoreToken.AccountId.IsNullOrEmpty() || StoreToken.Token.IsNullOrEmpty())
-					{
-						return false;
-					}
+                    string refreshToken = StoreToken?.RefreshToken;
+                    if (string.IsNullOrEmpty(refreshToken))
+                    {
+                        return false;
+                    }
 
-					EpicAccountResponse account = GetAccountInfo(StoreToken.AccountId).GetAwaiter().GetResult();
+                    tokenRefreshSemaphore.Wait();
+                    try
+                    {
+                        if (StoreToken == null || StoreToken.Token.IsNullOrEmpty() || StoreToken.RefreshToken != refreshToken)
+                        {
+                            RenewTokens(refreshToken);
+                        }
+                    }
+                    finally
+                    {
+                        tokenRefreshSemaphore.Release();
+                    }
+
+                    if (StoreToken == null || StoreToken.AccountId.IsNullOrEmpty() || StoreToken.Token.IsNullOrEmpty())
+                    {
+                        return false;
+                    }
+
+                    EpicAccountResponse account = GetAccountInfo(StoreToken.AccountId).GetAwaiter().GetResult();
                     if (CurrentAccountInfos.Pseudo.IsNullOrEmpty() && account.Id.IsEqual(StoreToken.AccountId))
                     {
                         CurrentAccountInfos.Pseudo = account?.DisplayName;
@@ -1248,15 +1290,16 @@ namespace CommonPluginsStores.Epic
                         var retryResult = await TryRefreshAndRetry<T>(url, token);
                         if (retryResult == null)
                         {
-                            // Explicitly throw so callers receive a handled exception instead of later getting a null reference
+                            // Log and return null so callers that handle null continue to work
                             Logger.Error($"[EpicApi] Authentication refresh failed for request {url}");
-                            throw new Exception("Epic authentication refresh failed");
+                            return null;
                         }
                         return retryResult;
                      }
  
-                     // Non-authentication error: preserve previous behavior and throw
-                     throw new Exception(error.errorCode);
+                     // Non-authentication error: log and return null so callers can handle gracefully
+                     Logger.Error($"[EpicApi] Error response from Epic: {error.errorCode}");
+                     return null;
                   }
                   else
                   {
@@ -1264,11 +1307,12 @@ namespace CommonPluginsStores.Epic
                       {
                           return new Tuple<string, T>(str, Serialization.FromJson<T>(str));
                       }
-                      catch
+                      catch (Exception ex)
                       {
-                          // For cases like #134, where the entire service is down and doesn't even return valid error messages.
+                          // For cases where the service returns unexpected content, log and return null so callers can handle gracefully
                           Logger.Error(str);
-                          throw new Exception("Failed to get data from Epic service.");
+                          Common.LogError(ex, false, true, PluginName);
+                          return null;
                       }
                   }
              }
@@ -1283,36 +1327,53 @@ namespace CommonPluginsStores.Epic
                 string refreshToken = token?.RefreshToken ?? StoreToken?.RefreshToken;
                 if (!string.IsNullOrEmpty(refreshToken))
                 {
-                    RenewTokens(refreshToken);
-
-                    if (StoreToken != null && !StoreToken.Token.IsNullOrEmpty())
+                    // Ensure only one thread performs a token refresh at a time
+                    await tokenRefreshSemaphore.WaitAsync();
+                    try
                     {
-                        using (var httpClient2 = new HttpClient())
+                        // Another thread might have refreshed while we were waiting - check and skip redundant refresh
+                        if (StoreToken == null || StoreToken.Token.IsNullOrEmpty() || StoreToken.RefreshToken != refreshToken)
                         {
-                            httpClient2.DefaultRequestHeaders.Clear();
-                            httpClient2.DefaultRequestHeaders.Add("Authorization", StoreToken.Type + " " + StoreToken.Token);
+                            RenewTokens(refreshToken);
+                        }
 
-                            var retryResp = await httpClient2.GetAsync(url);
-                            var retryStr = await retryResp.Content.ReadAsStringAsync();
+                        if (StoreToken != null && !StoreToken.Token.IsNullOrEmpty())
+                        {
+                            using (var httpClient2 = new HttpClient())
+                            {
+                                httpClient2.DefaultRequestHeaders.Clear();
+                                if (!string.IsNullOrEmpty(StoreToken.Token))
+                                {
+                                    string authType2 = string.IsNullOrEmpty(StoreToken.Type) ? "bearer" : StoreToken.Type;
+                                    httpClient2.DefaultRequestHeaders.Add("Authorization", authType2 + " " + StoreToken.Token);
+                                }
 
-                            if (Serialization.TryFromJson<ErrorResponse>(retryStr, out var retryError) && !string.IsNullOrEmpty(retryError.errorCode))
-                            {
-                                Logger.Error($"[EpicApi] Token refresh failed to resolve error: {retryError.errorCode}");
-                                StoreToken = null;
-                                SetStoredToken(null);
-                                return null;
-                            }
+                                var retryResp = await httpClient2.GetAsync(url);
+                                var retryStr = await retryResp.Content.ReadAsStringAsync();
 
-                            try
-                            {
-                                return new Tuple<string, T>(retryStr, Serialization.FromJson<T>(retryStr));
-                            }
-                            catch
-                            {
-                                Logger.Error(retryStr);
-                                throw new Exception("Failed to get data from Epic service.");
+                                if (Serialization.TryFromJson<ErrorResponse>(retryStr, out var retryError) && !string.IsNullOrEmpty(retryError.errorCode))
+                                {
+                                    Logger.Error($"[EpicApi] Token refresh failed to resolve error: {retryError.errorCode}");
+                                    StoreToken = null;
+                                    SetStoredToken(null);
+                                    return null;
+                                }
+
+                                try
+                                {
+                                    return new Tuple<string, T>(retryStr, Serialization.FromJson<T>(retryStr));
+                                }
+                                catch
+                                {
+                                    Logger.Error(retryStr);
+                                    throw new Exception("Failed to get data from Epic service.");
+                                }
                             }
                         }
+                    }
+                    finally
+                    {
+                        tokenRefreshSemaphore.Release();
                     }
                 }
             }

@@ -684,7 +684,7 @@ namespace CommonPluginsShared
 
                 // Normalize diacritics
                 string formD = result.Normalize(NormalizationForm.FormD);
-                var sb = new System.Text.StringBuilder();
+                var sb = new System.Text.StringBuilder(formD?.Length ?? 0);
                 foreach (char ch in formD)
                 {
                     var uc = CharUnicodeInfo.GetUnicodeCategory(ch);
@@ -727,8 +727,10 @@ namespace CommonPluginsShared
 
                 return result;
             }
-            catch
+            catch (Exception ex)
             {
+                // Log exception so failures in normalization are visible
+                Common.LogError(ex, false, $"NormalizeGameName failed for '{name}'");
                 // Fallback: return trimmed lower-case original
                 return name?.Trim().ToLowerInvariant() ?? string.Empty;
             }
