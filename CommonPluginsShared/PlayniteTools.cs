@@ -17,6 +17,7 @@ using Microsoft.Win32;
 using Playnite.SDK.Plugins;
 using System.Windows;
 using System.Globalization;
+using System.Text;
 
 namespace CommonPluginsShared
 {
