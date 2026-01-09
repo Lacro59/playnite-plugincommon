@@ -108,11 +108,12 @@ namespace CommonPluginsShared.PlayniteExtended
         internal static ILogger Logger => LogManager.GetLogger();
 
 
-        public string PluginName { get; }
+        public static string PluginName { get; set; }
 
-        public ISettings PluginSettings { get; set; }
+		public static string PluginFolder { get; set; }
+		public static string PluginUserDataPath { get; set; }
 
-        public string PluginFolder { get; set; }
+		public ISettings PluginSettings { get; set; }
 
 
         protected PlaynitePlugin(IPlayniteAPI playniteAPI, string pluginName) : base(playniteAPI)
@@ -126,6 +127,9 @@ namespace CommonPluginsShared.PlayniteExtended
 
             // Get plugin's location 
             PluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+			// Get plugin's data location 
+			PluginUserDataPath = this.GetPluginUserDataPath();
 
             LoadCommon();
         }

@@ -17,8 +17,8 @@ using System.IO;
 using System.Linq;
 using System.Security.Principal;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores
@@ -40,13 +40,17 @@ namespace CommonPluginsStores
         private readonly Lazy<ObservableCollection<AccountInfos>> _lazyFriends;
         private readonly Lazy<ObservableCollection<AccountGameInfos>> _lazyGames;
 
-        #region Account data
+		private readonly SemaphoreSlim _rateLimiter = new SemaphoreSlim(1, 1);
+		private DateTime _lastApiCall = DateTime.MinValue;
+		internal int MinApiCallIntervalMs = 500;
 
-        /// <summary>
-        /// Get the current account information for the user.
-        /// Caches the result for reuse.
-        /// </summary>
-        public AccountInfos CurrentAccountInfos
+		#region Account data
+
+		/// <summary>
+		/// Get the current account information for the user.
+		/// Caches the result for reuse.
+		/// </summary>
+		public AccountInfos CurrentAccountInfos
         {
             get => _lazyAccount.Value;
             set => SetValue(ref _lazyAccount, new Lazy<AccountInfos>(() => value), nameof(CurrentAccountInfos));
@@ -822,5 +826,25 @@ namespace CommonPluginsStores
             _gamesCache.Clear();
             _dlcsCache.Clear();
         }
-    }
+
+
+		private async Task<T> WithRateLimitAsync<T>(Func<Task<T>> apiCall)
+		{
+			await _rateLimiter.WaitAsync();
+			try
+			{
+				var elapsed = (DateTime.Now - _lastApiCall).TotalMilliseconds;
+				if (elapsed < MinApiCallIntervalMs)
+				{
+					await Task.Delay(MinApiCallIntervalMs - (int)elapsed);
+				}
+				_lastApiCall = DateTime.Now;
+				return await apiCall();
+			}
+			finally
+			{
+				_rateLimiter.Release();
+			}
+		}
+	}
 }
