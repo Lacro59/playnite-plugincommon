@@ -61,7 +61,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\Folder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ThemeLinearGradient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\SourceLink.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Paths.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PathValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteUiHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\GameMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginElement.cs" />

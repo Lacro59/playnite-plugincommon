@@ -250,6 +250,8 @@
                     stringReturn = uplay;
                     break;
                 case "epic":
+                case "egs":
+                case "epic games store":
                     stringReturn = epic;
                     break;
                 case "bethesda":

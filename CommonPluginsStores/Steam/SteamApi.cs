@@ -951,13 +951,13 @@ namespace CommonPluginsStores.Steam
 		/// </summary>
 		/// <param name="appId"></param>
 		/// <returns></returns>
-		public string GetGameName(uint appId)
+		public string GetGameName(uint appId, bool searchWithApi = true)
 		{
 			if (SteamAppsDict != null && SteamAppsDict.TryGetValue(appId, out SteamApp found))
 			{
 				return found.Name;
 			}
-			else
+			else if (searchWithApi)
 			{
 				Logger.Warn($"Not found with SteamApps for {appId} - Use Steam API");
 
@@ -1748,7 +1748,7 @@ namespace CommonPluginsStores.Steam
 				accountWishlists.Add(new AccountWishlist
 				{
 					Id = x.AppId.ToString(),
-					Name = gameData?.data?.name ?? GetGameName(x.AppId),
+					Name = gameData?.data?.name ?? GetGameName(x.AppId, false),
 					Link = string.Format(UrlSteamGame, x.AppId),
 					Released = DateHelper.ParseReleaseDate(gameData?.data?.release_date?.date)?.Date,
 					Added = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(x.DateAdded),
