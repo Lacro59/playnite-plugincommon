@@ -1018,32 +1018,39 @@ namespace CommonPluginsShared
                             {
                                  _ = Task.Run(async () => 
                                  {
-                                     while (!cts.Token.IsCancellationRequested)
+                                     try
                                      {
-                                         try
+                                         while (!cts.Token.IsCancellationRequested)
                                          {
-                                             // Check if loadingCompleted is already set to avoid unnecessary calls
-                                             if (loadingCompleted.IsSet) break;
-
-                                             var jsResult = await webViewOffscreen.EvaluateScriptAsync($"if (document.querySelector('{elementToWaitFor}')) return true; else return false;");
-                                             if (jsResult != null && jsResult.Result != null && (bool)jsResult.Result)
+                                             try
                                              {
-                                                 Common.LogDebug(true, $"DownloadWebView: Found element '{elementToWaitFor}', stopping wait.");
-                                                 loadingCompleted.Set();
-                                                 break;
+                                                 // Check if loadingCompleted is already set to avoid unnecessary calls
+                                                 if (loadingCompleted.IsSet) break;
+
+                                                 var jsResult = await webViewOffscreen.EvaluateScriptAsync($"(function() {{ return !!document.querySelector('{elementToWaitFor}'); }})()");
+                                                 if (jsResult?.Result != null && (jsResult.Result is bool b ? b : Convert.ToBoolean(jsResult.Result)))
+                                                 {
+                                                     Common.LogDebug(true, $"DownloadWebView: Found element '{elementToWaitFor}', stopping wait.");
+                                                     loadingCompleted.Set();
+                                                     break;
+                                                 }
                                              }
+                                             catch (Exception ex)
+                                             {
+                                                 // Logger.Debug($"Polling error: {ex.Message}");
+                                             }
+                                             
+                                             await Task.Delay(500, cts.Token);
                                          }
-                                         catch (Exception ex)
-                                         {
-                                             // Logger.Debug($"Polling error: {ex.Message}");
-                                         }
-                                         
-                                         await Task.Delay(500, cts.Token);
+                                     }
+                                     catch (OperationCanceledException)
+                                     {
+                                         // Expected when cancelled
                                      }
                                  }, cts.Token);
                             }
 
-                            if (Application.Current.Dispatcher.CheckAccess())
+                            if (Application.Current?.Dispatcher?.CheckAccess() == true)
                             {
                                 // We are on the UI thread, we must not block it with Wait()
                                 var frame = new DispatcherFrame();
