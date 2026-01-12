@@ -1000,7 +1000,10 @@ namespace CommonPluginsShared
                                 {
                                     loadingCompleted.Set();
                                 }
-                                catch (ObjectDisposedException) { }
+                                catch (ObjectDisposedException) 
+                                {
+                                    // Logger.Debug("WebView loading handler: ObjectDisposedException");
+                                }
                             }
                         };
 
@@ -1040,7 +1043,7 @@ namespace CommonPluginsShared
                                              }
                                              catch (Exception ex)
                                              {
-                                                 // Logger.Debug($"Polling error: {ex.Message}");
+                                                 Logger.Debug($"Polling error: {ex.Message}");
                                              }
                                              
                                              await Task.Delay(500, cts.Token);
@@ -1049,6 +1052,7 @@ namespace CommonPluginsShared
                                      catch (OperationCanceledException)
                                      {
                                          // Expected when cancelled
+                                         // Logger.Debug("Polling cancelled");
                                      }
                                  }, cts.Token);
                             }
