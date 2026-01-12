@@ -1027,7 +1027,8 @@ namespace CommonPluginsShared
                                                  // Check if loadingCompleted is already set to avoid unnecessary calls
                                                  if (loadingCompleted.IsSet) break;
 
-                                                 var jsResult = await webViewOffscreen.EvaluateScriptAsync($"(function() {{ return !!document.querySelector('{elementToWaitFor}'); }})()");
+                                                 var safeSelector = Serialization.ToJson(elementToWaitFor);
+                                                 var jsResult = await webViewOffscreen.EvaluateScriptAsync($"(function() {{ return !!document.querySelector({safeSelector}); }})()");
                                                  if (jsResult?.Result != null && (jsResult.Result is bool b ? b : Convert.ToBoolean(jsResult.Result)))
                                                  {
                                                      Common.LogDebug(true, $"DownloadWebView: Found element '{elementToWaitFor}', stopping wait.");
@@ -1085,7 +1086,7 @@ namespace CommonPluginsShared
                                 timer.Stop();
                                 checkTimer.Stop();
                                 
-                                webViewOffscreen.LoadingChanged -= loadingHandler;
+
                                 
                                 if (timedOut)
                                 {
