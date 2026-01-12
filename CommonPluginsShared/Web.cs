@@ -972,7 +972,7 @@ namespace CommonPluginsShared
         }
 
 
-        private static async Task<Tuple<string, List<HttpCookie>>> DownloadWebView(bool getSource, string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true)
+        private static async Task<Tuple<string, List<HttpCookie>>> DownloadWebView(bool getSource, string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null)
         {
             WebViewSettings webViewSettings = new WebViewSettings
             {
@@ -1004,11 +1004,44 @@ namespace CommonPluginsShared
 
                         webViewOffscreen.LoadingChanged += loadingHandler;
 
+                        // Polling for element support
+                        CancellationTokenSource cts = new CancellationTokenSource();
+                        
                         try
                         {
                             // 3. Navigate and wait for page to be fully loaded
                             webViewOffscreen.Navigate(url);
                             TimeSpan waitTimeout = TimeSpan.FromSeconds(30);
+
+                            // Start polling if selector is provided
+                            if (!string.IsNullOrEmpty(elementToWaitFor))
+                            {
+                                 _ = Task.Run(async () => 
+                                 {
+                                     while (!cts.Token.IsCancellationRequested)
+                                     {
+                                         try
+                                         {
+                                             // Check if loadingCompleted is already set to avoid unnecessary calls
+                                             if (loadingCompleted.IsSet) break;
+
+                                             var jsResult = await webViewOffscreen.EvaluateScriptAsync($"if (document.querySelector('{elementToWaitFor}')) return true; else return false;");
+                                             if (jsResult != null && jsResult.Result != null && (bool)jsResult.Result)
+                                             {
+                                                 Common.LogDebug(true, $"DownloadWebView: Found element '{elementToWaitFor}', stopping wait.");
+                                                 loadingCompleted.Set();
+                                                 break;
+                                             }
+                                         }
+                                         catch (Exception ex)
+                                         {
+                                             // Logger.Debug($"Polling error: {ex.Message}");
+                                         }
+                                         
+                                         await Task.Delay(500, cts.Token);
+                                     }
+                                 }, cts.Token);
+                            }
 
                             if (Application.Current.Dispatcher.CheckAccess())
                             {
@@ -1025,24 +1058,27 @@ namespace CommonPluginsShared
                                     frame.Continue = false; 
                                 };
                                 
-                                // Modify the handler to also stop the frame
-                                EventHandler<Playnite.SDK.Events.WebViewLoadingChangedEventArgs> uiLoadingHandler = (s, e) =>
+                                // Timer to check if loadingCompleted was set by the polling task or loading handler
+                                var checkTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+                                checkTimer.Tick += (t, args) =>
                                 {
-                                    if (!e.IsLoading)
+                                    if (loadingCompleted.IsSet)
                                     {
                                         timer.Stop();
+                                        checkTimer.Stop();
                                         frame.Continue = false;
                                     }
                                 };
                                 
-                                // Replace the generic handler with our UI-specific one
-                                webViewOffscreen.LoadingChanged -= loadingHandler; 
-                                webViewOffscreen.LoadingChanged += uiLoadingHandler;
-                                
                                 timer.Start();
+                                checkTimer.Start();
+                                
                                 Dispatcher.PushFrame(frame);
                                 
-                                webViewOffscreen.LoadingChanged -= uiLoadingHandler;
+                                timer.Stop();
+                                checkTimer.Stop();
+                                
+                                webViewOffscreen.LoadingChanged -= loadingHandler;
                                 
                                 if (timedOut)
                                 {
@@ -1061,6 +1097,8 @@ namespace CommonPluginsShared
                         }
                         finally
                         {
+                            cts.Cancel();
+                            cts.Dispose();
                             try 
                             { 
                                 webViewOffscreen.LoadingChanged -= loadingHandler; 
@@ -1110,9 +1148,9 @@ namespace CommonPluginsShared
             return await DownloadWebView(false, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled);
         }
 
-        public static async Task<Tuple<string, List<HttpCookie>>> DownloadSourceDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true)
+        public static async Task<Tuple<string, List<HttpCookie>>> DownloadSourceDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null)
         {
-            return await DownloadWebView(true, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled);
+            return await DownloadWebView(true, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, elementToWaitFor);
         }
 
 
