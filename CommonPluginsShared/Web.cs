@@ -1027,6 +1027,8 @@ namespace CommonPluginsShared
                                      {
                                          // Delay polling start to allow browser initialization and prevent crashes
                                          await Task.Delay(2000, cts.Token);
+                                         
+                                         int consecutiveErrors = 0;
 
                                          while (!cts.Token.IsCancellationRequested)
                                          {
@@ -1037,16 +1039,36 @@ namespace CommonPluginsShared
 
                                                  var safeSelector = Serialization.ToJson(elementToWaitFor);
                                                  var jsResult = await webViewOffscreen.EvaluateScriptAsync($"(function() {{ return !!document.querySelector({safeSelector}); }})()");
-                                                 if (jsResult?.Result != null && (jsResult.Result is bool b ? b : Convert.ToBoolean(jsResult.Result)))
+                                                 
+                                                 bool isFound = false;
+                                                 if (jsResult?.Result is bool b)
+                                                 {
+                                                     isFound = b;
+                                                 }
+                                                 else if (jsResult?.Result != null)
+                                                 {
+                                                     // Safer fallback than Convert.ToBoolean which can throw
+                                                     bool.TryParse(jsResult.Result.ToString(), out isFound);
+                                                 }
+
+                                                 if (isFound)
                                                  {
                                                      Common.LogDebug(true, $"DownloadWebView: Found element '{elementToWaitFor}', stopping wait.");
                                                      loadingCompleted.Set();
                                                      break;
                                                  }
+                                                 
+                                                 // Script executed successfully, reset error counter
+                                                 consecutiveErrors = 0;
                                              }
                                              catch (Exception ex)
                                              {
-                                                 Logger.Debug($"Polling error: {ex.Message}");
+                                                 consecutiveErrors++;
+                                                 string msg = $"Polling error for selector '{elementToWaitFor}': {ex.Message}";
+                                                 
+                                                 // Escalate to Warn if persistent
+                                                 if (consecutiveErrors >= 5) Logger.Warn(msg);
+                                                 else Logger.Debug(msg);
                                              }
                                              
                                              await Task.Delay(500, cts.Token);
