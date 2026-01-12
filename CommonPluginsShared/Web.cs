@@ -1025,6 +1025,9 @@ namespace CommonPluginsShared
                                  {
                                      try
                                      {
+                                         // Delay polling start to allow browser initialization and prevent crashes
+                                         await Task.Delay(2000, cts.Token);
+
                                          while (!cts.Token.IsCancellationRequested)
                                          {
                                              try
