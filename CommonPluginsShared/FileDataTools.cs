@@ -133,7 +133,7 @@ namespace CommonPluginsShared
 				using (var reader = new StreamReader(fileStream, Encoding.UTF8))
 				{
 					string jsonContent = await reader.ReadToEndAsync().ConfigureAwait(false);
-					return await Task.Run(() => Serialization.FromJson<T>(jsonContent)).ConfigureAwait(false);
+					return Serialization.FromJson<T>(jsonContent);
 				}
 			}, filePath).ConfigureAwait(false);
 		}
@@ -152,7 +152,7 @@ namespace CommonPluginsShared
 
 		/// <summary>
 		/// Saves data to a file asynchronously.
-		/// Uses a temporary file and atomic move to ensure data integrity.
+		/// Uses a temporary file and atomic replacement to ensure data integrity.
 		/// </summary>
 		/// <typeparam name="T">The type of data to save.</typeparam>
 		/// <param name="filePath">The path to the file.</param>
@@ -198,15 +198,16 @@ namespace CommonPluginsShared
 						fileStream.Flush(true);
 					}
 
-					// Atomically replace the target file with the temporary file
-					await Task.Run(() =>
+					if (File.Exists(filePath))
 					{
-						if (File.Exists(filePath))
-						{
-							File.Delete(filePath);
-						}
+						// Atomic replacement with backup (backup is automatically deleted after successful replace)
+						File.Replace(tempFilePath, filePath, null);
+					}
+					else
+					{
+						// If destination doesn't exist, just move the temp file
 						File.Move(tempFilePath, filePath);
-					}).ConfigureAwait(false);
+					}
 
 					return true;
 				}, filePath).ConfigureAwait(false);
