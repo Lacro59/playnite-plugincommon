@@ -486,16 +486,5 @@ namespace CommonPluginsStores.Steam
 
         #endregion
 
-        private class SteamAppListResponse
-        {
-            [SerializationPropertyName("applist")]
-            public SteamAppListContainer Applist { get; set; }
-        }
-
-        private class SteamAppListContainer
-        {
-            [SerializationPropertyName("apps")]
-            public List<SteamApp> Apps { get; set; }
-        }
     }
 }

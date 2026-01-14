@@ -90,6 +90,7 @@ namespace CommonPluginsShared
                         {
                             Common.LogError(ex, false, $"Failed to load saved cookies for {ClientName}");
                             FileSystem.DeleteFile(FileCookies);
+                            return storedCookies;
                         }
                         Thread.Sleep(500);
                     }

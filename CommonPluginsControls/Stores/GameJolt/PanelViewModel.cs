@@ -24,6 +24,7 @@ namespace CommonPluginsControls.Stores.GameJolt
                 _storeApi = value;
                 OnPropertyChanged(nameof(StoreApi));
                 OnPropertyChanged(nameof(User));
+                OnPropertyChanged(nameof(AuthStatus));
             }
         }
         public AccountInfos User => StoreApi?.CurrentAccountInfos;

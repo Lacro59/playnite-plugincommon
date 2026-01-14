@@ -1076,7 +1076,7 @@ namespace CommonPluginsStores.Epic
                     response = InvokeRequest<LibraryItemsResponse>(
                         $"{UrlAsset}&cursor={nextCursor}",
 						StoreToken).GetAwaiter().GetResult();
-                    if (response.Item2?.Records != null)
+                    if (response?.Item2?.Records != null)
                     {
                         result.AddRange(response.Item2.Records);
                         nextCursor = response?.Item2?.ResponseMetadata?.NextCursor;
