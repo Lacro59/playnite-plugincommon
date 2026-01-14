@@ -3,11 +3,8 @@ using CommonPluginsShared.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Plugins;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Text;
-using System.Web.UI.WebControls;
 
 namespace CommonPluginsShared.PlayniteExtended
 {
@@ -26,80 +23,10 @@ namespace CommonPluginsShared.PlayniteExtended
 
         public PluginExtended(IPlayniteAPI playniteAPI, string pluginName) : base(playniteAPI, pluginName)
         {
-            TransfertOldDatabase();
-            CleanOldDatabase();
-
             // Get plugin's database if used
             PluginDatabase = typeof(TPluginDatabase).CrateInstance<TPluginDatabase>(PluginSettings, this.GetPluginUserDataPath());
             _ = PluginDatabase.InitializeDatabase();
         }
-
-
-        // TODO Temp; must be deleted
-        #region Transfert database directory
-        private void TransfertOldDatabase()
-        {
-            string OldDirectory = Path.Combine(GetPluginUserDataPath(), "Activity");
-            string NewDirectory = Path.Combine(GetPluginUserDataPath(), "GameActivity");
-            if (Directory.Exists(OldDirectory))
-            {
-                if (Directory.Exists(NewDirectory))
-                {
-                    Logger.Warn($"{NewDirectory} already exists");
-                }
-                else
-                {
-                    Directory.Move(OldDirectory, NewDirectory);
-                }
-            }
-
-            OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "Achievements");
-            NewDirectory = Path.Combine(this.GetPluginUserDataPath(), "SuccessStory");
-            if (Directory.Exists(OldDirectory))
-            {
-                if (Directory.Exists(NewDirectory))
-                {
-                    Logger.Warn($"{NewDirectory} already exists");
-                }
-                else
-                {
-                    Directory.Move(OldDirectory, NewDirectory);
-                }
-            }
-
-            OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "Requierements");
-            NewDirectory = Path.Combine(this.GetPluginUserDataPath(), "SystemChecker");
-            if (Directory.Exists(OldDirectory))
-            {
-                if (Directory.Exists(NewDirectory))
-                {
-                    Logger.Warn($"{NewDirectory} already exists");
-                }
-                else
-                {
-                    Directory.Move(OldDirectory, NewDirectory);
-                }
-            }
-        }
-
-        // TODO Temp; must be deleted
-        private void CleanOldDatabase()
-        {
-            try
-            {
-                // Clean old database
-                string OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "activity_old");
-                FileSystem.DeleteDirectory(OldDirectory);
-
-                OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "activityDetails_old");
-                FileSystem.DeleteDirectory(OldDirectory);
-
-                OldDirectory = Path.Combine(this.GetPluginUserDataPath(), "cache");
-                FileSystem.DeleteDirectory(OldDirectory);
-            }
-            catch { }
-        }
-        #endregion
     }
 
 
