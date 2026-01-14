@@ -51,6 +51,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\DateTimeExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\ListExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileDataTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)HttpFileCachePlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageSourceManagerPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageTools.cs" />
@@ -60,7 +61,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\Folder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ThemeLinearGradient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\SourceLink.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Paths.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PathValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteUiHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\GameMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginElement.cs" />

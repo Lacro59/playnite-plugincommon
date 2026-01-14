@@ -170,7 +170,7 @@ namespace CommonPluginsStores.GameJolt
         public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
         {
             string cachePath = Path.Combine(PathAchievementsData, $"{id}.json");
-            Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
+            Tuple<string, ObservableCollection<GameAchievement>> data = FileDataTools.LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
 
             if (data == null || !(data.Item2?.Any() ?? false))
             {
