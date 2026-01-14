@@ -1066,7 +1066,7 @@ namespace CommonPluginsStores.Epic
                 {
                     Logger.Warn("EpicApi.GetAssets: Failed to fetch assets or no records returned.");
                     // Nothing to paginate if initial response didn't contain records
-                    SaveData(cacheFile, result);
+                    FileDataTools.SaveData(cacheFile, result);
                     return result;
                 }
 

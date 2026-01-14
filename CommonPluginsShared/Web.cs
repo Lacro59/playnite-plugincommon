@@ -996,6 +996,7 @@ namespace CommonPluginsShared
                         CancellationTokenSource cts = new CancellationTokenSource();
                         
                         try
+                        { 
                             // 3. Navigate and wait for page to be fully loaded
                             webViewOffscreen.Navigate(url);
                             
