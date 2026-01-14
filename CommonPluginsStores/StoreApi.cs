@@ -9,8 +9,6 @@ using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Data;
-using SuccessStory.Clients;
-using SuccessStory.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,8 +17,8 @@ using System.IO;
 using System.Linq;
 using System.Security.Principal;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores
@@ -42,13 +40,17 @@ namespace CommonPluginsStores
         private readonly Lazy<ObservableCollection<AccountInfos>> _lazyFriends;
         private readonly Lazy<ObservableCollection<AccountGameInfos>> _lazyGames;
 
-        #region Account data
+		private readonly SemaphoreSlim _rateLimiter = new SemaphoreSlim(1, 1);
+		private DateTime _lastApiCall = DateTime.MinValue;
+		internal int MinApiCallIntervalMs = 500;
 
-        /// <summary>
-        /// Get the current account information for the user.
-        /// Caches the result for reuse.
-        /// </summary>
-        public AccountInfos CurrentAccountInfos
+		#region Account data
+
+		/// <summary>
+		/// Get the current account information for the user.
+		/// Caches the result for reuse.
+		/// </summary>
+		public AccountInfos CurrentAccountInfos
         {
             get => _lazyAccount.Value;
             set => SetValue(ref _lazyAccount, new Lazy<AccountInfos>(() => value), nameof(CurrentAccountInfos));
@@ -167,6 +169,8 @@ namespace CommonPluginsStores
         /// </summary>
         protected CookiesTools CookiesTools { get; }
 
+        protected FileDataTools FileDataTools { get; }
+
         protected string FileToken { get; }
 
         private StoreToken _storeToken;
@@ -241,6 +245,11 @@ namespace CommonPluginsStores
                 ClientName,
                 FileCookies,
                 CookiesDomains);
+
+            FileDataTools = new FileDataTools(PluginName, ClientName)
+            {
+                ShowNotificationOldDataHandler = ShowNotificationOldData
+            };
 
             FileSystem.CreateDirectory(PathStoresData);
         }
@@ -642,7 +651,7 @@ namespace CommonPluginsStores
         /// <returns>Collection of owned games and DLC or null</returns>
         private ObservableCollection<GameDlcOwned> LoadGamesDlcsOwned(bool onlyNow = true)
         {
-            return LoadData<ObservableCollection<GameDlcOwned>>(FileGamesDlcsOwned, onlyNow ? 5 : 0);
+            return FileDataTools.LoadData<ObservableCollection<GameDlcOwned>>(FileGamesDlcsOwned, onlyNow ? 5 : 0);
         }
 
         /// <summary>
@@ -652,17 +661,7 @@ namespace CommonPluginsStores
         /// <returns>True if save was successful, false otherwise</returns>
         private bool SaveGamesDlcsOwned(ObservableCollection<GameDlcOwned> gamesDlcsOwned)
         {
-            try
-            {
-                FileSystem.PrepareSaveFile(FileGamesDlcsOwned);
-                File.WriteAllText(FileGamesDlcsOwned, Serialization.ToJson(gamesDlcsOwned));
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-                return false;
-            }
+            return FileDataTools.SaveData(FileGamesDlcsOwned, gamesDlcsOwned);
         }
 
         /// <summary>
@@ -714,7 +713,7 @@ namespace CommonPluginsStores
             string formatedDateLastWrite = localDateTimeConverter.Convert(dateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
             Logger.Warn($"Use saved UserData - {formatedDateLastWrite}");
             API.Instance.Notifications.Add(new NotificationMessage(
-                $"{PluginName}-{ClientNameLog}-LoadGamesDlcsOwned",
+                $"{PluginName}-{ClientNameLog}-LoadFileData",
                 $"{PluginName}" + Environment.NewLine
                     + string.Format(ResourceProvider.GetString("LOCCommonNotificationOldData"), ClientName, formatedDateLastWrite),
                 NotificationType.Info,
@@ -743,11 +742,14 @@ namespace CommonPluginsStores
                     try
                     {
                         ShowPluginSettings(PluginLibrary);
+                        // TODO
+                        /*
                         foreach (GenericAchievements achievementProvider in SuccessStoryDatabase.AchievementProviders.Values)
                         {
                             achievementProvider.ResetCachedConfigurationValidationResult();
                             achievementProvider.ResetCachedIsConnectedResult();
                         }
+                        */
                     }
                     catch (Exception ex)
                     {
@@ -806,120 +808,6 @@ namespace CommonPluginsStores
         }
 
         /// <summary>
-        /// Generic method to load data from file with optional age validation.
-        /// </summary>
-        /// <typeparam name="T">Type of data to load</typeparam>
-        /// <param name="filePath">Path to the data file</param>
-        /// <param name="minutes">Maximum age in minutes (0 to ignore age, positive to validate freshness)</param>
-        /// <returns>Loaded data of type T or null if loading fails or data is too old</returns>
-        protected T LoadData<T>(string filePath, int minutes) where T : class
-        {
-            Guard.Against.NullOrWhiteSpace(filePath, nameof(filePath));
-
-            if (!File.Exists(filePath))
-            {
-                return null;
-            }
-
-            try
-            {
-                DateTime dateLastWrite = File.GetLastWriteTime(filePath);
-
-                if (minutes > 0 && dateLastWrite.AddMinutes(minutes) <= DateTime.Now)
-                {
-                    return null;
-                }
-
-                if (minutes == 0)
-                {
-                    ShowNotificationOldData(dateLastWrite);
-                }
-
-                return Serialization.FromJsonFile<T>(filePath);
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-                return null;
-            }
-        }
-
-		/// <summary>
-		/// Asynchronously loads data from file with optional age validation.
-		/// </summary>
-		/// <typeparam name="T">Type of data to load</typeparam>
-		/// <param name="filePath">Path to the data file</param>
-		/// <param name="minutes">Maximum age in minutes (0 to ignore age, positive to validate freshness)</param>
-		/// <returns>Task that returns loaded data of type T or null if loading fails or data is too old</returns>
-		protected async Task<T> LoadDataAsync<T>(string filePath, int minutes) where T : class
-        {
-            Guard.Against.NullOrWhiteSpace(filePath, nameof(filePath));
-
-            if (!File.Exists(filePath))
-            {
-                return null;
-            }
-
-            try
-            {
-                var fileInfo = new FileInfo(filePath);
-                DateTime dateLastWrite = fileInfo.LastWriteTime;
-
-                if (minutes > 0 && dateLastWrite.AddMinutes(minutes) <= DateTime.Now)
-                {
-                    return null;
-                }
-
-                if (minutes == 0)
-                {
-                    ShowNotificationOldData(dateLastWrite);
-                }
-
-                return await Task.Run(() => Serialization.FromJsonFile<T>(filePath));
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-                return null;
-            }
-        }
-
-		/// <summary>
-		/// Saves data to file in JSON format or as raw text.
-		/// </summary>
-		/// <typeparam name="T">Type of data to save</typeparam>
-		/// <param name="filePath">Path to the data file</param>
-		/// <param name="data">Data object to save</param>
-		/// <returns>True if save was successful, false otherwise</returns>
-		protected bool SaveData<T>(string filePath, T data) where T : class
-        {
-            Guard.Against.NullOrWhiteSpace(filePath, nameof(filePath));
-            try
-            {
-                if (data == null)
-                {
-                    return false;
-                }
-
-                FileSystem.PrepareSaveFile(filePath);
-                if (data is string s)
-                {
-                    File.WriteAllText(filePath, s);
-                }
-                else
-                {
-                    File.WriteAllText(filePath, Serialization.ToJson(data));
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-                return false;
-            }
-        }
-
-        /// <summary>
         /// Purges all cached data including apps and achievements.
         /// </summary>
         public void PurgeCache()
@@ -938,5 +826,25 @@ namespace CommonPluginsStores
             _gamesCache.Clear();
             _dlcsCache.Clear();
         }
-    }
+
+
+		private async Task<T> WithRateLimitAsync<T>(Func<Task<T>> apiCall)
+		{
+			await _rateLimiter.WaitAsync();
+			try
+			{
+				var elapsed = (DateTime.Now - _lastApiCall).TotalMilliseconds;
+				if (elapsed < MinApiCallIntervalMs)
+				{
+					await Task.Delay(MinApiCallIntervalMs - (int)elapsed);
+				}
+				_lastApiCall = DateTime.Now;
+				return await apiCall();
+			}
+			finally
+			{
+				_rateLimiter.Release();
+			}
+		}
+	}
 }
