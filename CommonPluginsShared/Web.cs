@@ -37,7 +37,7 @@ namespace CommonPluginsShared
     {
         private static ILogger Logger => LogManager.GetLogger();
 
-        public static string UserAgent => $"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0";
+        public static string UserAgent => $"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
         private static readonly Lazy<HttpClient> SharedClientLazy = new Lazy<HttpClient>(() =>
         {
@@ -992,95 +992,147 @@ namespace CommonPluginsShared
                     // 2. Prepare asynchronous wait
                     using (var loadingCompleted = new ManualResetEventSlim(false))
                     {
-                        EventHandler<Playnite.SDK.Events.WebViewLoadingChangedEventArgs> loadingHandler = (s, e) =>
-                        {
-                            if (!e.IsLoading)
-                            {
-                                try
-                                {
-                                    loadingCompleted.Set();
-                                }
-                                catch (ObjectDisposedException) 
-                                {
-                                    // Logger.Debug("WebView loading handler: ObjectDisposedException");
-                                }
-                            }
-                        };
-
-                        webViewOffscreen.LoadingChanged += loadingHandler;
-
                         // Polling for element support
                         CancellationTokenSource cts = new CancellationTokenSource();
                         
                         try
-                        {
                             // 3. Navigate and wait for page to be fully loaded
                             webViewOffscreen.Navigate(url);
-                            TimeSpan waitTimeout = TimeSpan.FromSeconds(30);
+                            
+                            // Hide bot flags
+                            await webViewOffscreen.EvaluateScriptAsync("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
 
-                            // Start polling if selector is provided
-                            if (!string.IsNullOrEmpty(elementToWaitFor))
+                            TimeSpan waitTimeout = TimeSpan.FromSeconds(60);
+
+                            // Always start polling to handle Cloudflare challenges even if elementToWaitFor is null
+                            _ = Task.Run(async () => 
                             {
-                                 _ = Task.Run(async () => 
+                                 try
                                  {
-                                     try
+                                     // Initial delay to allow navigation to start
+                                     await Task.Delay(500, cts.Token);
+                                     
+                                     int consecutiveErrors = 0;
+
+                                     while (!cts.Token.IsCancellationRequested)
                                      {
-                                         // Delay polling start to allow browser initialization and prevent crashes
-                                         await Task.Delay(2000, cts.Token);
-                                         
-                                         int consecutiveErrors = 0;
-
-                                         while (!cts.Token.IsCancellationRequested)
+                                         try
                                          {
-                                             try
+                                             // Check if loadingCompleted is already set to avoid unnecessary calls
+                                             if (loadingCompleted.IsSet) break;
+
+                                             // Improved script that checks for Cloudflare AND the target element
+                                             string safeSelector = Serialization.ToJson(elementToWaitFor);
+                                             string script = "(function() { " +
+                                                "function isCf() { " +
+                                                    "var text = (document.body ? document.body.innerText : '') + (document.documentElement ? document.documentElement.innerText : ''); " +
+                                                    "var title = document.title || ''; " +
+                                                    "var hasCfTitle = title.includes('Just a moment...') || title.includes('Cloudflare'); " +
+                                                    "var hasCfText = text.includes('Verifying you are human') || " +
+                                                    "text.includes('needs to review the security of your connection') || " +
+                                                    "text.includes('Performance & security by Cloudflare') || " +
+                                                    "text.includes('Ray ID:'); " +
+                                                    "var hasCfSelectors = !!document.querySelector('#cf-challenge-running, .cf-browser-verification, #challenge-form'); " +
+                                                    "return hasCfTitle || (hasCfText && hasCfSelectors) || (hasCfText && title.length < 10); " +
+                                                "} " +
+                                                "if (isCf()) return { ready: false, cf: true }; " +
+                                                "var isComplete = document.readyState === 'complete' || document.readyState === 'interactive'; " +
+                                                "var text = (document.body ? document.body.innerText : '') + (document.documentElement ? document.documentElement.innerText : ''); " +
+                                                "text = text.trim(); " +
+                                                (string.IsNullOrEmpty(elementToWaitFor) 
+                                                    ? "return { ready: isComplete && text.length > 0, cf: false }; "
+                                                    : $"return {{ ready: isComplete && !!document.querySelector({safeSelector}), cf: false }}; ") +
+                                                "})()";
+
+                                             var jsResult = await webViewOffscreen.EvaluateScriptAsync(script);
+                                             
+                                             bool isFound = false;
+                                             bool isCf = false;
+                                             
+                                             if (jsResult?.Success == true && jsResult.Result != null)
                                              {
-                                                 // Check if loadingCompleted is already set to avoid unnecessary calls
-                                                 if (loadingCompleted.IsSet) break;
-
-                                                 var safeSelector = Serialization.ToJson(elementToWaitFor);
-                                                 var jsResult = await webViewOffscreen.EvaluateScriptAsync($"(function() {{ return !!document.querySelector({safeSelector}); }})()");
-                                                 
-                                                 bool isFound = false;
-                                                 if (jsResult?.Result is bool b)
+                                                 try 
                                                  {
-                                                     isFound = b;
+                                                     // jsResult.Result can be a Dictionary<string, object> or ExpandoObject
+                                                     if (jsResult.Result is System.Collections.Generic.IDictionary<string, object> dict)
+                                                     {
+                                                         isFound = dict.ContainsKey("ready") && (bool)dict["ready"];
+                                                         isCf = dict.ContainsKey("cf") && (bool)dict["cf"];
+                                                     }
+                                                     else
+                                                     {
+                                                         string json = Serialization.ToJson(jsResult.Result);
+                                                         var resultObj = Serialization.FromJson<dynamic>(json);
+                                                         isFound = (bool)resultObj["ready"];
+                                                         isCf = (bool)resultObj["cf"];
+                                                     }
                                                  }
-                                                 else if (jsResult?.Result != null)
+                                                 catch 
                                                  {
-                                                     // Safer fallback than Convert.ToBoolean which can throw
-                                                     bool.TryParse(jsResult.Result.ToString(), out isFound);
+                                                     // Fallback for simple results
+                                                     string resStr = jsResult.Result.ToString();
+                                                     isFound = resStr.Contains("\"ready\":true") || resStr.Contains("ready=True");
+                                                     isCf = resStr.Contains("\"cf\":true") || resStr.Contains("cf=True");
                                                  }
-
-                                                 if (isFound)
-                                                 {
-                                                     Common.LogDebug(true, $"DownloadWebView: Found element '{elementToWaitFor}', stopping wait.");
-                                                     loadingCompleted.Set();
-                                                     break;
-                                                 }
-                                                 
-                                                 // Script executed successfully, reset error counter
-                                                 consecutiveErrors = 0;
                                              }
-                                             catch (Exception ex)
+
+                                             if (isFound && !isCf)
+                                             {
+                                                 if (!string.IsNullOrEmpty(elementToWaitFor)) Common.LogDebug(true, $"DownloadWebView: Found element '{elementToWaitFor}', stopping wait.");
+                                                 else Common.LogDebug(true, $"DownloadWebView: Page ready (no CF detected), stopping wait.");
+                                                 
+                                                 loadingCompleted.Set();
+                                                 break;
+                                             }
+                                             
+                                             if (isCf)
+                                             {
+                                                 Common.LogDebug(true, $"DownloadWebView: Cloudflare challenge detected for {url}, waiting...");
+                                             }
+                                             else if (!isFound)
+                                             {
+                                                 // Diagnostic logging when target not found and not obviously CF
+                                                 try
+                                                 {
+                                                     var diagResult = await webViewOffscreen.EvaluateScriptAsync("(function() { return { title: document.title, len: document.body ? document.body.innerText.length : 0, state: document.readyState }; })()");
+                                                     if (diagResult?.Success == true && diagResult.Result != null)
+                                                     {
+                                                         Common.LogDebug(true, $"DownloadWebView Polling: {Serialization.ToJson(diagResult.Result)} (URL: {url})");
+                                                     }
+                                                 }
+                                                 catch { }
+                                             }
+                                             
+                                             // Script executed successfully, reset error counter
+                                             consecutiveErrors = 0;
+                                         }
+                                         catch (Exception ex)
+                                         {
+                                             // Scripts can only be executed within a V8Context. 
+                                             // This can happen if polling starts before the browser is fully initialized.
+                                             if (ex.Message.Contains("V8Context"))
+                                             {
+                                                 Common.LogDebug(true, $"DownloadWebView: V8Context not ready for selector '{elementToWaitFor}', retrying...");
+                                             }
+                                             else
                                              {
                                                  consecutiveErrors++;
                                                  string msg = $"Polling error for selector '{elementToWaitFor}': {ex.Message}";
-                                                 
+
                                                  // Escalate to Warn if persistent
                                                  if (consecutiveErrors >= 5) Logger.Warn(msg);
                                                  else Logger.Debug(msg);
                                              }
-                                             
-                                             await Task.Delay(500, cts.Token);
                                          }
+                                         
+                                         await Task.Delay(500, cts.Token);
                                      }
-                                     catch (OperationCanceledException)
-                                     {
-                                         // Expected when cancelled
-                                         // Logger.Debug("Polling cancelled");
-                                     }
-                                 }, cts.Token);
-                            }
+                                 }
+                                 catch (OperationCanceledException)
+                                 {
+                                     // Expected when cancelled
+                                 }
+                            }, cts.Token);
 
                             if (Application.Current?.Dispatcher?.CheckAccess() == true)
                             {
@@ -1138,15 +1190,6 @@ namespace CommonPluginsShared
                         {
                             cts.Cancel();
                             cts.Dispose();
-                            try 
-                            { 
-                                webViewOffscreen.LoadingChanged -= loadingHandler; 
-                            } 
-                            catch (Exception ex) 
-                            { 
-                                // Ignore exceptions during cleanup (webView may already be disposed)
-                                Common.LogDebug(true, $"Exception during event handler cleanup: {ex.Message}");
-                            }
                         }
                     }
 
@@ -1182,9 +1225,9 @@ namespace CommonPluginsShared
             }
         }
 
-        public static async Task<Tuple<string, List<HttpCookie>>> DownloadJsonDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true)
+        public static async Task<Tuple<string, List<HttpCookie>>> DownloadJsonDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null)
         {
-            return await DownloadWebView(false, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled);
+            return await DownloadWebView(false, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, elementToWaitFor);
         }
 
         public static async Task<Tuple<string, List<HttpCookie>>> DownloadSourceDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null)

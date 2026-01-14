@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 using System.Threading;
@@ -77,11 +78,18 @@ namespace CommonPluginsShared
                         storedCookies.RemoveAll(x => x.Expires != null && (DateTime)x.Expires <= DateTime.Now);
                         return storedCookies;
                     }
+                    catch (CryptographicException ex)
+                    {
+                        Common.LogError(ex, false, $"Failed to load saved cookies for {ClientName} (CryptographicException)");
+                        FileSystem.DeleteFile(FileCookies);
+                        return storedCookies;
+                    }
                     catch (Exception ex)
                     {
                         if (i == 4)
                         {
                             Common.LogError(ex, false, $"Failed to load saved cookies for {ClientName}");
+                            FileSystem.DeleteFile(FileCookies);
                         }
                         Thread.Sleep(500);
                     }
