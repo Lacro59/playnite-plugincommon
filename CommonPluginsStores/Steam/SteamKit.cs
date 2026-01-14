@@ -22,11 +22,12 @@ namespace CommonPluginsStores.Steam
 
         private static string UrlApi => @"https://api.steampowered.com";
         private static string UrlGetGameAchievements => UrlApi + @"/IPlayerService/GetGameAchievements/v1/?appid={0}&language={1}";
-        #endregion
+		#endregion
 
-        #region ISteamApps
+		#region ISteamApps
 
-        public static List<SteamApp> GetAppList()
+		[Obsolete("Used GetAppList(apiKey)")]
+		public static List<SteamApp> GetAppList()
         {
             Thread.Sleep(100);
             try
