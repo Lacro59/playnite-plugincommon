@@ -1001,7 +1001,27 @@ namespace CommonPluginsShared
                             webViewOffscreen.Navigate(url);
                             
                             // Hide bot flags
-                            await webViewOffscreen.EvaluateScriptAsync("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
+                            // Retry mechanism for V8Context
+                            for (int i = 0; i < 10; i++)
+                            {
+                                try
+                                {
+                                    await webViewOffscreen.EvaluateScriptAsync("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
+                                    break;
+                                }
+                                catch (Exception ex)
+                                {
+                                    if (ex.Message.Contains("V8Context"))
+                                    {
+                                        Common.LogDebug(true, $"DownloadWebView: V8Context not ready for 'webdriver' override, retrying... ({i + 1}/10)");
+                                        await Task.Delay(500, cts.Token);
+                                    }
+                                    else
+                                    {
+                                        throw;
+                                    }
+                                }
+                            }
 
                             TimeSpan waitTimeout = TimeSpan.FromSeconds(60);
 
