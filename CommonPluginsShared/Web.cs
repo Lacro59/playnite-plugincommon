@@ -1096,13 +1096,14 @@ namespace CommonPluginsShared
                                                          isCf = (bool)resultObj["cf"];
                                                      }
                                                  }
-                                                 catch 
-                                                 {
-                                                     // Fallback for simple results
-                                                     string resStr = jsResult.Result.ToString();
-                                                     isFound = resStr.Contains("\"ready\":true") || resStr.Contains("ready=True");
-                                                     isCf = resStr.Contains("\"cf\":true") || resStr.Contains("cf=True");
-                                                 }
+                                                 catch (Exception exParsed)
+                                                {
+                                                    // Fallback for simple results
+                                                    string resStr = jsResult.Result.ToString();
+                                                    Logger.Warn(exParsed, $"DownloadWebView: Structured parsing failed. Falling back to string check. Result: {resStr.Substring(0, Math.Min(resStr.Length, 150))}...");
+                                                    isFound = resStr.Contains("\"ready\":true") || resStr.Contains("ready=True");
+                                                    isCf = resStr.Contains("\"cf\":true") || resStr.Contains("cf=True");
+                                                }
                                              }
 
                                              if (isFound && !isCf)

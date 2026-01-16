@@ -785,7 +785,7 @@ namespace CommonPluginsStores.Epic
                     try
                     {
                         // Another thread may have refreshed while we waited
-                        if (StoreToken == null || StoreToken.Token.IsNullOrEmpty() || StoreToken.RefreshToken != refreshToken)
+                        if (StoreToken == null || StoreToken.Token.IsNullOrEmpty() || StoreToken.RefreshToken == refreshToken)
                         {
                             RenewTokens(refreshToken);
                         }
@@ -825,7 +825,7 @@ namespace CommonPluginsStores.Epic
                     tokenRefreshSemaphore.Wait();
                     try
                     {
-                        if (StoreToken == null || StoreToken.Token.IsNullOrEmpty() || StoreToken.RefreshToken != refreshToken)
+                        if (StoreToken == null || StoreToken.Token.IsNullOrEmpty() || StoreToken.RefreshToken == refreshToken)
                         {
                             RenewTokens(refreshToken);
                         }
@@ -1295,28 +1295,28 @@ namespace CommonPluginsStores.Epic
                             return null;
                         }
                         return retryResult;
-                     }
- 
-                     // Non-authentication error: log and return null so callers can handle gracefully
-                     Logger.Error($"[EpicApi] Error response from Epic: {error.errorCode}");
-                     return null;
-                  }
-                  else
-                  {
-                      try
-                      {
-                          return new Tuple<string, T>(str, Serialization.FromJson<T>(str));
-                      }
-                      catch (Exception ex)
-                      {
-                          // For cases where the service returns unexpected content, log and return null so callers can handle gracefully
-                          Logger.Error(str);
-                          Common.LogError(ex, false, true, PluginName);
-                          return null;
-                      }
-                  }
-             }
-         }
+                    }
+
+                    // Non-authentication error: log and return null so callers can handle gracefully
+                    Logger.Error($"[EpicApi] Error response from Epic: {error.errorCode}");
+                    return null;
+                }
+                else
+                {
+                    try
+                    {
+                        return new Tuple<string, T>(str, Serialization.FromJson<T>(str));
+                    }
+                    catch (Exception ex)
+                    {
+                        // For cases where the service returns unexpected content, log and return null so callers can handle gracefully
+                        Logger.Error(str);
+                        Common.LogError(ex, false, true, PluginName);
+                        return null;
+                    }
+                }
+            }
+        }
 
         // Helper to attempt token refresh and retry the original request once
         private async Task<Tuple<string, T>> TryRefreshAndRetry<T>(string url, StoreToken token = null) where T : class
@@ -1332,7 +1332,7 @@ namespace CommonPluginsStores.Epic
                     try
                     {
                         // Another thread might have refreshed while we were waiting - check and skip redundant refresh
-                        if (StoreToken == null || StoreToken.Token.IsNullOrEmpty() || StoreToken.RefreshToken != refreshToken)
+                        if (StoreToken == null || StoreToken.Token.IsNullOrEmpty() || StoreToken.RefreshToken == refreshToken)
                         {
                             RenewTokens(refreshToken);
                         }

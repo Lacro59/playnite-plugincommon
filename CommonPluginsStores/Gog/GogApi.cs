@@ -456,7 +456,7 @@ namespace CommonPluginsStores.Gog
             {
                 string url = string.Format(UrlUserGameAchievements, accountInfos.Pseudo, id, accountInfos.UserId);
                 string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Locale));
-                Logger.Info($"GetAchievementsPublic: Url={url}, Pseudo={accountInfos.Pseudo}, UserId={accountInfos.UserId}");
+                Logger.Info($"GetAchievementsPublic: Url={url}");
                 string response = Web.DownloadStringDataWithUrlBefore(url, urlLang).GetAwaiter().GetResult();
                 string jsonDataString = Tools.GetJsonInString(response, "(?<=window.profilesData.achievements\\s=\\s)");
 
@@ -828,15 +828,29 @@ namespace CommonPluginsStores.Gog
                 UserAgent = @"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Vivaldi/5.5.2805.50"
             }))
             {
+                bool _isHandlingLoading = false;
                 webView.LoadingChanged += async (s, e) =>
                 {
+                    if (_isHandlingLoading) return;
+                    _isHandlingLoading = true;
+
                     // Delay to avoid blocking UI and ensure page has time to initialize
                     await Task.Delay(500);
 
                     try
                     {
                         string url = webView.GetCurrentAddress();
-                        Logger.Info($"GogLogin: Checking Url={url}");
+                        string obscuredUrl = url;
+                        try
+                        {
+                            if (Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
+                            {
+                                obscuredUrl = uri.GetLeftPart(UriPartial.Path);
+                            }
+                        }
+                        catch { }
+                        
+                        Logger.Info($"GogLogin: Checking Url={obscuredUrl}");
 
                         if (!url.EndsWith("#openlogin"))
                         {
@@ -857,6 +871,10 @@ namespace CommonPluginsStores.Gog
                     catch (Exception ex)
                     {
                         Common.LogError(ex, false, true, PluginName);
+                    }
+                    finally
+                    {
+                        _isHandlingLoading = false;
                     }
                 };
 
