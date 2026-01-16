@@ -456,6 +456,7 @@ namespace CommonPluginsStores.Gog
             {
                 string url = string.Format(UrlUserGameAchievements, accountInfos.Pseudo, id, accountInfos.UserId);
                 string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Locale));
+                Logger.Info($"GetAchievementsPublic: Url={url}, Pseudo={accountInfos.Pseudo}, UserId={accountInfos.UserId}");
                 string response = Web.DownloadStringDataWithUrlBefore(url, urlLang).GetAwaiter().GetResult();
                 string jsonDataString = Tools.GetJsonInString(response, "(?<=window.profilesData.achievements\\s=\\s)");
 
@@ -829,22 +830,33 @@ namespace CommonPluginsStores.Gog
             {
                 webView.LoadingChanged += async (s, e) =>
                 {
-                    string url = webView.GetCurrentAddress();
-                    if (!url.EndsWith("#openlogin"))
+                    // Delay to avoid blocking UI and ensure page has time to initialize
+                    await Task.Delay(500);
+
+                    try
                     {
-                        bool loggedIn = await Task.Run(() =>
+                        string url = webView.GetCurrentAddress();
+                        Logger.Info($"GogLogin: Checking Url={url}");
+
+                        if (!url.EndsWith("#openlogin"))
                         {
-                            var pageText = Web.DownloadSourceDataWebView(UrlAccountInfo).GetAwaiter().GetResult();
-							string stringInfo = pageText.Item1;
-							_ = Serialization.TryFromJson(stringInfo, out AccountBasicResponse accountBasicResponse);
-							AccountBasic = accountBasicResponse;
-							return AccountBasic?.IsLoggedIn ?? false;
-                        });
-                        if (loggedIn)
-                        {
-                            _ = SetStoredCookies(GetWebCookies());
-                            webView.Close();
+                            var cookies = webView.GetCookies();
+                            if (cookies?.Any(x => x.Domain?.Contains("gog.com") == true) ?? false)
+                            {
+                                string response = await Web.DownloadStringData(UrlAccountInfo, cookies);
+                                if (Serialization.TryFromJson(response, out AccountBasicResponse accountBasicResponse) && (accountBasicResponse?.IsLoggedIn ?? false))
+                                {
+                                    Logger.Info("GogLogin: Login successful, saving cookies...");
+                                    AccountBasic = accountBasicResponse;
+                                    _ = SetStoredCookies(cookies);
+                                    webView.Close();
+                                }
+                            }
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, true, PluginName);
                     }
                 };
 

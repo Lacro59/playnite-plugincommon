@@ -1284,7 +1284,7 @@ namespace CommonPluginsStores.Epic
                 if (Serialization.TryFromJson<ErrorResponse>(str, out var error) && !string.IsNullOrEmpty(error.errorCode))
                 {
                     // Handle authentication errors by attempting a single token refresh + retry.
-                    if (error.errorCode.IndexOf("authentication", StringComparison.OrdinalIgnoreCase) >= 0)
+                    if (error.errorCode.IndexOf("authentication", StringComparison.OrdinalIgnoreCase) >= 0 || error.errorCode.IndexOf("invalid_token", StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         // Try to refresh token and retry request
                         var retryResult = await TryRefreshAndRetry<T>(url, token);

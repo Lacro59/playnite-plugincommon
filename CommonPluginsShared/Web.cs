@@ -974,7 +974,7 @@ namespace CommonPluginsShared
         }
 
 
-        private static async Task<Tuple<string, List<HttpCookie>>> DownloadWebView(bool getSource, string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null)
+        private static async Task<Tuple<string, List<HttpCookie>>> DownloadWebView(bool getSource, string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null, CancellationToken cancellationToken = default)
         {
             WebViewSettings webViewSettings = new WebViewSettings
             {
@@ -1004,6 +1004,8 @@ namespace CommonPluginsShared
                             // Retry mechanism for V8Context
                             for (int i = 0; i < 10; i++)
                             {
+                                if (cancellationToken.IsCancellationRequested) return new Tuple<string, List<HttpCookie>>(string.Empty, null);
+
                                 try
                                 {
                                     await webViewOffscreen.EvaluateScriptAsync("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
@@ -1037,6 +1039,12 @@ namespace CommonPluginsShared
 
                                      while (!cts.Token.IsCancellationRequested)
                                      {
+                                         if (cancellationToken.IsCancellationRequested)
+                                         {
+                                             loadingCompleted.Set();
+                                             break;
+                                         }
+                                         
                                          try
                                          {
                                              // Check if loadingCompleted is already set to avoid unnecessary calls
@@ -1174,7 +1182,7 @@ namespace CommonPluginsShared
                                 var checkTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
                                 checkTimer.Tick += (t, args) =>
                                 {
-                                    if (loadingCompleted.IsSet)
+                                    if (loadingCompleted.IsSet || cancellationToken.IsCancellationRequested)
                                     {
                                         timer.Stop();
                                         checkTimer.Stop();
@@ -1190,9 +1198,7 @@ namespace CommonPluginsShared
                                 timer.Stop();
                                 checkTimer.Stop();
                                 
-
-                                
-                                if (timedOut)
+                                if (timedOut || cancellationToken.IsCancellationRequested)
                                 {
                                     return new Tuple<string, List<HttpCookie>>(string.Empty, null);
                                 }
@@ -1215,6 +1221,8 @@ namespace CommonPluginsShared
                     }
 
                     // 4. Get content
+                    if (cancellationToken.IsCancellationRequested) return new Tuple<string, List<HttpCookie>>(string.Empty, null);
+
                     string data = getSource ? await webViewOffscreen.GetPageSourceAsync() : await webViewOffscreen.GetPageTextAsync();
 
                     // 5. Get cookies
@@ -1246,14 +1254,14 @@ namespace CommonPluginsShared
             }
         }
 
-        public static async Task<Tuple<string, List<HttpCookie>>> DownloadJsonDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null)
+        public static async Task<Tuple<string, List<HttpCookie>>> DownloadJsonDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null, CancellationToken cancellationToken = default)
         {
-            return await DownloadWebView(false, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, elementToWaitFor);
+            return await DownloadWebView(false, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, elementToWaitFor, cancellationToken);
         }
 
-        public static async Task<Tuple<string, List<HttpCookie>>> DownloadSourceDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null)
+        public static async Task<Tuple<string, List<HttpCookie>>> DownloadSourceDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null, CancellationToken cancellationToken = default)
         {
-            return await DownloadWebView(true, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, elementToWaitFor);
+            return await DownloadWebView(true, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, elementToWaitFor, cancellationToken);
         }
 
 
