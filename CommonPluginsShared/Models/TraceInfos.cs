@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace CommonPluginsShared.Models
 {
@@ -22,7 +23,7 @@ namespace CommonPluginsShared.Models
             StackFrame Frame = Trace.GetFrames()?.LastOrDefault();
             InitialCaller = Frame?.GetMethod()?.Name;
             CallerParams = Frame?.GetMethod()?.GetParameters();
-            FileName = (Frame?.GetFileName()?.IsNullOrEmpty() ?? true) ? "???" : Frame.GetFileName();
+            FileName = (Frame?.GetFileName()?.IsNullOrEmpty() ?? true) ? "???" : Path.GetFileName(Frame.GetFileName());
             LineNumber = Frame?.GetFileLineNumber() ?? 0;
         }
     }

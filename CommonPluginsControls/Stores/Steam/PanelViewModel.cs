@@ -8,7 +8,18 @@ namespace CommonPluginsControls.Stores.Steam
 {
     public class PanelViewModel : ObservableObject
     {
-        internal IStoreApi StoreApi { get; set; }
+        private IStoreApi _storeApi;
+        internal IStoreApi StoreApi
+        {
+            get => _storeApi;
+            set
+            {
+                _storeApi = value;
+                OnPropertyChanged(nameof(StoreApi));
+                OnPropertyChanged(nameof(User));
+                OnPropertyChanged(nameof(AuthStatus));
+            }
+        }
         public AccountInfos User => StoreApi?.CurrentAccountInfos;
 
         private bool useApi = true;

@@ -77,6 +77,7 @@ namespace CommonPluginsStores.Gog
         private UserDataOwned UserDataOwned => LoadUserDataOwned() ?? GetUserDataOwnedData() ?? LoadUserDataOwned(false);
 
         private AccountBasicResponse _accountBasic;
+        private int _isHandlingLoading = 0;
         private AccountBasicResponse AccountBasic
         {
             get
@@ -456,6 +457,7 @@ namespace CommonPluginsStores.Gog
             {
                 string url = string.Format(UrlUserGameAchievements, accountInfos.Pseudo, id, accountInfos.UserId);
                 string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Locale));
+                Logger.Info($"GetAchievementsPublic: GameId={id}");
                 string response = Web.DownloadStringDataWithUrlBefore(url, urlLang).GetAwaiter().GetResult();
                 string jsonDataString = Tools.GetJsonInString(response, "(?<=window.profilesData.achievements\\s=\\s)");
 
@@ -829,22 +831,52 @@ namespace CommonPluginsStores.Gog
             {
                 webView.LoadingChanged += async (s, e) =>
                 {
-                    string url = webView.GetCurrentAddress();
-                    if (!url.EndsWith("#openlogin"))
+                    if (Interlocked.Exchange(ref _isHandlingLoading, 1) == 1) return;
+
+                    try
                     {
-                        bool loggedIn = await Task.Run(() =>
+                        // Delay to avoid blocking UI and ensure page has time to initialize
+                        await Task.Delay(500);
+
+                        try
                         {
-                            var pageText = Web.DownloadSourceDataWebView(UrlAccountInfo).GetAwaiter().GetResult();
-							string stringInfo = pageText.Item1;
-							_ = Serialization.TryFromJson(stringInfo, out AccountBasicResponse accountBasicResponse);
-							AccountBasic = accountBasicResponse;
-							return AccountBasic?.IsLoggedIn ?? false;
-                        });
-                        if (loggedIn)
-                        {
-                            _ = SetStoredCookies(GetWebCookies());
-                            webView.Close();
+                            string url = webView.GetCurrentAddress();
+                            string obscuredUrl = url;
+                            try
+                            {
+                                if (Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
+                                {
+                                    obscuredUrl = uri.GetLeftPart(UriPartial.Path);
+                                }
+                            }
+                            catch { }
+                            
+                            Logger.Info($"GogLogin: Checking Url={obscuredUrl}");
+
+                            if (!url.EndsWith("#openlogin"))
+                            {
+                                var cookies = webView.GetCookies();
+                                if (cookies?.Any(x => x.Domain?.Contains("gog.com") == true) ?? false)
+                                {
+                                    string response = await Web.DownloadStringData(UrlAccountInfo, cookies);
+                                    if (Serialization.TryFromJson(response, out AccountBasicResponse accountBasicResponse) && (accountBasicResponse?.IsLoggedIn ?? false))
+                                    {
+                                        Logger.Info("GogLogin: Login successful, saving cookies...");
+                                        AccountBasic = accountBasicResponse;
+                                        _ = SetStoredCookies(cookies);
+                                        webView.Close();
+                                    }
+                                }
+                            }
                         }
+                        catch (Exception ex)
+                        {
+                            Common.LogError(ex, false, true, PluginName);
+                        }
+                    }
+                    finally
+                    {
+                        _isHandlingLoading = 0;
                     }
                 };
 
