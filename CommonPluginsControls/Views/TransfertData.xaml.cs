@@ -73,7 +73,6 @@ namespace CommonPluginsControls.Views
                     PluginData = PluginDatabase.GetClone(((DataGame)PART_CbPluginGame.SelectedItem).Id);
                     PluginData.Id = ((DataGame)PART_CbGame.SelectedItem).Id;
                     PluginData.Name = ((DataGame)PART_CbGame.SelectedItem).Name;
-                    PluginData.Game = API.Instance.Database.Games.Get(((DataGame)PART_CbGame.SelectedItem).Id);
                 }
 
                 if (PluginData != null)
