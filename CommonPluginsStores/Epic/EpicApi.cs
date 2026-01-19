@@ -21,6 +21,7 @@ using System.Net.Http;
 using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using static CommonPluginsShared.PlayniteTools;
 
@@ -28,6 +29,9 @@ namespace CommonPluginsStores.Epic
 {
     public class EpicApi : StoreApi
     {
+        // Semaphore to ensure only one token refresh is performed at a time
+        private readonly SemaphoreSlim tokenRefreshSemaphore = new SemaphoreSlim(1, 1);
+
         #region Urls
         
         private static string UrlBase => @"https://www.epicgames.com";
@@ -160,6 +164,15 @@ namespace CommonPluginsStores.Epic
 
             if (!CurrentAccountInfos.IsPrivate && !StoreSettings.UseAuth)
             {
+                if (StoreToken == null)
+                {
+                    StoreToken = GetStoredToken();
+                }
+
+                if (StoreToken != null)
+                {
+                    CheckIsUserLoggedIn();
+                }
                 return !CurrentAccountInfos.UserId.IsNullOrEmpty();
             }
 
@@ -268,18 +281,39 @@ namespace CommonPluginsStores.Epic
                 ObservableCollection<AccountInfos> accountsInfos = new ObservableCollection<AccountInfos>();
 
                 EpicFriendsSummary epicFriendsSummary = GetFriendsSummary().GetAwaiter().GetResult();
-                var tasks = epicFriendsSummary.Friends.Select(async x =>
+                if (epicFriendsSummary == null || epicFriendsSummary.Friends == null)
                 {
-                    EpicAccountResponse epicAccountResponsea = await GetAccountInfo(x.AccountId);
-                    return new AccountInfos
-                    {
-                        DateAdded = null,
-                        UserId = x.AccountId,
-                        Avatar = string.Empty,
-                        Pseudo = epicAccountResponsea.DisplayName,
-                        Link = string.Format(UrlAccountProfile, x.AccountId)
-                    };
-                }).ToList();
+                    // No friends data available (possibly auth refresh failed); return empty list
+                    return new ObservableCollection<AccountInfos>();
+                }
+                var tasks = epicFriendsSummary.Friends.Select(async x =>
+                 {
+                     try
+                     {
+                         EpicAccountResponse epicAccountResponsea = await GetAccountInfo(x.AccountId);
+                         string pseudo = epicAccountResponsea?.DisplayName ?? x.AccountId ?? string.Empty;
+                         return new AccountInfos
+                         {
+                             DateAdded = null,
+                             UserId = x.AccountId,
+                             Avatar = string.Empty,
+                             Pseudo = pseudo,
+                             Link = string.Format(UrlAccountProfile, x.AccountId)
+                         };
+                     }
+                     catch (Exception ex)
+                     {
+                         Common.LogError(ex, false, true, PluginName);
+                         return new AccountInfos
+                         {
+                             DateAdded = null,
+                             UserId = x.AccountId,
+                             Avatar = string.Empty,
+                             Pseudo = x.AccountId ?? string.Empty,
+                             Link = string.Format(UrlAccountProfile, x.AccountId)
+                         };
+                     }
+                 }).ToList();
 
                 var results = Task.WhenAll(tasks).GetAwaiter().GetResult();
                 foreach (var userInfos in results)
@@ -586,6 +620,11 @@ namespace CommonPluginsStores.Epic
 			{
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
                 var achievementResponse = QueryAchievement(@namespace).GetAwaiter().GetResult();
+                if (achievementResponse == null)
+                {
+                    Logger.Warn($"EpicApi.GetAchievementsSchema: QueryAchievement returned null for {@namespace}");
+                    return new Tuple<string, ObservableCollection<GameAchievement>>(string.Empty, gameAchievements);
+                }
                 string productId = achievementResponse.Data?.Achievement?.ProductAchievementsRecordBySandbox?.ProductId;
                 achievementResponse?.Data?.Achievement?.ProductAchievementsRecordBySandbox?.Achievements?.ForEach(x =>
                 {
@@ -735,7 +774,27 @@ namespace CommonPluginsStores.Epic
                 EpicAccountResponse account = GetAccountInfo(StoreToken.AccountId).GetAwaiter().GetResult();
                 if (account == null)
                 {
-                    RenewTokens(StoreToken.RefreshToken);
+                    string refreshToken = StoreToken?.RefreshToken;
+                    if (string.IsNullOrEmpty(refreshToken))
+                    {
+                        return false;
+                    }
+
+                    // Ensure only one thread refreshes tokens at a time
+                    tokenRefreshSemaphore.Wait();
+                    try
+                    {
+                        // Another thread may have refreshed while we waited
+                        if (StoreToken == null || StoreToken.Token.IsNullOrEmpty() || StoreToken.RefreshToken == refreshToken)
+                        {
+                            RenewTokens(refreshToken);
+                        }
+                    }
+                    finally
+                    {
+                        tokenRefreshSemaphore.Release();
+                    }
+
                     if (StoreToken == null || StoreToken.AccountId.IsNullOrEmpty() || StoreToken.Token.IsNullOrEmpty())
                     {
                         return false;
@@ -757,13 +816,31 @@ namespace CommonPluginsStores.Epic
                 {
                     Logger.Warn("Retry CheckIsUserLoggedIn()");
 
-                    RenewTokens(StoreToken.RefreshToken);
-					if (StoreToken == null || StoreToken.AccountId.IsNullOrEmpty() || StoreToken.Token.IsNullOrEmpty())
-					{
-						return false;
-					}
+                    string refreshToken = StoreToken?.RefreshToken;
+                    if (string.IsNullOrEmpty(refreshToken))
+                    {
+                        return false;
+                    }
 
-					EpicAccountResponse account = GetAccountInfo(StoreToken.AccountId).GetAwaiter().GetResult();
+                    tokenRefreshSemaphore.Wait();
+                    try
+                    {
+                        if (StoreToken == null || StoreToken.Token.IsNullOrEmpty() || StoreToken.RefreshToken == refreshToken)
+                        {
+                            RenewTokens(refreshToken);
+                        }
+                    }
+                    finally
+                    {
+                        tokenRefreshSemaphore.Release();
+                    }
+
+                    if (StoreToken == null || StoreToken.AccountId.IsNullOrEmpty() || StoreToken.Token.IsNullOrEmpty())
+                    {
+                        return false;
+                    }
+
+                    EpicAccountResponse account = GetAccountInfo(StoreToken.AccountId).GetAwaiter().GetResult();
                     if (CurrentAccountInfos.Pseudo.IsNullOrEmpty() && account.Id.IsEqual(StoreToken.AccountId))
                     {
                         CurrentAccountInfos.Pseudo = account?.DisplayName;
@@ -948,7 +1025,13 @@ namespace CommonPluginsStores.Epic
         public List<PlaytimeItem> GetPlaytimeItems()
         {
             string formattedPlaytimeUrl = string.Format(UrlPlaytimeAll, CurrentAccountInfos.UserId);
-            return InvokeRequest<List<PlaytimeItem>>(formattedPlaytimeUrl).GetAwaiter().GetResult().Item2;
+            var result = InvokeRequest<List<PlaytimeItem>>(formattedPlaytimeUrl).GetAwaiter().GetResult();
+            if (result == null || result.Item2 == null)
+            {
+                // Return empty list when no data or authentication refresh failed
+                return new List<PlaytimeItem>();
+            }
+            return result.Item2;
         }
 
         public List<Asset> GetAssets()
@@ -959,18 +1042,50 @@ namespace CommonPluginsStores.Epic
             var result = FileDataTools.LoadData<List<Asset>>(cacheFile, 10);
             if (result == null || result.Count() == 0)
             {
+                if (StoreToken == null)
+                {
+                    Logger.Warn("EpicApi.GetAssets: StoreToken is null, cannot fetch assets.");
+                    API.Instance.Notifications.Add(new NotificationMessage(
+                        $"{PluginName}-Epic-NoToken",
+                        string.Format("{0}: Login required to fetch Epic assets.", PluginName),
+                        NotificationType.Error,
+                        () => CommonPlayniteShared.Common.ProcessStarter.StartUrl(UrlLogin)
+                    ));
+                    return result ?? new List<Asset>();
+                }
+
                 var response = InvokeRequest<LibraryItemsResponse>(UrlAsset, StoreToken).GetAwaiter().GetResult();
                 result = new List<Asset>();
-                result.AddRange(response.Item2.Records);
 
-                string nextCursor = response.Item2.ResponseMetadata?.NextCursor;
+                // If InvokeRequest failed (e.g. token refresh failed) it may return null — guard against that
+                if (response?.Item2?.Records != null)
+                {
+                    result.AddRange(response.Item2.Records);
+                }
+                else
+                {
+                    Logger.Warn("EpicApi.GetAssets: Failed to fetch assets or no records returned.");
+                    // Nothing to paginate if initial response didn't contain records
+                    FileDataTools.SaveData(cacheFile, result);
+                    return result;
+                }
+
+                string nextCursor = response?.Item2?.ResponseMetadata?.NextCursor;
                 while (nextCursor != null)
                 {
                     response = InvokeRequest<LibraryItemsResponse>(
                         $"{UrlAsset}&cursor={nextCursor}",
 						StoreToken).GetAwaiter().GetResult();
-                    result.AddRange(response.Item2.Records);
-                    nextCursor = response.Item2.ResponseMetadata.NextCursor;
+                    if (response?.Item2?.Records != null)
+                    {
+                        result.AddRange(response.Item2.Records);
+                        nextCursor = response?.Item2?.ResponseMetadata?.NextCursor;
+                    }
+                    else
+                    {
+                        Logger.Warn("EpicApi.GetAssets: Records is null in paginated response; stopping pagination.");
+                        break;
+                    }
                 }
 
                 FileDataTools.SaveData(cacheFile, result);
@@ -983,14 +1098,14 @@ namespace CommonPluginsStores.Epic
         {
             string url = string.Format(UrlFriendsSummary, CurrentAccountInfos.UserId);
             Tuple<string, EpicFriendsSummary> data = await InvokeRequest<EpicFriendsSummary>(url);
-            return data.Item2;
+            return data?.Item2;
         }
 
         private async Task<EpicAccountResponse> GetAccountInfo(string id)
         {
             string url = string.Format(UrlAccount, id);
             Tuple<string, EpicAccountResponse> data = await InvokeRequest<EpicAccountResponse>(url, StoreToken);
-            return data.Item2;
+            return data?.Item2;
         }
 
         public CatalogItem GetCatalogItem(string nameSpace, string catalogItemId)
@@ -1005,6 +1120,12 @@ namespace CommonPluginsStores.Epic
                 Tuple<string, Dictionary<string, CatalogItem>> catalogResponse = InvokeRequest<Dictionary<string, CatalogItem>>(UrlApiCatalog + url).GetAwaiter().GetResult();
                 result = catalogResponse.Item2;
                 FileDataTools.SaveData(cacheFile, result);
+            }
+
+            if (result == null)
+            {
+                Logger.Warn($"EpicApi.GetCatalogItem: Failed to retrieve catalog item for {nameSpace} {catalogItemId}");
+                return null;
             }
 
             return result.TryGetValue(catalogItemId, out CatalogItem catalogItem)
@@ -1162,7 +1283,23 @@ namespace CommonPluginsStores.Epic
 
                 if (Serialization.TryFromJson<ErrorResponse>(str, out var error) && !string.IsNullOrEmpty(error.errorCode))
                 {
-                    throw new Exception(error.errorCode);
+                    // Handle authentication errors by attempting a single token refresh + retry.
+                    if (error.errorCode.IndexOf("authentication", StringComparison.OrdinalIgnoreCase) >= 0 || error.errorCode.IndexOf("invalid_token", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        // Try to refresh token and retry request
+                        var retryResult = await TryRefreshAndRetry<T>(url, token);
+                        if (retryResult == null)
+                        {
+                            // Log and return null so callers that handle null continue to work
+                            Logger.Error($"[EpicApi] Authentication refresh failed for request {url}");
+                            return null;
+                        }
+                        return retryResult;
+                    }
+
+                    // Non-authentication error: log and return null so callers can handle gracefully
+                    Logger.Error($"[EpicApi] Error response from Epic: {error.errorCode}");
+                    return null;
                 }
                 else
                 {
@@ -1170,15 +1307,86 @@ namespace CommonPluginsStores.Epic
                     {
                         return new Tuple<string, T>(str, Serialization.FromJson<T>(str));
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // For cases like #134, where the entire service is down and doesn't even return valid error messages.
+                        // For cases where the service returns unexpected content, log and return null so callers can handle gracefully
                         Logger.Error(str);
-                        throw new Exception("Failed to get data from Epic service.");
+                        Common.LogError(ex, false, true, PluginName);
+                        return null;
                     }
                 }
             }
         }
+
+        // Helper to attempt token refresh and retry the original request once
+        private async Task<Tuple<string, T>> TryRefreshAndRetry<T>(string url, StoreToken token = null) where T : class
+        {
+            Logger.Info($"[EpicApi] Authentication error detected. Attempting token refresh and retry.");
+            try
+            {
+                string refreshToken = token?.RefreshToken ?? StoreToken?.RefreshToken;
+                if (!string.IsNullOrEmpty(refreshToken))
+                {
+                    // Ensure only one thread performs a token refresh at a time
+                    await tokenRefreshSemaphore.WaitAsync();
+                    try
+                    {
+                        // Another thread might have refreshed while we were waiting - check and skip redundant refresh
+                        if (StoreToken == null || StoreToken.Token.IsNullOrEmpty() || StoreToken.RefreshToken == refreshToken)
+                        {
+                            RenewTokens(refreshToken);
+                        }
+
+                        if (StoreToken != null && !StoreToken.Token.IsNullOrEmpty())
+                        {
+                            using (var httpClient2 = new HttpClient())
+                            {
+                                httpClient2.DefaultRequestHeaders.Clear();
+                                if (!string.IsNullOrEmpty(StoreToken.Token))
+                                {
+                                    string authType2 = string.IsNullOrEmpty(StoreToken.Type) ? "bearer" : StoreToken.Type;
+                                    httpClient2.DefaultRequestHeaders.Add("Authorization", authType2 + " " + StoreToken.Token);
+                                }
+
+                                var retryResp = await httpClient2.GetAsync(url);
+                                var retryStr = await retryResp.Content.ReadAsStringAsync();
+
+                                if (Serialization.TryFromJson<ErrorResponse>(retryStr, out var retryError) && !string.IsNullOrEmpty(retryError.errorCode))
+                                {
+                                    Logger.Error($"[EpicApi] Token refresh failed to resolve error: {retryError.errorCode}");
+                                    StoreToken = null;
+                                    SetStoredToken(null);
+                                    return null;
+                                }
+
+                                try
+                                {
+                                    return new Tuple<string, T>(retryStr, Serialization.FromJson<T>(retryStr));
+                                }
+                                catch
+                                {
+                                    Logger.Error(retryStr);
+                                    throw new Exception("Failed to get data from Epic service.");
+                                }
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        tokenRefreshSemaphore.Release();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, true, PluginName);
+            }
+
+            // If we reach here, token refresh didn't work — clear stored token and return null so callers can handle gracefully
+            StoreToken = null;
+            SetStoredToken(null);
+            return null;
+         }
 
         private async Task<T> QueryGraphQL<T>(object queryObject) where T : class
         {
@@ -1212,13 +1420,14 @@ namespace CommonPluginsStores.Epic
                     httpClient.DefaultRequestHeaders.Clear();
                     httpClient.DefaultRequestHeaders.Add("User-Agent", UserAgent);
 
-					bool needsAuth = (CurrentAccountInfos?.IsPrivate ?? false) || StoreSettings.UseAuth;
-					if (needsAuth && StoreToken != null && !StoreToken.Token.IsNullOrEmpty())
-					{
-						httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + StoreToken.Token);
-					}
+                    bool needsAuth = (CurrentAccountInfos?.IsPrivate ?? false) || StoreSettings.UseAuth;
+                    if (needsAuth && StoreToken != null && !StoreToken.Token.IsNullOrEmpty())
+                    {
+                        // Use the same token.Type format as other requests for consistency (e.g. "bearer" vs "Bearer")
+                        httpClient.DefaultRequestHeaders.Add("Authorization", StoreToken.Type + " " + StoreToken.Token);
+                    }
 
-					HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content);
+                    HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content);
                     string str = await response.Content.ReadAsStringAsync();
 
                     if (!response.IsSuccessStatusCode)
