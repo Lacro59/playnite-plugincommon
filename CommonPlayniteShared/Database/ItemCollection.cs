@@ -8,7 +8,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CommonPlayniteShared.Database
@@ -37,10 +36,7 @@ namespace CommonPlayniteShared.Database
         public TItem this[Guid id]
         {
             get => Get(id);
-            set
-            {
-                new NotImplementedException();
-            }
+            set => throw new NotImplementedException();
         }
 
         public event EventHandler<ItemCollectionChangedEventArgs<TItem>> ItemCollectionChanged;
@@ -282,7 +278,7 @@ namespace CommonPlayniteShared.Database
             var item = Get(id);
             if (item == null)
             {
-                throw new Exception($"Item {item.Id} doesn't exists.");
+                throw new Exception($"Item {id} doesn't exist.");
             }
 
             lock (collectionLock)
@@ -342,7 +338,7 @@ namespace CommonPlayniteShared.Database
             }
 
             TItem oldData;
-            TItem loadedItem;
+            TItem loadedItem = null;
 
             lock (collectionLock)
             {
@@ -377,21 +373,26 @@ namespace CommonPlayniteShared.Database
                 // If item doesn't exist, don't update.
                 if (oldData == null)
                 {
-                    logger.Warn($"Update skipped: item {itemToUpdate.Id} does not exist.");
-                    return;
-                }
+                    Add(itemToUpdate);
+                    loadedItem = Get(itemToUpdate.Id);
 
-                // Save new data.
-                if (isPersistent)
-                {
-                    SaveItemData(itemToUpdate);
+                    oldData = null;
                 }
-
-                // Update memory instance.
-                loadedItem = Get(itemToUpdate.Id);
-                if (loadedItem != null && !ReferenceEquals(loadedItem, itemToUpdate))
+                else
                 {
-                    itemToUpdate.CopyDiffTo(loadedItem);
+                    // Save new data.
+                    if (isPersistent)
+                    {
+                        SaveItemData(itemToUpdate);
+                    }
+
+                    // Update memory instance using fresh deserialized data (ensures lists are correct).
+                    loadedItem = Get(itemToUpdate.Id);
+                    if (loadedItem != null)
+                    {
+                        var fresh = isPersistent ? GetItemData(itemToUpdate.Id) : itemToUpdate;
+                        fresh.CopyDiffTo(loadedItem);
+                    }
                 }
             }
 
@@ -410,6 +411,8 @@ namespace CommonPlayniteShared.Database
                 foreach (var item in itemsToUpdate)
                 {
                     TItem oldData;
+                    TItem loadedItem = null;
+
                     if (isPersistent)
                     {
                         try
@@ -433,25 +436,33 @@ namespace CommonPlayniteShared.Database
 
                     if (oldData == null)
                     {
-                        throw new Exception($"Item {oldData.Id} doesn't exists.");
+                        Add(item);
+                        loadedItem = Get(item.Id);
+                        updates.Add(new ItemUpdateEvent<TItem>(null, loadedItem));
+                        continue;
                     }
-
-                    if (isPersistent)
+                    else
                     {
-                        SaveItemData(item);
-                    }
+                        if (isPersistent)
+                        {
+                            SaveItemData(item);
+                        }
 
-                    var loadedItem = Get(item.Id);
-                    if (!ReferenceEquals(loadedItem, item))
-                    {
-                        item.CopyDiffTo(loadedItem);
+                        loadedItem = Get(item.Id);
+                        if (!ReferenceEquals(loadedItem, item))
+                        {
+                            item.CopyDiffTo(loadedItem);
+                        }
                     }
 
                     updates.Add(new ItemUpdateEvent<TItem>(oldData, loadedItem));
                 }
             }
 
-            OnItemUpdated(updates);
+            if (updates.Count > 0)
+            {
+                OnItemUpdated(updates);
+            }
         }
 
         public void Clear()
@@ -563,7 +574,9 @@ namespace CommonPlayniteShared.Database
 
         public void Dispose()
         {
-            this.Dispose();
+            AddedItemsEventBuffer?.Clear();
+            RemovedItemsEventBuffer?.Clear();
+            ItemUpdatesEventBuffer?.Clear();
         }
 
         public IDisposable BufferedUpdate()
