@@ -491,7 +491,7 @@ namespace CommonPluginsShared.Collections
 
             _ = API.Instance.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
             {
-                RefreshNoLoader(id);
+                RefreshNoLoader(id, activateGlobalProgress.CancelToken);
             }, globalProgressOptions);
         }
 
@@ -543,7 +543,7 @@ namespace CommonPluginsShared.Collections
                     try
                     {
                         Thread.Sleep(100);
-                        RefreshNoLoader(id);
+                        RefreshNoLoader(id, a.CancelToken);
                     }
                     catch (Exception ex)
                     {
@@ -572,7 +572,7 @@ namespace CommonPluginsShared.Collections
         /// Refreshes data for a game ID without a loader.
         /// </summary>
         /// <param name="id">Game ID to refresh.</param>
-        public virtual void RefreshNoLoader(Guid id)
+        public virtual void RefreshNoLoader(Guid id, CancellationToken cancellationToken = default)
         {
             Game game = API.Instance.Database.Games.Get(id);
             Logger.Info($"RefreshNoLoader({game?.Name} - {game?.Id})");

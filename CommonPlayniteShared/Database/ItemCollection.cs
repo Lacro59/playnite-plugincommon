@@ -433,7 +433,8 @@ namespace CommonPlayniteShared.Database
 
                     if (oldData == null)
                     {
-                        throw new Exception($"Item {oldData.Id} doesn't exists.");
+                        logger.Error($"Item {item.Id} doesn't exists.");
+                        continue;
                     }
 
                     if (isPersistent)

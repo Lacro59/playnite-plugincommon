@@ -140,7 +140,7 @@ namespace CommonPluginsStores.GameJolt
                         GameAchievement item = gameAchievements.FirstOrDefault(y => y.Id.IsEqual(x.GameTrophyId.ToString()));
                         if (item != null)
                         {
-                            item.DateUnlocked = x.LoggedOn == null ? new DateTime(1982, 15, 12, 0, 0, 0, 0) : new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds((long)x.LoggedOn);
+                            item.DateUnlocked = x.LoggedOn == null ? new DateTime(1982, 12, 15, 0, 0, 0, 0) : new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds((long)x.LoggedOn);
                             item.UrlUnlocked = x.GameTrophy.ImgThumbnail;
                         }
                     });
@@ -170,7 +170,7 @@ namespace CommonPluginsStores.GameJolt
         public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
         {
             string cachePath = Path.Combine(PathAchievementsData, $"{id}.json");
-            Tuple<string, ObservableCollection<GameAchievement>> data = LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
+            Tuple<string, ObservableCollection<GameAchievement>> data = FileDataTools.LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
 
             if (data == null || !(data.Item2?.Any() ?? false))
             {
