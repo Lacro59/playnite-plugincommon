@@ -3,7 +3,9 @@
 
     <Style x:Key="ListExtendStyleLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
         <Style.Triggers>
-            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}}, Path=IsSelected}"
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}}, 
+                                           Path=IsSelected, 
+                                           FallbackValue=False}"
                          Value="True">
                 <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}}, Path=Foreground}" />
             </DataTrigger>
@@ -12,9 +14,33 @@
 
     <Style x:Key="ListExtendStyleTextBlock" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
         <Style.Triggers>
-            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}}, Path=IsSelected}"
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}}, 
+                                           Path=IsSelected, 
+                                           FallbackValue=False}"
                          Value="True">
                 <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}}, Path=Foreground}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ListBoxExtendStyleLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, 
+                                           Path=IsSelected, 
+                                           FallbackValue=False}"
+                         Value="True">
+                <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=Foreground}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ListBoxExtendStyleTextBlock" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, 
+                                           Path=IsSelected, 
+                                           FallbackValue=False}"
+                         Value="True">
+                <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=Foreground}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>

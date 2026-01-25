@@ -6,12 +6,14 @@ namespace CommonPluginsShared.Collections
     public abstract class PluginDataBaseGame<T> : PluginDataBaseGameBase
     {
         #region Cache fields
-        private bool? _hasData;
-        private int? _count;
+
+        private bool? hasData;
+        private int? count;
+
         #endregion
 
 
-        private List<T> _items = new List<T>();
+        private List<T> items = new List<T>();
 
         /// <summary>
         /// Gets or sets the list of items associated with the game.
@@ -19,10 +21,10 @@ namespace CommonPluginsShared.Collections
         /// </summary>
         public List<T> Items
         {
-            get => _items ?? new List<T>();
+            get => items ?? new List<T>();
             set
             {
-                SetValue(ref _items, value);
+                SetValue(ref items, value);
                 OnItemsChanged();
             }
         }
@@ -36,11 +38,11 @@ namespace CommonPluginsShared.Collections
         {
             get
             {
-                if (!_hasData.HasValue)
+                if (!hasData.HasValue)
                 {
-                    _hasData = Items != null && Items.Count > 0;
+                    hasData = Items != null && Items.Count > 0;
                 }
-                return _hasData.Value;
+                return hasData.Value;
             }
         }
 
@@ -53,11 +55,11 @@ namespace CommonPluginsShared.Collections
         {
             get
             {
-                if (!_count.HasValue)
+                if (!count.HasValue)
                 {
-                    _count = Items?.Count ?? 0;
+                    count = Items?.Count ?? 0;
                 }
-                return (ulong)_count.Value;
+                return (ulong)count.Value;
             }
         }
 
@@ -69,8 +71,8 @@ namespace CommonPluginsShared.Collections
         /// </summary>
         protected virtual void OnItemsChanged()
         {
-            _hasData = null;
-            _count = null;
+            hasData = null;
+            count = null;
 
             RefreshCachedValues();
         }
