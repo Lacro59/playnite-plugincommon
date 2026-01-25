@@ -439,7 +439,6 @@ namespace CommonPlayniteShared.Database
                         Add(item);
                         loadedItem = Get(item.Id);
                         updates.Add(new ItemUpdateEvent<TItem>(null, loadedItem));
-                        continue;
                     }
                     else
                     {
