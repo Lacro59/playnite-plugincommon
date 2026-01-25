@@ -336,10 +336,17 @@ namespace CommonPlayniteShared.Database
 
         public virtual void Update(TItem itemToUpdate)
         {
-            TItem oldData = null;
+            if (itemToUpdate == null)
+            {
+                throw new ArgumentNullException(nameof(itemToUpdate));
+            }
+
+            TItem oldData;
             TItem loadedItem;
+
             lock (collectionLock)
             {
+                // Try to get the existing item.
                 if (isPersistent)
                 {
                     try
@@ -349,16 +356,17 @@ namespace CommonPlayniteShared.Database
                     catch (Exception e)
                     {
                         logger.Error(e, "Failed to read stored item data.");
+                        oldData = null;
                     }
 
-                    // This should never ever happen, but there are automatic crash reports of Playnite db files being corrupted.
-                    // This happens because of trash launchers from games like Zula,
-                    // which mess with Playnite process and dump their log entries to our files.
-                    // This will most likely cause some other issues, but at least it won't crash the whole app.
+                    // Fallback in case of corrupted database.
                     if (oldData == null)
                     {
-                        logger.Error("Failed to read stored item data.");
-                        oldData = Serialization.GetClone(this[itemToUpdate.Id]);
+                        var existingItem = Get(itemToUpdate.Id);
+
+                        oldData = existingItem != null
+                            ? Serialization.GetClone(existingItem)
+                            : null;
                     }
                 }
                 else
@@ -366,24 +374,32 @@ namespace CommonPlayniteShared.Database
                     oldData = Get(itemToUpdate.Id);
                 }
 
+                // If item doesn't exist, don't update.
                 if (oldData == null)
                 {
-                    throw new Exception($"Item {oldData.Id} doesn't exists.");
+                    logger.Warn($"Update skipped: item {itemToUpdate.Id} does not exist.");
+                    return;
                 }
 
+                // Save new data.
                 if (isPersistent)
                 {
                     SaveItemData(itemToUpdate);
                 }
 
+                // Update memory instance.
                 loadedItem = Get(itemToUpdate.Id);
-                if (!ReferenceEquals(loadedItem, itemToUpdate))
+                if (loadedItem != null && !ReferenceEquals(loadedItem, itemToUpdate))
                 {
                     itemToUpdate.CopyDiffTo(loadedItem);
                 }
             }
 
-            OnItemUpdated(new List<ItemUpdateEvent<TItem>>() { new ItemUpdateEvent<TItem>(oldData, loadedItem) });
+            // Notify change.
+            OnItemUpdated(new List<ItemUpdateEvent<TItem>>
+            {
+                new ItemUpdateEvent<TItem>(oldData, loadedItem)
+            });
         }
 
         public virtual void Update(IEnumerable<TItem> itemsToUpdate)
