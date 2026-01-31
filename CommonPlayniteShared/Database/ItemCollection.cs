@@ -163,12 +163,6 @@ namespace CommonPlayniteShared.Database
 
 			storagePath = path;
 
-			// Fix issue where custom scripts create files instead of directories
-			if (File.Exists(storagePath))
-			{
-				File.Delete(storagePath);
-			}
-
 			if (Directory.Exists(storagePath))
 			{
 				LoadItemsFromDirectory();
