@@ -697,8 +697,11 @@ namespace CommonPlayniteShared.Database
 			}
 			else
 			{
-				addedItemsEventBuffer.AddRange(addedItems);
-				removedItemsEventBuffer.AddRange(removedItems);
+				lock (collectionLock)
+				{
+					addedItemsEventBuffer.AddRange(addedItems);
+					removedItemsEventBuffer.AddRange(removedItems);
+				}
 			}
 		}
 
@@ -719,15 +722,18 @@ namespace CommonPlayniteShared.Database
 			}
 			else
 			{
-				foreach (ItemUpdateEvent<TItem> update in updates)
+				lock (collectionLock)
 				{
-					if (itemUpdatesEventBuffer.TryGetValue(update.NewData.Id, out ItemUpdateEvent<TItem> existing))
+					foreach (ItemUpdateEvent<TItem> update in updates)
 					{
-						existing.NewData = update.NewData;
-					}
-					else
-					{
-						itemUpdatesEventBuffer.Add(update.NewData.Id, update);
+						if (itemUpdatesEventBuffer.TryGetValue(update.NewData.Id, out ItemUpdateEvent<TItem> existing))
+						{
+							existing.NewData = update.NewData;
+						}
+						else
+						{
+							itemUpdatesEventBuffer.Add(update.NewData.Id, update);
+						}
 					}
 				}
 			}
