@@ -531,31 +531,75 @@ namespace CommonPlayniteShared.Database
 		/// <param name="itemToUpdate">The item with updated data.</param>
 		public virtual void Update(TItem itemToUpdate)
 		{
+			if (itemToUpdate == null)
+			{
+				throw new ArgumentNullException(nameof(itemToUpdate));
+			}
+
 			TItem oldData;
-			TItem loadedItem;
+			TItem loadedItem = null;
 
 			lock (collectionLock)
 			{
-				oldData = GetOldItemData(itemToUpdate.Id);
-				if (oldData == null)
-				{
-					logger.Error($"Item {itemToUpdate.Id} doesn't exist.");
-					return;
-				}
-
+				// Try to get the existing item.
 				if (isPersistent)
 				{
-					SaveItemData(itemToUpdate);
+					try
+					{
+						oldData = GetItemData(itemToUpdate.Id);
+					}
+					catch (Exception e)
+					{
+						logger.Error(e, "Failed to read stored item data.");
+						oldData = null;
+					}
+
+					// Fallback in case of corrupted database.
+					if (oldData == null)
+					{
+						var existingItem = Get(itemToUpdate.Id);
+
+						oldData = existingItem != null
+							? Serialization.GetClone(existingItem)
+							: null;
+					}
+				}
+				else
+				{
+					oldData = Get(itemToUpdate.Id);
 				}
 
-				loadedItem = Get(itemToUpdate.Id);
-				if (!ReferenceEquals(loadedItem, itemToUpdate))
+				// If item doesn't exist, don't update.
+				if (oldData == null)
 				{
-					itemToUpdate.CopyDiffTo(loadedItem);
+					Add(itemToUpdate);
+					loadedItem = Get(itemToUpdate.Id);
+
+					oldData = null;
+				}
+				else
+				{
+					// Save new data.
+					if (isPersistent)
+					{
+						SaveItemData(itemToUpdate);
+					}
+
+					// Update memory instance using fresh deserialized data (ensures lists are correct).
+					loadedItem = Get(itemToUpdate.Id);
+					if (loadedItem != null)
+					{
+						var fresh = isPersistent ? GetItemData(itemToUpdate.Id) : itemToUpdate;
+						fresh.CopyDiffTo(loadedItem);
+					}
 				}
 			}
 
-			OnItemUpdated(new List<ItemUpdateEvent<TItem>> { new ItemUpdateEvent<TItem>(oldData, loadedItem) });
+			// Notify change.
+			OnItemUpdated(new List<ItemUpdateEvent<TItem>>
+			{
+				new ItemUpdateEvent<TItem>(oldData, loadedItem)
+			});
 		}
 
 		/// <summary>
@@ -592,7 +636,10 @@ namespace CommonPlayniteShared.Database
 				}
 			}
 
-			OnItemUpdated(updates);
+			if (updates.Count > 0)
+			{
+				OnItemUpdated(updates);
+			}
 		}
 
 		/// <summary>
@@ -799,8 +846,9 @@ namespace CommonPlayniteShared.Database
 		/// </summary>
 		public void Dispose()
 		{
-			// Note: Original implementation calls Dispose on itself (infinite recursion)
-			// This should be fixed if actual cleanup is needed
+			addedItemsEventBuffer?.Clear();
+			removedItemsEventBuffer?.Clear();
+			itemUpdatesEventBuffer?.Clear();
 		}
 
 		#endregion
