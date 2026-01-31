@@ -462,14 +462,14 @@ namespace CommonPlayniteShared.Database
 		/// <exception cref="Exception">Thrown if the item doesn't exist.</exception>
 		public virtual bool Remove(Guid id)
 		{
-			TItem item = Get(id);
-			if (item == null)
-			{
-				throw new Exception($"Item {id} doesn't exist.");
-			}
-
+			TItem item;
 			lock (collectionLock)
 			{
+				if (!Items.TryGetValue(id, out item))
+				{
+					throw new Exception($"Item {id} doesn't exist.");
+				}
+
 				if (isPersistent)
 				{
 					FileSystem.DeleteFile(GetItemFilePath(id));
@@ -480,6 +480,7 @@ namespace CommonPlayniteShared.Database
 
 			OnCollectionChanged(new List<TItem>(), new List<TItem> { item });
 			return true;
+		}
 		}
 
 		/// <summary>
