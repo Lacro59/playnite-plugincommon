@@ -567,7 +567,8 @@ namespace CommonPlayniteShared.Database
 				}
 				else
 				{
-					oldData = Get(itemToUpdate.Id);
+					var existingItem = Get(itemToUpdate.Id);
+					oldData = existingItem != null ? Serialization.GetClone(existingItem) : null;
 				}
 
 				// If item doesn't exist, don't update.
@@ -668,7 +669,8 @@ namespace CommonPlayniteShared.Database
 			}
 			else
 			{
-				return Get(id);
+				var existingItem = Get(id);
+				return existingItem != null ? Serialization.GetClone(existingItem) : null;
 			}
 		}
 
