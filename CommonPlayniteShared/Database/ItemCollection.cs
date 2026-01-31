@@ -356,19 +356,20 @@ namespace CommonPlayniteShared.Database
 		public virtual IEnumerable<TItem> Add(List<string> itemsToAdd, Func<TItem, string, bool> existingComparer)
 		{
 			var toAdd = new List<TItem>();
+			var result = new List<TItem>(itemsToAdd.Count);
 
 			foreach (string itemName in itemsToAdd)
 			{
 				TItem existingItem = this.FirstOrDefault(a => existingComparer(a, itemName));
 				if (existingItem != null)
 				{
-					yield return existingItem;
+					result.Add(existingItem);
 				}
 				else
 				{
 					TItem newItem = typeof(TItem).CrateInstance<TItem>(itemName);
 					toAdd.Add(newItem);
-					yield return newItem;
+					result.Add(newItem);
 				}
 			}
 
@@ -376,6 +377,8 @@ namespace CommonPlayniteShared.Database
 			{
 				Add(toAdd);
 			}
+
+			return result;
 		}
 
 		/// <summary>
