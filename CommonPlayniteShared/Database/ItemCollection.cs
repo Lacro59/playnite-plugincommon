@@ -592,7 +592,10 @@ namespace CommonPlayniteShared.Database
 					if (loadedItem != null)
 					{
 						var fresh = isPersistent ? GetItemData(itemToUpdate.Id) : itemToUpdate;
-						fresh.CopyDiffTo(loadedItem);
+						if (!ReferenceEquals(fresh, loadedItem))
+						{
+							fresh.CopyDiffTo(loadedItem);
+						}
 					}
 				}
 			}
