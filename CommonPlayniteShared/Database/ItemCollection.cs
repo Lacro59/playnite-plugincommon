@@ -787,7 +787,24 @@ namespace CommonPlayniteShared.Database
 		/// </summary>
 		public void Clear()
 		{
-			throw new NotImplementedException();
+			List<TItem> removedItems;
+			lock (collectionLock)
+			{
+				removedItems = Items.Values.ToList();
+				if (isPersistent)
+				{
+					foreach (var item in removedItems)
+					{
+						FileSystem.DeleteFile(GetItemFilePath(item.Id));
+					}
+				}
+				Items.Clear();
+			}
+
+			if (removedItems.Count > 0)
+			{
+				OnCollectionChanged(new List<TItem>(), removedItems);
+			}
 		}
 
 		/// <summary>
@@ -841,13 +858,22 @@ namespace CommonPlayniteShared.Database
 			return this.Select(a => Serialization.GetClone(a));
 		}
 
+		private sealed class BufferScope : IDisposable
+		{
+			private readonly ItemCollection<TItem> owner;
+			public BufferScope(ItemCollection<TItem> owner) => this.owner = owner;
+			public void Dispose() => owner.EndBufferUpdate();
+		}
+
 		/// <summary>
-		/// Creates a buffered update context (not implemented).
+		/// Creates a buffered update context.
 		/// </summary>
 		/// <returns>A disposable buffered update context.</returns>
+
 		public IDisposable BufferedUpdate()
 		{
-			throw new NotImplementedException();
+			BeginBufferUpdate();
+			return new BufferScope(this);
 		}
 
 		#endregion
