@@ -475,7 +475,6 @@ namespace CommonPlayniteShared.Database
 			OnCollectionChanged(new List<TItem>(), new List<TItem> { item });
 			return true;
 		}
-		}
 
 		/// <summary>
 		/// Removes the specified item from the collection.
