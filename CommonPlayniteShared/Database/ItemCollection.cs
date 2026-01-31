@@ -742,8 +742,11 @@ namespace CommonPlayniteShared.Database
 		/// </summary>
 		public void BeginBufferUpdate()
 		{
-			isEventBufferEnabled = true;
-			bufferDepth++;
+			lock (collectionLock)
+			{
+				isEventBufferEnabled = true;
+				bufferDepth++;
+			}
 		}
 
 		/// <summary>
@@ -752,27 +755,45 @@ namespace CommonPlayniteShared.Database
 		/// </summary>
 		public void EndBufferUpdate()
 		{
-			if (bufferDepth > 0)
+			List<TItem> addedCopy = null;
+			List<TItem> removedCopy = null;
+			List<ItemUpdateEvent<TItem>> updatesCopy = null;
+
+			lock (collectionLock)
 			{
-				bufferDepth--;
+				if (bufferDepth > 0)
+				{
+					bufferDepth--;
+				}
+
+				if (bufferDepth == 0)
+				{
+					isEventBufferEnabled = false;
+
+					if (addedItemsEventBuffer.Count > 0 || removedItemsEventBuffer.Count > 0)
+					{
+						addedCopy = addedItemsEventBuffer.ToList();
+						removedCopy = removedItemsEventBuffer.ToList();
+						addedItemsEventBuffer.Clear();
+						removedItemsEventBuffer.Clear();
+					}
+
+					if (itemUpdatesEventBuffer.Count > 0)
+					{
+						updatesCopy = itemUpdatesEventBuffer.Values.ToList();
+						itemUpdatesEventBuffer.Clear();
+					}
+				}
 			}
 
-			if (bufferDepth == 0)
+			if (addedCopy != null && (addedCopy.Count > 0 || removedCopy.Count > 0))
 			{
-				isEventBufferEnabled = false;
+				ItemCollectionChanged?.Invoke(this, new ItemCollectionChangedEventArgs<TItem>(addedCopy, removedCopy));
+			}
 
-				if (addedItemsEventBuffer.Count > 0 || removedItemsEventBuffer.Count > 0)
-				{
-					OnCollectionChanged(addedItemsEventBuffer.ToList(), removedItemsEventBuffer.ToList());
-					addedItemsEventBuffer.Clear();
-					removedItemsEventBuffer.Clear();
-				}
-
-				if (itemUpdatesEventBuffer.Count > 0)
-				{
-					OnItemUpdated(itemUpdatesEventBuffer.Values);
-					itemUpdatesEventBuffer.Clear();
-				}
+			if (updatesCopy != null && updatesCopy.Count > 0)
+			{
+				ItemUpdated?.Invoke(this, new ItemUpdatedEventArgs<TItem>(updatesCopy));
 			}
 		}
 
