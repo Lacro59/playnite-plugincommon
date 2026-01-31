@@ -4,21 +4,21 @@ namespace CommonPluginsShared.Collections
 {
 	public abstract class PluginDataBaseGameDetails<T, Y> : PluginDataBaseGame<T>
 	{
-		private Y itemsDetails = default;
+		private Y _itemsDetails = default;
 
 		/// <summary>
-		/// Gets or sets the list of itemsDetails associated with the game.
+		/// Gets or sets the list of items details associated with the game.
 		/// Setting this property triggers the OnItemsChanged event and refreshes cached values.
 		/// </summary>
 		public Y ItemsDetails
 		{
 			get
 			{
-				return itemsDetails == null ? default : itemsDetails;
+				return EqualityComparer<Y>.Default.Equals(_itemsDetails, default) ? default : _itemsDetails;
 			}
 			set
 			{
-				SetValue(ref itemsDetails, value);
+				SetValue(ref _itemsDetails, value);
 				OnItemsChanged();
 			}
 		}
