@@ -233,6 +233,10 @@ namespace CommonPlayniteShared.Database
 		/// <returns>The full file path for the item.</returns>
 		internal string GetItemFilePath(Guid id)
 		{
+			if (string.IsNullOrEmpty(storagePath))
+			{
+				throw new InvalidOperationException("Storage path not initialized. Call InitializeCollection(path) before using persistence.");
+			}
 			return Path.Combine(storagePath, $"{id}{JSON_EXTENSION}");
 		}
 
