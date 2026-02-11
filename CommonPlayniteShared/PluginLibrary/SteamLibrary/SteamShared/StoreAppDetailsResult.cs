@@ -114,9 +114,9 @@ namespace CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared
             public string short_description;
             public string supported_languages;
             public string website;
-            public object pc_requirements;
-            public object mac_requirements;
-            public object linux_requirements;
+            public Requirement pc_requirements;
+            public Requirement mac_requirements;
+            public Requirement linux_requirements;
             public List<Genre> genres;
             public ReleaseDate release_date;
             public List<string> developers;

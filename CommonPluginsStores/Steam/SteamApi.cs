@@ -6,6 +6,7 @@ using CommonPlayniteShared.PluginLibrary.SteamLibrary;
 using CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared;
 using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
+using CommonPluginsShared.Models;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Enumerations;
 using CommonPluginsStores.Steam.Models;
@@ -1206,12 +1207,433 @@ namespace CommonPluginsStores.Steam
             return storeAppDetailsResult;
         }
 
-        /// <summary>
-        /// Get game achievements schema with hidden description & percent & without stats
-        /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
-        private ObservableCollection<GameAchievement> GetAchievementsSchema(uint appId)
+		/// <summary>
+		/// Downloads and parses the Windows PC system requirements for a given Steam App ID.
+		/// Returns null if the app has no requirements data or the request fails.
+		/// </summary>
+		/// <param name="appId">Steam App ID</param>
+		public GameRequirements GetGameRequirements(uint appId)
+		{
+			try
+			{
+				StoreAppDetailsResult storeAppDetailsResult = GetAppDetails(appId, 1);
+				if (storeAppDetailsResult?.data == null)
+				{
+					Logger.Warn($"SteamApi.GetSystemRequirements - No app data for {appId}");
+					return null;
+				}
+
+				if (storeAppDetailsResult.data.pc_requirements?.minimum == null || storeAppDetailsResult.data.pc_requirements?.recommended == null)
+				{
+					Logger.Warn($"SteamApi.GetSystemRequirements - No pc_requirements for {appId}");
+					return null;
+				}
+
+				GameRequirements result = new GameRequirements
+				{
+					Id = appId.ToString(),
+					GameName = storeAppDetailsResult.data.name ?? string.Empty
+				};
+
+				if (!storeAppDetailsResult.data.pc_requirements.minimum.IsNullOrEmpty())
+				{
+					result.Minimum = ParseSteamRequirementHtml(storeAppDetailsResult.data.pc_requirements.minimum);
+				}
+				if (!storeAppDetailsResult.data.pc_requirements.recommended.IsNullOrEmpty())
+				{
+					result.Recommended = ParseSteamRequirementHtml(storeAppDetailsResult.data.pc_requirements.recommended);
+				}
+
+				result.SourceLink = new SourceLink
+				{
+					Name = "Steam",
+					GameName = result.GameName,
+					Url = $"https://store.steampowered.com/app/{appId}"
+				};
+
+				return result;
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, true, PluginName);
+				return null;
+			}
+		}
+
+		private static RequirementEntry ParseSteamRequirementHtml(string html)
+		{
+			RequirementEntry entry = new RequirementEntry();
+
+			HtmlParser parser = new HtmlParser();
+			IHtmlDocument document = parser.Parse(html);
+
+			foreach (IElement element in document.QuerySelectorAll("li"))
+			{
+				Common.LogDebug(true, $"SteamApi.ParseSteamRequirementHtml - {element.InnerHtml}");
+
+				if (element.InnerHtml.Contains("TBD", StringComparison.InvariantCultureIgnoreCase))
+				{
+					continue;
+				}
+
+				if (element.InnerHtml.IndexOf("<strong>OS") > -1)
+				{
+					ParseOs(element.InnerHtml, entry);
+				}
+				else if (element.InnerHtml.IndexOf("<strong>Processor") > -1)
+				{
+					ParseCpu(element.InnerHtml, entry);
+				}
+				else if (element.InnerHtml.IndexOf("<strong>Memory") > -1)
+				{
+					entry.Ram = ParseMemorySize(element.InnerHtml);
+				}
+				else if (element.InnerHtml.IndexOf("<strong>Graphics") > -1)
+				{
+					ParseGpu(element.InnerHtml, entry);
+				}
+				else if (element.InnerHtml.IndexOf("<strong>DirectX") > -1)
+				{
+					ParseDirectX(element.InnerHtml, entry);
+				}
+				else if (element.InnerHtml.IndexOf("<strong>Storage") > -1
+					  || element.InnerHtml.IndexOf("<strong>Hard Drive") > -1)
+				{
+					entry.Storage = ParseStorageSize(element.InnerHtml);
+				}
+			}
+
+			return entry;
+		}
+
+		private static void ParseOs(string html, RequirementEntry entry)
+		{
+			string os = Regex.Replace(html, "<[^>]*>", string.Empty)
+				.ToLower()
+				.Replace("\t", " ")
+				.Replace("os: ", string.Empty)
+				.Replace("os *: ", string.Empty)
+				.Replace("pc/ms-dos 5.0", string.Empty)
+				.Replace("(64-bit required)", string.Empty)
+				.Replace("(32/64-bit)", string.Empty)
+				.Replace("with platform update for  7 ( versions only)", string.Empty)
+				.Replace("(vista+ probably works)", string.Empty)
+				.Replace("win ", string.Empty)
+				.Replace("windows", string.Empty)
+				.Replace("microsoft", string.Empty)
+				.Replace(", 32-bit", string.Empty)
+				.Replace(", 32bit", string.Empty)
+				.Replace(", 64-bit", string.Empty)
+				.Replace(", 64bit", string.Empty)
+				.Replace("®", string.Empty)
+				.Replace("™", string.Empty)
+				.Replace("+", string.Empty)
+				.Replace("and above", string.Empty)
+				.Replace("x32", string.Empty)
+				.Replace("and", string.Empty)
+				.Replace("x64", string.Empty)
+				.Replace("32-bit", string.Empty)
+				.Replace("32bit", string.Empty)
+				.Replace("32 bit", string.Empty)
+				.Replace("64-bit", string.Empty)
+				.Replace("64bit", string.Empty)
+				.Replace("64 bit", string.Empty)
+				.Replace("latest service pack", string.Empty)
+				.Replace("32-bit/64-bit", string.Empty)
+				.Replace("32bit/64bit", string.Empty)
+				.Replace("64-bit operating system required", string.Empty)
+				.Replace("32-bit operating system required", string.Empty)
+				.Replace(" operating system required", string.Empty)
+				.Replace("operating system required", string.Empty)
+				.Replace(" equivalent or better", string.Empty)
+				.Replace(" or equivalent.", string.Empty)
+				.Replace(" or equivalent", string.Empty)
+				.Replace(" or newer", string.Empty)
+				.Replace("or newer", string.Empty)
+				.Replace("or later", string.Empty)
+				.Replace("or higher", string.Empty)
+				.Replace("()", string.Empty)
+				.Trim();
+
+			if (os.Trim() == "(/)" || os.Trim().IsNullOrEmpty())
+			{
+				return;
+			}
+
+			foreach (string token in os.Replace(",", "¤").Replace(" or ", "¤").Replace("/", "¤").Split('¤'))
+			{
+				string t = token.Trim();
+				if (!t.IsNullOrEmpty())
+				{
+					entry.Os.Add(t);
+				}
+			}
+		}
+
+		private static void ParseCpu(string html, RequirementEntry entry)
+		{
+			string cpu = html
+				.Replace("\t", " ")
+				.Replace("<strong>Processor:</strong>", string.Empty)
+				.Replace("<strong>Processor: </strong>", string.Empty)
+				.Replace("&nbsp;", string.Empty)
+				.Replace("GHz, or better)", "GHz)")
+				.Replace("Requires a 64-bit processor and operating system", string.Empty)
+				.Replace("More than a Pentium", string.Empty)
+				.Replace("equivalent or higher processor", string.Empty)
+				.Replace("- Low budget CPUs such as Celeron or Duron needs to be at about twice the CPU speed", string.Empty)
+				.Replace(" equivalent or faster processor", string.Empty)
+				.Replace(" equivalent or better", string.Empty)
+				.Replace("above", string.Empty)
+				.Replace("or similar", string.Empty)
+				.Replace("or faster", string.Empty)
+				.Replace("and up", string.Empty)
+				.Replace("(or higher)", string.Empty)
+				.Replace("or higher", string.Empty)
+				.Replace(" or equivalent.", string.Empty)
+				.Replace(" over", string.Empty)
+				.Replace(" or faster", string.Empty)
+				.Replace(" or better", string.Empty)
+				.Replace(" or equivalent", string.Empty)
+				.Replace(" or Equivalent", string.Empty)
+				.Replace("4 CPUs", string.Empty)
+				.Replace("(3 GHz Pentium® 4 recommended)", string.Empty)
+				.Replace("ghz", "GHz")
+				.Replace("Ghz", "GHz")
+				.Replace("®", string.Empty)
+				.Replace("™", string.Empty)
+				.Replace("or later that's SSE2 capable", string.Empty)
+				.Replace("Processor", string.Empty)
+				.Replace("processor", string.Empty)
+				.Replace("x86-compatible", string.Empty)
+				.Replace("(not recommended for Intel HD Graphics cards)", ", not recommended for Intel HD Graphics cards")
+				.Replace("()", string.Empty)
+				.Replace("<br>", string.Empty)
+				.Replace(", x86", string.Empty)
+				.Replace("Yes", string.Empty)
+				.Replace("GHz+", "GHz")
+				.Trim();
+
+			cpu = Regex.Replace(cpu, "<[^>]*>", string.Empty);
+			cpu = Regex.Replace(cpu, @", ~?(\d+(\.\d+)?)", " $1", RegexOptions.IgnoreCase);
+			cpu = Regex.Replace(cpu, @"(\d+),(\d+ GHz)", "$1.$2", RegexOptions.IgnoreCase);
+			cpu = Regex.Replace(cpu, @"(\d+),(\d+) - (\d+ GHz)", "$3", RegexOptions.IgnoreCase);
+			cpu = Regex.Replace(cpu, @"(\d+)GHz", "$1 GHz", RegexOptions.IgnoreCase);
+			cpu = Regex.Replace(cpu, @"(\d+)k", "$1K", RegexOptions.IgnoreCase);
+			cpu = Regex.Replace(cpu, @"(\d+\.\d+)\+ (GHz)", "$1 $2", RegexOptions.IgnoreCase);
+			cpu = Regex.Replace(cpu, @"(,|\/|\sor\s|\sand\s|\|)", "¤", RegexOptions.IgnoreCase);
+
+			foreach (string token in cpu.Split('¤'))
+			{
+				string t = token.Trim();
+				if (!t.IsNullOrEmpty())
+				{
+					entry.Cpu.Add(t);
+				}
+			}
+		}
+
+		private static void ParseGpu(string html, RequirementEntry entry)
+		{
+			string gpu = Regex.Replace(html, @"with [(]?\d+[ ]?(MB)?(GB)?[)]? (Memory)?(Video RAM)?", string.Empty, RegexOptions.IgnoreCase);
+			gpu = Regex.Replace(gpu, @"\(GTX \d+ or above required for VR\)", string.Empty, RegexOptions.IgnoreCase);
+			gpu = Regex.Replace(gpu, @"DirectX \d class GPU with \dGB VRAM \(", string.Empty, RegexOptions.IgnoreCase);
+			gpu = Regex.Replace(gpu, @"Shader Model \d+(\.\d+)?", string.Empty, RegexOptions.IgnoreCase);
+			gpu = Regex.Replace(gpu, @"card capable of shader \d+(\.\d+)?", string.Empty, RegexOptions.IgnoreCase);
+			gpu = Regex.Replace(gpu, @"DX\d+ Compliant with PS\d+(\.\d+)? support", string.Empty, RegexOptions.IgnoreCase);
+			gpu = Regex.Replace(gpu, @"DX\d+ Compliant", string.Empty, RegexOptions.IgnoreCase);
+			gpu = Regex.Replace(gpu, @"de \d+ GB", string.Empty, RegexOptions.IgnoreCase);
+			gpu = Regex.Replace(gpu, @"GPU (\d+)GB VRAM", "GPU $1 GB VRAM", RegexOptions.IgnoreCase);
+			gpu = Regex.Replace(gpu, @"(,|with)?\s*(\d+)\s*(GB|MB)(\s* system ram)?", " ($2 $3)", RegexOptions.IgnoreCase);
+			gpu = Regex.Replace(gpu, @"\(A minimum of \(\d+ GB\) of VRAM\)", string.Empty, RegexOptions.IgnoreCase);
+
+			gpu = gpu.Replace("\t", " ")
+				.Replace("<strong>Graphics:</strong>", string.Empty)
+				.Replace("<strong>Graphics: </strong>", string.Empty)
+				.Replace("requires graphics card. minimum GPU needed: \"", string.Empty)
+				.Replace("(Integrated Graphics)", string.Empty)
+				.Replace("\" or similar", string.Empty)
+				.Replace("Graphics card supporting", string.Empty)
+				.Replace("compatible video card (integrated or dedicated with min 512MB memory)", string.Empty)
+				.Replace("capable GPU", string.Empty)
+				.Replace("at least ", string.Empty)
+				.Replace(" capable.", string.Empty)
+				.Replace(" or Higher VRAM Graphics Cards", string.Empty)
+				.Replace("VRAM Graphics Cards", "VRAM")
+				.Replace("hardware driver support required for WebGL acceleration. (AMD Catalyst 10.9, nVidia 358.50)", string.Empty)
+				.Replace("ATI or NVidia card w/ 1024 MB RAM (NVIDIA GeForce GTX 260 or ATI HD 4890)", "NVIDIA GeForce GTX 260 or ATI HD 4890")
+				.Replace("Video card must be 128 MB or more and should be a DirectX 9-compatible with support for Pixel Shader 2.0b (", string.Empty)
+				.Replace("- *NOT* an Express graphics card).", string.Empty)
+				.Replace("2GB (GeForce GTX 970 / amd RX 5500 XT)", "GeForce GTX 970 / AMD RX 5500 XT")
+				.Replace(" - anything capable of running OpenGL 4.0 (eg. ATI Radeon HD 57xx or Nvidia GeForce 400 and higher)", string.Empty)
+				.Replace("(AMD or NVIDIA equivalent)", string.Empty)
+				.Replace("/320M 512MB VRAM", string.Empty)
+				.Replace("/Intel Extreme Graphics 82845, 82865, 82915", string.Empty)
+				.Replace(" 512MB VRAM (Intel integrated GPUs are not supported!)", " / Intel integrated GPUs are not supported!")
+				.Replace("(not recommended for Intel HD Graphics cards)", ", not recommended for Intel HD Graphics cards")
+				.Replace("or similar (no support for onboard cards)", string.Empty)
+				.Replace("level Graphics Card (requires support for SSE)", string.Empty)
+				.Replace("- Integrated graphics and very low budget cards might not work.", string.Empty)
+				.Replace("3D with TnL support and", string.Empty)
+				.Replace(" compatible", string.Empty)
+				.Replace("of addressable memory", string.Empty)
+				.Replace("Any", string.Empty)
+				.Replace("any", string.Empty)
+				.Replace("/Nvidia", " / Nvidia")
+				.Replace("or AMD equivalent", string.Empty)
+				.Replace("(Requires support for SSE)", string.Empty)
+				.Replace("ATI or NVidia card", "Card")
+				.Replace("w/", "with")
+				.Replace("Graphics: ", string.Empty)
+				.Replace(" equivalent or better", string.Empty)
+				.Replace(" or equivalent.", string.Empty)
+				.Replace("or equivalent.", string.Empty)
+				.Replace(" or equivalent", string.Empty)
+				.Replace(" or better.", string.Empty)
+				.Replace("or better.", string.Empty)
+				.Replace(" or better", string.Empty)
+				.Replace(" or newer", string.Empty)
+				.Replace("or newer", string.Empty)
+				.Replace("or higher", string.Empty)
+				.Replace("or better", string.Empty)
+				.Replace("or greater graphics card", string.Empty)
+				.Replace("or equivalent", string.Empty)
+				.Replace("Mid-range", string.Empty)
+				.Replace(" Memory Minimum", string.Empty)
+				.Replace(" memory minimum", string.Empty)
+				.Replace(" Memory Recommended", string.Empty)
+				.Replace(" memory recommended", string.Empty)
+				.Replace("e.g.", string.Empty)
+				.Replace("Laptop integrated ", string.Empty)
+				.Replace("GPU 1GB VRAM", "GPU 1 GB VRAM")
+				.Replace("8GB Memory 8 GB RAM", "(8 GB)")
+				.Replace(" or more and should be a DirectX 9-compatible with support for Pixel Shader 3.0", string.Empty)
+				.Replace("Yes", string.Empty)
+				.Replace(", or ", string.Empty)
+				.Replace("()", string.Empty)
+				.Replace("<br>", string.Empty)
+				.Replace("®", string.Empty)
+				.Replace("™", string.Empty)
+				.Replace(" Compatible", string.Empty)
+				.Replace("  ", " ")
+				.Replace("(Shared Memory is not recommended)", string.Empty)
+				.Replace(". Integrated Intel HD Graphics should work but is not supported; problems are generally solved with a driver update.", string.Empty)
+				.Trim();
+
+			gpu = Regex.Replace(gpu, "<[^>]*>", string.Empty);
+
+			// Strip a leading VRAM size that has no GPU name
+			string gpuVramOnly = Regex.Match(gpu.ToLower(), @"\d+((.|,)\d+)?[ ]?(mb|gb)").ToString().Trim();
+			if (!gpuVramOnly.IsNullOrEmpty() && gpu.ToLower().IndexOf(gpuVramOnly) == 0)
+			{
+				gpu = gpuVramOnly;
+			}
+
+			gpu = Regex.Replace(gpu, @"(gb|mb)(\))?\s*\+", "$1$2", RegexOptions.IgnoreCase);
+			gpu = Regex.Replace(gpu, @" - (\d+) (gb|mb)", " ($1 $2)", RegexOptions.IgnoreCase);
+			gpu = gpu.Replace(",", "¤").Replace(" or ", "¤").Replace(" OR ", "¤")
+					 .Replace(" / ", "¤").Replace(" /", "¤").Replace(" | ", "¤");
+
+			foreach (string token in gpu.Split('¤'))
+			{
+				string t = token.Trim();
+				if (t.IsNullOrEmpty()) { continue; }
+
+				if (t.ToLower().IndexOf("nvidia") > -1 || t.ToLower().IndexOf("amd") > -1 || t.ToLower().IndexOf("intel") > -1)
+				{
+					entry.Gpu.Add(Regex.Replace(t, @"\(\d+\s*(mb|gb)\)", string.Empty, RegexOptions.IgnoreCase).Trim());
+				}
+				else if (Regex.IsMatch(t, @"\d+((.|,)\d+)?\s*(mb|gb)", RegexOptions.IgnoreCase) && t.Length < 10)
+				{
+					entry.Gpu.Add(t.ToUpper().Replace("(", string.Empty).Replace(")", string.Empty).Trim() + " VRAM");
+				}
+				else if (Regex.IsMatch(t, @"\(\d+((.|,)\d+)?\s*(mb|gb)\) vram", RegexOptions.IgnoreCase))
+				{
+					entry.Gpu.Add(t.ToUpper().Replace("(", string.Empty).Replace(")", string.Empty).Trim());
+				}
+				else if (Regex.IsMatch(t, @"\(\d+((.|,)\d+)?\s*(mb|gb)\) ram", RegexOptions.IgnoreCase))
+				{
+					entry.Gpu.Add(t.ToUpper().Replace("(", string.Empty).Replace(")", string.Empty).Replace("RAM", "VRAM").Trim());
+				}
+				else if (Regex.IsMatch(t, @"DirectX \d+[.]\d", RegexOptions.IgnoreCase))
+				{
+					entry.Gpu.Add(Regex.Replace(t, @"[.]\d", string.Empty));
+				}
+				else
+				{
+					entry.Gpu.Add(t);
+				}
+			}
+		}
+
+		private static void ParseDirectX(string html, RequirementEntry entry)
+		{
+			int[] versions = { 8, 9, 10, 11, 12 };
+			foreach (int version in versions)
+			{
+				string dx = $"DirectX {version}";
+				if (html.IndexOf(version.ToString()) > -1 && entry.Gpu.Find(x => x.IsEqual(dx)) == null)
+				{
+					entry.Gpu.Add(dx);
+				}
+			}
+		}
+
+		/// <summary>Parses "NNN MB/GB" or "NNN.N GB/MB" from a raw HTML element string into bytes.</summary>
+		private static double ParseMemorySize(string html)
+		{
+			string ram = Regex.Match(html.ToLower()
+				.Replace("\t", " ")
+				.Replace("<strong>memory:</strong>", string.Empty)
+				.Replace("<strong>memory: </strong>", string.Empty),
+				@"\d+((.|,)\d+)?[ ]?(mb|gb)").ToString().Trim();
+
+			// Keep highest value when multiple sizes appear (e.g. "4/8 GB")
+			ram = ram.Split('/')[ram.Split('/').Length - 1];
+			return ParseSizeString(ram);
+		}
+
+		private static double ParseStorageSize(string html)
+		{
+			string storage = Regex.Match(html.ToLower()
+				.Replace("\t", " ")
+				.Replace("<strong>storage:</strong>", string.Empty)
+				.Replace("<strong>storage: </strong>", string.Empty)
+				.Replace("<strong>hard drive:</strong>", string.Empty)
+				.Replace("<strong>hard drive: </strong>", string.Empty),
+				@"\d+((.|,)\d+)?[ ]?(mb|gb)").ToString().Trim();
+
+			return ParseSizeString(storage);
+		}
+
+		/// <summary>Converts a "NNN MB" / "NNN.N GB" string to bytes as double.</summary>
+		private static double ParseSizeString(string sizeToken)
+		{
+			if (sizeToken.IndexOf("mb", StringComparison.OrdinalIgnoreCase) > -1)
+			{
+				double.TryParse(
+					sizeToken.ToLower().Replace("mb", string.Empty)
+						.Replace(".", CultureInfo.CurrentCulture.NumberFormat.CurrencyDecimalSeparator).Trim(),
+					out double mb);
+				return 1024.0 * 1024 * mb;
+			}
+			if (sizeToken.IndexOf("gb", StringComparison.OrdinalIgnoreCase) > -1)
+			{
+				double.TryParse(
+					sizeToken.ToLower().Replace("gb", string.Empty)
+						.Replace(".", CultureInfo.CurrentCulture.NumberFormat.CurrencyDecimalSeparator).Trim(),
+					out double gb);
+				return 1024.0 * 1024 * 1024 * gb;
+			}
+			return 0;
+		}
+
+		/// <summary>
+		/// Get game achievements schema with hidden description & percent & without stats
+		/// </summary>
+		/// <param name="appId"></param>
+		/// <returns></returns>
+		private ObservableCollection<GameAchievement> GetAchievementsSchema(uint appId)
         {
             ObservableCollection<GameAchievement> gameAchievements = null;
             if (appId > 0)
