@@ -12,7 +12,7 @@ namespace CommonPluginsShared
 {
     public class UI
     {
-        private static ILogger Logger => LogManager.GetLogger();
+        private static readonly ILogger Logger = LogManager.GetLogger();
 
 
         /// <summary>

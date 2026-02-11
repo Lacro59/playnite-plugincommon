@@ -14,7 +14,7 @@ namespace CommonPluginsShared
 {
     public class HttpFileCachePlugin
     {
-        private static ILogger Logger => LogManager.GetLogger();
+        private static readonly ILogger Logger = LogManager.GetLogger();
 
         private static object CacheLock { get; set; } = new object();
         public static string CacheDirectory { get; set; } = PlaynitePaths.ImagesCachePath;

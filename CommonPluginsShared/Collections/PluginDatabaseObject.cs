@@ -32,7 +32,7 @@ namespace CommonPluginsShared.Collections
 		where TDatabase : PluginItemCollection<TItem>
 		where TItem : PluginDataBaseGameBase
 	{
-		protected static ILogger Logger => LogManager.GetLogger();
+		protected static readonly ILogger Logger = LogManager.GetLogger();
 
 		public TSettings PluginSettings { get; set; }
 		public UI UI { get; set; } = new UI();

@@ -15,7 +15,7 @@ namespace CommonPluginsShared
 {
     public class Common
     {
-        private static ILogger Logger => LogManager.GetLogger();
+        private static readonly ILogger Logger = LogManager.GetLogger();
 
         /// <summary>
         /// Load common resources (localization, styles, fonts) from the plugin directory.

@@ -15,7 +15,7 @@ namespace CommonPluginsStores.Steam
 {
     public class SteamKit
     {
-        internal static ILogger Logger => LogManager.GetLogger();
+        internal static readonly ILogger Logger = LogManager.GetLogger();
 
         #region Urls
         private static string UrlAchievementImg => @"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/{0}/{1}";

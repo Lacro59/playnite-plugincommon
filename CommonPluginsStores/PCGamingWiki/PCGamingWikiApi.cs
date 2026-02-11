@@ -22,7 +22,7 @@ namespace CommonPluginsStores.PCGamingWiki
 {
 	public class PCGamingWikiApi
 	{
-		internal static ILogger Logger => LogManager.GetLogger();
+		internal static readonly ILogger Logger = LogManager.GetLogger();
 
 		internal string PluginName { get; }
 		internal string ClientName => "PCGamingWiki";
@@ -149,7 +149,7 @@ namespace CommonPluginsStores.PCGamingWiki
 				string html = string.Empty;
 				try
 				{
-					html = Web.DownloadStringData(url).GetAwaiter().GetResult();
+					html = Web.DownloadSourceDataWebView(url).GetAwaiter().GetResult().Item1;
 				}
 				catch (Exception ex)
 				{

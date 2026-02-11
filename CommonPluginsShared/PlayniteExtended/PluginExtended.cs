@@ -32,7 +32,7 @@ namespace CommonPluginsShared.PlayniteExtended
 
     public abstract class PlaynitePlugin<ISettings> : GenericPlugin
     {
-        internal static ILogger Logger => LogManager.GetLogger();
+        internal static readonly ILogger Logger = LogManager.GetLogger();
 
 
         public static string PluginName { get; set; }

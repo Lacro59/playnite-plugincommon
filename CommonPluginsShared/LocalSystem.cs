@@ -15,7 +15,7 @@ namespace CommonPluginsShared
     /// </summary>
     public class LocalSystem
     {
-        private static ILogger Logger => LogManager.GetLogger();
+        private static readonly ILogger Logger = LogManager.GetLogger();
 
         private SystemConfiguration SystemConfiguration { get; set; }
         private int IdConfiguration { get; set; } = -1;

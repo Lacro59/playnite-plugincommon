@@ -29,7 +29,7 @@ namespace CommonPluginsStores
     /// </summary>
     public abstract class StoreApi : ObservableObject, IStoreApi, IStoreApiInternal
     {
-        protected static ILogger Logger => LogManager.GetLogger();
+        protected static readonly ILogger Logger = LogManager.GetLogger();
 
         private readonly SmartCache<AccountInfos> _accountCache;
         private readonly SmartCache<ObservableCollection<AccountInfos>> _friendsCache;

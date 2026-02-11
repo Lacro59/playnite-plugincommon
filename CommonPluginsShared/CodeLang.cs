@@ -6,7 +6,7 @@ namespace CommonPluginsShared
 {
     public class CodeLang
     {
-        private static ILogger Logger => LogManager.GetLogger();
+        private static readonly ILogger Logger = LogManager.GetLogger();
 
         // Static dictionary mapping Playnite language codes to Steam language codes
         private static readonly Dictionary<string, string> _steamLangMap = new Dictionary<string, string>

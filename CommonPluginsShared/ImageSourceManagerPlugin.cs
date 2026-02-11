@@ -16,7 +16,7 @@ namespace CommonPluginsShared
 {
     public class ImageSourceManagerPlugin
     {
-        private static ILogger Logger => LogManager.GetLogger();
+        private static readonly ILogger Logger = LogManager.GetLogger();
 
         public static MemoryCache Cache = new MemoryCache(Units.MegaBytesToBytes(100));
         private const string btmpPropsFld = "bitmappros";
