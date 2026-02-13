@@ -30,6 +30,9 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using SystemChecker.Clients;
+using static CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared.StoreAppDetailsResult.AppDetails;
+using static CommonPlayniteShared.PluginLibrary.XboxLibrary.Models.TitleHistoryResponse;
 using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.Steam
@@ -1182,10 +1185,14 @@ namespace CommonPluginsStores.Steam
                 string url = string.Format(UrlApiGameDetails, appId, CodeLang.GetSteamLang(Locale));
                 string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
 
-                if (Serialization.TryFromJson(response, out Dictionary<string, StoreAppDetailsResult> parsedData))
+                if (Serialization.TryFromJson(response, out Dictionary<string, StoreAppDetailsResult> parsedData, out Exception ex) && parsedData != null)
                 {
                     storeAppDetailsResult = parsedData[appId.ToString()];
 					FileDataTools.SaveData(cachePath, storeAppDetailsResult);
+                }
+                else if (ex != null)
+                {
+                    Common.LogError(ex, false, false, PluginName);
                 }
                 else
                 {
@@ -1223,9 +1230,16 @@ namespace CommonPluginsStores.Steam
 					return null;
 				}
 
-				if (storeAppDetailsResult.data.pc_requirements?.minimum == null || storeAppDetailsResult.data.pc_requirements?.recommended == null)
+				string rawRequirements = Serialization.ToJson(storeAppDetailsResult.data.pc_requirements);
+				if (rawRequirements == "[]" || rawRequirements.IsNullOrEmpty())
 				{
 					Logger.Warn($"SteamApi.GetSystemRequirements - No pc_requirements for {appId}");
+					return null;
+				}
+
+				Serialization.TryFromJson(rawRequirements, out Requirement pcRequirements);
+				if (pcRequirements == null)
+				{
 					return null;
 				}
 
@@ -1235,13 +1249,13 @@ namespace CommonPluginsStores.Steam
 					GameName = storeAppDetailsResult.data.name ?? string.Empty
 				};
 
-				if (!storeAppDetailsResult.data.pc_requirements.minimum.IsNullOrEmpty())
+				if (!pcRequirements.minimum.IsNullOrEmpty())
 				{
-					result.Minimum = ParseSteamRequirementHtml(storeAppDetailsResult.data.pc_requirements.minimum);
+					result.Minimum = ParseSteamRequirementHtml(pcRequirements.minimum, true);
 				}
-				if (!storeAppDetailsResult.data.pc_requirements.recommended.IsNullOrEmpty())
+				if (!pcRequirements.recommended.IsNullOrEmpty())
 				{
-					result.Recommended = ParseSteamRequirementHtml(storeAppDetailsResult.data.pc_requirements.recommended);
+					result.Recommended = ParseSteamRequirementHtml(pcRequirements.recommended, false);
 				}
 
 				result.SourceLink = new SourceLink
@@ -1260,9 +1274,9 @@ namespace CommonPluginsStores.Steam
 			}
 		}
 
-		private static RequirementEntry ParseSteamRequirementHtml(string html)
+		private static RequirementEntry ParseSteamRequirementHtml(string html, bool isMinimum)
 		{
-			RequirementEntry entry = new RequirementEntry();
+			RequirementEntry entry = new RequirementEntry { IsMinimum = isMinimum };
 
 			HtmlParser parser = new HtmlParser();
 			IHtmlDocument document = parser.Parse(html);

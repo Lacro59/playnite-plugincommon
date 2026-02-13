@@ -12,8 +12,8 @@ namespace CommonPluginsStores.Models
 		public string Id { get; set; } = string.Empty;
 		public string GameName { get; set; } = string.Empty;
 		public SourceLink SourceLink { get; set; }
-		public RequirementEntry Minimum { get; set; }
-		public RequirementEntry Recommended { get; set; }
+		public RequirementEntry Minimum { get; set; } = new RequirementEntry { IsMinimum = true };
+		public RequirementEntry Recommended { get; set; } = new RequirementEntry { IsMinimum = false };
 	}
 
 	public class RequirementEntry
