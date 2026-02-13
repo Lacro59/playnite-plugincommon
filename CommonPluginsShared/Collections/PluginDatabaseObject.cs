@@ -38,7 +38,82 @@ namespace CommonPluginsShared.Collections
 		public UI UI { get; set; } = new UI();
 		public string PluginName { get; set; }
 		public PluginPaths Paths { get; set; }
-		public TDatabase Database { get; set; }
+		/// <summary>
+		/// Timeout in milliseconds for waiting for database to load (default: 10 seconds)
+		/// </summary>
+		protected virtual int DatabaseLoadTimeout => 10000;
+
+		internal TDatabase _database;
+
+		/// <summary>
+		/// Gets the database, ensuring it is loaded before access.
+		/// Uses SpinWait with timeout only for external access (not during loading).
+		/// </summary>
+		public TDatabase Database
+		{
+			get
+			{
+				WaitForDatabaseLoad();
+				return _database;
+			}
+			set
+			{
+				_database = value;
+			}
+		}
+
+		/// <summary>
+		/// Waits for the database to be loaded with a configurable timeout.
+		/// Throws TimeoutException if database is not loaded within the timeout period.
+		/// </summary>
+		private void WaitForDatabaseLoad()
+		{
+			if (IsLoaded)
+			{
+				return;
+			}
+
+			Logger.Info($"Waiting for database to load (timeout: {DatabaseLoadTimeout}ms)...");
+
+			bool loaded = SpinWait.SpinUntil(() => IsLoaded, DatabaseLoadTimeout);
+
+			if (!loaded)
+			{
+				string errorMessage = $"Database load timeout after {DatabaseLoadTimeout}ms";
+				Logger.Error(errorMessage);
+				throw new TimeoutException(errorMessage);
+			}
+
+			Logger.Info("Database loaded successfully");
+		}
+
+		/// <summary>
+		/// Safely accesses the database without throwing exception on timeout.
+		/// Returns null if database is not loaded within timeout period.
+		/// </summary>
+		/// <returns>Database instance or null if not loaded</returns>
+		protected TDatabase GetDatabaseSafe()
+		{
+			try
+			{
+				return Database;
+			}
+			catch (TimeoutException ex)
+			{
+				Logger.Warn($"Database access timeout: {ex.Message}");
+				return null;
+			}
+		}
+
+		/// <summary>
+		/// Checks if database is loaded without waiting.
+		/// </summary>
+		/// <returns>True if database is ready to use</returns>
+		public bool IsDatabaseReady()
+		{
+			return IsLoaded && _database != null;
+		}
+
 		public Game GameContext { get; set; }
 
 		protected string TagBefore { get; set; } = string.Empty;
@@ -117,20 +192,17 @@ namespace CommonPluginsShared.Collections
 				Stopwatch stopWatch = new Stopwatch();
 				stopWatch.Start();
 
-				Database = typeof(TDatabase).CrateInstance<TDatabase>(Paths.PluginDatabasePath, GameDatabaseCollection.Uknown);
-
-				Database.SetGameInfo<T>();
+				_database = ObjectExtensions.CrateInstance<TDatabase>(typeof(TDatabase), Paths.PluginDatabasePath, GameDatabaseCollection.Uknown);
+				_database.SetGameInfo<T>();
 
 				DeleteDataWithDeletedGame();
-
 				LoadMoreData();
 
 				stopWatch.Stop();
-
 				TimeSpan ts = stopWatch.Elapsed;
 				Logger.Info(string.Format(
 					"LoadDatabase with {0} items - {1:00}:{2:00}.{3:00}",
-					Database.Count,
+					_database.Count,
 					ts.Minutes,
 					ts.Seconds,
 					ts.Milliseconds / 10));
@@ -188,11 +260,11 @@ namespace CommonPluginsShared.Collections
 		/// </summary>
 		public virtual void DeleteDataWithDeletedGame()
 		{
-			IEnumerable<KeyValuePair<Guid, TItem>> GamesDeleted = Database.Items.Where(x => API.Instance.Database.Games.Get(x.Key) == null).Select(x => x);
+			IEnumerable<KeyValuePair<Guid, TItem>> GamesDeleted = _database.Items.Where(x => API.Instance.Database.Games.Get(x.Key) == null).Select(x => x);
 			GamesDeleted.ForEach(x =>
 			{
 				Logger.Info($"Delete data for missing game: {x.Value.Name} - {x.Key}");
-				Database.Remove(x.Key);
+				_database.Remove(x.Key);
 			});
 		}
 
