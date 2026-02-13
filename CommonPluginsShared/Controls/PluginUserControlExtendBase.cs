@@ -5,6 +5,7 @@ using Playnite.SDK.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -261,29 +262,42 @@ namespace CommonPluginsShared.Controls
 
 		/// <summary>
 		/// Notifies all alive instances and cleans up dead weak references
+		/// Groups instances by dispatcher to reduce overhead.
 		/// </summary>
 		protected static void NotifyAllInstances(Action<PluginUserControlExtendBase> action)
 		{
-			lock (_initLock)
+			List<PluginUserControlExtendBase> instances = new List<PluginUserControlExtendBase>();
+
+			for (int i = _instances.Count - 1; i >= 0; i--)
 			{
-				for (int i = _instances.Count - 1; i >= 0; i--)
+				if (_instances[i].TryGetTarget(out PluginUserControlExtendBase instance))
 				{
-					if (_instances[i].TryGetTarget(out PluginUserControlExtendBase instance))
+					instances.Add(instance);
+				}
+				else
+				{
+					_instances.RemoveAt(i);
+				}
+			}
+
+			// Group by dispatcher and batch invoke
+			var dispatcherGroups = instances.GroupBy(i => i.Dispatcher);
+			foreach (var group in dispatcherGroups)
+			{
+				var dispatcher = group.Key;
+				var groupList = group.ToList();
+
+				dispatcher?.BeginInvoke((Action)delegate
+				{
+					foreach (var instance in groupList)
 					{
 						try
 						{
-							instance.Dispatcher?.BeginInvoke(action, instance);
+							action(instance);
 						}
-						catch
-						{
-							_instances.RemoveAt(i);
-						}
+						catch { }
 					}
-					else
-					{
-						_instances.RemoveAt(i);
-					}
-				}
+				}, DispatcherPriority.Background);
 			}
 		}
 

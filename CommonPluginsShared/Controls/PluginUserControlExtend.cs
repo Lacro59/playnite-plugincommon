@@ -20,6 +20,12 @@ namespace CommonPluginsShared.Controls
 		/// </summary>
 		protected virtual IPluginDatabase pluginDatabase { get; }
 
+		protected void OnLoaded(object sender, RoutedEventArgs e)
+		{
+			InitializeStaticEvents();
+			PluginSettings_PropertyChanged(null, null);
+		}
+
 		/// <summary>
 		/// Sets the control data using the provided game and associated plugin data.
 		/// This method should be overridden by derived classes to implement custom logic.
@@ -56,10 +62,7 @@ namespace CommonPluginsShared.Controls
 				return;
 			}
 
-			await API.Instance.MainView.UIDispatcher?.InvokeAsync(
-				() => SetData(GameContext, pluginGameData),
-				DispatcherPriority.Render
-			);
+			SetData(GameContext, pluginGameData);
 		}
 	}
 }
