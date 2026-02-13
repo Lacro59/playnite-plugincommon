@@ -39,6 +39,7 @@ namespace CommonPluginsShared.Controls
 		private static bool _staticEventsInitialized = false;
 		private static readonly object _initLock = new object();
 		private static readonly List<WeakReference<PluginUserControlExtendBase>> _instances = new List<WeakReference<PluginUserControlExtendBase>>();
+		private static readonly Dictionary<string, bool> _pluginEventsAttached = new Dictionary<string, bool>();
 
 		#region Properties
 
@@ -191,6 +192,22 @@ namespace CommonPluginsShared.Controls
 		}
 
 		/// <summary>
+		/// Attaches plugin-specific event handlers only once per plugin.
+		/// Uses a unique key to prevent duplicate attachments.
+		/// </summary>
+		protected void AttachPluginEvents(string pluginKey, Action attachAction)
+		{
+			lock (_initLock)
+			{
+				if (!_pluginEventsAttached.ContainsKey(pluginKey))
+				{
+					attachAction?.Invoke();
+					_pluginEventsAttached[pluginKey] = true;
+				}
+			}
+		}
+
+		/// <summary>
 		/// Attaches static event handlers. Override in derived classes to attach to specific plugin databases.
 		/// </summary>
 		protected virtual void AttachStaticEvents()
@@ -205,6 +222,42 @@ namespace CommonPluginsShared.Controls
 		{
 			NotifyAllInstances(instance => instance.Games_ItemUpdated(sender, e));
 		}
+
+		/// <summary>
+		/// Creates a static event handler for plugin settings changes that notifies all instances
+		/// </summary>
+		protected static PropertyChangedEventHandler CreatePluginSettingsHandler()
+		{
+			return (sender, e) =>
+			{
+				NotifyAllInstances(instance => instance.PluginSettings_PropertyChanged(sender, e));
+			};
+		}
+
+		/// <summary>
+		/// Creates a static event handler for database item updates that notifies all instances.
+		/// Generic version that preserves type information.
+		/// </summary>
+		protected static EventHandler<ItemUpdatedEventArgs<TItem>> CreateDatabaseItemUpdatedHandler<TItem>() where TItem : DatabaseObject
+		{
+			return (sender, e) =>
+			{
+				NotifyAllInstances(instance => instance.HandleDatabaseItemUpdated(sender, e));
+			};
+		}
+
+		/// <summary>
+		/// Creates a static event handler for database collection changes that notifies all instances.
+		/// Generic version that preserves type information.
+		/// </summary>
+		protected static EventHandler<ItemCollectionChangedEventArgs<TItem>> CreateDatabaseCollectionChangedHandler<TItem>() where TItem : DatabaseObject
+		{
+			return (sender, e) =>
+			{
+				NotifyAllInstances(instance => instance.HandleDatabaseCollectionChanged(sender, e));
+			};
+		}
+
 
 		/// <summary>
 		/// Notifies all alive instances and cleans up dead weak references
@@ -342,7 +395,7 @@ namespace CommonPluginsShared.Controls
 		/// </summary>
 		protected virtual void Database_ItemUpdated<TItem>(object sender, ItemUpdatedEventArgs<TItem> e) where TItem : DatabaseObject
 		{
-			_ = Application.Current.Dispatcher?.BeginInvoke(DispatcherPriority.Render, (Action)delegate
+			_ = API.Instance.MainView.UIDispatcher?.BeginInvoke(DispatcherPriority.Render, (Action)delegate
 			{
 				if (GameContext == null)
 				{
