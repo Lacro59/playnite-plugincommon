@@ -415,7 +415,7 @@ namespace CommonPluginsShared.Controls
 		/// </summary>
 		protected virtual void Database_ItemCollectionChanged<TItem>(object sender, ItemCollectionChangedEventArgs<TItem> e) where TItem : DatabaseObject
 		{
-			_ = Application.Current.Dispatcher?.BeginInvoke(DispatcherPriority.Render, (Action)delegate
+			_ = API.Instance.MainView.UIDispatcher?.BeginInvoke(DispatcherPriority.Render, (Action)delegate
 			{
 				if (GameContext == null)
 				{
@@ -431,7 +431,7 @@ namespace CommonPluginsShared.Controls
 		/// </summary>
 		protected virtual void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e)
 		{
-			_ = Application.Current.Dispatcher?.BeginInvoke(DispatcherPriority.Render, (Action)delegate
+			_ = API.Instance.MainView.UIDispatcher?.BeginInvoke(DispatcherPriority.Render, (Action)delegate
 			{
 				if (GameContext == null)
 				{
@@ -483,7 +483,7 @@ namespace CommonPluginsShared.Controls
 				return;
 			}
 
-			await Application.Current.Dispatcher?.InvokeAsync(() => SetData(GameContext), DispatcherPriority.Render);
+			await API.Instance.MainView.UIDispatcher?.InvokeAsync(() => SetData(GameContext), DispatcherPriority.Render);
 		}
 
 		/// <summary>

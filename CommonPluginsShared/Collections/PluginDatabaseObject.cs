@@ -433,7 +433,7 @@ namespace CommonPluginsShared.Collections
 				}
 
 				itemToAdd.IsSaved = true;
-				Application.Current.Dispatcher?.Invoke(() => Database?.Add(itemToAdd), DispatcherPriority.Send);
+				API.Instance.MainView.UIDispatcher?.Invoke(() => Database?.Add(itemToAdd), DispatcherPriority.Send);
 
 				object Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
 				PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
@@ -475,7 +475,7 @@ namespace CommonPluginsShared.Collections
 
 				TItem cachedItem = Get(itemToUpdate.Id, true);
 				Database?.Items.TryUpdate(itemToUpdate.Id, itemToUpdate, cachedItem);
-				Application.Current.Dispatcher?.Invoke(() => Database?.Update(itemToUpdate), DispatcherPriority.Send);
+				API.Instance.MainView.UIDispatcher?.Invoke(() => Database?.Update(itemToUpdate), DispatcherPriority.Send);
 
 				object Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
 				PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
