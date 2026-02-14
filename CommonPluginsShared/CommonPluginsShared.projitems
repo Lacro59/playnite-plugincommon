@@ -68,6 +68,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)services\IWindowPluginService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SmartCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IDataContext.cs" />
@@ -86,5 +87,8 @@
     <None Include="$(MSBuildThisFileDirectory)Resources\font.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Services\" />
   </ItemGroup>
 </Project>

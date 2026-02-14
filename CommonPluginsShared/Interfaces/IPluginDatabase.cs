@@ -1,4 +1,5 @@
 ﻿using CommonPluginsShared.Collections;
+using CommonPluginsShared.Services;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 using System;
@@ -13,7 +14,9 @@ namespace CommonPluginsShared.Interfaces
 
         bool IsLoaded { get; set; }
 
-        Task<bool> InitializeDatabase();
+		IWindowPluginService WindowPluginService { get; set; }
+
+		Task<bool> InitializeDatabase();
 
         PluginDataBaseGameBase Get(Game game, bool onlyCache = false, bool force = false);
         PluginDataBaseGameBase Get(Guid id, bool onlyCache = false, bool force = false);

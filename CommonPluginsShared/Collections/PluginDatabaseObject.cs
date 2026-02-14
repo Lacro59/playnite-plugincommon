@@ -3,6 +3,7 @@ using CommonPlayniteShared.Common;
 using CommonPluginsControls.Controls;
 using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.Models;
+using CommonPluginsShared.Services;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
@@ -121,18 +122,18 @@ namespace CommonPluginsShared.Collections
 
 		private bool _isLoaded = false;
 		public bool IsLoaded { get => _isLoaded; set => SetValue(ref _isLoaded, value); }
-		public bool IsViewOpen { get; set; } = false;
 		public bool TagMissing { get; set; } = false;
 
 		private IEnumerable<Guid> PreviousIds { get; set; } = new List<Guid>();
+        public IWindowPluginService WindowPluginService { get; set; }
 
-		/// <summary>
-		/// Constructor for PluginDatabaseObject.
-		/// </summary>
-		/// <param name="pluginSettings">Plugin settings.</param>
-		/// <param name="pluginName">Name of the plugin.</param>
-		/// <param name="pluginUserDataPath">Path for plugin user data.</param>
-		protected PluginDatabaseObject(TSettings pluginSettings, string pluginName, string pluginUserDataPath)
+        /// <summary>
+        /// Constructor for PluginDatabaseObject.
+        /// </summary>
+        /// <param name="pluginSettings">Plugin settings.</param>
+        /// <param name="pluginName">Name of the plugin.</param>
+        /// <param name="pluginUserDataPath">Path for plugin user data.</param>
+        protected PluginDatabaseObject(TSettings pluginSettings, string pluginName, string pluginUserDataPath)
 		{
 			PluginSettings = pluginSettings;
 			PluginName = pluginName;
