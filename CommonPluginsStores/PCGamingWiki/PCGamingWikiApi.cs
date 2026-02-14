@@ -221,7 +221,7 @@ namespace CommonPluginsStores.PCGamingWiki
 					if (!dataRecommended.IsNullOrEmpty()) target.Recommended.Ram = ParseSize(dataRecommended);
 					break;
 
-				case "hard disk drive (hdd)":
+				case "storage drive (hdd/ssd)":
 					if (!dataMinimum.IsNullOrEmpty()) target.Minimum.Storage = ParseSize(dataMinimum);
 					if (!dataRecommended.IsNullOrEmpty()) target.Recommended.Storage = ParseSize(dataRecommended);
 					break;
