@@ -40,6 +40,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\LocalDateTimeConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\LocalDateYMConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\LocalTimeConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\NullOrEmptyToVisibilityConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\PlayTimeToStringConverterWithZero.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\StringRemoveConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\StringToBooleanConverter.cs" />
