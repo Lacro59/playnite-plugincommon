@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDataBaseGameDetails.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDatabaseObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginItemCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)collections\PluginMenus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Commands.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\AttachedProperties.cs" />

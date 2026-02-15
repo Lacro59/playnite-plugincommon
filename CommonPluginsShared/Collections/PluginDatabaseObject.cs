@@ -733,6 +733,21 @@ namespace CommonPluginsShared.Collections
 			return result;
 		}
 
+		public virtual void Remove(List<Guid> ids)
+		{
+			foreach (Guid id in ids)
+			{
+				try
+				{
+					Remove(id);
+				}
+				catch (Exception ex)
+				{
+					Common.LogError(ex, false, true, PluginName);
+				}
+			}
+		}
+
 		/// <summary>
 		/// Removes a list of games from the database by IDs.
 		/// </summary>
@@ -1379,6 +1394,6 @@ namespace CommonPluginsShared.Collections
 			return null;
 		}
 
-		#endregion
-	}
+        #endregion
+    }
 }

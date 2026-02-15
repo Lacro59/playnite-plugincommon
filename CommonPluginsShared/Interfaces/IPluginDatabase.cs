@@ -14,9 +14,9 @@ namespace CommonPluginsShared.Interfaces
 
         bool IsLoaded { get; set; }
 
-		IWindowPluginService WindowPluginService { get; set; }
+        IWindowPluginService WindowPluginService { get; set; }
 
-		Task<bool> InitializeDatabase();
+        Task<bool> InitializeDatabase();
 
         PluginDataBaseGameBase Get(Game game, bool onlyCache = false, bool force = false);
         PluginDataBaseGameBase Get(Guid id, bool onlyCache = false, bool force = false);
@@ -28,6 +28,7 @@ namespace CommonPluginsShared.Interfaces
 
         bool Remove(Game game);
         bool Remove(Guid id);
+        void Remove(List<Guid> ids);
 
         void AddOrUpdate(PluginDataBaseGameBase item);
 
@@ -40,5 +41,11 @@ namespace CommonPluginsShared.Interfaces
         IEnumerable<Game> GetGamesWithNoData();
 
         IEnumerable<Game> GetGamesOldData(int months);
+
+        bool ClearDatabase();
+        void GetSelectData();
+        void AddTagSelectData();
+        void AddTagAllGame();
+        void RemoveTagAllGame(bool fromClearDatabase = false);
     }
 }
