@@ -288,4 +288,10 @@ Windows variables can be used to add a dynamic string:
 {CommonProgramFiles(x86)}
 {ProgramFiles(x86)</sys:String>
 
+    <!-- OptionsDownloadData dialog -->
+    <sys:String x:Key="LOCCommonGameSource">Game source</sys:String>
+    <sys:String x:Key="LOCCommonInstallationStatus">Installation status</sys:String>
+    <sys:String x:Key="LOCCommonTimeFilters">Time-based filters</sys:String>
+    <sys:String x:Key="LOCCommonAdditionalOptions">Additional options</sys:String>
+    
 </ResourceDictionary>
