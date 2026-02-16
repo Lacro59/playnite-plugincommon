@@ -6,6 +6,10 @@ using System.Windows.Data;
 
 namespace CommonPluginsShared.Converters
 {
+    /// <summary>
+    /// Converts null, empty strings, "0", or empty collections to Visibility.Collapsed.
+    /// Otherwise returns Visibility.Visible.
+    /// </summary>
     public class NullOrEmptyToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -15,48 +19,57 @@ namespace CommonPluginsShared.Converters
                 return Visibility.Collapsed;
             }
 
-            if (value is string stringValue)
+            try
             {
-                if (string.IsNullOrWhiteSpace(stringValue) || stringValue == "0" || stringValue.IndexOf("0 bytes") > -1)
+                if (value is string stringValue)
                 {
-                    return Visibility.Collapsed;
+                    if (string.IsNullOrWhiteSpace(stringValue) || stringValue == "0" || stringValue.IndexOf("0 bytes", StringComparison.OrdinalIgnoreCase) > -1)
+                    {
+                        return Visibility.Collapsed;
+                    }
+                    return Visibility.Visible;
                 }
+
+                if (value is ICollection collection)
+                {
+                    if (collection.Count == 0)
+                    {
+                        return Visibility.Collapsed;
+                    }
+                    return Visibility.Visible;
+                }
+
+                if (value is int intValue)
+                {
+                    if (intValue == 0)
+                    {
+                        return Visibility.Collapsed;
+                    }
+                    return Visibility.Visible;
+                }
+
+                if (value is long longValue)
+                {
+                    if (longValue == 0)
+                    {
+                        return Visibility.Collapsed;
+                    }
+                    return Visibility.Visible;
+                }
+
                 return Visibility.Visible;
             }
-
-            if (value is ICollection collection)
+            catch (Exception)
             {
-                if (collection.Count == 0)
-                {
-                    return Visibility.Collapsed;
-                }
+                // Fallback to Visible in case of error, or Collapsed depending on preference.
+                // Log if necessary, but converters are noisy.
                 return Visibility.Visible;
             }
-
-            if (value is int intValue)
-            {
-                if (intValue == 0)
-                {
-                    return Visibility.Collapsed;
-                }
-                return Visibility.Visible;
-            }
-
-            if (value is long longValue)
-            {
-                if (longValue == 0)
-                {
-                    return Visibility.Collapsed;
-                }
-                return Visibility.Visible;
-            }
-
-            return Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
     }
 }
