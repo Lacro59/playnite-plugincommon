@@ -8,6 +8,10 @@ using System.Threading;
 
 namespace CommonPluginsShared.Collections
 {
+	/// <summary>
+	/// Provides common context objects (settings and database) that can be used
+	/// to build Playnite menu integrations for a plugin (main menu, game menu, etc.).
+	/// </summary>
 	public class PluginMenus
 	{
 		internal readonly PluginSettings _settings;

@@ -1,4 +1,4 @@
-﻿using Playnite.SDK;
+using Playnite.SDK;
 using Playnite.SDK.Models;
 using CommonPlayniteShared.Database;
 using System;
@@ -13,6 +13,24 @@ namespace CommonPluginsShared.Collections
 	/// <typeparam name="TItem">The type of items stored in the collection, must inherit from PluginDataBaseGameBase.</typeparam>
 	public class PluginItemCollection<TItem> : ItemCollection<TItem> where TItem : PluginDataBaseGameBase
 	{
+		/// <summary>
+		/// Timeout in milliseconds when waiting for the Playnite database to open.
+		/// </summary>
+		private const int DatabaseOpenTimeoutMilliseconds = 30000;
+
+		/// <summary>
+		/// Gets a value indicating whether the Playnite database is currently open and available.
+		/// </summary>
+		private static bool IsDatabaseOpen
+		{
+			get
+			{
+				return API.Instance != null
+					&& API.Instance.Database != null
+					&& API.Instance.Database.IsOpen;
+			}
+		}
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="PluginItemCollection{TItem}"/> class.
 		/// </summary>
@@ -32,21 +50,22 @@ namespace CommonPluginsShared.Collections
 		{
 			try
 			{
-                if (Items.TryGetValue(id, out TItem item))
-                {
-                    Game game = API.Instance.Database.Games.Get(id);
+				if (Items.TryGetValue(id, out TItem item))
+				{
+					Game game = API.Instance.Database.Games.Get(id);
 
-                    if (game != null && expectedType.IsInstanceOfType(item))
-                    {
-                        item.Name = game.Name;
-                        item.IsSaved = true;
-                    }
-                    else
-                    {
-                        item.IsDeleted = true;
-                    }
-                }
-            }
+					if (game != null && expectedType.IsInstanceOfType(item))
+					{
+						item.Name = game.Name;
+						item.IsSaved = true;
+					}
+					else
+					{
+						item.IsDeleted = true;
+						Common.LogDebug(true, $"Marking item {id} as deleted because game is missing or type does not match {expectedType.Name}.");
+					}
+				}
+			}
 			catch (Exception ex)
 			{
 				Common.LogError(ex, false, $"Error updating game info for ID {id}");
@@ -72,11 +91,27 @@ namespace CommonPluginsShared.Collections
 		/// <typeparam name="T">The generic type parameter of the items.</typeparam>
 		public void SetGameInfo<T>()
 		{
-			SpinWait.SpinUntil(() => API.Instance.Database.IsOpen, -1);
-			foreach (var item in Items)
+			if (!WaitForDatabase("SetGameInfo"))
 			{
-				SetGameInfo<T>(item.Key);
+				return;
 			}
+
+			if (Items.Count == 0)
+			{
+				return;
+			}
+
+			Common.LogDebug(true, $"Starting bulk game info update for {Items.Count} items using PluginDataBaseGame<{typeof(T).Name}>.");
+
+			using (BufferedUpdate())
+			{
+				foreach (var item in Items)
+				{
+					SetGameInfo<T>(item.Key);
+				}
+			}
+
+			Common.LogDebug(true, $"Completed bulk game info update for {Items.Count} items using PluginDataBaseGame<{typeof(T).Name}>.");
 		}
 
 		/// <summary>
@@ -100,11 +135,53 @@ namespace CommonPluginsShared.Collections
 		/// <typeparam name="Y">The second generic type parameter of the items.</typeparam>
 		public void SetGameInfoDetails<T, Y>()
 		{
-			SpinWait.SpinUntil(() => API.Instance.Database.IsOpen, -1);
-			foreach (var item in Items)
+			if (!WaitForDatabase("SetGameInfoDetails"))
 			{
-				SetGameInfoDetails<T, Y>(item.Key);
+				return;
 			}
+
+			if (Items.Count == 0)
+			{
+				return;
+			}
+
+			Common.LogDebug(true, $"Starting bulk game info details update for {Items.Count} items using PluginDataBaseGameDetails<{typeof(T).Name}, {typeof(Y).Name}>.");
+
+			using (BufferedUpdate())
+			{
+				foreach (var item in Items)
+				{
+					SetGameInfoDetails<T, Y>(item.Key);
+				}
+			}
+
+			Common.LogDebug(true, $"Completed bulk game info details update for {Items.Count} items using PluginDataBaseGameDetails<{typeof(T).Name}, {typeof(Y).Name}>.");
+		}
+
+		/// <summary>
+		/// Waits for the Playnite database to be opened, with a timeout and logging.
+		/// </summary>
+		/// <param name="operationName">Name of the operation waiting on the database (for logging).</param>
+		/// <returns>
+		/// True if the database became available before the timeout; otherwise, false.
+		/// </returns>
+		private static bool WaitForDatabase(string operationName)
+		{
+			if (IsDatabaseOpen)
+			{
+				return true;
+			}
+
+			Common.LogDebug(true, $"Waiting for Playnite database to open before '{operationName}'.");
+
+			bool isOpen = SpinWait.SpinUntil(() => IsDatabaseOpen, DatabaseOpenTimeoutMilliseconds);
+			if (!isOpen)
+			{
+				var exception = new TimeoutException("Timed out while waiting for Playnite database to open.");
+				Common.LogError(exception, false, $"{operationName} aborted because the database did not open within {DatabaseOpenTimeoutMilliseconds} ms.");
+			}
+
+			return isOpen;
 		}
 	}
 }

@@ -1,4 +1,4 @@
-﻿using CommonPlayniteShared;
+using CommonPlayniteShared;
 using CommonPlayniteShared.Common;
 using CommonPluginsControls.Controls;
 using CommonPluginsShared.Interfaces;
@@ -35,9 +35,24 @@ namespace CommonPluginsShared.Collections
 	{
 		protected static readonly ILogger Logger = LogManager.GetLogger();
 
+		/// <summary>
+		/// Gets or sets the strongly-typed plugin settings view model.
+		/// </summary>
 		public TSettings PluginSettings { get; set; }
+
+		/// <summary>
+		/// Gets or sets the UI helper used to create Playnite windows and controls.
+		/// </summary>
 		public UI UI { get; set; } = new UI();
+
+		/// <summary>
+		/// Gets or sets the plugin name used for logging, UI captions and file naming.
+		/// </summary>
 		public string PluginName { get; set; }
+
+		/// <summary>
+		/// Gets or sets plugin specific paths (database, cache, installation directory).
+		/// </summary>
 		public PluginPaths Paths { get; set; }
 		/// <summary>
 		/// Timeout in milliseconds for waiting for database to load (default: 10 seconds)
@@ -115,16 +130,37 @@ namespace CommonPluginsShared.Collections
 			return IsLoaded && _database != null;
 		}
 
+		/// <summary>
+		/// Gets or sets the current game context used by some UI operations.
+		/// </summary>
 		public Game GameContext { get; set; }
 
+		/// <summary>
+		/// Optional prefix used when creating tags for this plugin.
+		/// </summary>
 		protected string TagBefore { get; set; } = string.Empty;
+
+		/// <summary>
+		/// Gets the list of existing tags belonging to this plugin (filtered by <see cref="TagBefore"/>).
+		/// </summary>
 		protected IEnumerable<Tag> PluginTags => GetPluginTags();
 
 		private bool _isLoaded = false;
+
+		/// <summary>
+		/// Gets or sets a value indicating whether the plugin database has finished loading.
+		/// </summary>
 		public bool IsLoaded { get => _isLoaded; set => SetValue(ref _isLoaded, value); }
+
+		/// <summary>
+		/// Gets or sets a value indicating whether a "no data" tag should be added when data is missing.
+		/// </summary>
 		public bool TagMissing { get; set; } = false;
 
 		private IEnumerable<Guid> PreviousIds { get; set; } = new List<Guid>();
+        /// <summary>
+        /// Gets or sets the window plugin service used to show custom plugin windows.
+        /// </summary>
         public IWindowPluginService WindowPluginService { get; set; }
 
         /// <summary>
