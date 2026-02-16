@@ -2,7 +2,7 @@ using CommonPluginsShared.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 
-namespace CommonPluginsShared.Interfaces
+namespace CommonPluginsShared.Services
 {
 	/// <summary>
 	/// Window management interface
@@ -10,6 +10,7 @@ namespace CommonPluginsShared.Interfaces
 	public interface IWindowPluginService
 	{
 		string PluginName { get; }
+
 		IPluginDatabase PluginDatabase { get; }
 
 		void ShowPluginGameDataWindow(Game gameContext);

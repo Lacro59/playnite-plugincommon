@@ -69,7 +69,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginSettings.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)services\IWindowPluginService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IWindowPluginService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SmartCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IDataContext.cs" />
