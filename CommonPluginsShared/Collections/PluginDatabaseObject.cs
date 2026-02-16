@@ -145,6 +145,16 @@ namespace CommonPluginsShared.Collections
 		/// </summary>
 		protected IEnumerable<Tag> PluginTags => GetPluginTags();
 
+		/// <summary>
+		/// Cache for plugin tags to avoid repeated database enumeration.
+		/// </summary>
+		private List<Tag> _pluginTagsCache;
+
+		/// <summary>
+		/// Indicates whether the plugin tags cache has been initialized.
+		/// </summary>
+		private bool _pluginTagsCacheInitialized;
+
 		private bool _isLoaded = false;
 
 		/// <summary>
@@ -921,12 +931,39 @@ namespace CommonPluginsShared.Collections
 		/// <returns>List of plugin tags.</returns>
 		private IEnumerable<Tag> GetPluginTags()
 		{
-			IEnumerable<Tag> PluginTags = new List<Tag>();
-			if (!TagBefore.IsNullOrEmpty())
+			if (_pluginTagsCacheInitialized)
 			{
-				PluginTags = API.Instance.Database.Tags?.Where(x => (bool)x.Name?.StartsWith(TagBefore))?.ToList() ?? new List<Tag>();
+				return _pluginTagsCache;
 			}
-			return PluginTags;
+
+			_pluginTagsCacheInitialized = true;
+
+			if (TagBefore.IsNullOrEmpty())
+			{
+				_pluginTagsCache = new List<Tag>();
+				return _pluginTagsCache;
+			}
+
+			var allTags = API.Instance.Database.Tags;
+			if (allTags == null)
+			{
+				_pluginTagsCache = new List<Tag>();
+				return _pluginTagsCache;
+			}
+
+			_pluginTagsCache = allTags
+				.Where(t => !t.Name.IsNullOrEmpty() && t.Name.StartsWith(TagBefore, StringComparison.Ordinal))
+				.ToList();
+
+			return _pluginTagsCache;
+		}
+
+		/// <summary>
+		/// Resets the plugin tags cache so it will be rebuilt on next access.
+		/// </summary>
+		private void ResetPluginTagsCache()
+		{
+			_pluginTagsCacheInitialized = false;
 		}
 
 		/// <summary>
@@ -936,14 +973,22 @@ namespace CommonPluginsShared.Collections
 		/// <returns>Tag ID.</returns>
 		internal Guid? CheckTagExist(string tagName)
 		{
-			string completTagName = TagBefore.IsNullOrEmpty() ? tagName : TagBefore + " " + tagName;
-			Guid? findGoodPluginTags = PluginTags.FirstOrDefault(x => x.Name == completTagName)?.Id;
-			if (findGoodPluginTags == null)
+			string fullTagName = TagBefore.IsNullOrEmpty()
+				? tagName
+				: string.Format("{0} {1}", TagBefore, tagName);
+
+			Tag existingTag = PluginTags.FirstOrDefault(t => string.Equals(t.Name, fullTagName, StringComparison.Ordinal));
+			if (existingTag != null)
 			{
-				API.Instance.Database.Tags.Add(new Tag { Name = completTagName });
-				findGoodPluginTags = PluginTags.FirstOrDefault(x => x.Name == completTagName).Id;
+				return existingTag.Id;
 			}
-			return findGoodPluginTags;
+
+			API.Instance.Database.Tags.Add(new Tag { Name = fullTagName });
+
+			ResetPluginTagsCache();
+
+			Tag createdTag = PluginTags.FirstOrDefault(t => string.Equals(t.Name, fullTagName, StringComparison.Ordinal));
+			return createdTag != null ? (Guid?)createdTag.Id : null;
 		}
 
 		/// <summary>
@@ -969,13 +1014,13 @@ namespace CommonPluginsShared.Collections
 					Guid? tagId = FindGoodPluginTags(string.Empty);
 					if (tagId != null)
 					{
-						if (game.TagIds != null)
+						if (game.TagIds == null)
 						{
-							game.TagIds.Add((Guid)tagId);
+							game.TagIds = new List<Guid> { tagId.Value };
 						}
-						else
+						else if (!game.TagIds.Contains(tagId.Value))
 						{
-							game.TagIds = new List<Guid> { (Guid)tagId };
+							game.TagIds.Add(tagId.Value);
 						}
 					}
 				}
@@ -987,13 +1032,17 @@ namespace CommonPluginsShared.Collections
 			}
 			else if (TagMissing)
 			{
-				if (game.TagIds != null)
+				Guid? noDataTagId = AddNoDataTag();
+				if (noDataTagId != null)
 				{
-					game.TagIds.Add((Guid)AddNoDataTag());
-				}
-				else
-				{
-					game.TagIds = new List<Guid> { (Guid)AddNoDataTag() };
+					if (game.TagIds == null)
+					{
+						game.TagIds = new List<Guid> { noDataTagId.Value };
+					}
+					else if (!game.TagIds.Contains(noDataTagId.Value))
+					{
+						game.TagIds.Add(noDataTagId.Value);
+					}
 				}
 			}
 
@@ -1024,10 +1073,16 @@ namespace CommonPluginsShared.Collections
 		/// <param name="message">Custom message.</param>
 		public void AddTag(IEnumerable<Guid> ids, string message)
 		{
+			List<Guid> idList = ids.ToList();
+			if (idList.Count == 0)
+			{
+				return;
+			}
+
 			GlobalProgressOptions options = new GlobalProgressOptions(message)
 			{
 				Cancelable = true,
-				IsIndeterminate = ids.Count() == 1
+				IsIndeterminate = idList.Count == 1
 			};
 
 			API.Instance.Dialogs.ActivateGlobalProgress((a) =>
@@ -1040,9 +1095,9 @@ namespace CommonPluginsShared.Collections
 					Stopwatch stopWatch = new Stopwatch();
 					stopWatch.Start();
 
-					a.ProgressMaxValue = ids.Count();
+					a.ProgressMaxValue = idList.Count;
 
-					foreach (Guid id in ids)
+					foreach (Guid id in idList)
 					{
 						Game game = API.Instance.Database.Games.Get(id);
 						if (game == null)
@@ -1051,7 +1106,7 @@ namespace CommonPluginsShared.Collections
 						}
 
 						a.Text = message
-							+ (ids.Count() == 1 ? string.Empty : "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}")
+							+ (idList.Count == 1 ? string.Empty : "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}")
 							+ "\n" + game?.Name + (game?.Source == null ? string.Empty : $" ({game?.Source.Name})");
 
 						if (a.CancelToken.IsCancellationRequested)
@@ -1076,7 +1131,7 @@ namespace CommonPluginsShared.Collections
 
 					stopWatch.Stop();
 					TimeSpan ts = stopWatch.Elapsed;
-					Logger.Info($"AddTag(){(a.CancelToken.IsCancellationRequested ? " canceled" : string.Empty)} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{(double)ids.Count()} items");
+					Logger.Info($"AddTag(){(a.CancelToken.IsCancellationRequested ? " canceled" : string.Empty)} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{(double)idList.Count} items");
 				}
 				catch (Exception ex)
 				{
@@ -1184,8 +1239,8 @@ namespace CommonPluginsShared.Collections
 					Stopwatch stopWatch = new Stopwatch();
 					stopWatch.Start();
 
-					IEnumerable<Game> playniteDb = API.Instance.Database.Games.Where(x => x.Hidden == false);
-					a.ProgressMaxValue = playniteDb.Count();
+					List<Game> playniteDb = API.Instance.Database.Games.Where(x => x.Hidden == false).ToList();
+					a.ProgressMaxValue = playniteDb.Count;
 
 					foreach (Game game in playniteDb)
 					{
@@ -1212,7 +1267,7 @@ namespace CommonPluginsShared.Collections
 
 					stopWatch.Stop();
 					TimeSpan ts = stopWatch.Elapsed;
-					Logger.Info($"RemoveTagAllGame(){(a.CancelToken.IsCancellationRequested ? " canceled" : string.Empty)} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{(double)playniteDb.Count()} items");
+					Logger.Info($"RemoveTagAllGame(){(a.CancelToken.IsCancellationRequested ? " canceled" : string.Empty)} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{(double)playniteDb.Count} items");
 				}
 				catch (Exception ex)
 				{
