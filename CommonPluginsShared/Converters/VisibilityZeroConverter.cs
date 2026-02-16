@@ -1,28 +1,27 @@
 ﻿using CommonPlayniteShared;
-using Playnite.SDK;
 using System;
-using System.Drawing.Imaging;
 using System.Globalization;
-using System.IO;
-using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Markup;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace CommonPluginsShared.Converters
 {
+    /// <summary>
+    /// Hides visibility if value is "0".
+    /// Parameter "1" uses Collapsed, otherwise Hidden.
+    /// </summary>
     public class VisibilityZeroConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             try
             {
-                if (value.ToString() == "0")
+                string stringValue = value?.ToString();
+
+                if (stringValue == "0")
                 {
-                    if (parameter.ToString() == "1")
+                    string paramString = parameter?.ToString();
+                    if (paramString == "1")
                     {
                         return Visibility.Collapsed;
                     }

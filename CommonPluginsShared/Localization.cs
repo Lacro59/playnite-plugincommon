@@ -10,7 +10,7 @@ namespace CommonPluginsShared
 {
     public class PluginLocalization
     {
-        private static ILogger Logger => LogManager.GetLogger();
+        private static readonly ILogger Logger = LogManager.GetLogger();
 
         /// <summary>
         /// Load plugin localization resources from XAML files.

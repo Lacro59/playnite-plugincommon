@@ -25,14 +25,14 @@ namespace CommonPluginsShared.PlayniteExtended
         {
             // Get plugin's database if used
             PluginDatabase = typeof(TPluginDatabase).CrateInstance<TPluginDatabase>(PluginSettings, this.GetPluginUserDataPath());
-            _ = PluginDatabase.InitializeDatabase();
+            PluginDatabase.InitializeDatabase();
         }
     }
 
 
     public abstract class PlaynitePlugin<ISettings> : GenericPlugin
     {
-        internal static ILogger Logger => LogManager.GetLogger();
+        internal static readonly ILogger Logger = LogManager.GetLogger();
 
 
         public static string PluginName { get; set; }

@@ -1,28 +1,22 @@
 ﻿using CommonPlayniteShared;
-using Playnite.SDK;
 using System;
-using System.Drawing.Imaging;
 using System.Globalization;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Markup;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace CommonPluginsShared.Converters
 {
+    /// <summary>
+    /// Gets a cached image path using ImageSourceManagerPlugin.
+    /// </summary>
     public class GetImageConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             try
             {
-                if (value is string)
+                if (value is string imagePath)
                 {
-                    return ImageSourceManagerPlugin.GetImagePath((string)value);
+                    return ImageSourceManagerPlugin.GetImagePath(imagePath);
                 }
             }
             catch (Exception ex)
@@ -35,7 +29,7 @@ namespace CommonPluginsShared.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using CommonPlayniteShared.Common;
+using CommonPlayniteShared.Common;
 using CommonPluginsShared.Models;
 using Playnite.SDK;
 using Playnite.SDK.Data;
@@ -6,22 +6,24 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web.UI;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace CommonPluginsShared
 {
+    /// <summary>
+    /// Provides shared helper methods for resource loading, logging and common UI helpers.
+    /// </summary>
     public class Common
     {
-        private static ILogger Logger => LogManager.GetLogger();
+        private static readonly ILogger Logger = LogManager.GetLogger();
 
         /// <summary>
         /// Load common resources (localization, styles, fonts) from the plugin directory.
         /// </summary>
-        /// <param name="pluginFolder">Path to the plugin folder</param>
-        /// <param name="language">Current language code</param>
+        /// <param name="pluginFolder">Path to the plugin folder.</param>
+        /// <param name="language">Current language code.</param>
         public static void Load(string pluginFolder, string language)
         {
             // Load localization
@@ -36,6 +38,12 @@ namespace CommonPluginsShared
         /// </summary>
         private static void LoadResourceDictionaries(string pluginFolder)
         {
+            if (Application.Current == null)
+            {
+                Logger.Warn("LoadResourceDictionaries called while Application.Current is null.");
+                return;
+            }
+
             var resourceFiles = new List<string>
             {
                 Path.Combine(pluginFolder, "Resources\\Common.xaml"),
@@ -48,7 +56,7 @@ namespace CommonPluginsShared
                 if (!File.Exists(file))
                 {
                     Logger.Warn($"File {file} not found");
-                    return;
+                    continue;
                 }
 
                 string fileName = Path.GetFileName(file);
@@ -93,6 +101,12 @@ namespace CommonPluginsShared
         /// </summary>
         private static void LoadFontResource(string pluginFolder)
         {
+            if (Application.Current == null)
+            {
+                Logger.Warn("LoadFontResource called while Application.Current is null.");
+                return;
+            }
+
             var fontPath = Path.Combine(pluginFolder, "Resources\\font.ttf");
             if (!File.Exists(fontPath))
             {
@@ -137,20 +151,32 @@ namespace CommonPluginsShared
         }
 
         /// <summary>
-        /// Log error with various overloads.
+        /// Log an error with optional ignore flag.
         /// </summary>
         public static void LogError(Exception ex, bool isIgnored) =>
             LogError(ex, isIgnored, string.Empty, false, string.Empty, string.Empty);
 
+        /// <summary>
+        /// Log an error with an additional message.
+        /// </summary>
         public static void LogError(Exception ex, bool isIgnored, string message) =>
             LogError(ex, isIgnored, message, false, string.Empty, string.Empty);
 
+        /// <summary>
+        /// Log an error and optionally display a user notification.
+        /// </summary>
         public static void LogError(Exception ex, bool isIgnored, bool showNotification, string pluginName) =>
             LogError(ex, isIgnored, string.Empty, showNotification, pluginName, string.Empty);
 
+        /// <summary>
+        /// Log an error and optionally display a user notification with a custom message.
+        /// </summary>
         public static void LogError(Exception ex, bool isIgnored, bool showNotification, string pluginName, string notificationMessage) =>
             LogError(ex, isIgnored, string.Empty, showNotification, pluginName, notificationMessage);
 
+        /// <summary>
+        /// Log an error with an additional message and optionally display a user notification.
+        /// </summary>
         public static void LogError(Exception ex, bool isIgnored, string message, bool showNotification, string pluginName) =>
             LogError(ex, isIgnored, message, showNotification, pluginName, string.Empty);
 
@@ -199,8 +225,19 @@ namespace CommonPluginsShared
 
         #endregion
 
+        /// <summary>
+        /// Add a single ICO font based <see cref="TextBlock"/> resource if it does not already exist.
+        /// </summary>
+        /// <param name="key">Resource key to register.</param>
+        /// <param name="text">Glyph text to display.</param>
         public static void AddTextIcoFontResource(string key, string text)
         {
+            if (Application.Current == null)
+            {
+                Logger.Warn("AddTextIcoFontResource called while Application.Current is null.");
+                return;
+            }
+
             if (Application.Current.Resources.Contains(key))
             {
                 return;
@@ -214,6 +251,12 @@ namespace CommonPluginsShared
             });
         }
 
+        /// <summary>
+        /// Add multiple ICO font based <see cref="TextBlock"/> resources.
+        /// </summary>
+        /// <param name="iconsResourcesToAdd">
+        /// Dictionary where the key is the resource key and the value is the glyph text.
+        /// </param>
         public static void AddTextIcoFontResource(Dictionary<string, string> iconsResourcesToAdd)
         {
             foreach (var iconResource in iconsResourcesToAdd)

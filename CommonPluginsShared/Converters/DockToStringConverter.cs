@@ -1,18 +1,15 @@
-﻿using Playnite;
-using Playnite.SDK;
-//using Playnite.Settings;
+﻿using Playnite.SDK;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Globalization;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Markup;
-using System.Windows.Media;
 
 namespace CommonPluginsShared.Converters
 {
+    /// <summary>
+    /// Converts Dock enum to localized string.
+    /// </summary>
     public class DockToStringConverter : MarkupExtension, IValueConverter
     {
         public static string GetString(Dock value)
@@ -29,17 +26,21 @@ namespace CommonPluginsShared.Converters
                     return ResourceProvider.GetString("LOCDockBottom");
             }
 
-            return "<UknownDockMode>";
+            return "<UnknownDockMode>";
         }
 
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return GetString((Dock)value);
+            if (value is Dock dock)
+            {
+                return GetString(dock);
+            }
+            return "<UnknownDockMode>";
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return new NotSupportedException();
+            throw new NotSupportedException();
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)

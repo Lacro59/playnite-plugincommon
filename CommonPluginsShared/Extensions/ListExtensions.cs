@@ -11,47 +11,66 @@ namespace CommonPluginsShared.Extensions
     /// <summary>
     /// A class to hold extension methods for C# Lists 
     /// </summary>
+    /// <summary>
+    /// A class to hold extension methods for C# Lists 
+    /// </summary>
     public static class ListExtensions
     {
         /// <summary>
-        /// Convert a list of Type T to a CSV
+        /// Convert a list of Type T to a CSV string.
         /// </summary>
         /// <typeparam name="T">The type of the object held in the list</typeparam>
         /// <param name="items">The list of items to process</param>
-        /// <param name="delimiter">Specify the delimiter, default is ,</param>
-        /// <returns></returns>
+        /// <param name="orderBy">Whether to order properties alphabetically.</param>
+        /// <param name="delimiter">Specify the delimiter, default is comma.</param>
+        /// <param name="noHeader">If true, omits the header row.</param>
+        /// <param name="header">Optional custom header list.</param>
+        /// <returns>A CSV formatted string.</returns>
         public static string ToCsv<T>(this List<T> items, bool orderBy = true, string delimiter = ",", bool noHeader = false, List<string> header = null)
         {
-            Type itemType = typeof(T);
-            IEnumerable<PropertyInfo> props = orderBy
-                ? itemType.GetProperties(BindingFlags.Public | BindingFlags.Instance).OrderBy(p => p.Name)
-                : (IEnumerable<PropertyInfo>)itemType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            StringBuilder csv = new StringBuilder();
-
-            // Write Headers
-            if (!noHeader)
+            try
             {
-                _ = header?.Count > 0 ? csv.AppendLine(string.Join(delimiter, header)) : csv.AppendLine(string.Join(delimiter, props.Select(p => p.Name)));
-            }
+                Type itemType = typeof(T);
+                IEnumerable<PropertyInfo> props = orderBy
+                    ? itemType.GetProperties(BindingFlags.Public | BindingFlags.Instance).OrderBy(p => p.Name)
+                    : (IEnumerable<PropertyInfo>)itemType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-            // Write Rows
-            foreach (T item in items)
+                StringBuilder csv = new StringBuilder();
+
+                // Write Headers
+                if (!noHeader)
+                {
+                    if (header?.Count > 0)
+                    {
+                        csv.AppendLine(string.Join(delimiter, header));
+                    }
+                    else
+                    {
+                        csv.AppendLine(string.Join(delimiter, props.Select(p => p.Name)));
+                    }
+                }
+
+                // Write Rows
+                foreach (T item in items)
+                {
+                    // Write Fields
+                    csv.AppendLine(string.Join(delimiter, props.Select(p => GetCsvFieldBasedOnValue(p, item))));
+                }
+
+                return csv.ToString();
+            }
+            catch (Exception)
             {
-                // Write Fields
-                _ = csv.AppendLine(string.Join(delimiter, props.Select(p => GetCsvFieldasedOnValue(p, item))));
+                // Re-throw to let the caller handle it, or log it if possible.
+                // Preserving stack trace is important.
+                throw;
             }
-
-            return csv.ToString();
         }
 
         /// <summary>
-        /// Provide generic and specific handling of fields
+        /// Provide generic and specific handling of fields for CSV export.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="p"></param>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        private static object GetCsvFieldasedOnValue<T>(PropertyInfo p, T item)
+        private static object GetCsvFieldBasedOnValue<T>(PropertyInfo p, T item)
         {
             string value;
             try
@@ -59,23 +78,26 @@ namespace CommonPluginsShared.Extensions
                 value = p.GetValue(item, null)?.ToString();
                 if (value == null)
                 {
-                    return "NULL";  // Deal with nulls
+                    return "NULL";
                 }
 
-                if (value.Trim().Length == 0)
+                if (string.IsNullOrWhiteSpace(value))
                 {
-                    return ""; // Deal with spaces and blanks
+                    return "";
                 }
 
-                // Guard strings with "s, they may contain the delimiter!
+                // Guard strings with quotes if they contain the delimiter or quotes
+                // For simplicity assuming basic CSV escaping requirements or just quotes
                 if (p.PropertyType == typeof(string))
                 {
-                    value = string.Format("\"{0}\"", value);
+                    // Escape double quotes by doubling them
+                    value = value.Replace("\"", "\"\"");
+                    value = $"\"{value}\"";
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                throw;
             }
             return value;
         }

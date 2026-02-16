@@ -5,9 +5,12 @@ using System.Windows.Data;
 
 namespace CommonPluginsShared.Converters
 {
+    /// <summary>
+    /// Returns a font icon based on media file extension (Video or Image).
+    /// </summary>
     public class GetMediaTypeConverter : IValueConverter
     {
-        private static readonly HashSet<string> VideoExtensions = new HashSet<string>
+        private static readonly HashSet<string> VideoExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             ".mkv", ".mp4", ".avi", ".webm"
         };
@@ -16,22 +19,22 @@ namespace CommonPluginsShared.Converters
         {
             try
             {
-                var strValue = value as string;
+                string strValue = value as string;
                 if (!string.IsNullOrEmpty(strValue))
                 {
-                    var ext = System.IO.Path.GetExtension(strValue)?.ToLowerInvariant();
+                    string ext = System.IO.Path.GetExtension(strValue);
                     if (string.IsNullOrEmpty(ext))
                     {
-                        return "\ueb16";
+                        return "\ueb16"; // Image icon?
                     }
 
                     if (VideoExtensions.Contains(ext))
                     {
-                        return "\ueb13";
+                        return "\ueb13"; // Video icon?
                     }
-                    if (ext == ".webp")
+                    if (ext.Equals(".webp", StringComparison.OrdinalIgnoreCase))
                     {
-                        return "\ueb16 \ueb13";
+                        return "\ueb16 \ueb13"; // Both?
                     }
 
                     return "\ueb16";

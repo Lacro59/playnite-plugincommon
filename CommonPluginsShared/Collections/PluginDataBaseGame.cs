@@ -1,8 +1,14 @@
-﻿using Playnite.SDK.Data;
+using Playnite.SDK.Data;
 using System.Collections.Generic;
 
 namespace CommonPluginsShared.Collections
 {
+	/// <summary>
+	/// Base class for plugin game data that stores a typed list of items
+	/// (for example achievements, sessions, stats) associated with a Playnite game.
+	/// Provides cached access to item count and data presence.
+	/// </summary>
+	/// <typeparam name="T">Type of items stored for the game.</typeparam>
 	public abstract class PluginDataBaseGame<T> : PluginDataBaseGameBase
 	{
 		#region Cache fields

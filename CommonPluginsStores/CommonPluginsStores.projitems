@@ -82,6 +82,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\AchievementProgression.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\BasicGameInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\DlcInfos.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\GameRequirements.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Interfaces\IStoreApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\AccountGameInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\AccountWishlist.cs" />

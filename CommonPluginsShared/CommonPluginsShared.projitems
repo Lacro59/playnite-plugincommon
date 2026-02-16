@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDataBaseGameDetails.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDatabaseObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginItemCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)collections\PluginMenus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Commands.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Controls\AttachedProperties.cs" />
@@ -40,6 +41,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\LocalDateTimeConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\LocalDateYMConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\LocalTimeConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\NullOrEmptyToVisibilityConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\PlayTimeToStringConverterWithZero.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\StringRemoveConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\StringToBooleanConverter.cs" />
@@ -67,6 +69,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IWindowPluginService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SmartCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IDataContext.cs" />
@@ -85,5 +88,8 @@
     <None Include="$(MSBuildThisFileDirectory)Resources\font.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Services\" />
   </ItemGroup>
 </Project>

@@ -26,7 +26,7 @@ namespace CommonPluginsShared
     /// </summary>
     public class PlayniteTools
     {
-        private static ILogger Logger => LogManager.GetLogger();
+        private static readonly ILogger Logger = LogManager.GetLogger();
 
         private static List<Emulator> ListEmulators { get; set; } = null;
 
