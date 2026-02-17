@@ -1,5 +1,6 @@
 ﻿using CommonPlayniteShared;
 using CommonPlayniteShared.Common;
+using CommonPluginsShared.Services;
 using Playnite.SDK;
 using System;
 using System.Collections.Generic;
@@ -51,7 +52,7 @@ namespace CommonPluginsShared
             {
                 try
                 {
-                    var cachedFile = HttpFileCachePlugin.GetWebFile(source, resize);
+                    var cachedFile = HttpFileCacheService.GetWebFile(source, resize);
                     if (string.IsNullOrEmpty(cachedFile))
                     {
                         return HttpFileCache.GetWebFile(source);
@@ -193,7 +194,7 @@ namespace CommonPluginsShared
             {
                 try
                 {
-                    string cachedFile = HttpFileCachePlugin.GetWebFile(source);
+                    string cachedFile = HttpFileCacheService.GetWebFile(source);
                     if (string.IsNullOrEmpty(cachedFile))
                     {
                         cachedFile = HttpFileCache.GetWebFile(source);

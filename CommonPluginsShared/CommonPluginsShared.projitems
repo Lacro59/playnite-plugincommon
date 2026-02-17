@@ -54,7 +54,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\ListExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileDataTools.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)HttpFileCachePlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageSourceManagerPlugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ImageTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginSettings.cs" />
@@ -70,7 +69,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IWindowPluginService.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SmartCache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)services\CachingServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IDataContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginDatabase.cs" />
