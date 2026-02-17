@@ -121,7 +121,7 @@ namespace CommonPluginsShared.Collections
 		/// <typeparam name="T">The first generic type parameter of the item.</typeparam>
 		/// <typeparam name="Y">The second generic type parameter of the item.</typeparam>
 		/// <param name="id">The unique identifier of the game item.</param>
-		public void SetGameInfoDetails<T, Y>(Guid id)
+		public void SetGameInfoDetails<T, Y>(Guid id) where Y : new()
 		{
 			SetGameInfoInternal(id, typeof(PluginDataBaseGameDetails<T, Y>));
 		}
@@ -133,7 +133,7 @@ namespace CommonPluginsShared.Collections
 		/// </summary>
 		/// <typeparam name="T">The first generic type parameter of the items.</typeparam>
 		/// <typeparam name="Y">The second generic type parameter of the items.</typeparam>
-		public void SetGameInfoDetails<T, Y>()
+		public void SetGameInfoDetails<T, Y>() where Y : new()
 		{
 			if (!WaitForDatabase("SetGameInfoDetails"))
 			{
