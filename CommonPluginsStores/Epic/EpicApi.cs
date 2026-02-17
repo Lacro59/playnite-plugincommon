@@ -614,7 +614,7 @@ namespace CommonPluginsStores.Epic
         public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string @namespace)
         {
             string cacheFile = Path.Combine(PathAchievementsData, $"{@namespace}.json");
-            Tuple<string, ObservableCollection<GameAchievement>> data = FileDataTools.LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cacheFile, 1440);
+            Tuple<string, ObservableCollection<GameAchievement>> data = FileDataService.LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cacheFile, 1440);
 
 			if (data?.Item2 == null || data.Item2.Count() == 0)
 			{
@@ -643,7 +643,7 @@ namespace CommonPluginsStores.Epic
                 });
 
                 data = new Tuple<string, ObservableCollection<GameAchievement>>(productId, gameAchievements);
-                FileDataTools.SaveData(cacheFile, data);
+                FileDataService.SaveData(cacheFile, data);
             }
 
             return data;
@@ -1039,7 +1039,7 @@ namespace CommonPluginsStores.Epic
             string cacheFile = CommonPlayniteShared.Common.Paths.GetSafePathName($"assets.json");
             cacheFile = Path.Combine(PathAppsData, cacheFile);
 
-            var result = FileDataTools.LoadData<List<Asset>>(cacheFile, 10);
+            var result = FileDataService.LoadData<List<Asset>>(cacheFile, 10);
             if (result == null || result.Count() == 0)
             {
                 if (StoreToken == null)
@@ -1066,7 +1066,7 @@ namespace CommonPluginsStores.Epic
                 {
                     Logger.Warn("EpicApi.GetAssets: Failed to fetch assets or no records returned.");
                     // Nothing to paginate if initial response didn't contain records
-                    FileDataTools.SaveData(cacheFile, result);
+                    FileDataService.SaveData(cacheFile, result);
                     return result;
                 }
 
@@ -1088,7 +1088,7 @@ namespace CommonPluginsStores.Epic
                     }
                 }
 
-                FileDataTools.SaveData(cacheFile, result);
+                FileDataService.SaveData(cacheFile, result);
             }
 
             return result;
@@ -1113,13 +1113,13 @@ namespace CommonPluginsStores.Epic
             string cacheFile = CommonPlayniteShared.Common.Paths.GetSafePathName($"{nameSpace}_{catalogItemId}.json");
             cacheFile = Path.Combine(PathAppsData, cacheFile);
 
-            Dictionary<string, CatalogItem> result = FileDataTools.LoadData<Dictionary<string, CatalogItem>>(cacheFile, -1);
+            Dictionary<string, CatalogItem> result = FileDataService.LoadData<Dictionary<string, CatalogItem>>(cacheFile, -1);
             if (result == null)
             {
                 string url = string.Format("/catalog/api/shared/namespace/{0}/bulk/items?id={1}&country={2}&locale={3}&includeMainGameDetails=true", nameSpace, catalogItemId, CodeLang.GetCountryFromLast(Locale), CodeLang.GetEpicLang(Locale));
                 Tuple<string, Dictionary<string, CatalogItem>> catalogResponse = InvokeRequest<Dictionary<string, CatalogItem>>(UrlApiCatalog + url).GetAwaiter().GetResult();
                 result = catalogResponse.Item2;
-                FileDataTools.SaveData(cacheFile, result);
+                FileDataService.SaveData(cacheFile, result);
             }
 
             if (result == null)
@@ -1138,11 +1138,11 @@ namespace CommonPluginsStores.Epic
             string cacheFile = CommonPlayniteShared.Common.Paths.GetSafePathName($"CatalogMappings_{@namespace}.json");
             cacheFile = Path.Combine(PathAppsData, cacheFile);
 
-            var result = FileDataTools.LoadData<CatalogMappingsResponse>(cacheFile, -1); 
+            var result = FileDataService.LoadData<CatalogMappingsResponse>(cacheFile, -1); 
             if (result?.Data?.Catalog?.CatalogNs?.Mappings?.FirstOrDefault()?.PageSlug == null)
             {
                 result = QueryCatalogMappings(@namespace).GetAwaiter().GetResult();
-                FileDataTools.SaveData(cacheFile, result);
+                FileDataService.SaveData(cacheFile, result);
             }
 
             return result?.Data?.Catalog?.CatalogNs?.Mappings?.FirstOrDefault()?.PageSlug;

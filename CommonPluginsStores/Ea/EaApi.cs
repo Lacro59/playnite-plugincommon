@@ -348,14 +348,14 @@ namespace CommonPluginsStores.Ea
         private Models.GameStoreDataResponse GetStoreData(string gameSlug)
         {
             string cachePath = Path.Combine(PathAppsData, $"{gameSlug}.json");
-            Models.GameStoreDataResponse gameStoreDataResponse = FileDataTools.LoadData<Models.GameStoreDataResponse>(cachePath, 1440);
+            Models.GameStoreDataResponse gameStoreDataResponse = FileDataService.LoadData<Models.GameStoreDataResponse>(cachePath, 1440);
 
             if (gameStoreDataResponse == null)
             {
                 string url = string.Format(UrlGameData, gameSlug, CodeLang.GetCountryFromLast(Locale));
                 string response = Task.Run(async () => await Web.DownloadStringData(url)).GetAwaiter().GetResult();
                 Serialization.TryFromJson(response, out gameStoreDataResponse);
-				FileDataTools.SaveData(cachePath, gameStoreDataResponse);
+				FileDataService.SaveData(cachePath, gameStoreDataResponse);
             }
 
             return gameStoreDataResponse;
@@ -381,7 +381,7 @@ namespace CommonPluginsStores.Ea
 
         private async Task<ResponseOwnedGameProducts> GetOwnedGameProducts()
         {
-            ResponseOwnedGameProducts data = FileDataTools.LoadData<ResponseOwnedGameProducts>(PathOwnedGameProductsCache, 10);
+            ResponseOwnedGameProducts data = FileDataService.LoadData<ResponseOwnedGameProducts>(PathOwnedGameProductsCache, 10);
             if (data?.Data?.Me?.OwnedGameProducts?.Items != null && data?.Data?.Me?.OwnedGameProducts?.Items?.Count > 0)
             {
                 return data;
@@ -390,14 +390,14 @@ namespace CommonPluginsStores.Ea
             QueryOwnedGameProducts query = new QueryOwnedGameProducts();
             query.variables.locale = CodeLang.GetCountryFromLast(Locale);
             data = await GetGraphQl<ResponseOwnedGameProducts>(UrlGraphQL, query);
-            FileDataTools.SaveData(PathOwnedGameProductsCache, data);
+            FileDataService.SaveData(PathOwnedGameProductsCache, data);
             return data;
         }
 
         private async Task<ResponseAchievements> GetAchievements(string offerId, string playerPsd)
         {
             string cachePath = Path.Combine(PathAchievementsData, $"{offerId}-{playerPsd}.json");
-            ResponseAchievements data = FileDataTools.LoadData<ResponseAchievements>(cachePath, 10);
+            ResponseAchievements data = FileDataService.LoadData<ResponseAchievements>(cachePath, 10);
             if (data?.Data?.Achievements?.FirstOrDefault()?.AchievementsData != null && data?.Data?.Achievements?.FirstOrDefault()?.AchievementsData?.Count > 0)
             {
                 return data;
@@ -408,7 +408,7 @@ namespace CommonPluginsStores.Ea
             query.variables.playerPsd = playerPsd;
             query.variables.locale = CodeLang.GetCountryFromLast(Locale);
             data = await GetGraphQl<ResponseAchievements>(UrlGraphQL, query);
-            FileDataTools.SaveData(cachePath, data);
+            FileDataService.SaveData(cachePath, data);
             return data;
         }
 

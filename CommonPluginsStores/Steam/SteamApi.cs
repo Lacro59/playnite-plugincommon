@@ -98,7 +98,7 @@ namespace CommonPluginsStores.Steam
 				if (_steamApps == null)
 				{
 					// 1. Try to load from cache (valid for 3 days)
-					_steamApps = FileDataTools.LoadData<List<SteamApp>>(AppsListPath, 4320);
+					_steamApps = FileDataService.LoadData<List<SteamApp>>(AppsListPath, 4320);
 
 					// 2. If cache is expired or missing, fetch from Web
 					if (_steamApps == null)
@@ -126,7 +126,7 @@ namespace CommonPluginsStores.Steam
 
 						// 3. Load existing cache to merge with new data
 						// Use -1 to load silently if we have new data to add, otherwise 0 to flag as expired
-						_steamApps = FileDataTools.LoadData<List<SteamApp>>(AppsListPath, steamAppsNew?.Count > 0 ? -1 : 0)
+						_steamApps = FileDataService.LoadData<List<SteamApp>>(AppsListPath, steamAppsNew?.Count > 0 ? -1 : 0)
 									 ?? new List<SteamApp>();
 
 						// 4. Merge new apps without duplicates
@@ -180,7 +180,7 @@ namespace CommonPluginsStores.Steam
 		/// Uses cached data if available and not expired (10 minutes),
 		/// otherwise fetches fresh data from Steam.
 		/// </summary>
-		private SteamUserData UserData => FileDataTools.LoadData<SteamUserData>(FileUserData, 10) ?? GetUserData() ?? FileDataTools.LoadData<SteamUserData>(FileUserData, 0);
+		private SteamUserData UserData => FileDataService.LoadData<SteamUserData>(FileUserData, 10) ?? GetUserData() ?? FileDataService.LoadData<SteamUserData>(FileUserData, 0);
 
         #region Paths
 
@@ -756,7 +756,7 @@ namespace CommonPluginsStores.Steam
 		public override Tuple<string, ObservableCollection<GameAchievement>> GetAchievementsSchema(string id)
         {
             string cachePath = Path.Combine(PathAchievementsData, $"{id}.json");
-            Tuple<string, ObservableCollection<GameAchievement>> data = FileDataTools.LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
+            Tuple<string, ObservableCollection<GameAchievement>> data = FileDataService.LoadData<Tuple<string, ObservableCollection<GameAchievement>>>(cachePath, 1440);
 
             if (data?.Item2 == null)
             {
@@ -768,7 +768,7 @@ namespace CommonPluginsStores.Steam
                     x.GamerScore = CalcGamerScore(x.Percent);
                 });
 
-				FileDataTools.SaveData(cachePath, data);
+				FileDataService.SaveData(cachePath, data);
             }
 
             return data;
@@ -1177,7 +1177,7 @@ namespace CommonPluginsStores.Steam
         public StoreAppDetailsResult GetAppDetails(uint appId, int retryCount)
         {
             string cachePath = Path.Combine(PathAppsData, $"{appId}.json");
-            StoreAppDetailsResult storeAppDetailsResult = FileDataTools.LoadData<StoreAppDetailsResult>(cachePath, 4320);
+            StoreAppDetailsResult storeAppDetailsResult = FileDataService.LoadData<StoreAppDetailsResult>(cachePath, 4320);
 
             if (storeAppDetailsResult == null)
             {
@@ -1188,7 +1188,7 @@ namespace CommonPluginsStores.Steam
                 if (Serialization.TryFromJson(response, out Dictionary<string, StoreAppDetailsResult> parsedData, out Exception ex) && parsedData != null)
                 {
                     storeAppDetailsResult = parsedData[appId.ToString()];
-					FileDataTools.SaveData(cachePath, storeAppDetailsResult);
+					FileDataService.SaveData(cachePath, storeAppDetailsResult);
                 }
                 else if (ex != null)
                 {
