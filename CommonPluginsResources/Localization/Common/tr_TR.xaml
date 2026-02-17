@@ -7,7 +7,29 @@
     <sys:String x:Key="LOCCommonMonths">{0} ay</sys:String>
     <sys:String x:Key="LOCCommonYear">{0} yıl</sys:String>
     <sys:String x:Key="LOCCommonYears">{0} yıl</sys:String>
-    
+
+    <!-- Time-related -->
+    <sys:String x:Key="LOCCommonHourAgo">{0}h ago</sys:String>
+    <sys:String x:Key="LOCCommonHoursAgo">{0}h ago</sys:String>
+    <sys:String x:Key="LOCCommonDayAgo">{0}d ago</sys:String>
+    <sys:String x:Key="LOCCommonDaysAgo">{0}d ago</sys:String>
+    <sys:String x:Key="LOCCommonMonthAgo">{0}mo ago</sys:String>
+    <sys:String x:Key="LOCCommonMonthsAgo">{0}mo ago</sys:String>
+    <sys:String x:Key="LOCCommonYearAgo">{0}y ago</sys:String>
+    <sys:String x:Key="LOCCommonYearsAgo">{0}y ago</sys:String>
+    <sys:String x:Key="LOCCommonToday">Today</sys:String>
+    <sys:String x:Key="LOCCommonNever">Never</sys:String>
+
+    <!-- List actions -->
+    <sys:String x:Key="LOCCommonClearSelection">Clear Selection</sys:String>
+    <sys:String x:Key="LOCCommonRefreshSelected">⟳ Refresh Selected</sys:String>
+    <sys:String x:Key="LOCCommonSelected">Selected:</sys:String>
+
+    <!-- Filters -->
+    <sys:String x:Key="LOCCommonSearchByName">Search by name...</sys:String>
+    <sys:String x:Key="LOCCommonAllSources">All Sources</sys:String>
+    <sys:String x:Key="LOCCommonAllPlatforms">All Platforms</sys:String>
+
     <sys:String x:Key="LOCCommonYearLabel">Yıl</sys:String>
     <sys:String x:Key="LOCCommonYearsLabel">Yıl</sys:String>
     <sys:String x:Key="LOCCommonMonthLabel">Ay</sys:String>
@@ -75,7 +97,7 @@
     <sys:String x:Key="LOCCommonControlConfiguration">Kontrol yapılandırması</sys:String>
     <sys:String x:Key="LOCCommonGetAccountID">Hesap ID al</sys:String>
 
-    <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: kullanıcı kimliği doğrulanmadı</sys:String>
+    <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticated</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: API anahtarı yok</sys:String>
     <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Kötü yapılandırma</sys:String>
     <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: Yapılandırma bulunamadı</sys:String>
@@ -116,7 +138,7 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">Öntanımlı oyun listesi sıralaması</sys:String>
 
-    <sys:String x:Key="LOCCommonAutoImport">Kütüphane güncellendiğinde veriyi otomatik içeri aktar (sadece yenileri)</sys:String>
+    <sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated (only new items)</sys:String>
     <sys:String x:Key="LOCCommonAutoImportOnInstalled">Kurulu oyunlar için otomatik olarak içe aktar</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">Kontrol ekranında kart seçeneklerini gizle</sys:String>
@@ -130,11 +152,11 @@ Dizini açmak ister misiniz?</sys:String>
     <sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Önbellek dizini silinemiyor:
 {0}</sys:String>
 
-    <!-- CommonMenus -->
+    <!-- Common menus -->
 
     <sys:String x:Key="LOCCommonTotalFound">Toplam bulunan</sys:String>
 
-    <!-- CommonSettingsView -->
+    <!-- Common settings view -->
 
     <sys:String x:Key="LOCCommonMenuInExtensions">Eklentiler alt menüsünde eklentinin menüsünü göster *</sys:String>
     <sys:String x:Key="LOCCommonIconStore">Mağaza simgesini göster</sys:String>
@@ -179,7 +201,7 @@ Dizini açmak ister misiniz?</sys:String>
 
     <sys:String x:Key="LOCCommonControlsVisibleNoData">Veri yoksa görüntüle</sys:String>
 
-    <!-- CommonMenus -->
+    <!-- Common menus (game list / data) -->
 
     <sys:String x:Key="LOCCommonViewNoData">Eklenti verisi olmadan oyunları görüntüle</sys:String>
 
@@ -198,7 +220,7 @@ Dizini açmak ister misiniz?</sys:String>
     <sys:String x:Key="LOCCommonClearAllDatas">Tüm oyunlardan veri sil</sys:String>
     <sys:String x:Key="LOCCommonRemoveAllTags">Eklenti etiketini kaldır</sys:String>
 
-    <!-- CommonGlobalProgress -->
+    <!-- Common global progress -->
 
     <sys:String x:Key="LOCCommonGettingData">Veri indiriliyor...</sys:String>
     <sys:String x:Key="LOCCommonGettingAllDatas">Tüm oyunların verileri indiriliyor...</sys:String>
@@ -210,11 +232,11 @@ Dizini açmak ister misiniz?</sys:String>
     <sys:String x:Key="LOCCommonProcessing">İşleniyor, lütfen bekleyin...</sys:String>
     <sys:String x:Key="LOCCommonConverting">Dönüştürülüyor, lütfen bekleyin...</sys:String>
 
-    <!-- CommonNotificationsErrors -->
+    <!-- Common notification errors -->
 
-    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0} kullanıcı kimliği doğrulanmadı</sys:String>
+    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: user is not authenticated.</sys:String>
     
-    <!-- CommonNotifications -->
+    <!-- Common notifications -->
 
     <sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">{0} üzerinden veri alınırken hata oluştu.
 Lütfen yeniden deneyin.</sys:String>
@@ -224,14 +246,14 @@ Lütfen yeniden deneyin.</sys:String>
     <sys:String x:Key="LOCCommonDataRemove">Eklenti verisi silindi.</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">Eklenti verisi silinirken hata oluştu. Lütfen yeniden deneyin.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">{0} etiketi eklenirken hata oluştu.
-Lütfen eklenti menüsünden tüm etiketleri temizleyin.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Error adding tag with {0}.
+Please clear all tags in the plugin menu.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">{0} için eski kayıtlı veriyi kullan [{1}]
-Kimlik doğrulamanız gerekmektedir.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Using previously saved data for {0} [{1}]
+You must authenticate.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">{0} için 1'den fazla veri bulundu.
-Lütfen eklenti ayarlarını kontrol edin.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">More than one data entry found for {0}.
+Please check the plugin settings.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Boyutlar</sys:String>
@@ -245,32 +267,32 @@ Lütfen eklenti ayarlarını kontrol edin.</sys:String>
     <sys:String x:Key="LOCCommonSelectVariable">Değişken seç</sys:String>
 
 
-    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Dinamik bir söz dizimi eklemek için özel değişkenler kullanılabilir:
-{InstallDir} - Oyun kurulum dizini
-{InstallDirName} - Kurulum dizini adı
-{ImagePath} - Ayarlanmışsa oyun ISO/ROM konumu
-{ImageName} - Oyun ISO/ROM dosya adı
-{ImageNameNoExt} - Dosya adı uzantısı olmaksızın oyun ISO/ROM dosya adı
-{PlayniteDir} - Playnite kurulum dizini
-{Name} - Oyun adı
-       
-Dinamik bir söz dizimi eklemek için bulut değişkenleri kullanılabilir:        
+    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
+{InstallDir} - Game installation directory
+{InstallDirName} - Installation folder name
+{ImagePath} - Game ISO/ROM path if set
+{ImageName} - Game ISO/ROM file name
+{ImageNameNoExt} - Game ISO/ROM file name without extension
+{PlayniteDir} - Playnite installation directory
+{Name} - Game name
+
+Cloud variables can be used to add a dynamic string:
 {DropboxFolder}
 {OneDriveFolder}
-       
-Dinamik bir söz dizimi eklemek için Steam değişkenleri kullanılabilir:        
-{SteamId} - Steam kullanıcı kimliği
-{SteamAccountId} - Steam hesap kimliği
-{SteamInstallDir} - Steam kurulum dizini
-{SteamScreenshotsDir} - Steam ekran görüntüleri dizini
-       
-Dinamik bir söz dizimi eklemek için Ubisoft değişkenleri kullanılabilir:        
-{UbisoftInstallDir} - Ubisoft kurulum dizini
-{UbisoftScreenshotsDir} - Ubisoft ekran görüntüleri dizini
-        
-{RetroArchScreenshotsDir}
-            
-Dinamik bir söz dizimi eklemek için Windows değişkenleri kullanılabilir:        
+
+Steam variables can be used to add a dynamic string:
+{SteamId} - Steam user ID
+{SteamAccountId} - Steam account ID
+{SteamInstallDir} - Steam installation directory
+{SteamScreenshotsDir} - Steam screenshots directory
+
+Ubisoft Connect variables can be used to add a dynamic string:
+{UbisoftInstallDir} - Ubisoft installation directory
+{UbisoftScreenshotsDir} - Ubisoft screenshots directory
+
+{RetroArchScreenshotsDir} - RetroArch screenshots directory
+
+Windows variables can be used to add a dynamic string:
 {WinDir}
 {AllUsersProfile}
 {AppData}
@@ -286,6 +308,12 @@ Dinamik bir söz dizimi eklemek için Windows değişkenleri kullanılabilir:
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)</sys:String>
+{ProgramFiles(x86)} - 32-bit Program Files directory</sys:String>
 
+    <!-- OptionsDownloadData dialog -->
+    <sys:String x:Key="LOCCommonGameSource">Game source</sys:String>
+    <sys:String x:Key="LOCCommonInstallationStatus">Installation status</sys:String>
+    <sys:String x:Key="LOCCommonTimeFilters">Time-based filters</sys:String>
+    <sys:String x:Key="LOCCommonAdditionalOptions">Additional options</sys:String>
+    
 </ResourceDictionary>
