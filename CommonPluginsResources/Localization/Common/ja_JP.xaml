@@ -7,7 +7,29 @@
     <sys:String x:Key="LOCCommonMonths">{0} months</sys:String>
     <sys:String x:Key="LOCCommonYear">{0} year</sys:String>
     <sys:String x:Key="LOCCommonYears">{0} years</sys:String>
-    
+
+    <!-- Time-related -->
+    <sys:String x:Key="LOCCommonHourAgo">{0}h ago</sys:String>
+    <sys:String x:Key="LOCCommonHoursAgo">{0}h ago</sys:String>
+    <sys:String x:Key="LOCCommonDayAgo">{0}d ago</sys:String>
+    <sys:String x:Key="LOCCommonDaysAgo">{0}d ago</sys:String>
+    <sys:String x:Key="LOCCommonMonthAgo">{0}mo ago</sys:String>
+    <sys:String x:Key="LOCCommonMonthsAgo">{0}mo ago</sys:String>
+    <sys:String x:Key="LOCCommonYearAgo">{0}y ago</sys:String>
+    <sys:String x:Key="LOCCommonYearsAgo">{0}y ago</sys:String>
+    <sys:String x:Key="LOCCommonToday">Today</sys:String>
+    <sys:String x:Key="LOCCommonNever">Never</sys:String>
+
+    <!-- List actions -->
+    <sys:String x:Key="LOCCommonClearSelection">Clear Selection</sys:String>
+    <sys:String x:Key="LOCCommonRefreshSelected">⟳ Refresh Selected</sys:String>
+    <sys:String x:Key="LOCCommonSelected">Selected:</sys:String>
+
+    <!-- Filters -->
+    <sys:String x:Key="LOCCommonSearchByName">Search by name...</sys:String>
+    <sys:String x:Key="LOCCommonAllSources">All Sources</sys:String>
+    <sys:String x:Key="LOCCommonAllPlatforms">All Platforms</sys:String>
+
     <sys:String x:Key="LOCCommonYearLabel">Year</sys:String>
     <sys:String x:Key="LOCCommonYearsLabel">Years</sys:String>
     <sys:String x:Key="LOCCommonMonthLabel">Month</sys:String>
@@ -75,7 +97,7 @@
     <sys:String x:Key="LOCCommonControlConfiguration">Control configuration</sys:String>
     <sys:String x:Key="LOCCommonGetAccountID">Get account ID</sys:String>
 
-    <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: ユーザーが認証されていません</sys:String>
+    <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticated</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: API キーがありません</sys:String>
     <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: 設定が不正です</sys:String>
     <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: No configuration found</sys:String>
@@ -116,7 +138,7 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">デフォルトのゲームリストの並べ替え順</sys:String>
 
-    <sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated (only new)</sys:String>
+    <sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated (only new items)</sys:String>
     <sys:String x:Key="LOCCommonAutoImportOnInstalled">Automatically import for installed games</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">コントロール時にグラフのオプションを非表示</sys:String>
@@ -130,11 +152,11 @@
     <sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">キャッシュフォルダを削除できません:
 {0}</sys:String>
 
-    <!-- CommonMenus -->
+    <!-- Common menus -->
 
     <sys:String x:Key="LOCCommonTotalFound">合計</sys:String>
 
-    <!-- CommonSettingsView -->
+    <!-- Common settings view -->
 
     <sys:String x:Key="LOCCommonMenuInExtensions">拡張機能のサブメニューにプラグインメニューを表示</sys:String>
     <sys:String x:Key="LOCCommonIconStore">ストアアイコンを表示</sys:String>
@@ -179,7 +201,7 @@
 
     <sys:String x:Key="LOCCommonControlsVisibleNoData">データがない場合に表示</sys:String>
 
-    <!-- CommonMenus -->
+    <!-- Common menus (game list / data) -->
 
     <sys:String x:Key="LOCCommonViewNoData">プラグインデータのないゲームを表示</sys:String>
 
@@ -198,7 +220,7 @@
     <sys:String x:Key="LOCCommonClearAllDatas">すべてのゲームからデータを削除</sys:String>
     <sys:String x:Key="LOCCommonRemoveAllTags">プラグインタグを削除</sys:String>
 
-    <!-- CommonGlobalProgress -->
+    <!-- Common global progress -->
 
     <sys:String x:Key="LOCCommonGettingData">データをダウンロード中...</sys:String>
     <sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games...</sys:String>
@@ -210,27 +232,27 @@
     <sys:String x:Key="LOCCommonProcessing">処理中です。しばらくお待ちください…</sys:String>
     <sys:String x:Key="LOCCommonConverting">変換中です。しばらくお待ちください…</sys:String>
 
-    <!-- CommonNotificationsErrors -->
+    <!-- Common notification errors -->
 
-    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: ユーザーが認証されていません</sys:String>
+    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: user is not authenticated.</sys:String>
     
-    <!-- CommonNotifications -->
+    <!-- Common notifications -->
 
     <sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">{0} からデータを取得中にエラーが発生しました。
 もう一度お試しください。</sys:String>
     
-    <sys:String x:Key="LOCCommonCreateLog">ログパッケージを作成しますか？</sys:String>
+    <sys:String x:Key="LOCCommonCreateLog">Do you want to create a log package?</sys:String>
     
     <sys:String x:Key="LOCCommonDataRemove">プラグインデータが削除されました。</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">プラグインデータの削除中にエラーが発生しました。もう一度やり直してください。</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">{0} でタグを追加する際にエラーが発生しました。
-プラグインメニューのすべてのタグを消去してください。</sys:String>
+    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Error adding tag with {0}.
+Please clear all tags in the plugin menu.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">{0} [{1}] の保存データを使用します。
-認証が必要です。</sys:String>
+    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Using previously saved data for {0} [{1}]
+You must authenticate.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">More than 1 data found for {0}.
+    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">More than one data entry found for {0}.
 Please check the plugin settings.</sys:String>
 
 
@@ -245,32 +267,32 @@ Please check the plugin settings.</sys:String>
     <sys:String x:Key="LOCCommonSelectVariable">変数を選択</sys:String>
 
 
-    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">特殊な変数を使用して、動的な文字列を追加できます:
-{InstallDir} - ゲームのインストールディレクトリ
-{InstallDirName} - インストールディレクトリの名前
-{ImagePath} - ゲームの ISO/ROM ファイルへのパス（設定されている場合）
-{ImageName} - ゲームの ISO/ROM ファイル名
-{ImageNameNoExt} - ゲームの ISO/ROM ファイル名(拡張子なし)
-{PlayniteDir} - Playnite のインストールディレクトリ
-{Name} - ゲームのタイトル
-       
-クラウド変数を使用して、動的な文字列を追加できます:        
+    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
+{InstallDir} - Game installation directory
+{InstallDirName} - Installation folder name
+{ImagePath} - Game ISO/ROM path if set
+{ImageName} - Game ISO/ROM file name
+{ImageNameNoExt} - Game ISO/ROM file name without extension
+{PlayniteDir} - Playnite installation directory
+{Name} - Game name
+
+Cloud variables can be used to add a dynamic string:
 {DropboxFolder}
 {OneDriveFolder}
-       
-Steam 変数を使用して、動的な文字列を追加できます:        
-{SteamId} - Steam ユーザー ID
-{SteamAccountId} - Steam アカウント ID
-{SteamInstallDir} - Steam インストールディレクトリ
-{SteamScreenshotsDir} - Steam スクリーンショットディレクトリ
-       
-Ubisoft Connect 変数を使用して、動的な文字列を追加できます:        
-{UbisoftInstallDir} - Ubisoft インストールディレクトリ
-{UbisoftScreenshotsDir} - Ubisoft スクリーンショットディレクトリ
-        
-{RetroArchScreenshotsDir}
-            
-Windows 変数を使用して、動的な文字列を追加できます:        
+
+Steam variables can be used to add a dynamic string:
+{SteamId} - Steam user ID
+{SteamAccountId} - Steam account ID
+{SteamInstallDir} - Steam installation directory
+{SteamScreenshotsDir} - Steam screenshots directory
+
+Ubisoft Connect variables can be used to add a dynamic string:
+{UbisoftInstallDir} - Ubisoft installation directory
+{UbisoftScreenshotsDir} - Ubisoft screenshots directory
+
+{RetroArchScreenshotsDir} - RetroArch screenshots directory
+
+Windows variables can be used to add a dynamic string:
 {WinDir}
 {AllUsersProfile}
 {AppData}
@@ -286,6 +308,12 @@ Windows 変数を使用して、動的な文字列を追加できます:
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)</sys:String>
+{ProgramFiles(x86)} - 32-bit Program Files directory</sys:String>
 
+    <!-- OptionsDownloadData dialog -->
+    <sys:String x:Key="LOCCommonGameSource">Game source</sys:String>
+    <sys:String x:Key="LOCCommonInstallationStatus">Installation status</sys:String>
+    <sys:String x:Key="LOCCommonTimeFilters">Time-based filters</sys:String>
+    <sys:String x:Key="LOCCommonAdditionalOptions">Additional options</sys:String>
+    
 </ResourceDictionary>
