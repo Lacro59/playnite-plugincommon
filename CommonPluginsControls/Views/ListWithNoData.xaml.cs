@@ -10,56 +10,41 @@ using System.Windows.Media;
 
 namespace CommonPluginsControls.Views
 {
-    /// <summary>
-    /// Interaction logic for ListWithNoData.xaml
-    /// </summary>
     public partial class ListWithNoData : UserControl
     {
-        private IPluginDatabase PluginDatabase { get; set; }
+        private IPluginDatabase _pluginDatabase;
         private List<GameDataViewModel> _allGames = new List<GameDataViewModel>();
         private List<GameDataViewModel> _filteredGames = new List<GameDataViewModel>();
 
-        private RelayCommand<Guid> GoToGame { get; set; }
+        private SelectableDbItemList _sourceList;
+        private SelectableDbItemList _platformList;
+
+        private RelayCommand<Guid> _goToGame;
 
         public ListWithNoData(IPluginDatabase pluginDatabase)
         {
-            this.PluginDatabase = pluginDatabase;
+            _pluginDatabase = pluginDatabase;
 
             InitializeComponent();
 
-            GoToGame = new RelayCommand<Guid>((id) =>
+            _goToGame = new RelayCommand<Guid>((id) =>
             {
                 API.Instance.MainView.SelectGame(id);
                 API.Instance.MainView.SwitchToLibraryView();
             });
 
-            InitializeFilters();
             RefreshData();
         }
-
-        #region Initialization
-
-        private void InitializeFilters()
-        {
-            PART_SourceFilter.Items.Add(new FilterItem { Display = "All Sources", Value = null });
-            PART_PlatformFilter.Items.Add(new FilterItem { Display = "All Platforms", Value = null });
-
-            PART_SourceFilter.SelectedIndex = 0;
-            PART_PlatformFilter.SelectedIndex = 0;
-        }
-
-        #endregion
 
         #region Data Management
 
         private void RefreshData()
         {
             ShowProgress(true);
-
             try
             {
-                IEnumerable<Game> games = PluginDatabase.GetGamesWithNoData();
-                _allGames = games.Select(game => new GameDataViewModel(game, GoToGame)).ToList();
+                IEnumerable<Game> games = _pluginDatabase.GetGamesWithNoData();
+                _allGames = games.Select(game => new GameDataViewModel(game, _goToGame)).ToList();
 
                 UpdateFilterOptions();
                 ApplyFilters();
@@ -72,61 +57,74 @@ namespace CommonPluginsControls.Views
 
         private void UpdateFilterOptions()
         {
-            HashSet<string> sources = new HashSet<string>();
-            HashSet<string> platforms = new HashSet<string>();
+            // Collect distinct DatabaseObject instances directly from games
+            Dictionary<Guid, GameSource> sourcesById = new Dictionary<Guid, GameSource>();
+            Dictionary<Guid, Platform> platformsById = new Dictionary<Guid, Platform>();
 
-            foreach (GameDataViewModel game in _allGames)
+            foreach (GameDataViewModel vm in _allGames)
             {
-                if (!string.IsNullOrEmpty(game.SourceName))
+                if (vm.Source != null && !sourcesById.ContainsKey(vm.Source.Id))
                 {
-                    sources.Add(game.SourceName);
+                    sourcesById[vm.Source.Id] = vm.Source;
                 }
-                if (!string.IsNullOrEmpty(game.PlatformName))
+
+                foreach (Platform platform in vm.Platforms)
                 {
-                    platforms.Add(game.PlatformName);
+                    if (!platformsById.ContainsKey(platform.Id))
+                    {
+                        platformsById[platform.Id] = platform;
+                    }
                 }
             }
 
-            object selectedSource = PART_SourceFilter.SelectedItem;
-            object selectedPlatform = PART_PlatformFilter.SelectedItem;
+            // Preserve current selection across refreshes
+            IEnumerable<Guid> previousSourceIds = _sourceList?.GetSelectedIds();
+            IEnumerable<Guid> previousPlatformIds = _platformList?.GetSelectedIds();
 
-            PART_SourceFilter.Items.Clear();
-            PART_SourceFilter.Items.Add(new FilterItem { Display = "All Sources", Value = null });
-            foreach (string source in sources.OrderBy(s => s))
-            {
-                PART_SourceFilter.Items.Add(new FilterItem { Display = source, Value = source });
-            }
+            if (_sourceList != null) { _sourceList.SelectionChanged -= OnFilterSelectionChanged; }
+            if (_platformList != null) { _platformList.SelectionChanged -= OnFilterSelectionChanged; }
 
-            PART_PlatformFilter.Items.Clear();
-            PART_PlatformFilter.Items.Add(new FilterItem { Display = "All Platforms", Value = null });
-            foreach (string platform in platforms.OrderBy(p => p))
-            {
-                PART_PlatformFilter.Items.Add(new FilterItem { Display = platform, Value = platform });
-            }
+            _sourceList = new SelectableDbItemList(
+                sourcesById.Values.OrderBy(s => s.Name),
+                previousSourceIds);
 
-            PART_SourceFilter.SelectedItem = selectedSource ?? PART_SourceFilter.Items[0];
-            PART_PlatformFilter.SelectedItem = selectedPlatform ?? PART_PlatformFilter.Items[0];
+            _platformList = new SelectableDbItemList(
+                platformsById.Values.OrderBy(p => p.Name),
+                previousPlatformIds);
+
+            _sourceList.SelectionChanged += OnFilterSelectionChanged;
+            _platformList.SelectionChanged += OnFilterSelectionChanged;
+
+            PART_SourceFilter.ItemsList = _sourceList;
+            PART_PlatformFilter.ItemsList = _platformList;
         }
 
         private void ApplyFilters()
         {
             string searchText = PART_SearchBox.Text?.Trim().ToLowerInvariant() ?? string.Empty;
-            string selectedSource = (PART_SourceFilter.SelectedItem as FilterItem)?.Value;
-            string selectedPlatform = (PART_PlatformFilter.SelectedItem as FilterItem)?.Value;
+
+            HashSet<Guid> selectedSourceIds = new HashSet<Guid>(
+                _sourceList?.GetSelectedIds() ?? Enumerable.Empty<Guid>());
+
+            HashSet<Guid> selectedPlatformIds = new HashSet<Guid>(
+                _platformList?.GetSelectedIds() ?? Enumerable.Empty<Guid>());
 
             _filteredGames = _allGames.Where(game =>
             {
-                if (!string.IsNullOrEmpty(searchText) && !game.Name.ToLowerInvariant().Contains(searchText))
+                if (!string.IsNullOrEmpty(searchText) &&
+                    !game.Name.ToLowerInvariant().Contains(searchText))
                 {
                     return false;
                 }
 
-                if (!string.IsNullOrEmpty(selectedSource) && game.SourceName != selectedSource)
+                if (selectedSourceIds.Count > 0 &&
+                    (game.Source == null || !selectedSourceIds.Contains(game.Source.Id)))
                 {
                     return false;
                 }
 
-                if (!string.IsNullOrEmpty(selectedPlatform) && game.PlatformName != selectedPlatform)
+                if (selectedPlatformIds.Count > 0 &&
+                    !game.Platforms.Any(p => selectedPlatformIds.Contains(p.Id)))
                 {
                     return false;
                 }
@@ -150,42 +148,25 @@ namespace CommonPluginsControls.Views
 
         #region Event Handlers
 
+        private void OnFilterSelectionChanged(object sender, EventArgs e)
+        {
+            ApplyFilters();
+        }
+
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             ApplyFilters();
         }
 
-        private void SourceFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (_allGames.Count > 0)
-            {
-                ApplyFilters();
-            }
-        }
-
-        private void PlatformFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (_allGames.Count > 0)
-            {
-                ApplyFilters();
-            }
-        }
-
         private void SelectAll_Click(object sender, RoutedEventArgs e)
         {
-            foreach (GameDataViewModel game in _filteredGames)
-            {
-                game.IsSelected = true;
-            }
+            foreach (GameDataViewModel game in _filteredGames) { game.IsSelected = true; }
             UpdateSelectedCount();
         }
 
         private void SelectNone_Click(object sender, RoutedEventArgs e)
         {
-            foreach (GameDataViewModel game in _filteredGames)
-            {
-                game.IsSelected = false;
-            }
+            foreach (GameDataViewModel game in _filteredGames) { game.IsSelected = false; }
             UpdateSelectedCount();
         }
 
@@ -196,18 +177,17 @@ namespace CommonPluginsControls.Views
 
         private void RefreshSelected_Click(object sender, RoutedEventArgs e)
         {
-            List<Guid> selectedIds = _filteredGames.Where(g => g.IsSelected).Select(g => g.Id).ToList();
+            List<Guid> selectedIds = _filteredGames
+                .Where(g => g.IsSelected)
+                .Select(g => g.Id)
+                .ToList();
 
-            if (selectedIds.Count == 0)
-            {
-                return;
-            }
+            if (selectedIds.Count == 0) { return; }
 
             ShowProgress(true);
-
             try
             {
-                PluginDatabase.Refresh(selectedIds);
+                _pluginDatabase.Refresh(selectedIds);
                 RefreshData();
             }
             finally
@@ -219,10 +199,9 @@ namespace CommonPluginsControls.Views
         private void RefreshAll_Click(object sender, RoutedEventArgs e)
         {
             ShowProgress(true);
-
             try
             {
-                PluginDatabase.Refresh(_allGames.Select(x => x.Id));
+                _pluginDatabase.Refresh(_allGames.Select(x => x.Id));
                 RefreshData();
             }
             finally
@@ -237,10 +216,9 @@ namespace CommonPluginsControls.Views
 
         private void UpdateSelectedCount()
         {
-            int selectedCount = _filteredGames.Count(g => g.IsSelected);
-            PART_SelectedCount.Text = selectedCount.ToString();
-
-            PART_RefreshSelected.IsEnabled = selectedCount > 0;
+            int count = _filteredGames.Count(g => g.IsSelected);
+            PART_SelectedCount.Text = count.ToString();
+            PART_RefreshSelected.IsEnabled = count > 0;
         }
 
         private void ShowProgress(bool show)
@@ -257,29 +235,29 @@ namespace CommonPluginsControls.Views
     {
         private bool _isSelected;
 
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public string PlatformName { get; set; }
-        public string SourceName { get; set; }
-        public string InstallStatusText { get; set; }
-        public Brush InstallStatusBrush { get; set; }
-        public DateTime? AddedDate { get; set; }
-        public string AddedDateText { get; set; }
-        public string AddedDateFull { get; set; }
-        public DateTime? LastActivityDate { get; set; }
-        public string LastActivityText { get; set; }
-        public string LastActivityFull { get; set; }
-        public Brush LastActivityBrush { get; set; }
-        public RelayCommand<Guid> GoToGame { get; set; }
+        public Guid Id { get; }
+        public string Name { get; }
+        public string PlatformName { get; }
+        public string SourceName { get; }
+        public string InstallStatusText { get; }
+        public Brush InstallStatusBrush { get; }
+        public DateTime? AddedDate { get; }
+        public string AddedDateText { get; }
+        public string AddedDateFull { get; }
+        public DateTime? LastActivityDate { get; }
+        public string LastActivityText { get; }
+        public string LastActivityFull { get; }
+        public Brush LastActivityBrush { get; }
+        public RelayCommand<Guid> GoToGame { get; }
+
+        // Raw Playnite objects for Guid-based filtering
+        public GameSource Source { get; }
+        public IReadOnlyList<Platform> Platforms { get; }
 
         public bool IsSelected
         {
             get { return _isSelected; }
-            set
-            {
-                _isSelected = value;
-                OnPropertyChanged();
-            }
+            set { _isSelected = value; OnPropertyChanged(); }
         }
 
         public GameDataViewModel(Game game, RelayCommand<Guid> goToGameCommand)
@@ -288,10 +266,12 @@ namespace CommonPluginsControls.Views
             Name = game.Name;
             GoToGame = goToGameCommand;
 
-            PlatformName = GetPlatformNames(game);
+            Source = game.Source;
+            Platforms = game.Platforms?.ToList() ?? new List<Platform>();
+
+            PlatformName = BuildPlatformName(game);
             SourceName = game.Source?.Name ?? ResourceProvider.GetString("LOCUnknownLabel");
 
-            // Utiliser les clés natives de Playnite
             InstallStatusText = game.IsInstalled
                 ? ResourceProvider.GetString("LOCGameIsInstalledTitle")
                 : ResourceProvider.GetString("LOCGameIsUnInstalledTitle");
@@ -315,10 +295,10 @@ namespace CommonPluginsControls.Views
             LastActivityDate = game.LastActivity;
             if (game.LastActivity.HasValue)
             {
-                TimeSpan timeSinceActivity = DateTime.Now - game.LastActivity.Value;
-                LastActivityText = FormatTimeAgo(timeSinceActivity);
+                TimeSpan elapsed = DateTime.Now - game.LastActivity.Value;
+                LastActivityText = FormatTimeAgo(elapsed);
                 LastActivityFull = game.LastActivity.Value.ToString("dd MMMM yyyy HH:mm");
-                LastActivityBrush = timeSinceActivity.TotalDays > 365
+                LastActivityBrush = elapsed.TotalDays > 365
                     ? new SolidColorBrush(Color.FromRgb(244, 67, 54))
                     : new SolidColorBrush(Color.FromRgb(255, 152, 0));
             }
@@ -330,7 +310,7 @@ namespace CommonPluginsControls.Views
             }
         }
 
-        private string GetPlatformNames(Game game)
+        private static string BuildPlatformName(Game game)
         {
             if (game.Platforms == null || game.Platforms.Count == 0)
             {
@@ -342,52 +322,35 @@ namespace CommonPluginsControls.Views
                 return game.Platforms[0].Name;
             }
 
-            return string.Join(", ", game.Platforms.Take(2).Select(p => p.Name)) +
-                   (game.Platforms.Count > 2 ? $" +{game.Platforms.Count - 2}" : string.Empty);
+            string joined = string.Join(", ", game.Platforms.Take(2).Select(p => p.Name));
+            return game.Platforms.Count > 2
+                ? string.Format("{0} +{1}", joined, game.Platforms.Count - 2)
+                : joined;
         }
 
-        private string FormatTimeAgo(TimeSpan timeSpan)
+        private static string FormatTimeAgo(TimeSpan timeSpan)
         {
             if (timeSpan.TotalDays >= 365)
             {
                 int years = (int)(timeSpan.TotalDays / 365);
-                string key = years == 1 ? "LOCCommonYearAgo" : "LOCCommonYearsAgo";
-                return string.Format(ResourceProvider.GetString(key), years);
+                return string.Format(ResourceProvider.GetString(years == 1 ? "LOCCommonYearAgo" : "LOCCommonYearsAgo"), years);
             }
-
             if (timeSpan.TotalDays >= 30)
             {
                 int months = (int)(timeSpan.TotalDays / 30);
-                string key = months == 1 ? "LOCCommonMonthAgo" : "LOCCommonMonthsAgo";
-                return string.Format(ResourceProvider.GetString(key), months);
+                return string.Format(ResourceProvider.GetString(months == 1 ? "LOCCommonMonthAgo" : "LOCCommonMonthsAgo"), months);
             }
-
             if (timeSpan.TotalDays >= 1)
             {
                 int days = (int)timeSpan.TotalDays;
-                string key = days == 1 ? "LOCCommonDayAgo" : "LOCCommonDaysAgo";
-                return string.Format(ResourceProvider.GetString(key), days);
+                return string.Format(ResourceProvider.GetString(days == 1 ? "LOCCommonDayAgo" : "LOCCommonDaysAgo"), days);
             }
-
             if (timeSpan.TotalHours >= 1)
             {
                 int hours = (int)timeSpan.TotalHours;
-                string key = hours == 1 ? "LOCCommonHourAgo" : "LOCCommonHoursAgo";
-                return string.Format(ResourceProvider.GetString(key), hours);
+                return string.Format(ResourceProvider.GetString(hours == 1 ? "LOCCommonHourAgo" : "LOCCommonHoursAgo"), hours);
             }
-
             return ResourceProvider.GetString("LOCCommonToday");
-        }
-    }
-
-    public class FilterItem
-    {
-        public string Display { get; set; }
-        public string Value { get; set; }
-
-        public override string ToString()
-        {
-            return Display;
         }
     }
 
