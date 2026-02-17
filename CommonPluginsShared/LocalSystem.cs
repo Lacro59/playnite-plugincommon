@@ -1,4 +1,5 @@
 ﻿using CommonPlayniteShared.Common;
+using CommonPluginsShared.Utilities;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
@@ -168,7 +169,7 @@ namespace CommonPluginsShared
                     break;
                 }
 
-                systemConfiguration.RamUsage = Tools.SizeSuffix(systemConfiguration.Ram, true);
+                systemConfiguration.RamUsage = UtilityTools.SizeSuffix(systemConfiguration.Ram, true);
             }
             catch (Exception ex)
             {
@@ -195,7 +196,7 @@ namespace CommonPluginsShared
                         Name = d.VolumeLabel,
                         Drive = d.Name,
                         FreeSpace = d.TotalFreeSpace,
-                        FreeSpaceUsage = Tools.SizeSuffix(d.TotalFreeSpace)
+                        FreeSpaceUsage = UtilityTools.SizeSuffix(d.TotalFreeSpace)
                     });
                 }
                 catch (Exception ex)

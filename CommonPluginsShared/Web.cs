@@ -2,6 +2,7 @@
 using CommonPlayniteShared.Common;
 using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Images;
+using CommonPluginsShared.Utilities;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
@@ -1294,7 +1295,7 @@ namespace CommonPluginsShared
 
                 try
                 {
-                    string fixedValue = Tools.FixCookieValue(cookie.Value);
+                    string fixedValue = UtilityTools.FixCookieValue(cookie.Value);
 
                     Cookie c = new Cookie
                     {

@@ -48,7 +48,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\ValueOperationConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\VisibilityZeroConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CookiesTools.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CumulsErrors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\DateTimeExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\ListExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
@@ -75,9 +74,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\TraceInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteExtended\PluginExtended.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteTools.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Tools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransformIcon.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ui\UIServices.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)utilities\UtilityServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -89,6 +88,7 @@
     <Folder Include="$(MSBuildThisFileDirectory)Caching\" />
     <Folder Include="$(MSBuildThisFileDirectory)IO\" />
     <Folder Include="$(MSBuildThisFileDirectory)Images\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Utilities\" />
     <Folder Include="$(MSBuildThisFileDirectory)UI\" />
   </ItemGroup>
 </Project>

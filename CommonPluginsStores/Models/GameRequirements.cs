@@ -1,5 +1,6 @@
 ﻿using CommonPluginsShared;
 using CommonPluginsShared.Models;
+using CommonPluginsShared.Utilities;
 using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
@@ -23,9 +24,9 @@ namespace CommonPluginsStores.Models
 		public List<string> Cpu { get; set; } = new List<string>();
 		public List<string> Gpu { get; set; } = new List<string>();
 		public double Ram { get; set; }
-		public string RamUsage => Tools.SizeSuffix(Ram, true);
+		public string RamUsage => UtilityTools.SizeSuffix(Ram, true);
 		public double Storage { get; set; }
-		public string StorageUsage => Tools.SizeSuffix(Storage);
+		public string StorageUsage => UtilityTools.SizeSuffix(Storage);
 
 		[DontSerialize]
 		public bool HasData => Os.Count >= 1 || Cpu.Count >= 1 || Gpu.Count >= 1 || Ram > 0;
