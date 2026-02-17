@@ -5,7 +5,7 @@ using CommonPluginsShared;
 using CommonPluginsShared.Converters;
 using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Models;
-using CommonPluginsShared.Services;
+using CommonPluginsShared.Caching;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Interfaces;
 using Playnite.SDK;

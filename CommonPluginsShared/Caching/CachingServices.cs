@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 
-namespace CommonPluginsShared.Services
+namespace CommonPluginsShared.Caching
 {
 	/// <summary>
 	/// Represents a cached item with expiration tracking.

@@ -3,7 +3,7 @@ using CommonPlayniteShared.Common;
 using CommonPluginsControls.Controls;
 using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.Models;
-using CommonPluginsShared.Services;
+using CommonPluginsShared.Caching;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
@@ -18,6 +18,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using CommonPluginsShared.Services;
 
 namespace CommonPluginsShared.Collections
 {

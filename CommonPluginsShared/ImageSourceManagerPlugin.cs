@@ -1,6 +1,6 @@
 ﻿using CommonPlayniteShared;
 using CommonPlayniteShared.Common;
-using CommonPluginsShared.Services;
+using CommonPluginsShared.Caching;
 using Playnite.SDK;
 using System;
 using System.Collections.Generic;
