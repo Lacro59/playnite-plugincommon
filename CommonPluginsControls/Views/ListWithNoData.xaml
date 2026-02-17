@@ -149,7 +149,7 @@
                         </GridViewColumn>
 
                         <!-- Checkbox Column -->
-                        <GridViewColumn Width="45">
+                        <GridViewColumn Width="50">
                             <GridViewColumnHeader Content="☑" Padding="8,6" />
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
