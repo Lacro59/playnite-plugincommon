@@ -7,7 +7,29 @@
     <sys:String x:Key="LOCCommonMonths">{0} months</sys:String>
     <sys:String x:Key="LOCCommonYear">{0} year</sys:String>
     <sys:String x:Key="LOCCommonYears">{0} years</sys:String>
-    
+
+    <!-- Time-related -->
+    <sys:String x:Key="LOCCommonHourAgo">{0}h ago</sys:String>
+    <sys:String x:Key="LOCCommonHoursAgo">{0}h ago</sys:String>
+    <sys:String x:Key="LOCCommonDayAgo">{0}d ago</sys:String>
+    <sys:String x:Key="LOCCommonDaysAgo">{0}d ago</sys:String>
+    <sys:String x:Key="LOCCommonMonthAgo">{0}mo ago</sys:String>
+    <sys:String x:Key="LOCCommonMonthsAgo">{0}mo ago</sys:String>
+    <sys:String x:Key="LOCCommonYearAgo">{0}y ago</sys:String>
+    <sys:String x:Key="LOCCommonYearsAgo">{0}y ago</sys:String>
+    <sys:String x:Key="LOCCommonToday">Today</sys:String>
+    <sys:String x:Key="LOCCommonNever">Never</sys:String>
+
+    <!-- List actions -->
+    <sys:String x:Key="LOCCommonClearSelection">Clear Selection</sys:String>
+    <sys:String x:Key="LOCCommonRefreshSelected">⟳ Refresh Selected</sys:String>
+    <sys:String x:Key="LOCCommonSelected">Selected:</sys:String>
+
+    <!-- Filters -->
+    <sys:String x:Key="LOCCommonSearchByName">Search by name...</sys:String>
+    <sys:String x:Key="LOCCommonAllSources">All Sources</sys:String>
+    <sys:String x:Key="LOCCommonAllPlatforms">All Platforms</sys:String>
+
     <sys:String x:Key="LOCCommonYearLabel">Year</sys:String>
     <sys:String x:Key="LOCCommonYearsLabel">Years</sys:String>
     <sys:String x:Key="LOCCommonMonthLabel">Month</sys:String>
@@ -75,7 +97,7 @@
     <sys:String x:Key="LOCCommonControlConfiguration">控制设置</sys:String>
     <sys:String x:Key="LOCCommonGetAccountID">获取账户 ID</sys:String>
 
-    <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}：用户未身份验证</sys:String>
+    <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticated</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}：没有 API 密钥</sys:String>
     <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: 错误的配置</sys:String>
     <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: 未找到配置</sys:String>
@@ -116,7 +138,7 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">默认的游戏列表排序</sys:String>
 
-    <sys:String x:Key="LOCCommonAutoImport">更新库时自动导入数据 (仅新添加)</sys:String>
+    <sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated (only new items)</sys:String>
     <sys:String x:Key="LOCCommonAutoImportOnInstalled">为已安装的游戏自动导入</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">在控制中隐藏图表选项</sys:String>
@@ -130,11 +152,11 @@
     <sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">无法删除缓存文件夹：
 {0}</sys:String>
 
-    <!-- CommonMenus -->
+    <!-- Common menus -->
 
     <sys:String x:Key="LOCCommonTotalFound">已找到总计</sys:String>
 
-    <!-- CommonSettingsView -->
+    <!-- Common settings view -->
 
     <sys:String x:Key="LOCCommonMenuInExtensions">在扩展子菜单中显示插件菜单 *</sys:String>
     <sys:String x:Key="LOCCommonIconStore">显示商店图</sys:String>
@@ -179,7 +201,7 @@
 
     <sys:String x:Key="LOCCommonControlsVisibleNoData">当没有数据时显示</sys:String>
 
-    <!-- CommonMenus -->
+    <!-- Common menus (game list / data) -->
 
     <sys:String x:Key="LOCCommonViewNoData">查看没有插件数据的游戏</sys:String>
 
@@ -198,7 +220,7 @@
     <sys:String x:Key="LOCCommonClearAllDatas">从所有游戏中删除数据</sys:String>
     <sys:String x:Key="LOCCommonRemoveAllTags">移除插件标签</sys:String>
 
-    <!-- CommonGlobalProgress -->
+    <!-- Common global progress -->
 
     <sys:String x:Key="LOCCommonGettingData">正在下载数据...</sys:String>
     <sys:String x:Key="LOCCommonGettingAllDatas">正在为所有游戏下载数据...</sys:String>
@@ -210,28 +232,28 @@
     <sys:String x:Key="LOCCommonProcessing">正在处理，请稍候...</sys:String>
     <sys:String x:Key="LOCCommonConverting">正在转换，请稍候...</sys:String>
 
-    <!-- CommonNotificationsErrors -->
+    <!-- Common notification errors -->
 
-    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0} 用户未身份验</sys:String>
+    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: user is not authenticated.</sys:String>
     
-    <!-- CommonNotifications -->
+    <!-- Common notifications -->
 
     <sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">从 {0} 检索数据时出错。
 请再试一次。</sys:String>
     
-    <sys:String x:Key="LOCCommonCreateLog">您想要创建一个日志包吗？</sys:String>
+    <sys:String x:Key="LOCCommonCreateLog">Do you want to create a log package?</sys:String>
     
     <sys:String x:Key="LOCCommonDataRemove">插件数据已被移除。</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">移除插件数据时出错。请重试。</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">以 {0} 添加标签时出错。
-请清除插件菜单中的所有标签。</sys:String>
+    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Error adding tag with {0}.
+Please clear all tags in the plugin menu.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">为 {0} 使用旧的存档数据 [{1}]
-您必须进行身份验</sys:String>
+    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Using previously saved data for {0} [{1}]
+You must authenticate.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">找到 {0} 的多个数据。
-请检查插件设置。</sys:String>
+    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">More than one data entry found for {0}.
+Please check the plugin settings.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">尺寸</sys:String>
@@ -245,32 +267,32 @@
     <sys:String x:Key="LOCCommonSelectVariable">选择变量</sys:String>
 
 
-    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">可用于动态字符串的特殊变量：
-{InstallDir} - 游戏安装目录
-{InstallDirName} - 安装文件夹名称
-{ImagePath} - 游戏 ISO/ROM 路径（若已设置）
-{ImageName} -  游戏 ISO/ROM 文件名
-{ImageNameNoExt} - 游戏 ISO/ROM 文件名（无扩展名）
-{PlayniteDir} - Playnite 安装目录
-{Name} - 游戏名称
+    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
+{InstallDir} - Game installation directory
+{InstallDirName} - Installation folder name
+{ImagePath} - Game ISO/ROM path if set
+{ImageName} - Game ISO/ROM file name
+{ImageNameNoExt} - Game ISO/ROM file name without extension
+{PlayniteDir} - Playnite installation directory
+{Name} - Game name
 
-可用于动态字符串的云服务变量：
+Cloud variables can be used to add a dynamic string:
 {DropboxFolder}
 {OneDriveFolder}
 
-可用于动态字符串的 Steam 变量：
-{SteamId} - Steam 用户 ID
-{SteamAccountId} - Steam 账户 ID
-{SteamInstallDir} - Steam 安装目录
-{SteamScreenshotsDir} - Steam 截图目录
+Steam variables can be used to add a dynamic string:
+{SteamId} - Steam user ID
+{SteamAccountId} - Steam account ID
+{SteamInstallDir} - Steam installation directory
+{SteamScreenshotsDir} - Steam screenshots directory
 
-可用于动态字符串的 Ubisoft Connect 变量：
-{UbisoftInstallDir} - Ubisoft 安装目录
-{UbisoftScreenshotsDir} - Ubisoft 截图目录
+Ubisoft Connect variables can be used to add a dynamic string:
+{UbisoftInstallDir} - Ubisoft installation directory
+{UbisoftScreenshotsDir} - Ubisoft screenshots directory
 
-{RetroArchScreenshotsDir}
+{RetroArchScreenshotsDir} - RetroArch screenshots directory
 
-可用于动态字符串的 Windows 变量：
+Windows variables can be used to add a dynamic string:
 {WinDir}
 {AllUsersProfile}
 {AppData}
@@ -286,6 +308,12 @@
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)}</sys:String>
+{ProgramFiles(x86)} - 32-bit Program Files directory</sys:String>
 
+    <!-- OptionsDownloadData dialog -->
+    <sys:String x:Key="LOCCommonGameSource">Game source</sys:String>
+    <sys:String x:Key="LOCCommonInstallationStatus">Installation status</sys:String>
+    <sys:String x:Key="LOCCommonTimeFilters">Time-based filters</sys:String>
+    <sys:String x:Key="LOCCommonAdditionalOptions">Additional options</sys:String>
+    
 </ResourceDictionary>
