@@ -53,8 +53,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\DateTimeExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\ListExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ImageSourceManagerPlugin.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ImageTools.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)images\ImageServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)io\IOServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\CheckElement.cs" />
@@ -90,5 +89,6 @@
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Caching\" />
     <Folder Include="$(MSBuildThisFileDirectory)IO\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Images\" />
   </ItemGroup>
 </Project>

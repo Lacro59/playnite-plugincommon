@@ -1,5 +1,6 @@
 ﻿using CommonPlayniteShared;
 using CommonPluginsShared.Converters;
+using CommonPluginsShared.Images;
 using System;
 using System.Threading.Tasks;
 using System.Windows;

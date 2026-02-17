@@ -1,6 +1,7 @@
 ﻿using CommonPlayniteShared;
 using CommonPlayniteShared.Common;
 using CommonPluginsShared.Extensions;
+using CommonPluginsShared.Images;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;

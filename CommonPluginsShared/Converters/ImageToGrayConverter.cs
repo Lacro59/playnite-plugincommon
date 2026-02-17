@@ -1,4 +1,5 @@
 ﻿using CommonPlayniteShared;
+using CommonPluginsShared.Images;
 using System;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -20,7 +21,7 @@ namespace CommonPluginsShared.Converters
                 {
                     string imagePath = ImageSourceManagerPlugin.GetImagePath(str);
                     BitmapImage tmpImg = BitmapExtensions.BitmapFromFile(imagePath);
-                    return ImageTools.ConvertBitmapImage(tmpImg, ImageColor.Gray);
+                    return ImageTools.ConvertBitmapImage(tmpImg, ImageColorMode.Gray);
                 }
             }
             catch (Exception ex)
