@@ -7,7 +7,29 @@
     <sys:String x:Key="LOCCommonMonths">{0} mesi</sys:String>
     <sys:String x:Key="LOCCommonYear">{0} anno</sys:String>
     <sys:String x:Key="LOCCommonYears">{0} anni</sys:String>
-    
+
+    <!-- Time-related -->
+    <sys:String x:Key="LOCCommonHourAgo">{0}h ago</sys:String>
+    <sys:String x:Key="LOCCommonHoursAgo">{0}h ago</sys:String>
+    <sys:String x:Key="LOCCommonDayAgo">{0}d ago</sys:String>
+    <sys:String x:Key="LOCCommonDaysAgo">{0}d ago</sys:String>
+    <sys:String x:Key="LOCCommonMonthAgo">{0}mo ago</sys:String>
+    <sys:String x:Key="LOCCommonMonthsAgo">{0}mo ago</sys:String>
+    <sys:String x:Key="LOCCommonYearAgo">{0}y ago</sys:String>
+    <sys:String x:Key="LOCCommonYearsAgo">{0}y ago</sys:String>
+    <sys:String x:Key="LOCCommonToday">Today</sys:String>
+    <sys:String x:Key="LOCCommonNever">Never</sys:String>
+
+    <!-- List actions -->
+    <sys:String x:Key="LOCCommonClearSelection">Clear Selection</sys:String>
+    <sys:String x:Key="LOCCommonRefreshSelected">⟳ Refresh Selected</sys:String>
+    <sys:String x:Key="LOCCommonSelected">Selected:</sys:String>
+
+    <!-- Filters -->
+    <sys:String x:Key="LOCCommonSearchByName">Search by name...</sys:String>
+    <sys:String x:Key="LOCCommonAllSources">All Sources</sys:String>
+    <sys:String x:Key="LOCCommonAllPlatforms">All Platforms</sys:String>
+
     <sys:String x:Key="LOCCommonYearLabel">Anno</sys:String>
     <sys:String x:Key="LOCCommonYearsLabel">Anni</sys:String>
     <sys:String x:Key="LOCCommonMonthLabel">Mese</sys:String>
@@ -75,7 +97,7 @@
     <sys:String x:Key="LOCCommonControlConfiguration">Configurazione di controllo</sys:String>
     <sys:String x:Key="LOCCommonGetAccountID">Ottieni ID account</sys:String>
 
-    <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: utente non autenticato</sys:String>
+    <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticated</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: nessuna chiave API</sys:String>
     <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Configurazione errata</sys:String>
     <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: Nessuna configurazione trovata</sys:String>
@@ -116,7 +138,7 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">Ordinamento predefinito della lista giochi</sys:String>
 
-    <sys:String x:Key="LOCCommonAutoImport">Importa automaticamente i dati quando la libreria viene aggiornata (solo nuovi)</sys:String>
+    <sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated (only new items)</sys:String>
     <sys:String x:Key="LOCCommonAutoImportOnInstalled">Importa automaticamente per i giochi installati</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">Nascondi le opzioni del grafico sul controllo</sys:String>
@@ -130,11 +152,11 @@ Vuoi aprire la cartella?</sys:String>
     <sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Impossibile eliminare la cartella cache:
 {0}</sys:String>
 
-    <!-- CommonMenus -->
+    <!-- Common menus -->
 
     <sys:String x:Key="LOCCommonTotalFound">Totale trovato</sys:String>
 
-    <!-- CommonSettingsView -->
+    <!-- Common settings view -->
 
     <sys:String x:Key="LOCCommonMenuInExtensions">Mostra menu plugin nel sottomenu estensioni *</sys:String>
     <sys:String x:Key="LOCCommonIconStore">Mostra icona negozio</sys:String>
@@ -179,7 +201,7 @@ Vuoi aprire la cartella?</sys:String>
 
     <sys:String x:Key="LOCCommonControlsVisibleNoData">Visualizza quando non ci sono dati</sys:String>
 
-    <!-- CommonMenus -->
+    <!-- Common menus (game list / data) -->
 
     <sys:String x:Key="LOCCommonViewNoData">Visualizza giochi senza i dati dei plugin</sys:String>
 
@@ -198,7 +220,7 @@ Vuoi aprire la cartella?</sys:String>
     <sys:String x:Key="LOCCommonClearAllDatas">Elimina dati da tutti i giochi</sys:String>
     <sys:String x:Key="LOCCommonRemoveAllTags">Rimuovi tag plugin</sys:String>
 
-    <!-- CommonGlobalProgress -->
+    <!-- Common global progress -->
 
     <sys:String x:Key="LOCCommonGettingData">Scaricamento dati...</sys:String>
     <sys:String x:Key="LOCCommonGettingAllDatas">Scaricamento dati per tutti i giochi...</sys:String>
@@ -210,28 +232,28 @@ Vuoi aprire la cartella?</sys:String>
     <sys:String x:Key="LOCCommonProcessing">Elaborazione, attendere prego...</sys:String>
     <sys:String x:Key="LOCCommonConverting">Conversione, sei pregato di attendere...</sys:String>
 
-    <!-- CommonNotificationsErrors -->
+    <!-- Common notification errors -->
 
-    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0} utente non autenticato</sys:String>
+    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: user is not authenticated.</sys:String>
     
-    <!-- CommonNotifications -->
+    <!-- Common notifications -->
 
     <sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">Errore nel recupero dei dati da {0}.
 Riprova.</sys:String>
     
-    <sys:String x:Key="LOCCommonCreateLog">Vuoi creare un pacchetto di registri?</sys:String>
+    <sys:String x:Key="LOCCommonCreateLog">Do you want to create a log package?</sys:String>
     
     <sys:String x:Key="LOCCommonDataRemove">I dati del plugin sono stati rimossi.</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">Errore nella rimozione dei dati del plugin. Riprova.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Errore nell'aggiunta dell' etichetta con {0}.
-Si prega di cancellare tutti le etichette nel menu del plugin.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Error adding tag with {0}.
+Please clear all tags in the plugin menu.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Utilizzare i vecchi dati salvati per {0} [{1}]
-È necessario autenticarsi.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Using previously saved data for {0} [{1}]
+You must authenticate.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">Più di 1 dato trovato per {0}.
-Si prega di controllare le impostazioni del plugin.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">More than one data entry found for {0}.
+Please check the plugin settings.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Dimensioni</sys:String>
@@ -245,31 +267,32 @@ Si prega di controllare le impostazioni del plugin.</sys:String>
     <sys:String x:Key="LOCCommonSelectVariable">Seleziona variabile</sys:String>
 
 
-    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Variabili speciali che possono essere utilizzate per aggiungere una stringa dinamica:
-{InstallDir} - Cartella di installazione del gioco
-{InstallDirName} - Nome della cartella di installazione
-{ImagePath} - Percorso della ISO/ROM del gioco se impostato
-{ImageName} - Nome del file della ISO/ROM del gioco
-{ImageNameNoExt} - Nome del file senza estensione della ISO/ROM del gioco
-{PlayniteDir} - Cartella di installazione di Playnite
-{Name} - Nome del gioco
-       
-Variabili cloud possono essere utilizzate per aggiungere una stringa dinamica:        
+    <sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
+{InstallDir} - Game installation directory
+{InstallDirName} - Installation folder name
+{ImagePath} - Game ISO/ROM path if set
+{ImageName} - Game ISO/ROM file name
+{ImageNameNoExt} - Game ISO/ROM file name without extension
+{PlayniteDir} - Playnite installation directory
+{Name} - Game name
+
+Cloud variables can be used to add a dynamic string:
 {DropboxFolder}
 {OneDriveFolder}
-      
-Variabili steam che possono essere utilizzate per aggiungere una stringa dinamica:        
-{SteamId} - ID utente di Steam
-{SteamInstallDir} - Cartella di installazione di Steam
-{SteamScreenshotsDir} - Cartella delle catture di schermate di Steam
-       
-Variabili di Ubisoft Connect che possono essere utilizzate per aggiungere una stringa dinamica:        
-{UbisoftInstallDir} - Cartella di installazione di Ubisoft
-{UbisoftScreenshotsDir} - Cartella delle catture di schermate di Ubisoft
 
-{RetroArchScreenshotsDir}
-            
-Variabili di Windows che possono essere utilizzate per aggiungere una stringa dinamica:        
+Steam variables can be used to add a dynamic string:
+{SteamId} - Steam user ID
+{SteamAccountId} - Steam account ID
+{SteamInstallDir} - Steam installation directory
+{SteamScreenshotsDir} - Steam screenshots directory
+
+Ubisoft Connect variables can be used to add a dynamic string:
+{UbisoftInstallDir} - Ubisoft installation directory
+{UbisoftScreenshotsDir} - Ubisoft screenshots directory
+
+{RetroArchScreenshotsDir} - RetroArch screenshots directory
+
+Windows variables can be used to add a dynamic string:
 {WinDir}
 {AllUsersProfile}
 {AppData}
@@ -285,6 +308,12 @@ Variabili di Windows che possono essere utilizzate per aggiungere una stringa di
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)}</sys:String>
+{ProgramFiles(x86)} - 32-bit Program Files directory</sys:String>
 
+    <!-- OptionsDownloadData dialog -->
+    <sys:String x:Key="LOCCommonGameSource">Game source</sys:String>
+    <sys:String x:Key="LOCCommonInstallationStatus">Installation status</sys:String>
+    <sys:String x:Key="LOCCommonTimeFilters">Time-based filters</sys:String>
+    <sys:String x:Key="LOCCommonAdditionalOptions">Additional options</sys:String>
+    
 </ResourceDictionary>
