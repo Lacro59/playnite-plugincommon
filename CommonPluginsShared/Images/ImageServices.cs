@@ -13,7 +13,6 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Resources;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace CommonPluginsShared.Images
 {
@@ -82,7 +81,7 @@ namespace CommonPluginsShared.Images
 
 			try
 			{
-				using (System.Drawing.Image image = System.Drawing.Image.FromFile(srcPath))
+				using (Image image = Image.FromFile(srcPath))
 				{
 					return new ImageProperty
 					{
@@ -107,7 +106,7 @@ namespace CommonPluginsShared.Images
 		{
 			try
 			{
-				using (System.Drawing.Image image = System.Drawing.Image.FromStream(imgStream))
+				using (Image image = Image.FromStream(imgStream))
 				{
 					return new ImageProperty
 					{
@@ -128,7 +127,7 @@ namespace CommonPluginsShared.Images
 		/// </summary>
 		/// <param name="image">Image object</param>
 		/// <returns>Image dimensions or null on error</returns>
-		public static ImageProperty GetImageProperty(System.Drawing.Image image)
+		public static ImageProperty GetImageProperty(Image image)
 		{
 			try
 			{
@@ -168,7 +167,7 @@ namespace CommonPluginsShared.Images
 
 			try
 			{
-				using (System.Drawing.Image image = System.Drawing.Image.FromFile(srcPath))
+				using (Image image = Image.FromFile(srcPath))
 				{
 					using (Bitmap resultImage = Resize(image, width, height))
 					{
@@ -202,7 +201,7 @@ namespace CommonPluginsShared.Images
 
 			try
 			{
-				using (System.Drawing.Image image = System.Drawing.Image.FromFile(srcPath))
+				using (Image image = Image.FromFile(srcPath))
 				{
 					int width = image.Width;
 					int height = image.Height;
@@ -249,7 +248,7 @@ namespace CommonPluginsShared.Images
 
 			try
 			{
-				using (System.Drawing.Image image = System.Drawing.Image.FromFile(srcPath))
+				using (Image image = Image.FromFile(srcPath))
 				{
 					if (image.Width > width || image.Height > height)
 					{
@@ -285,7 +284,7 @@ namespace CommonPluginsShared.Images
 		{
 			try
 			{
-				using (System.Drawing.Image image = System.Drawing.Image.FromStream(imgStream))
+				using (Image image = Image.FromStream(imgStream))
 				{
 					using (Bitmap resultImage = Resize(image, width, height))
 					{
@@ -308,7 +307,7 @@ namespace CommonPluginsShared.Images
 		/// <param name="width">Target width</param>
 		/// <param name="height">Target height</param>
 		/// <returns>Resized Bitmap or null on error</returns>
-		public static Bitmap Resize(System.Drawing.Image image, int width, int height)
+		public static Bitmap Resize(Image image, int width, int height)
 		{
 			try
 			{
@@ -462,7 +461,7 @@ namespace CommonPluginsShared.Images
 		/// </summary>
 		/// <param name="image">Source Image</param>
 		/// <returns>BitmapImage or null on error</returns>
-		public static BitmapImage ConvertImageToBitmapImage(System.Drawing.Image image)
+		public static BitmapImage ConvertImageToBitmapImage(Image image)
 		{
 			try
 			{
@@ -509,7 +508,7 @@ namespace CommonPluginsShared.Images
 					return srcPath;
 				}
 
-				using (System.Drawing.Image image = System.Drawing.Image.FromFile(srcPath))
+				using (Image image = Image.FromFile(srcPath))
 				{
 					ImageCodecInfo codecInfo = GetEncoderInfo(ImageFormat.Jpeg);
 					EncoderParameters encoderParams = new EncoderParameters(1);
@@ -740,7 +739,7 @@ namespace CommonPluginsShared.Images
 						imagePath = source.Replace("resources:", "pack://application:,,,");
 					}
 
-					StreamResourceInfo streamInfo = System.Windows.Application.GetResourceStream(new Uri(imagePath));
+					StreamResourceInfo streamInfo = Application.GetResourceStream(new Uri(imagePath));
 					using (Stream stream = streamInfo.Stream)
 					{
 						BitmapImage imageData = BitmapExtensions.BitmapFromStream(stream, loadProperties);

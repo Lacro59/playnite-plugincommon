@@ -69,11 +69,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IDataContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginDatabase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Localization.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)LocalSystem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\PluginPaths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\TraceInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteExtended\PluginExtended.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteTools.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SystemInfo\SystemServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransformIcon.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ui\UIServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)utilities\UtilityServices.cs" />
@@ -88,6 +88,7 @@
     <Folder Include="$(MSBuildThisFileDirectory)Caching\" />
     <Folder Include="$(MSBuildThisFileDirectory)IO\" />
     <Folder Include="$(MSBuildThisFileDirectory)Images\" />
+    <Folder Include="$(MSBuildThisFileDirectory)SystemInfo\" />
     <Folder Include="$(MSBuildThisFileDirectory)Utilities\" />
     <Folder Include="$(MSBuildThisFileDirectory)UI\" />
   </ItemGroup>
