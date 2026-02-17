@@ -1,4 +1,6 @@
-﻿using CommonPluginsShared.Interfaces;
+﻿using CommonPluginsShared;
+using CommonPluginsShared.Interfaces;
+using CommonPluginsShared.UI;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 using System;
@@ -27,13 +29,9 @@ namespace CommonPluginsControls.Views
 
             InitializeComponent();
 
-            _goToGame = new RelayCommand<Guid>((id) =>
-            {
-                API.Instance.MainView.SelectGame(id);
-                API.Instance.MainView.SwitchToLibraryView();
-            });
+            _goToGame = CommandsHelper.GoToGame;
 
-            RefreshData();
+			RefreshData();
         }
 
         #region Data Management
@@ -270,7 +268,7 @@ namespace CommonPluginsControls.Views
             Platforms = game.Platforms?.ToList() ?? new List<Platform>();
 
             PlatformName = BuildPlatformName(game);
-            SourceName = game.Source?.Name ?? ResourceProvider.GetString("LOCUnknownLabel");
+            SourceName = PlayniteTools.GetSourceName(game);
 
             InstallStatusText = game.IsInstalled
                 ? ResourceProvider.GetString("LOCGameIsInstalledTitle")
@@ -296,7 +294,7 @@ namespace CommonPluginsControls.Views
             if (game.LastActivity.HasValue)
             {
                 TimeSpan elapsed = DateTime.Now - game.LastActivity.Value;
-                LastActivityText = FormatTimeAgo(elapsed);
+                LastActivityText = PlayniteTools.FormatTimeAgo(elapsed);
                 LastActivityFull = game.LastActivity.Value.ToString("dd MMMM yyyy HH:mm");
                 LastActivityBrush = elapsed.TotalDays > 365
                     ? new SolidColorBrush(Color.FromRgb(244, 67, 54))
@@ -314,7 +312,7 @@ namespace CommonPluginsControls.Views
         {
             if (game.Platforms == null || game.Platforms.Count == 0)
             {
-                return ResourceProvider.GetString("LOCUnknownLabel");
+                return "Playnite";
             }
 
             if (game.Platforms.Count == 1)
@@ -326,31 +324,6 @@ namespace CommonPluginsControls.Views
             return game.Platforms.Count > 2
                 ? string.Format("{0} +{1}", joined, game.Platforms.Count - 2)
                 : joined;
-        }
-
-        private static string FormatTimeAgo(TimeSpan timeSpan)
-        {
-            if (timeSpan.TotalDays >= 365)
-            {
-                int years = (int)(timeSpan.TotalDays / 365);
-                return string.Format(ResourceProvider.GetString(years == 1 ? "LOCCommonYearAgo" : "LOCCommonYearsAgo"), years);
-            }
-            if (timeSpan.TotalDays >= 30)
-            {
-                int months = (int)(timeSpan.TotalDays / 30);
-                return string.Format(ResourceProvider.GetString(months == 1 ? "LOCCommonMonthAgo" : "LOCCommonMonthsAgo"), months);
-            }
-            if (timeSpan.TotalDays >= 1)
-            {
-                int days = (int)timeSpan.TotalDays;
-                return string.Format(ResourceProvider.GetString(days == 1 ? "LOCCommonDayAgo" : "LOCCommonDaysAgo"), days);
-            }
-            if (timeSpan.TotalHours >= 1)
-            {
-                int hours = (int)timeSpan.TotalHours;
-                return string.Format(ResourceProvider.GetString(hours == 1 ? "LOCCommonHourAgo" : "LOCCommonHoursAgo"), hours);
-            }
-            return ResourceProvider.GetString("LOCCommonToday");
         }
     }
 
