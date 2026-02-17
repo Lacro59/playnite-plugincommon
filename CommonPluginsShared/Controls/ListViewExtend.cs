@@ -1,4 +1,5 @@
 ﻿using CommonPluginsShared.Extensions;
+using CommonPluginsShared.UI;
 using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
@@ -84,11 +85,11 @@ namespace CommonPluginsShared.Controls
             {
                 if ((bool)e.NewValue)
                 {
-                    obj.PreviewMouseWheel += UI.HandlePreviewMouseWheel;
+                    obj.PreviewMouseWheel += UIHelper.HandlePreviewMouseWheel;
                 }
                 else
                 {
-                    obj.PreviewMouseWheel -= UI.HandlePreviewMouseWheel;
+                    obj.PreviewMouseWheel -= UIHelper.HandlePreviewMouseWheel;
                 }
             }
         }

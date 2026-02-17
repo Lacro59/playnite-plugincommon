@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommonPluginsShared.UI;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
@@ -41,7 +42,7 @@ namespace CommonPluginsShared.Controls
 
         private static void UpdateExpanderArrow(Expander expander, bool visible)
         {
-            foreach (TextBlock el in UI.FindVisualChildren<TextBlock>(expander))
+            foreach (TextBlock el in UIHelper.FindVisualChildren<TextBlock>(expander))
             {
                 if (el.Name == "DownArrow")
                 {

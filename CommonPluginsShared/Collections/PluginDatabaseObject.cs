@@ -42,11 +42,6 @@ namespace CommonPluginsShared.Collections
 		public TSettings PluginSettings { get; set; }
 
 		/// <summary>
-		/// Gets or sets the UI helper used to create Playnite windows and controls.
-		/// </summary>
-		public UI UI { get; set; } = new UI();
-
-		/// <summary>
 		/// Gets or sets the plugin name used for logging, UI captions and file naming.
 		/// </summary>
 		public string PluginName { get; set; }
