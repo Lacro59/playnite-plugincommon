@@ -109,13 +109,13 @@ namespace CommonPluginsShared.Collections
 
 		private IEnumerable<Guid> PreviousIds { get; set; } = new List<Guid>();
 
-		/// <summary>
-		/// Initialises paths, cache directories, and subscribes to Playnite game events.
-		/// </summary>
-		/// <param name="pluginSettings">Plugin settings view model.</param>
-		/// <param name="pluginName">Human-readable plugin name used for logging and file naming.</param>
-		/// <param name="pluginUserDataPath">Root path for all plugin user data.</param>
-		protected PluginDatabaseObject(TSettings pluginSettings, string pluginName, string pluginUserDataPath)
+        /// <summary>
+        /// Initialises paths, cache directories, and subscribes to Playnite game events.
+        /// </summary>
+        /// <param name="pluginSettings">Plugin settings view model.</param>
+        /// <param name="pluginName">Human-readable plugin name used for logging and file naming.</param>
+        /// <param name="pluginUserDataPath">Root path for all plugin user data.</param>
+        protected PluginDatabaseObject(TSettings pluginSettings, string pluginName, string pluginUserDataPath)
 		{
 			PluginSettings = pluginSettings;
 			PluginName = pluginName;

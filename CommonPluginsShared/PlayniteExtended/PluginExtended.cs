@@ -1,5 +1,6 @@
 ﻿using CommonPlayniteShared.Common;
 using CommonPluginsShared.Interfaces;
+using CommonPluginsShared.UI;
 using Playnite.SDK;
 using Playnite.SDK.Plugins;
 using System;
@@ -26,8 +27,8 @@ namespace CommonPluginsShared.PlayniteExtended
             // Get plugin's database if used
             PluginDatabase = typeof(TPluginDatabase).CrateInstance<TPluginDatabase>(PluginSettings, this.GetPluginUserDataPath());
             PluginDatabase.InitializeDatabase();
-        }
-    }
+		}
+	}
 
 
     public abstract class PlaynitePlugin<ISettings> : GenericPlugin

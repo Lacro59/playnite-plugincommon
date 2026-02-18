@@ -1,5 +1,6 @@
 ﻿using CommonPluginsShared.Collections;
 using CommonPluginsShared.Services;
+using CommonPluginsShared.UI;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 using System;
@@ -16,11 +17,11 @@ namespace CommonPluginsShared.Interfaces
 
         IWindowPluginService WindowPluginService { get; set; }
 
-        /// <summary>
-        /// Initialize the database.
-        /// </summary>
-        /// <returns></returns>
-        Task<bool> InitializeDatabase();
+		/// <summary>
+		/// Initialize the database.
+		/// </summary>
+		/// <returns></returns>
+		Task<bool> InitializeDatabase();
 
         /// <summary>
         /// Get the plugin data for a game.
