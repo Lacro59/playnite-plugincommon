@@ -22,7 +22,7 @@
 
     <!-- List actions -->
     <sys:String x:Key="LOCCommonClearSelection">Auswahl löschen</sys:String>
-    <sys:String x:Key="LOCCommonRefreshSelected">&lt;unk&gt; Ausgewählte aktualisieren</sys:String>
+    <sys:String x:Key="LOCCommonRefreshSelected">Ausgewählte aktualisieren</sys:String>
     <sys:String x:Key="LOCCommonSelected">Ausgewählt:</sys:String>
 
     <!-- Filters -->
