@@ -9,6 +9,20 @@
         <Setter Property="Margin" Value="0,0,0,8" />
     </Style>
 
+    <Style x:Key="ViewColumnLabelText" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextBrushDarker}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="ViewColumnValueText" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
     <!-- SECTION: RADIO BUTTON -->
 
     <Style x:Key="ModernRadio" TargetType="RadioButton">
@@ -283,6 +297,18 @@
     <Style x:Key="FilterCardBorder" TargetType="Border" BasedOn="{StaticResource SectionBorder}">
         <Setter Property="Padding" Value="10" />
         <Setter Property="Margin" Value="0,0,0,10" />
+    </Style>
+
+    <Style x:Key="ViewPluginCard" TargetType="Border" BasedOn="{StaticResource CardBorder}">
+        <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="20,16" />
+        <Setter Property="Margin" Value="8" />
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.3" Color="Black" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- SECTION: MODERN TEXTBOX WITH ICON -->
