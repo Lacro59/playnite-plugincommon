@@ -22,7 +22,7 @@
 
     <!-- List actions -->
     <sys:String x:Key="LOCCommonClearSelection">Clear Selection</sys:String>
-    <sys:String x:Key="LOCCommonRefreshSelected">⟳ Refresh Selected</sys:String>
+    <sys:String x:Key="LOCCommonRefreshSelected">Refresh Selected</sys:String>
     <sys:String x:Key="LOCCommonSelected">Selected:</sys:String>
 
     <!-- Filters -->
