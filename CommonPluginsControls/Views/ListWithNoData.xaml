@@ -111,8 +111,7 @@
                     MinWidth="100" 
                     Margin="0,0,8,0" />
 
-                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" 
-                       Margin="4,0" />
+                <Separator Margin="4,0" />
 
                 <Button x:Name="PART_RefreshSelected" 
                     Content="{DynamicResource LOCCommonRefreshSelected}" 
@@ -171,7 +170,7 @@
                                                   Tag="Name" Padding="8,6" />
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Margin="4,4">
+                                        <TextBlock Style="{DynamicResource BaseTextBlockStyle}" Margin="4,4">
                                         <Hyperlink Command="{Binding GoToGame}" 
                                                    CommandParameter="{Binding Id}"
                                                    TextDecorations="None">

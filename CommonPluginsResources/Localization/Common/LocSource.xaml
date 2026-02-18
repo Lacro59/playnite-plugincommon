@@ -315,5 +315,11 @@ Windows variables can be used to add a dynamic string:
     <sys:String x:Key="LOCCommonInstallationStatus">Installation status</sys:String>
     <sys:String x:Key="LOCCommonTimeFilters">Time-based filters</sys:String>
     <sys:String x:Key="LOCCommonAdditionalOptions">Additional options</sys:String>
-    
+
+    <!-- DdItemListSelectionBox -->
+    <sys:String x:Key="LOCDdItemList_ClearSelection">Clear selection</sys:String>
+    <sys:String x:Key="LOCDdItemList_ShowSelectedOnly">Show selected items only</sys:String>
+    <sys:String x:Key="LOCDdItemList_SearchPlaceholder">Search...</sys:String>
+    <sys:String x:Key="LOCDdItemList_NoItems">No items available</sys:String>
+
 </ResourceDictionary>

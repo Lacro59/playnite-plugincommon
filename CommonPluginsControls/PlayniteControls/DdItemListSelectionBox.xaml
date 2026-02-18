@@ -5,37 +5,58 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:playnitecontrols="clr-namespace:CommonPluginsControls.PlayniteControls"
              mc:Ignorable="d"
-             SnapsToDevicePixels="True" Height="24">
+             SnapsToDevicePixels="True"
+             Height="24">
 
-    <Border BorderThickness="{DynamicResource ControlBorderThickness}"
+    <UserControl.Resources>
+
+        <!-- Icon template: clear (×) button using IcoFont -->
+        <DataTemplate x:Key="ClearIconTemplate">
+            <TextBlock Text="&#xef00;"
+                       FontFamily="{DynamicResource FontIcoFont}"
+                       FontSize="14"
+                       Foreground="{DynamicResource GlyphBrush}"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center" />
+        </DataTemplate>
+
+        <!-- Icon template: dropdown chevron using Marlett -->
+        <DataTemplate x:Key="ChevronIconTemplate">
+            <TextBlock Text="6"
+                       FontFamily="Marlett"
+                       FontSize="11"
+                       Foreground="{DynamicResource GlyphBrush}"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center" />
+        </DataTemplate>
+
+    </UserControl.Resources>
+
+    <!--
+        Root border: uses HighlightBorder from Playnite theme for focus/hover feedback.
+        CornerRadius and BorderThickness are driven by theme resources for consistency.
+    -->
+    <Border x:Name="PART_RootBorder"
+            BorderThickness="{DynamicResource ControlBorderThickness}"
             CornerRadius="{DynamicResource ControlCornerRadius}"
-            Style="{DynamicResource HighlightBorder}"
-            x:Name="Root">
-        <Grid>
-            <DockPanel>
-                <Viewbox Margin="0,0,2,0" DockPanel.Dock="Right">
-                    <TextBlock Text="6" FontFamily="Marlett"
-                               Foreground="{DynamicResource GlyphBrush}"
-                               VerticalAlignment="Center" />
-                </Viewbox>
-                <TextBlock x:Name="PART_TextFilterString"
-                           Style="{StaticResource BaseTextBlockStyle}"
-                           TextTrimming="CharacterEllipsis"
-                           HorizontalAlignment="Stretch"
-                           VerticalAlignment="Center"
-                           DockPanel.Dock="Left"
-                           Margin="5,0,0,0" />
-            </DockPanel>
+            Style="{DynamicResource HighlightBorder}">
 
+        <Grid>
+
+            <!-- Background hit area: ToggleButton opens the popup -->
             <ToggleButton x:Name="MainToggle"
-                          BorderThickness="0" Focusable="False"
+                          BorderThickness="0"
+                          Focusable="True"
+                          Background="Transparent"
                           HorizontalContentAlignment="Stretch"
-                          Background="Transparent">
+                          VerticalContentAlignment="Stretch"
+                          AutomationProperties.Name="{DynamicResource LOCDdItemList_SearchPlaceholder}">
                 <ToggleButton.Style>
                     <Style TargetType="ToggleButton">
                         <Setter Property="Template">
                             <Setter.Value>
                                 <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                    <!-- Transparent border captures the full click area -->
                                     <Border Background="Transparent">
                                         <ContentPresenter />
                                     </Border>
@@ -46,16 +67,74 @@
                 </ToggleButton.Style>
             </ToggleButton>
 
+            <!-- Main layout: text label + chevron icon -->
+            <DockPanel IsHitTestVisible="False">
+
+                <!-- Dropdown chevron, right-docked -->
+                <Viewbox Width="16" Height="16"
+                         Margin="0,0,4,0"
+                         DockPanel.Dock="Right"
+                         VerticalAlignment="Center">
+                    <ContentPresenter ContentTemplate="{StaticResource ChevronIconTemplate}" />
+                </Viewbox>
+
+                <!-- Selected items summary text -->
+                <TextBlock x:Name="PART_TextFilterString"
+                           Style="{DynamicResource BaseTextBlockStyle}"
+                           TextTrimming="CharacterEllipsis"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Stretch"
+                           DockPanel.Dock="Left"
+                           Margin="6,0,0,0" />
+            </DockPanel>
+
+            <!--
+                Clear button: visible only on mouse-over of the root border.
+                Uses a minimal transparent style (per spec).
+                Positioned before the chevron to avoid overlap.
+            -->
             <Button x:Name="PART_ButtonClearFilter"
-                    Margin="0,0,20,0" FontSize="18"
-                    Background="Transparent" HorizontalAlignment="Right"
-                    BorderThickness="0" Padding="3,0,3,0"
-                    ContentTemplate="{DynamicResource ClearTextIconTemplate}">
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Margin="0,0,20,0"
+                    Width="18" Height="18"
+                    Padding="0"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    ContentTemplate="{StaticResource ClearIconTemplate}"
+                    ToolTip="{DynamicResource LOCDdItemList_ClearSelection}">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <!-- Hidden by default, revealed on root hover -->
                         <Setter Property="Visibility" Value="Collapsed" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="ClearBorder"
+                                            Background="Transparent"
+                                            CornerRadius="2"
+                                            Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="ClearBorder"
+                                                    Property="Background"
+                                                    Value="{DynamicResource HoverBrush}" />
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter TargetName="ClearBorder"
+                                                    Property="Opacity"
+                                                    Value="0.7" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsMouseOver, ElementName=Root}" Value="True">
+                            <DataTrigger Binding="{Binding IsMouseOver, ElementName=PART_RootBorder}" Value="True">
                                 <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
                         </Style.Triggers>
@@ -63,34 +142,73 @@
                 </Button.Style>
             </Button>
 
-            <Popup x:Name="Popup"
-                   Placement="Bottom" Focusable="False" AllowsTransparency="True"
+            <!--
+                Dropdown popup.
+                - AllowsTransparency="True" for the rounded popup border.
+                - StaysOpen="False" closes on outside click.
+                - Delay=100 avoids immediate close on toggle.
+            -->
+            <Popup x:Name="PART_DropdownPopup"
+                   Placement="Bottom"
+                   Focusable="False"
+                   AllowsTransparency="True"
+                   StaysOpen="False"
+                   MaxHeight="300"
                    IsOpen="{Binding IsChecked, ElementName=MainToggle, Mode=TwoWay, Delay=100}"
-                   StaysOpen="False" MaxHeight="300"
                    MinWidth="{Binding ActualWidth, ElementName=MainToggle}">
+
                 <Border Background="{DynamicResource PopupBackgroundBrush}"
                         BorderThickness="{DynamicResource PopupBorderThickness}"
-                        BorderBrush="{DynamicResource PopupBorderBrush}">
+                        BorderBrush="{DynamicResource PopupBorderBrush}"
+                        CornerRadius="4">
+
                     <Grid>
                         <Grid.RowDefinitions>
+                            <!-- Search + filter row -->
                             <RowDefinition Height="Auto" />
+                            <!-- Separator -->
+                            <RowDefinition Height="Auto" />
+                            <!-- Items list -->
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
-                        <DockPanel Grid.Row="0" Margin="5" x:Name="PART_ElemSearchHost">
+                        <!--
+                            Search host: search box + "selected only" toggle.
+                            Visibility is bound in code-behind via ShowSearchBox.
+                        -->
+                        <DockPanel x:Name="PART_ElemSearchHost"
+                                   Grid.Row="0"
+                                   Margin="6,6,6,4"
+                                   LastChildFill="True">
+
+                            <!-- "Show selected only" toggle, using ModernCheckBox style -->
                             <CheckBox x:Name="PART_ToggleSelectedOnly"
                                       DockPanel.Dock="Right"
-                                      ToolTip="{DynamicResource LOCOnlyItemsSelectedTooltip}"
-                                      FontFamily="{DynamicResource FontIcoFont}" />
+                                      Margin="4,0,0,0"
+                                      VerticalAlignment="Center"
+                                      Style="{StaticResource ModernCheckBox}"
+                                      ToolTip="{DynamicResource LOCDdItemList_ShowSelectedOnly}" />
+
+                            <!-- Search text box -->
                             <playnitecontrols:SearchBox x:Name="PART_SearchBox"
-                                             DockPanel.Dock="Left"
-                                             Margin="0,0,5,0" />
+                                                        DockPanel.Dock="Left" />
                         </DockPanel>
 
-                        <ItemsControl x:Name="PART_ItemsPanel" Grid.Row="1" />
+                        <!--
+                            Separator between search area and item list.
+                        -->
+                        <Border Grid.Row="1"
+                                Margin="6,0,6,0" />
+
+                        <!-- Virtualized items list -->
+                        <ItemsControl x:Name="PART_ItemsPanel"
+                                      Grid.Row="2"
+                                      Margin="4,4,4,4" />
+
                     </Grid>
                 </Border>
             </Popup>
+
         </Grid>
     </Border>
 </UserControl>
