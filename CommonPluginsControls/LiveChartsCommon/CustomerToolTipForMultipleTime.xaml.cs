@@ -10,6 +10,7 @@ using CommonPluginsShared;
 using LiveCharts;
 using LiveCharts.Wpf;
 using System.Collections.Generic;
+using CommonPluginsShared.Utilities;
 
 namespace CommonPluginsControls.LiveChartsCommon
 {
@@ -147,7 +148,7 @@ namespace CommonPluginsControls.LiveChartsCommon
         {
             get
             {
-                return Tools.WeekOfYearISO8601(Monday);
+                return UtilityTools.WeekOfYearISO8601(Monday);
             }
         }
     }
