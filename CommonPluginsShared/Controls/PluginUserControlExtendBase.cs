@@ -87,11 +87,15 @@ namespace CommonPluginsShared.Controls
 			{
 				bool mustDisplay = (bool)e.NewValue;
 				Visibility newVisibility = mustDisplay ? Visibility.Visible : Visibility.Collapsed;
-				obj.Visibility = newVisibility;
 
 				if (obj.Parent is ContentControl contentControl)
 				{
 					contentControl.Visibility = newVisibility;
+				}
+
+				if (!mustDisplay)
+				{
+					obj.Visibility = Visibility.Collapsed;
 				}
 			}
 		}
@@ -404,14 +408,18 @@ namespace CommonPluginsShared.Controls
 		public virtual async Task UpdateDataAsync()
 		{
 			UpdateDataTimer.Stop();
-			Visibility = MustDisplay ? Visibility.Visible : Visibility.Collapsed;
 
 			if (GameContext == null || CurrentGame == null || GameContext.Id != CurrentGame.Id)
 			{
+				Visibility = Visibility.Collapsed;
 				return;
 			}
 
-			await API.Instance.MainView.UIDispatcher?.InvokeAsync(() => SetData(GameContext), DispatcherPriority.Render);
+			await API.Instance.MainView.UIDispatcher?.InvokeAsync(() =>
+			{
+				SetData(GameContext);
+				Visibility = MustDisplay ? Visibility.Visible : Visibility.Collapsed;
+			}, DispatcherPriority.Render);
 		}
 
 		/// <summary>Kept for backward compatibility with controls that override the single-argument form.</summary>

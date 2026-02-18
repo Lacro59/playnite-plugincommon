@@ -39,21 +39,18 @@ namespace CommonPluginsShared.Controls
 		public override async Task UpdateDataAsync()
 		{
 			UpdateDataTimer.Stop();
-			Visibility = MustDisplay ? Visibility.Visible : Visibility.Collapsed;
 
 			if (GameContext == null || CurrentGame == null || GameContext.Id != CurrentGame.Id)
 			{
+				Visibility = Visibility.Collapsed;
 				return;
 			}
 
-			// Capture before await — GameContext may change while awaiting.
 			Game gameSnapshot = GameContext;
 			Guid gameId = gameSnapshot.Id;
 
-			// Run potentially slow I/O off the UI thread.
 			PluginDataBaseGameBase pluginGameData = await Task.Run(() => pluginDatabase.Get(gameSnapshot, true));
 
-			// Game context may have changed while the background task ran.
 			if (GameContext == null || GameContext.Id != gameId)
 			{
 				return;
@@ -65,6 +62,7 @@ namespace CommonPluginsShared.Controls
 				return;
 			}
 
+			Visibility = MustDisplay ? Visibility.Visible : Visibility.Collapsed;
 			SetData(GameContext, pluginGameData);
 		}
 	}
