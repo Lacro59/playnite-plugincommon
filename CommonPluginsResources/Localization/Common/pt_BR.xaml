@@ -9,26 +9,26 @@
     <sys:String x:Key="LOCCommonYears">{0} anos</sys:String>
 
     <!-- Time-related -->
-    <sys:String x:Key="LOCCommonHourAgo">{0}h ago</sys:String>
-    <sys:String x:Key="LOCCommonHoursAgo">{0}h ago</sys:String>
-    <sys:String x:Key="LOCCommonDayAgo">{0}d ago</sys:String>
-    <sys:String x:Key="LOCCommonDaysAgo">{0}d ago</sys:String>
-    <sys:String x:Key="LOCCommonMonthAgo">{0}mo ago</sys:String>
-    <sys:String x:Key="LOCCommonMonthsAgo">{0}mo ago</sys:String>
-    <sys:String x:Key="LOCCommonYearAgo">{0}y ago</sys:String>
-    <sys:String x:Key="LOCCommonYearsAgo">{0}y ago</sys:String>
-    <sys:String x:Key="LOCCommonToday">Today</sys:String>
-    <sys:String x:Key="LOCCommonNever">Never</sys:String>
+    <sys:String x:Key="LOCCommonHourAgo">{0}h atrás</sys:String>
+    <sys:String x:Key="LOCCommonHoursAgo">{0}h atrás</sys:String>
+    <sys:String x:Key="LOCCommonDayAgo">{0}d atrás</sys:String>
+    <sys:String x:Key="LOCCommonDaysAgo">{0}d atrás</sys:String>
+    <sys:String x:Key="LOCCommonMonthAgo">{0}mês atrás</sys:String>
+    <sys:String x:Key="LOCCommonMonthsAgo">{0}mês atrás</sys:String>
+    <sys:String x:Key="LOCCommonYearAgo">{0}a atrás</sys:String>
+    <sys:String x:Key="LOCCommonYearsAgo">{0}a atrás</sys:String>
+    <sys:String x:Key="LOCCommonToday">Hoje</sys:String>
+    <sys:String x:Key="LOCCommonNever">Nunca</sys:String>
 
     <!-- List actions -->
-    <sys:String x:Key="LOCCommonClearSelection">Clear Selection</sys:String>
-    <sys:String x:Key="LOCCommonRefreshSelected">⟳ Refresh Selected</sys:String>
-    <sys:String x:Key="LOCCommonSelected">Selected:</sys:String>
+    <sys:String x:Key="LOCCommonClearSelection">Limpar Seleção</sys:String>
+    <sys:String x:Key="LOCCommonRefreshSelected">Atualizar Selecionados</sys:String>
+    <sys:String x:Key="LOCCommonSelected">Selecionado:</sys:String>
 
     <!-- Filters -->
-    <sys:String x:Key="LOCCommonSearchByName">Search by name...</sys:String>
-    <sys:String x:Key="LOCCommonAllSources">All Sources</sys:String>
-    <sys:String x:Key="LOCCommonAllPlatforms">All Platforms</sys:String>
+    <sys:String x:Key="LOCCommonSearchByName">Pesquisar por nome...</sys:String>
+    <sys:String x:Key="LOCCommonAllSources">Todas as fontes</sys:String>
+    <sys:String x:Key="LOCCommonAllPlatforms">Todas as Plataformas</sys:String>
 
     <sys:String x:Key="LOCCommonYearLabel">Ano</sys:String>
     <sys:String x:Key="LOCCommonYearsLabel">Anos</sys:String>
@@ -97,7 +97,7 @@
     <sys:String x:Key="LOCCommonControlConfiguration">Configuração de controle</sys:String>
     <sys:String x:Key="LOCCommonGetAccountID">Obter ID da conta</sys:String>
 
-    <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticated</sys:String>
+    <sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: usuário não está autenticado</sys:String>
     <sys:String x:Key="LOCCommonStoreNoApiKey">{0}: Nenhuma chave de API</sys:String>
     <sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Configuração inválida</sys:String>
     <sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: Nenhuma configuração encontrada</sys:String>
@@ -138,7 +138,7 @@
 
     <sys:String x:Key="LOCCommonDefaultSorting">Classificação padrão da lista de jogos</sys:String>
 
-    <sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated (only new items)</sys:String>
+    <sys:String x:Key="LOCCommonAutoImport">Importar dados automaticamente quando a biblioteca for atualizada (somente novos)</sys:String>
     <sys:String x:Key="LOCCommonAutoImportOnInstalled">Importar automaticamente para os jogos instalados</sys:String>
 
     <sys:String x:Key="LOCCommonChartHideOptions">Ocultar opções de gráfico no controle</sys:String>
@@ -234,26 +234,25 @@ Você quer abrir o diretório?</sys:String>
 
     <!-- Common notification errors -->
 
-    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: user is not authenticated.</sys:String>
+    <sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: usuário não está autenticado.</sys:String>
     
     <!-- Common notifications -->
 
     <sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">Erro ao recuperar dados de {0}.
 Por favor, tente novamente.</sys:String>
     
-    <sys:String x:Key="LOCCommonCreateLog">Do you want to create a log package?</sys:String>
+    <sys:String x:Key="LOCCommonCreateLog">Deseja criar um pacote de log?</sys:String>
     
     <sys:String x:Key="LOCCommonDataRemove">Os dados do plugin foram apagados.</sys:String>
     <sys:String x:Key="LOCCommonDataErrorRemove">Erro ao remover dados do plugin. Por favor, tente novamente.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Error adding tag with {0}.
-Please clear all tags in the plugin menu.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Erro adicionando a tag com {0}.
+Por favor, limpe todas as tags no menu de plugins.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Using previously saved data for {0} [{1}]
-You must authenticate.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Usando dados salvos antigos para {0} [{1}]
+Você deve autenticar.</sys:String>
 
-    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">More than one data entry found for {0}.
-Please check the plugin settings.</sys:String>
+    <sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">Mais de um dado encontrado para {0}. Por favor, cheque as configurações do plugin.</sys:String>
 
 
     <sys:String x:Key="LOCCommonDimensions">Dimensões</sys:String>
