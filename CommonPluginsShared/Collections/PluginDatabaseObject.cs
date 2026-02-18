@@ -896,7 +896,7 @@ namespace CommonPluginsShared.Collections
 		}
 
 		/// <inheritdoc/>
-		public void AddTagAllGame()
+		public void AddTagAllGames()
 		{
 			Logger.Info("AddTagAllGame() started.");
 			IEnumerable<Guid> ids = API.Instance.Database.Games.Where(x => !x.Hidden).Select(x => x.Id);
@@ -1024,7 +1024,7 @@ namespace CommonPluginsShared.Collections
 		}
 
 		/// <inheritdoc/>
-		public void RemoveTagAllGame(bool fromClearDatabase = false)
+		public void RemoveTagAllGames(bool fromClearDatabase = false)
 		{
 			Common.LogDebug(true, "RemoveTagAllGame()");
 

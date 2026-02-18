@@ -139,12 +139,12 @@ namespace CommonPluginsShared.Interfaces
         /// <summary>
         /// Add tags to all games in the database.
         /// </summary>
-        void AddTagAllGame();
+        void AddTagAllGames();
 
         /// <summary>
         /// Remove tags from all games in the database.
         /// </summary>
         /// <param name="fromClearDatabase"></param>
-        void RemoveTagAllGame(bool fromClearDatabase = false);
+        void RemoveTagAllGames(bool fromClearDatabase = false);
     }
 }

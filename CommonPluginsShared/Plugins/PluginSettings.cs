@@ -8,14 +8,30 @@ namespace CommonPluginsShared.Plugins
 {
     public class PluginSettings : ObservableObject, IPluginSettings
     {
-        public bool MenuInExtensions { get; set; } = true;
+        private bool _menuInExtensions = true;
+        public bool MenuInExtensions
+        {
+            get => _menuInExtensions;
+            set => SetValue(ref _menuInExtensions, value);
+        }
 
-        public bool EnableTag { get; set; } = false;
+        private bool _enableTag = false;
+        public bool EnableTag
+        {
+            get => _enableTag;
+            set => SetValue(ref _enableTag, value);
+        }
 
         #region Automatic update when updating library
 
         public DateTime LastAutoLibUpdateAssetsDownload { get; set; } = DateTime.Now;
-        public bool AutoImport { get; set; } = true;
+
+        private bool _autoImport = false;
+        public bool AutoImport
+        {
+            get => _autoImport;
+            set => SetValue(ref _autoImport, value);
+        }
 
         #endregion
 
