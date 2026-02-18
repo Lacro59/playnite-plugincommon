@@ -12,69 +12,66 @@
 
     </UserControl.Resources>
 
-    <Grid MaxWidth="900" MinWidth="650">
-        <Border HorizontalAlignment="Center" 
-                VerticalAlignment="Center"
-                BorderThickness="0,1,0,0"
-                BorderBrush="{DynamicResource NormalBorderBrush}">
+    <Border Style="{StaticResource TopSeparatorBorder}">
 
+        <Grid MaxWidth="900" MinWidth="650">
             <DockPanel LastChildFill="True" Margin="20">
                 <!-- Header -->
                 <StackPanel DockPanel.Dock="Top" Margin="0,0,0,20">
                     <TextBlock Text="{DynamicResource LOCFilters}" 
-                               Style="{DynamicResource BaseTextBlockStyle}"
-                               FontSize="20" 
-                               FontWeight="SemiBold" />
+                            Style="{DynamicResource BaseTextBlockStyle}"
+                            FontSize="20" 
+                            FontWeight="SemiBold" />
                     <Border Height="2" 
-                            Background="{DynamicResource GlyphBrush}" 
-                            HorizontalAlignment="Stretch" 
-                            Margin="0,8,0,0" />
+                        Background="{DynamicResource GlyphBrush}" 
+                        HorizontalAlignment="Stretch" 
+                        Margin="0,8,0,0" />
                 </StackPanel>
 
                 <!-- Footer buttons -->
                 <Border BorderThickness="0,1,0,0" 
-                        BorderBrush="{DynamicResource NormalBorderBrush}"
-                        Padding="0,10,0,0"
-                        Margin="0,10,0,0"
-                        DockPanel.Dock="Bottom">
+                    BorderBrush="{DynamicResource NormalBorderBrush}"
+                    Padding="0,10,0,0"
+                    Margin="0,10,0,0"
+                    DockPanel.Dock="Bottom">
                     <StackPanel Orientation="Horizontal"
-                                HorizontalAlignment="Right">
+                            HorizontalAlignment="Right">
                         <Button Name="PART_BtClose" 
-                                Content="{DynamicResource LOCCloseLabel}" 
-                                Style="{StaticResource SecondaryButton}" 
-                                Click="PART_BtClose_Click"
-                                TabIndex="1" />
+                            Content="{DynamicResource LOCCloseLabel}" 
+                            Style="{StaticResource SecondaryButton}" 
+                            Click="PART_BtClose_Click"
+                            TabIndex="1" />
                         <Button Name="PART_BtDownload" 
-                                Content="{DynamicResource LOCDownloadLabel}" 
-                                Style="{StaticResource PrimaryButton}" 
-                                Click="PART_BtDownload_Click"
-                                TabIndex="0" />
+                            Content="{DynamicResource LOCDownloadLabel}" 
+                            Style="{StaticResource PrimaryButton}" 
+                            Click="PART_BtDownload_Click"
+                            TabIndex="0" />
                     </StackPanel>
                 </Border>
 
                 <!-- Main content -->
                 <ScrollViewer VerticalScrollBarVisibility="Auto" 
-                              HorizontalScrollBarVisibility="Disabled">
+                            HorizontalScrollBarVisibility="Disabled">
                     <StackPanel>
                         <!-- Game Source Section -->
                         <Border Style="{StaticResource SectionBorder}">
                             <StackPanel>
                                 <TextBlock Text="{DynamicResource LOCCommonGameSource}" 
-                                           Style="{StaticResource SectionHeaderText}" />
+                                        Style="{StaticResource SectionHeaderText}" />
                                 <UniformGrid Columns="3" Rows="1">
                                     <RadioButton Name="PART_AllGames" 
-                                                 Style="{StaticResource ModernRadio}"
-                                                 GroupName="RadioFilters" 
-                                                 IsChecked="True"
-                                                 Content="{DynamicResource LOCQuickFilterAllGames}" />
+                                                Style="{StaticResource ModernRadio}"
+                                                GroupName="RadioFilters" 
+                                                IsChecked="True"
+                                                Content="{DynamicResource LOCQuickFilterAllGames}" />
                                     <RadioButton Name="PART_Filtred" 
-                                                 Style="{StaticResource ModernRadio}"
-                                                 GroupName="RadioFilters" 
-                                                 Content="{DynamicResource LOCMetaGameSourceFiltered}" />
+                                                Style="{StaticResource ModernRadio}"
+                                                GroupName="RadioFilters" 
+                                                Content="{DynamicResource LOCMetaGameSourceFiltered}" />
                                     <RadioButton Name="PART_Selected" 
-                                                 Style="{StaticResource ModernRadio}"
-                                                 GroupName="RadioFilters" 
-                                                 Content="{DynamicResource LOCMetaGameSourceSelected}" />
+                                                Style="{StaticResource ModernRadio}"
+                                                GroupName="RadioFilters" 
+                                                Content="{DynamicResource LOCMetaGameSourceSelected}" />
                                 </UniformGrid>
                             </StackPanel>
                         </Border>
@@ -83,23 +80,23 @@
                         <Border Style="{StaticResource SectionBorder}">
                             <StackPanel>
                                 <TextBlock Text="{DynamicResource LOCCommonInstallationStatus}" 
-                                           Style="{StaticResource SectionHeaderText}" />
+                                        Style="{StaticResource SectionHeaderText}" />
                                 <UniformGrid Columns="3" Rows="1">
                                     <RadioButton Name="PART_GamesInstalled" 
-                                                 Style="{StaticResource ModernRadio}"
-                                                 GroupName="RadioFilters" 
-                                                 Checked="RadioButton_Checked"
-                                                 Content="{DynamicResource LOCGameIsGameInstalledTitle}" />
+                                                Style="{StaticResource ModernRadio}"
+                                                GroupName="RadioFilters" 
+                                                Checked="RadioButton_Checked"
+                                                Content="{DynamicResource LOCGameIsGameInstalledTitle}" />
                                     <RadioButton Name="PART_GamesNotInstalled" 
-                                                 Style="{StaticResource ModernRadio}"
-                                                 GroupName="RadioFilters" 
-                                                 Checked="RadioButton_Checked"
-                                                 Content="{DynamicResource LOCGameIsUnInstalledTitle}" />
+                                                Style="{StaticResource ModernRadio}"
+                                                GroupName="RadioFilters" 
+                                                Checked="RadioButton_Checked"
+                                                Content="{DynamicResource LOCGameIsUnInstalledTitle}" />
                                     <RadioButton Name="PART_GamesFavorite" 
-                                                 Style="{StaticResource ModernRadio}"
-                                                 GroupName="RadioFilters" 
-                                                 Checked="RadioButton_Checked"
-                                                 Content="{DynamicResource LOCQuickFilterFavorites}" />
+                                                Style="{StaticResource ModernRadio}"
+                                                GroupName="RadioFilters" 
+                                                Checked="RadioButton_Checked"
+                                                Content="{DynamicResource LOCQuickFilterFavorites}" />
                                 </UniformGrid>
                             </StackPanel>
                         </Border>
@@ -108,7 +105,7 @@
                         <Border Style="{StaticResource SectionBorder}">
                             <StackPanel>
                                 <TextBlock Text="{DynamicResource LOCCommonTimeFilters}" 
-                                           Style="{StaticResource SectionHeaderText}" />
+                                        Style="{StaticResource SectionHeaderText}" />
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -118,48 +115,48 @@
                                     </Grid.ColumnDefinitions>
 
                                     <RadioButton Name="PART_OldData" 
-                                                 Grid.Column="0"
-                                                 Style="{StaticResource ModernRadio}"
-                                                 GroupName="RadioFilters" 
-                                                 Checked="RadioButton_Checked"
-                                                 Content="{DynamicResource LOCCommonOldData}" />
+                                                Grid.Column="0"
+                                                Style="{StaticResource ModernRadio}"
+                                                GroupName="RadioFilters" 
+                                                Checked="RadioButton_Checked"
+                                                Content="{DynamicResource LOCCommonOldData}" />
                                     <RadioButton Name="PART_GamesRecentlyPlayed" 
-                                                 Grid.Column="1"
-                                                 Style="{StaticResource ModernRadio}"
-                                                 GroupName="RadioFilters" 
-                                                 Checked="RadioButton_Checked"
-                                                 Content="{DynamicResource LOCQuickFilterRecentlyPlayed}" />
+                                                Grid.Column="1"
+                                                Style="{StaticResource ModernRadio}"
+                                                GroupName="RadioFilters" 
+                                                Checked="RadioButton_Checked"
+                                                Content="{DynamicResource LOCQuickFilterRecentlyPlayed}" />
                                     <RadioButton Name="PART_GamesRecentlyAdded" 
-                                                 Grid.Column="2"
-                                                 Style="{StaticResource ModernRadio}"
-                                                 GroupName="RadioFilters" 
-                                                 Checked="RadioButton_Checked"
-                                                 Content="{DynamicResource LOCCommonRecentlyAdded}" />
+                                                Grid.Column="2"
+                                                Style="{StaticResource ModernRadio}"
+                                                GroupName="RadioFilters" 
+                                                Checked="RadioButton_Checked"
+                                                Content="{DynamicResource LOCCommonRecentlyAdded}" />
 
                                     <Border Grid.Column="3" 
-                                            Background="{DynamicResource ControlBackgroundBrush}"
-                                            BorderBrush="{DynamicResource NormalBorderBrush}"
-                                            BorderThickness="1"
-                                            CornerRadius="3"
-                                            Padding="12,6"
-                                            Margin="16,0,0,0">
+                                        Background="{DynamicResource ControlBackgroundBrush}"
+                                        BorderBrush="{DynamicResource NormalBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="3"
+                                        Padding="12,6"
+                                        Margin="16,0,0,0">
                                         <StackPanel Name="Part_MonthSelect" 
-                                                    Orientation="Horizontal">
+                                                Orientation="Horizontal">
                                             <TextBlock Text="{DynamicResource LOCCommonSince}" 
-                                                       Style="{DynamicResource BaseTextBlockStyle}"
-                                                       VerticalAlignment="Center" 
-                                                       Margin="0,0,8,0" />
+                                                    Style="{DynamicResource BaseTextBlockStyle}"
+                                                    VerticalAlignment="Center" 
+                                                    Margin="0,0,8,0" />
                                             <playnitecontrols:NumericBox x:Name="PART_Months" 
-                                                                         MinWidth="50" 
-                                                                         Height="24" 
-                                                                         LongValue="1" 
-                                                                         MinLongValue="1" 
-                                                                         HorizontalContentAlignment="Center" 
-                                                                         VerticalAlignment="Center" />
+                                                                        MinWidth="50" 
+                                                                        Height="24" 
+                                                                        LongValue="1" 
+                                                                        MinLongValue="1" 
+                                                                        HorizontalContentAlignment="Center" 
+                                                                        VerticalAlignment="Center" />
                                             <TextBlock Text="{DynamicResource LOCCommonMonthsLabel}" 
-                                                       Style="{DynamicResource BaseTextBlockStyle}"
-                                                       VerticalAlignment="Center" 
-                                                       Margin="8,0,0,0" />
+                                                    Style="{DynamicResource BaseTextBlockStyle}"
+                                                    VerticalAlignment="Center" 
+                                                    Margin="8,0,0,0" />
                                         </StackPanel>
                                     </Border>
                                 </Grid>
@@ -170,22 +167,23 @@
                         <Border Style="{StaticResource SectionBorder}" Margin="0">
                             <StackPanel>
                                 <TextBlock Text="{DynamicResource LOCCommonAdditionalOptions}" 
-                                           Style="{StaticResource SectionHeaderText}" />
+                                        Style="{StaticResource SectionHeaderText}" />
                                 <UniformGrid Columns="2" Rows="1">
                                     <CheckBox Name="PART_TagMissing" 
-                                              Style="{StaticResource ModernCheckBox}"
-                                              IsChecked="False"
-                                              Content="{DynamicResource LOCCommonMissingData}" />
+                                            Style="{StaticResource ModernCheckBox}"
+                                            IsChecked="False"
+                                            Content="{DynamicResource LOCCommonMissingData}" />
                                     <CheckBox Name="PART_OnlyMissing" 
-                                              Style="{StaticResource ModernCheckBox}"
-                                              IsChecked="True"
-                                              Content="{DynamicResource LOCCommonOnlyMissing}" />
+                                            Style="{StaticResource ModernCheckBox}"
+                                            IsChecked="True"
+                                            Content="{DynamicResource LOCCommonOnlyMissing}" />
                                 </UniformGrid>
                             </StackPanel>
                         </Border>
                     </StackPanel>
                 </ScrollViewer>
             </DockPanel>
-        </Border>
-    </Grid>
+        </Grid>
+
+    </Border>
 </UserControl>

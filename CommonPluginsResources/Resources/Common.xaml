@@ -328,4 +328,11 @@
         <Setter Property="MinWidth" Value="150" />
     </Style>
 
+    <!-- SECTION: USER CONTROL CONTAINERS -->
+
+    <Style x:Key="TopSeparatorBorder" TargetType="Border">
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+        <Setter Property="BorderBrush" Value="{DynamicResource NormalBorderBrush}" />
+    </Style>
+
 </ResourceDictionary>
