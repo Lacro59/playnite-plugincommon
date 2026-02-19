@@ -121,6 +121,7 @@
       <DependentUpon>PanelView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Stores\Steam\PanelViewModel.cs" />
+    <Compile Include="ViewsModels\TransfertDataViewModel.cs" />
     <Compile Include="Views\ListDataUpdated.xaml.cs">
       <DependentUpon>ListDataUpdated.xaml</DependentUpon>
     </Compile>
