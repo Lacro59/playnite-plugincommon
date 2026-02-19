@@ -54,7 +54,7 @@ namespace CommonPluginsShared.Collections
 		/// Command to navigate to the associated game in Playnite.
 		/// </summary>
 		[DontSerialize]
-		public RelayCommand<Guid> GoToGame => CommandsHelper.GoToGame;
+		public RelayCommand<Guid> GoToGame => CommandsNavigation.GoToGame;
 
 		#region Game data
 
