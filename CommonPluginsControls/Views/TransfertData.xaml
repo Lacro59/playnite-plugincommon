@@ -6,7 +6,7 @@
              xmlns:converters="clr-namespace:CommonPluginsShared.Converters"
              xmlns:pConverters="clr-namespace:CommonPlayniteShared.Converters"
              mc:Ignorable="d"
-             MinHeight="210" Width="960">
+             d:DesignHeight="200" d:DesignWidth="1000">
 
     <UserControl.Resources>
         <converters:DefaultIconConverter x:Key="DefaultIconConverter" />
