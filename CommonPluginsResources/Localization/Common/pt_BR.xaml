@@ -314,5 +314,18 @@ Windows variables can be used to add a dynamic string:
     <sys:String x:Key="LOCCommonInstallationStatus">Installation status</sys:String>
     <sys:String x:Key="LOCCommonTimeFilters">Time-based filters</sys:String>
     <sys:String x:Key="LOCCommonAdditionalOptions">Additional options</sys:String>
-    
+
+    <!-- DdItemListSelectionBox -->
+    <sys:String x:Key="LOCDdItemList_ClearSelection">Limpar seleção</sys:String>
+    <sys:String x:Key="LOCDdItemList_ShowSelectedOnly">Mostrar apenas os itens selecionados</sys:String>
+    <sys:String x:Key="LOCDdItemList_SearchPlaceholder">Buscar...</sys:String>
+    <sys:String x:Key="LOCDdItemList_NoItems">Nenhum item disponível</sys:String>
+
+	<!-- Settings -->
+	<sys:String x:Key="LOCCommonAddTag">Adicionar etiqueta indicando configuração suportada</sys:String>
+	<sys:String x:Key="LOCCommonTagSectionTitle">Gestão de etiquetas</sys:String>
+	<sys:String x:Key="LOCCommonDataSectionTitle">Gestão de dados</sys:String>
+	<sys:String x:Key="LOCCommonClearAllDescription">Exclui permanentemente todos os dados de verificação do sistema em cache para cada jogo. Esta ação não pode ser desfeita.</sys:String>
+	<sys:String x:Key="LOCCommonClearAllConfirm">Tem certeza que deseja excluir todos os dados do plugin? Esta ação não pode ser desfeita.</sys:String>
+
 </ResourceDictionary>
