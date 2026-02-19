@@ -315,5 +315,18 @@ Windows Variablen können verwendet werden, um eine dynamische Zeichenfolge hinz
     <sys:String x:Key="LOCCommonInstallationStatus">Installationsstatus</sys:String>
     <sys:String x:Key="LOCCommonTimeFilters">Zeitbasierte Filter</sys:String>
     <sys:String x:Key="LOCCommonAdditionalOptions">Zusätzliche Optionen</sys:String>
-    
+
+    <!-- DdItemListSelectionBox -->
+    <sys:String x:Key="LOCDdItemList_ClearSelection">Auswahl löschen</sys:String>
+    <sys:String x:Key="LOCDdItemList_ShowSelectedOnly">Nur ausgewählte Elemente anzeigen</sys:String>
+    <sys:String x:Key="LOCDdItemList_SearchPlaceholder">Suchen...</sys:String>
+    <sys:String x:Key="LOCDdItemList_NoItems">Keine Einträge gefunden</sys:String>
+
+	<!-- Settings -->
+	<sys:String x:Key="LOCCommonAddTag">Tag hinzufügen, der die unterstützte Konfiguration anzeigt</sys:String>
+	<sys:String x:Key="LOCCommonTagSectionTitle">Tag-Verwaltung</sys:String>
+	<sys:String x:Key="LOCCommonDataSectionTitle">Datenmanagement</sys:String>
+	<sys:String x:Key="LOCCommonClearAllDescription">Löscht alle zwischengespeicherten Systemüberprüfdaten dauerhaft für jedes Spiel. Diese Aktion kann nicht rückgängig gemacht werden.</sys:String>
+	<sys:String x:Key="LOCCommonClearAllConfirm">Sind Sie sicher, dass Sie alle Plugin-Daten löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.</sys:String>
+
 </ResourceDictionary>
