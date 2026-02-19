@@ -83,9 +83,18 @@ namespace CommonPluginsShared
             bool widthSet = false;
             bool heightSet = false;
 
+            double screenWidth = SystemParameters.WorkArea.Width;
+            double screenHeight = SystemParameters.WorkArea.Height;
+
+            // ----- WIDTH -----
             if (windowOptions.Width > 0)
             {
                 window.Width = windowOptions.Width;
+                widthSet = true;
+            }
+            else if (windowOptions.WidthPercent > 0)
+            {
+                window.Width = screenWidth * (windowOptions.WidthPercent / 100d);
                 widthSet = true;
             }
             else if (!double.IsNaN(viewExtension.Width) && viewExtension.Width > 0)
@@ -99,9 +108,15 @@ namespace CommonPluginsShared
                 widthSet = true;
             }
 
+            // ----- HEIGHT -----
             if (windowOptions.Height > 0)
             {
                 window.Height = windowOptions.Height;
+                heightSet = true;
+            }
+            else if (windowOptions.HeightPercent > 0)
+            {
+                window.Height = screenHeight * (windowOptions.HeightPercent / 100d);
                 heightSet = true;
             }
             else if (!double.IsNaN(viewExtension.Height) && viewExtension.Height > 0)
@@ -115,6 +130,7 @@ namespace CommonPluginsShared
                 heightSet = true;
             }
 
+            // ----- SizeToContent fallback -----
             if (!widthSet && !heightSet)
             {
                 window.SizeToContent = SizeToContent.WidthAndHeight;
@@ -128,6 +144,7 @@ namespace CommonPluginsShared
                 window.SizeToContent = SizeToContent.Height;
             }
         }
+
 
         /// <summary>
         /// Applies window size constraints independently (min/max dimensions).
@@ -159,7 +176,9 @@ namespace CommonPluginsShared
     public class WindowOptions : WindowCreationOptions
     {
         public double Width { get; set; }
+        public double WidthPercent { get; set; }
         public double Height { get; set; }
+        public double HeightPercent { get; set; }
         public double MinWidth { get; set; }
         public double MinHeight { get; set; }
         public double MaxWidth { get; set; }
