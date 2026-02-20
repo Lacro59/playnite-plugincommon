@@ -1,4 +1,5 @@
 ﻿using CommonPluginsShared.Collections;
+using CommonPluginsShared.Models;
 using CommonPluginsShared.Services;
 using CommonPluginsShared.UI;
 using Playnite.SDK;
@@ -13,7 +14,9 @@ namespace CommonPluginsShared.Interfaces
     {
         string PluginName { get; set; }
 
-        bool IsLoaded { get; set; }
+		PluginPaths Paths { get; set; }
+
+		bool IsLoaded { get; set; }
 
         IWindowPluginService WindowPluginService { get; set; }
 
@@ -147,5 +150,19 @@ namespace CommonPluginsShared.Interfaces
         /// </summary>
         /// <param name="fromClearDatabase"></param>
         void RemoveTagAllGames(bool fromClearDatabase = false);
-    }
+
+		/// <summary>
+		/// Exports all plugin data to a timestamped CSV file and opens the containing folder in Explorer.
+		/// </summary>
+		/// <param name="path">Target directory for the output file.</param>
+		/// <param name="minimum">When <c>true</c>, exports minimum requirement data; otherwise recommended.</param>
+		/// <returns><c>true</c> if the file was written successfully.</returns>
+		bool ExtractToCsv(string path, bool minimum);
+
+		/// <summary>Returns a projection of all database entries as <see cref="DataGame"/> view models.</summary>
+		IEnumerable<DataGame> GetDataGames();
+
+        /// <summary>Returns database entries that are marked as deleted (their Playnite game was removed).</summary>
+        IEnumerable<DataGame> GetIsolatedDataGames();
+	}
 }
