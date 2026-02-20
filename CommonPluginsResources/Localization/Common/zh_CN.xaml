@@ -26,7 +26,7 @@
 
     <sys:String x:Key="LOCCommonExtractToCsv">将插件数据提取到 CSV</sys:String>
     <sys:String x:Key="LOCCommonExtractAllToCsv">提取所有插件数据到 CSV (耗时长)</sys:String>
-    <sys:String x:Key="LOCCommonExtracting">提取中...</sys:String>
+    <sys:String x:Key="LOCCommonProcessingExtraction">提取中...</sys:String>
 
     <sys:String x:Key="LOCCommonImporting">Importing...</sys:String>
 

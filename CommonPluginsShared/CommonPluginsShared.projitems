@@ -49,7 +49,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\VisibilityZeroConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CookiesTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\DateTimeExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\ListExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)images\ImageServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginSettings.cs" />
@@ -62,6 +61,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteUiHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\GameMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginElement.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)plugins\PluginExportCsv.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginWindows.cs" />

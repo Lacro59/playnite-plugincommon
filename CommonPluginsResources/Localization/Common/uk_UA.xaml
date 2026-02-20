@@ -26,7 +26,7 @@
 
     <sys:String x:Key="LOCCommonExtractToCsv">Видобути дані плагіну в CSV</sys:String>
     <sys:String x:Key="LOCCommonExtractAllToCsv">Видобути всі дані плагіну у CSV (дуже довго)</sys:String>
-    <sys:String x:Key="LOCCommonExtracting">Видобування...</sys:String>
+    <sys:String x:Key="LOCCommonProcessingExtraction">Видобування...</sys:String>
 
     <sys:String x:Key="LOCCommonImporting">Імпортування...</sys:String>
 

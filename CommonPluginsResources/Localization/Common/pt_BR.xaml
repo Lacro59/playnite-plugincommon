@@ -26,7 +26,7 @@
 
     <sys:String x:Key="LOCCommonExtractToCsv">Extrair dados do plugin para CSV</sys:String>
     <sys:String x:Key="LOCCommonExtractAllToCsv">Extraia todos os dados do plugin para CSV (muito longo)</sys:String>
-    <sys:String x:Key="LOCCommonExtracting">Extraindo...</sys:String>
+    <sys:String x:Key="LOCCommonProcessingExtraction">Extraindo...</sys:String>
 
     <sys:String x:Key="LOCCommonImporting">Importando...</sys:String>
 

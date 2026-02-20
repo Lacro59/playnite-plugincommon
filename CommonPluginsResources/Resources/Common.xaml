@@ -134,6 +134,12 @@
         </Setter>
     </Style>
 
+    <!-- SECTION: CHECKBOX - COMPACT VARIANT -->
+    <Style x:Key="CompactCheckBox" TargetType="CheckBox" BasedOn="{StaticResource ModernCheckBox}">
+        <Setter Property="Padding" Value="8,2"/>
+        <Setter Property="Margin"  Value="0,1"/>
+    </Style>
+
     <!-- SECTION: BUTTONS - BASE STYLE -->
 
     <Style x:Key="ModernButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">

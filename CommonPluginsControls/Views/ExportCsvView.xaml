@@ -1,0 +1,153 @@
+﻿<UserControl x:Class="CommonPluginsControls.Views.ExportCsvView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib" 
+             xmlns:viewmodels="clr-namespace:CommonPluginsControls.ViewModels" 
+             d:DataContext="{d:DesignInstance Type=viewmodels:ExportCsvViewModel}"
+             mc:Ignorable="d"
+             d:DesignHeight="520" d:DesignWidth="460">
+
+    <UserControl.Resources>
+        <!-- Boolean constants used as CommandParameter -->
+        <sys:Boolean x:Key="True">True</sys:Boolean>
+        <sys:Boolean x:Key="False">False</sys:Boolean>
+
+        <!-- Hover highlight on each field checkbox row — no equivalent in Common.xaml -->
+        <Style x:Key="FieldRowStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding"      Value="6,3"/>
+            <Setter Property="Background"   Value="Transparent"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Style="{DynamicResource TopSeparatorBorder}">
+        <StackPanel Margin="16">
+
+            <!-- ══════════════════════════════════════════════════════
+                 SECTION 1 — Fields to export
+            ══════════════════════════════════════════════════════ -->
+            <Border Style="{DynamicResource ViewPluginCard}">
+                <StackPanel>
+
+                    <TextBlock Text="{DynamicResource LOCCommonExportFieldsSection}"
+                               Style="{DynamicResource SectionHeaderText}"/>
+
+                    <!-- Select / Deselect all -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <Button Content="{DynamicResource LOCSelectAll}"
+                                Style="{DynamicResource SecondaryButton}"
+                                Command="{Binding SelectAllCommand}"
+                                CommandParameter="{StaticResource True}"/>
+
+                        <Button Content="{DynamicResource LOCDeselectAll}"
+                                Style="{DynamicResource SecondaryButton}"
+                                Command="{Binding SelectAllCommand}"
+                                CommandParameter="{StaticResource False}"/>
+                    </StackPanel>
+
+                    <!-- Fields list -->
+                    <Border BorderBrush="{DynamicResource NormalBorderBrush}"
+                            BorderThickness="1" CornerRadius="6"
+                            MaxHeight="200">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding Fields}" Margin="4">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource FieldRowStyle}">
+                                            <CheckBox IsChecked="{Binding IsSelected}"
+                                                      Content="{Binding LocalizedName}"
+                                                      Style="{DynamicResource CompactCheckBox}"
+                                                      VerticalContentAlignment="Center"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+
+                </StackPanel>
+            </Border>
+
+            <!-- ══════════════════════════════════════════════════════
+                 SECTION 2 — Export options
+            ══════════════════════════════════════════════════════ -->
+            <Border Style="{DynamicResource ViewPluginCard}">
+                <StackPanel>
+
+                    <TextBlock Text="{DynamicResource LOCCommonExportOptionsSection}"
+                               Style="{DynamicResource SectionHeaderText}"/>
+
+                    <!-- Separator row -->
+                    <DockPanel Margin="0,0,0,12">
+                        <TextBlock Text="{DynamicResource LOCCommonSeparator}"
+                                   Style="{DynamicResource ViewColumnLabelText}"
+                                   Margin="0,0,8,0"/>
+                        <ComboBox ItemsSource="{Binding Separators}"
+                                  SelectedItem="{Binding SelectedSeparator}"
+                                  Style="{DynamicResource FilterComboBox}"
+                                  Width="110" HorizontalAlignment="Right"/>
+                    </DockPanel>
+
+                    <!-- Output file row
+                         ⚠ DockPanel order: Right-docked Browse button MUST come
+                           before the filling TextBox in the XAML tree -->
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Left"
+                                   Text="{DynamicResource LOCCommonExportOutputFile}"
+                                   Style="{DynamicResource ViewColumnLabelText}"
+                                   Margin="0,0,8,0"/>
+
+                        <Button DockPanel.Dock="Right"
+                                Style="{DynamicResource SecondaryButton}"
+                                Command="{Binding BrowseOutputCommand}"
+                                ToolTip="{DynamicResource LOCBrowse}"
+                                Padding="10,5">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{DynamicResource LOCBrowse}"
+                                           Style="{DynamicResource BaseTextBlockStyle}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Read-only path display — SearchTextBox for consistent padding/font -->
+                        <TextBox Style="{DynamicResource SearchTextBox}"
+                                 Text="{Binding OutputPath, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 VerticalContentAlignment="Center"
+                                 ToolTip="{Binding OutputPath}"/>
+                    </DockPanel>
+
+                </StackPanel>
+            </Border>
+
+            <!-- ══════════════════════════════════════════════════════
+                 ACTION BUTTONS
+                 Cancel : SecondaryButton — action passive
+                 Export : PrimaryButton  — action principale
+            ══════════════════════════════════════════════════════ -->
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Margin="0,4,0,0">
+
+                <Button Content="{DynamicResource LOCCancelLabel}"
+                        Style="{DynamicResource SecondaryButton}"
+                        IsCancel="True"/>
+
+                <Button Content="{DynamicResource LOCCommonExport}"
+                        Style="{DynamicResource PrimaryButton}"
+                        Command="{Binding ConfirmCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                        IsDefault="True"/>
+
+            </StackPanel>
+
+        </StackPanel>
+    </Border>
+</UserControl>

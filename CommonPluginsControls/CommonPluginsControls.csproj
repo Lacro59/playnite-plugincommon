@@ -121,7 +121,11 @@
       <DependentUpon>PanelView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Stores\Steam\PanelViewModel.cs" />
+    <Compile Include="ViewsModels\ExportCsvViewModel.cs" />
     <Compile Include="ViewsModels\TransfertDataViewModel.cs" />
+    <Compile Include="Views\ExportCsvView.xaml.cs">
+      <DependentUpon>ExportCsvView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ListDataUpdated.xaml.cs">
       <DependentUpon>ListDataUpdated.xaml</DependentUpon>
     </Compile>
@@ -208,6 +212,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Stores\Steam\PanelView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ExportCsvView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

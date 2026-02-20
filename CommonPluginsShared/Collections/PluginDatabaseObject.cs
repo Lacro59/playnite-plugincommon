@@ -31,7 +31,7 @@ namespace CommonPluginsShared.Collections
 	/// <typeparam name="TDatabase">Typed collection inheriting <see cref="PluginItemCollection{TItem}"/>.</typeparam>
 	/// <typeparam name="TItem">Database item type inheriting <see cref="PluginDataBaseGameBase"/>.</typeparam>
 	/// <typeparam name="T">Inner data type used to parameterise <see cref="PluginDataBaseGame{T}"/>.</typeparam>
-	public abstract class PluginDatabaseObject<TSettings, TDatabase, TItem, T> : ObservableObject, IPluginDatabase
+	public abstract class PluginDatabaseObject<TSettings, TDatabase, TItem, T> : ObservableObject, IPluginDatabase<TItem>
 		where TSettings : ISettings
 		where TDatabase : PluginItemCollection<TItem>
 		where TItem : PluginDataBaseGameBase
@@ -43,6 +43,8 @@ namespace CommonPluginsShared.Collections
 
 		/// <summary>Gets or sets the strongly-typed plugin settings view model.</summary>
 		public TSettings PluginSettings { get; set; }
+
+		public PluginExportCsv<TItem> PluginExportCsv { get; set; }
 
 		/// <summary>Gets or sets plugin-specific paths (database, cache, installation directory).</summary>
 		public PluginPaths Paths { get; set; }
@@ -110,13 +112,13 @@ namespace CommonPluginsShared.Collections
 
 		private IEnumerable<Guid> PreviousIds { get; set; } = new List<Guid>();
 
-        /// <summary>
-        /// Initialises paths, cache directories, and subscribes to Playnite game events.
-        /// </summary>
-        /// <param name="pluginSettings">Plugin settings view model.</param>
-        /// <param name="pluginName">Human-readable plugin name used for logging and file naming.</param>
-        /// <param name="pluginUserDataPath">Root path for all plugin user data.</param>
-        protected PluginDatabaseObject(TSettings pluginSettings, string pluginName, string pluginUserDataPath)
+		/// <summary>
+		/// Initialises paths, cache directories, and subscribes to Playnite game events.
+		/// </summary>
+		/// <param name="pluginSettings">Plugin settings view model.</param>
+		/// <param name="pluginName">Human-readable plugin name used for logging and file naming.</param>
+		/// <param name="pluginUserDataPath">Root path for all plugin user data.</param>
+		protected PluginDatabaseObject(TSettings pluginSettings, string pluginName, string pluginUserDataPath)
 		{
 			PluginSettings = pluginSettings;
 			PluginName = pluginName;
@@ -616,7 +618,10 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Fetches data from an online source using the game object.</summary>
 		public virtual TItem GetWeb(Game game) => GetWeb(game.Id);
 
-		// ── Explicit IPluginDatabase implementations ──────────────────────────────
+		// ── Explicit IPluginDatabase (non-générique) implementations ─────────────
+		// Les méthodes publiques retournent TItem ; IPluginDatabase attend PluginDataBaseGameBase.
+		// Ces bridges assurent la conformité sans casser l'API publique fortement typée.
+		// ExtractToCsv est satisfaite directement par la méthode publique typée via IPluginDatabase<TItem>.
 
 		PluginDataBaseGameBase IPluginDatabase.Get(Game game, bool onlyCache, bool force) => Get(game, onlyCache, force);
 		PluginDataBaseGameBase IPluginDatabase.Get(Guid id, bool onlyCache, bool force) => Get(id, onlyCache, force);
@@ -1164,83 +1169,10 @@ namespace CommonPluginsShared.Collections
 
 		#region CSV extraction
 
-		/// <summary>
-		/// Exports all plugin data to a timestamped CSV file and opens the containing folder in Explorer.
-		/// </summary>
-		/// <param name="path">Target directory for the output file.</param>
-		/// <param name="minimum">When <c>true</c>, exports minimum requirement data; otherwise recommended.</param>
-		/// <returns><c>true</c> if the file was written successfully.</returns>
-		public bool ExtractToCsv(string path, bool minimum)
+		public bool ExtractToCsv()
 		{
-			bool isOk = false;
-
-			try
-			{
-				Logger.Info($"ExtractToCsv(minimum={minimum}) started.");
-
-				GlobalProgressOptions options = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonExtracting")}")
-				{
-					Cancelable = true,
-					IsIndeterminate = false
-				};
-
-				API.Instance.Dialogs.ActivateGlobalProgress((a) =>
-				{
-					Stopwatch stopWatch = Stopwatch.StartNew();
-
-					try
-					{
-						ulong totalItems = 0;
-						foreach (TItem item in Database.Items?.Values)
-						{
-							totalItems += item.Count;
-						}
-						a.ProgressMaxValue = totalItems;
-
-						string filePath = CommonPlayniteShared.Common.Paths.FixPathLength(
-							Path.Combine(path, $"{PluginName}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv"));
-
-						FileSystem.PrepareSaveFile(filePath);
-						string csvData = GetCsvData(a, minimum);
-
-						if (!csvData.IsNullOrEmpty() && !a.CancelToken.IsCancellationRequested)
-						{
-							File.WriteAllText(filePath, csvData, Encoding.UTF8);
-							System.Diagnostics.Process.Start("explorer.exe", path);
-							isOk = true;
-						}
-						else if (csvData.IsNullOrEmpty())
-						{
-							Logger.Warn($"No CSV data available for {PluginName}.");
-						}
-					}
-					catch (Exception ex)
-					{
-						Common.LogError(ex, false, true, PluginName);
-					}
-
-					stopWatch.Stop();
-					TimeSpan ts = stopWatch.Elapsed;
-					Logger.Info(string.Format(
-						"ExtractToCsv(minimum={0}){1} — {2:00}:{3:00}.{4:00} for {5} items",
-						minimum,
-						a.CancelToken.IsCancellationRequested ? " (canceled)" : string.Empty,
-						ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
-						Database.Items?.Count()));
-				}, options);
-			}
-			catch (Exception ex)
-			{
-				Common.LogError(ex, false, true, PluginName);
-			}
-
-			return isOk;
+			return PluginExportCsv.ExportToCsv(PluginName, Database);
 		}
-
-		/// <summary>
-		/// Override to produce CSV content. Return <c>null</c> or empty to skip file creation.
-		/// </summary>
-		internal virtual string GetCsvData(GlobalProgressActionArgs a, bool minimum) => null;
 
 		#endregion
 
