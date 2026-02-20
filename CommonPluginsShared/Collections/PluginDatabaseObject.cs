@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using CommonPluginsShared.Services;
+using GameActivity.Services;
 
 namespace CommonPluginsShared.Collections
 {
@@ -58,8 +59,8 @@ namespace CommonPluginsShared.Collections
 		/// </summary>
 		public Game GameContext { get; set; }
 
-		/// <inheritdoc cref="IPluginDatabase.WindowPluginService"/>
-		public IWindowPluginService WindowPluginService { get; set; }
+		/// <inheritdoc cref="PluginWindows.PluginWindows"/>
+		public PluginWindows PluginWindows { get; set; }
 
 		/// <summary>
 		/// Prefix prepended to every tag created by this plugin (e.g. <c>"[SC]"</c>).

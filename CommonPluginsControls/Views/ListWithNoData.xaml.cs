@@ -25,7 +25,7 @@ namespace CommonPluginsControls.Views
 		{
 			_pluginDatabase = pluginDatabase;
 			InitializeComponent();
-			_goToGame = CommandsHelper.GoToGame;
+			_goToGame = CommandsNavigation.GoToGame;
 			RefreshData();
 		}
 
