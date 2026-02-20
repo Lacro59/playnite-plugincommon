@@ -1,9 +1,11 @@
 ﻿using CommonPlayniteShared;
 using CommonPlayniteShared.Common;
 using CommonPluginsControls.Controls;
+using CommonPluginsShared.Caching;
 using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.Models;
-using CommonPluginsShared.Caching;
+using CommonPluginsShared.Plugins;
+using CommonPluginsShared.Services;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
@@ -18,8 +20,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-using CommonPluginsShared.Services;
-using GameActivity.Services;
 
 namespace CommonPluginsShared.Collections
 {
@@ -59,8 +59,8 @@ namespace CommonPluginsShared.Collections
 		/// </summary>
 		public Game GameContext { get; set; }
 
-		/// <inheritdoc cref="PluginWindows.PluginWindows"/>
-		public PluginWindows PluginWindows { get; set; }
+		/// <inheritdoc cref="IPluginDatabase.PluginWindows"/>
+		public IPluginWindows PluginWindows { get; set; }
 
 		/// <summary>
 		/// Prefix prepended to every tag created by this plugin (e.g. <c>"[SC]"</c>).

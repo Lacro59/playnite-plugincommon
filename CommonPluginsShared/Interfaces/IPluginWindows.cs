@@ -10,7 +10,7 @@ namespace CommonPluginsShared.Services
 	/// <summary>
 	/// Window management interface
 	/// </summary>
-	public interface IWindowPluginService
+	public interface IPluginWindows
 	{
 		string PluginName { get; }
 

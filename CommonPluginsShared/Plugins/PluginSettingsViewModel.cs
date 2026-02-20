@@ -1,13 +1,8 @@
-using AngleSharp.Network;
 using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.UI;
 using Playnite.SDK;
-using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace CommonPluginsShared.Plugins
 {

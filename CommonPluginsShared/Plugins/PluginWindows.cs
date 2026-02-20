@@ -1,19 +1,17 @@
 using CommonPluginsControls.Views;
-using CommonPluginsShared;
 using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.Services;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 using System.Windows;
-using GameActivity.Views;
 using Playnite.SDK.Plugins;
 using System.Collections.Generic;
 using CommonPluginsShared.Models;
 using System.Linq;
 
-namespace GameActivity.Services
+namespace CommonPluginsShared.Plugins
 {
-	public class PluginWindows : IWindowPluginService
+	public class PluginWindows : IPluginWindows
 	{
 		protected static readonly ILogger Logger = LogManager.GetLogger();
 

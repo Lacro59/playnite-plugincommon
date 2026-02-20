@@ -64,7 +64,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginMenu.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Plugins\PluginSettings.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IWindowPluginService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginWindows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Caching\CachingServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IDataContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginDatabase.cs" />

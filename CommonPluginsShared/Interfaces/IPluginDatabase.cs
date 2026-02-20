@@ -1,9 +1,6 @@
 ﻿using CommonPluginsShared.Collections;
 using CommonPluginsShared.Models;
 using CommonPluginsShared.Services;
-using CommonPluginsShared.UI;
-using GameActivity.Services;
-using Playnite.SDK;
 using Playnite.SDK.Models;
 using System;
 using System.Collections.Generic;
@@ -19,7 +16,7 @@ namespace CommonPluginsShared.Interfaces
 
 		bool IsLoaded { get; set; }
 
-		PluginWindows PluginWindows { get; set; }
+		IPluginWindows PluginWindows { get; set; }
 
 		/// <summary>
 		/// Initialize the database.
