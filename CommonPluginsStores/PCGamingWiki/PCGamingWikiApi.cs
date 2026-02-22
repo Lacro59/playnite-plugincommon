@@ -28,6 +28,8 @@ namespace CommonPluginsStores.PCGamingWiki
 		internal string ClientName => "PCGamingWiki";
 		internal ExternalPlugin PluginLibrary { get; }
 
+		private SteamApi SteamApi { get; }
+
 		#region Urls
 
 		private string UrlBase => @"https://pcgamingwiki.com";
@@ -41,6 +43,7 @@ namespace CommonPluginsStores.PCGamingWiki
 		{
 			PluginName = pluginName;
 			PluginLibrary = pluginLibrary;
+			SteamApi = new SteamApi(PluginName, ExternalPlugin.CheckLocalizations);
 		}
 
 		/// <summary>
@@ -62,8 +65,7 @@ namespace CommonPluginsStores.PCGamingWiki
 				}
 				else
 				{
-					SteamApi steamApi = new SteamApi(PluginName, ExternalPlugin.CheckLocalizations);
-					appId = steamApi.GetAppId(game);
+					appId = SteamApi.GetAppId(game);
 				}
 
 				if (appId != 0)

@@ -30,9 +30,6 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using SystemChecker.Clients;
-using static CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared.StoreAppDetailsResult.AppDetails;
-using static CommonPlayniteShared.PluginLibrary.XboxLibrary.Models.TitleHistoryResponse;
 using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.Steam
@@ -1237,7 +1234,7 @@ namespace CommonPluginsStores.Steam
 					return null;
 				}
 
-				Serialization.TryFromJson(rawRequirements, out Requirement pcRequirements);
+				Serialization.TryFromJson(rawRequirements, out StoreAppDetailsResult.AppDetails.Requirement pcRequirements);
 				if (pcRequirements == null)
 				{
 					return null;
