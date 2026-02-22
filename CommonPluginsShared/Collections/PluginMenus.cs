@@ -3,7 +3,9 @@ using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.Plugins;
 using Playnite.SDK;
 using Playnite.SDK.Models;
+using Playnite.SDK.Plugins;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace CommonPluginsShared.Collections
@@ -12,20 +14,18 @@ namespace CommonPluginsShared.Collections
 	/// Provides common context objects (settings and database) that can be used
 	/// to build Playnite menu integrations for a plugin (main menu, game menu, etc.).
 	/// </summary>
-	public class PluginMenus
+	public abstract class PluginMenus
 	{
-		internal readonly PluginSettings _settings;
-		internal readonly IPluginDatabase _database;
+		protected readonly PluginSettings _settings;
+		protected readonly IPluginDatabase _database;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="PluginMenus"/> class.
-		/// </summary>
-		/// <param name="pluginSettings">The plugin settings view model.</param>
-		/// <param name="database">The plugin database service.</param>
-		public PluginMenus(PluginSettings pluginSettings, IPluginDatabase database)
+		protected PluginMenus(PluginSettings settings, IPluginDatabase database)
 		{
-			_settings = pluginSettings;
+			_settings = settings;
 			_database = database;
 		}
+
+		public abstract IEnumerable<GameMenuItem> GetGameMenuItems(GetGameMenuItemsArgs args);
+		public abstract IEnumerable<MainMenuItem> GetMainMenuItems(GetMainMenuItemsArgs args);
 	}
 }
