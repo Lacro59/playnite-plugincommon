@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using Playnite.SDK;
 
 namespace CommonPluginsShared
@@ -12,91 +9,180 @@ namespace CommonPluginsShared
     public class PlayniteUiHelper
     {
         /// <summary>
-        /// Can to exit window with escape key
+        /// Handles window closure with Escape key.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender">Event sender</param>
+        /// <param name="e">Key event arguments</param>
         public static void HandleEsc(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Escape)
+            if (e.Key == Key.Escape && sender is Window window)
             {
-                if (sender is Window window)
-                {
-                    e.Handled = true;
-                    window.Close();
-                }
+                e.Handled = true;
+                window.Close();
             }
         }
 
         /// <summary>
-        /// Create Window with Playnite SDK
+        /// Creates a Playnite extension window with the specified settings.
         /// </summary>
-        /// <param name="Title"></param>
-        /// <param name="ViewExtension"></param>
-        /// <param name="windowOptions"></param>
-        /// <returns></returns>
-        public static Window CreateExtensionWindow(string Title, UserControl ViewExtension, WindowOptions windowOptions = null)
+        /// <param name="title">Window title</param>
+        /// <param name="viewExtension">User control to display</param>
+        /// <param name="windowOptions">Window configuration options</param>
+        /// <returns>Configured Window instance</returns>
+        public static Window CreateExtensionWindow(string title, UserControl viewExtension, WindowOptions windowOptions = null)
         {
-            // Default window options
-            if (windowOptions == null)
+            if (string.IsNullOrWhiteSpace(title))
             {
-                windowOptions = new WindowOptions
-                {
-                    ShowMinimizeButton = false,
-                    ShowMaximizeButton = false,
-                    ShowCloseButton = true
-                };
+                throw new ArgumentException("Title cannot be null or empty.", nameof(title));
             }
 
-            Window windowExtension = API.Instance.Dialogs.CreateWindow(windowOptions);
+            if (viewExtension == null)
+            {
+                throw new ArgumentNullException(nameof(viewExtension));
+            }
 
-            windowExtension.Title = Title;
+            windowOptions = windowOptions ?? GetDefaultWindowOptions();
+
+            Window windowExtension = API.Instance.Dialogs.CreateWindow(windowOptions);
+            windowExtension.Title = title;
             windowExtension.ShowInTaskbar = false;
             windowExtension.ResizeMode = windowOptions.CanBeResizable ? ResizeMode.CanResize : ResizeMode.NoResize;
             windowExtension.Owner = API.Instance.Dialogs.GetCurrentAppWindow();
             windowExtension.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            windowExtension.Content = ViewExtension;
+            windowExtension.Content = viewExtension;
 
-            // TODO Still useful to add margin?
-            if (!double.IsNaN(ViewExtension.Height) && !double.IsNaN(ViewExtension.Width))
-            {
-                windowExtension.Height = ViewExtension.Height + 25;
-                windowExtension.Width = ViewExtension.Width;
-            }
-            else if (!double.IsNaN(ViewExtension.MinHeight) && !double.IsNaN(ViewExtension.MinWidth) && ViewExtension.MinHeight > 0 && ViewExtension.MinWidth > 0)
-            {
-                windowExtension.Height = ViewExtension.MinHeight + 25;
-                windowExtension.Width = ViewExtension.MinWidth;
-            }
-            else if (windowOptions.Width != 0 && windowOptions.Height != 0)
-            {
-                windowExtension.Width = windowOptions.Width;
-                windowExtension.Height = windowOptions.Height;
-            }
-            else
-            {
-                // TODO A black border is visible; SDK problem?
-                windowExtension.SizeToContent = SizeToContent.WidthAndHeight;
-            }
+            ApplyWindowDimensions(windowExtension, viewExtension, windowOptions);
+            ApplyWindowConstraints(windowExtension, windowOptions);
 
-            //if (windowExtension.ResizeMode == ResizeMode.NoResize)
-            //{
-            //    windowExtension.SizeToContent = SizeToContent.WidthAndHeight;
-            //}
-
-            // Add escape event
-            windowExtension.PreviewKeyDown += new KeyEventHandler(HandleEsc);
+            windowExtension.PreviewKeyDown += HandleEsc;
 
             return windowExtension;
         }
-    }
 
+        /// <summary>
+        /// Gets default window options configuration.
+        /// </summary>
+        /// <returns>Default WindowOptions instance</returns>
+        private static WindowOptions GetDefaultWindowOptions()
+        {
+            return new WindowOptions
+            {
+                ShowMinimizeButton = false,
+                ShowMaximizeButton = false,
+                ShowCloseButton = true,
+                CanBeResizable = false
+            };
+        }
+
+        /// <summary>
+        /// Applies window dimensions independently based on available sources.
+        /// Priority: WindowOptions > ViewExtension explicit size > ViewExtension min size > SizeToContent
+        /// </summary>
+        private static void ApplyWindowDimensions(Window window, UserControl viewExtension, WindowOptions windowOptions)
+        {
+            bool widthSet = false;
+            bool heightSet = false;
+
+            double screenWidth = SystemParameters.WorkArea.Width;
+            double screenHeight = SystemParameters.WorkArea.Height;
+
+            // ----- WIDTH -----
+            if (windowOptions.Width > 0)
+            {
+                window.Width = windowOptions.Width;
+                widthSet = true;
+            }
+            else if (windowOptions.WidthPercent > 0)
+            {
+                window.Width = screenWidth * (windowOptions.WidthPercent / 100d);
+                widthSet = true;
+            }
+            else if (!double.IsNaN(viewExtension.Width) && viewExtension.Width > 0)
+            {
+                window.Width = viewExtension.Width;
+                widthSet = true;
+            }
+            else if (!double.IsNaN(viewExtension.MinWidth) && viewExtension.MinWidth > 0)
+            {
+                window.Width = viewExtension.MinWidth;
+                widthSet = true;
+            }
+
+            // ----- HEIGHT -----
+            if (windowOptions.Height > 0)
+            {
+                window.Height = windowOptions.Height;
+                heightSet = true;
+            }
+            else if (windowOptions.HeightPercent > 0)
+            {
+                window.Height = screenHeight * (windowOptions.HeightPercent / 100d);
+                heightSet = true;
+            }
+            else if (!double.IsNaN(viewExtension.Height) && viewExtension.Height > 0)
+            {
+                window.Height = viewExtension.Height + 25;
+                heightSet = true;
+            }
+            else if (!double.IsNaN(viewExtension.MinHeight) && viewExtension.MinHeight > 0)
+            {
+                window.Height = viewExtension.MinHeight + 25;
+                heightSet = true;
+            }
+
+            // ----- SizeToContent fallback -----
+            if (!widthSet && !heightSet)
+            {
+                window.SizeToContent = SizeToContent.WidthAndHeight;
+            }
+            else if (!widthSet)
+            {
+                window.SizeToContent = SizeToContent.Width;
+            }
+            else if (!heightSet)
+            {
+                window.SizeToContent = SizeToContent.Height;
+            }
+        }
+
+
+        /// <summary>
+        /// Applies window size constraints independently (min/max dimensions).
+        /// </summary>
+        private static void ApplyWindowConstraints(Window window, WindowOptions windowOptions)
+        {
+            if (windowOptions.MinWidth > 0)
+            {
+                window.MinWidth = windowOptions.MinWidth;
+            }
+
+            if (windowOptions.MinHeight > 0)
+            {
+                window.MinHeight = windowOptions.MinHeight;
+            }
+
+            if (windowOptions.MaxWidth > 0)
+            {
+                window.MaxWidth = windowOptions.MaxWidth;
+            }
+
+            if (windowOptions.MaxHeight > 0)
+            {
+                window.MaxHeight = windowOptions.MaxHeight;
+            }
+        }
+    }
 
     public class WindowOptions : WindowCreationOptions
     {
         public double Width { get; set; }
+        public double WidthPercent { get; set; }
         public double Height { get; set; }
-
+        public double HeightPercent { get; set; }
+        public double MinWidth { get; set; }
+        public double MinHeight { get; set; }
+        public double MaxWidth { get; set; }
+        public double MaxHeight { get; set; }
         public bool CanBeResizable { get; set; } = false;
     }
 }

@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:CommonPluginsControls.Views"
              xmlns:converters="clr-namespace:CommonPluginsShared.Converters"
              mc:Ignorable="d" 
-             Height="600" Width="600">
+             d:DesignHeight="600" d:DesignWidth="600">
 
     <Grid Margin="10">
         <Grid.RowDefinitions>

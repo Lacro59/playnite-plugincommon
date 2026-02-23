@@ -16,12 +16,9 @@
     <Compile Include="Collections\PluginDatabaseObject.cs" />
     <Compile Include="Collections\PluginItemCollection.cs" />
     <Compile Include="Common.cs" />
-    <Compile Include="CumulsErrors.cs" />
-    <Compile Include="ImageTools.cs" />
     <Compile Include="Localization.cs" />
     <Compile Include="Models\TraceInfos.cs" />
     <Compile Include="PlayniteTools.cs" />
-    <Compile Include="Tools.cs" />
     <Compile Include="TransformIcon.cs" />
     <Compile Include="Web.cs" />
   </ItemGroup>

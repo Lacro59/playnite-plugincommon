@@ -1,27 +1,32 @@
 ﻿using CommonPlayniteShared;
-using Playnite.SDK;
+using CommonPluginsShared.Images;
 using System;
 using System.Drawing.Imaging;
 using System.Globalization;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Markup;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace CommonPluginsShared.Converters
 {
+    /// <summary>
+    /// Converts an image path to a grayscale BitmapImage.
+    /// </summary>
     public class ImageToGrayConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is string str && !str.IsNullOrEmpty())
+            try
             {
-                BitmapImage tmpImg = BitmapExtensions.BitmapFromFile(ImageSourceManagerPlugin.GetImagePath(str));
-                return ImageTools.ConvertBitmapImage(tmpImg, ImageColor.Gray);
+                if (value is string str && !str.IsNullOrEmpty())
+                {
+                    string imagePath = ImageSourceManagerPlugin.GetImagePath(str);
+                    BitmapImage tmpImg = BitmapExtensions.BitmapFromFile(imagePath);
+                    return ImageTools.ConvertBitmapImage(tmpImg, ImageColorMode.Gray);
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
             }
 
             return value;
@@ -29,7 +34,7 @@ namespace CommonPluginsShared.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
     }
 }

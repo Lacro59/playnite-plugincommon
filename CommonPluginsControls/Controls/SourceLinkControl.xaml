@@ -1,0 +1,60 @@
+﻿<UserControl x:Class="CommonPluginsControls.Controls.SourceLinkControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <Style x:Key="LinkButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Border BorderThickness="0,1,0,0" 
+            BorderBrush="{DynamicResource NormalBorderBrush}"
+            Padding="0,12,0,0"
+            Visibility="{Binding HasSource, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding LabelText, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                       Style="{DynamicResource BaseTextBlockStyle}" 
+                       FontSize="10" 
+                       Opacity="0.6"
+                       VerticalAlignment="Center"
+                       Margin="0,0,8,0"/>
+
+            <Button Style="{StaticResource LinkButtonStyle}"
+                    Command="{Binding NavigateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{Binding SourceUrl, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    ToolTip="{Binding SourceUrl, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    VerticalAlignment="Center">
+                <TextBlock Text="{Binding SourceLabel, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                           FontSize="10"
+                           Foreground="{DynamicResource GlyphBrush}"
+                           TextDecorations="Underline">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Button>
+        </StackPanel>
+    </Border>
+</UserControl>

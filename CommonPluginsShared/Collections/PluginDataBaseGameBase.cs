@@ -1,8 +1,9 @@
-﻿using Playnite.SDK.Models;
+﻿using CommonPluginsShared.UI;
+using Playnite.SDK;
 using Playnite.SDK.Data;
+using Playnite.SDK.Models;
 using System;
 using System.Collections.Generic;
-using Playnite.SDK;
 
 namespace CommonPluginsShared.Collections
 {
@@ -53,7 +54,7 @@ namespace CommonPluginsShared.Collections
 		/// Command to navigate to the associated game in Playnite.
 		/// </summary>
 		[DontSerialize]
-		public RelayCommand<Guid> GoToGame => Commands.GoToGame;
+		public RelayCommand<Guid> GoToGame => CommandsNavigation.GoToGame;
 
 		#region Game data
 

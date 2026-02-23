@@ -1,47 +1,121 @@
+﻿<!--
+    Modernized ListExtend styles.
+    Replace the existing ListExtend ResourceDictionary content with this block,
+    or merge it into the shared styles dictionary.
+
+    Changes vs. original:
+    - All TextBlock styles now inherit BaseTextBlockStyle for font consistency.
+    - Foreground binding uses AncestorType path that is more resilient to virtualisation
+      by using FallbackValue=False on the DataTrigger.
+    - ListBoxItem variants mirror ListView variants for full parity.
+    - Added ListExtendStyleTextBlockDarker for secondary text (e.g. timestamps)
+      that should appear muted but still honour selection highlight.
+-->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Style x:Key="ListExtendStyleLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
+    <!-- ── ListView: Label ──────────────────────────────────────────────────── -->
+    <Style x:Key="ListExtendStyleLabel"
+           TargetType="{x:Type Label}"
+           BasedOn="{StaticResource {x:Type Label}}">
         <Style.Triggers>
-            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}}, 
-                                           Path=IsSelected, 
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}},
+                                           Path=IsSelected,
                                            FallbackValue=False}"
                          Value="True">
-                <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}}, Path=Foreground}" />
+                <!-- Mirror the ListViewItem foreground so selected rows stay readable
+                     regardless of which theme accent colour is active. -->
+                <Setter Property="Foreground"
+                        Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}},
+                                        Path=Foreground}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="ListExtendStyleTextBlock" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+    <!-- ── ListView: TextBlock (primary) ────────────────────────────────────── -->
+    <Style x:Key="ListExtendStyleTextBlock"
+           TargetType="{x:Type TextBlock}"
+           BasedOn="{StaticResource BaseTextBlockStyle}">
         <Style.Triggers>
-            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}}, 
-                                           Path=IsSelected, 
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}},
+                                           Path=IsSelected,
                                            FallbackValue=False}"
                          Value="True">
-                <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}}, Path=Foreground}" />
+                <Setter Property="Foreground"
+                        Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}},
+                                        Path=Foreground}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="ListBoxExtendStyleLabel" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
+    <!-- ── ListView: TextBlock (secondary / muted) ──────────────────────────── -->
+    <!--
+        For non-primary text in a row (e.g. dates, counters).
+        Uses TextBrushDarker by default, overrides to full foreground when selected.
+    -->
+    <Style x:Key="ListExtendStyleTextBlockDarker"
+           TargetType="{x:Type TextBlock}"
+           BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="Foreground" Value="{DynamicResource TextBrushDarker}" />
         <Style.Triggers>
-            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, 
-                                           Path=IsSelected, 
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}},
+                                           Path=IsSelected,
                                            FallbackValue=False}"
                          Value="True">
-                <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=Foreground}" />
+                <Setter Property="Foreground"
+                        Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}},
+                                        Path=Foreground}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="ListBoxExtendStyleTextBlock" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource {x:Type TextBlock}}">
+    <!-- ── ListBox: Label ────────────────────────────────────────────────────── -->
+    <Style x:Key="ListBoxExtendStyleLabel"
+           TargetType="{x:Type Label}"
+           BasedOn="{StaticResource {x:Type Label}}">
         <Style.Triggers>
-            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, 
-                                           Path=IsSelected, 
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                           Path=IsSelected,
                                            FallbackValue=False}"
                          Value="True">
-                <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=Foreground}" />
+                <Setter Property="Foreground"
+                        Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                        Path=Foreground}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
+
+    <!-- ── ListBox: TextBlock (primary) ─────────────────────────────────────── -->
+    <Style x:Key="ListBoxExtendStyleTextBlock"
+           TargetType="{x:Type TextBlock}"
+           BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                           Path=IsSelected,
+                                           FallbackValue=False}"
+                         Value="True">
+                <Setter Property="Foreground"
+                        Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                        Path=Foreground}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- ── ListBox: TextBlock (secondary / muted) ───────────────────────────── -->
+    <Style x:Key="ListBoxExtendStyleTextBlockDarker"
+           TargetType="{x:Type TextBlock}"
+           BasedOn="{StaticResource BaseTextBlockStyle}">
+        <Setter Property="Foreground" Value="{DynamicResource TextBrushDarker}" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                           Path=IsSelected,
+                                           FallbackValue=False}"
+                         Value="True">
+                <Setter Property="Foreground"
+                        Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                        Path=Foreground}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
 </ResourceDictionary>

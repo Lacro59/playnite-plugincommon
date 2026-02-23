@@ -26,7 +26,7 @@ namespace CommonPluginsShared
     /// </summary>
     public class PlayniteTools
     {
-        private static ILogger Logger => LogManager.GetLogger();
+        private static readonly ILogger Logger = LogManager.GetLogger();
 
         private static List<Emulator> ListEmulators { get; set; } = null;
 
@@ -147,12 +147,6 @@ namespace CommonPluginsShared
         public static Guid GetPluginId(ExternalPlugin externalPlugin)
         {
             return PluginsById.FirstOrDefault(x => x.Value == externalPlugin).Key;
-        }
-
-        [Obsolete]
-        public static bool IsDisabledPlaynitePlugins(string pluginName)
-        {
-            return DisabledPlugins?.Contains(pluginName) ?? false;
         }
 
         /// <summary>
@@ -1070,5 +1064,31 @@ namespace CommonPluginsShared
                 Common.LogError(ex, false);
             }
         }
-    }
+
+
+		public static string FormatTimeAgo(TimeSpan timeSpan)
+		{
+			if (timeSpan.TotalDays >= 365)
+			{
+				int years = (int)(timeSpan.TotalDays / 365);
+				return string.Format(ResourceProvider.GetString(years == 1 ? "LOCCommonYearAgo" : "LOCCommonYearsAgo"), years);
+			}
+			if (timeSpan.TotalDays >= 30)
+			{
+				int months = (int)(timeSpan.TotalDays / 30);
+				return string.Format(ResourceProvider.GetString(months == 1 ? "LOCCommonMonthAgo" : "LOCCommonMonthsAgo"), months);
+			}
+			if (timeSpan.TotalDays >= 1)
+			{
+				int days = (int)timeSpan.TotalDays;
+				return string.Format(ResourceProvider.GetString(days == 1 ? "LOCCommonDayAgo" : "LOCCommonDaysAgo"), days);
+			}
+			if (timeSpan.TotalHours >= 1)
+			{
+				int hours = (int)timeSpan.TotalHours;
+				return string.Format(ResourceProvider.GetString(hours == 1 ? "LOCCommonHourAgo" : "LOCCommonHoursAgo"), hours);
+			}
+			return ResourceProvider.GetString("LOCCommonToday");
+		}
+	}
 }

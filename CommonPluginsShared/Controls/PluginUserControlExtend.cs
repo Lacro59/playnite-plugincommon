@@ -1,62 +1,69 @@
 ﻿using CommonPluginsShared.Collections;
 using CommonPluginsShared.Interfaces;
+using Playnite.SDK;
 using Playnite.SDK.Models;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
 namespace CommonPluginsShared.Controls
 {
-    /// <summary>
-    /// Extended user control base class that integrates with a plugin database.
-    /// Automatically handles data retrieval and UI updates based on the current game context.
-    /// </summary>
-    public class PluginUserControlExtend : PluginUserControlExtendBase
-    {
-        /// <summary>
-        /// The plugin's database interface for accessing game-specific data.
-        /// </summary>
-        protected virtual IPluginDatabase pluginDatabase { get; }
+	/// <summary>
+	/// Extended user control base class that integrates with a plugin database.
+	/// Automatically handles data retrieval and UI updates based on the current game context.
+	/// Database access is offloaded to a background thread to keep the UI responsive.
+	/// </summary>
+	public class PluginUserControlExtend : PluginUserControlExtendBase
+	{
+		protected virtual IPluginDatabase pluginDatabase { get; }
 
-        /// <summary>
-        /// Sets the control data using the provided game and associated plugin data.
-        /// This method should be overridden by derived classes to implement custom logic.
-        /// </summary>
-        /// <param name="newContext">The current selected game context.</param>
-        /// <param name="pluginGameData">The plugin-specific data associated with the game.</param>
-        public virtual void SetData(Game newContext, PluginDataBaseGameBase pluginGameData)
-        {
-        }
+		protected void OnLoaded(object sender, RoutedEventArgs e)
+		{
+			InitializeStaticEvents();
+			PluginSettings_PropertyChanged(null, null);
+		}
 
-        /// <summary>
-        /// Updates the control's content asynchronously using game context and plugin data.
-        /// </summary>
-        public override async Task UpdateDataAsync()
-        {
-            UpdateDataTimer.Stop();
-            Visibility = MustDisplay ? Visibility.Visible : Visibility.Collapsed;
+		/// <summary>
+		/// Sets the control data using the provided game and associated plugin data.
+		/// Override in derived classes to apply game-specific UI logic.
+		/// </summary>
+		/// <param name="newContext">The current selected game.</param>
+		/// <param name="pluginGameData">The plugin-specific data for the game.</param>
+		public virtual void SetData(Game newContext, PluginDataBaseGameBase pluginGameData) { }
 
-            if (GameContext is null)
-            {
-                return;
-            }
+		/// <summary>
+		/// Updates the control asynchronously. Database I/O runs on a background thread;
+		/// the result is marshalled back to the UI thread for rendering.
+		/// </summary>
+		public override async Task UpdateDataAsync()
+		{
+			UpdateDataTimer.Stop();
 
-            if (GameContext is null || GameContext.Id != CurrentGame.Id)
-            {
-                return;
-            }
+			if (GameContext == null || CurrentGame == null || GameContext.Id != CurrentGame.Id)
+			{
+				Visibility = Visibility.Collapsed;
+				return;
+			}
 
-            PluginDataBaseGameBase PluginGameData = pluginDatabase.Get(GameContext, true);
-            if (GameContext is null || GameContext.Id != CurrentGame.Id || (!PluginGameData?.HasData ?? true))
-            {
-                Visibility = AlwaysShow ? Visibility.Visible : Visibility.Collapsed;
-                return;
-            }
+			Game gameSnapshot = GameContext;
+			Guid gameId = gameSnapshot.Id;
 
-            await Application.Current.Dispatcher?.InvokeAsync(
-                () => SetData(GameContext, PluginGameData),
-                DispatcherPriority.Render
-            );
-        }
-    }
+			PluginDataBaseGameBase pluginGameData = await Task.Run(() => pluginDatabase.Get(gameSnapshot, true));
+
+			if (GameContext == null || GameContext.Id != gameId)
+			{
+				return;
+			}
+
+			if (pluginGameData == null || !pluginGameData.HasData)
+			{
+				Visibility = AlwaysShow ? Visibility.Visible : Visibility.Collapsed;
+				return;
+			}
+
+			Visibility = MustDisplay ? Visibility.Visible : Visibility.Collapsed;
+			SetData(GameContext, pluginGameData);
+		}
+	}
 }

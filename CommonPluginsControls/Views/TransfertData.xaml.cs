@@ -1,103 +1,114 @@
-﻿using Playnite.SDK;
+﻿using CommonPluginsControls.ViewModels;
+using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using CommonPluginsShared.Interfaces;
-using CommonPluginsShared;
-using CommonPluginsShared.Collections;
-using Playnite.SDK.Data;
+using System.Windows.Input;
 
 namespace CommonPluginsControls.Views
 {
     /// <summary>
-    /// Logique d'interaction pour TransfertData.xaml
+    /// Code-behind for TransfertData.xaml.
+    /// Kept minimal: business logic lives in <see cref="TransfertDataViewModel"/>.
+    ///
+    /// SelectionChanged handlers solve two WPF editable ComboBox issues:
+    ///   1. WPF writes ToString() back into the Text binding after selection,
+    ///      which would retrigger the filter and collapse the selection.
+    ///      Guard flags on the ViewModel suppress the refresh during that write-back.
+    ///   2. Focus remains trapped inside the editable TextBox after selection.
+    ///      MoveFocus releases it to the next logical element.
     /// </summary>
     public partial class TransfertData : UserControl
     {
-        internal static readonly ILogger logger = LogManager.GetLogger();
-        private IPluginDatabase PluginDatabase { get; set; }
+        // ── Constructors ──────────────────────────────────────────────────────
 
-
-        public TransfertData(List<DataGame> DataPluginGames, IPluginDatabase PluginDatabase)
+        /// <summary>Opens the transfer dialog with a selectable list of source games.</summary>
+        public TransfertData(List<DataGame> dataPluginGames, IPluginDatabase pluginDatabase)
         {
-            this.PluginDatabase = PluginDatabase;
-            Init(DataPluginGames);
+            InitializeComponent();
+            BindViewModel(new TransfertDataViewModel(dataPluginGames, pluginDatabase));
         }
 
-        public TransfertData(DataGame DataPluginGame, IPluginDatabase PluginDatabase)
-        {
-            this.PluginDatabase = PluginDatabase;
-            Init(new List<DataGame> { DataPluginGame });
-            PART_CbPluginGame.SelectedIndex = 0;
-            PART_CbPluginGame.IsEnabled = false;
-        }
-
-
-        private void Init(List<DataGame> DataPluginGames)
+        /// <summary>Opens the transfer dialog with a single pre-selected and locked source game.</summary>
+        public TransfertData(DataGame dataPluginGame, IPluginDatabase pluginDatabase)
         {
             InitializeComponent();
 
-            List<DataGame> DataGames = API.Instance.Database.Games.Select(x => new DataGame
-            {
-                Id = x.Id,
-                Icon = x.Icon.IsNullOrEmpty() ? x.Icon : API.Instance.Database.GetFullFilePath(x.Icon),
-                Name = x.Name,
-                CountData = PluginDatabase.Get(x.Id, true)?.Count ?? 0
-            }).Distinct().ToList();
+            TransfertDataViewModel vm = new TransfertDataViewModel(
+                new List<DataGame> { dataPluginGame },
+                pluginDatabase);
 
-            PART_CbPluginGame.ItemsSource = DataPluginGames.OrderBy(x => x.Name).ToList();
-            PART_CbGame.ItemsSource = DataGames.OrderBy(x => x.Name).ToList();
+            vm.LockSourceGame(dataPluginGame);
+            BindViewModel(vm);
         }
 
+        // ── Event handlers ────────────────────────────────────────────────────
 
-        private void PART_BtClose_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Raised when the user selects an item in the source ComboBox.
+        ///
+        /// Sequence when the user clicks an item in an editable ComboBox:
+        ///   1. SelectionChanged fires → guard flag raised.
+        ///   2. WPF writes item.ToString() into Text (SearchTextSource).
+        ///      The guard prevents the setter from refreshing the view.
+        ///   3. ResetSearchSource() clears the filter so the full list is visible
+        ///      the next time the drop-down opens.
+        ///   4. Guard flag lowered.
+        ///   5. MoveFocus transfers keyboard focus away from the internal TextBox
+        ///      so the user is not stuck inside the editable field.
+        /// </summary>
+        private void PART_CbPluginGame_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ((Window)this.Parent).Close();
+            if (!(DataContext is TransfertDataViewModel vm)) return;
+
+            vm.IsSelectingSource = true;
+            vm.ResetSearchSource();
+            vm.IsSelectingSource = false;
+
+            // Release focus from the ComboBox internal TextBox to the next element.
+            ReleaseFocus(sender as UIElement);
         }
 
-        private void PART_BtTransfer_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Raised when the user selects an item in the target ComboBox.
+        /// Follows the same guard + focus pattern as <see cref="PART_CbPluginGame_SelectionChanged"/>.
+        /// </summary>
+        private void PART_CbGame_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            try
-            {
-                PluginDataBaseGameBase PluginData;
+            if (!(DataContext is TransfertDataViewModel vm)) return;
 
-                if ((bool)Part_Merged.IsChecked)
-                {
-                    PluginData = PluginDatabase.MergeData(((DataGame)PART_CbPluginGame.SelectedItem).Id, ((DataGame)PART_CbGame.SelectedItem).Id);
-                }
-                else
-                {
-                    PluginData = PluginDatabase.GetClone(((DataGame)PART_CbPluginGame.SelectedItem).Id);
-                    PluginData.Id = ((DataGame)PART_CbGame.SelectedItem).Id;
-                    PluginData.Name = ((DataGame)PART_CbGame.SelectedItem).Name;
-                }
+            vm.IsSelectingTarget = true;
+            vm.ResetSearchTarget();
+            vm.IsSelectingTarget = false;
 
-                if (PluginData != null)
-                {
-                    PluginDatabase.AddOrUpdate(PluginData);
-                }
-                else
-                {
-                    logger.Warn($"{PluginDatabase.PluginName} - No data saved from {((DataGame)PART_CbPluginGame.SelectedItem).Name} to {((DataGame)PART_CbGame.SelectedItem).Name}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginDatabase.PluginName);
-            }
-
-            ((Window)this.Parent).Close();
+            ReleaseFocus(sender as UIElement);
         }
 
+        // ── Private helpers ───────────────────────────────────────────────────
 
-        private void PART_Cb_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        /// <summary>
+        /// Moves keyboard focus forward to the next focusable element in tab order.
+        /// If no next element exists (e.g. single-item dialog), focus is simply cleared.
+        /// </summary>
+        private static void ReleaseFocus(UIElement element)
         {
-            PART_BtTransfer.IsEnabled = PART_CbPluginGame.SelectedIndex == -1 || PART_CbGame.SelectedIndex == -1
-                ? false
-                : ((DataGame)PART_CbPluginGame.SelectedItem).Id != ((DataGame)PART_CbGame.SelectedItem).Id;
+            if (element == null) return;
+
+            // Request the element to take logical focus first, then move forward.
+            // This ensures focus leaves the internal editable TextBox of the ComboBox.
+            element.Focus();
+            element.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+        }
+
+        /// <summary>
+        /// Sets the DataContext and wires the ViewModel's RequestClose event
+        /// so the ViewModel can close the host window without any View reference.
+        /// </summary>
+        private void BindViewModel(TransfertDataViewModel vm)
+        {
+            vm.RequestClose += () => Window.GetWindow(this)?.Close();
+            DataContext = vm;
         }
     }
 }

@@ -5,59 +5,282 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CommonPluginsControls.Views"
              xmlns:controlsShared="clr-namespace:CommonPluginsShared.Controls"
-             xmlns:converters="clr-namespace:CommonPlayniteShared.Converters"
-             mc:Ignorable="d" Height="600" Width="600">
+             xmlns:converters="clr-namespace:CommonPlayniteShared.Converters" 
+             xmlns:playnitecontrols="clr-namespace:CommonPluginsControls.PlayniteControls"
+             xmlns:desktopapp="clr-namespace:CommonPlayniteShared.DesktopApp"
+             mc:Ignorable="d" d:DesignHeight="700" d:DesignWidth="1000">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter" />
     </UserControl.Resources>
 
-    <Grid Margin="10">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="10" />
-            <RowDefinition Height="auto" />
-        </Grid.RowDefinitions>
+    <Border Style="{StaticResource TopSeparatorBorder}">
 
-        <Grid Name="PART_LvContener" Grid.ColumnSpan="2">
-            <controlsShared:ListViewExtend x:Name="ListViewGames" FontSize="24" Height="{Binding ElementName=PART_LvContener, Path=ActualHeight}"
+        <Grid Margin="15">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Header Section -->
+            <Border Grid.Row="0" Style="{StaticResource CardBorder}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <TextBlock Style="{DynamicResource BaseTextBlockStyle}" 
+                               Text="📊" FontSize="20" 
+                               VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBlock Text="{DynamicResource LOCCommonTotalFound}" 
+                               Style="{DynamicResource SectionHeaderText}"
+                               VerticalAlignment="Center"
+                               Margin="0" />
+                        <TextBlock x:Name="PART_Count" Text="0" 
+                               Style="{DynamicResource BaseTextBlockStyle}"
+                               FontWeight="Bold" FontSize="16" 
+                               Foreground="{DynamicResource WarningBrush}"
+                               Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <TextBlock Style="{DynamicResource BaseTextBlockStyle}" 
+                               Text="✓" FontSize="16" 
+                               VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <TextBlock Text="{DynamicResource LOCCommonSelected}" 
+                               Style="{DynamicResource BaseTextBlockStyle}"
+                               FontSize="13" VerticalAlignment="Center" />
+                        <TextBlock x:Name="PART_SelectedCount" Text="0" 
+                               Style="{DynamicResource BaseTextBlockStyle}"
+                               FontWeight="SemiBold" FontSize="13" 
+                               Foreground="{DynamicResource GlyphBrush}"
+                               Margin="6,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Filter Section -->
+            <!-- Filter Section -->
+            <Border Grid.Row="1" Style="{StaticResource FilterCardBorder}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <DockPanel Grid.Column="0">
+                        <playnitecontrols:SearchBox x:Name="PART_SearchBox"
+                                        TextChanged="SearchBox_TextChanged" />
+                    </DockPanel>
+
+                    <desktopapp:DdItemListSelectionBox
+                            x:Name="PART_SourceFilter"
+                            Grid.Column="2"
+                            ShowSearchBox="True" />
+
+                    <desktopapp:DdItemListSelectionBox
+                            x:Name="PART_PlatformFilter"
+                            Grid.Column="4"
+                            ShowSearchBox="True" />
+                </Grid>
+            </Border>
+
+            <!-- Action Buttons -->
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,10">
+                <Button x:Name="PART_SelectAll" 
+                    Content="{DynamicResource LOCSelectAll}" 
+                    Click="SelectAll_Click" 
+                    Style="{StaticResource SecondaryButton}"
+                    MinWidth="100" 
+                    Margin="0,0,8,0" />
+
+                <Button x:Name="PART_SelectNone" 
+                    Content="{DynamicResource LOCCommonClearSelection}" 
+                    Click="SelectNone_Click" 
+                    Style="{StaticResource SecondaryButton}"
+                    MinWidth="100" 
+                    Margin="0,0,8,0" />
+
+                <Separator Margin="4,0" />
+
+                <Button x:Name="PART_RefreshSelected" 
+                    Content="{DynamicResource LOCCommonRefreshSelected}" 
+                    Click="RefreshSelected_Click" 
+                    Style="{StaticResource PrimaryButton}"
+                    MinWidth="140" 
+                    Margin="8,0,8,0" />
+
+                <Button x:Name="PART_RefreshAll" 
+                    Content="{DynamicResource LOCCommonRefreshAllData}" 
+                    Click="RefreshAll_Click" 
+                    Style="{StaticResource WarningButton}"
+                    MinWidth="120" />
+            </StackPanel>
+
+            <!-- Games List -->
+            <Border Grid.Row="3" 
+                BorderBrush="{DynamicResource NormalBorderBrush}" 
+                BorderThickness="1" 
+                CornerRadius="4">
+                <controlsShared:ListViewExtend x:Name="ListViewGames" 
+                                           FontSize="13"
+                                           SelectionMode="Extended"
                                            Style="{StaticResource {x:Type ListView}}"
-                                           SortingSortDirection="Ascending" SortingDefaultDataName="Name" SortingEnable="True">
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn Width="0" DisplayMemberBinding="{Binding Name}">
-                            <controlsShared:GridViewColumnHeaderExtend Style="{StaticResource {x:Type GridViewColumnHeader}}" IsHitTestVisible="False" RefIndex="1" />
-                        </GridViewColumn>
-                        <GridViewColumn Width="500">
-                            <GridViewColumnHeader Content="{DynamicResource LOCGameNameTitle}" Tag="Name" />
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel>
-                                        <TextBlock>
-                                            <Hyperlink Command="{Binding GoToGame}" CommandParameter="{Binding Id}">
-                                                <TextBlock Text="{Binding Name}" Style="{DynamicResource ListExtendStyleTextBlock}" />
-                                            </Hyperlink>
-                                        </TextBlock>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                    </GridView>
-                </ListView.View>
-            </controlsShared:ListViewExtend>
+                                           SortingSortDirection="Ascending" 
+                                           SortingDefaultDataName="Name" 
+                                           SortingEnable="True"
+                                           ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListView.View>
+                        <GridView>
+                            <!-- Hidden column for sorting -->
+                            <GridViewColumn Width="0" DisplayMemberBinding="{Binding Name}">
+                                <controlsShared:GridViewColumnHeaderExtend 
+                                Style="{StaticResource {x:Type GridViewColumnHeader}}" 
+                                IsHitTestVisible="False" RefIndex="1" />
+                            </GridViewColumn>
+
+                            <!-- Checkbox Column -->
+                            <GridViewColumn Width="50">
+                                <GridViewColumnHeader Content="☑" Padding="8,6" />
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" 
+                                              Style="{StaticResource ModernCheckBox}"
+                                              HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"
+                                              Checked="CheckBox_Changed" 
+                                              Unchecked="CheckBox_Changed" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <!-- Game Name Column -->
+                            <GridViewColumn Width="280">
+                                <GridViewColumnHeader Content="{DynamicResource LOCGameNameTitle}" 
+                                                  Tag="Name" Padding="8,6" />
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Style="{DynamicResource BaseTextBlockStyle}" Margin="4,4">
+                                        <Hyperlink Command="{Binding GoToGame}" 
+                                                   CommandParameter="{Binding Id}"
+                                                   TextDecorations="None">
+                                            <TextBlock Text="{Binding Name}" 
+                                                       Style="{DynamicResource BaseTextBlockStyle}"
+                                                       FontWeight="Medium"
+                                                       Foreground="{DynamicResource TextBrush}" />
+                                        </Hyperlink>
+                                    </TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <!-- Platform Column -->
+                            <GridViewColumn Width="160">
+                                <GridViewColumnHeader Content="{DynamicResource LOCPlatformTitle}" 
+                                                  Tag="PlatformName" 
+                                                  Padding="8,6" />
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding PlatformName}" 
+                                               Style="{DynamicResource BaseTextBlockStyle}"
+                                               Margin="4" 
+                                               TextTrimming="CharacterEllipsis"
+                                               ToolTip="{Binding PlatformName}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <!-- Source Column -->
+                            <GridViewColumn Width="120">
+                                <GridViewColumnHeader Content="{DynamicResource LOCSourceLabel}" 
+                                                  Tag="SourceName" 
+                                                  Padding="8,6" />
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding SourceName}" 
+                                               Style="{DynamicResource BaseTextBlockStyle}"
+                                               Margin="4" 
+                                               TextTrimming="CharacterEllipsis"
+                                               ToolTip="{Binding SourceName}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <!-- Install Status Column -->
+                            <GridViewColumn Width="90">
+                                <GridViewColumnHeader Content="{DynamicResource LOCGameInstallationStatus}" 
+                                                  Tag="InstallStatusText" 
+                                                  Padding="8,6" />
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{Binding InstallStatusBrush}" 
+                                            CornerRadius="3" 
+                                            Padding="6,3" 
+                                            HorizontalAlignment="Center">
+                                            <TextBlock Text="{Binding InstallStatusText}" 
+                                                   Style="{DynamicResource BaseTextBlockStyle}"
+                                                   FontSize="11" 
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TextBrushDark}" />
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <!-- Added Date Column -->
+                            <GridViewColumn Width="110">
+                                <GridViewColumnHeader Content="{DynamicResource LOCDateAddedLabel}" 
+                                                  Tag="AddedDate" 
+                                                  Padding="8,6" />
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding AddedDateText}" 
+                                               Style="{DynamicResource BaseTextBlockStyle}"
+                                               Margin="4" 
+                                               FontSize="12"
+                                               ToolTip="{Binding AddedDateFull}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <!-- Last Activity Column -->
+                            <GridViewColumn Width="110">
+                                <GridViewColumnHeader Content="{DynamicResource LOCLastPlayed}" 
+                                                  Tag="LastActivityDate" 
+                                                  Padding="8,6" />
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding LastActivityText}" 
+                                               Style="{DynamicResource BaseTextBlockStyle}"
+                                               Margin="4" 
+                                               FontSize="12"
+                                               Foreground="{Binding LastActivityBrush}"
+                                               ToolTip="{Binding LastActivityFull}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </controlsShared:ListViewExtend>
+            </Border>
+
+            <!-- Progress Indicator -->
+            <ProgressBar Grid.Row="4" x:Name="PART_ProgressBar" 
+                     Height="4" 
+                     Margin="0,8,0,0"
+                     IsIndeterminate="True"
+                     Visibility="Collapsed" />
         </Grid>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal">
-            <Label Content="{DynamicResource LOCCommonTotalFound}" />
-            <Label Margin="20,0,0,0" Content="xxxx" Name="PART_Count" />
-        </StackPanel>
-
-        <Button Grid.Row="2" Grid.Column="2" Content="{DynamicResource LOCCommonRefreshAllData}" HorizontalAlignment="Right"
-                Click="Button_Click" />
-    </Grid>
+    </Border>
 </UserControl>

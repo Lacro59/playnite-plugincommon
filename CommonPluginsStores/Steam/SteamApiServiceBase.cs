@@ -10,7 +10,7 @@ namespace CommonPluginsStores.Steam
 {
 	public class SteamApiServiceBase
 	{
-		protected static ILogger Logger => LogManager.GetLogger();
+		protected static readonly ILogger Logger = LogManager.GetLogger();
 
 		public static TResponse Get<TResponse>(string baseUrl, Dictionary<string, string> parameters, SteamApiRetrySettings retrySettings = null) where TResponse : class
 		{

@@ -1,4 +1,6 @@
-﻿using CommonPluginsShared.Interfaces;
+﻿using CommonPluginsShared;
+using CommonPluginsShared.Interfaces;
+using CommonPluginsShared.UI;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 using System;
@@ -6,60 +8,358 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace CommonPluginsControls.Views
 {
-    /// <summary>
-    /// Logique d'interaction pour ListWithNoData.xaml
-    /// </summary>
-    public partial class ListWithNoData : UserControl
-    {
-        private IPluginDatabase PluginDatabase { get; set; }
-        private List<GameData> gameData = new List<GameData>();
+	public partial class ListWithNoData : UserControl
+	{
+		private IPluginDatabase _pluginDatabase;
+		private List<GameDataViewModel> _allGames = new List<GameDataViewModel>();
+		private List<GameDataViewModel> _filteredGames = new List<GameDataViewModel>();
+		private SelectableDbItemList _sourceList;
+		private SelectableDbItemList _platformList;
+		private RelayCommand<Guid> _goToGame;
 
-        private RelayCommand<Guid> GoToGame { get; set; }
+		public ListWithNoData(IPluginDatabase pluginDatabase)
+		{
+			_pluginDatabase = pluginDatabase;
+			InitializeComponent();
+			_goToGame = CommandsNavigation.GoToGame;
+			RefreshData();
+		}
 
-        public ListWithNoData(IPluginDatabase PluginDatabase)
-        {
-            this.PluginDatabase = PluginDatabase;
+		#region Data Management
 
-            InitializeComponent();
+		private void RefreshData()
+		{
+			ShowProgress(true);
+			try
+			{
+				IEnumerable<Game> games = _pluginDatabase.GetGamesWithNoData();
+				_allGames = games.Select(game => new GameDataViewModel(game, _goToGame)).ToList();
+				UpdateFilterOptions();
+				ApplyFilters();
+			}
+			finally
+			{
+				ShowProgress(false);
+			}
+		}
 
-            GoToGame = new RelayCommand<Guid>((Id) =>
-            {
-                API.Instance.MainView.SelectGame(Id);
-                API.Instance.MainView.SwitchToLibraryView();
-            });
+		private void UpdateFilterOptions()
+		{
+			Dictionary<Guid, DatabaseObject> sourcesById = new Dictionary<Guid, DatabaseObject>();
+			Dictionary<Guid, DatabaseObject> platformsById = new Dictionary<Guid, DatabaseObject>();
 
-            RefreshData();
-        }
+			bool hasGamesWithoutSource = false;
+			bool hasGamesWithoutPlatform = false;
 
+			foreach (GameDataViewModel vm in _allGames)
+			{
+				if (vm.Source != null && !sourcesById.ContainsKey(vm.Source.Id))
+				{
+					sourcesById[vm.Source.Id] = vm.Source;
+				}
+				else if (vm.Source == null)
+				{
+					hasGamesWithoutSource = true;
+				}
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            PluginDatabase.Refresh(gameData.Select(x => x.Id));
-            RefreshData();
-        }
+				if (vm.Platforms != null && vm.Platforms.Count > 0)
+				{
+					foreach (Platform platform in vm.Platforms)
+					{
+						if (!platformsById.ContainsKey(platform.Id))
+						{
+							platformsById[platform.Id] = platform;
+						}
+					}
+				}
+				else
+				{
+					hasGamesWithoutPlatform = true;
+				}
+			}
 
+			// Add "Playnite" entry for games without source
+			if (hasGamesWithoutSource)
+			{
+				sourcesById[Guid.Empty] = new GameSource("Playnite")
+				{
+					Id = Guid.Empty
+				};
+			}
 
-        private void RefreshData()
-        {
-            ListViewGames.ItemsSource = null;
-            IEnumerable<Game> games = PluginDatabase.GetGamesWithNoData();
-            gameData = games.Select(x => new GameData { Id = x.Id, Name = x.Name, GoToGame = GoToGame }).ToList();
-            ListViewGames.ItemsSource = gameData;
+			// Add "None" entry for games without platform
+			if (hasGamesWithoutPlatform)
+			{
+				platformsById[Guid.Empty] = new GameSource(ResourceProvider.GetString("LOCNone"))
+				{
+					Id = Guid.Empty
+				};
+			}
 
-            PART_Count.Content = gameData.Count;
+			// Preserve current selection across refreshes
+			IEnumerable<Guid> previousSourceIds = _sourceList?.GetSelectedIds();
+			IEnumerable<Guid> previousPlatformIds = _platformList?.GetSelectedIds();
 
-            ListViewGames.Sorting();
-        }
-    }
+			if (_sourceList != null) { _sourceList.SelectionChanged -= OnFilterSelectionChanged; }
+			if (_platformList != null) { _platformList.SelectionChanged -= OnFilterSelectionChanged; }
 
+			_sourceList = new SelectableDbItemList(
+				sourcesById.Values.OrderBy(s => s.Name),
+				previousSourceIds);
 
-    public class GameData
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public RelayCommand<Guid> GoToGame { get; set; }
-    }
+			_platformList = new SelectableDbItemList(
+				platformsById.Values.OrderBy(p => p.Name),
+				previousPlatformIds);
+
+			_sourceList.SelectionChanged += OnFilterSelectionChanged;
+			_platformList.SelectionChanged += OnFilterSelectionChanged;
+
+			PART_SourceFilter.ItemsList = _sourceList;
+			PART_PlatformFilter.ItemsList = _platformList;
+		}
+
+		private void ApplyFilters()
+		{
+			string searchText = PART_SearchBox.Text?.Trim().ToLowerInvariant() ?? string.Empty;
+			HashSet<Guid> selectedSourceIds = new HashSet<Guid>(
+				_sourceList?.GetSelectedIds() ?? Enumerable.Empty<Guid>());
+			HashSet<Guid> selectedPlatformIds = new HashSet<Guid>(
+				_platformList?.GetSelectedIds() ?? Enumerable.Empty<Guid>());
+
+			_filteredGames = _allGames.Where(game =>
+			{
+				if (!string.IsNullOrEmpty(searchText) &&
+					!game.Name.ToLowerInvariant().Contains(searchText))
+				{
+					return false;
+				}
+
+				if (selectedSourceIds.Count > 0)
+				{
+					bool hasSource = game.Source != null && selectedSourceIds.Contains(game.Source.Id);
+					bool playniteSelected = selectedSourceIds.Contains(Guid.Empty) && game.Source == null;
+
+					if (!hasSource && !playniteSelected)
+					{
+						return false;
+					}
+				}
+
+				if (selectedPlatformIds.Count > 0)
+				{
+					bool hasPlatform = game.Platforms != null &&
+									  game.Platforms.Any(p => selectedPlatformIds.Contains(p.Id));
+					bool playniteSelected = selectedPlatformIds.Contains(Guid.Empty) &&
+										  (game.Platforms == null || game.Platforms.Count == 0);
+
+					if (!hasPlatform && !playniteSelected)
+					{
+						return false;
+					}
+				}
+
+				return true;
+			}).ToList();
+
+			ListViewGames.ItemsSource = null;
+			ListViewGames.ItemsSource = _filteredGames;
+			PART_Count.Text = _filteredGames.Count.ToString();
+			UpdateSelectedCount();
+
+			if (_filteredGames.Count > 0)
+			{
+				ListViewGames.Sorting();
+			}
+		}
+
+		#endregion
+
+		#region Event Handlers
+
+		private void OnFilterSelectionChanged(object sender, EventArgs e)
+		{
+			ApplyFilters();
+		}
+
+		private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			ApplyFilters();
+		}
+
+		private void SelectAll_Click(object sender, RoutedEventArgs e)
+		{
+			foreach (GameDataViewModel game in _filteredGames) { game.IsSelected = true; }
+			UpdateSelectedCount();
+		}
+
+		private void SelectNone_Click(object sender, RoutedEventArgs e)
+		{
+			foreach (GameDataViewModel game in _filteredGames) { game.IsSelected = false; }
+			UpdateSelectedCount();
+		}
+
+		private void CheckBox_Changed(object sender, RoutedEventArgs e)
+		{
+			UpdateSelectedCount();
+		}
+
+		private void RefreshSelected_Click(object sender, RoutedEventArgs e)
+		{
+			List<Guid> selectedIds = _filteredGames
+				.Where(g => g.IsSelected)
+				.Select(g => g.Id)
+				.ToList();
+
+			if (selectedIds.Count == 0) { return; }
+
+			ShowProgress(true);
+			try
+			{
+				_pluginDatabase.Refresh(selectedIds);
+				RefreshData();
+			}
+			finally
+			{
+				ShowProgress(false);
+			}
+		}
+
+		private void RefreshAll_Click(object sender, RoutedEventArgs e)
+		{
+			ShowProgress(true);
+			try
+			{
+				_pluginDatabase.Refresh(_allGames.Select(x => x.Id));
+				RefreshData();
+			}
+			finally
+			{
+				ShowProgress(false);
+			}
+		}
+
+		#endregion
+
+		#region Helper Methods
+
+		private void UpdateSelectedCount()
+		{
+			int count = _filteredGames.Count(g => g.IsSelected);
+			PART_SelectedCount.Text = count.ToString();
+			PART_RefreshSelected.IsEnabled = count > 0;
+		}
+
+		private void ShowProgress(bool show)
+		{
+			PART_ProgressBar.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+		}
+
+		#endregion
+	}
+
+	#region View Models
+
+	public class GameDataViewModel : ObservableObject
+	{
+		private bool _isSelected;
+
+		public Guid Id { get; }
+		public string Name { get; }
+		public string PlatformName { get; }
+		public string SourceName { get; }
+		public string InstallStatusText { get; }
+		public Brush InstallStatusBrush { get; }
+		public DateTime? AddedDate { get; }
+		public string AddedDateText { get; }
+		public string AddedDateFull { get; }
+		public DateTime? LastActivityDate { get; }
+		public string LastActivityText { get; }
+		public string LastActivityFull { get; }
+		public Brush LastActivityBrush { get; }
+		public RelayCommand<Guid> GoToGame { get; }
+
+		// Raw Playnite objects for Guid-based filtering
+		public GameSource Source { get; }
+		public IReadOnlyList<Platform> Platforms { get; }
+
+		public bool IsSelected
+		{
+			get { return _isSelected; }
+			set { _isSelected = value; OnPropertyChanged(); }
+		}
+
+		public GameDataViewModel(Game game, RelayCommand<Guid> goToGameCommand)
+		{
+			Id = game.Id;
+			Name = game.Name;
+			GoToGame = goToGameCommand;
+
+			Source = game.Source;
+			Platforms = game.Platforms?.ToList() ?? new List<Platform>();
+
+			PlatformName = BuildPlatformName(game);
+			SourceName = PlayniteTools.GetSourceName(game);
+
+			InstallStatusText = game.IsInstalled
+				? ResourceProvider.GetString("LOCGameIsInstalledTitle")
+				: ResourceProvider.GetString("LOCGameIsUnInstalledTitle");
+
+			InstallStatusBrush = game.IsInstalled
+				? new SolidColorBrush(Color.FromRgb(76, 175, 80))
+				: new SolidColorBrush(Color.FromRgb(158, 158, 158));
+
+			AddedDate = game.Added;
+			if (game.Added.HasValue)
+			{
+				AddedDateText = game.Added.Value.ToString("dd/MM/yyyy");
+				AddedDateFull = game.Added.Value.ToString("dd MMMM yyyy HH:mm");
+			}
+			else
+			{
+				AddedDateText = "N/A";
+				AddedDateFull = "Not available";
+			}
+
+			LastActivityDate = game.LastActivity;
+			if (game.LastActivity.HasValue)
+			{
+				TimeSpan elapsed = DateTime.Now - game.LastActivity.Value;
+				LastActivityText = PlayniteTools.FormatTimeAgo(elapsed);
+				LastActivityFull = game.LastActivity.Value.ToString("dd MMMM yyyy HH:mm");
+				LastActivityBrush = elapsed.TotalDays > 365
+					? new SolidColorBrush(Color.FromRgb(244, 67, 54))
+					: new SolidColorBrush(Color.FromRgb(255, 152, 0));
+			}
+			else
+			{
+				LastActivityText = ResourceProvider.GetString("LOCCommonNever");
+				LastActivityFull = ResourceProvider.GetString("LOCCommonNever");
+				LastActivityBrush = new SolidColorBrush(Color.FromRgb(158, 158, 158));
+			}
+		}
+
+		private static string BuildPlatformName(Game game)
+		{
+			if (game.Platforms == null || game.Platforms.Count == 0)
+			{
+				return ResourceProvider.GetString("LOCNone");
+			}
+
+			if (game.Platforms.Count == 1)
+			{
+				return game.Platforms[0].Name;
+			}
+
+			string joined = string.Join(", ", game.Platforms.Take(2).Select(p => p.Name));
+			return game.Platforms.Count > 2
+				? string.Format("{0} +{1}", joined, game.Platforms.Count - 2)
+				: joined;
+		}
+	}
+
+	#endregion
 }

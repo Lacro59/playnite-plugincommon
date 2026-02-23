@@ -2,8 +2,10 @@
 using CommonPlayniteShared;
 using CommonPlayniteShared.Common;
 using CommonPluginsShared;
+using CommonPluginsShared.Caching;
 using CommonPluginsShared.Converters;
 using CommonPluginsShared.Extensions;
+using CommonPluginsShared.IO;
 using CommonPluginsShared.Models;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Interfaces;
@@ -29,7 +31,7 @@ namespace CommonPluginsStores
     /// </summary>
     public abstract class StoreApi : ObservableObject, IStoreApi, IStoreApiInternal
     {
-        protected static ILogger Logger => LogManager.GetLogger();
+        protected static readonly ILogger Logger = LogManager.GetLogger();
 
         private readonly SmartCache<AccountInfos> _accountCache;
         private readonly SmartCache<ObservableCollection<AccountInfos>> _friendsCache;
@@ -169,7 +171,7 @@ namespace CommonPluginsStores
         /// </summary>
         protected CookiesTools CookiesTools { get; }
 
-        protected FileDataTools FileDataTools { get; }
+        protected FileDataService FileDataService { get; }
 
         protected string FileToken { get; }
 
@@ -246,7 +248,7 @@ namespace CommonPluginsStores
                 FileCookies,
                 CookiesDomains);
 
-            FileDataTools = new FileDataTools(PluginName, ClientName)
+            FileDataService = new FileDataService(PluginName, ClientName)
             {
                 ShowNotificationOldDataHandler = ShowNotificationOldData
             };
@@ -651,7 +653,7 @@ namespace CommonPluginsStores
         /// <returns>Collection of owned games and DLC or null</returns>
         private ObservableCollection<GameDlcOwned> LoadGamesDlcsOwned(bool onlyNow = true)
         {
-            return FileDataTools.LoadData<ObservableCollection<GameDlcOwned>>(FileGamesDlcsOwned, onlyNow ? 5 : 0);
+            return FileDataService.LoadData<ObservableCollection<GameDlcOwned>>(FileGamesDlcsOwned, onlyNow ? 5 : 0);
         }
 
         /// <summary>
@@ -661,7 +663,7 @@ namespace CommonPluginsStores
         /// <returns>True if save was successful, false otherwise</returns>
         private bool SaveGamesDlcsOwned(ObservableCollection<GameDlcOwned> gamesDlcsOwned)
         {
-            return FileDataTools.SaveData(FileGamesDlcsOwned, gamesDlcsOwned);
+            return FileDataService.SaveData(FileGamesDlcsOwned, gamesDlcsOwned);
         }
 
         /// <summary>

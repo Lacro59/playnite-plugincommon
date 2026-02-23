@@ -5,6 +5,7 @@ using CommonPlayniteShared.Common;
 using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Models;
+using CommonPluginsShared.Utilities;
 using CommonPluginsStores.Gog.Models;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Enumerations;
@@ -249,7 +250,7 @@ namespace CommonPluginsStores.Gog
                     return null;
                 }
 
-                string jsonDataString = Tools.GetJsonInString(reponse, "window.profilesData.profileUserFriends[ ]?=[ ]?");
+                string jsonDataString = UtilityTools.GetJsonInString(reponse, "window.profilesData.profileUserFriends[ ]?=[ ]?");
                 _ = Serialization.TryFromJson(jsonDataString, out List<ProfileUserFriends> profileUserFriends);
 
                 if (profileUserFriends == null)
@@ -459,7 +460,7 @@ namespace CommonPluginsStores.Gog
                 string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Locale));
                 Logger.Info($"GetAchievementsPublic: GameId={id}");
                 string response = Web.DownloadStringDataWithUrlBefore(url, urlLang).GetAwaiter().GetResult();
-                string jsonDataString = Tools.GetJsonInString(response, "(?<=window.profilesData.achievements\\s=\\s)");
+                string jsonDataString = UtilityTools.GetJsonInString(response, "(?<=window.profilesData.achievements\\s=\\s)");
 
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
                 if (!jsonDataString.IsNullOrEmpty() && Serialization.TryFromJson(jsonDataString, out dynamic data))
@@ -896,7 +897,7 @@ namespace CommonPluginsStores.Gog
         private ProfileUser GetAccountInfoByPseudo(string pseudo)
         {
             string reponse = Web.DownloadStringData(string.Format(UrlUser, pseudo), GetStoredCookies()).GetAwaiter().GetResult();
-            string jsonDataString = Tools.GetJsonInString(reponse, @"window.profilesData.currentUser[ ]?=[ ]?");
+            string jsonDataString = UtilityTools.GetJsonInString(reponse, @"window.profilesData.currentUser[ ]?=[ ]?");
             _ = Serialization.TryFromJson(jsonDataString, out ProfileUser profileUser);
             return profileUser;
         }
@@ -911,7 +912,7 @@ namespace CommonPluginsStores.Gog
         public ProductApiDetail GetProductDetail(string id)
         {
             string cachePath = Path.Combine(PathAppsData, $"{id}.json");
-            ProductApiDetail productApiDetail = FileDataTools.LoadData<ProductApiDetail>(cachePath, 1440);
+            ProductApiDetail productApiDetail = FileDataService.LoadData<ProductApiDetail>(cachePath, 1440);
 
             if (productApiDetail == null)
             {
@@ -924,7 +925,7 @@ namespace CommonPluginsStores.Gog
                         ManageException($"No data for {id}", ex, response.Contains("404"));
                     }
 
-					FileDataTools.SaveData(cachePath, productApiDetail);
+					FileDataService.SaveData(cachePath, productApiDetail);
                 }
             }
 

@@ -1,10 +1,14 @@
 ﻿using CommonPlayniteShared.Common;
+using CommonPluginsShared.Collections;
 using CommonPluginsShared.Interfaces;
+using CommonPluginsShared.Plugins;
+using CommonPluginsShared.UI;
 using Playnite.SDK;
 using Playnite.SDK.Plugins;
 using System;
 using System.IO;
 using System.Reflection;
+using SystemChecker.Services;
 
 namespace CommonPluginsShared.PlayniteExtended
 {
@@ -20,19 +24,22 @@ namespace CommonPluginsShared.PlayniteExtended
     {
         public static TPluginDatabase PluginDatabase { get; set; }
 
+		protected bool _preventLibraryUpdatedOnStart { get; set; } = true;
 
-        public PluginExtended(IPlayniteAPI playniteAPI, string pluginName) : base(playniteAPI, pluginName)
+		protected PluginMenus _menus;
+
+		public PluginExtended(IPlayniteAPI playniteAPI, string pluginName) : base(playniteAPI, pluginName)
         {
             // Get plugin's database if used
             PluginDatabase = typeof(TPluginDatabase).CrateInstance<TPluginDatabase>(PluginSettings, this.GetPluginUserDataPath());
-            _ = PluginDatabase.InitializeDatabase();
-        }
-    }
+            PluginDatabase.InitializeDatabase();
+		}
+	}
 
 
     public abstract class PlaynitePlugin<ISettings> : GenericPlugin
     {
-        internal static ILogger Logger => LogManager.GetLogger();
+        internal static readonly ILogger Logger = LogManager.GetLogger();
 
 
         public static string PluginName { get; set; }
