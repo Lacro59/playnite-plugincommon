@@ -20,8 +20,21 @@ namespace CommonPluginsShared.Controls
 
 		protected void OnLoaded(object sender, RoutedEventArgs e)
 		{
+#if DEBUG
+			var timer = new DebugTimer(GetType().Name + ".OnLoaded");
+#endif
+
 			InitializeStaticEvents();
+
+#if DEBUG
+			timer.Step("InitializeStaticEvents done");
+#endif
+
 			PluginSettings_PropertyChanged(null, null);
+
+#if DEBUG
+			timer.Stop();
+#endif
 		}
 
 		/// <summary>
@@ -38,32 +51,62 @@ namespace CommonPluginsShared.Controls
 		/// </summary>
 		public override async Task UpdateDataAsync()
 		{
+#if DEBUG
+			var timer = new DebugTimer(GetType().Name + ".UpdateDataAsync");
+#endif
+
 			UpdateDataTimer.Stop();
 
 			if (GameContext == null || CurrentGame == null || GameContext.Id != CurrentGame.Id)
 			{
 				Visibility = Visibility.Collapsed;
+#if DEBUG
+				timer.Stop("early exit (context mismatch)");
+#endif
 				return;
 			}
 
 			Game gameSnapshot = GameContext;
 			Guid gameId = gameSnapshot.Id;
 
+#if DEBUG
+			timer.Step(string.Format("starting DB fetch for game='{0}'", gameSnapshot.Name));
+#endif
+
 			PluginDataBaseGameBase pluginGameData = await Task.Run(() => pluginDatabase.Get(gameSnapshot, true));
+
+#if DEBUG
+			timer.Step(string.Format("DB fetch done, hasData={0}", pluginGameData?.HasData));
+#endif
 
 			if (GameContext == null || GameContext.Id != gameId)
 			{
+#if DEBUG
+				timer.Stop("context changed during fetch, abort");
+#endif
 				return;
 			}
 
 			if (pluginGameData == null || !pluginGameData.HasData)
 			{
 				Visibility = AlwaysShow ? Visibility.Visible : Visibility.Collapsed;
+#if DEBUG
+				timer.Stop(string.Format("no data, visibility={0}", Visibility));
+#endif
 				return;
 			}
 
 			Visibility = MustDisplay ? Visibility.Visible : Visibility.Collapsed;
+
+#if DEBUG
+			timer.Step("calling SetData");
+#endif
+
 			SetData(GameContext, pluginGameData);
+
+#if DEBUG
+			timer.Stop();
+#endif
 		}
 	}
 }

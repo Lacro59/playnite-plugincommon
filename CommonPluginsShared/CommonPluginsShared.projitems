@@ -48,6 +48,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\ValueOperationConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\VisibilityZeroConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CookiesTools.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DebugTimer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\DateTimeExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)images\ImageServices.cs" />
