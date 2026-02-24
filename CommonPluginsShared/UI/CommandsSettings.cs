@@ -4,7 +4,8 @@ using System;
 using System.Threading;
 using System.Windows;
 
-namespace CommonPluginsShared.UI { 	
+namespace CommonPluginsShared.UI
+{
 	public class CommandsSettings
 	{
 		private static readonly ILogger Logger = LogManager.GetLogger();
@@ -24,9 +25,15 @@ namespace CommonPluginsShared.UI {
 		public RelayCommand CmdRemoveTag { get; private set; }
 
 		/// <summary>
-		/// Clears all plugin data from the database.
+		/// Clears all plugin data from the database, then clears the cache.
 		/// </summary>
 		public RelayCommand CmdClearAll { get; private set; }
+
+		/// <summary>
+		/// Deletes all temporary cache files stored by the plugin.
+		/// Does not affect plugin data or the Playnite library.
+		/// </summary>
+		public RelayCommand CmdClearCache { get; private set; }
 
 		/// <summary>
 		/// Marks the parent window's view model as requiring a Playnite restart.
@@ -84,7 +91,7 @@ namespace CommonPluginsShared.UI {
 				}
 			});
 
-			// Clear all data command: asks for confirmation before wiping data.
+			// Clear all data command: asks for confirmation before wiping data and cache.
 			// Uses Playnite's built-in dialog API to stay consistent with the host UI.
 			CmdClearAll = new RelayCommand(() =>
 			{
@@ -104,6 +111,28 @@ namespace CommonPluginsShared.UI {
 				catch (Exception ex)
 				{
 					Common.LogError(ex, false, "CmdClearAll failed", true, PluginName, ResourceProvider.GetString("LOCCommonClearAllError"));
+				}
+			});
+
+			// Clear cache command: no confirmation needed, cache files are non-destructive for user data.
+			CmdClearCache = new RelayCommand(() =>
+			{
+				try
+				{
+					MessageBoxResult result = API.Instance.Dialogs.ShowMessage(
+						ResourceProvider.GetString("LOCCommonClearCacheConfirm"),
+						ResourceProvider.GetString($"{PluginName}"),
+						MessageBoxButton.YesNo,
+						MessageBoxImage.Warning);
+
+					if (result == MessageBoxResult.Yes)
+					{
+						PluginDatabase.ClearCache();
+					}
+				}
+				catch (Exception ex)
+				{
+					Common.LogError(ex, false, "CmdClearCache failed", true, PluginName, ResourceProvider.GetString("LOCCommonClearCacheError"));
 				}
 			});
 		}

@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -34,7 +35,7 @@ namespace CommonPluginsShared.Collections
 		where TItem : PluginDataBaseGameBase
 	{
 		protected static readonly ILogger Logger = LogManager.GetLogger();
-
+		
 		/// <inheritdoc cref="IPluginDatabase.PluginName"/>
 		public string PluginName { get; set; }
 
@@ -111,8 +112,8 @@ namespace CommonPluginsShared.Collections
 
 			HttpFileCacheService.CacheDirectory = Paths.PluginCachePath;
 
-			FileSystem.CreateDirectory(Paths.PluginDatabasePath);
-			FileSystem.CreateDirectory(Paths.PluginCachePath);
+			CommonPlayniteShared.Common.FileSystem.CreateDirectory(Paths.PluginDatabasePath);
+			CommonPlayniteShared.Common.FileSystem.CreateDirectory(Paths.PluginCachePath);
 
 			API.Instance.Database.Games.ItemUpdated += Games_ItemUpdated;
 			API.Instance.Database.Games.ItemCollectionChanged += Games_ItemCollectionChanged;
@@ -361,6 +362,7 @@ namespace CommonPluginsShared.Collections
 
 			API.Instance.Dialogs.ActivateGlobalProgress((a) =>
 			{
+				// Step 1: remove all plugin data entries directly via LiteDB.
 				List<TItem> allItems = _database.FindAll().ToList();
 				a.ProgressMaxValue = allItems.Count;
 
@@ -368,18 +370,34 @@ namespace CommonPluginsShared.Collections
 				{
 					try
 					{
-						Remove(item.Id);
+						RemoveTag(item.Id);
+						_database.Remove(item.Id);
+						Logger.Info(string.Format(
+							"ClearDatabase — removed item {0} ({1})", item.Id, item.Name));
 						a.CurrentProgressValue++;
 					}
 					catch (Exception ex)
 					{
+						isOk = false;
 						Common.LogError(ex, false,
 							string.Format("Error clearing {0} — {1}", item.Id, item.Name),
 							false, PluginName);
-						isOk = false;
 					}
 				}
+
+				// Step 2: raise a single collection-changed event once the batch is complete.
+				// Avoids flooding the UI with one notification per deleted item.
+				DatabaseItemCollectionChanged?.Invoke(this,
+					new ItemCollectionChangedEventArgs<TItem>(
+						new List<TItem>(), new List<TItem>()));
 			}, options);
+
+			// Step 3: clear the cache after all data entries have been removed.
+			bool cacheOk = ClearCache();
+			if (!cacheOk)
+			{
+				isOk = false;
+			}
 
 			return isOk;
 		}
@@ -1245,10 +1263,11 @@ namespace CommonPluginsShared.Collections
 		#region Cache management
 
 		/// <summary>Deletes the plugin's on-disk file cache with a progress dialog.</summary>
-		public void ClearCache()
+		public bool ClearCache()
 		{
-			string cacheDir = Path.Combine(PlaynitePaths.DataCachePath, PluginName);
+			bool isOk = true;
 
+			string cacheDir = Path.Combine(PlaynitePaths.DataCachePath, PluginName);
 			GlobalProgressOptions options = new GlobalProgressOptions(
 				string.Format("{0} - {1}", PluginName,
 					ResourceProvider.GetString("LOCCommonProcessing")))
@@ -1259,20 +1278,65 @@ namespace CommonPluginsShared.Collections
 
 			API.Instance.Dialogs.ActivateGlobalProgress((a) =>
 			{
-				try
+				Thread.Sleep(2000);
+
+				if (!Directory.Exists(cacheDir))
 				{
-					Thread.Sleep(2000);
-					FileSystem.DeleteDirectory(cacheDir, true);
+					Logger.Info(string.Format(
+						"Cache directory does not exist, nothing to clear: {0}", cacheDir));
+					return;
 				}
-				catch (Exception ex)
+
+				// Delete all files recursively, logging each one individually.
+				foreach (string file in Directory.GetFiles(cacheDir, "*", SearchOption.AllDirectories))
 				{
-					Common.LogError(ex, false, false, PluginName);
-					API.Instance.Dialogs.ShowErrorMessage(
-						string.Format(
-							ResourceProvider.GetString("LOCCommonErrorDeleteCache"), cacheDir),
-						PluginName);
+					try
+					{
+						File.Delete(file);
+						Logger.Info(string.Format("Cache file deleted: {0}", file));
+					}
+					catch (Exception ex)
+					{
+						isOk = false;
+						Common.LogError(ex, false,
+							string.Format("Failed to delete cache file: {0}", file),
+							false, PluginName);
+						API.Instance.Dialogs.ShowErrorMessage(
+							string.Format(
+								ResourceProvider.GetString("LOCCommonErrorDeleteCache"), file),
+							PluginName);
+					}
 				}
+
+				// Delete all subdirectories once files are gone.
+				foreach (string subDir in Directory.GetDirectories(cacheDir))
+				{
+					try
+					{
+						Directory.Delete(subDir, true);
+						Logger.Info(string.Format("Cache subdirectory deleted: {0}", subDir));
+					}
+					catch (Exception ex)
+					{
+						isOk = false;
+						Common.LogError(ex, false,
+							string.Format("Failed to delete cache subdirectory: {0}", subDir),
+							false, PluginName);
+						API.Instance.Dialogs.ShowErrorMessage(
+							string.Format(
+								ResourceProvider.GetString("LOCCommonErrorDeleteCache"), subDir),
+							PluginName);
+					}
+				}
+
+				// Invalidate the in-memory file cache so subsequent requests
+				// do not return stale paths pointing to deleted files.
+				HttpFileCacheService.ClearAllCache();
+				Logger.Info(string.Format("Cache cleared: {0}", cacheDir));
+
 			}, options);
+
+			return isOk;
 		}
 
 		#endregion

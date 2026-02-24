@@ -27,12 +27,18 @@ namespace CommonPluginsShared.Plugins
 		/// </summary>
 		public RelayCommand CmdClearAll { get; private set; }
 
+		/// <summary>
+		/// Deletes all temporary cache files stored by the plugin.
+		/// Does not affect plugin data or the Playnite library.
+		/// </summary>
+		public RelayCommand CmdClearCache { get; private set; }
+
 		#endregion
 
-        /// <summary>
-        /// Initializes all RelayCommands for the settings view.
-        /// </summary>
-        public void InitializeCommands(string pluginName, IPluginDatabase pluginDatabase)
+		/// <summary>
+		/// Initializes all RelayCommands for the settings view.
+		/// </summary>
+		public void InitializeCommands(string pluginName, IPluginDatabase pluginDatabase)
 		{
 			try
 			{
@@ -40,6 +46,7 @@ namespace CommonPluginsShared.Plugins
 				CmdAddTag = commandsSettings.CmdAddTag;
 				CmdRemoveTag = commandsSettings.CmdRemoveTag;
 				CmdClearAll = commandsSettings.CmdClearAll;
+				CmdClearCache = commandsSettings.CmdClearCache;
 			}
 			catch (Exception ex)
 			{

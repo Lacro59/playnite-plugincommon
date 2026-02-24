@@ -86,7 +86,18 @@ namespace CommonPluginsShared.Interfaces
 		/// <summary>Get list of games with data older than x months.</summary>
 		IEnumerable<Game> GetGamesOldData(int months);
 
-		/// <summary>Clear all data from the database.</summary>
+		/// <summary>
+		/// Deletes all temporary files stored by this plugin (downloaded images, web responses, etc.).
+		/// Plugin data and the Playnite library are not affected.
+		/// </summary>
+		/// <returns><c>true</c> if all cache directories were deleted successfully; <c>false</c> if any error occurred.</returns>
+		bool ClearCache();
+
+		/// <summary>
+		/// Removes all plugin data entries for every game in the library, then clears the plugin cache.
+		/// This is a combined destructive action: both stored plugin data and temporary cache files are deleted.
+		/// </summary>
+		/// <returns><c>true</c> if both operations completed without error; <c>false</c> otherwise.</returns>
 		bool ClearDatabase();
 
 		/// <summary>Get the selection data for the plugin (e.g. for filter views).</summary>
