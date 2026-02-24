@@ -4,7 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- ==================== TIME UNITS ==================== -->
+	<sys:String x:Key="LOCCommonMigratingDatabase">Migrating database…</sys:String>
+	<sys:String x:Key="LOCCommonMigrationPartialFailure">Migration completed with {0} error(s) out of {1} file(s).</sys:String>
+
+	<!-- ==================== TIME UNITS ==================== -->
 
     <sys:String x:Key="LOCCommonDay">{0} day</sys:String>
     <sys:String x:Key="LOCCommonDays">{0} days</sys:String>

@@ -37,6 +37,18 @@ namespace CommonPluginsShared.Interfaces
 		/// <summary>Get the plugin data for a game.</summary>
 		PluginDataBaseGameBase Get(Guid id, bool onlyCache = false, bool force = false);
 
+		/// <summary>
+		/// Returns the in-memory cached item without any disk or web access.
+		/// Returns null if the item has never been loaded this session.
+		/// </summary>
+		PluginDataBaseGameBase GetOnlyCache(Guid id);
+
+		/// <summary>
+		/// Returns the in-memory cached item without any disk or web access.
+		/// Returns null if the item has never been loaded this session.
+		/// </summary>
+		PluginDataBaseGameBase GetOnlyCache(Game game);
+
 		/// <summary>Get a clone of the plugin data for a game.</summary>
 		PluginDataBaseGameBase GetClone(Guid id);
 
@@ -95,9 +107,12 @@ namespace CommonPluginsShared.Interfaces
 		/// <summary>Returns database entries that are marked as deleted (their Playnite game was removed).</summary>
 		IEnumerable<DataGame> GetIsolatedDataGames();
 
+		/// <summary>Exports all database entries to a CSV file.</summary>
 		bool ExtractToCsv();
-	}
 
+		/// <summary>Returns true if the database is ready for immediate access (loaded and non-null).</summary>
+		bool IsDatabaseReady();
+	}
 
 	/// <summary>
 	/// Generic interface inheriting from <see cref="IPluginDatabase"/>.
@@ -107,6 +122,25 @@ namespace CommonPluginsShared.Interfaces
 	/// <typeparam name="TItem">Database item type inheriting <see cref="PluginDataBaseGameBase"/>.</typeparam>
 	public interface IPluginDatabase<TItem> : IPluginDatabase where TItem : PluginDataBaseGameBase
 	{
+		/// <summary>Gets the strongly-typed plugin data for a game.</summary>
+		new TItem Get(Game game, bool onlyCache = false, bool force = false);
 
+		/// <summary>Gets the strongly-typed plugin data for a game.</summary>
+		new TItem Get(Guid id, bool onlyCache = false, bool force = false);
+
+		/// <summary>Returns the strongly-typed in-memory cached item without any disk or web access.</summary>
+		new TItem GetOnlyCache(Guid id);
+
+		/// <summary>Returns the strongly-typed in-memory cached item without any disk or web access.</summary>
+		new TItem GetOnlyCache(Game game);
+
+		/// <summary>Gets a strongly-typed deep clone of the plugin data for a game.</summary>
+		new TItem GetClone(Guid id);
+
+		/// <summary>Gets a strongly-typed deep clone of the plugin data for a game.</summary>
+		new TItem GetClone(Game game);
+
+		/// <summary>Adds or updates strongly-typed data for a game.</summary>
+		void AddOrUpdate(TItem item);
 	}
 }
