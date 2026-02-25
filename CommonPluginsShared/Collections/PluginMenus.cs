@@ -1,12 +1,9 @@
-using CommonPlayniteShared.Database;
+using CommonPluginsShared.Commands;
 using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.Plugins;
 using Playnite.SDK;
-using Playnite.SDK.Models;
 using Playnite.SDK.Plugins;
-using System;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace CommonPluginsShared.Collections
 {
@@ -16,16 +13,25 @@ namespace CommonPluginsShared.Collections
 	/// </summary>
 	public abstract class PluginMenus
 	{
+		protected static readonly ILogger Logger = LogManager.GetLogger();
+
 		protected readonly PluginSettings _settings;
 		protected readonly IPluginDatabase _database;
+		protected readonly CommandsPlugin _commands;
 
 		protected PluginMenus(PluginSettings settings, IPluginDatabase database)
 		{
 			_settings = settings;
 			_database = database;
+
+			_commands = new CommandsPlugin(_database.PluginName, database);
 		}
 
+		/// <inheritdoc cref="Plugin.GetGameMenuItems(GetGameMenuItemsArgs)"/>
 		public abstract IEnumerable<GameMenuItem> GetGameMenuItems(GetGameMenuItemsArgs args);
+
+		/// <inheritdoc cref="Plugin.GetMainMenuItems(GetMainMenuItemsArgs)"/>
 		public abstract IEnumerable<MainMenuItem> GetMainMenuItems(GetMainMenuItemsArgs args);
+
 	}
 }
