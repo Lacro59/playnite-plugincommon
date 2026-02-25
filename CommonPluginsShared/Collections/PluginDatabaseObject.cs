@@ -20,6 +20,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using SystemChecker.Models;
 
 namespace CommonPluginsShared.Collections
 {
@@ -530,6 +531,19 @@ namespace CommonPluginsShared.Collections
 			}
 
 			Refresh(playniteDb.Select(x => x.Id));
+		}
+
+		/// <summary>
+		/// Returns all cached items directly from the in-memory ConcurrentDictionary.
+		/// Faster than GetGamesList() which does an extra Games.Get() per item.
+		/// </summary>
+		public IEnumerable<TItem> GetAllCache()
+		{
+			if (_database == null)
+			{
+				return Enumerable.Empty<TItem>();
+			}
+			return _database.FindAll();
 		}
 
 		/// <summary>
