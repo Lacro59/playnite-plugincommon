@@ -1049,11 +1049,16 @@ namespace CommonPluginsShared.Collections
 		}
 
 		/// <summary>Returns the ID of the localised "No Data" tag, creating it if needed.</summary>
-		public Guid? AddNoDataTag()
-			=> CheckTagExist(ResourceProvider.GetString("LOCNoData"));
+		public Guid? AddNoDataTag() => CheckTagExist(ResourceProvider.GetString("LOCNoData"));
 
-		/// <summary>Adds the appropriate plugin tag to <paramref name="game"/>.</summary>
-		public virtual void AddTag(Game game)
+		/// <summary>
+		/// Resolves and appends the appropriate plugin tag to <paramref name="game"/>.TagIds in memory.
+		/// Does NOT persist the change — caller is responsible for calling PersistGameUpdate.
+		/// </summary>
+		/// <returns>
+		/// <c>true</c> if TagIds was modified and a persist is needed; <c>false</c> otherwise.
+		/// </returns>
+		protected virtual bool AppendPluginTag(Game game)
 		{
 			TItem item = Get(game, true);
 
@@ -1065,28 +1070,38 @@ namespace CommonPluginsShared.Collections
 					if (tagId != null)
 					{
 						AppendTagId(game, tagId.Value);
+						return true;
 					}
 				}
 				catch (Exception ex)
 				{
-					Common.LogError(ex, false,
-						string.Format("Tag insert error — {0}", game.Name), true, PluginName,
-						string.Format(
-							ResourceProvider.GetString("LOCCommonNotificationTagError"),
-							game.Name));
-					return;
+					Common.LogError(ex, false, $"Tag insert error {game.Name}", true, PluginName,
+						string.Format(ResourceProvider.GetString("LOCCommonNotificationTagError"), game.Name));
 				}
+				return false;
 			}
-			else if (TagMissing)
+
+			if (TagMissing)
 			{
 				Guid? noDataTagId = AddNoDataTag();
 				if (noDataTagId != null)
 				{
 					AppendTagId(game, noDataTagId.Value);
+					return true;
 				}
 			}
 
-			PersistGameUpdate(game);
+			return false;
+		}
+
+		/// <summary>Adds the appropriate plugin tag to <paramref name="game"/>.</summary>
+		public void AddTag(Game game)
+		{
+			bool modified = AppendPluginTag(game);
+			if (modified)
+			{
+				PersistGameUpdate(game);
+			}
 		}
 
 		/// <summary>Adds the appropriate plugin tag to the game identified by <paramref name="id"/>.</summary>
@@ -1136,13 +1151,20 @@ namespace CommonPluginsShared.Collections
 		}
 
 		/// <summary>Adds plugin tags to a batch of games with a cancellable progress dialog.</summary>
+		/// <summary>
+		/// Adds plugin tags to a batch of games with a cancellable progress dialog.
+		/// </summary>
+		/// <summary>
+		/// Adds plugin tags to a batch of games with a cancellable progress dialog.
+		/// Removes existing plugin tags before applying the new ones.
+		/// A single database write is performed per game.
+		/// </summary>
+		/// <param name="ids">The identifiers of the games to tag.</param>
+		/// <param name="message">The message displayed in the progress dialog.</param>
 		public void AddTag(IEnumerable<Guid> ids, string message)
 		{
 			List<Guid> idList = ids.ToList();
-			if (idList.Count == 0)
-			{
-				return;
-			}
+			if (idList.Count == 0) return;
 
 			GlobalProgressOptions options = new GlobalProgressOptions(message)
 			{
@@ -1150,8 +1172,10 @@ namespace CommonPluginsShared.Collections
 				IsIndeterminate = idList.Count == 1
 			};
 
-			API.Instance.Dialogs.ActivateGlobalProgress((a) =>
+			API.Instance.Dialogs.ActivateGlobalProgress(a =>
 			{
+				int errorCount = 0;
+
 				try
 				{
 					API.Instance.Database.BeginBufferUpdate();
@@ -1162,28 +1186,29 @@ namespace CommonPluginsShared.Collections
 
 					foreach (Guid id in idList)
 					{
-						if (a.CancelToken.IsCancellationRequested)
-						{
-							break;
-						}
+						if (a.CancelToken.IsCancellationRequested) break;
 
 						Game game = API.Instance.Database.Games.Get(id);
 						if (game == null)
 						{
+							a.CurrentProgressValue++;
 							continue;
 						}
 
-						a.Text = BuildProgressText(
-							message, a.CurrentProgressValue, idList.Count, game);
-						Thread.Sleep(10);
+						a.Text = BuildProgressText(message, a.CurrentProgressValue, idList.Count, game);
 
 						try
 						{
-							RemoveTag(game);
-							AddTag(game);
+							StripPluginTags(game);
+							bool modified = AppendPluginTag(game);
+							if (modified)
+							{
+								PersistGameUpdate(game);
+							}
 						}
 						catch (Exception ex)
 						{
+							errorCount++;
 							Common.LogError(ex, false, false, PluginName);
 						}
 
@@ -1193,10 +1218,19 @@ namespace CommonPluginsShared.Collections
 					stopWatch.Stop();
 					TimeSpan ts = stopWatch.Elapsed;
 					Logger.Info(string.Format(
-						"AddTag(){0} — {1:00}:{2:00}.{3:00} for {4}/{5} items",
-						a.CancelToken.IsCancellationRequested ? " (canceled)" : string.Empty,
+						"AddTag {0} {1:00}:{2:00}.{3:000} for {4}/{5} items",
+						a.CancelToken.IsCancellationRequested ? "canceled" : string.Empty,
 						ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
 						a.CurrentProgressValue, idList.Count));
+
+					if (errorCount > 0)
+					{
+						API.Instance.Notifications.Add(new NotificationMessage(
+							string.Format("{0}-AddTag-Error", PluginName),
+							string.Format(ResourceProvider.GetString("LOCCommonNotificationTagBatchError"), errorCount),
+							NotificationType.Error,
+							() => PlayniteTools.CreateLogPackage(PluginName)));
+					}
 				}
 				catch (Exception ex)
 				{
@@ -1210,17 +1244,28 @@ namespace CommonPluginsShared.Collections
 			}, options);
 		}
 
-		/// <summary>Removes all plugin tags from <paramref name="game"/>.</summary>
-		public void RemoveTag(Game game)
+		/// <summary>
+		/// Removes all plugin-owned tags from <paramref name="game"/>.TagIds in memory.
+		/// Does NOT persist the change — caller is responsible for calling PersistGameUpdate.
+		/// </summary>
+		protected void StripPluginTags(Game game)
 		{
-			if (game?.TagIds == null)
-			{
-				return;
-			}
+			if (game?.TagIds == null) return;
 
 			game.TagIds = game.TagIds
 				.Where(x => !PluginTags.Any(y => x == y.Id))
 				.ToList();
+		}
+
+		/// <summary>Removes all plugin tags from <paramref name="game"/>.</summary>
+		public void RemoveTag(Game game)
+		{
+			if (game?.TagIds == null)
+			{ 
+				return; 
+			}
+
+			StripPluginTags(game);
 			PersistGameUpdate(game);
 		}
 
