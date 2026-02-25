@@ -104,7 +104,7 @@ namespace CommonPluginsShared.Controls
 				{
 					try
 					{
-						pluginDatabase.Get(capturedId, onlyCache: false);
+						pluginDatabase.Get(capturedId, true);
 					}
 					catch (Exception ex)
 					{
