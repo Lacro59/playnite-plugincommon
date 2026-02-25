@@ -1,12 +1,13 @@
 using CommonPluginsShared.Interfaces;
+using CommonPluginsShared.UI;
 using Playnite.SDK;
 using System;
 using System.Threading;
 using System.Windows;
 
-namespace CommonPluginsShared.UI
+namespace CommonPluginsShared.Commands
 {
-	public class CommandsSettings
+	public class CommandsPlugin
 	{
 		private static readonly ILogger Logger = LogManager.GetLogger();
 
@@ -58,7 +59,7 @@ namespace CommonPluginsShared.UI
 			}
 		});
 
-		public CommandsSettings(string pluginName, IPluginDatabase pluginDatabase)
+		public CommandsPlugin(string pluginName, IPluginDatabase pluginDatabase)
 		{
 			PluginName = pluginName;
 			PluginDatabase = pluginDatabase;

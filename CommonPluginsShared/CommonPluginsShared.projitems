@@ -79,9 +79,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)plugins\PluginWindows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SystemInfo\SystemServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransformIcon.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UI\CommandsNavigation.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ui\CommandsSettings.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UI\CommandsWindows.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Commands\CommandsNavigation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Commands\CommandsPlugin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Commands\CommandsWindows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI\ResourcesList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI\UIHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)utilities\UtilityServices.cs" />
@@ -96,6 +96,7 @@
     <Folder Include="$(MSBuildThisFileDirectory)Caching\" />
     <Folder Include="$(MSBuildThisFileDirectory)IO\" />
     <Folder Include="$(MSBuildThisFileDirectory)Images\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Commands\" />
     <Folder Include="$(MSBuildThisFileDirectory)SystemInfo\" />
     <Folder Include="$(MSBuildThisFileDirectory)Utilities\" />
   </ItemGroup>

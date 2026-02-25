@@ -1,5 +1,5 @@
+using CommonPluginsShared.Commands;
 using CommonPluginsShared.Interfaces;
-using CommonPluginsShared.UI;
 using Playnite.SDK;
 using System;
 using System.Collections.Generic;
@@ -42,11 +42,11 @@ namespace CommonPluginsShared.Plugins
 		{
 			try
 			{
-				var commandsSettings = new CommandsSettings(pluginName, pluginDatabase);
-				CmdAddTag = commandsSettings.CmdAddTag;
-				CmdRemoveTag = commandsSettings.CmdRemoveTag;
-				CmdClearAll = commandsSettings.CmdClearAll;
-				CmdClearCache = commandsSettings.CmdClearCache;
+				var commandsPlugin = new CommandsPlugin(pluginName, pluginDatabase);
+				CmdAddTag = commandsPlugin.CmdAddTag;
+				CmdRemoveTag = commandsPlugin.CmdRemoveTag;
+				CmdClearAll = commandsPlugin.CmdClearAll;
+				CmdClearCache = commandsPlugin.CmdClearCache;
 			}
 			catch (Exception ex)
 			{

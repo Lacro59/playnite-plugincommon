@@ -1,4 +1,4 @@
-﻿using CommonPluginsShared.UI;
+﻿using CommonPluginsShared.Commands;
 using LiteDB;
 using Playnite.SDK;
 using Playnite.SDK.Data;

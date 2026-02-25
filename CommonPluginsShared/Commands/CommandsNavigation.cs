@@ -4,7 +4,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace CommonPluginsShared.UI
+namespace CommonPluginsShared.Commands
 {
     /// <summary>
     /// Provides static relay commands for UI navigation within Playnite.

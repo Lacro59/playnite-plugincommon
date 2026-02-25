@@ -25,6 +25,8 @@ namespace CommonPluginsShared.Collections
 	public class LiteDbItemCollection<TItem> : IDisposable
 		where TItem : PluginDataBaseGameBase
 	{
+		#region Fields & Constants
+
 		private static readonly ILogger Logger = LogManager.GetLogger();
 
 		private const int DatabaseOpenTimeoutMilliseconds = 30000;
@@ -36,10 +38,18 @@ namespace CommonPluginsShared.Collections
 
 		private bool _disposed;
 
+		#endregion
+
+		#region Properties
+
 		/// <summary>
 		/// Gets the number of items currently stored in the database.
 		/// </summary>
 		public int Count => _collection.Count();
+
+		#endregion
+
+		#region Lifecycle
 
 		/// <summary>
 		/// Opens or creates the LiteDB database file at <paramref name="dbPath"/>.
@@ -59,8 +69,6 @@ namespace CommonPluginsShared.Collections
 			_collection.EnsureIndex(x => x.Id, unique: true);
 		}
 
-
-
 		/// <summary>
 		/// Loads all items from LiteDB into the session cache eagerly.
 		/// Call once at startup before the UI becomes interactive.
@@ -75,6 +83,20 @@ namespace CommonPluginsShared.Collections
 			}
 			return count;
 		}
+
+		/// <inheritdoc />
+		public void Dispose()
+		{
+			if (_disposed)
+			{
+				return;
+			}
+
+			_disposed = true;
+			_db?.Dispose();
+		}
+
+		#endregion
 
 		#region Read
 
@@ -188,7 +210,29 @@ namespace CommonPluginsShared.Collections
 
 		#endregion
 
-		#region SetGameInfo
+		#region Cache
+
+		/// <summary>
+		/// Clears the entire in-memory session cache.
+		/// Next read for any item will hit LiteDB.
+		/// </summary>
+		public void InvalidateSessionCache()
+		{
+			_sessionCache.Clear();
+		}
+
+		/// <summary>
+		/// Removes a single entry from the session cache without touching LiteDB.
+		/// </summary>
+		public void InvalidateSessionCache(Guid id)
+		{
+			TItem ignored;
+			_sessionCache.TryRemove(id, out ignored);
+		}
+
+		#endregion
+
+		#region GameInfo
 
 		/// <summary>
 		/// Updates Name and IsSaved for the item identified by <paramref name="id"/>
@@ -214,6 +258,7 @@ namespace CommonPluginsShared.Collections
 				else
 				{
 					item.IsDeleted = true;
+					Upsert(item);
 					Common.LogDebug(true, string.Format(
 						"SetGameInfo — marking item {0} as deleted (game not found).", id));
 				}
@@ -351,28 +396,6 @@ namespace CommonPluginsShared.Collections
 
 		#endregion
 
-		#region Cache
-
-		/// <summary>
-		/// Clears the entire in-memory session cache.
-		/// Next read for any item will hit LiteDB.
-		/// </summary>
-		public void InvalidateSessionCache()
-		{
-			_sessionCache.Clear();
-		}
-
-		/// <summary>
-		/// Removes a single entry from the session cache without touching LiteDB.
-		/// </summary>
-		public void InvalidateSessionCache(Guid id)
-		{
-			TItem ignored;
-			_sessionCache.TryRemove(id, out ignored);
-		}
-
-		#endregion
-
 		#region Helpers
 
 		private static bool IsDatabaseOpen =>
@@ -403,17 +426,5 @@ namespace CommonPluginsShared.Collections
 		}
 
 		#endregion
-
-		/// <inheritdoc />
-		public void Dispose()
-		{
-			if (_disposed)
-			{
-				return;
-			}
-
-			_disposed = true;
-			_db?.Dispose();
-		}
 	}
 }
