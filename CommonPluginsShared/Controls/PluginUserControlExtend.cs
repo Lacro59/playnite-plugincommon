@@ -3,6 +3,7 @@ using CommonPluginsShared.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
@@ -19,6 +20,8 @@ namespace CommonPluginsShared.Controls
 	public abstract class PluginUserControlExtend : PluginUserControlExtendBase
 	{
 		protected abstract IPluginDatabase pluginDatabase { get; }
+
+		private CancellationTokenSource _updateCts;
 
 		protected void OnLoaded(object sender, RoutedEventArgs e)
 		{
@@ -40,6 +43,17 @@ namespace CommonPluginsShared.Controls
 		}
 
 		/// <summary>
+		/// Cancels the in-flight <see cref="UpdateDataAsync"/> CTS for this instance.
+		/// Called from <see cref="PluginUserControlExtendBase.GameContextChanged"/> before restarting the timer.
+		/// </summary>
+		protected override void CancelPendingUpdate()
+		{
+			_updateCts?.Cancel();
+			_updateCts?.Dispose();
+			_updateCts = null;
+		}
+
+		/// <summary>
 		/// Synchronous fallback. Override <see cref="SetDataAsync"/> instead when
 		/// computation is expensive — this overload is only kept for backward compatibility
 		/// with controls that have not yet migrated.
@@ -57,7 +71,8 @@ namespace CommonPluginsShared.Controls
 		/// </summary>
 		/// <param name="newContext">The current selected game.</param>
 		/// <param name="pluginGameData">The plugin-specific data for the game.</param>
-		public Task SetDataAsync(Game newContext, PluginDataBaseGameBase pluginGameData)
+		/// <param name="cancellationToken">Token to observe for cancellation.</param>
+		public virtual Task SetDataAsync(Game newContext, PluginDataBaseGameBase pluginGameData, CancellationToken cancellationToken)
 		{
 			SetData(newContext, pluginGameData);
 			return Task.CompletedTask;
@@ -70,6 +85,7 @@ namespace CommonPluginsShared.Controls
 		/// blocking the UI thread.
 		/// Heavy per-game computation is delegated to <see cref="SetDataAsync"/> which
 		/// derived classes can override to run off the UI thread.
+		/// In-flight updates are cancelled via <see cref="CancellationToken"/> when the game context changes.
 		/// </summary>
 		public override async Task UpdateDataAsync()
 		{
@@ -79,9 +95,12 @@ namespace CommonPluginsShared.Controls
 
 			UpdateDataTimer.Stop();
 
+			_updateCts = new CancellationTokenSource();
+			CancellationToken cancellationToken = _updateCts.Token;
+
 			if (GameContext == null || CurrentGame == null || GameContext.Id != CurrentGame.Id)
 			{
-				Visibility = Visibility.Collapsed;
+				SetVisibility(Visibility.Collapsed);
 #if DEBUG
 				timer.Stop("early exit (context mismatch)");
 #endif
@@ -101,18 +120,17 @@ namespace CommonPluginsShared.Controls
 			timer.Step(string.Format("cache lookup done, hasData={0}", pluginGameData?.HasData));
 #endif
 
-			if (GameContext == null || GameContext.Id != gameId)
+			if (cancellationToken.IsCancellationRequested || GameContext == null || GameContext.Id != gameId)
 			{
 #if DEBUG
-				timer.Stop("context changed during lookup, abort");
+				timer.Stop("cancelled or context changed during lookup, abort");
 #endif
 				return;
 			}
 
 			if (pluginGameData == null)
 			{
-				Visibility = AlwaysShow ? Visibility.Visible : Visibility.Collapsed;
-
+				SetVisibility(AlwaysShow ? Visibility.Visible : Visibility.Collapsed);
 #if DEBUG
 				timer.Stop(string.Format("no entry, visibility={0}", Visibility));
 #endif
@@ -121,20 +139,20 @@ namespace CommonPluginsShared.Controls
 
 			if (!pluginGameData.HasData)
 			{
-				Visibility = AlwaysShow ? Visibility.Visible : Visibility.Collapsed;
+				SetVisibility(AlwaysShow ? Visibility.Visible : Visibility.Collapsed);
 #if DEBUG
 				timer.Stop(string.Format("no data, visibility={0}", Visibility));
 #endif
 				return;
 			}
 
-			Visibility = MustDisplay ? Visibility.Visible : Visibility.Collapsed;
+			SetVisibility(MustDisplay ? Visibility.Visible : Visibility.Collapsed);
 
 #if DEBUG
 			timer.Step("calling SetDataAsync");
 #endif
 
-			await SetDataAsync(gameSnapshot, pluginGameData);
+			await SetDataAsync(gameSnapshot, pluginGameData, cancellationToken);
 
 #if DEBUG
 			timer.Stop();

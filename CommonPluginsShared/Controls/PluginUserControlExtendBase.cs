@@ -84,7 +84,7 @@ namespace CommonPluginsShared.Controls
 
 				if (!mustDisplay)
 				{
-					obj.Visibility = Visibility.Collapsed;
+					obj.SetVisibility(Visibility.Collapsed);
 				}
 			}
 		}
@@ -317,7 +317,9 @@ namespace CommonPluginsShared.Controls
 		}
 
 		/// <summary>
-		/// Dispatches an action to all alive instances, batched by dispatcher.
+		/// Dispatches an action to all alive instances.
+		/// Fast-path: if all instances share the same dispatcher (typical in Playnite Desktop),
+		/// skips LINQ GroupBy and dispatches in a single BeginInvoke.
 		/// Cleans up dead weak references under lock.
 		/// </summary>
 		protected static void NotifyAllInstances(Action<PluginUserControlExtendBase> action)
@@ -339,22 +341,48 @@ namespace CommonPluginsShared.Controls
 				}
 			}
 
-			var groups = alive.GroupBy(i => i.Dispatcher);
-			foreach (var group in groups)
+			if (alive.Count == 0)
 			{
-				Dispatcher dispatcher = group.Key;
-				List<PluginUserControlExtendBase> groupList = group.ToList();
-				dispatcher?.BeginInvoke((Action)delegate
+				return;
+			}
+
+			Dispatcher sharedDispatcher = alive[0].Dispatcher;
+			bool allSameDispatcher = true;
+			for (int i = 1; i < alive.Count; i++)
+			{
+				if (!ReferenceEquals(alive[i].Dispatcher, sharedDispatcher))
 				{
-					foreach (PluginUserControlExtendBase instance in groupList)
+					allSameDispatcher = false;
+					break;
+				}
+			}
+
+			if (allSameDispatcher)
+			{
+				sharedDispatcher.BeginInvoke((Action)delegate
+				{
+					foreach (PluginUserControlExtendBase instance in alive)
 					{
-						try
-						{
-							action(instance);
-						}
-						catch { }
+						try { action(instance); } catch { }
 					}
 				}, DispatcherPriority.Background);
+			}
+			else
+			{
+				// Fallback: multi-dispatcher edge case
+				var groups = alive.GroupBy(i => i.Dispatcher);
+				foreach (var group in groups)
+				{
+					Dispatcher dispatcher = group.Key;
+					List<PluginUserControlExtendBase> groupList = group.ToList();
+					dispatcher?.BeginInvoke((Action)delegate
+					{
+						foreach (PluginUserControlExtendBase instance in groupList)
+						{
+							try { action(instance); } catch { }
+						}
+					}, DispatcherPriority.Background);
+				}
 			}
 		}
 
@@ -392,9 +420,16 @@ namespace CommonPluginsShared.Controls
 			var timer = new DebugTimer(string.Format("{0}.GameContextChanged(game='{1}')", GetType().Name, newContext?.Name ?? "null"));
 #endif
 
+			// Cancel any in-flight update for the previous game
+			CancelPendingUpdate();
+
+#if DEBUG
+			timer.Step("CancelPendingUpdate done");
+#endif
+
 			CurrentGame = newContext;
 			UpdateDataTimer.Stop();
-			Visibility = Visibility.Collapsed;
+			SetVisibility(Visibility.Collapsed);
 			SetDefaultDataContext();
 
 #if DEBUG
@@ -439,6 +474,24 @@ namespace CommonPluginsShared.Controls
 
 		public virtual void SetDefaultDataContext() { }
 
+		/// <summary>
+		/// Cancels any in-flight <see cref="UpdateDataAsync"/> for the current instance.
+		/// Must be called on the UI thread (before restarting the timer).
+		/// </summary>
+		protected virtual void CancelPendingUpdate() { }
+
+		/// <summary>
+		/// Sets <see cref="UIElement.Visibility"/> only when the value actually changes,
+		/// avoiding spurious WPF layout invalidations.
+		/// </summary>
+		protected void SetVisibility(Visibility value)
+		{
+			if (Visibility != value)
+			{
+				Visibility = value;
+			}
+		}
+
 		private async void UpdateDataEvent(object sender, EventArgs e)
 		{
 			await UpdateDataAsync();
@@ -454,7 +507,7 @@ namespace CommonPluginsShared.Controls
 
 			if (GameContext == null || CurrentGame == null || GameContext.Id != CurrentGame.Id)
 			{
-				Visibility = Visibility.Collapsed;
+				SetVisibility(Visibility.Collapsed);
 #if DEBUG
 				timer.Stop("early exit (context mismatch)");
 #endif
@@ -464,7 +517,7 @@ namespace CommonPluginsShared.Controls
 			await API.Instance.MainView.UIDispatcher?.InvokeAsync(() =>
 			{
 				SetData(GameContext);
-				Visibility = MustDisplay ? Visibility.Visible : Visibility.Collapsed;
+				SetVisibility(MustDisplay ? Visibility.Visible : Visibility.Collapsed);
 			}, DispatcherPriority.Render);
 
 #if DEBUG
