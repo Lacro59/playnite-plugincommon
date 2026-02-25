@@ -49,6 +49,8 @@ namespace CommonPluginsShared.Caching
 	/// <typeparam name="T">Type of values to cache</typeparam>
 	public class SmartCache<T>
 	{
+		private static readonly ILogger Logger = LogManager.GetLogger();
+
 		private readonly Dictionary<string, CacheItem<T>> _cache = new Dictionary<string, CacheItem<T>>();
 		private readonly object _lockObject = new object();
 
@@ -61,15 +63,29 @@ namespace CommonPluginsShared.Caching
 		/// <returns>Cached or newly created value</returns>
 		public T GetOrSet(string key, Func<T> factory, TimeSpan ttl)
 		{
+#if DEBUG
+			var timer = new DebugTimer(string.Format("SmartCache<{0}>.GetOrSet(key='{1}')", typeof(T).Name, key));
+#endif
 			lock (_lockObject)
 			{
 				if (_cache.TryGetValue(key, out CacheItem<T> item) && !item.IsExpired)
 				{
+#if DEBUG
+					timer.Stop("hit");
+#endif
 					return item.Data;
 				}
 
+#if DEBUG
+				timer.Step("miss — invoking factory");
+#endif
+
 				T data = factory();
 				_cache[key] = new CacheItem<T>(data, ttl);
+
+#if DEBUG
+				timer.Stop("factory done, value cached");
+#endif
 				return data;
 			}
 		}
@@ -82,6 +98,9 @@ namespace CommonPluginsShared.Caching
 		/// <param name="ttl">Time to live</param>
 		public void Set(string key, T value, TimeSpan ttl)
 		{
+#if DEBUG
+			Logger.Debug(string.Format("[SmartCache<{0}>.Set] key='{1}'", typeof(T).Name, key));
+#endif
 			lock (_lockObject)
 			{
 				_cache[key] = new CacheItem<T>(value, ttl);
@@ -93,6 +112,9 @@ namespace CommonPluginsShared.Caching
 		/// </summary>
 		public void Clear()
 		{
+#if DEBUG
+			Logger.Debug(string.Format("[SmartCache<{0}>.Clear] all entries removed", typeof(T).Name));
+#endif
 			lock (_lockObject)
 			{
 				_cache.Clear();
@@ -106,6 +128,9 @@ namespace CommonPluginsShared.Caching
 		/// <returns>True if item was removed, false if not found</returns>
 		public bool Remove(string key)
 		{
+#if DEBUG
+			Logger.Debug(string.Format("[SmartCache<{0}>.Remove] key='{1}'", typeof(T).Name, key));
+#endif
 			lock (_lockObject)
 			{
 				return _cache.Remove(key);
@@ -159,7 +184,12 @@ namespace CommonPluginsShared.Caching
 			}
 
 			string cacheFile = Path.Combine(CacheDirectory, GetFileNameFromUrl(url));
-			return File.Exists(cacheFile) && new FileInfo(cacheFile).Length > 0;
+			bool exists = File.Exists(cacheFile) && new FileInfo(cacheFile).Length > 0;
+
+#if DEBUG
+			Logger.Debug(string.Format("[HttpFileCacheService.IsFileCached] url='{0}' cached={1}", url, exists));
+#endif
+			return exists;
 		}
 
 		/// <summary>
@@ -171,8 +201,14 @@ namespace CommonPluginsShared.Caching
 		/// <returns>Local cache file path or empty string on error</returns>
 		public static string GetWebFile(string url, int resize = 0)
 		{
+#if DEBUG
+			var timer = new DebugTimer(string.Format("HttpFileCacheService.GetWebFile(url='{0}', resize={1})", url, resize));
+#endif
 			if (string.IsNullOrEmpty(url))
 			{
+#if DEBUG
+				timer.Stop("empty url, skip");
+#endif
 				return string.Empty;
 			}
 
@@ -182,8 +218,15 @@ namespace CommonPluginsShared.Caching
 			{
 				if (File.Exists(cacheFile) && new FileInfo(cacheFile).Length > 0)
 				{
+#if DEBUG
+					timer.Stop("disk hit");
+#endif
 					return cacheFile;
 				}
+
+#if DEBUG
+				timer.Step("disk miss — downloading");
+#endif
 
 				FileSystem.CreateDirectory(CacheDirectory);
 
@@ -193,6 +236,11 @@ namespace CommonPluginsShared.Caching
 					{
 						string tmpPath = Path.Combine(PlaynitePaths.ImagesCachePath, Path.GetFileName(cacheFile));
 						HttpDownloader.DownloadFile(url, tmpPath);
+
+#if DEBUG
+						timer.Step("download done, resizing");
+#endif
+
 						ImageTools.Resize(tmpPath, resize, resize, cacheFile);
 						FileSystem.DeleteFileSafe(tmpPath);
 					}
@@ -201,21 +249,33 @@ namespace CommonPluginsShared.Caching
 						HttpDownloader.DownloadFile(url, cacheFile);
 					}
 
+#if DEBUG
+					timer.Stop("cached to disk");
+#endif
 					return cacheFile;
 				}
 				catch (WebException e)
 				{
 					if (e.Response == null)
 					{
+#if DEBUG
+						Logger.Debug(string.Format("[HttpFileCacheService.GetWebFile] network error (no response) for url='{0}': {1}", url, e.Message));
+#endif
 						throw;
 					}
 
 					HttpWebResponse response = (HttpWebResponse)e.Response;
 					if (response.StatusCode != HttpStatusCode.NotFound)
 					{
+#if DEBUG
+						Logger.Debug(string.Format("[HttpFileCacheService.GetWebFile] HTTP {0} for url='{1}'", (int)response.StatusCode, url));
+#endif
 						throw;
 					}
 
+#if DEBUG
+					timer.Stop(string.Format("HTTP 404 — url='{0}'", url));
+#endif
 					return string.Empty;
 				}
 			}
@@ -239,6 +299,9 @@ namespace CommonPluginsShared.Caching
 				{
 					try
 					{
+#if DEBUG
+						Logger.Debug(string.Format("[HttpFileCacheService.ClearCache] removing url='{0}'", url));
+#endif
 						FileSystem.DeleteFileSafe(cacheFile);
 					}
 					catch (Exception e)
@@ -254,6 +317,9 @@ namespace CommonPluginsShared.Caching
 		/// </summary>
 		public static void ClearAllCache()
 		{
+#if DEBUG
+			Logger.Debug("[HttpFileCacheService.ClearAllCache] start");
+#endif
 			lock (CacheLock)
 			{
 				try
@@ -265,6 +331,9 @@ namespace CommonPluginsShared.Caching
 							FileSystem.DeleteFileSafe(file);
 						}
 					}
+#if DEBUG
+					Logger.Debug("[HttpFileCacheService.ClearAllCache] done");
+#endif
 				}
 				catch (Exception e)
 				{
