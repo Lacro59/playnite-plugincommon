@@ -26,9 +26,9 @@ namespace CommonPluginsShared.Collections
 	///   Use <see cref="BackupDatabase"/> regularly to mitigate this risk.
 	/// - Shared file mode allows external tools to open the file read-only while the plugin has it open.
 	/// </summary>
-	/// <typeparam name="TItem">Database item type inheriting <see cref="PluginDataBaseGameBase"/>.</typeparam>
+	/// <typeparam name="TItem">Database item type inheriting <see cref="PluginGameEntry"/>.</typeparam>
 	public class LiteDbItemCollection<TItem> : IDisposable
-		where TItem : PluginDataBaseGameBase
+		where TItem : PluginGameEntry
 	{
 		#region Fields & Constants
 
@@ -342,10 +342,10 @@ namespace CommonPluginsShared.Collections
 		#region GameInfo
 
 		/// <summary>
-		/// Synchronises <see cref="PluginDataBaseGameBase.Name"/> and
-		/// <see cref="PluginDataBaseGameBase.IsSaved"/> for the item identified by <paramref name="id"/>
+		/// Synchronises <see cref="PluginGameEntry.Name"/> and
+		/// <see cref="PluginGameEntry.IsSaved"/> for the item identified by <paramref name="id"/>
 		/// against the Playnite game database.
-		/// If the game no longer exists, sets <see cref="PluginDataBaseGameBase.IsDeleted"/> to
+		/// If the game no longer exists, sets <see cref="PluginGameEntry.IsDeleted"/> to
 		/// <see langword="true"/> and persists the change.
 		/// </summary>
 		public void SetGameInfo(Guid id)

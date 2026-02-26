@@ -10,8 +10,8 @@ namespace CommonPluginsShared.Collections
 	/// Represents a collection of plugin items of type <typeparamref name="TItem"/>.
 	/// Provides methods to update game information from the Playnite database.
 	/// </summary>
-	/// <typeparam name="TItem">The type of items stored in the collection, must inherit from PluginDataBaseGameBase.</typeparam>
-	public class PluginItemCollection<TItem> : ItemCollection<TItem> where TItem : PluginDataBaseGameBase
+	/// <typeparam name="TItem">The type of items stored in the collection, must inherit from PluginGameEntry.</typeparam>
+	public class PluginItemCollection<TItem> : ItemCollection<TItem> where TItem : PluginGameEntry
 	{
 		/// <summary>
 		/// Timeout in milliseconds when waiting for the Playnite database to open.
@@ -74,18 +74,18 @@ namespace CommonPluginsShared.Collections
 
 		/// <summary>
 		/// Updates the game information for the item with the specified ID,
-		/// assuming the item is of type <see cref="PluginDataBaseGame{T}"/>.
+		/// assuming the item is of type <see cref="PluginGameCollection{T}"/>.
 		/// </summary>
 		/// <typeparam name="T">The generic type parameter of the item.</typeparam>
 		/// <param name="id">The unique identifier of the game item.</param>
 		public void SetGameInfo<T>(Guid id)
 		{
-			SetGameInfoInternal(id, typeof(PluginDataBaseGame<T>));
+			SetGameInfoInternal(id, typeof(PluginGameCollection<T>));
 		}
 
 		/// <summary>
 		/// Updates the game information for all items in the collection,
-		/// assuming each item is of type <see cref="PluginDataBaseGame{T}"/>.
+		/// assuming each item is of type <see cref="PluginGameCollection{T}"/>.
 		/// Waits until the Playnite database is open before processing.
 		/// </summary>
 		/// <typeparam name="T">The generic type parameter of the items.</typeparam>
@@ -101,7 +101,7 @@ namespace CommonPluginsShared.Collections
 				return;
 			}
 
-			Common.LogDebug(true, $"Starting bulk game info update for {Items.Count} items using PluginDataBaseGame<{typeof(T).Name}>.");
+			Common.LogDebug(true, $"Starting bulk game info update for {Items.Count} items using PluginGameCollection<{typeof(T).Name}>.");
 
 			using (BufferedUpdate())
 			{
@@ -111,24 +111,24 @@ namespace CommonPluginsShared.Collections
 				}
 			}
 
-			Common.LogDebug(true, $"Completed bulk game info update for {Items.Count} items using PluginDataBaseGame<{typeof(T).Name}>.");
+			Common.LogDebug(true, $"Completed bulk game info update for {Items.Count} items using PluginGameCollection<{typeof(T).Name}>.");
 		}
 
 		/// <summary>
 		/// Updates the game information for the item with the specified ID,
-		/// assuming the item is of type <see cref="PluginDataBaseGameDetails{T, Y}"/>.
+		/// assuming the item is of type <see cref="PluginGameCollectionWithDetails{T, Y}"/>.
 		/// </summary>
 		/// <typeparam name="T">The first generic type parameter of the item.</typeparam>
 		/// <typeparam name="Y">The second generic type parameter of the item.</typeparam>
 		/// <param name="id">The unique identifier of the game item.</param>
 		public void SetGameInfoDetails<T, Y>(Guid id) where Y : new()
 		{
-			SetGameInfoInternal(id, typeof(PluginDataBaseGameDetails<T, Y>));
+			SetGameInfoInternal(id, typeof(PluginGameCollectionWithDetails<T, Y>));
 		}
 
 		/// <summary>
 		/// Updates the game information for all items in the collection,
-		/// assuming each item is of type <see cref="PluginDataBaseGameDetails{T, Y}"/>.
+		/// assuming each item is of type <see cref="PluginGameCollectionWithDetails{T, Y}"/>.
 		/// Waits until the Playnite database is open before processing.
 		/// </summary>
 		/// <typeparam name="T">The first generic type parameter of the items.</typeparam>
@@ -145,7 +145,7 @@ namespace CommonPluginsShared.Collections
 				return;
 			}
 
-			Common.LogDebug(true, $"Starting bulk game info details update for {Items.Count} items using PluginDataBaseGameDetails<{typeof(T).Name}, {typeof(Y).Name}>.");
+			Common.LogDebug(true, $"Starting bulk game info details update for {Items.Count} items using PluginGameCollectionWithDetails<{typeof(T).Name}, {typeof(Y).Name}>.");
 
 			using (BufferedUpdate())
 			{
@@ -155,7 +155,7 @@ namespace CommonPluginsShared.Collections
 				}
 			}
 
-			Common.LogDebug(true, $"Completed bulk game info details update for {Items.Count} items using PluginDataBaseGameDetails<{typeof(T).Name}, {typeof(Y).Name}>.");
+			Common.LogDebug(true, $"Completed bulk game info details update for {Items.Count} items using PluginGameCollectionWithDetails<{typeof(T).Name}, {typeof(Y).Name}>.");
 		}
 
 		/// <summary>

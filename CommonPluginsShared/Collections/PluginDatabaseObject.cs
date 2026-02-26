@@ -29,11 +29,11 @@ namespace CommonPluginsShared.Collections
 	/// Provides CRUD, tag management, refresh orchestration, and CSV extraction.
 	/// </summary>
 	/// <typeparam name="TSettings">Settings view-model type implementing <see cref="ISettings"/>.</typeparam>
-	/// <typeparam name="TItem">Database item type inheriting <see cref="PluginDataBaseGameBase"/>.</typeparam>
-	/// <typeparam name="T">Inner data type used to parameterise <see cref="PluginDataBaseGame{T}"/>.</typeparam>
+	/// <typeparam name="TItem">Database item type inheriting <see cref="PluginGameEntry"/>.</typeparam>
+	/// <typeparam name="T">Inner data type used to parameterise <see cref="PluginGameCollection{T}"/>.</typeparam>
 	public abstract class PluginDatabaseObject<TSettings, TItem, T> : ObservableObject, IPluginDatabase<TItem>
 		where TSettings : ISettings
-		where TItem : PluginDataBaseGameBase
+		where TItem : PluginGameEntry
 	{
 		protected static readonly ILogger Logger = LogManager.GetLogger();
 		
@@ -819,19 +819,19 @@ namespace CommonPluginsShared.Collections
 		public virtual TItem GetWeb(Game game) => GetWeb(game.Id);
 
 		// ── Explicit IPluginDatabase bridges ─────────────────────────────────────
-		PluginDataBaseGameBase IPluginDatabase.Get(Game game, bool onlyCache, bool force)
+		PluginGameEntry IPluginDatabase.Get(Game game, bool onlyCache, bool force)
 			=> Get(game, onlyCache, force);
-		PluginDataBaseGameBase IPluginDatabase.Get(Guid id, bool onlyCache, bool force)
+		PluginGameEntry IPluginDatabase.Get(Guid id, bool onlyCache, bool force)
 			=> Get(id, onlyCache, force);
-		PluginDataBaseGameBase IPluginDatabase.GetOnlyCache(Guid id)
+		PluginGameEntry IPluginDatabase.GetOnlyCache(Guid id)
 			=> GetOnlyCache(id);
-		PluginDataBaseGameBase IPluginDatabase.GetOnlyCache(Game game)
+		PluginGameEntry IPluginDatabase.GetOnlyCache(Game game)
 			=> GetOnlyCache(game);
-		PluginDataBaseGameBase IPluginDatabase.GetClone(Game game)
+		PluginGameEntry IPluginDatabase.GetClone(Game game)
 			=> GetClone(game);
-		PluginDataBaseGameBase IPluginDatabase.GetClone(Guid id)
+		PluginGameEntry IPluginDatabase.GetClone(Guid id)
 			=> GetClone(id);
-		void IPluginDatabase.AddOrUpdate(PluginDataBaseGameBase item)
+		void IPluginDatabase.AddOrUpdate(PluginGameEntry item)
 			=> AddOrUpdate((TItem)item);
 
 		#endregion
@@ -1004,7 +1004,7 @@ namespace CommonPluginsShared.Collections
 		public virtual void RefreshWithNoData(IEnumerable<Guid> ids) => Refresh(ids);
 
 		/// <inheritdoc/>
-		public virtual PluginDataBaseGameBase MergeData(Guid fromId, Guid toId) => null;
+		public virtual PluginGameEntry MergeData(Guid fromId, Guid toId) => null;
 
 		#endregion
 

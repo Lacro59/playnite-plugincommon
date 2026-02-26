@@ -4,11 +4,12 @@ using System.Collections.Generic;
 namespace CommonPluginsShared.Collections
 {
 	/// <summary>
-	/// Base class for plugin game data that stores a typed list of items associated
-	/// with a Playnite game. Provides cached access to item count and data presence.
+	/// Base class for plugin game data that stores a typed list of items
+	/// (for example achievements, sessions, stats) associated with a Playnite game.
+	/// Provides cached access to item count and data presence.
 	/// </summary>
 	/// <typeparam name="T">Type of items stored for the game.</typeparam>
-	public abstract class PluginDataBaseGame<T> : PluginDataBaseGameBase
+	public abstract class PluginGameCollection<T> : PluginGameEntry
 	{
 		private List<T> _items = new List<T>();
 
@@ -62,7 +63,7 @@ namespace CommonPluginsShared.Collections
 
 		/// <summary>
 		/// Called when the Items list changes. Delegates cache invalidation to
-		/// <see cref="PluginDataBaseGameBase.RefreshCachedValues"/>.
+		/// <see cref="PluginGameEntry.RefreshCachedValues"/>.
 		/// Override in derived classes to perform additional post-change logic.
 		/// </summary>
 		protected virtual void OnItemsChanged()

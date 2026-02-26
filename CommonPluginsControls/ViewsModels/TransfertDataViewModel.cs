@@ -317,7 +317,7 @@ namespace CommonPluginsControls.ViewModels
         {
             try
             {
-                PluginDataBaseGameBase pluginData;
+                PluginGameEntry pluginData;
 
                 if (IsMergeMode)
                 {

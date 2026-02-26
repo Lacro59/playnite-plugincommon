@@ -60,19 +60,19 @@ namespace CommonPluginsShared.Controls
 		/// </summary>
 		/// <param name="newContext">The current selected game.</param>
 		/// <param name="pluginGameData">The plugin-specific data for the game.</param>
-		public virtual void SetData(Game newContext, PluginDataBaseGameBase pluginGameData) { }
+		public virtual void SetData(Game newContext, PluginGameEntry pluginGameData) { }
 
 		/// <summary>
 		/// Async entry point for game-specific UI updates.
 		/// Override this in derived classes to offload heavy computation (e.g. benchmark lookups)
 		/// to a background thread via <see cref="Task.Run"/>, then marshal only the final
 		/// UI mutation back to the UI thread.
-		/// Default implementation delegates to the synchronous <see cref="SetData(Game, PluginDataBaseGameBase)"/> overload.
+		/// Default implementation delegates to the synchronous <see cref="SetData(Game, PluginGameEntry)"/> overload.
 		/// </summary>
 		/// <param name="newContext">The current selected game.</param>
 		/// <param name="pluginGameData">The plugin-specific data for the game.</param>
 		/// <param name="cancellationToken">Token to observe for cancellation.</param>
-		public virtual Task SetDataAsync(Game newContext, PluginDataBaseGameBase pluginGameData, CancellationToken cancellationToken)
+		public virtual Task SetDataAsync(Game newContext, PluginGameEntry pluginGameData, CancellationToken cancellationToken)
 		{
 			SetData(newContext, pluginGameData);
 			return Task.CompletedTask;
@@ -114,7 +114,7 @@ namespace CommonPluginsShared.Controls
 			timer.Step(string.Format("cache lookup for game='{0}'", gameSnapshot.Name));
 #endif
 
-			PluginDataBaseGameBase pluginGameData = pluginDatabase.GetOnlyCache(gameSnapshot);
+			PluginGameEntry pluginGameData = pluginDatabase.GetOnlyCache(gameSnapshot);
 
 #if DEBUG
 			timer.Step(string.Format("cache lookup done, hasData={0}", pluginGameData?.HasData));

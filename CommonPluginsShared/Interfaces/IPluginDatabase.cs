@@ -12,7 +12,7 @@ namespace CommonPluginsShared.Interfaces
 	/// <summary>
 	/// Non-generic interface for contexts where <c>TItem</c> is not accessible
 	/// (e.g. shared services, generic views, injection without type constraints).
-	/// All methods operate on <see cref="PluginDataBaseGameBase"/>.
+	/// All methods operate on <see cref="PluginGameEntry"/>.
 	/// </summary>
 	public interface IPluginDatabase
 	{
@@ -32,31 +32,31 @@ namespace CommonPluginsShared.Interfaces
 		Task<bool> InitializeDatabase();
 
 		/// <summary>Get the plugin data for a game.</summary>
-		PluginDataBaseGameBase Get(Game game, bool onlyCache = false, bool force = false);
+		PluginGameEntry Get(Game game, bool onlyCache = false, bool force = false);
 
 		/// <summary>Get the plugin data for a game.</summary>
-		PluginDataBaseGameBase Get(Guid id, bool onlyCache = false, bool force = false);
+		PluginGameEntry Get(Guid id, bool onlyCache = false, bool force = false);
 
 		/// <summary>
 		/// Returns the in-memory cached item without any disk or web access.
 		/// Returns null if the item has never been loaded this session.
 		/// </summary>
-		PluginDataBaseGameBase GetOnlyCache(Guid id);
+		PluginGameEntry GetOnlyCache(Guid id);
 
 		/// <summary>
 		/// Returns the in-memory cached item without any disk or web access.
 		/// Returns null if the item has never been loaded this session.
 		/// </summary>
-		PluginDataBaseGameBase GetOnlyCache(Game game);
+		PluginGameEntry GetOnlyCache(Game game);
 
 		/// <summary>Get a clone of the plugin data for a game.</summary>
-		PluginDataBaseGameBase GetClone(Guid id);
+		PluginGameEntry GetClone(Guid id);
 
 		/// <summary>Get a clone of the plugin data for a game.</summary>
-		PluginDataBaseGameBase GetClone(Game game);
+		PluginGameEntry GetClone(Game game);
 
 		/// <summary>Merge data from one game to another.</summary>
-		PluginDataBaseGameBase MergeData(Guid fromId, Guid toId);
+		PluginGameEntry MergeData(Guid fromId, Guid toId);
 
 		/// <summary>Remove data for a game.</summary>
 		bool Remove(Game game);
@@ -68,7 +68,7 @@ namespace CommonPluginsShared.Interfaces
 		void Remove(List<Guid> ids);
 
 		/// <summary>Add or update data for a game.</summary>
-		void AddOrUpdate(PluginDataBaseGameBase item);
+		void AddOrUpdate(PluginGameEntry item);
 
 		/// <summary>Refresh data for a game (reload from disk/source).</summary>
 		void Refresh(Guid id);
@@ -130,8 +130,8 @@ namespace CommonPluginsShared.Interfaces
 	/// Only adds members requiring knowledge of <typeparamref name="TItem"/>.
 	/// To be used when the concrete type of the item is known (e.g. plugin implementations).
 	/// </summary>
-	/// <typeparam name="TItem">Database item type inheriting <see cref="PluginDataBaseGameBase"/>.</typeparam>
-	public interface IPluginDatabase<TItem> : IPluginDatabase where TItem : PluginDataBaseGameBase
+	/// <typeparam name="TItem">Database item type inheriting <see cref="PluginGameEntry"/>.</typeparam>
+	public interface IPluginDatabase<TItem> : IPluginDatabase where TItem : PluginGameEntry
 	{
 		/// <summary>Gets the strongly-typed plugin data for a game.</summary>
 		new TItem Get(Game game, bool onlyCache = false, bool force = false);

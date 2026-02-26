@@ -12,10 +12,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Behaviors\DatePickerCalendar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeLang.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)collections\LiteDbItemCollection.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDataBaseGame.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDataBaseGameBase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDataBaseGameDetails.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDatabaseObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)collections\PluginGameCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)collections\PluginGameCollectionWithDetails.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)collections\PluginGameEntry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginItemCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginMenus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common.cs" />
