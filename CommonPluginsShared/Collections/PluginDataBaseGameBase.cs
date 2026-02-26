@@ -1,4 +1,5 @@
 ﻿using CommonPluginsShared.Commands;
+using CommonPluginsShared.Models;
 using LiteDB;
 using Playnite.SDK;
 using Playnite.SDK.Data;
@@ -13,6 +14,16 @@ namespace CommonPluginsShared.Collections
 	/// </summary>
 	public class PluginDataBaseGameBase : DatabaseObject
 	{
+		#region Cache fields
+
+		/// <summary>Backing nullable cache for <see cref="HasData"/>. Null = invalidated.</summary>
+		protected bool? _hasData;
+
+		/// <summary>Backing nullable cache for <see cref="Count"/>. Null = invalidated.</summary>
+		protected ulong? _count;
+
+		#endregion
+
 		#region Data
 
 		/// <summary>
@@ -36,6 +47,7 @@ namespace CommonPluginsShared.Collections
 
 		/// <summary>
 		/// Indicates whether this instance contains meaningful plugin data.
+		/// Uses cached value for better performance.
 		/// </summary>
 		[DontSerialize]
 		[BsonIgnore]
@@ -43,10 +55,23 @@ namespace CommonPluginsShared.Collections
 
 		/// <summary>
 		/// Gets the count of elements associated with the plugin data.
+		/// Uses cached value for better performance.
 		/// </summary>
 		[DontSerialize]
 		[BsonIgnore]
 		public virtual ulong Count => 0;
+
+		private SourceLink _sourcesLink;
+
+		/// <summary>
+		/// Gets or sets the URL of the source from which this plugin's data was scraped.
+		/// Common to all plugins; defaults to <c>null</c> when not applicable.
+		/// </summary>
+		public SourceLink SourcesLink
+		{
+			get => _sourcesLink;
+			set => SetValue(ref _sourcesLink, value);
+		}
 
 		#endregion
 
@@ -177,5 +202,16 @@ namespace CommonPluginsShared.Collections
 		public bool IsInstalled => Game?.IsInstalled ?? default;
 
 		#endregion
+
+		/// <summary>
+		/// Invalidates <see cref="HasData"/> and <see cref="Count"/> caches.
+		/// Called by <see cref="PluginDataBaseGame{T}"/> when Items changes.
+		/// Override in derived classes to invalidate additional cached values.
+		/// </summary>
+		protected virtual void RefreshCachedValues()
+		{
+			_hasData = null;
+			_count = null;
+		}
 	}
 }
