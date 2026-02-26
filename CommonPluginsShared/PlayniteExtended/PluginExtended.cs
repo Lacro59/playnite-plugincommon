@@ -24,8 +24,6 @@ namespace CommonPluginsShared.PlayniteExtended
     {
         public static TPluginDatabase PluginDatabase { get; set; }
 
-		protected bool _preventLibraryUpdatedOnStart { get; set; } = true;
-
 		protected PluginMenus _menus;
 
 		public PluginExtended(IPlayniteAPI playniteAPI, string pluginName) : base(playniteAPI, pluginName)
