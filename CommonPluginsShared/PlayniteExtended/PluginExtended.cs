@@ -29,7 +29,7 @@ namespace CommonPluginsShared.PlayniteExtended
 		public PluginExtended(IPlayniteAPI playniteAPI, string pluginName) : base(playniteAPI, pluginName)
         {
             // Get plugin's database if used
-            PluginDatabase = typeof(TPluginDatabase).CrateInstance<TPluginDatabase>(PluginSettings, this.GetPluginUserDataPath());
+            PluginDatabase = typeof(TPluginDatabase).CrateInstance<TPluginDatabase>(PluginSettingsViewModel, this.GetPluginUserDataPath());
             PluginDatabase.InitializeDatabase();
 		}
 	}
@@ -37,15 +37,14 @@ namespace CommonPluginsShared.PlayniteExtended
 
     public abstract class PlaynitePlugin<ISettings> : GenericPlugin
     {
-        internal static readonly ILogger Logger = LogManager.GetLogger();
-
+        protected static readonly ILogger Logger = LogManager.GetLogger();
 
         public static string PluginName { get; set; }
 
 		public static string PluginFolder { get; set; }
 		public static string PluginUserDataPath { get; set; }
 
-		public ISettings PluginSettings { get; set; }
+		public ISettings PluginSettingsViewModel { get; set; }
 
 
         protected PlaynitePlugin(IPlayniteAPI playniteAPI, string pluginName) : base(playniteAPI)
@@ -55,7 +54,7 @@ namespace CommonPluginsShared.PlayniteExtended
             PluginName = pluginName;
 
 			// Get plugin's settings 
-			PluginSettings = typeof(ISettings).CrateInstance<ISettings>(this);
+			PluginSettingsViewModel = typeof(ISettings).CrateInstance<ISettings>(this);
 
             // Get plugin's location 
             PluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
