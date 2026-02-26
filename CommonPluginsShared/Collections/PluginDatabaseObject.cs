@@ -1,5 +1,4 @@
 ﻿using CommonPlayniteShared;
-using CommonPlayniteShared.Common;
 using CommonPluginsControls.Controls;
 using CommonPluginsShared.Caching;
 using CommonPluginsShared.Interfaces;
@@ -13,14 +12,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Abstractions;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Threading;
-using SystemChecker.Models;
 
 namespace CommonPluginsShared.Collections
 {
@@ -32,7 +28,7 @@ namespace CommonPluginsShared.Collections
 	/// <typeparam name="TItem">Database item type inheriting <see cref="PluginGameEntry"/>.</typeparam>
 	/// <typeparam name="T">Inner data type used to parameterise <see cref="PluginGameCollection{T}"/>.</typeparam>
 	public abstract class PluginDatabaseObject<TSettings, TItem, T> : ObservableObject, IPluginDatabase<TItem>
-		where TSettings : ISettings
+		where TSettings : PluginSettings
 		where TItem : PluginGameEntry
 	{
 		protected static readonly ILogger Logger = LogManager.GetLogger();
@@ -975,27 +971,20 @@ namespace CommonPluginsShared.Collections
 		{
 			Logger.Info("RefreshRecent() started.");
 
-			object settings = PluginSettings.GetType()
-				.GetProperty("Settings").GetValue(PluginSettings);
-			PropertyInfo propertyInfo = settings.GetType()
-				.GetProperty("LastAutoLibUpdateAssetsDownload");
-
-			DateTime since = propertyInfo != null
-				? (DateTime)propertyInfo.GetValue(settings)
-				: DateTime.Now.AddMonths(-1);
-
-			if (propertyInfo == null)
+			if (PluginSettings == null)
 			{
-				Logger.Warn(
-					"LastAutoLibUpdateAssetsDownload not found in settings; defaulting to -1 month.");
+				Logger.Warn("PluginSettings is null in RefreshRecent(); defaulting to -1 month.");
 			}
+
+			DateTime since = PluginSettings != null
+				? PluginSettings.LastAutoLibUpdateAssetsDownload
+				: DateTime.Now.AddMonths(-1);
 
 			IEnumerable<Guid> ids = API.Instance.Database.Games
 				.Where(x => x.Added != null && x.Added > since)
 				.Select(x => x.Id);
 
-			Logger.Info(string.Format(
-				"RefreshRecent — {0} game(s) queued.", ids.Count()));
+			Logger.Info(string.Format("RefreshRecent — {0} game(s) queued.", ids.Count()));
 			Refresh(ids, ResourceProvider.GetString("LOCCommonGettingNewDatas"));
 		}
 
@@ -1563,21 +1552,9 @@ namespace CommonPluginsShared.Collections
 			return message + counterLine + gameLine;
 		}
 
-		private bool IsTaggingEnabled()
-		{
-			object settings = PluginSettings.GetType()
-				.GetProperty("Settings")?.GetValue(PluginSettings);
-			PropertyInfo prop = settings?.GetType().GetProperty("EnableTag");
-			return prop != null && (bool)prop.GetValue(settings);
-		}
+		private bool IsTaggingEnabled() => PluginSettings != null && PluginSettings.EnableTag;
 
-		private bool IsAutoImportOnInstalledEnabled()
-		{
-			object settings = PluginSettings.GetType()
-				.GetProperty("Settings")?.GetValue(PluginSettings);
-			PropertyInfo prop = settings?.GetType().GetProperty("AutoImportOnInstalled");
-			return prop != null && (bool)prop.GetValue(settings);
-		}
+		private bool IsAutoImportOnInstalledEnabled() => PluginSettings != null && PluginSettings.AutoImportOnInstalled;
 
 		private void NotifyError(string operation, Exception ex)
 		{

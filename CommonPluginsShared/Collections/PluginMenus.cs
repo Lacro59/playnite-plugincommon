@@ -15,11 +15,11 @@ namespace CommonPluginsShared.Collections
 	{
 		protected static readonly ILogger Logger = LogManager.GetLogger();
 
-		protected readonly PluginSettings _settings;
+		protected readonly IPluginSettings _settings;
 		protected readonly IPluginDatabase _database;
 		protected readonly CommandsPlugin _commands;
 
-		protected PluginMenus(PluginSettings settings, IPluginDatabase database)
+		protected PluginMenus(IPluginSettings settings, IPluginDatabase database)
 		{
 			_settings = settings;
 			_database = database;

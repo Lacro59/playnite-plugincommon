@@ -54,6 +54,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)images\ImageServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)interfaces\IPluginSettingsViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)io\IOServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\CheckElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\DataGame.cs" />
