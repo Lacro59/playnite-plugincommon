@@ -279,6 +279,7 @@ Riprova.</sys:String>
 
 	<sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Errore nell'aggiungere il tag con {0}.
 Si prega di cancellare tutti i tag nel menu del plugin.</sys:String>
+	<sys:String x:Key="LOCCommonNotificationTagBatchError" xml:space="preserve">{0} error(s) occurred while adding tags. Check the log for details.</sys:String>
 
 	<sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">Più di una voce di dati trovata per {0}.
 Si prega di controllare le impostazioni del plugin.</sys:String>
