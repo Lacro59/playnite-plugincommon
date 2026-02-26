@@ -279,6 +279,7 @@ Você deve autenticar.</sys:String>
 
 	<sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Erro adicionando a tag com {0}.
 Por favor, limpe todas as tags no menu de plugins.</sys:String>
+	<sys:String x:Key="LOCCommonNotificationTagBatchError" xml:space="preserve">{0} error(s) occurred while adding tags. Check the log for details.</sys:String>
 
 	<sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">Mais de um dado encontrado para {0}. Por favor, cheque as configurações do plugin.</sys:String>
 
