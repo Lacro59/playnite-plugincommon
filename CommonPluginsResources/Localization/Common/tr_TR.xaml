@@ -26,8 +26,8 @@
 	<sys:String x:Key="LOCCommonNever">Never</sys:String>
 	<sys:String x:Key="LOCCommonHourAgo">{0}h ago</sys:String>
 	<!-- NOTE: singular and plural share the same format — keep both for translator flexibility -->
-	<sys:String x:Key="LOCCommonHoursAgo">{0}h ago</sys:String>
-	<sys:String x:Key="LOCCommonDayAgo">{0}d ago</sys:String>
+	<sys:String x:Key="LOCCommonHoursAgo">{0} saat önce</sys:String>
+	<sys:String x:Key="LOCCommonDayAgo">{0} gün önce</sys:String>
 	<sys:String x:Key="LOCCommonDaysAgo">{0}d ago</sys:String>
 	<sys:String x:Key="LOCCommonMonthAgo">{0}mo ago</sys:String>
 	<sys:String x:Key="LOCCommonMonthsAgo">{0}mo ago</sys:String>
