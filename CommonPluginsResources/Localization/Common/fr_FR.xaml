@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-	<sys:String x:Key="LOCCommonMigratingDatabase">Migrating database…</sys:String>
+	<sys:String x:Key="LOCCommonMigratingDatabase">Migration de la base de données…</sys:String>
 	<sys:String x:Key="LOCCommonMigrationPartialFailure">Migration completed with {0} error(s) out of {1} file(s).</sys:String>
 
 	<!-- ==================== TIME UNITS ==================== -->
@@ -23,7 +23,7 @@
 	<!-- ==================== RELATIVE TIME ==================== -->
 
 	<sys:String x:Key="LOCCommonToday"></sys:String>
-	<sys:String x:Key="LOCCommonNever">Never</sys:String>
+	<sys:String x:Key="LOCCommonNever">Jamais</sys:String>
 	<sys:String x:Key="LOCCommonHourAgo">{0}h ago</sys:String>
 	<!-- NOTE: singular and plural share the same format — keep both for translator flexibility -->
 	<sys:String x:Key="LOCCommonHoursAgo">{0}h ago</sys:String>
@@ -80,27 +80,27 @@
 
 	<!-- ==================== FILTERS ==================== -->
 
-	<sys:String x:Key="LOCCommonAllPlatforms">All Platforms</sys:String>
-	<sys:String x:Key="LOCCommonAllSources">All Sources</sys:String>
+	<sys:String x:Key="LOCCommonAllPlatforms">Toutes les Plateformes</sys:String>
+	<sys:String x:Key="LOCCommonAllSources">Toutes les sources</sys:String>
 	<sys:String x:Key="LOCCommonDefaultFilters">Restaurer les filtres par défaut</sys:String>
-	<sys:String x:Key="LOCCommonGameSource">Game source</sys:String>
-	<sys:String x:Key="LOCCommonInstallationStatus">Installation status</sys:String>
+	<sys:String x:Key="LOCCommonGameSource">Source du jeu</sys:String>
+	<sys:String x:Key="LOCCommonInstallationStatus">Statut de l'installation</sys:String>
 	<sys:String x:Key="LOCCommonMissingData">Appliquer une étiquette aux jeux avec des données manquantes</sys:String>
 	<sys:String x:Key="LOCCommonOldData">Ancienne donnée</sys:String>
 	<sys:String x:Key="LOCCommonOnlyMissing">Manquant uniquement</sys:String>
 	<sys:String x:Key="LOCCommonRecentlyAdded">Ajoutées récemment</sys:String>
 	<sys:String x:Key="LOCCommonSaveFilters">Enregistrer les filtres actuels</sys:String>
-	<sys:String x:Key="LOCCommonSearchByName">Search by name...</sys:String>
+	<sys:String x:Key="LOCCommonSearchByName">Recherche par nom...</sys:String>
 	<sys:String x:Key="LOCCommonSelectFilters">Choisir les filtres</sys:String>
-	<sys:String x:Key="LOCCommonTimeFilters">Time-based filters</sys:String>
+	<sys:String x:Key="LOCCommonTimeFilters">Filtres de temps</sys:String>
 	<sys:String x:Key="LOCCommonUsedFilteredGames">Jeux actuellement filtrés utilisés</sys:String>
-	<sys:String x:Key="LOCCommonAdditionalOptions">Additional options</sys:String>
+	<sys:String x:Key="LOCCommonAdditionalOptions">Options supplémentaires</sys:String>
 
 	<!-- ==================== LIST ACTIONS ==================== -->
 
-	<sys:String x:Key="LOCCommonClearSelection">Clear Selection</sys:String>
-	<sys:String x:Key="LOCCommonRefreshSelected">Refresh Selected</sys:String>
-	<sys:String x:Key="LOCCommonSelected">Selected:</sys:String>
+	<sys:String x:Key="LOCCommonClearSelection">Effacer la sélection</sys:String>
+	<sys:String x:Key="LOCCommonRefreshSelected">Actualiser la sélection</sys:String>
+	<sys:String x:Key="LOCCommonSelected">Sélectionnés :</sys:String>
 	<sys:String x:Key="LOCCommonSelectGames">Sélectionner des jeux</sys:String>
 	<sys:String x:Key="LOCCommonSelectVariable">Sélectionner une variable</sys:String>
 	<sys:String x:Key="LOCCommonTotalFound">Total trouvé</sys:String>
@@ -127,22 +127,22 @@
 	<sys:String x:Key="LOCCommonRemoveAllTags">Supprimer les étiquettes du plugin</sys:String>
 
 	<!-- Settings section -->
-	<sys:String x:Key="LOCCommonAddTag">Add tag indicating supported configuration</sys:String>
-	<sys:String x:Key="LOCCommonTagSectionTitle">Tag management</sys:String>
+	<sys:String x:Key="LOCCommonAddTag">Ajouter un tag indiquant la configuration prise en charge</sys:String>
+	<sys:String x:Key="LOCCommonTagSectionTitle">Gestion des étiquettes</sys:String>
 
 	<!-- ==================== DATA SECTION (Settings) ==================== -->
 
-	<sys:String x:Key="LOCCommonDataSectionTitle">Data management</sys:String>
-	<sys:String x:Key="LOCCommonClearAllDescription">Permanently deletes all plugin data for every game in your library, then clears all temporary cache files. The Playnite library itself is not affected. This action cannot be undone.</sys:String>
-	<sys:String x:Key="LOCCommonClearAllConfirm">Are you sure you want to delete all plugin data? This action cannot be undone.</sys:String>
+	<sys:String x:Key="LOCCommonDataSectionTitle">Gestion des données</sys:String>
+	<sys:String x:Key="LOCCommonClearAllDescription">Supprime définitivement toutes les données de plugin pour chaque jeu de votre bibliothèque, puis efface tous les fichiers de cache temporaires. La bibliothèque Playnite elle-même n'est pas affectée. Cette action ne peut pas être annulée.</sys:String>
+	<sys:String x:Key="LOCCommonClearAllConfirm">Êtes-vous sûr de vouloir supprimer toutes les données du plugin ? Cette action ne peut pas être annulée.</sys:String>
 
 	<!-- ==================== CACHE SECTION (Settings) ==================== -->
 
 	<sys:String x:Key="LOCCommonCacheSectionTitle">Cache</sys:String>
-	<sys:String x:Key="LOCCommonClearCacheDescription">Deletes all temporary files stored by this plugin (downloaded images, web responses, etc.). Plugin data and the Playnite library remain intact.</sys:String>
-	<sys:String x:Key="LOCCommonClearCache">Clear cache</sys:String>
-	<sys:String x:Key="LOCCommonClearCacheError">An error occurred while clearing the plugin cache.</sys:String>
-	<sys:String x:Key="LOCCommonClearCacheConfirm">Are you sure you want to delete all plugin cache? This action cannot be undone.</sys:String>
+	<sys:String x:Key="LOCCommonClearCacheDescription">Supprime tous les fichiers temporaires stockés par ce plugin (images téléchargées, réponses web, etc.). Les données du plugin et la bibliothèque Playnite restent intactes.</sys:String>
+	<sys:String x:Key="LOCCommonClearCache">Vider le cache</sys:String>
+	<sys:String x:Key="LOCCommonClearCacheError">Une erreur s'est produite lors de l'effacement du cache du plugin.</sys:String>
+	<sys:String x:Key="LOCCommonClearCacheConfirm">Êtes-vous sûr de vouloir supprimer tout le cache du plugin? Cette action ne peut pas être annulée.</sys:String>
 
 	<!-- ==================== FOLDER & FILE MANAGEMENT ==================== -->
 
@@ -152,24 +152,24 @@
 
 	<!-- ==================== IMPORT / EXPORT ==================== -->
 
-	<sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated (only new items)</sys:String>
+	<sys:String x:Key="LOCCommonAutoImport">Importer automatiquement les données lorsque la bibliothèque est mise à jour (uniquement les nouveaux éléments)</sys:String>
 	<sys:String x:Key="LOCCommonAutoImportOnInstalled">Importer automatiquement pour les jeux installés</sys:String>
 	<sys:String x:Key="LOCCommonImporting">Importation en cours...</sys:String>
-	<sys:String x:Key="LOCCommonExport">Export</sys:String>
+	<sys:String x:Key="LOCCommonExport">Exporter</sys:String>
 	<sys:String x:Key="LOCCommonExportData">Exporter les données</sys:String>
-	<sys:String x:Key="LOCCommonExportSettings">CSV export settings</sys:String>
+	<sys:String x:Key="LOCCommonExportSettings">Paramètres d'exportation CSV</sys:String>
 	<sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} données ont été exportées.
 Voulez-vous ouvrir le répertoire ?</sys:String>
 	<sys:String x:Key="LOCCommonExtractToCsv">Extraire les données du plugin en CSV</sys:String>
 	<sys:String x:Key="LOCCommonExtractAllToCsv">Extraire toutes les données du plugin en CSV (très long)</sys:String>
 	<sys:String x:Key="LOCCommonExtracting">Extraction en cours...</sys:String>
-	<sys:String x:Key="LOCCommonProcessingExtraction">Extracting data...</sys:String>
-	<sys:String x:Key="LOCCommonSeparator">Field separator:</sys:String>
-	<sys:String x:Key="LOCCommonExportOutputFile">Output file</sys:String>
-	<sys:String x:Key="LOCCommonExportOutputFilePlaceholder">Select a destination file…</sys:String>
-	<sys:String x:Key="LOCCommonExportNoOutputFile">Please select a destination file before exporting.</sys:String>
-	<sys:String x:Key="LOCCommonExportFieldsSection">Fields to export</sys:String>
-	<sys:String x:Key="LOCCommonExportOptionsSection">Export options</sys:String>
+	<sys:String x:Key="LOCCommonProcessingExtraction">Extraction des données...</sys:String>
+	<sys:String x:Key="LOCCommonSeparator">Séparateur de champ :</sys:String>
+	<sys:String x:Key="LOCCommonExportOutputFile">Fichier de sortie</sys:String>
+	<sys:String x:Key="LOCCommonExportOutputFilePlaceholder">Sélectionnez un fichier de destination…</sys:String>
+	<sys:String x:Key="LOCCommonExportNoOutputFile">Veuillez sélectionner un fichier de destination avant d'exporter.</sys:String>
+	<sys:String x:Key="LOCCommonExportFieldsSection">Champs à exporter</sys:String>
+	<sys:String x:Key="LOCCommonExportOptionsSection">Options d'exportation</sys:String>
 
 	<!-- ==================== UPDATE ==================== -->
 
@@ -192,7 +192,7 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 	<sys:String x:Key="LOCCommonAuthenticateLabel">Connexion</sys:String>
 	<sys:String x:Key="LOCCommonControlConfiguration">Configuration du contrôle</sys:String>
 	<sys:String x:Key="LOCCommonGetAccountID">Obtenir l'ID du compte</sys:String>
-	<sys:String x:Key="LOCCommonHasApiKey">Has API key</sys:String>
+	<sys:String x:Key="LOCCommonHasApiKey">Possède une clé API</sys:String>
 	<sys:String x:Key="LOCCommonIsPrivate">Est privé</sys:String>
 	<sys:String x:Key="LOCCommonLoggedIn">Utilisateur connecté</sys:String>
 	<sys:String x:Key="LOCCommonLoginChecking">Vérification du statut d'authentification…</sys:String>
@@ -206,7 +206,7 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 	<sys:String x:Key="LOCCommonStoreBadConfiguration">{0} : Mauvaise configuration</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoApiKey">{0} : Aucune clé API</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0} : Aucune configuration trouvée</sys:String>
-	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticated</sys:String>
+	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0} : l'utilisateur n'est pas authentifié</sys:String>
 
 	<!-- Ignored items -->
 	<sys:String x:Key="LOCCommonIgnoredItems">Éléments ignorés</sys:String>
@@ -263,10 +263,10 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 
 	<!-- ==================== NOTIFICATIONS & ERRORS ==================== -->
 
-	<sys:String x:Key="LOCCommonCreateLog">Do you want to create a log package?</sys:String>
+	<sys:String x:Key="LOCCommonCreateLog">Voulez-vous créer un paquet de log ?</sys:String>
 	<sys:String x:Key="LOCCommonDataErrorRemove">Erreur lors de la suppression des données du plugin. Veuillez réessayer.</sys:String>
 	<sys:String x:Key="LOCCommonDataRemove">Les données du plugin ont été supprimées.</sys:String>
-	<sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: user is not authenticated.</sys:String>
+	<sys:String x:Key="LOCCommonPluginNoAuthenticate">{0} : l'utilisateur n'est pas authentifié.</sys:String>
 
 	<sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Impossible de supprimer le dossier de cache :
 {0}</sys:String>
@@ -274,19 +274,19 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 	<sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">Erreur lors de la récupération des données de {0}.
 Veuillez réessayer.</sys:String>
 
-	<sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Using previously saved data for {0} [{1}]
-You must authenticate.</sys:String>
+	<sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Utilisation des données enregistrées précédemment pour {0} [{1}]
+Vous devez vous authentifier.</sys:String>
 
-	<sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Error adding tag with {0}.
-Please clear all tags in the plugin menu.</sys:String>
-	<sys:String x:Key="LOCCommonNotificationTagBatchError" xml:space="preserve">{0} error(s) occurred while adding tags. Check the log for details.</sys:String>
+	<sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Erreur lors de l'ajout de l'étiquette {0}.
+Veuillez effacer toutes les étiquettes à partir du menu du plugin.</sys:String>
+	<sys:String x:Key="LOCCommonNotificationTagBatchError" xml:space="preserve">{0} erreur(s) s'est produite lors de l'ajout des étiquettes. Consultez le journal pour plus de détails.</sys:String>
 
-	<sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">More than one data entry found for {0}.
-Please check the plugin settings.</sys:String>
+	<sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">Plus d'une entrée de données trouvée pour {0}.
+Veuillez vérifier les paramètres du plugin.</sys:String>
 
 	<!-- ==================== DROPDOWN ITEM LIST (DdItemListSelectionBox) ==================== -->
 
-	<sys:String x:Key="LOCDdItemList_ClearSelection">Clear selection</sys:String>
+	<sys:String x:Key="LOCDdItemList_ClearSelection">Effacer la sélection</sys:String>
 	<sys:String x:Key="LOCDdItemList_NoItems">No items available</sys:String>
 	<sys:String x:Key="LOCDdItemList_SearchPlaceholder">Search...</sys:String>
 	<sys:String x:Key="LOCDdItemList_ShowSelectedOnly">Show selected items only</sys:String>
