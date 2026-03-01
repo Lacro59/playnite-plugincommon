@@ -83,8 +83,8 @@
 	<sys:String x:Key="LOCCommonAllPlatforms">Todas as Plataformas</sys:String>
 	<sys:String x:Key="LOCCommonAllSources">Todas as fontes</sys:String>
 	<sys:String x:Key="LOCCommonDefaultFilters">Restaurar filtros padrão</sys:String>
-	<sys:String x:Key="LOCCommonGameSource">Game source</sys:String>
-	<sys:String x:Key="LOCCommonInstallationStatus">Installation status</sys:String>
+	<sys:String x:Key="LOCCommonGameSource">Fonte do jogo</sys:String>
+	<sys:String x:Key="LOCCommonInstallationStatus">Status da instalação</sys:String>
 	<sys:String x:Key="LOCCommonMissingData">Etiquetar jogos faltando dados</sys:String>
 	<sys:String x:Key="LOCCommonOldData">Dados antigos</sys:String>
 	<sys:String x:Key="LOCCommonOnlyMissing">Apenas faltando</sys:String>
@@ -92,9 +92,9 @@
 	<sys:String x:Key="LOCCommonSaveFilters">Salvar os filtros atuais</sys:String>
 	<sys:String x:Key="LOCCommonSearchByName">Pesquisar por nome...</sys:String>
 	<sys:String x:Key="LOCCommonSelectFilters">Selecionar filtros</sys:String>
-	<sys:String x:Key="LOCCommonTimeFilters">Time-based filters</sys:String>
+	<sys:String x:Key="LOCCommonTimeFilters">Filtros baseados em tempo</sys:String>
 	<sys:String x:Key="LOCCommonUsedFilteredGames">Jogos filtrados atualmente em uso</sys:String>
-	<sys:String x:Key="LOCCommonAdditionalOptions">Additional options</sys:String>
+	<sys:String x:Key="LOCCommonAdditionalOptions">Opções adicionais</sys:String>
 
 	<!-- ==================== LIST ACTIONS ==================== -->
 
@@ -133,16 +133,16 @@
 	<!-- ==================== DATA SECTION (Settings) ==================== -->
 
 	<sys:String x:Key="LOCCommonDataSectionTitle">Gestão de dados</sys:String>
-	<sys:String x:Key="LOCCommonClearAllDescription">Permanently deletes all plugin data for every game in your library, then clears all temporary cache files. The Playnite library itself is not affected. This action cannot be undone.</sys:String>
+	<sys:String x:Key="LOCCommonClearAllDescription">Exclui permanentemente todos os dados dos plugins para cada jogo na sua biblioteca e, em seguida, limpa todos os arquivos de cache temporários. A biblioteca do Playnite APAGAR não é afetada. Esta ação não pode ser desfeita.</sys:String>
 	<sys:String x:Key="LOCCommonClearAllConfirm">Tem certeza que deseja excluir todos os dados do plugin? Esta ação não pode ser desfeita.</sys:String>
 
 	<!-- ==================== CACHE SECTION (Settings) ==================== -->
 
 	<sys:String x:Key="LOCCommonCacheSectionTitle">Cache</sys:String>
-	<sys:String x:Key="LOCCommonClearCacheDescription">Deletes all temporary files stored by this plugin (downloaded images, web responses, etc.). Plugin data and the Playnite library remain intact.</sys:String>
-	<sys:String x:Key="LOCCommonClearCache">Clear cache</sys:String>
-	<sys:String x:Key="LOCCommonClearCacheError">An error occurred while clearing the plugin cache.</sys:String>
-	<sys:String x:Key="LOCCommonClearCacheConfirm">Are you sure you want to delete all plugin cache? This action cannot be undone.</sys:String>
+	<sys:String x:Key="LOCCommonClearCacheDescription">Exclui todos os arquivos temporários armazenados por este plugin (imagens baixadas, respostas da web, etc.). Dados de plugins e a biblioteca do Playnite permanecem intactos.</sys:String>
+	<sys:String x:Key="LOCCommonClearCache">Limpar cache</sys:String>
+	<sys:String x:Key="LOCCommonClearCacheError">Ocorreu um erro ao limpar o cache do plugin.</sys:String>
+	<sys:String x:Key="LOCCommonClearCacheConfirm">Tem certeza que deseja excluir todos os dados do plugin? Esta ação não pode ser desfeita.</sys:String>
 
 	<!-- ==================== FOLDER & FILE MANAGEMENT ==================== -->
 
@@ -155,21 +155,21 @@
 	<sys:String x:Key="LOCCommonAutoImport">Importar dados automaticamente quando a biblioteca for atualizada (somente novos)</sys:String>
 	<sys:String x:Key="LOCCommonAutoImportOnInstalled">Importar automaticamente para os jogos instalados</sys:String>
 	<sys:String x:Key="LOCCommonImporting">Importando...</sys:String>
-	<sys:String x:Key="LOCCommonExport">Export</sys:String>
+	<sys:String x:Key="LOCCommonExport">Exportar</sys:String>
 	<sys:String x:Key="LOCCommonExportData">Exportar dados</sys:String>
-	<sys:String x:Key="LOCCommonExportSettings">CSV export settings</sys:String>
+	<sys:String x:Key="LOCCommonExportSettings">Configurações de exportação CSV</sys:String>
 	<sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} dados foram exportados.
 Você quer abrir o diretório?</sys:String>
 	<sys:String x:Key="LOCCommonExtractToCsv">Extrair dados do plugin para CSV</sys:String>
 	<sys:String x:Key="LOCCommonExtractAllToCsv">Extraia todos os dados do plugin para CSV (muito longo)</sys:String>
 	<sys:String x:Key="LOCCommonExtracting">Extraindo...</sys:String>
-	<sys:String x:Key="LOCCommonProcessingExtraction">Extracting data...</sys:String>
-	<sys:String x:Key="LOCCommonSeparator">Field separator:</sys:String>
-	<sys:String x:Key="LOCCommonExportOutputFile">Output file</sys:String>
-	<sys:String x:Key="LOCCommonExportOutputFilePlaceholder">Select a destination file…</sys:String>
-	<sys:String x:Key="LOCCommonExportNoOutputFile">Please select a destination file before exporting.</sys:String>
-	<sys:String x:Key="LOCCommonExportFieldsSection">Fields to export</sys:String>
-	<sys:String x:Key="LOCCommonExportOptionsSection">Export options</sys:String>
+	<sys:String x:Key="LOCCommonProcessingExtraction">Extraindo dados...</sys:String>
+	<sys:String x:Key="LOCCommonSeparator">Separador de campos:</sys:String>
+	<sys:String x:Key="LOCCommonExportOutputFile">Arquivo de saída</sys:String>
+	<sys:String x:Key="LOCCommonExportOutputFilePlaceholder">Selecione um arquivo de destino…</sys:String>
+	<sys:String x:Key="LOCCommonExportNoOutputFile">Por favor, selecione um arquivo de destino antes de exportar.</sys:String>
+	<sys:String x:Key="LOCCommonExportFieldsSection">Campos para exportar</sys:String>
+	<sys:String x:Key="LOCCommonExportOptionsSection">Opções de exportação</sys:String>
 
 	<!-- ==================== UPDATE ==================== -->
 
@@ -192,7 +192,7 @@ Você quer abrir o diretório?</sys:String>
 	<sys:String x:Key="LOCCommonAuthenticateLabel">Autenticar</sys:String>
 	<sys:String x:Key="LOCCommonControlConfiguration">Configuração de controle</sys:String>
 	<sys:String x:Key="LOCCommonGetAccountID">Obter ID da conta</sys:String>
-	<sys:String x:Key="LOCCommonHasApiKey">Has API key</sys:String>
+	<sys:String x:Key="LOCCommonHasApiKey">Tem chave API</sys:String>
 	<sys:String x:Key="LOCCommonIsPrivate">É privado</sys:String>
 	<sys:String x:Key="LOCCommonLoggedIn">Usuário autenticado</sys:String>
 	<sys:String x:Key="LOCCommonLoginChecking">Verificando status da autenticação…</sys:String>
@@ -279,7 +279,7 @@ Você deve autenticar.</sys:String>
 
 	<sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Erro adicionando a tag com {0}.
 Por favor, limpe todas as tags no menu de plugins.</sys:String>
-	<sys:String x:Key="LOCCommonNotificationTagBatchError" xml:space="preserve">{0} error(s) occurred while adding tags. Check the log for details.</sys:String>
+	<sys:String x:Key="LOCCommonNotificationTagBatchError" xml:space="preserve">{0} erro(s) ocorreram durante a adição de etiquetas. Verifique o log para detalhes.</sys:String>
 
 	<sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">Mais de um dado encontrado para {0}. Por favor, cheque as configurações do plugin.</sys:String>
 
@@ -292,33 +292,33 @@ Por favor, limpe todas as tags no menu de plugins.</sys:String>
 
 	<!-- ==================== VARIABLES TOOLTIP ==================== -->
 
-	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
-{InstallDir} - Game installation directory
-{InstallDirName} - Installation folder name
-{ImagePath} - Game ISO/ROM path if set
-{ImageName} - Game ISO/ROM file name
-{ImageNameNoExt} - Game ISO/ROM file name without extension
-{PlayniteDir} - Playnite installation directory
-{Name} - Game name
+	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Variáveis especiais podem ser usadas para adicionar uma expressão dinâmica:
+{InstallDir} - Diretório de instalação do jogo
+{InstallDirName} - Nome da pasta de instalação
+{ImagePath} - Caminho da ISO/ROM do jogo, se configurada
+{ImageName} - Nome do arquivo ISO/ROM do jogo
+{ImageNameNoExt} - Nome do arquivo ISO/ROM do jogo sem extensão
+{PlayniteDir} - Diretório de Instalação do Playnite
+{Name} - Nome do Jogo
 
-Cloud variables:
+Variáveis de nuvem:
 {DropboxFolder}
 {OneDriveFolder}
 
-Steam variables:
-{SteamId} - Steam user ID
-{SteamAccountId} - Steam account ID
-{SteamInstallDir} - Steam installation directory
-{SteamScreenshotsDir} - Steam screenshots directory
+Variáveis do Steam:
+{SteamId} - ID de usuário do Steam
+{SteamAccountId} - ID de conta Steam
+{SteamInstallDir} - Diretório de instalação do Steam
+{SteamScreenshotsDir} - Diretório de capturas de tela do Steam
 
-Ubisoft Connect variables:
-{UbisoftInstallDir} - Ubisoft installation directory
-{UbisoftScreenshotsDir} - Ubisoft screenshots directory
+Variáveis da Ubisoft Connect:
+{UbisoftInstallDir} - Diretório de instalação da Ubisoft
+{UbisoftScreenshotsDir} - Diretório de capturas de tela da Ubisoft
 
-RetroArch variables:
-{RetroArchScreenshotsDir} - RetroArch screenshots directory
+Variáveis do RetroArch:
+{RetroArchScreenshotsDir} - Diretório de capturas de tela do RetroArch
 
-Windows variables:
+Variáveis do Windows:
 {WinDir}
 {AllUsersProfile}
 {AppData}
@@ -334,6 +334,6 @@ Windows variables:
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)} - 32-bit Program Files directory</sys:String>
+{ProgramFiles(x86)} - Diretório de Arquivos de Programas de 32-bit</sys:String>
 
 </ResourceDictionary>
