@@ -9,20 +9,13 @@ namespace CommonPluginsShared.Collections
 	/// Provides cached access to item count and data presence.
 	/// </summary>
 	/// <typeparam name="T">Type of items stored for the game.</typeparam>
-	public abstract class PluginDataBaseGame<T> : PluginDataBaseGameBase
+	public abstract class PluginGameCollection<T> : PluginGameEntry
 	{
-		#region Cache fields
-
-		private bool? _hasData;
-		private int? _count;
-
-		#endregion
-
 		private List<T> _items = new List<T>();
 
 		/// <summary>
 		/// Gets or sets the list of items associated with the game.
-		/// Setting this property triggers the OnItemsChanged event and refreshes cached values.
+		/// Setting this property invalidates the HasData and Count caches.
 		/// </summary>
 		public List<T> Items
 		{
@@ -52,7 +45,7 @@ namespace CommonPluginsShared.Collections
 		}
 
 		/// <summary>
-		/// Returns the count of items, cast to ulong.
+		/// Returns the count of items as ulong.
 		/// Uses cached value for better performance.
 		/// </summary>
 		[DontSerialize]
@@ -62,30 +55,20 @@ namespace CommonPluginsShared.Collections
 			{
 				if (!_count.HasValue)
 				{
-					_count = _items?.Count ?? 0;
+					_count = (ulong)(_items?.Count ?? 0);
 				}
-				return (ulong)_count.Value;
+				return _count.Value;
 			}
 		}
 
 		/// <summary>
-		/// Called when the Items list changes.
-		/// Override in derived classes to refresh stats or notify property changes.
-		/// This base implementation clears cached values.
+		/// Called when the Items list changes. Delegates cache invalidation to
+		/// <see cref="PluginGameEntry.RefreshCachedValues"/>.
+		/// Override in derived classes to perform additional post-change logic.
 		/// </summary>
 		protected virtual void OnItemsChanged()
 		{
-			_hasData = null;
-			_count = null;
 			RefreshCachedValues();
-		}
-
-		/// <summary>
-		/// Refreshes cached values when Items list changes.
-		/// Override in derived classes to implement custom caching logic.
-		/// </summary>
-		protected virtual void RefreshCachedValues()
-		{
 		}
 	}
 }

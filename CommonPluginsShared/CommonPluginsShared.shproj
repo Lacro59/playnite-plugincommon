@@ -10,9 +10,6 @@
   <PropertyGroup />
   <ItemGroup>
     <Compile Include="CodeLang.cs" />
-    <Compile Include="Collections\PluginDataBaseGame.cs" />
-    <Compile Include="Collections\PluginDataBaseGameBase.cs" />
-    <Compile Include="Collections\PluginDataBaseGameDetails.cs" />
     <Compile Include="Collections\PluginDatabaseObject.cs" />
     <Compile Include="Collections\PluginItemCollection.cs" />
     <Compile Include="Common.cs" />

@@ -11,10 +11,11 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Behaviors\DatePickerCalendar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeLang.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDataBaseGame.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDataBaseGameBase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDataBaseGameDetails.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)collections\LiteDbItemCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDatabaseObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)collections\PluginGameCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)collections\PluginGameCollectionWithDetails.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)collections\PluginGameEntry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginItemCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginMenus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common.cs" />
@@ -48,10 +49,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\ValueOperationConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\VisibilityZeroConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CookiesTools.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DebugTimer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\DateTimeExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\StringExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)images\ImageServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IPluginSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)interfaces\IPluginSettingsViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)io\IOServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\CheckElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\DataGame.cs" />
@@ -77,9 +80,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)plugins\PluginWindows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SystemInfo\SystemServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransformIcon.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UI\CommandsNavigation.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ui\CommandsSettings.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UI\CommandsWindows.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Commands\CommandsNavigation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Commands\CommandsPlugin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Commands\CommandsWindows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI\ResourcesList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI\UIHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)utilities\UtilityServices.cs" />
@@ -94,6 +97,7 @@
     <Folder Include="$(MSBuildThisFileDirectory)Caching\" />
     <Folder Include="$(MSBuildThisFileDirectory)IO\" />
     <Folder Include="$(MSBuildThisFileDirectory)Images\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Commands\" />
     <Folder Include="$(MSBuildThisFileDirectory)SystemInfo\" />
     <Folder Include="$(MSBuildThisFileDirectory)Utilities\" />
   </ItemGroup>

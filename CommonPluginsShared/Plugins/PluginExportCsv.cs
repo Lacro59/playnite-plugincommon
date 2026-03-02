@@ -14,7 +14,7 @@ using System.Text;
 
 namespace CommonPluginsShared.Plugins
 {
-	public abstract class PluginExportCsv<TItem> where TItem : PluginDataBaseGameBase
+	public abstract class PluginExportCsv<TItem> where TItem : PluginGameEntry
 	{
 		protected static readonly ILogger Logger = LogManager.GetLogger();
 

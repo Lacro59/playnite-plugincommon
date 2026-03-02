@@ -21,24 +21,14 @@ namespace CommonPluginsShared.Controls
 	public class PluginUserControlExtendBase : PluginUserControl
 	{
 		protected static readonly ILogger Logger = LogManager.GetLogger();
-
 		protected virtual IDataContext controlDataContext { get; set; }
-
 		protected DispatcherTimer UpdateDataTimer { get; set; }
-
 		protected Game CurrentGame { get; set; }
 
 		private static readonly object _initLock = new object();
-
-		// Keyed by concrete type so each derived class initialises independently.
 		private static readonly Dictionary<Type, bool> _typeEventsInitialized = new Dictionary<Type, bool>();
-
-		// Separate flag for the single Games.ItemUpdated subscription shared by all types.
 		private static bool _baseEventsAttached = false;
-
-		// Per-plugin guard (e.g. PluginButton and PluginViewItem share the same plugin key).
 		private static readonly Dictionary<string, bool> _pluginEventsAttached = new Dictionary<string, bool>();
-
 		private static readonly List<WeakReference<PluginUserControlExtendBase>> _instances =
 			new List<WeakReference<PluginUserControlExtendBase>>();
 
@@ -87,7 +77,6 @@ namespace CommonPluginsShared.Controls
 			{
 				bool mustDisplay = (bool)e.NewValue;
 				Visibility newVisibility = mustDisplay ? Visibility.Visible : Visibility.Collapsed;
-
 				if (obj.Parent is ContentControl contentControl)
 				{
 					contentControl.Visibility = newVisibility;
@@ -95,7 +84,7 @@ namespace CommonPluginsShared.Controls
 
 				if (!mustDisplay)
 				{
-					obj.Visibility = Visibility.Collapsed;
+					obj.SetVisibility(Visibility.Collapsed);
 				}
 			}
 		}
@@ -132,10 +121,18 @@ namespace CommonPluginsShared.Controls
 
 		public PluginUserControlExtendBase()
 		{
+#if DEBUG
+			var timer = new DebugTimer(GetType().Name + ".ctor");
+#endif
+
 			if (API.Instance?.ApplicationInfo?.Mode == ApplicationMode.Desktop)
 			{
 				ActiveViewAtCreation = API.Instance.MainView.ActiveDesktopView;
 			}
+
+#if DEBUG
+			timer.Step("ActiveViewAtCreation resolved");
+#endif
 
 			UpdateDataTimer = new DispatcherTimer
 			{
@@ -143,8 +140,16 @@ namespace CommonPluginsShared.Controls
 			};
 			UpdateDataTimer.Tick += UpdateDataEvent;
 
+#if DEBUG
+			timer.Step("DispatcherTimer created");
+#endif
+
 			RegisterInstance();
 			Unloaded += PluginUserControlExtendBase_Unloaded;
+
+#if DEBUG
+			timer.Stop();
+#endif
 		}
 
 		#region Instance Management
@@ -164,10 +169,16 @@ namespace CommonPluginsShared.Controls
 		/// </summary>
 		protected void InitializeStaticEvents()
 		{
-			Type type = GetType();
+#if DEBUG
+			var timer = new DebugTimer(GetType().Name + ".InitializeStaticEvents");
+#endif
 
+			Type type = GetType();
 			if (_typeEventsInitialized.ContainsKey(type))
 			{
+#if DEBUG
+				timer.Stop("already initialized, skip");
+#endif
 				return;
 			}
 
@@ -175,12 +186,23 @@ namespace CommonPluginsShared.Controls
 			{
 				if (_typeEventsInitialized.ContainsKey(type))
 				{
+#if DEBUG
+					timer.Stop("already initialized (inside lock), skip");
+#endif
 					return;
 				}
+
+#if DEBUG
+				timer.Step("calling AttachStaticEvents");
+#endif
 
 				AttachStaticEvents();
 				_typeEventsInitialized[type] = true;
 			}
+
+#if DEBUG
+			timer.Stop();
+#endif
 		}
 
 		/// <summary>
@@ -188,7 +210,6 @@ namespace CommonPluginsShared.Controls
 		/// </summary>
 		protected void AttachPluginEvents(string pluginKey, Action attachAction)
 		{
-			// Must be called inside the _initLock held by InitializeStaticEvents.
 			if (!_pluginEventsAttached.ContainsKey(pluginKey))
 			{
 				attachAction?.Invoke();
@@ -198,15 +219,26 @@ namespace CommonPluginsShared.Controls
 
 		/// <summary>
 		/// Override in derived classes to attach plugin-specific handlers via <see cref="AttachPluginEvents"/>.
-		/// This method is always called inside <see cref="_initLock"/>.
+		/// This method is always called inside <see cref="InitializeStaticEvents"/>.
 		/// </summary>
 		protected virtual void AttachStaticEvents()
 		{
+#if DEBUG
+			var timer = new DebugTimer(GetType().Name + ".AttachStaticEvents");
+#endif
+
 			if (!_baseEventsAttached)
 			{
 				API.Instance.Database.Games.ItemUpdated += OnStaticGamesItemUpdated;
 				_baseEventsAttached = true;
+#if DEBUG
+				timer.Step("Games.ItemUpdated attached");
+#endif
 			}
+
+#if DEBUG
+			timer.Stop();
+#endif
 		}
 
 		private static void OnStaticGamesItemUpdated(object sender, ItemUpdatedEventArgs<Game> e)
@@ -239,7 +271,6 @@ namespace CommonPluginsShared.Controls
 						updatedIds.Add(item.NewData.Id);
 					}
 				}
-
 				NotifyAllInstances(instance => instance.OnDatabaseItemUpdated(updatedIds));
 			};
 		}
@@ -260,7 +291,6 @@ namespace CommonPluginsShared.Controls
 		/// Handles a database item update for this instance.
 		/// Called on the UI thread via <see cref="NotifyAllInstances"/>.
 		/// </summary>
-		/// <param name="updatedIds">IDs of the updated database items.</param>
 		protected virtual void OnDatabaseItemUpdated(List<Guid> updatedIds)
 		{
 			if (GameContext == null)
@@ -287,17 +317,17 @@ namespace CommonPluginsShared.Controls
 		}
 
 		/// <summary>
-		/// Dispatches an action to all alive instances, batched by dispatcher.
+		/// Dispatches an action to all alive instances.
+		/// Fast-path: if all instances share the same dispatcher (typical in Playnite Desktop),
+		/// skips LINQ GroupBy and dispatches in a single BeginInvoke.
 		/// Cleans up dead weak references under lock.
 		/// </summary>
 		protected static void NotifyAllInstances(Action<PluginUserControlExtendBase> action)
 		{
 			List<PluginUserControlExtendBase> alive;
-
 			lock (_initLock)
 			{
 				alive = new List<PluginUserControlExtendBase>(_instances.Count);
-
 				for (int i = _instances.Count - 1; i >= 0; i--)
 				{
 					if (_instances[i].TryGetTarget(out PluginUserControlExtendBase instance))
@@ -311,24 +341,48 @@ namespace CommonPluginsShared.Controls
 				}
 			}
 
-			// Batch by dispatcher to minimise cross-thread overhead.
-			var groups = alive.GroupBy(i => i.Dispatcher);
-			foreach (var group in groups)
+			if (alive.Count == 0)
 			{
-				Dispatcher dispatcher = group.Key;
-				List<PluginUserControlExtendBase> groupList = group.ToList();
+				return;
+			}
 
-				dispatcher?.BeginInvoke((Action)delegate
+			Dispatcher sharedDispatcher = alive[0].Dispatcher;
+			bool allSameDispatcher = true;
+			for (int i = 1; i < alive.Count; i++)
+			{
+				if (!ReferenceEquals(alive[i].Dispatcher, sharedDispatcher))
 				{
-					foreach (PluginUserControlExtendBase instance in groupList)
+					allSameDispatcher = false;
+					break;
+				}
+			}
+
+			if (allSameDispatcher)
+			{
+				sharedDispatcher.BeginInvoke((Action)delegate
+				{
+					foreach (PluginUserControlExtendBase instance in alive)
 					{
-						try
-						{
-							action(instance);
-						}
-						catch { }
+						try { action(instance); } catch { }
 					}
 				}, DispatcherPriority.Background);
+			}
+			else
+			{
+				// Fallback: multi-dispatcher edge case
+				var groups = alive.GroupBy(i => i.Dispatcher);
+				foreach (var group in groups)
+				{
+					Dispatcher dispatcher = group.Key;
+					List<PluginUserControlExtendBase> groupList = group.ToList();
+					dispatcher?.BeginInvoke((Action)delegate
+					{
+						foreach (PluginUserControlExtendBase instance in groupList)
+						{
+							try { action(instance); } catch { }
+						}
+					}, DispatcherPriority.Background);
+				}
 			}
 		}
 
@@ -338,7 +392,6 @@ namespace CommonPluginsShared.Controls
 		private void PluginUserControlExtendBase_Unloaded(object sender, RoutedEventArgs e)
 		{
 			UpdateDataTimer.Stop();
-
 			lock (_initLock)
 			{
 				for (int i = _instances.Count - 1; i >= 0; i--)
@@ -363,20 +416,41 @@ namespace CommonPluginsShared.Controls
 
 		public override void GameContextChanged(Game oldContext, Game newContext)
 		{
+#if DEBUG
+			var timer = new DebugTimer(string.Format("{0}.GameContextChanged(game='{1}')", GetType().Name, newContext?.Name ?? "null"));
+#endif
+
+			// Cancel any in-flight update for the previous game
+			CancelPendingUpdate();
+
+#if DEBUG
+			timer.Step("CancelPendingUpdate done");
+#endif
+
 			CurrentGame = newContext;
 			UpdateDataTimer.Stop();
-			Visibility = Visibility.Collapsed;
-
+			SetVisibility(Visibility.Collapsed);
 			SetDefaultDataContext();
+
+#if DEBUG
+			timer.Step("SetDefaultDataContext done");
+#endif
 
 			MustDisplay = AlwaysShow || controlDataContext.IsActivated;
 
 			if (!(controlDataContext?.IsActivated ?? false) || newContext == null || !MustDisplay)
 			{
+#if DEBUG
+				timer.Stop("early exit (not activated or no context)");
+#endif
 				return;
 			}
 
 			RestartTimer();
+
+#if DEBUG
+			timer.Stop("timer restarted");
+#endif
 		}
 
 		protected virtual void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e)
@@ -400,6 +474,24 @@ namespace CommonPluginsShared.Controls
 
 		public virtual void SetDefaultDataContext() { }
 
+		/// <summary>
+		/// Cancels any in-flight <see cref="UpdateDataAsync"/> for the current instance.
+		/// Must be called on the UI thread (before restarting the timer).
+		/// </summary>
+		protected virtual void CancelPendingUpdate() { }
+
+		/// <summary>
+		/// Sets <see cref="UIElement.Visibility"/> only when the value actually changes,
+		/// avoiding spurious WPF layout invalidations.
+		/// </summary>
+		protected void SetVisibility(Visibility value)
+		{
+			if (Visibility != value)
+			{
+				Visibility = value;
+			}
+		}
+
 		private async void UpdateDataEvent(object sender, EventArgs e)
 		{
 			await UpdateDataAsync();
@@ -407,19 +499,30 @@ namespace CommonPluginsShared.Controls
 
 		public virtual async Task UpdateDataAsync()
 		{
+#if DEBUG
+			var timer = new DebugTimer(GetType().Name + ".UpdateDataAsync(base)");
+#endif
+
 			UpdateDataTimer.Stop();
 
 			if (GameContext == null || CurrentGame == null || GameContext.Id != CurrentGame.Id)
 			{
-				Visibility = Visibility.Collapsed;
+				SetVisibility(Visibility.Collapsed);
+#if DEBUG
+				timer.Stop("early exit (context mismatch)");
+#endif
 				return;
 			}
 
 			await API.Instance.MainView.UIDispatcher?.InvokeAsync(() =>
 			{
 				SetData(GameContext);
-				Visibility = MustDisplay ? Visibility.Visible : Visibility.Collapsed;
+				SetVisibility(MustDisplay ? Visibility.Visible : Visibility.Collapsed);
 			}, DispatcherPriority.Render);
+
+#if DEBUG
+			timer.Stop();
+#endif
 		}
 
 		/// <summary>Kept for backward compatibility with controls that override the single-argument form.</summary>
