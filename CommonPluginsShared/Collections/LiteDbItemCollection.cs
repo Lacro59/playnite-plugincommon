@@ -27,8 +27,7 @@ namespace CommonPluginsShared.Collections
 	/// - Shared file mode allows external tools to open the file read-only while the plugin has it open.
 	/// </summary>
 	/// <typeparam name="TItem">Database item type inheriting <see cref="PluginGameEntry"/>.</typeparam>
-	public class LiteDbItemCollection<TItem> : IDisposable
-		where TItem : PluginGameEntry
+	public class LiteDbItemCollection<TItem> : IDisposable where TItem : PluginGameEntry
 	{
 		#region Fields & Constants
 
@@ -61,8 +60,7 @@ namespace CommonPluginsShared.Collections
 		/// NOTE: returned <typeparamref name="TItem"/> instances are not defensively copied;
 		/// callers must not mutate them without calling <see cref="Upsert"/> afterwards.
 		/// </summary>
-		private readonly ConcurrentDictionary<Guid, TItem> _sessionCache
-			= new ConcurrentDictionary<Guid, TItem>();
+		private readonly ConcurrentDictionary<Guid, TItem> _sessionCache = new ConcurrentDictionary<Guid, TItem>();
 
 		/// <summary>
 		/// In-memory document count kept in sync with LiteDB to avoid repeated COUNT queries.

@@ -9,8 +9,7 @@ namespace CommonPluginsShared.Collections
 	/// </summary>
 	/// <typeparam name="T">Type of items stored in <see cref="PluginGameCollection{T}.Items"/>.</typeparam>
 	/// <typeparam name="TDetails">Type of the details object. Must have a public parameterless constructor.</typeparam>
-	public abstract class PluginGameCollectionWithDetails<T, TDetails> : PluginGameCollection<T>
-		where TDetails : new()
+	public abstract class PluginGameCollectionWithDetails<T, TDetails> : PluginGameCollection<T> where TDetails : new()
 	{
 		private TDetails _itemsDetails = default;
 
