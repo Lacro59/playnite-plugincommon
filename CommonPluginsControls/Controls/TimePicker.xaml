@@ -4,13 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             d:DesignHeight="90" d:DesignWidth="200">
+             d:DesignHeight="90" d:DesignWidth="200"
+             x:Name="TimePickerRoot">
 
     <UserControl.Resources>
-
-        <!-- ── Spinner button style ──────────────────────────────────────────
-             Flat, icon-only button used for the up/down arrows.
-             Uses GlyphBrush on hover instead of hardcoded colors.          -->
         <Style x:Key="SpinnerButton" TargetType="Button">
             <Setter Property="Background"   Value="Transparent" />
             <Setter Property="BorderBrush"  Value="Transparent" />
@@ -24,7 +21,6 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <!-- Rounded hit-area so hover highlight is tight around the icon -->
                         <Border x:Name="Bd"
                                 Background="{TemplateBinding Background}"
                                 CornerRadius="{DynamicResource ControlCornerRadius}"
@@ -34,10 +30,8 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background"
-                                        Value="{DynamicResource HoverBrush}" />
-                                <Setter Property="Foreground"
-                                        Value="{DynamicResource GlyphBrush}" />
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HoverBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource GlyphBrush}" />
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="Bd" Property="Opacity" Value="0.7" />
@@ -51,9 +45,6 @@
             </Setter>
         </Style>
 
-        <!-- ── Digit TextBox style ───────────────────────────────────────────
-             Transparent background, centered text, no border.
-             Theme font size so it scales with the active Playnite theme.   -->
         <Style x:Key="TimeDigitBox" TargetType="TextBox">
             <Setter Property="Background"       Value="Transparent" />
             <Setter Property="BorderThickness"  Value="0" />
@@ -70,7 +61,6 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
-                        <!-- Subtle bottom-border focus indicator instead of a full box border -->
                         <Border x:Name="Bd"
                                 Background="{TemplateBinding Background}"
                                 BorderThickness="0,0,0,1"
@@ -82,19 +72,15 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter TargetName="Bd" Property="BorderBrush"
-                                        Value="{DynamicResource GlyphBrush}" />
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource GlyphBrush}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-
     </UserControl.Resources>
 
-    <!-- ── Root card ─────────────────────────────────────────────────────────
-         Rounded container consistent with the CardBorder style in Common.xaml -->
     <Border Background="{DynamicResource PopupBackgroundBrush}"
             BorderBrush="{DynamicResource NormalBorderBrush}"
             BorderThickness="{DynamicResource ControlBorderThickness}"
@@ -105,41 +91,34 @@
                     VerticalAlignment="Center"
                     HorizontalAlignment="Center">
 
-            <!-- ── Clock icon ─────────────────────────────────────────────── -->
             <TextBlock Style="{DynamicResource BaseTextBlockStyle}"
-                       Text="&#xEE01;"
+                       Text="&#xEC4E;"
                        FontFamily="{DynamicResource FontIcoFont}"
                        FontSize="{DynamicResource FontSize}"
                        Foreground="{DynamicResource TextBrushDarker}"
                        VerticalAlignment="Center"
                        Margin="0,0,10,0"
-                       ToolTip="{DynamicResource LOCGaTimePickerTooltip}" />
+                       ToolTip="{DynamicResource LOCCommonTimePickerTooltip}" />
 
-            <!-- ══════════ HOURS column ══════════ -->
             <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-
-                <!-- Up arrow -->
                 <Button Style="{StaticResource SpinnerButton}"
-                        Content="&#xEFC2;"
-                        Command="{Binding IncrementHoursCommand}"
-                        ToolTip="{DynamicResource LOCGaTimePickerIncrease}" />
+                        Content="&#xEAB9;"
+                        Command="{Binding ViewModel.IncrementHoursCommand, ElementName=TimePickerRoot}"
+                        ToolTip="{DynamicResource LOCCommonTimePickerIncrease}" />
 
-                <!-- Hour input -->
                 <TextBox Style="{StaticResource TimeDigitBox}"
-                         Text="{Binding HoursDisplay, Mode=OneWay}"
+                         Text="{Binding ViewModel.HoursDisplay, ElementName=TimePickerRoot, Mode=OneWay}"
                          PreviewTextInput="NumericField_PreviewTextInput"
                          GotKeyboardFocus="NumericField_GotKeyboardFocus"
                          PreviewMouseLeftButtonDown="NumericField_PreviewMouseLeftButtonDown"
                          MouseWheel="Hours_OnMouseWheel" />
 
-                <!-- Down arrow -->
                 <Button Style="{StaticResource SpinnerButton}"
-                        Content="&#xEFC1;"
-                        Command="{Binding DecrementHoursCommand}"
-                        ToolTip="{DynamicResource LOCGaTimePickerDecrease}" />
+                        Content="&#xEAB2;"
+                        Command="{Binding ViewModel.DecrementHoursCommand, ElementName=TimePickerRoot}"
+                        ToolTip="{DynamicResource LOCCommonTimePickerDecrease}" />
             </StackPanel>
 
-            <!-- Separator -->
             <TextBlock Style="{DynamicResource BaseTextBlockStyle}"
                        Text=":"
                        FontSize="{DynamicResource FontSizeLarge}"
@@ -148,51 +127,38 @@
                        VerticalAlignment="Center"
                        Margin="4,0" />
 
-            <!-- ══════════ MINUTES column ══════════ -->
             <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-
                 <Button Style="{StaticResource SpinnerButton}"
-                        Content="&#xEFC2;"
-                        Command="{Binding IncrementMinutesCommand}"
-                        ToolTip="{DynamicResource LOCGaTimePickerIncrease}" />
+                        Content="&#xEAB9;"
+                        Command="{Binding ViewModel.IncrementMinutesCommand, ElementName=TimePickerRoot}"
+                        ToolTip="{DynamicResource LOCCommonTimePickerIncrease}" />
 
                 <TextBox Style="{StaticResource TimeDigitBox}"
-                         Text="{Binding MinutesDisplay, Mode=OneWay}"
+                         Text="{Binding ViewModel.MinutesDisplay, ElementName=TimePickerRoot, Mode=OneWay}"
                          PreviewTextInput="NumericField_PreviewTextInput"
                          GotKeyboardFocus="NumericField_GotKeyboardFocus"
                          PreviewMouseLeftButtonDown="NumericField_PreviewMouseLeftButtonDown"
                          MouseWheel="Minutes_OnMouseWheel" />
 
                 <Button Style="{StaticResource SpinnerButton}"
-                        Content="&#xEFC1;"
-                        Command="{Binding DecrementMinutesCommand}"
-                        ToolTip="{DynamicResource LOCGaTimePickerDecrease}" />
+                        Content="&#xEAB2;"
+                        Command="{Binding ViewModel.DecrementMinutesCommand, ElementName=TimePickerRoot}"
+                        ToolTip="{DynamicResource LOCCommonTimePickerDecrease}" />
             </StackPanel>
 
-            <!-- ══════════ SECONDS column (conditionnel) ══════════
-                 Visibility pilotée par ShowSeconds sur le UserControl.
-                 Le Binding passe par le code-behind via la DP,
-                 puis le VM expose la même valeur.                   -->
             <StackPanel Orientation="Vertical" VerticalAlignment="Center">
                 <StackPanel.Style>
                     <Style TargetType="StackPanel">
                         <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding ShowSeconds}" Value="True">
+                            <DataTrigger Binding="{Binding ViewModel.ShowSeconds, ElementName=TimePickerRoot}" Value="True">
                                 <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </StackPanel.Style>
 
-                <!-- Separator before seconds -->
-                <StackPanel.Resources>
-                    <!-- inner separator displayed only when the panel is visible -->
-                </StackPanel.Resources>
-
-                <!-- Separator colon + seconds are wrapped together -->
                 <StackPanel Orientation="Horizontal">
-
                     <TextBlock Style="{DynamicResource BaseTextBlockStyle}"
                                Text=":"
                                FontSize="{DynamicResource FontSizeLarge}"
@@ -202,28 +168,25 @@
                                Margin="4,0" />
 
                     <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-
                         <Button Style="{StaticResource SpinnerButton}"
-                                Content="&#xEFC2;"
-                                Command="{Binding IncrementSecondsCommand}"
-                                ToolTip="{DynamicResource LOCGaTimePickerIncrease}" />
+                                Content="&#xEAB9;"
+                                Command="{Binding ViewModel.IncrementSecondsCommand, ElementName=TimePickerRoot}"
+                                ToolTip="{DynamicResource LOCCommonTimePickerIncrease}" />
 
                         <TextBox Style="{StaticResource TimeDigitBox}"
-                                 Text="{Binding SecondsDisplay, Mode=OneWay}"
+                                 Text="{Binding ViewModel.SecondsDisplay, ElementName=TimePickerRoot, Mode=OneWay}"
                                  PreviewTextInput="NumericField_PreviewTextInput"
                                  GotKeyboardFocus="NumericField_GotKeyboardFocus"
                                  PreviewMouseLeftButtonDown="NumericField_PreviewMouseLeftButtonDown"
                                  MouseWheel="Seconds_OnMouseWheel" />
 
                         <Button Style="{StaticResource SpinnerButton}"
-                                Content="&#xEFC1;"
-                                Command="{Binding DecrementSecondsCommand}"
-                                ToolTip="{DynamicResource LOCGaTimePickerDecrease}" />
+                                Content="&#xEAB2;"
+                                Command="{Binding ViewModel.DecrementSecondsCommand, ElementName=TimePickerRoot}"
+                                ToolTip="{DynamicResource LOCCommonTimePickerDecrease}" />
                     </StackPanel>
-
                 </StackPanel>
             </StackPanel>
-
         </StackPanel>
     </Border>
 </UserControl>

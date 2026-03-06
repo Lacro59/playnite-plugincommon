@@ -6,37 +6,21 @@ using System.Windows.Input;
 
 namespace CommonPluginsControls.ViewModels
 {
-    /// <summary>
-    /// ViewModel for the TimePicker control.
-    /// Exposes Hours, Minutes and optionally Seconds as bindable integers,
-    /// and aggregates them into a formatted string property (SelectedTime).
-    /// All logic lives here — zero code-behind.
-    /// </summary>
     public class TimePickerViewModel : INotifyPropertyChanged
     {
-        // ── INotifyPropertyChanged ────────────────────────────────────────────
-
         public event PropertyChangedEventHandler PropertyChanged;
-
-        private void OnPropertyChanged([CallerMemberName] string name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
-        // ── Backing fields ────────────────────────────────────────────────────
+        private void OnPropertyChanged([CallerMemberName] string name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
         private int _hours;
         private int _minutes;
         private int _seconds;
         private bool _showSeconds;
 
-        // ── Properties ────────────────────────────────────────────────────────
-
-        /// <summary>Current hour value (0–23).</summary>
         public int Hours
         {
             get => _hours;
             set
             {
-                // Wrap around: 23 + 1 = 0, 0 - 1 = 23
                 _hours = ((value % 24) + 24) % 24;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(HoursDisplay));
@@ -44,7 +28,6 @@ namespace CommonPluginsControls.ViewModels
             }
         }
 
-        /// <summary>Current minute value (0–59).</summary>
         public int Minutes
         {
             get => _minutes;
@@ -57,7 +40,6 @@ namespace CommonPluginsControls.ViewModels
             }
         }
 
-        /// <summary>Current second value (0–59).</summary>
         public int Seconds
         {
             get => _seconds;
@@ -70,20 +52,10 @@ namespace CommonPluginsControls.ViewModels
             }
         }
 
-        /// <summary>Zero-padded display string for hours.</summary>
         public string HoursDisplay => _hours.ToString("D2");
-
-        /// <summary>Zero-padded display string for minutes.</summary>
         public string MinutesDisplay => _minutes.ToString("D2");
-
-        /// <summary>Zero-padded display string for seconds.</summary>
         public string SecondsDisplay => _seconds.ToString("D2");
 
-        /// <summary>
-        /// Aggregated time string.
-        /// Format: "HH:mm:ss" when ShowSeconds is true, "HH:mm" otherwise.
-        /// This is the primary bindable output of the control.
-        /// </summary>
         public string SelectedTime
         {
             get => _showSeconds
@@ -91,10 +63,6 @@ namespace CommonPluginsControls.ViewModels
                 : string.Format("{0:D2}:{1:D2}", _hours, _minutes);
         }
 
-        /// <summary>
-        /// Controls whether the seconds column is visible.
-        /// Changing this value re-evaluates SelectedTime format.
-        /// </summary>
         public bool ShowSeconds
         {
             get => _showSeconds;
@@ -107,37 +75,20 @@ namespace CommonPluginsControls.ViewModels
             }
         }
 
-        // ── Commands ──────────────────────────────────────────────────────────
-
-        /// <summary>Increments hours by 1, with wrap-around at 23.</summary>
         public ICommand IncrementHoursCommand { get; }
-
-        /// <summary>Decrements hours by 1, with wrap-around at 0.</summary>
         public ICommand DecrementHoursCommand { get; }
-
-        /// <summary>Increments minutes by 1, with wrap-around at 59.</summary>
         public ICommand IncrementMinutesCommand { get; }
-
-        /// <summary>Decrements minutes by 1, with wrap-around at 0.</summary>
         public ICommand DecrementMinutesCommand { get; }
-
-        /// <summary>Increments seconds by 1, with wrap-around at 59.</summary>
         public ICommand IncrementSecondsCommand { get; }
-
-        /// <summary>Decrements seconds by 1, with wrap-around at 0.</summary>
         public ICommand DecrementSecondsCommand { get; }
-
-        // ── Constructor ───────────────────────────────────────────────────────
 
         public TimePickerViewModel()
         {
-            // Initialise to current time
             var now = DateTime.Now;
             _hours = now.Hour;
             _minutes = now.Minute;
             _seconds = now.Second;
 
-            // Wire up RelayCommands — lambdas keep them concise (C# 7.0 compliant)
             IncrementHoursCommand = new RelayCommand(() => Hours++);
             DecrementHoursCommand = new RelayCommand(() => Hours--);
             IncrementMinutesCommand = new RelayCommand(() => Minutes++);
@@ -146,12 +97,6 @@ namespace CommonPluginsControls.ViewModels
             DecrementSecondsCommand = new RelayCommand(() => Seconds--);
         }
 
-        // ── Public helpers ────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Sets the time from a "HH:mm" or "HH:mm:ss" string.
-        /// Silently ignores malformed input.
-        /// </summary>
         public void SetFromString(string value)
         {
             if (string.IsNullOrWhiteSpace(value)) return;
@@ -159,20 +104,24 @@ namespace CommonPluginsControls.ViewModels
             var parts = value.Split(':');
             if (parts.Length < 2) return;
 
-            int h, m, s;
+            int h, m, s = 0;
             if (!int.TryParse(parts[0], out h)) return;
             if (!int.TryParse(parts[1], out m)) return;
-            s = (parts.Length >= 3 && int.TryParse(parts[2], out s)) ? s : 0;
+            if (parts.Length >= 3) int.TryParse(parts[2], out s);
 
-            // Assign through properties so bounds-checking + notifications fire
-            Hours = h;
-            Minutes = m;
-            Seconds = s;
+            _hours = ((h % 24) + 24) % 24;
+            _minutes = ((m % 60) + 60) % 60;
+            _seconds = ((s % 60) + 60) % 60;
+
+            OnPropertyChanged(nameof(Hours));
+            OnPropertyChanged(nameof(Minutes));
+            OnPropertyChanged(nameof(Seconds));
+            OnPropertyChanged(nameof(HoursDisplay));
+            OnPropertyChanged(nameof(MinutesDisplay));
+            OnPropertyChanged(nameof(SecondsDisplay));
+            OnPropertyChanged(nameof(SelectedTime));
         }
 
-        /// <summary>
-        /// Sets the time directly from a TimeSpan for convenience.
-        /// </summary>
         public void SetFromTimeSpan(TimeSpan value)
         {
             Hours = value.Hours;
@@ -180,8 +129,6 @@ namespace CommonPluginsControls.ViewModels
             Seconds = value.Seconds;
         }
 
-        /// <summary>Returns the current value as a TimeSpan.</summary>
-        public TimeSpan ToTimeSpan()
-            => new TimeSpan(_hours, _minutes, _seconds);
+        public TimeSpan ToTimeSpan() => new TimeSpan(_hours, _minutes, _seconds);
     }
 }
