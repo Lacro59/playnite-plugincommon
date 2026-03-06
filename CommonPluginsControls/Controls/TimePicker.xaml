@@ -1,0 +1,229 @@
+﻿<UserControl x:Class="CommonPluginsControls.Controls.TimePicker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="90" d:DesignWidth="200">
+
+    <UserControl.Resources>
+
+        <!-- ── Spinner button style ──────────────────────────────────────────
+             Flat, icon-only button used for the up/down arrows.
+             Uses GlyphBrush on hover instead of hardcoded colors.          -->
+        <Style x:Key="SpinnerButton" TargetType="Button">
+            <Setter Property="Background"   Value="Transparent" />
+            <Setter Property="BorderBrush"  Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground"   Value="{DynamicResource TextBrushDarker}" />
+            <Setter Property="FontFamily"   Value="{DynamicResource FontIcoFont}" />
+            <Setter Property="FontSize"     Value="{DynamicResource FontSize}" />
+            <Setter Property="Padding"      Value="4,2" />
+            <Setter Property="Cursor"       Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <!-- Rounded hit-area so hover highlight is tight around the icon -->
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="{DynamicResource ControlCornerRadius}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background"
+                                        Value="{DynamicResource HoverBrush}" />
+                                <Setter Property="Foreground"
+                                        Value="{DynamicResource GlyphBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.7" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.3" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── Digit TextBox style ───────────────────────────────────────────
+             Transparent background, centered text, no border.
+             Theme font size so it scales with the active Playnite theme.   -->
+        <Style x:Key="TimeDigitBox" TargetType="TextBox">
+            <Setter Property="Background"       Value="Transparent" />
+            <Setter Property="BorderThickness"  Value="0" />
+            <Setter Property="Foreground"       Value="{DynamicResource TextBrush}" />
+            <Setter Property="FontSize"         Value="{DynamicResource FontSizeLarge}" />
+            <Setter Property="FontWeight"       Value="SemiBold" />
+            <Setter Property="Width"            Value="32" />
+            <Setter Property="MaxLength"        Value="2" />
+            <Setter Property="TextAlignment"    Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="CaretBrush"       Value="{DynamicResource GlyphBrush}" />
+            <Setter Property="SelectionBrush"   Value="{DynamicResource HoverBrush}" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <!-- Subtle bottom-border focus indicator instead of a full box border -->
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderThickness="0,0,0,1"
+                                BorderBrush="Transparent"
+                                CornerRadius="0"
+                                Padding="2,0">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush"
+                                        Value="{DynamicResource GlyphBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
+
+    <!-- ── Root card ─────────────────────────────────────────────────────────
+         Rounded container consistent with the CardBorder style in Common.xaml -->
+    <Border Background="{DynamicResource PopupBackgroundBrush}"
+            BorderBrush="{DynamicResource NormalBorderBrush}"
+            BorderThickness="{DynamicResource ControlBorderThickness}"
+            CornerRadius="6"
+            Padding="12,8">
+
+        <StackPanel Orientation="Horizontal"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
+
+            <!-- ── Clock icon ─────────────────────────────────────────────── -->
+            <TextBlock Style="{DynamicResource BaseTextBlockStyle}"
+                       Text="&#xEE01;"
+                       FontFamily="{DynamicResource FontIcoFont}"
+                       FontSize="{DynamicResource FontSize}"
+                       Foreground="{DynamicResource TextBrushDarker}"
+                       VerticalAlignment="Center"
+                       Margin="0,0,10,0"
+                       ToolTip="{DynamicResource LOCGaTimePickerTooltip}" />
+
+            <!-- ══════════ HOURS column ══════════ -->
+            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+
+                <!-- Up arrow -->
+                <Button Style="{StaticResource SpinnerButton}"
+                        Content="&#xEFC2;"
+                        Command="{Binding IncrementHoursCommand}"
+                        ToolTip="{DynamicResource LOCGaTimePickerIncrease}" />
+
+                <!-- Hour input -->
+                <TextBox Style="{StaticResource TimeDigitBox}"
+                         Text="{Binding HoursDisplay, Mode=OneWay}"
+                         PreviewTextInput="NumericField_PreviewTextInput"
+                         GotKeyboardFocus="NumericField_GotKeyboardFocus"
+                         PreviewMouseLeftButtonDown="NumericField_PreviewMouseLeftButtonDown"
+                         MouseWheel="Hours_OnMouseWheel" />
+
+                <!-- Down arrow -->
+                <Button Style="{StaticResource SpinnerButton}"
+                        Content="&#xEFC1;"
+                        Command="{Binding DecrementHoursCommand}"
+                        ToolTip="{DynamicResource LOCGaTimePickerDecrease}" />
+            </StackPanel>
+
+            <!-- Separator -->
+            <TextBlock Style="{DynamicResource BaseTextBlockStyle}"
+                       Text=":"
+                       FontSize="{DynamicResource FontSizeLarge}"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource TextBrushDarker}"
+                       VerticalAlignment="Center"
+                       Margin="4,0" />
+
+            <!-- ══════════ MINUTES column ══════════ -->
+            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+
+                <Button Style="{StaticResource SpinnerButton}"
+                        Content="&#xEFC2;"
+                        Command="{Binding IncrementMinutesCommand}"
+                        ToolTip="{DynamicResource LOCGaTimePickerIncrease}" />
+
+                <TextBox Style="{StaticResource TimeDigitBox}"
+                         Text="{Binding MinutesDisplay, Mode=OneWay}"
+                         PreviewTextInput="NumericField_PreviewTextInput"
+                         GotKeyboardFocus="NumericField_GotKeyboardFocus"
+                         PreviewMouseLeftButtonDown="NumericField_PreviewMouseLeftButtonDown"
+                         MouseWheel="Minutes_OnMouseWheel" />
+
+                <Button Style="{StaticResource SpinnerButton}"
+                        Content="&#xEFC1;"
+                        Command="{Binding DecrementMinutesCommand}"
+                        ToolTip="{DynamicResource LOCGaTimePickerDecrease}" />
+            </StackPanel>
+
+            <!-- ══════════ SECONDS column (conditionnel) ══════════
+                 Visibility pilotée par ShowSeconds sur le UserControl.
+                 Le Binding passe par le code-behind via la DP,
+                 puis le VM expose la même valeur.                   -->
+            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ShowSeconds}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+
+                <!-- Separator before seconds -->
+                <StackPanel.Resources>
+                    <!-- inner separator displayed only when the panel is visible -->
+                </StackPanel.Resources>
+
+                <!-- Separator colon + seconds are wrapped together -->
+                <StackPanel Orientation="Horizontal">
+
+                    <TextBlock Style="{DynamicResource BaseTextBlockStyle}"
+                               Text=":"
+                               FontSize="{DynamicResource FontSizeLarge}"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextBrushDarker}"
+                               VerticalAlignment="Center"
+                               Margin="4,0" />
+
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+
+                        <Button Style="{StaticResource SpinnerButton}"
+                                Content="&#xEFC2;"
+                                Command="{Binding IncrementSecondsCommand}"
+                                ToolTip="{DynamicResource LOCGaTimePickerIncrease}" />
+
+                        <TextBox Style="{StaticResource TimeDigitBox}"
+                                 Text="{Binding SecondsDisplay, Mode=OneWay}"
+                                 PreviewTextInput="NumericField_PreviewTextInput"
+                                 GotKeyboardFocus="NumericField_GotKeyboardFocus"
+                                 PreviewMouseLeftButtonDown="NumericField_PreviewMouseLeftButtonDown"
+                                 MouseWheel="Seconds_OnMouseWheel" />
+
+                        <Button Style="{StaticResource SpinnerButton}"
+                                Content="&#xEFC1;"
+                                Command="{Binding DecrementSecondsCommand}"
+                                ToolTip="{DynamicResource LOCGaTimePickerDecrease}" />
+                    </StackPanel>
+
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
+    </Border>
+</UserControl>

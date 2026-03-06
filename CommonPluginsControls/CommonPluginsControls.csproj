@@ -81,6 +81,9 @@
     <Compile Include="Controls\SliderWithPointer.xaml.cs">
       <DependentUpon>SliderWithPointer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\SourceLinkControl.xaml.cs">
+      <DependentUpon>SourceLinkControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\TextBlockTrimmed.xaml.cs">
       <DependentUpon>TextBlockTrimmed.xaml</DependentUpon>
     </Compile>
@@ -89,6 +92,9 @@
     </Compile>
     <Compile Include="Controls\MediaElementExtend.xaml.cs">
       <DependentUpon>MediaElementExtend.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TimePicker.xaml.cs">
+      <DependentUpon>TimePicker.xaml</DependentUpon>
     </Compile>
     <Compile Include="LiveChartsCommon\CustomerForSingle.cs" />
     <Compile Include="LiveChartsCommon\CustomerForTime.cs" />
@@ -122,6 +128,7 @@
     </Compile>
     <Compile Include="Stores\Steam\PanelViewModel.cs" />
     <Compile Include="ViewsModels\ExportCsvViewModel.cs" />
+    <Compile Include="ViewsModels\TimePickerViewModel.cs" />
     <Compile Include="ViewsModels\TransfertDataViewModel.cs" />
     <Compile Include="Views\ExportCsvView.xaml.cs">
       <DependentUpon>ExportCsvView.xaml</DependentUpon>
@@ -167,6 +174,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\SourceLinkControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Controls\TextBlockTrimmed.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -178,6 +189,10 @@
     <Page Include="Controls\MediaElementExtend.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TimePicker.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="LiveChartsCommon\CustomerToolTipForMultipleSingle.xaml">
       <Generator>MSBuild:Compile</Generator>
