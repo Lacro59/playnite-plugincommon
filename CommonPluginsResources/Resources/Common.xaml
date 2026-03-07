@@ -181,6 +181,7 @@
         <Setter Property="Foreground" Value="{DynamicResource TextBrushDark}" />
         <Setter Property="BorderBrush" Value="{DynamicResource NormalBorderBrush}" />
         <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}" />
+        <Setter Property="IsDefault" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -214,6 +215,7 @@
     <!-- SECTION: BUTTONS - SECONDARY VARIANT -->
 
     <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+        <Setter Property="IsDefault" Value="False" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -251,6 +253,7 @@
         <Setter Property="BorderBrush" Value="{DynamicResource WarningBrush}" />
         <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}" />
         <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="IsDefault" Value="False" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
@@ -278,6 +281,20 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!-- SECTION: BUTTONS - ICON-ONLY VARIANT -->
+    <!-- Compact square variant of ModernButton for single IcoFont glyphs.
+     Removes MinWidth constraint and tightens padding — template is inherited. -->
+
+    <Style x:Key="IconButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+        <Setter Property="MinWidth"   Value="0" />
+        <Setter Property="Margin"     Value="0" />
+        <Setter Property="Padding"    Value="6" />
+        <Setter Property="FontFamily" Value="{DynamicResource FontIcoFont}" />
+        <Setter Property="FontSize"   Value="{DynamicResource FontSize}" />
+        <Setter Property="Cursor"     Value="Hand" />
+        <Setter Property="IsDefault"  Value="False" />
     </Style>
 
     <!-- SECTION: CONTAINERS -->
@@ -339,6 +356,70 @@
     <Style x:Key="TopSeparatorBorder" TargetType="Border">
         <Setter Property="BorderThickness" Value="0,1,0,0" />
         <Setter Property="BorderBrush" Value="{DynamicResource NormalBorderBrush}" />
+    </Style>
+
+    <!-- SECTION: MODERN DATEPICKER -->
+    <!-- Redefines the DatePicker template to replace the native calendar button
+     with an IconButton (FontIcoFont glyph) consistent with the rest of the UI.
+     PART_TextBox and PART_Popup keep their default behavior — only the button changes. -->
+
+    <Style x:Key="ModernDatePicker" TargetType="DatePicker"
+       BasedOn="{StaticResource {x:Type DatePicker}}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DatePicker">
+                    <Border x:Name="PART_Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="3"
+                        Padding="0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"    />
+                                <!-- Text input     -->
+                                <ColumnDefinition Width="Auto" />
+                                <!-- Calendar button -->
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Text input — standard WPF named part, must keep x:Name -->
+                            <DatePickerTextBox x:Name="PART_TextBox"
+                                           Grid.Column="0"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           Background="Transparent"
+                                           BorderThickness="0"
+                                           Padding="8,6"
+                                           VerticalAlignment="Center"
+                                           HorizontalContentAlignment="Left"
+                                           Focusable="{TemplateBinding Focusable}" />
+
+                            <!-- Calendar toggle button — replaces the default ugly button -->
+                            <!-- ui-calendar &#xEC45; from IcoFont -->
+                            <Button x:Name="PART_Button"
+                                Grid.Column="1"
+                                Style="{DynamicResource IconButton}"
+                                Content="&#xEC45;"
+                                VerticalAlignment="Center"
+                                Margin="2,0,2,0"
+                                Focusable="False" />
+
+                            <!-- Popup — standard WPF named part, must keep x:Name -->
+                            <Popup x:Name="PART_Popup"
+                               AllowsTransparency="True"
+                               Placement="Bottom"
+                               PlacementTarget="{Binding ElementName=PART_TextBox}"
+                               StaysOpen="False" />
+                        </Grid>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>
