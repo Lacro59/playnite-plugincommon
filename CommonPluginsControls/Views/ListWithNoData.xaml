@@ -8,7 +8,8 @@
              xmlns:converters="clr-namespace:CommonPlayniteShared.Converters" 
              xmlns:playnitecontrols="clr-namespace:CommonPluginsControls.PlayniteControls"
              xmlns:desktopapp="clr-namespace:CommonPlayniteShared.DesktopApp"
-             mc:Ignorable="d" d:DesignHeight="700" d:DesignWidth="1000">
+             mc:Ignorable="d" d:DesignHeight="700" d:DesignWidth="1000"
+             Background="{DynamicResource WindowBackgourndBrush}">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
