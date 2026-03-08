@@ -4,7 +4,12 @@
 	<sys:String x:Key="LOCCommonMigratingDatabase">Migrating database…</sys:String>
 	<sys:String x:Key="LOCCommonMigrationPartialFailure">Migration completed with {0} error(s) out of {1} file(s).</sys:String>
 
-	<!-- ==================== TIME UNITS ==================== -->
+    <!-- ==================== TimePicker control ==================== -->
+    <sys:String x:Key="LOCCommonTimePickerTooltip">Time</sys:String>
+    <sys:String x:Key="LOCCommonTimePickerIncrease">Increase</sys:String>
+    <sys:String x:Key="LOCCommonTimePickerDecrease">Decrease</sys:String>
+
+    <!-- ==================== TIME UNITS ==================== -->
 
 	<sys:String x:Key="LOCCommonDay">{0} gün</sys:String>
 	<sys:String x:Key="LOCCommonDays">{0} gün</sys:String>
