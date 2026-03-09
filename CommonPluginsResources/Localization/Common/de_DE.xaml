@@ -5,9 +5,9 @@
 	<sys:String x:Key="LOCCommonMigrationPartialFailure">Migration completed with {0} error(s) out of {1} file(s).</sys:String>
 
     <!-- ==================== TimePicker control ==================== -->
-    <sys:String x:Key="LOCCommonTimePickerTooltip">Time</sys:String>
-    <sys:String x:Key="LOCCommonTimePickerIncrease">Increase</sys:String>
-    <sys:String x:Key="LOCCommonTimePickerDecrease">Decrease</sys:String>
+    <sys:String x:Key="LOCCommonTimePickerTooltip">Zeit</sys:String>
+    <sys:String x:Key="LOCCommonTimePickerIncrease">Verlängern</sys:String>
+    <sys:String x:Key="LOCCommonTimePickerDecrease">Verringern</sys:String>
 
     <!-- ==================== TIME UNITS ==================== -->
 
