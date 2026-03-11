@@ -1,6 +1,70 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- ==================== NAV ICON BUTTON ==================== -->
+    <!--
+    Compact square button for chart navigation bars.
+    Uses FontIcoFont for icon glyphs. Width/Height fixed at 32px to match
+    the visual design of the Playnite sidebar buttons.
+    IsEnabled=False: opacity drops to 35% (navigation disabled in ShowAllData mode).
+-->
+    <Style x:Key="NavIconButton" TargetType="Button">
+        <Setter Property="Width"           Value="32" />
+        <Setter Property="Height"          Value="32" />
+        <Setter Property="Padding"         Value="0" />
+        <Setter Property="Margin"          Value="2,0" />
+        <Setter Property="Cursor"          Value="Hand" />
+        <Setter Property="Foreground"      Value="{DynamicResource GlyphBrush}" />
+        <Setter Property="Background"      Value="Transparent" />
+        <Setter Property="BorderBrush"     Value="{DynamicResource NormalBorderBrush}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}" />
+        <Setter Property="FontFamily"      Value="{DynamicResource FontIcoFont}" />
+        <Setter Property="FontSize"        Value="{DynamicResource FontSize}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{DynamicResource ControlCornerRadius}"
+                        Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background"   Value="{DynamicResource HoverBrush}" />
+                            <Setter TargetName="Bd" Property="BorderBrush"  Value="{DynamicResource GlyphBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.65" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.35" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- NavIconButton active variant: filled GlyphBrush border when toggled ON (ShowAllData). -->
+    <Style x:Key="NavIconButtonActive" TargetType="Button" BasedOn="{StaticResource NavIconButton}">
+        <Setter Property="BorderBrush" Value="{DynamicResource GlyphBrush}" />
+        <Setter Property="Background"  Value="{DynamicResource HoverBrush}" />
+    </Style>
+
+    <!-- Nav label badge: styled TextBlock used for the "Week 12" chip on the right. -->
+    <Style x:Key="NavLabelBadge" TargetType="Border">
+        <Setter Property="Background"      Value="{DynamicResource NormalBrush}" />
+        <Setter Property="BorderBrush"     Value="{DynamicResource NormalBorderBrush}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}" />
+        <Setter Property="CornerRadius"    Value="3" />
+        <Setter Property="Padding"         Value="10,4" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
     <!-- SECTION: TEXT STYLES -->
 
     <Style x:Key="SectionHeaderText" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
