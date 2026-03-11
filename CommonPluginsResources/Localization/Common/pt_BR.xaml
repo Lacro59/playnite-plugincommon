@@ -4,6 +4,17 @@
 	<sys:String x:Key="LOCCommonMigratingDatabase">Migrando banco de dados…</sys:String>
 	<sys:String x:Key="LOCCommonMigrationPartialFailure">Migração concluída com {0} erro(s) de {1} arquivo(s).</sys:String>
 
+    <!-- ==================== CHART NAVIGATION BAR ==================== -->
+
+    <sys:String x:Key="LOCCommonNavFirst">Go to first data point</sys:String>
+    <sys:String x:Key="LOCCommonNavPrev">Previous period</sys:String>
+    <sys:String x:Key="LOCCommonNavShowAll">Show all data</sys:String>
+    <sys:String x:Key="LOCCommonNavShowAllActive">Exit full view</sys:String>
+    <sys:String x:Key="LOCCommonNavNext">Next period</sys:String>
+    <sys:String x:Key="LOCCommonNavLast">Go to last data point</sys:String>
+    <sys:String x:Key="LOCCommonNavPagePrev">Previous page</sys:String>
+    <sys:String x:Key="LOCCommonNavPageNext">Next page</sys:String>
+
     <!-- ==================== TimePicker control ==================== -->
     <sys:String x:Key="LOCCommonTimePickerTooltip">Tempo</sys:String>
     <sys:String x:Key="LOCCommonTimePickerIncrease">Aumentar</sys:String>
