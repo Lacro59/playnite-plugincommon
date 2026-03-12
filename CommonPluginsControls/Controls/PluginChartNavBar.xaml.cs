@@ -1,5 +1,7 @@
 ﻿using Playnite.SDK;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -146,7 +148,6 @@ namespace CommonPluginsControls.Controls
 
         #endregion
 
-
         // ────────────────────────────────────────────────────────────────────
         // Routed Events — bubbling so the parent UserControl can catch them
         // ────────────────────────────────────────────────────────────────────
@@ -220,6 +221,44 @@ namespace CommonPluginsControls.Controls
         }
 
 
+        // ────────────────────────────────────────────────────────────────────
+        // Helpers
+        // ────────────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Builds a "first – last" range label from the rendered X-axis labels array.
+        /// </summary>
+        /// <remarks>
+        /// The labels are expected to already be formatted for the current UI culture
+        /// (e.g. via <see cref="Constants.DateUiFormat"/> or a localised week string),
+        /// so no date parsing or re-formatting is performed here.
+        /// <see cref="CultureInfo.CurrentCulture"/> is used for the composite format so that
+        /// punctuation and text direction are handled correctly for all locales.
+        /// </remarks>
+        /// <param name="labels">The X-axis label array currently assigned to the chart.</param>
+        /// <returns>
+        /// A single label string when the range contains only one entry;
+        /// a "first – last" string when the range spans multiple entries;
+        /// <see cref="string.Empty"/> when <paramref name="labels"/> is null or empty.
+        /// </returns>
+        public static string BuildRangeLabel(string[] labels)
+        {
+            if (labels == null || labels.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            string first = labels[0];
+            string last = labels[labels.Length - 1];
+
+            if (string.Equals(first, last, StringComparison.CurrentCulture))
+            {
+                return first;
+            }
+
+            // CurrentCulture ensures correct punctuation and RTL handling across locales.
+            return string.Format(CultureInfo.CurrentCulture, "{0}  –  {1}", first, last);
+        }
 
         // ────────────────────────────────────────────────────────────────────
         // Public imperative API — callable from parent code-behind

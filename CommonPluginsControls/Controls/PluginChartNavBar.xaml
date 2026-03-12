@@ -133,7 +133,6 @@
                         </TextBlock>
                     </Button>
 
-
                     <!-- › Next — EAB8 simple-right -->
                     <Button Style="{DynamicResource NavIconButton}"
                             ToolTip="{DynamicResource LOCCommonNavNext}"
@@ -176,7 +175,7 @@
 
                 </StackPanel>
             </DockPanel>
-            </Border>
-    
+        </Border>
+
     </Grid>
 </UserControl>
