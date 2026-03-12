@@ -16,24 +16,27 @@ namespace CommonPluginsControls.Controls
     ///   <item>Nine buttons: First, PrevPage, Prev, ShowAll toggle, Next, NextPage, Last,
     ///         AxisLimitDecrease, AxisLimitIncrease.</item>
     ///   <item>First / PrevPage / Prev / Next / NextPage / Last / AxisLimitIncrease are disabled
-    ///         when <see cref="PluginChartNavBarDataContext.CanNavigate"/> is <c>false</c>
+    ///         when <see cref="PluginChartNavBarDataContext.CanNavigate"/> is false
     ///         (i.e. ShowAllData is active — navigation is meaningless over the full dataset).</item>
     ///   <item>AxisLimitDecrease is additionally disabled when <see cref="AxisLimit"/> is already
-    ///         at <see cref="AxisLimitMinimum"/> (5).</item>
+    ///         at <c>AxisLimitMinimum</c> (5).</item>
+    ///   <item>AxisLimitIncrease is additionally disabled when <see cref="AxisLimit"/> reaches
+    ///         <see cref="AxisLimitMaximum"/> (when defined &gt; 0).</item>
     ///   <item>The centre button toggles ShowAllData; its visual style reflects the active state.</item>
     ///   <item>An optional NavLabel badge is shown on the right (e.g. "Week 12").</item>
     ///   <item>PageSize controls how many steps PrevPage/NextPage jump.
     ///         When PageSize &lt;= 0, the PrevPage/NextPage buttons are hidden.</item>
     /// </list>
-    ///
     /// Integration:
     /// <list type="bullet">
+    ///   <item>Consumers observe <see cref="AxisLimitProperty"/> via
+    ///         <c>DependencyPropertyDescriptor.AddValueChanged</c> in their Loaded handler.</item>
     ///   <item>Consumers subscribe to RoutedEvents for XAML-side wiring.</item>
-    ///   <item>Consumers call <c>Invoke*()</c> methods for programmatic triggering.</item>
-    ///   <item>The parent resolves <c>PageSize = AxisLimit ?? PluginSettings.ChartXxxCountAbscissa</c>
+    ///   <item>Consumers call Invoke*() methods for programmatic triggering.</item>
+    ///   <item>The parent resolves PageSize = AxisLimit ?? PluginSettings.ChartXxxCountAbscissa
     ///         and binds it to this DP.</item>
-    ///   <item>The parent binds <see cref="AxisLimit"/> two-way and reacts to
-    ///         <see cref="AxisLimitDecreased"/> / <see cref="AxisLimitIncreased"/> to refresh the chart.</item>
+    ///   <item>The parent sets <see cref="AxisLimitMaximum"/> after each render to cap the +
+    ///         button at the actual dataset size.</item>
     /// </list>
     /// </remarks>
     public partial class PluginChartNavBar : UserControl
@@ -96,7 +99,21 @@ namespace CommonPluginsControls.Controls
             ctrl._ctx.CanNavigate = !active;
             ctrl._ctx.ShowAllData = active;
 
-            // Tooltip text reflects the current state so the user knows what the button will do next.
+            // When ShowAllData is active, both limit buttons must be disabled:
+            // zooming in/out is meaningless when the full dataset is already rendered.
+            // When deactivated, restore the individual computed states.
+            if (active)
+            {
+                ctrl._ctx.CanDecreaseAxisLimit = false;
+                ctrl._ctx.CanIncreaseAxisLimit = false;
+            }
+            else
+            {
+                // Restore individual states from current DP values.
+                ctrl._ctx.CanDecreaseAxisLimit = ctrl.AxisLimit > AxisLimitMinimum;
+                ctrl._ctx.CanIncreaseAxisLimit = CanIncrease(ctrl.AxisLimit, ctrl.AxisLimitMaximum);
+            }
+
             ctrl._ctx.ShowAllToolTip = active
                 ? ResourceProvider.GetString("LOCCommonNavShowAllActive")
                 : ResourceProvider.GetString("LOCCommonNavShowAll");
@@ -107,8 +124,9 @@ namespace CommonPluginsControls.Controls
         #region NavLabel
 
         /// <summary>
-        /// Optional info label shown as a badge on the right of the bar (e.g. "Week 12" or "Jan – Mar 2024").
-        /// Setting this to <c>null</c> or empty hides the badge.
+        /// Optional info label shown as a badge on the right of the bar
+        /// (e.g. "Week 12" or "Jan – Mar 2024").
+        /// Setting this to null or empty hides the badge.
         /// </summary>
         public string NavLabel
         {
@@ -137,7 +155,7 @@ namespace CommonPluginsControls.Controls
         /// <summary>
         /// Number of items skipped by the PrevPage / NextPage buttons.
         /// Typically bound to <see cref="AxisLimit"/> (if set) or to
-        /// <c>PluginSettings.ChartXxxCountAbscissa</c>.
+        /// PluginSettings.ChartXxxCountAbscissa.
         /// When &lt;= 0, the PrevPage and NextPage buttons are hidden.
         /// </summary>
         public int PageSize
@@ -168,8 +186,6 @@ namespace CommonPluginsControls.Controls
         /// Returns a localised tooltip string appended with the page size in parentheses
         /// when <paramref name="size"/> is positive, or just the bare localised string otherwise.
         /// </summary>
-        /// <param name="locKey">Localisation key for the button label.</param>
-        /// <param name="size">Current page size value.</param>
         private static string BuildPageToolTip(string locKey, int size)
         {
             string baseText = ResourceProvider.GetString(locKey);
@@ -183,8 +199,9 @@ namespace CommonPluginsControls.Controls
         /// <summary>
         /// Current X-axis data limit exposed to the parent chart control.
         /// Incremented / decremented by the AxisLimitIncrease / AxisLimitDecrease buttons.
-        /// Clamped to a minimum of <see cref="AxisLimitMinimum"/> (5) — enforced on decrease.
-        /// A value of <c>0</c> carries the "no explicit limit" semantic managed by the parent.
+        /// Clamped to a minimum of <c>AxisLimitMinimum</c> (5) on decrease.
+        /// Clamped to <see cref="AxisLimitMaximum"/> (when &gt; 0) on increase.
+        /// A value of 0 carries the "no explicit limit" semantic managed by the parent.
         /// Binding is two-way by default so the parent can both read and initialise the value.
         /// </summary>
         public int AxisLimit
@@ -196,7 +213,8 @@ namespace CommonPluginsControls.Controls
         /// <summary>Backing store for <see cref="AxisLimit"/>.</summary>
         public static readonly DependencyProperty AxisLimitProperty = DependencyProperty.Register(
             nameof(AxisLimit), typeof(int), typeof(PluginChartNavBar),
-            new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnAxisLimitChanged));
+            new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                OnAxisLimitChanged));
 
         private static void OnAxisLimitChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -204,19 +222,16 @@ namespace CommonPluginsControls.Controls
             int limit = (int)e.NewValue;
 
             ctrl._ctx.AxisLimit = limit;
-            // Decrease is blocked at the floor so the chart always shows at least AxisLimitMinimum points.
-            ctrl._ctx.CanDecreaseAxisLimit = limit > AxisLimitMinimum;
-            // Rebuild tooltips to show the resulting value after the click.
+            ctrl._ctx.CanDecreaseAxisLimit = !ctrl.ShowAllData && limit > AxisLimitMinimum;
+            ctrl._ctx.CanIncreaseAxisLimit = !ctrl.ShowAllData && CanIncrease(limit, ctrl.AxisLimitMaximum);
             ctrl._ctx.AxisLimitDecreaseToolTip = BuildAxisLimitToolTip("LOCCommonNavAxisLimitDecrease", limit);
             ctrl._ctx.AxisLimitIncreaseToolTip = BuildAxisLimitToolTip("LOCCommonNavAxisLimitIncrease", limit);
         }
 
         /// <summary>
         /// Returns a localised tooltip string appended with the current limit in parentheses
-        /// when <paramref name="currentLimit"/> is positive, or just the bare localised string otherwise.
+        /// when <paramref name="currentLimit"/> is positive, or just the bare localised string.
         /// </summary>
-        /// <param name="locKey">Localisation key for the button label.</param>
-        /// <param name="currentLimit">Current axis limit value.</param>
         private static string BuildAxisLimitToolTip(string locKey, int currentLimit)
         {
             string baseText = ResourceProvider.GetString(locKey);
@@ -227,9 +242,49 @@ namespace CommonPluginsControls.Controls
 
         #endregion
 
+        #region AxisLimitMaximum
+
+        /// <summary>
+        /// Upper bound for <see cref="AxisLimit"/>, set by the parent after each render
+        /// to the actual number of data points available in the current dataset.
+        /// When 0, no upper bound is enforced and the + button is always enabled
+        /// (subject to <see cref="PluginChartNavBarDataContext.CanNavigate"/>).
+        /// </summary>
+        public int AxisLimitMaximum
+        {
+            get => (int)GetValue(AxisLimitMaximumProperty);
+            set => SetValue(AxisLimitMaximumProperty, value);
+        }
+
+        /// <summary>Backing store for <see cref="AxisLimitMaximum"/>.</summary>
+        public static readonly DependencyProperty AxisLimitMaximumProperty = DependencyProperty.Register(
+            nameof(AxisLimitMaximum), typeof(int), typeof(PluginChartNavBar),
+            new FrameworkPropertyMetadata(0, OnAxisLimitMaximumChanged));
+
+        private static void OnAxisLimitMaximumChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var ctrl = (PluginChartNavBar)d;
+            int max = (int)e.NewValue;
+            // Guard ShowAllData: the parent always pushes AxisLimitMaximum after each render,
+            // including in ShowAllData mode — do not re-enable the button in that case.
+            ctrl._ctx.CanIncreaseAxisLimit = !ctrl.ShowAllData && CanIncrease(ctrl.AxisLimit, max);
+            ctrl._ctx.AxisLimitIncreaseToolTip = BuildAxisLimitToolTip("LOCCommonNavAxisLimitIncrease", ctrl.AxisLimit);
+        }
+
+        /// <summary>
+        /// Returns true when <paramref name="current"/> has not yet reached <paramref name="max"/>.
+        /// When <paramref name="max"/> is 0 (undefined), always returns true.
+        /// </summary>
+        private static bool CanIncrease(int current, int max)
+        {
+            return max <= 0 || current < max;
+        }
+
+        #endregion
+
         // ────────────────────────────────────────────────────────────────────
-        // Routed Events — Bubble strategy so the parent UserControl can catch them
-        // without needing a direct reference to this control.
+        // Routed Events — Bubble strategy so the parent UserControl can catch
+        // them without needing a direct reference to this control.
         // ────────────────────────────────────────────────────────────────────
 
         /// <summary>Raised when the user clicks the First button.</summary>
@@ -311,23 +366,35 @@ namespace CommonPluginsControls.Controls
         {
             _ctx = new PluginChartNavBarDataContext();
 
-            _ctx.CmdFirst = new RelayCommand(() => RaiseEvent(new RoutedEventArgs(FirstClickedEvent)));
-            _ctx.CmdPagePrev = new RelayCommand(() => RaiseEvent(new RoutedEventArgs(PagePrevClickedEvent)));
-            _ctx.CmdPrev = new RelayCommand(() => RaiseEvent(new RoutedEventArgs(PrevClickedEvent)));
+            _ctx.CmdFirst = new RelayCommand(() =>
+                RaiseEvent(new RoutedEventArgs(FirstClickedEvent)));
+
+            _ctx.CmdPagePrev = new RelayCommand(() =>
+                RaiseEvent(new RoutedEventArgs(PagePrevClickedEvent)));
+
+            _ctx.CmdPrev = new RelayCommand(() =>
+                RaiseEvent(new RoutedEventArgs(PrevClickedEvent)));
+
             _ctx.CmdToggleShowAll = new RelayCommand(() =>
             {
                 ShowAllData = !ShowAllData;
                 RaiseEvent(new RoutedEventArgs(ShowAllToggledEvent));
             });
-            _ctx.CmdNext = new RelayCommand(() => RaiseEvent(new RoutedEventArgs(NextClickedEvent)));
-            _ctx.CmdPageNext = new RelayCommand(() => RaiseEvent(new RoutedEventArgs(PageNextClickedEvent)));
-            _ctx.CmdLast = new RelayCommand(() => RaiseEvent(new RoutedEventArgs(LastClickedEvent)));
+
+            _ctx.CmdNext = new RelayCommand(() =>
+                RaiseEvent(new RoutedEventArgs(NextClickedEvent)));
+
+            _ctx.CmdPageNext = new RelayCommand(() =>
+                RaiseEvent(new RoutedEventArgs(PageNextClickedEvent)));
+
+            _ctx.CmdLast = new RelayCommand(() =>
+                RaiseEvent(new RoutedEventArgs(LastClickedEvent)));
 
             _ctx.CmdAxisLimitDecrease = new RelayCommand(() =>
             {
                 int next = Math.Max(AxisLimitMinimum, AxisLimit - 1);
-                // Guard: no-op when already at the floor (CanDecreaseAxisLimit should have prevented
-                // the button from being clickable, but defensive check is cheap).
+                // Guard: no-op when already at the floor (CanDecreaseAxisLimit should have
+                // prevented the button from being enabled, but this is a cheap safety net).
                 if (next == AxisLimit) { return; }
                 AxisLimit = next;
                 RaiseEvent(new RoutedEventArgs(AxisLimitDecreasedEvent));
@@ -335,15 +402,23 @@ namespace CommonPluginsControls.Controls
 
             _ctx.CmdAxisLimitIncrease = new RelayCommand(() =>
             {
-                AxisLimit = AxisLimit + 1;
+                int next = AxisLimit + 1;
+                // Clamp to ceiling when the parent has defined a maximum.
+                // CanIncreaseAxisLimit should already block the button, but guard defensively.
+                if (AxisLimitMaximum > 0 && next > AxisLimitMaximum)
+                {
+                    next = AxisLimitMaximum;
+                }
+                if (next == AxisLimit) { return; }
+                AxisLimit = next;
                 RaiseEvent(new RoutedEventArgs(AxisLimitIncreasedEvent));
             });
 
             InitializeComponent();
 
-            // Assign DataContext to the visual root, NOT to 'this', so that external DP bindings
-            // declared on this control by consumers continue to resolve against the parent's
-            // DataContext, while all internal XAML bindings use _ctx.
+            // Assign DataContext to the visual root, NOT to 'this', so that external DP
+            // bindings declared on this control by consumers continue to resolve against
+            // the parent's DataContext, while all internal XAML bindings use _ctx.
             PART_Root.DataContext = _ctx;
 
             // Seed localised tooltips; they will be refreshed whenever the relevant DP changes.
@@ -352,6 +427,9 @@ namespace CommonPluginsControls.Controls
             _ctx.PageNextToolTip = ResourceProvider.GetString("LOCCommonNavPageNext");
             _ctx.AxisLimitDecreaseToolTip = ResourceProvider.GetString("LOCCommonNavAxisLimitDecrease");
             _ctx.AxisLimitIncreaseToolTip = ResourceProvider.GetString("LOCCommonNavAxisLimitIncrease");
+
+            // + button starts enabled (no ceiling defined yet).
+            _ctx.CanIncreaseAxisLimit = true;
         }
 
         // ────────────────────────────────────────────────────────────────────
@@ -372,7 +450,7 @@ namespace CommonPluginsControls.Controls
         /// <returns>
         /// A single label string when the range contains only one entry;
         /// a "first – last" string when the range spans multiple entries;
-        /// <see cref="string.Empty"/> when <paramref name="labels"/> is <c>null</c> or empty.
+        /// <see cref="string.Empty"/> when <paramref name="labels"/> is null or empty.
         /// </returns>
         public static string BuildRangeLabel(string[] labels)
         {
@@ -390,7 +468,7 @@ namespace CommonPluginsControls.Controls
             }
 
             // CurrentCulture ensures correct punctuation and RTL handling across locales.
-            return string.Format(CultureInfo.CurrentCulture, "{0} – {1}", first, last);
+            return string.Format(CultureInfo.CurrentCulture, "{0} \u2013 {1}", first, last);
         }
 
         // ────────────────────────────────────────────────────────────────────
@@ -424,12 +502,15 @@ namespace CommonPluginsControls.Controls
         public void InvokeLast() => RaiseEvent(new RoutedEventArgs(LastClickedEvent));
 
         /// <summary>
-        /// Programmatically decrements <see cref="AxisLimit"/> by one (floor: <see cref="AxisLimitMinimum"/>).
-        /// No-op when already at the minimum.
+        /// Programmatically decrements <see cref="AxisLimit"/> by one
+        /// (floor: <c>AxisLimitMinimum</c>). No-op when already at the minimum.
         /// </summary>
         public void InvokeAxisLimitDecrease() => _ctx.CmdAxisLimitDecrease.Execute(null);
 
-        /// <summary>Programmatically increments <see cref="AxisLimit"/> by one.</summary>
+        /// <summary>
+        /// Programmatically increments <see cref="AxisLimit"/> by one
+        /// (ceiling: <see cref="AxisLimitMaximum"/> when defined). No-op when already at the maximum.
+        /// </summary>
         public void InvokeAxisLimitIncrease() => _ctx.CmdAxisLimitIncrease.Execute(null);
     }
 
@@ -452,7 +533,7 @@ namespace CommonPluginsControls.Controls
 
         private bool _canNavigate = true;
         /// <summary>
-        /// <c>false</c> while ShowAllData is active — disables all directional buttons and
+        /// False while ShowAllData is active — disables all directional buttons and
         /// the AxisLimitIncrease button (zooming in is irrelevant when all data is shown).
         /// </summary>
         public bool CanNavigate { get => _canNavigate; set => SetValue(ref _canNavigate, value); }
@@ -466,7 +547,7 @@ namespace CommonPluginsControls.Controls
         public string NavLabel { get => _navLabel; set => SetValue(ref _navLabel, value); }
 
         private bool _hasNavLabel;
-        /// <summary><c>true</c> when <see cref="NavLabel"/> is non-empty — drives badge Visibility.</summary>
+        /// <summary>True when <see cref="NavLabel"/> is non-empty — drives badge Visibility.</summary>
         public bool HasNavLabel { get => _hasNavLabel; set => SetValue(ref _hasNavLabel, value); }
 
         private int _pageSize;
@@ -474,7 +555,7 @@ namespace CommonPluginsControls.Controls
         public int PageSize { get => _pageSize; set => SetValue(ref _pageSize, value); }
 
         private bool _hasPageButtons;
-        /// <summary><c>true</c> when <see cref="PageSize"/> &gt; 0 — drives PrevPage/NextPage Visibility.</summary>
+        /// <summary>True when <see cref="PageSize"/> &gt; 0 — drives PrevPage/NextPage Visibility.</summary>
         public bool HasPageButtons { get => _hasPageButtons; set => SetValue(ref _hasPageButtons, value); }
 
         private int _axisLimit;
@@ -483,10 +564,18 @@ namespace CommonPluginsControls.Controls
 
         private bool _canDecreaseAxisLimit;
         /// <summary>
-        /// <c>false</c> when <see cref="AxisLimit"/> is already at its minimum (5).
+        /// False when <see cref="AxisLimit"/> is already at its minimum (5).
         /// Disables the AxisLimitDecrease button in XAML via IsEnabled binding.
         /// </summary>
         public bool CanDecreaseAxisLimit { get => _canDecreaseAxisLimit; set => SetValue(ref _canDecreaseAxisLimit, value); }
+
+        private bool _canIncreaseAxisLimit = true;
+        /// <summary>
+        /// False when <see cref="AxisLimit"/> has reached <see cref="PluginChartNavBar.AxisLimitMaximum"/>.
+        /// Also false while ShowAllData is active (governed by <see cref="CanNavigate"/>).
+        /// Disables the AxisLimitIncrease button in XAML via IsEnabled binding.
+        /// </summary>
+        public bool CanIncreaseAxisLimit { get => _canIncreaseAxisLimit; set => SetValue(ref _canIncreaseAxisLimit, value); }
 
         private string _showAllToolTip = string.Empty;
         /// <summary>Dynamic tooltip for the centre toggle — updated on every ShowAllData change.</summary>
@@ -501,11 +590,11 @@ namespace CommonPluginsControls.Controls
         public string PageNextToolTip { get => _pageNextToolTip; set => SetValue(ref _pageNextToolTip, value); }
 
         private string _axisLimitDecreaseToolTip = string.Empty;
-        /// <summary>Tooltip for the AxisLimitDecrease button — includes the current limit for discoverability.</summary>
+        /// <summary>Tooltip for the AxisLimitDecrease button — includes the current limit.</summary>
         public string AxisLimitDecreaseToolTip { get => _axisLimitDecreaseToolTip; set => SetValue(ref _axisLimitDecreaseToolTip, value); }
 
         private string _axisLimitIncreaseToolTip = string.Empty;
-        /// <summary>Tooltip for the AxisLimitIncrease button — includes the current limit for discoverability.</summary>
+        /// <summary>Tooltip for the AxisLimitIncrease button — includes the current limit.</summary>
         public string AxisLimitIncreaseToolTip { get => _axisLimitIncreaseToolTip; set => SetValue(ref _axisLimitIncreaseToolTip, value); }
 
         // Commands are assigned by PluginChartNavBar's constructor — not initialised here
@@ -527,7 +616,7 @@ namespace CommonPluginsControls.Controls
         public RelayCommand CmdLast { get; set; }
         /// <summary>Decrements <see cref="AxisLimit"/> by one (floor: 5).</summary>
         public RelayCommand CmdAxisLimitDecrease { get; set; }
-        /// <summary>Increments <see cref="AxisLimit"/> by one.</summary>
+        /// <summary>Increments <see cref="AxisLimit"/> by one (ceiling: <see cref="PluginChartNavBar.AxisLimitMaximum"/> when defined).</summary>
         public RelayCommand CmdAxisLimitIncrease { get; set; }
     }
 }

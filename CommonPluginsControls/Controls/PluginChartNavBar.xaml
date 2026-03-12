@@ -182,7 +182,7 @@
 
                         <Button Style="{StaticResource NavIconButton}"
                                 Command="{Binding CmdAxisLimitIncrease}"
-                                IsEnabled="{Binding CanNavigate}"
+                                IsEnabled="{Binding CanIncreaseAxisLimit}"
                                 ToolTip="{Binding AxisLimitIncreaseToolTip}"
                                 Content="+" />
                     </StackPanel>
