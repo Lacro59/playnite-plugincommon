@@ -173,6 +173,20 @@
                                    Foreground="{DynamicResource GlyphBrush}" />
                     </Button>
 
+                    <StackPanel Orientation="Horizontal" Margin="30,0,0,0">
+                        <Button Style="{StaticResource NavIconButton}"
+                                Command="{Binding CmdAxisLimitDecrease}"
+                                IsEnabled="{Binding CanDecreaseAxisLimit}"
+                                ToolTip="{Binding AxisLimitDecreaseToolTip}"
+                                Content="−" />
+
+                        <Button Style="{StaticResource NavIconButton}"
+                                Command="{Binding CmdAxisLimitIncrease}"
+                                IsEnabled="{Binding CanNavigate}"
+                                ToolTip="{Binding AxisLimitIncreaseToolTip}"
+                                Content="+" />
+                    </StackPanel>
+                    
                 </StackPanel>
             </DockPanel>
         </Border>

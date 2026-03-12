@@ -17,6 +17,8 @@
     <sys:String x:Key="LOCCommonNavLast">Go to last data point</sys:String>
     <sys:String x:Key="LOCCommonNavPagePrev">Previous page</sys:String>
     <sys:String x:Key="LOCCommonNavPageNext">Next page</sys:String>
+    <sys:String x:Key="LOCCommonNavAxisLimitDecrease">Decrease axis limit</sys:String>
+    <sys:String x:Key="LOCCommonNavAxisLimitIncrease">Increase axis limit</sys:String>
 
     <!-- ==================== TimePicker control ==================== -->
     <sys:String x:Key="LOCCommonTimePickerTooltip">Time</sys:String>
