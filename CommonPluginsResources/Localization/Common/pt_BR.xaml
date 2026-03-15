@@ -6,16 +6,16 @@
 
     <!-- ==================== CHART NAVIGATION BAR ==================== -->
 
-    <sys:String x:Key="LOCCommonNavFirst">Go to first data point</sys:String>
-    <sys:String x:Key="LOCCommonNavPrev">Previous period</sys:String>
-    <sys:String x:Key="LOCCommonNavShowAll">Show all data</sys:String>
-    <sys:String x:Key="LOCCommonNavShowAllActive">Exit full view</sys:String>
-    <sys:String x:Key="LOCCommonNavNext">Next period</sys:String>
-    <sys:String x:Key="LOCCommonNavLast">Go to last data point</sys:String>
-    <sys:String x:Key="LOCCommonNavPagePrev">Previous page</sys:String>
-    <sys:String x:Key="LOCCommonNavPageNext">Next page</sys:String>
-    <sys:String x:Key="LOCCommonNavAxisLimitDecrease">Decrease axis limit</sys:String>
-    <sys:String x:Key="LOCCommonNavAxisLimitIncrease">Increase axis limit</sys:String>
+    <sys:String x:Key="LOCCommonNavFirst">Ir ao primeiro ponto de dados</sys:String>
+    <sys:String x:Key="LOCCommonNavPrev">Período anterior</sys:String>
+    <sys:String x:Key="LOCCommonNavShowAll">Mostrar todos os dados</sys:String>
+    <sys:String x:Key="LOCCommonNavShowAllActive">Sair da visão completa</sys:String>
+    <sys:String x:Key="LOCCommonNavNext">Próximo período</sys:String>
+    <sys:String x:Key="LOCCommonNavLast">Ir para o último ponto de dados</sys:String>
+    <sys:String x:Key="LOCCommonNavPagePrev">Página anterior</sys:String>
+    <sys:String x:Key="LOCCommonNavPageNext">Próxima página</sys:String>
+    <sys:String x:Key="LOCCommonNavAxisLimitDecrease">Diminuir limite do eixo</sys:String>
+    <sys:String x:Key="LOCCommonNavAxisLimitIncrease">Aumentar limite do eixo</sys:String>
 
     <!-- ==================== TimePicker control ==================== -->
     <sys:String x:Key="LOCCommonTimePickerTooltip">Tempo</sys:String>
