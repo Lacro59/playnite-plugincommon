@@ -16,6 +16,7 @@
     <sys:String x:Key="LOCCommonNavPageNext">Nächste Seite</sys:String>
     <sys:String x:Key="LOCCommonNavAxisLimitDecrease">Achsenlimit verringern</sys:String>
     <sys:String x:Key="LOCCommonNavAxisLimitIncrease">Achsenlimit erhöhen</sys:String>
+    <sys:String x:Key="LOCCommonNavAxisLimitReset">Increase axis limit</sys:String>
 
     <!-- ==================== TimePicker control ==================== -->
     <sys:String x:Key="LOCCommonTimePickerTooltip">Zeit</sys:String>
