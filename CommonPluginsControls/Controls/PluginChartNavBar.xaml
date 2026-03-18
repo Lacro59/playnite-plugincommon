@@ -62,7 +62,7 @@
                     <Button Style="{DynamicResource NavIconButton}"
                             ToolTip="{DynamicResource LOCCommonNavFirst}"
                             Command="{Binding CmdFirst}"
-                            IsEnabled="{Binding CanNavigate}">
+                            IsEnabled="{Binding CanGoPrev}">
                         <TextBlock Text="&#xEA7B;"
                                    Style="{DynamicResource BaseTextBlockStyle}"
                                    FontFamily="{DynamicResource FontIcoFont}"
@@ -74,7 +74,7 @@
                          Hidden when PageSize=0 (no limit defined). -->
                     <Button Style="{DynamicResource NavIconButton}"
                             Command="{Binding CmdPagePrev}"
-                            IsEnabled="{Binding CanNavigate}"
+                            IsEnabled="{Binding CanGoPrev}"
                             Visibility="{Binding HasPageButtons, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Button.ToolTip>
                             <ToolTip Content="{Binding PagePrevToolTip}" />
@@ -90,7 +90,7 @@
                     <Button Style="{DynamicResource NavIconButton}"
                             ToolTip="{DynamicResource LOCCommonNavPrev}"
                             Command="{Binding CmdPrev}"
-                            IsEnabled="{Binding CanNavigate}">
+                            IsEnabled="{Binding CanGoPrev}">
                         <TextBlock Text="&#xEAB5;"
                                    Style="{DynamicResource BaseTextBlockStyle}"
                                    FontFamily="{DynamicResource FontIcoFont}"
@@ -137,7 +137,7 @@
                     <Button Style="{DynamicResource NavIconButton}"
                             ToolTip="{DynamicResource LOCCommonNavNext}"
                             Command="{Binding CmdNext}"
-                            IsEnabled="{Binding CanNavigate}">
+                            IsEnabled="{Binding CanGoNext}">
                         <TextBlock Text="&#xEAB8;"
                                    Style="{DynamicResource BaseTextBlockStyle}"
                                    FontFamily="{DynamicResource FontIcoFont}"
@@ -149,7 +149,7 @@
                          Hidden when PageSize=0 (no limit defined). -->
                     <Button Style="{DynamicResource NavIconButton}"
                             Command="{Binding CmdPageNext}"
-                            IsEnabled="{Binding CanNavigate}"
+                            IsEnabled="{Binding CanGoNext}"
                             Visibility="{Binding HasPageButtons, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Button.ToolTip>
                             <ToolTip Content="{Binding PageNextToolTip}" />
@@ -165,7 +165,7 @@
                     <Button Style="{DynamicResource NavIconButton}"
                             ToolTip="{DynamicResource LOCCommonNavLast}"
                             Command="{Binding CmdLast}"
-                            IsEnabled="{Binding CanNavigate}">
+                            IsEnabled="{Binding CanGoNext}">
                         <TextBlock Text="&#xEA7C;"
                                    Style="{DynamicResource BaseTextBlockStyle}"
                                    FontFamily="{DynamicResource FontIcoFont}"
@@ -174,20 +174,35 @@
                     </Button>
 
                     <StackPanel Orientation="Horizontal" Margin="30,0,0,0">
+
                         <Button Style="{StaticResource NavIconButton}"
                                 Command="{Binding CmdAxisLimitDecrease}"
                                 IsEnabled="{Binding CanDecreaseAxisLimit}"
                                 ToolTip="{Binding AxisLimitDecreaseToolTip}"
                                 Content="−" />
 
+                        <!-- Reset to default — glyph EA4C = "refresh/reset" in IcoFont -->
+                        <Button Style="{StaticResource NavIconButton}"
+                                Command="{Binding CmdAxisLimitReset}"
+                                IsEnabled="{Binding CanResetAxisLimit}"
+                                ToolTip="{Binding AxisLimitResetToolTip}">
+                            <TextBlock Text="&#xEE0B;"
+                                       Style="{DynamicResource BaseTextBlockStyle}"
+                                       FontFamily="{DynamicResource FontIcoFont}"
+                                       FontSize="{DynamicResource FontSize}"
+                                       Foreground="{DynamicResource GlyphBrush}" />
+                        </Button>
+
                         <Button Style="{StaticResource NavIconButton}"
                                 Command="{Binding CmdAxisLimitIncrease}"
                                 IsEnabled="{Binding CanIncreaseAxisLimit}"
                                 ToolTip="{Binding AxisLimitIncreaseToolTip}"
                                 Content="+" />
+
                     </StackPanel>
                     
                 </StackPanel>
+
             </DockPanel>
         </Border>
 
