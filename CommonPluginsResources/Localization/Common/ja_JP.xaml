@@ -25,33 +25,33 @@
 
     <!-- ==================== TIME UNITS ==================== -->
 
-	<sys:String x:Key="LOCCommonDay">{0} day</sys:String>
-	<sys:String x:Key="LOCCommonDays">{0} days</sys:String>
-	<sys:String x:Key="LOCCommonHours">Hours</sys:String>
-	<sys:String x:Key="LOCCommonMonth">{0} month</sys:String>
-	<sys:String x:Key="LOCCommonMonths">{0} months</sys:String>
-	<sys:String x:Key="LOCCommonYear">{0} year</sys:String>
-	<sys:String x:Key="LOCCommonYears">{0} years</sys:String>
+	<sys:String x:Key="LOCCommonDay">{0} 日</sys:String>
+	<sys:String x:Key="LOCCommonDays">{0} 日</sys:String>
+	<sys:String x:Key="LOCCommonHours">時間</sys:String>
+	<sys:String x:Key="LOCCommonMonth">{0} ヶ月</sys:String>
+	<sys:String x:Key="LOCCommonMonths">{0} ヶ月</sys:String>
+	<sys:String x:Key="LOCCommonYear">{0} 年</sys:String>
+	<sys:String x:Key="LOCCommonYears">{0} 年</sys:String>
 
 	<!-- Labels (standalone, without format parameter) -->
-	<sys:String x:Key="LOCCommonMonthLabel">Month</sys:String>
-	<sys:String x:Key="LOCCommonMonthsLabel">Months</sys:String>
-	<sys:String x:Key="LOCCommonYearLabel">Year</sys:String>
-	<sys:String x:Key="LOCCommonYearsLabel">Years</sys:String>
+	<sys:String x:Key="LOCCommonMonthLabel">月</sys:String>
+	<sys:String x:Key="LOCCommonMonthsLabel">月</sys:String>
+	<sys:String x:Key="LOCCommonYearLabel">年</sys:String>
+	<sys:String x:Key="LOCCommonYearsLabel">年</sys:String>
 
 	<!-- ==================== RELATIVE TIME ==================== -->
 
-	<sys:String x:Key="LOCCommonToday">Today</sys:String>
+	<sys:String x:Key="LOCCommonToday">今日</sys:String>
 	<sys:String x:Key="LOCCommonNever">Never</sys:String>
-	<sys:String x:Key="LOCCommonHourAgo">{0}h ago</sys:String>
+	<sys:String x:Key="LOCCommonHourAgo">{0} 時間前</sys:String>
 	<!-- NOTE: singular and plural share the same format — keep both for translator flexibility -->
-	<sys:String x:Key="LOCCommonHoursAgo">{0}h ago</sys:String>
-	<sys:String x:Key="LOCCommonDayAgo">{0}d ago</sys:String>
-	<sys:String x:Key="LOCCommonDaysAgo">{0}d ago</sys:String>
-	<sys:String x:Key="LOCCommonMonthAgo">{0}mo ago</sys:String>
-	<sys:String x:Key="LOCCommonMonthsAgo">{0}mo ago</sys:String>
-	<sys:String x:Key="LOCCommonYearAgo">{0}y ago</sys:String>
-	<sys:String x:Key="LOCCommonYearsAgo">{0}y ago</sys:String>
+	<sys:String x:Key="LOCCommonHoursAgo">{0} 時間前</sys:String>
+	<sys:String x:Key="LOCCommonDayAgo">{0} 日前</sys:String>
+	<sys:String x:Key="LOCCommonDaysAgo">{0} 日前</sys:String>
+	<sys:String x:Key="LOCCommonMonthAgo">{0} ヶ月前</sys:String>
+	<sys:String x:Key="LOCCommonMonthsAgo">{0} ヶ月前</sys:String>
+	<sys:String x:Key="LOCCommonYearAgo">{0} 年前</sys:String>
+	<sys:String x:Key="LOCCommonYearsAgo">{0} 年前</sys:String>
 
 	<!-- ==================== DATES ==================== -->
 
@@ -117,7 +117,7 @@
 
 	<!-- ==================== LIST ACTIONS ==================== -->
 
-	<sys:String x:Key="LOCCommonClearSelection">Clear Selection</sys:String>
+	<sys:String x:Key="LOCCommonClearSelection">選択を解除</sys:String>
 	<sys:String x:Key="LOCCommonRefreshSelected">Refresh Selected</sys:String>
 	<sys:String x:Key="LOCCommonSelected">Selected:</sys:String>
 	<sys:String x:Key="LOCCommonSelectGames">ゲームを選択</sys:String>
@@ -307,7 +307,7 @@ Please check the plugin settings.</sys:String>
 
 	<sys:String x:Key="LOCDdItemList_ClearSelection">Clear selection</sys:String>
 	<sys:String x:Key="LOCDdItemList_NoItems">No items available</sys:String>
-	<sys:String x:Key="LOCDdItemList_SearchPlaceholder">Search...</sys:String>
+	<sys:String x:Key="LOCDdItemList_SearchPlaceholder">検索...</sys:String>
 	<sys:String x:Key="LOCDdItemList_ShowSelectedOnly">Show selected items only</sys:String>
 
 	<!-- ==================== VARIABLES TOOLTIP ==================== -->
