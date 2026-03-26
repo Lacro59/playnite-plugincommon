@@ -16,7 +16,7 @@
     <sys:String x:Key="LOCCommonNavPageNext">Próxima página</sys:String>
     <sys:String x:Key="LOCCommonNavAxisLimitDecrease">Diminuir limite do eixo</sys:String>
     <sys:String x:Key="LOCCommonNavAxisLimitIncrease">Aumentar limite do eixo</sys:String>
-    <sys:String x:Key="LOCCommonNavAxisLimitReset">Increase axis limit</sys:String>
+    <sys:String x:Key="LOCCommonNavAxisLimitReset">Aumentar limite do eixo</sys:String>
 
     <!-- ==================== TimePicker control ==================== -->
     <sys:String x:Key="LOCCommonTimePickerTooltip">Tempo</sys:String>
