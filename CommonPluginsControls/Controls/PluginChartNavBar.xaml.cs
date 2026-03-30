@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -411,146 +412,6 @@ namespace CommonPluginsControls.Controls
 
         #endregion
 
-        #region CustomToggle
-
-        /// <summary>
-        /// State of the optional custom toggle button rendered at the far right of the nav bar.
-        /// When false (default), the button is hidden entirely.
-        /// </summary>
-        public bool CustomToggle
-        {
-            get => (bool)GetValue(CustomToggleProperty);
-            set => SetValue(CustomToggleProperty, value);
-        }
-
-        public static readonly DependencyProperty CustomToggleProperty = DependencyProperty.Register(
-            nameof(CustomToggle),
-            typeof(bool),
-            typeof(PluginChartNavBar),
-            new FrameworkPropertyMetadata(false, OnCustomToggleChanged)
-        );
-
-        private static void OnCustomToggleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var ctrl = (PluginChartNavBar)d;
-            bool active = (bool)e.NewValue;
-            ctrl._ctx.CustomToggle = active;
-            ctrl._ctx.CustomToggleToolTip = active
-                ? (ctrl._ctx.CustomToggleActiveToolTip ?? ctrl._ctx.CustomToggleToolTip)
-                : (ctrl._ctx.CustomToggleInactiveToolTip ?? ctrl._ctx.CustomToggleToolTip);
-        }
-
-        #endregion
-
-        #region CustomToggleVisible
-
-        /// <summary>
-        /// Controls whether the custom toggle button is rendered.
-        /// Set to true from the consumer to opt-in to the feature.
-        /// </summary>
-        public bool CustomToggleVisible
-        {
-            get => (bool)GetValue(CustomToggleVisibleProperty);
-            set => SetValue(CustomToggleVisibleProperty, value);
-        }
-
-        public static readonly DependencyProperty CustomToggleVisibleProperty = DependencyProperty.Register(
-            nameof(CustomToggleVisible),
-            typeof(bool),
-            typeof(PluginChartNavBar),
-            new FrameworkPropertyMetadata(false, OnCustomToggleVisibleChanged)
-        );
-
-        private static void OnCustomToggleVisibleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            ((PluginChartNavBar)d)._ctx.CustomToggleVisible = (bool)e.NewValue;
-        }
-
-        #endregion
-
-        #region CustomToggleInactiveIcon / CustomToggleActiveIcon
-
-        /// <summary>IcoFont glyph shown when the toggle is inactive.</summary>
-        public string CustomToggleInactiveIcon
-        {
-            get => (string)GetValue(CustomToggleInactiveIconProperty);
-            set => SetValue(CustomToggleInactiveIconProperty, value);
-        }
-
-        public static readonly DependencyProperty CustomToggleInactiveIconProperty = DependencyProperty.Register(
-            nameof(CustomToggleInactiveIcon),
-            typeof(string),
-            typeof(PluginChartNavBar),
-            new FrameworkPropertyMetadata(string.Empty, OnCustomToggleIconChanged)
-        );
-
-        /// <summary>IcoFont glyph shown when the toggle is active.</summary>
-        public string CustomToggleActiveIcon
-        {
-            get => (string)GetValue(CustomToggleActiveIconProperty);
-            set => SetValue(CustomToggleActiveIconProperty, value);
-        }
-
-        public static readonly DependencyProperty CustomToggleActiveIconProperty = DependencyProperty.Register(
-            nameof(CustomToggleActiveIcon),
-            typeof(string),
-            typeof(PluginChartNavBar),
-            new FrameworkPropertyMetadata(string.Empty, OnCustomToggleIconChanged)
-        );
-
-        private static void OnCustomToggleIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var ctrl = (PluginChartNavBar)d;
-            // Update displayed icon based on current toggle state
-            ctrl._ctx.CustomToggleIcon = ctrl.CustomToggle
-                ? (ctrl.CustomToggleActiveIcon ?? ctrl.CustomToggleInactiveIcon)
-                : ctrl.CustomToggleInactiveIcon;
-        }
-
-        #endregion
-
-        #region CustomToggleInactiveToolTip / CustomToggleActiveToolTip
-
-        /// <summary>Tooltip text when the toggle is inactive.</summary>
-        public string CustomToggleInactiveToolTip
-        {
-            get => (string)GetValue(CustomToggleInactiveToolTipProperty);
-            set => SetValue(CustomToggleInactiveToolTipProperty, value);
-        }
-
-        public static readonly DependencyProperty CustomToggleInactiveToolTipProperty = DependencyProperty.Register(
-            nameof(CustomToggleInactiveToolTip),
-            typeof(string),
-            typeof(PluginChartNavBar),
-            new FrameworkPropertyMetadata(string.Empty, OnCustomToggleToolTipChanged)
-        );
-
-        /// <summary>Tooltip text when the toggle is active.</summary>
-        public string CustomToggleActiveToolTip
-        {
-            get => (string)GetValue(CustomToggleActiveToolTipProperty);
-            set => SetValue(CustomToggleActiveToolTipProperty, value);
-        }
-
-        public static readonly DependencyProperty CustomToggleActiveToolTipProperty = DependencyProperty.Register(
-            nameof(CustomToggleActiveToolTip),
-            typeof(string),
-            typeof(PluginChartNavBar),
-            new FrameworkPropertyMetadata(string.Empty, OnCustomToggleToolTipChanged)
-        );
-
-        private static void OnCustomToggleToolTipChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            var ctrl = (PluginChartNavBar)d;
-            ctrl._ctx.CustomToggleInactiveToolTip = ctrl.CustomToggleInactiveToolTip;
-            ctrl._ctx.CustomToggleActiveToolTip = ctrl.CustomToggleActiveToolTip;
-            ctrl._ctx.CustomToggleToolTip = ctrl.CustomToggle
-                ? ctrl.CustomToggleActiveToolTip
-                : ctrl.CustomToggleInactiveToolTip;
-        }
-
-        #endregion
-
         // Routed Events
         public static readonly RoutedEvent FirstClickedEvent = EventManager.RegisterRoutedEvent(
             nameof(FirstClicked),
@@ -615,14 +476,6 @@ namespace CommonPluginsControls.Controls
                 typeof(PluginChartNavBar)
             );
 
-        public static readonly RoutedEvent CustomToggledEvent = 
-            EventManager.RegisterRoutedEvent(
-                nameof(CustomToggled),
-                RoutingStrategy.Bubble,
-                typeof(RoutedEventHandler),
-                typeof(PluginChartNavBar)
-            );
-
         public event RoutedEventHandler FirstClicked
         {
             add => AddHandler(FirstClickedEvent, value);
@@ -674,10 +527,23 @@ namespace CommonPluginsControls.Controls
             remove => RemoveHandler(AxisLimitIncreasedEvent, value);
         }
 
-        public event RoutedEventHandler CustomToggled
+        /// <summary>
+        /// Raised when any registered toggle changes state.
+        /// Inspect <see cref="NavBarToggleChangedEventArgs.ToggleId"/> to identify the source.
+        /// </summary>
+        public static readonly RoutedEvent NavBarToggleChangedEvent =
+            EventManager.RegisterRoutedEvent(
+                nameof(NavBarToggleChanged),
+                RoutingStrategy.Bubble,
+                typeof(NavBarToggleChangedEventHandler),
+                typeof(PluginChartNavBar)
+            );
+
+        /// <inheritdoc cref="NavBarToggleChangedEvent"/>
+        public event NavBarToggleChangedEventHandler NavBarToggleChanged
         {
-            add => AddHandler(CustomToggledEvent, value);
-            remove => RemoveHandler(CustomToggledEvent, value);
+            add => AddHandler(NavBarToggleChangedEvent, value);
+            remove => RemoveHandler(NavBarToggleChangedEvent, value);
         }
 
         public PluginChartNavBar()
@@ -734,20 +600,6 @@ namespace CommonPluginsControls.Controls
                     return;
                 AxisLimit = next;
                 RaiseEvent(new RoutedEventArgs(AxisLimitIncreasedEvent));
-            });
-
-            _ctx.CmdCustomToggle = new RelayCommand(() =>
-            {
-                CustomToggle = !CustomToggle;
-                // Sync icon & tooltip after state flip
-                _ctx.CustomToggle = CustomToggle;
-                _ctx.CustomToggleIcon = CustomToggle
-                    ? (CustomToggleActiveIcon ?? CustomToggleInactiveIcon)
-                    : CustomToggleInactiveIcon;
-                _ctx.CustomToggleToolTip = CustomToggle
-                    ? CustomToggleActiveToolTip
-                    : CustomToggleInactiveToolTip;
-                RaiseEvent(new RoutedEventArgs(CustomToggledEvent));
             });
 
 
@@ -814,11 +666,109 @@ namespace CommonPluginsControls.Controls
 
         public void InvokeAxisLimitIncrease() => _ctx.CmdAxisLimitIncrease.Execute(null);
 
-        public void InvokeCustomToggle()
+        #region Toggles
+
+        /// <summary>
+        /// Adds a toggle button to the nav bar.
+        /// </summary>
+        /// <param name="toggle">The toggle descriptor. Its <see cref="NavBarToggle.Id"/> must be unique.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="toggle"/> is null.</exception>
+        /// <exception cref="InvalidOperationException">A toggle with the same id is already registered.</exception>
+        public void AddToggle(NavBarToggle toggle)
         {
-            CustomToggle = !CustomToggle;
-            RaiseEvent(new RoutedEventArgs(CustomToggledEvent));
+            if (toggle == null)
+                throw new ArgumentNullException(nameof(toggle));
+
+            if (_togglesById.ContainsKey(toggle.Id))
+                throw new InvalidOperationException(
+                    string.Format("A toggle with id '{0}' is already registered.", toggle.Id)
+                );
+
+            var item = new ToggleItemViewModel(toggle);
+            _togglesById[toggle.Id] = item;
+
+            // Wire INPC on NavBarToggle to keep the ItemsControl item in sync and bubble the routed event.
+            toggle.PropertyChanged += OnTogglePropertyChanged;
+            toggle.IsActiveChanged += OnToggleIsActiveChanged;
+
+            _ctx.Toggles.Add(item);
         }
+
+        /// <summary>
+        /// Removes a previously registered toggle from the nav bar.
+        /// No-op if the id is not found.
+        /// </summary>
+        /// <param name="id">The <see cref="NavBarToggle.Id"/> of the toggle to remove.</param>
+        public void RemoveToggle(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+                return;
+
+            if (!_togglesById.TryGetValue(id, out ToggleItemViewModel item))
+                return;
+
+            item.Toggle.PropertyChanged -= OnTogglePropertyChanged;
+            item.Toggle.IsActiveChanged -= OnToggleIsActiveChanged;
+
+            _togglesById.Remove(id);
+            _ctx.Toggles.Remove(item);
+        }
+
+        /// <summary>
+        /// Sets the active state of a registered toggle without raising the routed event.
+        /// Use this to initialise or synchronise state from the consumer side without re-triggering handlers.
+        /// </summary>
+        /// <param name="id">Id of the target toggle.</param>
+        /// <param name="isActive">Desired state.</param>
+        public void SetToggleState(string id, bool isActive)
+        {
+            if (!_togglesById.TryGetValue(id, out ToggleItemViewModel item))
+                return;
+
+            // Temporarily suppress the routed event — this is a programmatic sync, not a user action.
+            _suppressToggleEvent = true;
+            try
+            {
+                item.Toggle.IsActive = isActive;
+            }
+            finally
+            {
+                _suppressToggleEvent = false;
+            }
+        }
+
+        // Lookup for O(1) access by id.
+        private readonly Dictionary<string, ToggleItemViewModel> _togglesById =
+            new Dictionary<string, ToggleItemViewModel>(StringComparer.Ordinal);
+
+        private bool _suppressToggleEvent;
+
+        /// <summary>
+        /// Propagates INPC changes from <see cref="NavBarToggle"/> to the matching
+        /// <see cref="ToggleItemViewModel"/> so the ItemsControl template re-evaluates.
+        /// </summary>
+        private void OnTogglePropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            // NavBarToggle already raises INPC on itself; the item template binds directly to the
+            // NavBarToggle properties (CurrentIcon, CurrentToolTip, IsActive) forwarded by
+            // ToggleItemViewModel, so WPF picks up the change automatically.
+            // This handler is kept as an extension point for future derived behaviour.
+        }
+
+        /// <summary>
+        /// Bubbles a <see cref="NavBarToggleChangedEvent"/> when a toggle's active state changes.
+        /// Suppressed during <see cref="SetToggleState"/> calls.
+        /// </summary>
+        private void OnToggleIsActiveChanged(object sender, EventArgs e)
+        {
+            if (_suppressToggleEvent)
+                return;
+
+            var toggle = (NavBarToggle)sender;
+            RaiseEvent(new NavBarToggleChangedEventArgs(NavBarToggleChangedEvent, toggle.Id, toggle.IsActive));
+        }
+
+        #endregion
     }
 
     /// <summary>
@@ -959,33 +909,11 @@ namespace CommonPluginsControls.Controls
             set => SetValue(ref _axisLimitIncreaseToolTip, value);
         }
 
-        private bool _customToggle;
-        public bool CustomToggle
-        {
-            get => _customToggle;
-            set => SetValue(ref _customToggle, value);
-        }
-
-        private bool _customToggleVisible;
-        public bool CustomToggleVisible
-        {
-            get => _customToggleVisible;
-            set => SetValue(ref _customToggleVisible, value);
-        }
-
-        private string _customToggleIcon = string.Empty;
-        public string CustomToggleIcon
-        {
-            get => _customToggleIcon;
-            set => SetValue(ref _customToggleIcon, value);
-        }
-
-        private string _customToggleToolTip = string.Empty;
-        public string CustomToggleToolTip
-        {
-            get => _customToggleToolTip;
-            set => SetValue(ref _customToggleToolTip, value);
-        }
+        /// <summary>
+        /// Observable list of toggle view-models rendered by the nav bar's ItemsControl.
+        /// Populated exclusively via <see cref="PluginChartNavBar.AddToggle"/>.
+        /// </summary>
+        public ObservableCollection<ToggleItemViewModel> Toggles { get; } = new ObservableCollection<ToggleItemViewModel>();
 
         // Commands
         public RelayCommand CmdFirst { get; set; }
@@ -998,11 +926,37 @@ namespace CommonPluginsControls.Controls
         public RelayCommand CmdAxisLimitDecrease { get; set; }
         public RelayCommand CmdAxisLimitReset { get; set; }
         public RelayCommand CmdAxisLimitIncrease { get; set; }
+    }
 
-        // Kept as backing store for DP sync only — not bound in XAML
-        internal string CustomToggleInactiveToolTip { get; set; } = string.Empty;
-        internal string CustomToggleActiveToolTip { get; set; } = string.Empty;
 
-        public RelayCommand CmdCustomToggle { get; set; }
+    /// <summary>
+    /// Per-item ViewModel wrapping a <see cref="NavBarToggle"/> for display inside the
+    /// <see cref="PluginChartNavBar"/> ItemsControl.
+    /// </summary>
+    /// <remarks>
+    /// Holds the command so the template stays stateless; the command flips
+    /// <see cref="NavBarToggle.IsActive"/> which propagates back via INPC.
+    /// </remarks>
+    public sealed class ToggleItemViewModel : ObservableObject
+    {
+        public NavBarToggle Toggle { get; }
+
+        public string CurrentIcon => Toggle.CurrentIcon;
+        public string CurrentToolTip => Toggle.CurrentToolTip;
+        public bool IsActive => Toggle.IsActive;
+
+        public RelayCommand ToggleCommand { get; }
+
+        public ToggleItemViewModel(NavBarToggle toggle)
+        {
+            Toggle = toggle;
+            ToggleCommand = new RelayCommand(() => toggle.IsActive = !toggle.IsActive);
+
+            Toggle.PropertyChanged += (s, e) => {
+                if (e.PropertyName == nameof(NavBarToggle.IsActive)) OnPropertyChanged(nameof(IsActive));
+                if (e.PropertyName == nameof(NavBarToggle.CurrentIcon)) OnPropertyChanged(nameof(CurrentIcon));
+                if (e.PropertyName == nameof(NavBarToggle.CurrentToolTip)) OnPropertyChanged(nameof(CurrentToolTip));
+            };
+        }
     }
 }
