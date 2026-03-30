@@ -37,7 +37,7 @@
 
             <DockPanel LastChildFill="False">
 
-                <!-- ── Right: optional info label badge (e.g. "Week 12") ── -->
+                <!-- ── Far-right: optional info label badge (e.g. "Week 12") ── -->
                 <!--
                     Declared before the button strip so DockPanel measures it first
                     and it stays flush-right regardless of label width.
@@ -103,11 +103,15 @@
                         <Button.ToolTip>
                             <ToolTip Content="{Binding ShowAllToolTip}" />
                         </Button.ToolTip>
-                        <Button.Resources>
-                            <!-- Swaps style background via trigger on ShowAllData -->
-                        </Button.Resources>
                         <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource NavIconButton}">
+                            <!--
+                                BasedOn="{StaticResource NavIconButton}" is intentionally avoided:
+                                StaticResource is resolved at BAML parse time, before Playnite merges
+                                its theme dictionaries, which crashes the VS designer.
+                                We base on the implicit Button type instead and let the runtime
+                                DynamicResource pipeline apply NavIconButton via the theme.
+                            -->
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding ShowAllData}" Value="True">
                                         <Setter Property="Background" Value="{DynamicResource NormalBrushDark}" />
@@ -125,7 +129,7 @@
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ShowAllData}" Value="True">
                                             <Setter Property="Text" Value="&#xEA6F;" />
-                                            <Setter Property="Foreground" Value="{DynamicResource HighlightGlyphBrush }" />
+                                            <Setter Property="Foreground" Value="{DynamicResource HighlightGlyphBrush}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -173,16 +177,17 @@
                                    Foreground="{DynamicResource GlyphBrush}" />
                     </Button>
 
+                    <!-- AxisLimit controls: −  reset  + -->
                     <StackPanel Orientation="Horizontal" Margin="30,0,0,0">
 
-                        <Button Style="{StaticResource NavIconButton}"
+                        <Button Style="{DynamicResource NavIconButton}"
                                 Command="{Binding CmdAxisLimitDecrease}"
                                 IsEnabled="{Binding CanDecreaseAxisLimit}"
                                 ToolTip="{Binding AxisLimitDecreaseToolTip}"
                                 Content="−" />
 
-                        <!-- Reset to default — glyph EA4C = "refresh/reset" in IcoFont -->
-                        <Button Style="{StaticResource NavIconButton}"
+                        <!-- Reset to default — glyph EE0B in IcoFont -->
+                        <Button Style="{DynamicResource NavIconButton}"
                                 Command="{Binding CmdAxisLimitReset}"
                                 IsEnabled="{Binding CanResetAxisLimit}"
                                 ToolTip="{Binding AxisLimitResetToolTip}">
@@ -193,14 +198,45 @@
                                        Foreground="{DynamicResource GlyphBrush}" />
                         </Button>
 
-                        <Button Style="{StaticResource NavIconButton}"
+                        <Button Style="{DynamicResource NavIconButton}"
                                 Command="{Binding CmdAxisLimitIncrease}"
                                 IsEnabled="{Binding CanIncreaseAxisLimit}"
                                 ToolTip="{Binding AxisLimitIncreaseToolTip}"
                                 Content="+" />
 
                     </StackPanel>
-                    
+
+                    <!-- ── Right : custom toggle ── -->
+                    <Button Command="{Binding CmdCustomToggle}" Margin="30,0,0,0"
+                            Visibility="{Binding CustomToggleVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Button.ToolTip>
+                            <ToolTip Content="{Binding CustomToggleToolTip}" />
+                        </Button.ToolTip>
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CustomToggle}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource NormalBrushDark}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock FontFamily="{DynamicResource FontIcoFont}"
+                                   FontSize="{DynamicResource FontSize}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+                                    <Setter Property="Text" Value="{Binding CustomToggleIcon}" />
+                                    <Setter Property="Foreground" Value="{DynamicResource GlyphBrush}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CustomToggle}" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource HighlightGlyphBrush}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Button>
+
                 </StackPanel>
 
             </DockPanel>

@@ -3,6 +3,7 @@ using CommonPluginsShared.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -25,6 +26,11 @@ namespace CommonPluginsShared.Controls
 
 		protected void OnLoaded(object sender, RoutedEventArgs e)
 		{
+			if (DesignerProperties.GetIsInDesignMode(this))
+			{
+				return;
+			}
+
 #if DEBUG
 			var timer = new DebugTimer(GetType().Name + ".OnLoaded");
 #endif

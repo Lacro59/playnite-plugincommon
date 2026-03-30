@@ -477,6 +477,260 @@
         <Setter Property="Background"  Value="{DynamicResource HoverBrush}" />
     </Style>
 
+    <!--
+        NavCommonButton — same shape as NavIconButton but uses CommonFont instead of FontIcoFont.
+        Use for navigation glyphs sourced from the plugin's embedded CommonFont
+        (e.g. prev/next arrows &#xe941;, &#xe942;, &#xe945;, &#xe946;).
+    -->
+    <Style x:Key="NavCommonButton" TargetType="Button" BasedOn="{StaticResource NavIconButton}">
+        <Setter Property="FontFamily" Value="{DynamicResource CommonFont}" />
+    </Style>
+
+    <!--
+        NavToggleButton — ToggleButton counterpart of NavIconButton.
+        Same 32×32 fixed size, same hover/press/disabled visual contract.
+        Uses CommonFont by default; override FontFamily for IcoFont glyphs.
+    -->
+    <Style x:Key="NavToggleButton" TargetType="ToggleButton"
+           BasedOn="{StaticResource {x:Type ToggleButton}}">
+        <Setter Property="Width"           Value="32" />
+        <Setter Property="Height"          Value="32" />
+        <Setter Property="Padding"         Value="0" />
+        <Setter Property="Margin"          Value="2,0" />
+        <Setter Property="FontFamily"      Value="{DynamicResource CommonFont}" />
+        <Setter Property="FontSize"        Value="{DynamicResource FontSizeLarge}" />
+        <Setter Property="Foreground"      Value="{DynamicResource GlyphBrush}" />
+        <Setter Property="BorderBrush"     Value="{DynamicResource NormalBorderBrush}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}" />
+        <Setter Property="Cursor"          Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border x:Name="Bd"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{DynamicResource ControlCornerRadius}"
+                        Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <!-- Hover: filled background + accent border -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background"  Value="{DynamicResource HoverBrush}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource GlyphBrush}" />
+                        </Trigger>
+                        <!-- Checked (toggled on): persistent accent fill -->
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Bd" Property="Background"  Value="{DynamicResource HoverBrush}" />
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource GlyphBrush}" />
+                        </Trigger>
+                        <!-- Press: slight fade -->
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.65" />
+                        </Trigger>
+                        <!-- Disabled: stronger fade — signals "locked" state -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.35" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--
+        StatValue — data-value counterpart of ViewColumnLabelText.
+        Same base as ViewColumnValueText but SemiBold to visually anchor the value
+        next to its muted label. Use in stats/summary cards.
+    -->
+    <Style x:Key="StatValue" TargetType="TextBlock"
+           BasedOn="{StaticResource ViewColumnValueText}">
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!-- ==================== MODERN EXPANDER — VARIANT C ==================== -->
+    <!--
+        ModernExpanderStyle — Full-row header with a small square icon-box on the left.
+        Visual contract:
+          • Header: NormalBrushDark fill; hover lightens to NormalBrush.
+          • Icon-box: 22×22 rounded square, border NormalBorderBrush.
+            The ▶ glyph animates to 90° on expand (0.15 s storyboard).
+          • Separator: 1 px NormalBorderBrush between header and content.
+          • Content area: transparent — the parent card provides the surface.
+          • Optional subtitle via Tag="…"; hidden when null or empty.
+        Usage:
+          <Expander Style="{DynamicResource ModernExpanderStyle}"
+                    Header="Configuration PC"
+                    Tag="Gaming-Rig · RTX 4080">
+              ...content...
+          </Expander>
+        Implementation note:
+          The header is a borderless ToggleButton whose IsChecked is TwoWay-bound to
+          IsExpanded. This is the standard WPF Expander pattern; no code-behind needed.
+    -->
+    <Style x:Key="ModernExpanderStyle" TargetType="Expander">
+        <Setter Property="Foreground"                 Value="{DynamicResource TextBrush}" />
+        <Setter Property="BorderBrush"                Value="{DynamicResource NormalBorderBrush}" />
+        <Setter Property="BorderThickness"            Value="1" />
+        <Setter Property="Background"                 Value="Transparent" />
+        <Setter Property="Padding"                    Value="10,8" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Expander">
+                    <!-- Outer card border — wraps header + content -->
+                    <Border BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="4"
+                            SnapsToDevicePixels="True">
+                        <DockPanel>
+
+                            <!-- ── Header ToggleButton ── -->
+                            <ToggleButton x:Name="PART_HeaderSite"
+                                          DockPanel.Dock="Top"
+                                          IsChecked="{Binding IsExpanded,
+                                              RelativeSource={RelativeSource TemplatedParent},
+                                              Mode=TwoWay}"
+                                          Focusable="False"
+                                          Cursor="Hand"
+                                          BorderThickness="0"
+                                          Padding="0">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="HeaderBd"
+                                                Background="{DynamicResource NormalBrushDark}"
+                                                Padding="10,8"
+                                                CornerRadius="3,3,0,0">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="8" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Square icon-box with IcoFont chevron-right glyph -->
+                                                <Border Grid.Column="0"
+                                                        Width="22" Height="22"
+                                                        CornerRadius="4"
+                                                        BorderThickness="1"
+                                                        BorderBrush="{DynamicResource NormalBorderBrush}"
+                                                        Background="Transparent"
+                                                        VerticalAlignment="Center">
+                                                    <TextBlock x:Name="Arrow"
+                                                               Text="&#xEA69;"
+                                                               FontFamily="{DynamicResource FontIcoFont}"
+                                                               FontSize="10"
+                                                               Foreground="{DynamicResource GlyphBrush}"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"
+                                                               RenderTransformOrigin="0.5,0.5">
+                                                        <TextBlock.RenderTransform>
+                                                            <RotateTransform x:Name="ArrowRotation" Angle="0" />
+                                                        </TextBlock.RenderTransform>
+                                                    </TextBlock>
+                                                </Border>
+
+                                                <!-- Title (Header property) -->
+                                                <ContentPresenter Grid.Column="2"
+                                                                  VerticalAlignment="Center"
+                                                                  RecognizesAccessKey="True"
+                                                                  TextBlock.FontSize="{DynamicResource FontSize}"
+                                                                  TextBlock.FontWeight="SemiBold"
+                                                                  TextBlock.Foreground="{DynamicResource TextBrush}" />
+
+                                                <!-- Subtitle (Tag property) -->
+                                                <TextBlock x:Name="SubtitleText"
+                                                           Grid.Column="3"
+                                                           Text="{Binding Tag,
+                                                               RelativeSource={RelativeSource AncestorType=Expander}}"
+                                                           FontSize="{DynamicResource FontSizeSmall}"
+                                                           Foreground="{DynamicResource TextBrushDarker}"
+                                                           VerticalAlignment="Center"
+                                                           Margin="12,0,4,0" />
+                                            </Grid>
+                                        </Border>
+
+                                        <ControlTemplate.Triggers>
+                                            <!-- Hover: lighten header background -->
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="HeaderBd" Property="Background"
+                                                        Value="{DynamicResource NormalBrush}" />
+                                            </Trigger>
+
+                                            <!-- Checked: animate arrow 0° → 90° -->
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Trigger.EnterActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation
+                                                                Storyboard.TargetName="ArrowRotation"
+                                                                Storyboard.TargetProperty="Angle"
+                                                                To="90" Duration="0:0:0.15" />
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </Trigger.EnterActions>
+                                                <Trigger.ExitActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation
+                                                                Storyboard.TargetName="ArrowRotation"
+                                                                Storyboard.TargetProperty="Angle"
+                                                                To="0" Duration="0:0:0.15" />
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </Trigger.ExitActions>
+                                            </Trigger>
+
+                                            <!-- Hide subtitle when Tag is null -->
+                                            <DataTrigger Binding="{Binding Tag,
+                                                RelativeSource={RelativeSource AncestorType=Expander}}"
+                                                         Value="{x:Null}">
+                                                <Setter TargetName="SubtitleText"
+                                                        Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+
+                                            <!-- Hide subtitle when Tag is empty string -->
+                                            <DataTrigger Binding="{Binding Tag,
+                                                RelativeSource={RelativeSource AncestorType=Expander}}"
+                                                         Value="">
+                                                <Setter TargetName="SubtitleText"
+                                                        Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+
+                            <!-- ── Content area — hidden until IsExpanded=True ── -->
+                            <ContentPresenter x:Name="ExpandSite"
+                                              DockPanel.Dock="Top"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}"
+                                              Focusable="False"
+                                              Visibility="Collapsed" />
+                        </DockPanel>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <!-- Reveal content when expanded -->
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Setter TargetName="ExpandSite" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <!-- Disabled: fade out -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- Nav label badge: styled Border used for the "Week 12" chip on the right. -->
     <Style x:Key="NavLabelBadge" TargetType="Border">
         <Setter Property="Background"        Value="{DynamicResource NormalBrush}" />

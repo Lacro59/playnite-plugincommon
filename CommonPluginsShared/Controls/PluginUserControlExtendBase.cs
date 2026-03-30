@@ -223,6 +223,12 @@ namespace CommonPluginsShared.Controls
 		/// </summary>
 		protected virtual void AttachStaticEvents()
 		{
+			// API.Instance is null in the VS Designer — skip all event wiring.
+			if (DesignerProperties.GetIsInDesignMode(this))
+			{
+				return;
+			}
+
 #if DEBUG
 			var timer = new DebugTimer(GetType().Name + ".AttachStaticEvents");
 #endif
