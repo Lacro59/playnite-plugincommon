@@ -1,4 +1,4 @@
-﻿using CommonPluginsControls.Controls;
+using CommonPluginsControls.Controls;
 using System;
 
 namespace CommonPluginsControls.LiveChartsCommon
@@ -11,6 +11,7 @@ namespace CommonPluginsControls.LiveChartsCommon
         public bool HideIsZero { get; set; }
 
         public string Name { get; set; }
+        public string SecondaryName { get; set; }
         public long Values { get; set; }
         public string ValuesFormat => (int)TimeSpan.FromSeconds(Values).TotalHours + "h " + TimeSpan.FromSeconds(Values).ToString(@"mm") + "min";
     }
