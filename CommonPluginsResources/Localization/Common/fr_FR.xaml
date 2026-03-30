@@ -4,6 +4,9 @@
 	<sys:String x:Key="LOCCommonMigratingDatabase">Migration de la base de données…</sys:String>
 	<sys:String x:Key="LOCCommonMigrationPartialFailure">Migration completed with {0} error(s) out of {1} file(s).</sys:String>
 
+    <sys:String x:Key="LOCCommonNavShowByWeeks">Show data by weeks</sys:String>
+    <sys:String x:Key="LOCCommonNavShowByWeeksDisable">Disable data by weeks</sys:String>
+
     <!-- ==================== CHART NAVIGATION BAR ==================== -->
 
     <sys:String x:Key="LOCCommonNavFirst">Go to first data point</sys:String>
