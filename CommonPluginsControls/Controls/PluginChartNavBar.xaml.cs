@@ -147,20 +147,18 @@ namespace CommonPluginsControls.Controls
             ctrl._ctx.CanGoNext = !active && ctrl.CanGoNext;
             ctrl._ctx.CanGoPrev = !active && ctrl.CanGoPrev;
 
-            bool allowDecrease =
-                ctrl.AxisLimitMaximum <= 0 || ctrl.AxisLimitMaximum > AxisLimitMinimum;
+            bool allowDecrease = ctrl.AxisLimitMaximum <= 0 || ctrl.AxisLimitMaximum > AxisLimitMinimum;
 
             // Re-evaluate limit interaction states based on mode
             if (active)
             {
-                ctrl._ctx.CanDecreaseAxisLimit = allowDecrease && ctrl.AxisLimit > AxisLimitMinimum;
-                ctrl._ctx.CanIncreaseAxisLimit = CanIncrease(ctrl.AxisLimit, ctrl.AxisLimitMaximum);
-                ctrl._ctx.CanResetAxisLimit = ctrl.AxisLimit != ctrl.AxisLimitDefault;
+                ctrl._ctx.CanDecreaseAxisLimit = false;
+                ctrl._ctx.CanIncreaseAxisLimit = false;
+                ctrl._ctx.CanResetAxisLimit = false;
             }
             else
             {
-                ctrl._ctx.CanDecreaseAxisLimit =
-                    ctrl.AllowDecreaseAxisLimit && ctrl.AxisLimit > AxisLimitMinimum;
+                ctrl._ctx.CanDecreaseAxisLimit = ctrl.AllowDecreaseAxisLimit && ctrl.AxisLimit > AxisLimitMinimum;
                 ctrl._ctx.CanIncreaseAxisLimit = CanIncrease(ctrl.AxisLimit, ctrl.AxisLimitMaximum);
                 ctrl._ctx.CanResetAxisLimit = ctrl.AxisLimit != ctrl.AxisLimitDefault;
             }
