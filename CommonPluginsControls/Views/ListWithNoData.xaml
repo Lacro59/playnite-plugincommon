@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="CommonPluginsControls.Views.ListWithNoData"
+<UserControl x:Class="CommonPluginsControls.Views.ListWithNoData"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -139,17 +139,11 @@
                                            Style="{StaticResource {x:Type ListView}}"
                                            SortingSortDirection="Ascending" 
                                            SortingDefaultDataName="Name" 
+                                           ColumnManagementMenuEnable="False"
                                            SortingEnable="True"
                                            ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                     <ListView.View>
                         <GridView>
-                            <!-- Hidden column for sorting -->
-                            <GridViewColumn Width="0" DisplayMemberBinding="{Binding Name}">
-                                <controlsShared:GridViewColumnHeaderExtend 
-                                Style="{StaticResource {x:Type GridViewColumnHeader}}" 
-                                IsHitTestVisible="False" RefIndex="1" />
-                            </GridViewColumn>
-
                             <!-- Checkbox Column -->
                             <GridViewColumn Width="50">
                                 <GridViewColumnHeader Content="☑" Padding="8,6" />
@@ -166,9 +160,9 @@
                             </GridViewColumn>
 
                             <!-- Game Name Column -->
-                            <GridViewColumn Width="280">
-                                <GridViewColumnHeader Content="{DynamicResource LOCGameNameTitle}" 
-                                                  Tag="Name" Padding="8,6" />
+                            <GridViewColumn Width="280"
+                                            controlsShared:ListViewColumnOptions.SortMemberPath="Name">
+                                <GridViewColumnHeader Content="{DynamicResource LOCGameNameTitle}" Padding="8,6" />
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Style="{DynamicResource BaseTextBlockStyle}" Margin="4,4">

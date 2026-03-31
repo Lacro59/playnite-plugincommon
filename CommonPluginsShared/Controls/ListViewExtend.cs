@@ -985,8 +985,8 @@ namespace CommonPluginsShared.Controls
                         return;
                     }
 
-                    // No sort
-                    if (((string)headerClicked.Tag)?.IsEqual("nosort") ?? false)
+                    // No sort when explicitly disabled on the column.
+                    if (headerClicked.Column != null && ListViewColumnOptions.GetDisableSorting(headerClicked.Column))
                     {
                         headerClicked = null;
                     }
@@ -1676,6 +1676,15 @@ namespace CommonPluginsShared.Controls
             new FrameworkPropertyMetadata(false));
 
         /// <summary>
+        /// Attached property to disable sorting for a specific column.
+        /// </summary>
+        public static readonly DependencyProperty DisableSortingProperty = DependencyProperty.RegisterAttached(
+            "DisableSorting",
+            typeof(bool),
+            typeof(ListViewColumnOptions),
+            new FrameworkPropertyMetadata(false));
+
+        /// <summary>
         /// Sets whether the target column should be listed in the column management menu.
         /// </summary>
         public static void SetShowInColumnManagementMenu(DependencyObject element, bool value)
@@ -1721,6 +1730,22 @@ namespace CommonPluginsShared.Controls
         public static bool GetForceHidden(DependencyObject element)
         {
             return (bool)element.GetValue(ForceHiddenProperty);
+        }
+
+        /// <summary>
+        /// Sets whether sorting is disabled for the target column.
+        /// </summary>
+        public static void SetDisableSorting(DependencyObject element, bool value)
+        {
+            element.SetValue(DisableSortingProperty, value);
+        }
+
+        /// <summary>
+        /// Gets whether sorting is disabled for the target column.
+        /// </summary>
+        public static bool GetDisableSorting(DependencyObject element)
+        {
+            return (bool)element.GetValue(DisableSortingProperty);
         }
     }
 

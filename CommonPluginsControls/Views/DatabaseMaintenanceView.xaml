@@ -130,6 +130,7 @@
                                                    BorderThickness="1"
                                                    BorderBrush="{DynamicResource NormalBorderBrush}"
                                                    Background="{DynamicResource ControlBackgroundBrush}"
+                                                   ColumnManagementMenuEnable="False"
                                                    SortingEnable="True"
                                                    SortingDefaultDataName="FileDate"
                                                    SortingSortDirection="Descending">
