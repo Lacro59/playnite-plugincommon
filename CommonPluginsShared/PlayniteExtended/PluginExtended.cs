@@ -1,4 +1,4 @@
-﻿using CommonPluginsShared.Collections;
+using CommonPluginsShared.Collections;
 using CommonPluginsShared.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Plugins;
@@ -28,6 +28,7 @@ namespace CommonPluginsShared.PlayniteExtended
         {
             // Get plugin's database if used
             PluginDatabase = typeof(TPluginDatabase).CrateInstance<TPluginDatabase>(PluginSettingsViewModel.Settings, this.GetPluginUserDataPath());
+			PluginDatabase.PersistSettingsAction = () => SavePluginSettings(PluginSettingsViewModel.Settings);
             PluginDatabase.InitializeDatabase();
 		}
 	}

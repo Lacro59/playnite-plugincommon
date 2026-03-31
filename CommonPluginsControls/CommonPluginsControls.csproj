@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -135,8 +135,12 @@
     </Compile>
     <Compile Include="Stores\Steam\PanelViewModel.cs" />
     <Compile Include="ViewsModels\ExportCsvViewModel.cs" />
+    <Compile Include="ViewsModels\DatabaseMaintenanceViewModel.cs" />
     <Compile Include="ViewsModels\TimePickerViewModel.cs" />
     <Compile Include="ViewsModels\TransfertDataViewModel.cs" />
+    <Compile Include="Views\DatabaseMaintenanceView.xaml.cs">
+      <DependentUpon>DatabaseMaintenanceView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ExportCsvView.xaml.cs">
       <DependentUpon>ExportCsvView.xaml</DependentUpon>
     </Compile>
@@ -246,6 +250,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\ExportCsvView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\DatabaseMaintenanceView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

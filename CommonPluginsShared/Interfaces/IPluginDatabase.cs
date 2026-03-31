@@ -1,4 +1,4 @@
-﻿using CommonPluginsShared.Collections;
+using CommonPluginsShared.Collections;
 using CommonPluginsShared.Models;
 using CommonPluginsShared.Plugins;
 using CommonPluginsShared.Services;
@@ -27,6 +27,11 @@ namespace CommonPluginsShared.Interfaces
 
 		/// <summary>Gets or sets the plugin windows helper.</summary>
 		IPluginWindows PluginWindows { get; set; }
+
+		/// <summary>
+		/// Optional callback used to persist settings immediately when changed from shared views.
+		/// </summary>
+		Action PersistSettingsAction { get; set; }
 
 		/// <summary>Initialize the database.</summary>
 		Task<bool> InitializeDatabase();
@@ -123,6 +128,27 @@ namespace CommonPluginsShared.Interfaces
 
 		/// <summary>Returns true if the database is ready for immediate access (loaded and non-null).</summary>
 		bool IsDatabaseReady();
+
+		/// <summary>Returns metadata for the active plugin database file.</summary>
+		DatabaseBackupInfo GetCurrentDatabaseInfo();
+
+		/// <summary>Returns metadata for available backup database files.</summary>
+		IEnumerable<DatabaseBackupInfo> GetDatabaseBackups();
+
+		/// <summary>Creates a backup file for the current database.</summary>
+		string CreateDatabaseBackup();
+
+		/// <summary>Restores the current database from a backup file.</summary>
+		bool RestoreDatabaseBackup(string backupFilePath);
+
+		/// <summary>Deletes a backup file from disk.</summary>
+		bool DeleteDatabaseBackup(string backupFilePath);
+
+		/// <summary>Gets the current backup retention count.</summary>
+		int GetDatabaseBackupMaxCount();
+
+		/// <summary>Sets the backup retention count.</summary>
+		void SetDatabaseBackupMaxCount(int value);
 	}
 
 	/// <summary>

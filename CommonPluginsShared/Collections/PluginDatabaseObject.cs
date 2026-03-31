@@ -1,4 +1,4 @@
-﻿using CommonPlayniteShared;
+using CommonPlayniteShared;
 using CommonPluginsControls.Controls;
 using CommonPluginsShared.Caching;
 using CommonPluginsShared.Interfaces;
@@ -43,6 +43,12 @@ namespace CommonPluginsShared.Collections
 
 		/// <summary>Gets or sets plugin-specific paths (database, cache, installation directory).</summary>
 		public PluginPaths Paths { get; set; }
+
+		/// <summary>
+		/// Optional callback used to persist plugin settings when they are updated
+		/// from shared UI screens outside the standard Playnite settings lifecycle.
+		/// </summary>
+		public Action PersistSettingsAction { get; set; }
 
 		/// <summary>
 		/// Timeout in milliseconds to wait for the database to finish loading.
@@ -195,6 +201,104 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Returns <c>true</c> if the database is ready for immediate access.</summary>
 		public bool IsDatabaseReady() => IsLoaded && _database != null;
 
+		/// <summary>Returns metadata for the active database file.</summary>
+		public virtual DatabaseBackupInfo GetCurrentDatabaseInfo()
+		{
+			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			return db == null ? null : db.GetCurrentDatabaseInfo();
+		}
+
+		/// <summary>Returns metadata for backup database files.</summary>
+		public virtual IEnumerable<DatabaseBackupInfo> GetDatabaseBackups()
+		{
+			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			if (db == null || Paths == null || string.IsNullOrEmpty(Paths.PluginDatabasePath))
+			{
+				return Enumerable.Empty<DatabaseBackupInfo>();
+			}
+
+			return db.GetBackupInfos(Paths.PluginDatabasePath);
+		}
+
+		/// <summary>Creates a backup in the plugin database folder.</summary>
+		public virtual string CreateDatabaseBackup()
+		{
+			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			if (db == null || Paths == null || string.IsNullOrEmpty(Paths.PluginDatabasePath))
+			{
+				return null;
+			}
+
+			return db.BackupDatabase(Paths.PluginDatabasePath);
+		}
+
+		/// <summary>Restores current database from the selected backup file.</summary>
+		public virtual bool RestoreDatabaseBackup(string backupFilePath)
+		{
+			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			if (db == null)
+			{
+				return false;
+			}
+
+			return db.RestoreDatabase(backupFilePath);
+		}
+
+		/// <summary>Deletes a backup file from disk.</summary>
+		public virtual bool DeleteDatabaseBackup(string backupFilePath)
+		{
+			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			if (db == null)
+			{
+				return false;
+			}
+
+			return db.DeleteBackup(backupFilePath);
+		}
+
+		/// <summary>Returns current backup retention count.</summary>
+		public virtual int GetDatabaseBackupMaxCount()
+		{
+			if (PluginSettings != null && PluginSettings.DatabaseBackupMaxCount >= 3)
+			{
+				return PluginSettings.DatabaseBackupMaxCount;
+			}
+
+			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			if (db != null)
+			{
+				return db.MaxBackupCount < 3 ? 3 : db.MaxBackupCount;
+			}
+
+			return 5;
+		}
+
+		/// <summary>Updates backup retention count in settings and active database instance.</summary>
+		public virtual void SetDatabaseBackupMaxCount(int value)
+		{
+			int normalized = value < 3 ? 3 : value;
+
+			if (PluginSettings != null)
+			{
+				PluginSettings.DatabaseBackupMaxCount = normalized;
+			}
+
+			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			if (db != null)
+			{
+				db.SetBackupRetentionCount(normalized);
+			}
+
+			try
+			{
+				PersistSettingsAction?.Invoke();
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, "Failed to persist plugin settings after DatabaseBackupMaxCount update.");
+			}
+		}
+
 		#endregion
 
 		#region Shared UI helpers
@@ -265,7 +369,14 @@ namespace CommonPluginsShared.Collections
 				Stopwatch stopWatch = Stopwatch.StartNew();
 
 				string dbPath = Path.Combine(Paths.PluginDatabasePath, PluginName + ".db");
-				_database = new LiteDbItemCollection<TItem>(dbPath);
+				int backupMaxCount = PluginSettings != null && PluginSettings.DatabaseBackupMaxCount > 0
+					? PluginSettings.DatabaseBackupMaxCount
+					: 5;
+				if (backupMaxCount < 3)
+				{
+					backupMaxCount = 3;
+				}
+				_database = new LiteDbItemCollection<TItem>(dbPath, backupMaxCount);
 
 				_database.BackupDatabase(Paths.PluginDatabasePath);
 

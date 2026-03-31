@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -58,6 +58,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)io\IOServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\CheckElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\DataGame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\DatabaseBackupInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Folder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ThemeLinearGradient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\SourceLink.cs" />

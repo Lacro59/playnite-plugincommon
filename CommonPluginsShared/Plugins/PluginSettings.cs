@@ -1,4 +1,4 @@
-﻿using CommonPluginsShared.Interfaces;
+using CommonPluginsShared.Interfaces;
 using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
@@ -62,6 +62,23 @@ namespace CommonPluginsShared.Plugins
 		{
 			get => _autoImportOnInstalled;
 			set => SetValue(ref _autoImportOnInstalled, value);
+		}
+
+		#endregion
+
+		#region Database
+
+		private int _databaseBackupMaxCount = 5;
+
+		/// <inheritdoc/>
+		public int DatabaseBackupMaxCount
+		{
+			get => _databaseBackupMaxCount;
+			set
+			{
+				int normalized = value < 3 ? 3 : value;
+				SetValue(ref _databaseBackupMaxCount, normalized);
+			}
 		}
 
 		#endregion

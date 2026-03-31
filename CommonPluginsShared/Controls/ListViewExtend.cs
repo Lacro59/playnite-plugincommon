@@ -897,13 +897,10 @@ namespace CommonPluginsShared.Controls
                     GridView gridView = this.View as GridView;
                     foreach (GridViewColumn gridViewColumn in gridView.Columns)
                     {
-                        if (gridViewColumn.DisplayMemberBinding is Binding binding)
+                        string property = GetColumnSortKey(gridViewColumn);
+                        if (property == dataName)
                         {
-                            string property = binding.Path.Path;
-                            if (property == dataName)
-                            {
-                                return gridViewColumn.Header as GridViewColumnHeader;
-                            }
+                            return gridViewColumn.Header as GridViewColumnHeader;
                         }
                     }
                 }
@@ -930,14 +927,11 @@ namespace CommonPluginsShared.Controls
                     for (int i = 0; i < gridView.Columns.Count; i++)
                     {
                         var gridViewColumn = gridView.Columns[i];
-                        if (gridViewColumn.DisplayMemberBinding is Binding binding)
+                        string property = GetColumnSortKey(gridViewColumn);
+                        if (property == dataName)
                         {
-                            string property = binding.Path.Path;
-                            if (property == dataName)
-                            {
-								return Tuple.Create(gridViewColumn.Header as GridViewColumnHeader, i);
-							}
-                        }
+							return Tuple.Create(gridViewColumn.Header as GridViewColumnHeader, i);
+						}
                     }
                 }
                 catch (Exception ex)
@@ -947,6 +941,31 @@ namespace CommonPluginsShared.Controls
             }
 			return Tuple.Create<GridViewColumnHeader, int>(null, -1);
 		}
+
+        /// <summary>
+        /// Resolves the sort key for a column.
+        /// Priority: attached SortMemberPath, then DisplayMemberBinding path.
+        /// </summary>
+        private static string GetColumnSortKey(GridViewColumn gridViewColumn)
+        {
+            if (gridViewColumn == null)
+            {
+                return string.Empty;
+            }
+
+            string attachedSortMemberPath = ListViewColumnOptions.GetSortMemberPath(gridViewColumn);
+            if (!attachedSortMemberPath.IsNullOrEmpty())
+            {
+                return attachedSortMemberPath;
+            }
+
+            if (gridViewColumn.DisplayMemberBinding is Binding binding && binding.Path != null)
+            {
+                return binding.Path.Path ?? string.Empty;
+            }
+
+            return string.Empty;
+        }
 
         /// <summary>
         /// Handles column header click events for sorting.
