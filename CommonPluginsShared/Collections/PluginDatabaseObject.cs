@@ -13,6 +13,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -476,6 +477,14 @@ namespace CommonPluginsShared.Collections
 
 			int migrated = 0;
 			int failed = 0;
+			int archived = 0;
+			string archivePath = Path.Combine(
+				Paths.PluginDatabasePath,
+				string.Format(
+					"{0}_json-migration_{1:yyyyMMdd_HHmmss}.zip",
+					PluginName,
+					DateTime.UtcNow));
+			List<string> filesToDelete = new List<string>();
 
 			GlobalProgressOptions options = new GlobalProgressOptions(
 				string.Format("{0} - {1}", PluginName,
@@ -487,14 +496,34 @@ namespace CommonPluginsShared.Collections
 
 			API.Instance.Dialogs.ActivateGlobalProgress((a) =>
 			{
-				a.ProgressMaxValue = jsonFiles.Length;
+				a.ProgressMaxValue = (jsonFiles.Length * 2) + 2;
+				a.Text = string.Format(
+					"{0} - {1}",
+					PluginName,
+					ResourceProvider.GetString("LOCCommonMigrationStepBackup"));
+
+				archived = CreateMigrationArchive(jsonFiles, archivePath);
+				a.CurrentProgressValue++;
+
+				if (archived != jsonFiles.Length)
+				{
+					Logger.Error(string.Format(
+						"MigrateJsonToLiteDb — archive incomplete ({0}/{1}), migration aborted.",
+						archived, jsonFiles.Length));
+					return;
+				}
+
+				a.Text = string.Format(
+					"{0} - {1}",
+					PluginName,
+					ResourceProvider.GetString("LOCCommonMigrationStepMigrate"));
 
 				foreach (string file in jsonFiles)
 				{
 					a.Text = string.Format(
 						"{0} - {1}\n\n{2}/{3}\n{4}",
 						PluginName,
-						ResourceProvider.GetString("LOCCommonMigratingDatabase"),
+						ResourceProvider.GetString("LOCCommonMigrationStepMigrate"),
 						migrated + failed + 1,
 						jsonFiles.Length,
 						Path.GetFileNameWithoutExtension(file));
@@ -516,9 +545,8 @@ namespace CommonPluginsShared.Collections
 						EnsureDateTimesUtc(item);
 						item.IsSaved = true;
 						_database.Upsert(item);
-
-						File.Delete(file);
 						migrated++;
+						filesToDelete.Add(file);
 					}
 					catch (Exception ex)
 					{
@@ -529,11 +557,41 @@ namespace CommonPluginsShared.Collections
 
 					a.CurrentProgressValue++;
 				}
+
+				a.Text = string.Format(
+					"{0} - {1}",
+					PluginName,
+					ResourceProvider.GetString("LOCCommonMigrationStepDeleteLegacy"));
+				a.CurrentProgressValue++;
+
+				for (int i = 0; i < filesToDelete.Count; i++)
+				{
+					string fileToDelete = filesToDelete[i];
+					a.Text = string.Format(
+						"{0} - {1}\n\n{2}/{3}\n{4}",
+						PluginName,
+						ResourceProvider.GetString("LOCCommonMigrationStepDeleteLegacy"),
+						i + 1,
+						filesToDelete.Count,
+						Path.GetFileNameWithoutExtension(fileToDelete));
+
+					try
+					{
+						File.Delete(fileToDelete);
+					}
+					catch (Exception ex)
+					{
+						Logger.Error(ex, string.Format(
+							"MigrateJsonToLiteDb — failed to delete legacy file '{0}'.", fileToDelete));
+					}
+
+					a.CurrentProgressValue++;
+				}
 			}, options);
 
 			Logger.Info(string.Format(
-				"MigrateJsonToLiteDb — completed: {0} migrated, {1} failed.",
-				migrated, failed));
+				"MigrateJsonToLiteDb — completed: {0} migrated, {1} archived, {2} failed.",
+				migrated, archived, failed));
 
 			if (failed > 0)
 			{
@@ -542,6 +600,52 @@ namespace CommonPluginsShared.Collections
 						ResourceProvider.GetString("LOCCommonMigrationPartialFailure"),
 						failed, jsonFiles.Length),
 					PluginName);
+			}
+		}
+
+		private int CreateMigrationArchive(string[] jsonFiles, string archivePath)
+		{
+			try
+			{
+				int archivedCount = 0;
+				using (FileStream archiveStream = new FileStream(archivePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+				using (ZipArchive archive = new ZipArchive(archiveStream, ZipArchiveMode.Create, false))
+				{
+					HashSet<string> usedEntryNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+					foreach (string file in jsonFiles)
+					{
+						string entryName = Path.GetFileName(file);
+						while (!usedEntryNames.Add(entryName))
+						{
+							entryName = string.Format(
+								"{0}_{1}{2}",
+								Path.GetFileNameWithoutExtension(file),
+								Guid.NewGuid().ToString("N"),
+								Path.GetExtension(file));
+						}
+
+						ZipArchiveEntry entry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
+						using (Stream entryStream = entry.Open())
+						using (FileStream fileStream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+						{
+							fileStream.CopyTo(entryStream);
+						}
+						archivedCount++;
+					}
+				}
+
+				Logger.Info(string.Format(
+					"MigrateJsonToLiteDb — archive created: {0} ({1} file(s)).",
+					archivePath, archivedCount));
+				return archivedCount;
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, string.Format(
+					"MigrateJsonToLiteDb — failed to create archive '{0}', migration aborted.",
+					archivePath));
+				return 0;
 			}
 		}
 
