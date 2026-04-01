@@ -542,6 +542,8 @@ namespace CommonPluginsShared.Collections
 							continue;
 						}
 
+						// Allow plugin-specific one-shot model migration during JSON import.
+						MigrateLegacyJsonItem(item, a);
 						EnsureDateTimesUtc(item);
 						item.IsSaved = true;
 						_database.Upsert(item);
@@ -648,6 +650,14 @@ namespace CommonPluginsShared.Collections
 				return 0;
 			}
 		}
+
+		/// <summary>
+		/// Override to migrate legacy JSON payloads before persisting to LiteDB.
+		/// Called during <see cref="MigrateJsonToLiteDb"/> for each deserialized item.
+		/// </summary>
+		/// <param name="item">Deserialized item about to be written into LiteDB.</param>
+		/// <param name="progressArgs">Current migration progress context for optional UI text updates.</param>
+		protected virtual void MigrateLegacyJsonItem(TItem item, GlobalProgressActionArgs progressArgs) { }
 
 		/// <summary>Override to perform additional plugin-specific initialisation after the base database loads.</summary>
 		protected virtual void LoadMoreData() { }
