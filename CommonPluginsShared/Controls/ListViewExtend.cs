@@ -1096,6 +1096,37 @@ namespace CommonPluginsShared.Controls
             stackPanel.Children.Add(labelCaret);
 
             headerClicked.Content = stackPanel;
+            EnsureColumnWidthForCaret(headerClicked, stackPanel);
+        }
+
+        /// <summary>
+        /// Ensures the target column is wide enough to display header content and sort caret.
+        /// </summary>
+        /// <param name="headerClicked">The sorted header.</param>
+        /// <param name="headerContent">The visual content that includes text and caret.</param>
+        private static void EnsureColumnWidthForCaret(GridViewColumnHeader headerClicked, FrameworkElement headerContent)
+        {
+            if (headerClicked?.Column == null || headerContent == null)
+            {
+                return;
+            }
+
+            // Measure required width for the full header (text + caret) and keep a small safety margin
+            // so the caret remains visible for any width strategy (fixed/auto/persisted).
+            headerContent.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            double requiredWidth = headerContent.DesiredSize.Width + 15d;
+
+            double currentWidth = headerClicked.Column.ActualWidth;
+            double configuredWidth = headerClicked.Column.Width;
+            if (!double.IsNaN(configuredWidth) && configuredWidth > currentWidth)
+            {
+                currentWidth = configuredWidth;
+            }
+
+            if (requiredWidth > currentWidth)
+            {
+                headerClicked.Column.Width = requiredWidth;
+            }
         }
 
         /// <summary>
