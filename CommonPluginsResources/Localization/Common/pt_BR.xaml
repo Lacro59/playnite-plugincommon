@@ -3,6 +3,9 @@
 
 	<sys:String x:Key="LOCCommonMigratingDatabase">Migrando banco de dados…</sys:String>
 	<sys:String x:Key="LOCCommonMigrationPartialFailure">Migração concluída com {0} erro(s) de {1} arquivo(s).</sys:String>
+	<sys:String x:Key="LOCCommonMigrationStepBackup">Backup of legacy database…</sys:String>
+	<sys:String x:Key="LOCCommonMigrationStepMigrate">Migration of legacy database…</sys:String>
+	<sys:String x:Key="LOCCommonMigrationStepDeleteLegacy">Deleting legacy database…</sys:String>
 
     <sys:String x:Key="LOCCommonNavShowByWeeks">Mostrar dados por semana</sys:String>
     <sys:String x:Key="LOCCommonNavShowByWeeksDisable">Desativar dados por semana</sys:String>
@@ -66,11 +69,13 @@
 	<!-- ==================== COMMON LABELS ==================== -->
 
 	<sys:String x:Key="LOCCommonNoData">Sem dados</sys:String>
+	<sys:String x:Key="LOCCommonNoDataAvailable">No data available</sys:String>
 	<sys:String x:Key="LOCCommonTotal">Total</sys:String>
 	<sys:String x:Key="LOCCommonCut">Recortar</sys:String>
 	<sys:String x:Key="LOCCommonMargin">Margem</sys:String>
 	<sys:String x:Key="LOCCommonMisc">Diversos</sys:String>
 	<sys:String x:Key="LOCCommonDatabase">Banco de dados</sys:String>
+	<sys:String x:Key="LOCCommonDatabaseMaintenance">Database maintenance</sys:String>
 	<sys:String x:Key="LOCCommonDimensions">Dimensões</sys:String>
 	<sys:String x:Key="LOCCommonStyles">Estilos</sys:String>
 	<sys:String x:Key="LOCCommonTypes">Tipos</sys:String>
@@ -305,7 +310,29 @@ Por favor, limpe todas as tags no menu de plugins.</sys:String>
 
 	<sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">Mais de um dado encontrado para {0}. Por favor, cheque as configurações do plugin.</sys:String>
 
-	<!-- ==================== DROPDOWN ITEM LIST (DdItemListSelectionBox) ==================== -->
+    <!-- ==================== DATABASE MAINTENANCE ==================== -->
+
+    <sys:String x:Key="LOCCommonDbMaintenanceCurrentDatabase">Current database</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceFile">File:</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceRows">Rows:</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceSize">File size:</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceBackupRetention">Backups to keep:</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceLastEntry">Last entry:</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenancePath">Path:</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceRefresh">Refresh</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceCreateBackup">Create backup</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceDeleteAllData">Delete all plugin data</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceAvailableBackups">Available backups</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceBackupHint">Select a backup to restore or delete.</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColBackupFile">Backup file</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColRows">Rows</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColSize">Size</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColLastEntry">Last entry</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColCreated">Created</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceDeleteBackup">Delete selected backup</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceRestoreBackup">Restore selected backup</sys:String>
+
+    <!-- ==================== DROPDOWN ITEM LIST (DdItemListSelectionBox) ==================== -->
 
 	<sys:String x:Key="LOCDdItemList_ClearSelection">Limpar seleção</sys:String>
 	<sys:String x:Key="LOCDdItemList_NoItems">Nenhum item disponível</sys:String>
