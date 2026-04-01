@@ -145,12 +145,12 @@
                     <ListView.View>
                         <GridView>
                             <!-- Checkbox Column -->
-                            <GridViewColumn Width="50">
+                            <GridViewColumn Width="auto">
                                 <GridViewColumnHeader Content="☑" Padding="8,6" />
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" 
-                                              Style="{StaticResource ModernCheckBox}"
+                                              Style="{StaticResource CompactCheckBox}"
                                               HorizontalAlignment="Center" 
                                               VerticalAlignment="Center"
                                               Checked="CheckBox_Changed" 
@@ -160,7 +160,7 @@
                             </GridViewColumn>
 
                             <!-- Game Name Column -->
-                            <GridViewColumn Width="280"
+                            <GridViewColumn Width="auto"
                                             controlsShared:ListViewColumnOptions.SortMemberPath="Name">
                                 <GridViewColumnHeader Content="{DynamicResource LOCGameNameTitle}" Padding="8,6" />
                                 <GridViewColumn.CellTemplate>
@@ -180,7 +180,7 @@
                             </GridViewColumn>
 
                             <!-- Platform Column -->
-                            <GridViewColumn Width="160">
+                            <GridViewColumn Width="auto">
                                 <GridViewColumnHeader Content="{DynamicResource LOCPlatformTitle}" 
                                                   Tag="PlatformName" 
                                                   Padding="8,6" />
@@ -196,7 +196,7 @@
                             </GridViewColumn>
 
                             <!-- Source Column -->
-                            <GridViewColumn Width="120">
+                            <GridViewColumn Width="auto">
                                 <GridViewColumnHeader Content="{DynamicResource LOCSourceLabel}" 
                                                   Tag="SourceName" 
                                                   Padding="8,6" />
@@ -212,7 +212,7 @@
                             </GridViewColumn>
 
                             <!-- Install Status Column -->
-                            <GridViewColumn Width="90">
+                            <GridViewColumn Width="auto">
                                 <GridViewColumnHeader Content="{DynamicResource LOCGameInstallationStatus}" 
                                                   Tag="InstallStatusText" 
                                                   Padding="8,6" />
@@ -233,7 +233,7 @@
                             </GridViewColumn>
 
                             <!-- Added Date Column -->
-                            <GridViewColumn Width="110">
+                            <GridViewColumn Width="auto">
                                 <GridViewColumnHeader Content="{DynamicResource LOCDateAddedLabel}" 
                                                   Tag="AddedDate" 
                                                   Padding="8,6" />
@@ -249,7 +249,7 @@
                             </GridViewColumn>
 
                             <!-- Last Activity Column -->
-                            <GridViewColumn Width="110">
+                            <GridViewColumn Width="auto">
                                 <GridViewColumnHeader Content="{DynamicResource LOCLastPlayed}" 
                                                   Tag="LastActivityDate" 
                                                   Padding="8,6" />
