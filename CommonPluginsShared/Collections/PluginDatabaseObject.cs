@@ -9,11 +9,13 @@ using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -511,6 +513,7 @@ namespace CommonPluginsShared.Collections
 							continue;
 						}
 
+						EnsureDateTimesUtc(item);
 						item.IsSaved = true;
 						_database.Upsert(item);
 
@@ -1666,6 +1669,216 @@ namespace CommonPluginsShared.Collections
 		private bool IsTaggingEnabled() => PluginSettings != null && PluginSettings.EnableTag;
 
 		private bool IsAutoImportOnInstalledEnabled() => PluginSettings != null && PluginSettings.AutoImportOnInstalled;
+
+		/// <summary>
+		/// Normalizes all DateTime values to UTC in the object graph.
+		/// This prevents legacy JSON data with Local/Unspecified kinds from being persisted
+		/// with inconsistent date formats during migration to LiteDB.
+		/// </summary>
+		private static void EnsureDateTimesUtc(object root)
+		{
+			if (root == null)
+			{
+				return;
+			}
+
+			HashSet<object> visited = new HashSet<object>(ReferenceEqualityComparer.Instance);
+			EnsureDateTimesUtcInternal(root, visited);
+		}
+
+		private static void EnsureDateTimesUtcInternal(object current, HashSet<object> visited)
+		{
+			if (current == null)
+			{
+				return;
+			}
+
+			Type currentType = current.GetType();
+			if (IsTerminalType(currentType))
+			{
+				return;
+			}
+
+			if (!currentType.IsValueType)
+			{
+				if (!visited.Add(current))
+				{
+					return;
+				}
+			}
+
+			IDictionary dictionary = current as IDictionary;
+			if (dictionary != null)
+			{
+				NormalizeDictionaryDateTimesToUtc(dictionary, visited);
+				return;
+			}
+
+			IList list = current as IList;
+			if (list != null)
+			{
+				for (int i = 0; i < list.Count; i++)
+				{
+					object listItem = list[i];
+					if (listItem is DateTime)
+					{
+						list[i] = NormalizeDateTimeToUtc((DateTime)listItem);
+					}
+					else
+					{
+						EnsureDateTimesUtcInternal(listItem, visited);
+					}
+				}
+				return;
+			}
+
+			IEnumerable enumerable = current as IEnumerable;
+			if (enumerable != null && !(current is string))
+			{
+				foreach (object entry in enumerable)
+				{
+					EnsureDateTimesUtcInternal(entry, visited);
+				}
+			}
+
+			PropertyInfo[] properties = currentType
+				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+				.Where(p => p.CanRead && p.CanWrite && p.GetIndexParameters().Length == 0)
+				.ToArray();
+
+			foreach (PropertyInfo property in properties)
+			{
+				object value;
+				try
+				{
+					value = property.GetValue(current, null);
+				}
+				catch
+				{
+					continue;
+				}
+
+				if (value == null)
+				{
+					continue;
+				}
+
+				Type propertyType = property.PropertyType;
+				if (propertyType == typeof(DateTime))
+				{
+					property.SetValue(current, NormalizeDateTimeToUtc((DateTime)value), null);
+					continue;
+				}
+
+				if (propertyType == typeof(DateTime?))
+				{
+					DateTime? nullableDate = (DateTime?)value;
+					if (nullableDate.HasValue)
+					{
+						property.SetValue(current, (DateTime?)NormalizeDateTimeToUtc(nullableDate.Value), null);
+					}
+					continue;
+				}
+
+				EnsureDateTimesUtcInternal(value, visited);
+			}
+		}
+
+		private static void NormalizeDictionaryDateTimesToUtc(IDictionary dictionary, HashSet<object> visited)
+		{
+			List<DictionaryEntry> entries = new List<DictionaryEntry>();
+			foreach (DictionaryEntry entry in dictionary)
+			{
+				entries.Add(entry);
+			}
+
+			bool keyChanged = false;
+			List<object> keysToRemove = new List<object>();
+			List<KeyValuePair<object, object>> entriesToAdd = new List<KeyValuePair<object, object>>();
+
+			foreach (DictionaryEntry entry in entries)
+			{
+				object key = entry.Key;
+				object value = entry.Value;
+
+				object normalizedKey = key;
+				if (key is DateTime)
+				{
+					normalizedKey = NormalizeDateTimeToUtc((DateTime)key);
+					if (!Equals(normalizedKey, key))
+					{
+						keyChanged = true;
+					}
+				}
+
+				if (value is DateTime)
+				{
+					dictionary[key] = NormalizeDateTimeToUtc((DateTime)value);
+				}
+				else
+				{
+					EnsureDateTimesUtcInternal(value, visited);
+				}
+
+				if (keyChanged)
+				{
+					keysToRemove.Add(key);
+					entriesToAdd.Add(new KeyValuePair<object, object>(normalizedKey, dictionary[key]));
+					keyChanged = false;
+				}
+			}
+
+			for (int i = 0; i < keysToRemove.Count; i++)
+			{
+				dictionary.Remove(keysToRemove[i]);
+			}
+
+			for (int i = 0; i < entriesToAdd.Count; i++)
+			{
+				dictionary[entriesToAdd[i].Key] = entriesToAdd[i].Value;
+			}
+		}
+
+		private static DateTime NormalizeDateTimeToUtc(DateTime dateTime)
+		{
+			if (dateTime.Kind == DateTimeKind.Utc)
+			{
+				return dateTime;
+			}
+
+			if (dateTime.Kind == DateTimeKind.Unspecified)
+			{
+				return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+			}
+
+			return dateTime.ToUniversalTime();
+		}
+
+		private static bool IsTerminalType(Type type)
+		{
+			return type.IsPrimitive
+				|| type.IsEnum
+				|| type == typeof(string)
+				|| type == typeof(decimal)
+				|| type == typeof(Guid)
+				|| type == typeof(DateTime)
+				|| type == typeof(DateTime?);
+		}
+
+		private sealed class ReferenceEqualityComparer : IEqualityComparer<object>
+		{
+			public static readonly ReferenceEqualityComparer Instance = new ReferenceEqualityComparer();
+
+			public bool Equals(object x, object y)
+			{
+				return ReferenceEquals(x, y);
+			}
+
+			public int GetHashCode(object obj)
+			{
+				return RuntimeHelpers.GetHashCode(obj);
+			}
+		}
 
 		private void NotifyError(string operation, Exception ex)
 		{
