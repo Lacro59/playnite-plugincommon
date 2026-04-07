@@ -59,6 +59,8 @@ namespace CommonPluginsShared.Collections
 		/// </summary>
 		protected virtual int DatabaseLoadTimeout => 10000;
 
+		private const string LegacyModelMigrationMarkerFileName = ".legacy-model-migration.done";
+
 		/// <summary>Gets or sets the current game displayed in the active UI panel.</summary>
 		public Game GameContext { get; set; }
 
@@ -73,7 +75,7 @@ namespace CommonPluginsShared.Collections
 
 		// ── LiteDB backend ────────────────────────────────────────────────────────
 
-		protected LiteDbItemCollection<TItem> _database;
+		protected PluginItemCollection<TItem> _database;
 
 		// ── IsLoaded ─────────────────────────────────────────────────────────────
 
@@ -187,7 +189,7 @@ namespace CommonPluginsShared.Collections
 		}
 
 		/// <summary>Returns the database without throwing on timeout; returns <c>null</c> instead.</summary>
-		protected LiteDbItemCollection<TItem> GetDatabaseSafe()
+		protected PluginItemCollection<TItem> GetDatabaseSafe()
 		{
 			try
 			{
@@ -207,56 +209,31 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Returns metadata for the active database file.</summary>
 		public virtual DatabaseBackupInfo GetCurrentDatabaseInfo()
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
-			return db == null ? null : db.GetCurrentDatabaseInfo();
+			return null;
 		}
 
 		/// <summary>Returns metadata for backup database files.</summary>
 		public virtual IEnumerable<DatabaseBackupInfo> GetDatabaseBackups()
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
-			if (db == null || Paths == null || string.IsNullOrEmpty(Paths.PluginDatabasePath))
-			{
-				return Enumerable.Empty<DatabaseBackupInfo>();
-			}
-
-			return db.GetBackupInfos(Paths.PluginDatabasePath);
+			return Enumerable.Empty<DatabaseBackupInfo>();
 		}
 
 		/// <summary>Creates a backup in the plugin database folder.</summary>
 		public virtual string CreateDatabaseBackup()
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
-			if (db == null || Paths == null || string.IsNullOrEmpty(Paths.PluginDatabasePath))
-			{
-				return null;
-			}
-
-			return db.BackupDatabase(Paths.PluginDatabasePath);
+			return null;
 		}
 
 		/// <summary>Restores current database from the selected backup file.</summary>
 		public virtual bool RestoreDatabaseBackup(string backupFilePath)
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
-			if (db == null)
-			{
-				return false;
-			}
-
-			return db.RestoreDatabase(backupFilePath);
+			return false;
 		}
 
 		/// <summary>Deletes a backup file from disk.</summary>
 		public virtual bool DeleteDatabaseBackup(string backupFilePath)
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
-			if (db == null)
-			{
-				return false;
-			}
-
-			return db.DeleteBackup(backupFilePath);
+			return false;
 		}
 
 		/// <summary>Returns current backup retention count.</summary>
@@ -265,12 +242,6 @@ namespace CommonPluginsShared.Collections
 			if (PluginSettings != null && PluginSettings.DatabaseBackupMaxCount >= 3)
 			{
 				return PluginSettings.DatabaseBackupMaxCount;
-			}
-
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
-			if (db != null)
-			{
-				return db.MaxBackupCount < 3 ? 3 : db.MaxBackupCount;
 			}
 
 			return 5;
@@ -284,12 +255,6 @@ namespace CommonPluginsShared.Collections
 			if (PluginSettings != null)
 			{
 				PluginSettings.DatabaseBackupMaxCount = normalized;
-			}
-
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
-			if (db != null)
-			{
-				db.SetBackupRetentionCount(normalized);
 			}
 
 			try
@@ -371,28 +336,10 @@ namespace CommonPluginsShared.Collections
 			{
 				Stopwatch stopWatch = Stopwatch.StartNew();
 
-				string dbPath = Path.Combine(Paths.PluginDatabasePath, PluginName + ".db");
-				int backupMaxCount = PluginSettings != null && PluginSettings.DatabaseBackupMaxCount > 0
-					? PluginSettings.DatabaseBackupMaxCount
-					: 5;
-				if (backupMaxCount < 3)
-				{
-					backupMaxCount = 3;
-				}
-				_database = new LiteDbItemCollection<TItem>(dbPath, backupMaxCount);
+				_database = new PluginItemCollection<TItem>(Paths.PluginDatabasePath, API.Instance.Database.Games.CollectionType);
 
-				_database.BackupDatabase(Paths.PluginDatabasePath);
-
-				// JSON → LiteDB one-shot migration (no-op when no JSON files are present).
+				// One-shot model migration on JSON storage, with backup created before any rewrite.
 				MigrateJsonToLiteDb();
-
-				// Pre-warm must complete before IsLoaded = true so every subsequent Get(id)
-				// is a ConcurrentDictionary lookup, not a LiteDB round-trip.
-				Stopwatch pwSw = Stopwatch.StartNew();
-				int cached = _database.PreWarm();
-				pwSw.Stop();
-				Logger.Info(string.Format(
-					"PreWarm — {0} items cached in {1} ms", cached, pwSw.ElapsedMilliseconds));
 
 				LoadMoreData();
 
@@ -404,10 +351,7 @@ namespace CommonPluginsShared.Collections
 					stopWatch.Elapsed.Seconds,
 					stopWatch.Elapsed.Milliseconds / 10));
 
-				// SetGameInfo() and DeleteDataWithDeletedGame() are deferred.
-				// They depend on Playnite's game database being open (up to 30 s wait),
-				// which would exceed WaitForDatabaseLoad's 10 s timeout if run here.
-				// The plugin is fully usable once PreWarm() is done; maintenance runs in background.
+				// Post-load maintenance is deferred to avoid delaying startup.
 				Task.Run(() => RunPostLoadMaintenance());
 
 				return true;
@@ -432,7 +376,7 @@ namespace CommonPluginsShared.Collections
 			{
 				// Synchronises Name / IsSaved / IsDeleted against Playnite's game list.
 				// Internally waits up to 30 s for Playnite's database to open.
-				_database.SetGameInfo();
+				_database.SetGameInfo<T>();
 			}
 			catch (Exception ex)
 			{
@@ -454,154 +398,87 @@ namespace CommonPluginsShared.Collections
 
 
 		/// <summary>
-		/// One-shot migration from the legacy one-JSON-file-per-game layout to LiteDB.
-		/// Shows a progress dialog while migrating.
-		/// No-op when no JSON files are present.
+		/// One-shot model migration for legacy JSON payloads.
+		/// A zip backup is created before rewriting any JSON file.
+		/// The migration is marked complete only when every item succeeds.
 		/// </summary>
 		private void MigrateJsonToLiteDb()
 		{
-			if (!Directory.Exists(Paths.PluginDatabasePath))
+			try
 			{
-				return;
-			}
+				if (_database == null || Paths == null || string.IsNullOrEmpty(Paths.PluginDatabasePath))
+				{
+					return;
+				}
 
-			string[] jsonFiles = Directory.GetFiles(Paths.PluginDatabasePath, "*.json");
-			if (jsonFiles.Length == 0)
-			{
-				return;
-			}
+				string markerPath = Path.Combine(Paths.PluginDatabasePath, LegacyModelMigrationMarkerFileName);
+				if (File.Exists(markerPath))
+				{
+					return;
+				}
 
-			Logger.Info(string.Format(
-				"MigrateJsonToLiteDb — {0} JSON file(s) found, starting migration.",
-				jsonFiles.Length));
+				string[] jsonFiles = Directory.GetFiles(Paths.PluginDatabasePath, "*.json");
+				if (jsonFiles.Length == 0)
+				{
+					File.WriteAllText(markerPath, "No JSON file found for migration.");
+					return;
+				}
 
-			int migrated = 0;
-			int failed = 0;
-			int archived = 0;
-			string archivePath = Path.Combine(
-				Paths.PluginDatabasePath,
-				string.Format(
-					"{0}_json-migration_{1:yyyyMMdd_HHmmss}.zip",
-					PluginName,
-					DateTime.UtcNow));
-			List<string> filesToDelete = new List<string>();
+				string archivePath = Path.Combine(
+					Paths.PluginDatabasePath,
+					string.Format(
+						"{0}_legacy-model-migration_{1:yyyyMMdd_HHmmss}.zip",
+						PluginName,
+						DateTime.UtcNow));
 
-			GlobalProgressOptions options = new GlobalProgressOptions(
-				string.Format("{0} - {1}", PluginName,
-					ResourceProvider.GetString("LOCCommonMigratingDatabase")))
-			{
-				Cancelable = false,
-				IsIndeterminate = false
-			};
-
-			API.Instance.Dialogs.ActivateGlobalProgress((a) =>
-			{
-				a.ProgressMaxValue = (jsonFiles.Length * 2) + 2;
-				a.Text = string.Format(
-					"{0} - {1}",
-					PluginName,
-					ResourceProvider.GetString("LOCCommonMigrationStepBackup"));
-
-				archived = CreateMigrationArchive(jsonFiles, archivePath);
-				a.CurrentProgressValue++;
-
+				int archived = CreateMigrationArchive(jsonFiles, archivePath);
 				if (archived != jsonFiles.Length)
 				{
 					Logger.Error(string.Format(
-						"MigrateJsonToLiteDb — archive incomplete ({0}/{1}), migration aborted.",
+						"MigrateLegacyJsonModelOnce — backup incomplete ({0}/{1}), migration aborted.",
 						archived, jsonFiles.Length));
 					return;
 				}
 
-				a.Text = string.Format(
-					"{0} - {1}",
-					PluginName,
-					ResourceProvider.GetString("LOCCommonMigrationStepMigrate"));
+				int migrated = 0;
+				int failed = 0;
 
-				foreach (string file in jsonFiles)
+				using (_database.BufferedUpdate())
 				{
-					a.Text = string.Format(
-						"{0} - {1}\n\n{2}/{3}\n{4}",
-						PluginName,
-						ResourceProvider.GetString("LOCCommonMigrationStepMigrate"),
-						migrated + failed + 1,
-						jsonFiles.Length,
-						Path.GetFileNameWithoutExtension(file));
-
-					try
+					foreach (TItem item in _database.ToList())
 					{
-						string json = File.ReadAllText(file);
-						TItem item = Serialization.FromJson<TItem>(json);
-
-						if (item == null)
+						try
 						{
-							Logger.Warn(string.Format(
-								"MigrateJsonToLiteDb — null result for '{0}', skipping.", file));
-							failed++;
-							a.CurrentProgressValue++;
-							continue;
+							MigrateLegacyJsonItem(item, null);
+							EnsureDateTimesUtc(item);
+							item.IsSaved = true;
+							_database.Update(item);
+							migrated++;
 						}
-
-						// Allow plugin-specific one-shot model migration during JSON import.
-						MigrateLegacyJsonItem(item, a);
-						EnsureDateTimesUtc(item);
-						item.IsSaved = true;
-						_database.Upsert(item);
-						migrated++;
-						filesToDelete.Add(file);
+						catch (Exception ex)
+						{
+							failed++;
+							Logger.Error(ex, string.Format(
+								"MigrateLegacyJsonModelOnce — failed for game '{0}' ({1}).",
+								item?.Name, item?.Id));
+						}
 					}
-					catch (Exception ex)
-					{
-						Logger.Error(ex, string.Format(
-							"MigrateJsonToLiteDb — failed on '{0}'.", file));
-						failed++;
-					}
-
-					a.CurrentProgressValue++;
 				}
 
-				a.Text = string.Format(
-					"{0} - {1}",
-					PluginName,
-					ResourceProvider.GetString("LOCCommonMigrationStepDeleteLegacy"));
-				a.CurrentProgressValue++;
-
-				for (int i = 0; i < filesToDelete.Count; i++)
+				if (failed == 0)
 				{
-					string fileToDelete = filesToDelete[i];
-					a.Text = string.Format(
-						"{0} - {1}\n\n{2}/{3}\n{4}",
-						PluginName,
-						ResourceProvider.GetString("LOCCommonMigrationStepDeleteLegacy"),
-						i + 1,
-						filesToDelete.Count,
-						Path.GetFileNameWithoutExtension(fileToDelete));
-
-					try
-					{
-						File.Delete(fileToDelete);
-					}
-					catch (Exception ex)
-					{
-						Logger.Error(ex, string.Format(
-							"MigrateJsonToLiteDb — failed to delete legacy file '{0}'.", fileToDelete));
-					}
-
-					a.CurrentProgressValue++;
+					File.WriteAllText(markerPath, string.Format(
+						"Completed at {0:u}. Migrated: {1}. Backup: {2}",
+						DateTime.UtcNow, migrated, archivePath));
 				}
-			}, options);
 
-			Logger.Info(string.Format(
-				"MigrateJsonToLiteDb — completed: {0} migrated, {1} archived, {2} failed.",
-				migrated, archived, failed));
-
-			if (failed > 0)
+				Logger.Info(string.Format(
+					"MigrateLegacyJsonModelOnce — completed: {0} migrated, {1} failed.",
+					migrated, failed));
+			}
+			catch (Exception ex)
 			{
-				API.Instance.Dialogs.ShowMessage(
-					string.Format(
-						ResourceProvider.GetString("LOCCommonMigrationPartialFailure"),
-						failed, jsonFiles.Length),
-					PluginName);
+				Logger.Error(ex, "MigrateLegacyJsonModelOnce — unexpected error.");
 			}
 		}
 
@@ -677,7 +554,7 @@ namespace CommonPluginsShared.Collections
 
 			API.Instance.Dialogs.ActivateGlobalProgress((a) =>
 			{
-				List<TItem> allItems = _database.FindAll().ToList();
+				List<TItem> allItems = _database.ToList();
 				a.ProgressMaxValue = allItems.Count;
 
 				foreach (TItem item in allItems)
@@ -717,7 +594,7 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Removes database entries whose corresponding Playnite game no longer exists.</summary>
 		public virtual void DeleteDataWithDeletedGame()
 		{
-			List<TItem> orphaned = _database.FindAll()
+			List<TItem> orphaned = _database
 				.Where(x => API.Instance.Database.Games.Get(x.Id) == null)
 				.ToList();
 
@@ -767,7 +644,7 @@ namespace CommonPluginsShared.Collections
 			{
 				return Enumerable.Empty<TItem>();
 			}
-			return _database.FindAll();
+			return _database;
 		}
 
 		/// <summary>
@@ -776,13 +653,13 @@ namespace CommonPluginsShared.Collections
 		/// </summary>
 		public virtual IEnumerable<Game> GetGamesList()
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
 			if (db == null)
 			{
 				yield break;
 			}
 
-			foreach (TItem item in db.FindAll())
+			foreach (TItem item in db)
 			{
 				Game game = API.Instance.Database.Games.Get(item.Id);
 				if (game != null)
@@ -795,19 +672,19 @@ namespace CommonPluginsShared.Collections
 		/// <inheritdoc/>
 		public virtual IEnumerable<Game> GetGamesWithNoData()
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
 			if (db == null)
 			{
 				return Enumerable.Empty<Game>();
 			}
 
-			IEnumerable<Game> withNoData = db.FindAll()
+			IEnumerable<Game> withNoData = db
 				.Where(x => !x.HasData)
 				.Select(x => API.Instance.Database.Games.Get(x.Id))
 				.Where(x => x != null);
 
 			IEnumerable<Game> notInDb = API.Instance.Database.Games
-				.Where(x => !db.Exists(x.Id));
+				.Where(x => !db.ContainsItem(x.Id));
 
 			return withNoData.Union(notInDb).Distinct().Where(x => !x.Hidden);
 		}
@@ -815,13 +692,13 @@ namespace CommonPluginsShared.Collections
 		/// <inheritdoc/>
 		public virtual IEnumerable<Game> GetGamesOldData(int months)
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
 			if (db == null)
 			{
 				return Enumerable.Empty<Game>();
 			}
 
-			return db.Find(x => x.DateLastRefresh <= DateTime.Now.AddMonths(-months))
+			return db.Where(x => x.DateLastRefresh <= DateTime.Now.AddMonths(-months))
 				.Select(x => API.Instance.Database.Games.Get(x.Id))
 				.Where(x => x != null);
 		}
@@ -829,13 +706,13 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Returns a projection of all database entries as DataGame view models.</summary>
 		public virtual IEnumerable<DataGame> GetDataGames()
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
 			if (db == null)
 			{
 				return Enumerable.Empty<DataGame>();
 			}
 
-			return db.FindAll().Select(x => new DataGame
+			return db.Select(x => new DataGame
 			{
 				Id = x.Id,
 				Icon = x.Icon.IsNullOrEmpty() ? x.Icon : API.Instance.Database.GetFullFilePath(x.Icon),
@@ -848,13 +725,13 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Returns database entries that are marked as deleted.</summary>
 		public virtual IEnumerable<DataGame> GetIsolatedDataGames()
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
 			if (db == null)
 			{
 				return Enumerable.Empty<DataGame>();
 			}
 
-			return db.FindAll().Where(x => x.IsDeleted).Select(x => new DataGame
+			return db.Where(x => x.IsDeleted).Select(x => new DataGame
 			{
 				Id = x.Id,
 				Icon = x.Icon.IsNullOrEmpty() ? x.Icon : API.Instance.Database.GetFullFilePath(x.Icon),
@@ -897,7 +774,14 @@ namespace CommonPluginsShared.Collections
 				}
 
 				itemToAdd.IsSaved = true;
-				_database.Upsert(itemToAdd);
+				if (_database.ContainsItem(itemToAdd.Id))
+				{
+					_database.Update(itemToAdd);
+				}
+				else
+				{
+					_database.Add(itemToAdd);
+				}
 
 				DatabaseItemUpdated?.Invoke(this, new ItemUpdatedEventArgs<TItem>(
 					new List<ItemUpdateEvent<TItem>>
@@ -931,7 +815,14 @@ namespace CommonPluginsShared.Collections
 
 				itemToUpdate.IsSaved = true;
 				itemToUpdate.DateLastRefresh = DateTime.Now.ToUniversalTime();
-				_database.Upsert(itemToUpdate);
+				if (_database.ContainsItem(itemToUpdate.Id))
+				{
+					_database.Update(itemToUpdate);
+				}
+				else
+				{
+					_database.Add(itemToUpdate);
+				}
 
 				DatabaseItemUpdated?.Invoke(this, new ItemUpdatedEventArgs<TItem>(
 					new List<ItemUpdateEvent<TItem>>
@@ -981,7 +872,15 @@ namespace CommonPluginsShared.Collections
 		public virtual bool Remove(Guid id)
 		{
 			RemoveTag(id);
-			bool removed = _database.Remove(id);
+			bool removed = false;
+			try
+			{
+				removed = _database.Remove(id);
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, false, PluginName);
+			}
 
 			if (removed)
 			{
@@ -1017,10 +916,10 @@ namespace CommonPluginsShared.Collections
 
 		// ── Cache accessors ───────────────────────────────────────────────────────
 
-		/// <summary>Returns the item from the LiteDB session cache without any web access.</summary>
+		/// <summary>Returns the item from the in-memory collection without any web access.</summary>
 		public virtual TItem GetOnlyCache(Guid id) => _database?.Get(id);
 
-		/// <summary>Returns the item from the LiteDB session cache without any web access.</summary>
+		/// <summary>Returns the item from the in-memory collection without any web access.</summary>
 		public virtual TItem GetOnlyCache(Game game) => _database?.Get(game.Id);
 
 		/// <summary>Returns a deep clone of the item for <paramref name="id"/>.</summary>
@@ -1139,13 +1038,13 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Refreshes all items that currently have data.</summary>
 		public virtual void RefreshAll()
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
 			if (db == null)
 			{
 				return;
 			}
 
-			IEnumerable<Guid> ids = db.FindAll()
+			IEnumerable<Guid> ids = db
 				.Where(x => x.HasData)
 				.Select(x => x.Id);
 			Refresh(ids);
@@ -1612,7 +1511,7 @@ namespace CommonPluginsShared.Collections
 					{
 						if (x.NewData?.Id != null)
 						{
-							_database.SetGameInfo(x.NewData.Id);
+							_database.SetGameInfo<T>(x.NewData.Id);
 							ActionAfterGames_ItemUpdated(x.OldData, x.NewData);
 						}
 					});
@@ -1677,7 +1576,7 @@ namespace CommonPluginsShared.Collections
 
 		public bool ExtractToCsv()
 		{
-			return PluginExportCsv.ExportToCsv(PluginName, _database.FindAll());
+			return PluginExportCsv.ExportToCsv(PluginName, _database);
 		}
 
 		#endregion
