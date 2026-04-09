@@ -5,6 +5,7 @@ using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.Models;
 using CommonPluginsShared.Plugins;
 using CommonPluginsShared.Services;
+using LiteDB;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
@@ -35,7 +36,7 @@ namespace CommonPluginsShared.Collections
 		where TItem : PluginGameEntry
 	{
 		protected static readonly ILogger Logger = LogManager.GetLogger();
-		
+
 		/// <inheritdoc cref="IPluginDatabase.PluginName"/>
 		public string PluginName { get; set; }
 
@@ -59,7 +60,7 @@ namespace CommonPluginsShared.Collections
 		/// </summary>
 		protected virtual int DatabaseLoadTimeout => 10000;
 
-		private const string LegacyModelMigrationMarkerFileName = ".legacy-model-migration.done";
+		private const string LegacyLiteDbMigrationMarkerFileName = ".legacy-litedb-migration.done";
 
 		/// <summary>Gets or sets the current game displayed in the active UI panel.</summary>
 		public Game GameContext { get; set; }
@@ -338,8 +339,8 @@ namespace CommonPluginsShared.Collections
 
 				_database = new PluginItemCollection<TItem>(Paths.PluginDatabasePath, API.Instance.Database.Games.CollectionType);
 
-				// One-shot model migration on JSON storage, with backup created before any rewrite.
-				MigrateJsonToLiteDb();
+				// One-shot migration from legacy LiteDB storage to JSON files.
+				MigrateLiteDbToJson();
 
 				LoadMoreData();
 
@@ -398,11 +399,11 @@ namespace CommonPluginsShared.Collections
 
 
 		/// <summary>
-		/// One-shot model migration for legacy JSON payloads.
-		/// A zip backup is created before rewriting any JSON file.
-		/// The migration is marked complete only when every item succeeds.
+		/// One-shot migration from legacy LiteDB files to JSON file-per-item storage.
+		/// A zip backup of legacy .db files is created before conversion.
+		/// The migration is marked complete only when every migrated item succeeds.
 		/// </summary>
-		private void MigrateJsonToLiteDb()
+		private void MigrateLiteDbToJson()
 		{
 			try
 			{
@@ -411,57 +412,90 @@ namespace CommonPluginsShared.Collections
 					return;
 				}
 
-				string markerPath = Path.Combine(Paths.PluginDatabasePath, LegacyModelMigrationMarkerFileName);
+				string markerPath = Path.Combine(Paths.PluginDatabasePath, LegacyLiteDbMigrationMarkerFileName);
 				if (File.Exists(markerPath))
 				{
 					return;
 				}
 
-				string[] jsonFiles = Directory.GetFiles(Paths.PluginDatabasePath, "*.json");
-				if (jsonFiles.Length == 0)
+				string[] liteDbFiles = Directory.GetFiles(Paths.PluginDatabasePath, "*.db");
+				if (liteDbFiles.Length == 0)
 				{
-					File.WriteAllText(markerPath, "No JSON file found for migration.");
+					File.WriteAllText(markerPath, "No LiteDB file found for migration.");
 					return;
 				}
 
 				string archivePath = Path.Combine(
 					Paths.PluginDatabasePath,
 					string.Format(
-						"{0}_legacy-model-migration_{1:yyyyMMdd_HHmmss}.zip",
+						"{0}_legacy-litedb-migration_{1:yyyyMMdd_HHmmss}.zip",
 						PluginName,
 						DateTime.UtcNow));
 
-				int archived = CreateMigrationArchive(jsonFiles, archivePath);
-				if (archived != jsonFiles.Length)
+				int archived = CreateMigrationArchive(liteDbFiles, archivePath);
+				if (archived != liteDbFiles.Length)
 				{
 					Logger.Error(string.Format(
-						"MigrateLegacyJsonModelOnce — backup incomplete ({0}/{1}), migration aborted.",
-						archived, jsonFiles.Length));
+						"MigrateLiteDbToJson — backup incomplete ({0}/{1}), migration aborted.",
+						archived, liteDbFiles.Length));
 					return;
 				}
 
 				int migrated = 0;
 				int failed = 0;
 
-				using (_database.BufferedUpdate())
+				foreach (string dbFile in liteDbFiles)
 				{
-					foreach (TItem item in _database.ToList())
+					try
 					{
-						try
+						using (var legacyDb = new LiteDatabase(dbFile))
 						{
-							MigrateLegacyJsonItem(item, null);
-							EnsureDateTimesUtc(item);
-							item.IsSaved = true;
-							_database.Update(item);
-							migrated++;
+							LiteCollection<TItem> legacyCollection = legacyDb.GetCollection<TItem>("items");
+							List<TItem> legacyItems = legacyCollection.FindAll().ToList();
+
+							using (_database.BufferedUpdate())
+							{
+								foreach (TItem item in legacyItems)
+								{
+									try
+									{
+										if (item == null || item.Id == Guid.Empty)
+										{
+											failed++;
+											continue;
+										}
+
+										MigrateLegacyJsonItem(item, null);
+										EnsureDateTimesUtc(item);
+										item.IsSaved = true;
+
+										if (_database.ContainsItem(item.Id))
+										{
+											_database.Update(item);
+										}
+										else
+										{
+											_database.Add(item);
+										}
+
+										migrated++;
+									}
+									catch (Exception ex)
+									{
+										failed++;
+										Logger.Error(ex, string.Format(
+											"MigrateLiteDbToJson — failed for game '{0}' ({1}) from '{2}'.",
+											item?.Name, item?.Id, dbFile));
+									}
+								}
+							}
 						}
-						catch (Exception ex)
-						{
-							failed++;
-							Logger.Error(ex, string.Format(
-								"MigrateLegacyJsonModelOnce — failed for game '{0}' ({1}).",
-								item?.Name, item?.Id));
-						}
+					}
+					catch (Exception ex)
+					{
+						Logger.Error(ex, string.Format(
+							"MigrateLiteDbToJson — failed to read legacy database '{0}'.", dbFile));
+						failed++;
 					}
 				}
 
@@ -470,15 +504,17 @@ namespace CommonPluginsShared.Collections
 					File.WriteAllText(markerPath, string.Format(
 						"Completed at {0:u}. Migrated: {1}. Backup: {2}",
 						DateTime.UtcNow, migrated, archivePath));
+
+					DeleteLegacyLiteDbFiles(liteDbFiles);
 				}
 
 				Logger.Info(string.Format(
-					"MigrateLegacyJsonModelOnce — completed: {0} migrated, {1} failed.",
+					"MigrateLiteDbToJson — completed: {0} migrated, {1} failed.",
 					migrated, failed));
 			}
 			catch (Exception ex)
 			{
-				Logger.Error(ex, "MigrateLegacyJsonModelOnce — unexpected error.");
+				Logger.Error(ex, "MigrateLiteDbToJson — unexpected error.");
 			}
 		}
 
@@ -487,7 +523,7 @@ namespace CommonPluginsShared.Collections
 			try
 			{
 				int archivedCount = 0;
-				using (FileStream archiveStream = new FileStream(archivePath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+				using (FileStream archiveStream = new FileStream(archivePath, System.IO.FileMode.Create, FileAccess.ReadWrite, FileShare.None))
 				using (ZipArchive archive = new ZipArchive(archiveStream, ZipArchiveMode.Create, false))
 				{
 					HashSet<string> usedEntryNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -506,7 +542,7 @@ namespace CommonPluginsShared.Collections
 
 						ZipArchiveEntry entry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
 						using (Stream entryStream = entry.Open())
-						using (FileStream fileStream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+						using (FileStream fileStream = new FileStream(file, System.IO.FileMode.Open, FileAccess.Read, FileShare.Read))
 						{
 							fileStream.CopyTo(entryStream);
 						}
@@ -515,22 +551,51 @@ namespace CommonPluginsShared.Collections
 				}
 
 				Logger.Info(string.Format(
-					"MigrateJsonToLiteDb — archive created: {0} ({1} file(s)).",
+					"MigrateLiteDbToJson — archive created: {0} ({1} file(s)).",
 					archivePath, archivedCount));
 				return archivedCount;
 			}
 			catch (Exception ex)
 			{
 				Logger.Error(ex, string.Format(
-					"MigrateJsonToLiteDb — failed to create archive '{0}', migration aborted.",
+					"MigrateLiteDbToJson — failed to create archive '{0}', migration aborted.",
 					archivePath));
 				return 0;
 			}
 		}
 
 		/// <summary>
+		/// Deletes legacy LiteDB files after a successful migration.
+		/// Errors are logged and do not throw to keep startup resilient.
+		/// </summary>
+		/// <param name="liteDbFiles">Legacy LiteDB file paths to delete.</param>
+		private void DeleteLegacyLiteDbFiles(IEnumerable<string> liteDbFiles)
+		{
+			if (liteDbFiles == null)
+			{
+				return;
+			}
+
+			foreach (string dbFile in liteDbFiles)
+			{
+				try
+				{
+					if (!string.IsNullOrEmpty(dbFile) && File.Exists(dbFile))
+					{
+						File.Delete(dbFile);
+					}
+				}
+				catch (Exception ex)
+				{
+					Logger.Error(ex, string.Format(
+						"MigrateLiteDbToJson — failed to delete legacy database '{0}'.", dbFile));
+				}
+			}
+		}
+
+		/// <summary>
 		/// Override to migrate legacy JSON payloads before persisting to LiteDB.
-		/// Called during <see cref="MigrateJsonToLiteDb"/> for each deserialized item.
+		/// Called during <see cref="MigrateLiteDbToJson"/> for each migrated item.
 		/// </summary>
 		/// <param name="item">Deserialized item about to be written into LiteDB.</param>
 		/// <param name="progressArgs">Current migration progress context for optional UI text updates.</param>
@@ -1391,8 +1456,8 @@ namespace CommonPluginsShared.Collections
 		public void RemoveTag(Game game)
 		{
 			if (game?.TagIds == null)
-			{ 
-				return; 
+			{
+				return;
 			}
 
 			StripPluginTags(game);
