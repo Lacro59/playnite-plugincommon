@@ -149,6 +149,47 @@ namespace CommonPluginsShared.Plugins
 		}
 
 		/// <summary>
+		/// Formats a UTC instant for CSV cells as local time.
+		/// <see cref="DateTimeKind.Unspecified"/> is interpreted as UTC (typical after JSON deserialization of UTC timestamps).
+		/// </summary>
+		/// <param name="value">Instant to format; null becomes an empty string.</param>
+		/// <param name="format">Date/time format string.</param>
+		/// <returns>Formatted local date/time, or an empty string when <paramref name="value"/> is null.</returns>
+		protected static string FormatCsvUtcDateTime(DateTime? value, string format = "yyyy-MM-dd HH:mm:ss")
+		{
+			if (!value.HasValue)
+			{
+				return string.Empty;
+			}
+			return FormatCsvUtcDateTime(value.Value, format);
+		}
+
+		/// <summary>
+		/// Formats a UTC instant for CSV cells as local time.
+		/// <see cref="DateTimeKind.Unspecified"/> is interpreted as UTC (typical after JSON deserialization of UTC timestamps).
+		/// </summary>
+		/// <param name="value">Instant to format.</param>
+		/// <param name="format">Date/time format string.</param>
+		/// <returns>Formatted local date/time.</returns>
+		protected static string FormatCsvUtcDateTime(DateTime value, string format = "yyyy-MM-dd HH:mm:ss")
+		{
+			DateTime utcInstant;
+			if (value.Kind == DateTimeKind.Utc)
+			{
+				utcInstant = value;
+			}
+			else if (value.Kind == DateTimeKind.Local)
+			{
+				return value.ToString(format);
+			}
+			else
+			{
+				utcInstant = DateTime.SpecifyKind(value, DateTimeKind.Utc);
+			}
+			return utcInstant.ToLocalTime().ToString(format);
+		}
+
+		/// <summary>
 		/// Technical Name vs Localized Name.
 		/// </summary>
 		protected abstract Dictionary<string, string> GetHeader();
