@@ -1,3 +1,4 @@
+/*
 using LiteDB;
 using CommonPluginsShared.Models;
 using Playnite.SDK;
@@ -958,3 +959,4 @@ namespace CommonPluginsShared.Collections
 		#endregion
 	}
 }
+*/

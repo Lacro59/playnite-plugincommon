@@ -5,7 +5,7 @@ using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.Models;
 using CommonPluginsShared.Plugins;
 using CommonPluginsShared.Services;
-using LiteDB;
+//using LiteDB;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
@@ -61,6 +61,11 @@ namespace CommonPluginsShared.Collections
 		protected virtual int DatabaseLoadTimeout => 10000;
 
 		private const string LegacyLiteDbMigrationMarkerFileName = ".legacy-litedb-migration.done";
+
+		/// <summary>
+		/// Marker file written after a successful one-shot <see cref="MigrateLegacyJsonItem"/> pass on JSON storage.
+		/// </summary>
+		private const string LegacyJsonModelMigrationMarkerFileName = ".legacy-json-model-migration.done";
 
 		/// <summary>Gets or sets the current game displayed in the active UI panel.</summary>
 		public Game GameContext { get; set; }
@@ -324,8 +329,8 @@ namespace CommonPluginsShared.Collections
 
 
 		/// <summary>
-		/// Opens the LiteDB file, runs the one-shot JSON migration if needed,
-		/// pre-warms the session cache, and calls <see cref="LoadMoreData"/>.
+		/// Opens JSON-backed storage, runs <see cref="RunLegacyJsonModelMigrationOnce"/> when needed,
+		/// then calls <see cref="LoadMoreData"/>.
 		/// SetGameInfo and DeleteDataWithDeletedGame are intentionally deferred
 		/// to <see cref="RunPostLoadMaintenance"/> which runs after IsLoaded is set,
 		/// avoiding a deadlock where WaitForDatabaseLoad (10 s) would expire before
@@ -339,8 +344,8 @@ namespace CommonPluginsShared.Collections
 
 				_database = new PluginItemCollection<TItem>(Paths.PluginDatabasePath, API.Instance.Database.Games.CollectionType);
 
-				// One-shot migration from legacy LiteDB storage to JSON files.
-				MigrateLiteDbToJson();
+				// One-shot legacy JSON model migration (MigrateLegacyJsonItem), if not already done.
+				RunLegacyJsonModelMigrationOnce();
 
 				LoadMoreData();
 
@@ -397,7 +402,92 @@ namespace CommonPluginsShared.Collections
 			Logger.Info("RunPostLoadMaintenance — completed.");
 		}
 
+		/// <summary>
+		/// Runs a one-shot in-place migration of JSON-backed items via <see cref="MigrateLegacyJsonItem"/>.
+		/// A zip backup of all <c>*.json</c> files in the plugin database folder is created before any rewrite.
+		/// Writes <c>.legacy-json-model-migration.done</c> only when every item migrates without error.
+		/// </summary>
+		private void RunLegacyJsonModelMigrationOnce()
+		{
+			try
+			{
+				if (_database == null || Paths == null || string.IsNullOrEmpty(Paths.PluginDatabasePath))
+				{
+					return;
+				}
 
+				string markerPath = Path.Combine(Paths.PluginDatabasePath, LegacyJsonModelMigrationMarkerFileName);
+				if (File.Exists(markerPath))
+				{
+					return;
+				}
+
+				string[] jsonFiles = Directory.GetFiles(Paths.PluginDatabasePath, "*.json");
+				if (jsonFiles.Length == 0)
+				{
+					File.WriteAllText(markerPath, "No JSON file found for legacy model migration.");
+					return;
+				}
+
+				string archivePath = Path.Combine(
+					Paths.PluginDatabasePath,
+					string.Format(
+						"{0}_legacy-json-model-migration_{1:yyyyMMdd_HHmmss}.zip",
+						PluginName,
+						DateTime.UtcNow));
+
+				int archived = CreateMigrationArchive(jsonFiles, archivePath);
+				if (archived != jsonFiles.Length)
+				{
+					Logger.Error(string.Format(
+						"RunLegacyJsonModelMigrationOnce — backup incomplete ({0}/{1}), migration aborted.",
+						archived, jsonFiles.Length));
+					return;
+				}
+
+				int migrated = 0;
+				int failed = 0;
+
+				using (_database.BufferedUpdate())
+				{
+					foreach (TItem item in _database.ToList())
+					{
+						try
+						{
+							MigrateLegacyJsonItem(item, null);
+							EnsureDateTimesUtc(item);
+							item.IsSaved = true;
+							_database.Update(item);
+							migrated++;
+						}
+						catch (Exception ex)
+						{
+							failed++;
+							Logger.Error(ex, string.Format(
+								"RunLegacyJsonModelMigrationOnce — failed for game '{0}' ({1}).",
+								item?.Name, item?.Id));
+						}
+					}
+				}
+
+				if (failed == 0)
+				{
+					File.WriteAllText(markerPath, string.Format(
+						"Completed at {0:u}. Migrated: {1}. Backup: {2}",
+						DateTime.UtcNow, migrated, archivePath));
+				}
+
+				Logger.Info(string.Format(
+					"RunLegacyJsonModelMigrationOnce — completed: {0} migrated, {1} failed.",
+					migrated, failed));
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, "RunLegacyJsonModelMigrationOnce — unexpected error.");
+			}
+		}
+
+		/*
 		/// <summary>
 		/// One-shot migration from legacy LiteDB files to JSON file-per-item storage.
 		/// A zip backup of legacy .db files is created before conversion.
@@ -517,6 +607,7 @@ namespace CommonPluginsShared.Collections
 				Logger.Error(ex, "MigrateLiteDbToJson — unexpected error.");
 			}
 		}
+		*/
 
 		private int CreateMigrationArchive(string[] jsonFiles, string archivePath)
 		{
@@ -551,14 +642,14 @@ namespace CommonPluginsShared.Collections
 				}
 
 				Logger.Info(string.Format(
-					"MigrateLiteDbToJson — archive created: {0} ({1} file(s)).",
+					"CreateMigrationArchive — archive created: {0} ({1} file(s)).",
 					archivePath, archivedCount));
 				return archivedCount;
 			}
 			catch (Exception ex)
 			{
 				Logger.Error(ex, string.Format(
-					"MigrateLiteDbToJson — failed to create archive '{0}', migration aborted.",
+					"CreateMigrationArchive — failed to create archive '{0}', migration aborted.",
 					archivePath));
 				return 0;
 			}
@@ -594,11 +685,11 @@ namespace CommonPluginsShared.Collections
 		}
 
 		/// <summary>
-		/// Override to migrate legacy JSON payloads before persisting to LiteDB.
-		/// Called during <see cref="MigrateLiteDbToJson"/> for each migrated item.
+		/// Override to migrate legacy JSON payloads in memory before they are saved back to disk.
+		/// Called once per item during <see cref="RunLegacyJsonModelMigrationOnce"/> (when the marker file is absent).
 		/// </summary>
-		/// <param name="item">Deserialized item about to be written into LiteDB.</param>
-		/// <param name="progressArgs">Current migration progress context for optional UI text updates.</param>
+		/// <param name="item">Loaded item to transform in place.</param>
+		/// <param name="progressArgs">Optional progress context; <c>null</c> when migration runs without a progress dialog.</param>
 		protected virtual void MigrateLegacyJsonItem(TItem item, GlobalProgressActionArgs progressArgs) { }
 
 		/// <summary>Override to perform additional plugin-specific initialisation after the base database loads.</summary>
