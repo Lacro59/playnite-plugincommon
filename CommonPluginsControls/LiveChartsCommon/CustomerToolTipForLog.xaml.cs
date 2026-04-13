@@ -79,8 +79,11 @@ namespace CommonPluginsControls.LiveChartsCommon
                 string cpuTemp = ResourceProvider.GetString("LOCGameActivityCpuTemp");
                 string gpuPower = ResourceProvider.GetString("LOCGameActivityGpuPower");
                 string cpuPower = ResourceProvider.GetString("LOCGameActivityCpuPower");
+                string fps1Low = ResourceProvider.GetString("LOCGameActivityFps1PercentLow");
+                string fps01Low = ResourceProvider.GetString("LOCGameActivityFps0Point1PercentLow");
 
-                if (title.Contains(gpuTemp) || title.Contains(cpuTemp) || title.Contains(gpuPower) || title.Contains(cpuPower))
+                if (title.Contains(gpuTemp) || title.Contains(cpuTemp) || title.Contains(gpuPower) || title.Contains(cpuPower)
+                    || title.Contains(fps1Low) || title.Contains(fps01Low))
                 {
                     return new DoubleCollection { 4, 2 };
                 }
