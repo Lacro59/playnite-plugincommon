@@ -31,19 +31,19 @@
 
     <!-- ==================== TIME UNITS ==================== -->
 
-	<sys:String x:Key="LOCCommonDay">{0} gün</sys:String>
-	<sys:String x:Key="LOCCommonDays">{0} gün</sys:String>
-	<sys:String x:Key="LOCCommonHours">Saat</sys:String>
-	<sys:String x:Key="LOCCommonMonth">{0} ay</sys:String>
-	<sys:String x:Key="LOCCommonMonths">{0} ay</sys:String>
-	<sys:String x:Key="LOCCommonYear">{0} yıl</sys:String>
-	<sys:String x:Key="LOCCommonYears">{0} yıl</sys:String>
+	<sys:String x:Key="LOCCommonDay">{0} day</sys:String>
+	<sys:String x:Key="LOCCommonDays">{0} days</sys:String>
+	<sys:String x:Key="LOCCommonHours">Hours</sys:String>
+	<sys:String x:Key="LOCCommonMonth">{0} month</sys:String>
+	<sys:String x:Key="LOCCommonMonths">{0} months</sys:String>
+	<sys:String x:Key="LOCCommonYear">{0} year</sys:String>
+	<sys:String x:Key="LOCCommonYears">{0} years</sys:String>
 
 	<!-- Labels (standalone, without format parameter) -->
-	<sys:String x:Key="LOCCommonMonthLabel">Ay</sys:String>
-	<sys:String x:Key="LOCCommonMonthsLabel">Ay</sys:String>
-	<sys:String x:Key="LOCCommonYearLabel">Yıl</sys:String>
-	<sys:String x:Key="LOCCommonYearsLabel">Yıl</sys:String>
+	<sys:String x:Key="LOCCommonMonthLabel">Month</sys:String>
+	<sys:String x:Key="LOCCommonMonthsLabel">Months</sys:String>
+	<sys:String x:Key="LOCCommonYearLabel">Year</sys:String>
+	<sys:String x:Key="LOCCommonYearsLabel">Years</sys:String>
 
 	<!-- ==================== RELATIVE TIME ==================== -->
 
@@ -61,66 +61,66 @@
 
 	<!-- ==================== DATES ==================== -->
 
-	<sys:String x:Key="LOCCommonDateData">Veri tarihi</sys:String>
-	<sys:String x:Key="LOCCommonStartDate">Başlangıç ​​tarihi</sys:String>
-	<sys:String x:Key="LOCCommonLastUpdate">Son güncelleme</sys:String>
-	<sys:String x:Key="LOCCommonSince">Tarih</sys:String>
+	<sys:String x:Key="LOCCommonDateData">Date of data</sys:String>
+	<sys:String x:Key="LOCCommonStartDate">Start date</sys:String>
+	<sys:String x:Key="LOCCommonLastUpdate">Last update</sys:String>
+	<sys:String x:Key="LOCCommonSince">Since</sys:String>
 
 	<!-- ==================== COMMON LABELS ==================== -->
 
-	<sys:String x:Key="LOCCommonNoData">Veri yok</sys:String>
+	<sys:String x:Key="LOCCommonNoData">No data</sys:String>
 	<sys:String x:Key="LOCCommonNoDataAvailable">No data available</sys:String>
-	<sys:String x:Key="LOCCommonTotal">Toplam</sys:String>
-	<sys:String x:Key="LOCCommonCut">Kes</sys:String>
-	<sys:String x:Key="LOCCommonMargin">Pay</sys:String>
-	<sys:String x:Key="LOCCommonMisc">Çeşitli</sys:String>
-	<sys:String x:Key="LOCCommonDatabase">Veritabanı</sys:String>
+	<sys:String x:Key="LOCCommonTotal">Total</sys:String>
+	<sys:String x:Key="LOCCommonCut">Cut</sys:String>
+	<sys:String x:Key="LOCCommonMargin">Margin</sys:String>
+	<sys:String x:Key="LOCCommonMisc">Misc</sys:String>
+	<sys:String x:Key="LOCCommonDatabase">Database</sys:String>
 	<sys:String x:Key="LOCCommonDatabaseMaintenance">Database maintenance</sys:String>
-	<sys:String x:Key="LOCCommonDimensions">Boyutlar</sys:String>
-	<sys:String x:Key="LOCCommonStyles">Biçimler</sys:String>
-	<sys:String x:Key="LOCCommonTypes">Türler</sys:String>
-	<sys:String x:Key="LOCCommonProgression">İlerleme</sys:String>
-	<sys:String x:Key="LOCCommonCompleted">Tamamlandı</sys:String>
-	<sys:String x:Key="LOCCommonGameTime">Oyun zamanı</sys:String>
+	<sys:String x:Key="LOCCommonDimensions">Dimensions</sys:String>
+	<sys:String x:Key="LOCCommonStyles">Styles</sys:String>
+	<sys:String x:Key="LOCCommonTypes">Types</sys:String>
+	<sys:String x:Key="LOCCommonProgression">Progression</sys:String>
+	<sys:String x:Key="LOCCommonCompleted">Completed</sys:String>
+	<sys:String x:Key="LOCCommonGameTime">Game time</sys:String>
 
 	<!-- ==================== SORTING ==================== -->
 
-	<sys:String x:Key="LOCCommonDefaultSorting">Öntanımlı oyun listesi sıralaması</sys:String>
-	<sys:String x:Key="LOCCommonSortByDate">Tarihe göre sırala</sys:String>
-	<sys:String x:Key="LOCCommonSortByScore">Puana göre sırala</sys:String>
+	<sys:String x:Key="LOCCommonDefaultSorting">Default game list sorting</sys:String>
+	<sys:String x:Key="LOCCommonSortByDate">Sort by date</sys:String>
+	<sys:String x:Key="LOCCommonSortByScore">Sort by score</sys:String>
 
 	<!-- ==================== PLAYTIME RANGES ==================== -->
 
-	<sys:String x:Key="LOCCommon0to1">00 - 01 saat</sys:String>
-	<sys:String x:Key="LOCCommon1to5">01 - 05 saat</sys:String>
-	<sys:String x:Key="LOCCommon5to10">05 - 10 saat</sys:String>
-	<sys:String x:Key="LOCCommon10to20">10 - 20 saat</sys:String>
-	<sys:String x:Key="LOCCommon20to30">20 - 30 saat</sys:String>
-	<sys:String x:Key="LOCCommon30to40">30 - 40 saat</sys:String>
-	<sys:String x:Key="LOCCommon40to50">40 - 50 saat</sys:String>
-	<sys:String x:Key="LOCCommon50to60">50 - 60 saat</sys:String>
-	<sys:String x:Key="LOCCommon60to70">60 - 70 saat</sys:String>
-	<sys:String x:Key="LOCCommon70to80">70 - 80 saat</sys:String>
-	<sys:String x:Key="LOCCommon80to90">80 - 90 saat</sys:String>
-	<sys:String x:Key="LOCCommon90to100">90 - 100 saat</sys:String>
-	<sys:String x:Key="LOCCommon100plus">100 saat ve fazlası</sys:String>
+	<sys:String x:Key="LOCCommon0to1">00 to 01 hours</sys:String>
+	<sys:String x:Key="LOCCommon1to5">01 to 05 hours</sys:String>
+	<sys:String x:Key="LOCCommon5to10">05 to 10 hours</sys:String>
+	<sys:String x:Key="LOCCommon10to20">10 to 20 hours</sys:String>
+	<sys:String x:Key="LOCCommon20to30">20 to 30 hours</sys:String>
+	<sys:String x:Key="LOCCommon30to40">30 to 40 hours</sys:String>
+	<sys:String x:Key="LOCCommon40to50">40 to 50 hours</sys:String>
+	<sys:String x:Key="LOCCommon50to60">50 to 60 hours</sys:String>
+	<sys:String x:Key="LOCCommon60to70">60 to 70 hours</sys:String>
+	<sys:String x:Key="LOCCommon70to80">70 to 80 hours</sys:String>
+	<sys:String x:Key="LOCCommon80to90">80 to 90 hours</sys:String>
+	<sys:String x:Key="LOCCommon90to100">90 to 100 hours</sys:String>
+	<sys:String x:Key="LOCCommon100plus">100 hours and more</sys:String>
 
 	<!-- ==================== FILTERS ==================== -->
 
 	<sys:String x:Key="LOCCommonAllPlatforms">All Platforms</sys:String>
 	<sys:String x:Key="LOCCommonAllSources">All Sources</sys:String>
-	<sys:String x:Key="LOCCommonDefaultFilters">Varsayılan filtreleri geri yükle</sys:String>
+	<sys:String x:Key="LOCCommonDefaultFilters">Restore default filters</sys:String>
 	<sys:String x:Key="LOCCommonGameSource">Game source</sys:String>
 	<sys:String x:Key="LOCCommonInstallationStatus">Installation status</sys:String>
-	<sys:String x:Key="LOCCommonMissingData">Verisi eksik olan oyunları etiketle</sys:String>
-	<sys:String x:Key="LOCCommonOldData">Eski veri</sys:String>
-	<sys:String x:Key="LOCCommonOnlyMissing">Sadece eksik olanlar</sys:String>
-	<sys:String x:Key="LOCCommonRecentlyAdded">Son eklenen</sys:String>
-	<sys:String x:Key="LOCCommonSaveFilters">Mevcut filtreleri kaydet</sys:String>
+	<sys:String x:Key="LOCCommonMissingData">Tag games missing data</sys:String>
+	<sys:String x:Key="LOCCommonOldData">Old data</sys:String>
+	<sys:String x:Key="LOCCommonOnlyMissing">Only missing</sys:String>
+	<sys:String x:Key="LOCCommonRecentlyAdded">Recently added</sys:String>
+	<sys:String x:Key="LOCCommonSaveFilters">Save current filters</sys:String>
 	<sys:String x:Key="LOCCommonSearchByName">Search by name...</sys:String>
-	<sys:String x:Key="LOCCommonSelectFilters">Filtreleri seç</sys:String>
+	<sys:String x:Key="LOCCommonSelectFilters">Select filters</sys:String>
 	<sys:String x:Key="LOCCommonTimeFilters">Time-based filters</sys:String>
-	<sys:String x:Key="LOCCommonUsedFilteredGames">Şu anda filtrelenmiş oyunlar kullanılıyor</sys:String>
+	<sys:String x:Key="LOCCommonUsedFilteredGames">Currently filtered games used</sys:String>
 	<sys:String x:Key="LOCCommonAdditionalOptions">Additional options</sys:String>
 
 	<!-- ==================== LIST ACTIONS ==================== -->
@@ -128,30 +128,30 @@
 	<sys:String x:Key="LOCCommonClearSelection">Clear Selection</sys:String>
 	<sys:String x:Key="LOCCommonRefreshSelected">Refresh Selected</sys:String>
 	<sys:String x:Key="LOCCommonSelected">Selected:</sys:String>
-	<sys:String x:Key="LOCCommonSelectGames">Oyun seç</sys:String>
-	<sys:String x:Key="LOCCommonSelectVariable">Değişken seç</sys:String>
-	<sys:String x:Key="LOCCommonTotalFound">Toplam bulunan</sys:String>
+	<sys:String x:Key="LOCCommonSelectGames">Select games</sys:String>
+	<sys:String x:Key="LOCCommonSelectVariable">Select variable</sys:String>
+	<sys:String x:Key="LOCCommonTotalFound">Total found</sys:String>
 
 	<!-- ==================== DATA MANAGEMENT ==================== -->
 
-	<sys:String x:Key="LOCCommonAddManually">El ile ekle</sys:String>
-	<sys:String x:Key="LOCCommonRefreshGameData">Veriyi yenile</sys:String>
-	<sys:String x:Key="LOCCommonRefreshAllData">Tüm verileri yenile</sys:String>
-	<sys:String x:Key="LOCCommonDeleteGameData">Veriyi sil</sys:String>
-	<sys:String x:Key="LOCCommonDeletePluginData">Eklenti verisini sil</sys:String>
-	<sys:String x:Key="LOCCommonClearAllDatas">Tüm oyunlardan veri sil</sys:String>
-	<sys:String x:Key="LOCCommonViewNoData">Eklenti verisi olmadan oyunları görüntüle</sys:String>
-	<sys:String x:Key="LOCCommonSelectData">Seçilen oyunlar için veri indir</sys:String>
-	<sys:String x:Key="LOCCommonDownloadPluginData">Eklenti verisini indir...</sys:String>
-	<sys:String x:Key="LOCCommonGetAllDatas">Tüm oyunlar için veri indir</sys:String>
-	<sys:String x:Key="LOCCommonIsolatedPluginData">İzole edilen eklenti verisi</sys:String>
+	<sys:String x:Key="LOCCommonAddManually">Add manually</sys:String>
+	<sys:String x:Key="LOCCommonRefreshGameData">Refresh data</sys:String>
+	<sys:String x:Key="LOCCommonRefreshAllData">Refresh all data</sys:String>
+	<sys:String x:Key="LOCCommonDeleteGameData">Delete data</sys:String>
+	<sys:String x:Key="LOCCommonDeletePluginData">Delete plugin data</sys:String>
+	<sys:String x:Key="LOCCommonClearAllDatas">Delete data from all games</sys:String>
+	<sys:String x:Key="LOCCommonViewNoData">View games without plugin data</sys:String>
+	<sys:String x:Key="LOCCommonSelectData">Download data for selected games</sys:String>
+	<sys:String x:Key="LOCCommonDownloadPluginData">Download plugin data...</sys:String>
+	<sys:String x:Key="LOCCommonGetAllDatas">Download data for all games</sys:String>
+	<sys:String x:Key="LOCCommonIsolatedPluginData">Isolated plugin data</sys:String>
 
 	<!-- ==================== TAG MANAGEMENT ==================== -->
 
-	<sys:String x:Key="LOCCommonAddAllTags">Tüm oyunlar için etiket ekle</sys:String>
-	<sys:String x:Key="LOCCommonAddTagAuto">Veri eklemesi de içeren otomatik etiket ekleme</sys:String>
-	<sys:String x:Key="LOCCommonAddTPlugin">Eklenti etiketi ekle...</sys:String>
-	<sys:String x:Key="LOCCommonRemoveAllTags">Eklenti etiketini kaldır</sys:String>
+	<sys:String x:Key="LOCCommonAddAllTags">Add tag for all games</sys:String>
+	<sys:String x:Key="LOCCommonAddTagAuto">Automatic tag addition with data addition</sys:String>
+	<sys:String x:Key="LOCCommonAddTPlugin">Add plugin tag...</sys:String>
+	<sys:String x:Key="LOCCommonRemoveAllTags">Remove plugin tag</sys:String>
 
 	<!-- Settings section -->
 	<sys:String x:Key="LOCCommonAddTag">Add tag indicating supported configuration</sys:String>
@@ -173,23 +173,23 @@
 
 	<!-- ==================== FOLDER & FILE MANAGEMENT ==================== -->
 
-	<sys:String x:Key="LOCCommonAddFolder">Dizin ekle</sys:String>
-	<sys:String x:Key="LOCCommonRemoveFolder">Dizin kaldır</sys:String>
-	<sys:String x:Key="LOCCommonAddFilePattern">Dosya kalıbı ekle</sys:String>
+	<sys:String x:Key="LOCCommonAddFolder">Add folder</sys:String>
+	<sys:String x:Key="LOCCommonRemoveFolder">Remove folder</sys:String>
+	<sys:String x:Key="LOCCommonAddFilePattern">Add file pattern</sys:String>
 
 	<!-- ==================== IMPORT / EXPORT ==================== -->
 
 	<sys:String x:Key="LOCCommonAutoImport">Automatically import data when library is updated (only new items)</sys:String>
-	<sys:String x:Key="LOCCommonAutoImportOnInstalled">Kurulu oyunlar için otomatik olarak içe aktar</sys:String>
-	<sys:String x:Key="LOCCommonImporting">İçe aktarılıyor...</sys:String>
+	<sys:String x:Key="LOCCommonAutoImportOnInstalled">Automatically import for installed games</sys:String>
+	<sys:String x:Key="LOCCommonImporting">Importing...</sys:String>
 	<sys:String x:Key="LOCCommonExport">Export</sys:String>
-	<sys:String x:Key="LOCCommonExportData">Veriyi dışa aktar</sys:String>
+	<sys:String x:Key="LOCCommonExportData">Export data</sys:String>
 	<sys:String x:Key="LOCCommonExportSettings">CSV export settings</sys:String>
-	<sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} veri dışa aktarıldı.
-Dizini açmak ister misiniz?</sys:String>
-	<sys:String x:Key="LOCCommonExtractToCsv">Eklenti verilerini CSV olarak ayıkla</sys:String>
-	<sys:String x:Key="LOCCommonExtractAllToCsv">Tüm eklenti verilerini CSV olarak ayıkla (çok uzun)</sys:String>
-	<sys:String x:Key="LOCCommonExtracting">Ayıklanıyor...</sys:String>
+	<sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} data has been exported.
+Do you want to open the directory?</sys:String>
+	<sys:String x:Key="LOCCommonExtractToCsv">Extract plugin data to CSV</sys:String>
+	<sys:String x:Key="LOCCommonExtractAllToCsv">Extract all plugin data to CSV (very long)</sys:String>
+	<sys:String x:Key="LOCCommonExtracting">Extracting...</sys:String>
 	<sys:String x:Key="LOCCommonProcessingExtraction">Extracting data...</sys:String>
 	<sys:String x:Key="LOCCommonSeparator">Field separator:</sys:String>
 	<sys:String x:Key="LOCCommonExportOutputFile">Output file</sys:String>
@@ -200,106 +200,106 @@ Dizini açmak ister misiniz?</sys:String>
 
 	<!-- ==================== UPDATE ==================== -->
 
-	<sys:String x:Key="LOCCommonUpdate">Güncelle</sys:String>
-	<sys:String x:Key="LOCCommonUpdateEvery">Güncelleme tarihi</sys:String>
-	<sys:String x:Key="LOCCommonUpdateOnStart">Uygulama başlangıcında güncelle</sys:String>
+	<sys:String x:Key="LOCCommonUpdate">Update</sys:String>
+	<sys:String x:Key="LOCCommonUpdateEvery">Update on</sys:String>
+	<sys:String x:Key="LOCCommonUpdateOnStart">Update on application startup</sys:String>
 
 	<!-- ==================== TRANSFER ==================== -->
 
-	<sys:String x:Key="LOCCommonTransfer">Aktar</sys:String>
-	<sys:String x:Key="LOCCommonTransferPluginData">Eklenti verisini aktar</sys:String>
-	<sys:String x:Key="LOCCommonSelectTransferData">Aktarılacak veri seçiliyor</sys:String>
-	<sys:String x:Key="LOCCommonMergedOrErased">Temizlemek yerine birleştirildi</sys:String>
-	<sys:String x:Key="LOCCommonErasedWarning">Dikkatli olun, hedef verilerin üzerine yazılacaktır!</sys:String>
+	<sys:String x:Key="LOCCommonTransfer">Transfer</sys:String>
+	<sys:String x:Key="LOCCommonTransferPluginData">Transfer plugin data</sys:String>
+	<sys:String x:Key="LOCCommonSelectTransferData">Selecting the data to transfer</sys:String>
+	<sys:String x:Key="LOCCommonMergedOrErased">Merged instead of clearing</sys:String>
+	<sys:String x:Key="LOCCommonErasedWarning">Be careful, the target data will be overwritten!</sys:String>
 
 	<!-- ==================== STORE / AUTHENTICATION ==================== -->
 
-	<sys:String x:Key="LOCCommonAccountConfiguration">Hesap yapılandırması</sys:String>
-	<sys:String x:Key="LOCCommonAccountName">Hesap adı</sys:String>
-	<sys:String x:Key="LOCCommonAuthenticateLabel">Kimlik doğrula</sys:String>
-	<sys:String x:Key="LOCCommonControlConfiguration">Kontrol yapılandırması</sys:String>
-	<sys:String x:Key="LOCCommonGetAccountID">Hesap ID al</sys:String>
+	<sys:String x:Key="LOCCommonAccountConfiguration">Account configuration</sys:String>
+	<sys:String x:Key="LOCCommonAccountName">Account Name</sys:String>
+	<sys:String x:Key="LOCCommonAuthenticateLabel">Authenticate</sys:String>
+	<sys:String x:Key="LOCCommonControlConfiguration">Control configuration</sys:String>
+	<sys:String x:Key="LOCCommonGetAccountID">Get account ID</sys:String>
 	<sys:String x:Key="LOCCommonHasApiKey">Has API key</sys:String>
-	<sys:String x:Key="LOCCommonIsPrivate">Özel mi</sys:String>
-	<sys:String x:Key="LOCCommonLoggedIn">Kullanıcı kimliği doğrulandı</sys:String>
-	<sys:String x:Key="LOCCommonLoginChecking">Kimlik doğrulama durumu denetleniyor…</sys:String>
-	<sys:String x:Key="LOCCommonNotLoggedIn">Kimlik doğrulama gerektiriyor</sys:String>
-	<sys:String x:Key="LOCCommonNotLoggedInError">Kullanıcı kimliği doğrulanamadı</sys:String>
-	<sys:String x:Key="LOCCommonPrivateChecking">Özel durum kontrol ediliyor…</sys:String>
-	<sys:String x:Key="LOCCommonUseAuthentication">Kimlik doğrulaması kullan</sys:String>
-	<sys:String x:Key="LOCCommonUseAuthenticationOption">Kimlik doğrulamayı kullan (isteğe bağlı, yalnızca daha fazla bilgi için)</sys:String>
+	<sys:String x:Key="LOCCommonIsPrivate">Is private</sys:String>
+	<sys:String x:Key="LOCCommonLoggedIn">User is authenticated</sys:String>
+	<sys:String x:Key="LOCCommonLoginChecking">Checking authentication status…</sys:String>
+	<sys:String x:Key="LOCCommonNotLoggedIn">Requires authentication</sys:String>
+	<sys:String x:Key="LOCCommonNotLoggedInError">Failed to authenticate user</sys:String>
+	<sys:String x:Key="LOCCommonPrivateChecking">Checking private status…</sys:String>
+	<sys:String x:Key="LOCCommonUseAuthentication">Use authentication</sys:String>
+	<sys:String x:Key="LOCCommonUseAuthenticationOption">Use authentication (optional, for more information only)</sys:String>
 
 	<!-- Store error messages -->
-	<sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Kötü yapılandırma</sys:String>
-	<sys:String x:Key="LOCCommonStoreNoApiKey">{0}: API anahtarı yok</sys:String>
-	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: Yapılandırma bulunamadı</sys:String>
+	<sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Bad configuration</sys:String>
+	<sys:String x:Key="LOCCommonStoreNoApiKey">{0}: No API key</sys:String>
+	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: No configuration found</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticated</sys:String>
 
 	<!-- Ignored items -->
-	<sys:String x:Key="LOCCommonIgnoredItems">Yok sayılan öğeler</sys:String>
-	<sys:String x:Key="LOCCommonInputItemIgnore">Yok saymak için bir öğe girin</sys:String>
-	<sys:String x:Key="LOCCommonNotIgnoredItems">Yok sayılmayan ögeler</sys:String>
+	<sys:String x:Key="LOCCommonIgnoredItems">Ignored items</sys:String>
+	<sys:String x:Key="LOCCommonInputItemIgnore">Input the item to ignore</sys:String>
+	<sys:String x:Key="LOCCommonNotIgnoredItems">Not ignored items</sys:String>
 
 	<!-- ==================== SETTINGS / INTEGRATION ==================== -->
 
-	<sys:String x:Key="LOCCommonChartAllPeriod">Öntanımlı olarak kart üstünde tüm veriyi görüntüle</sys:String>
-	<sys:String x:Key="LOCCommonChartCutPeriod">Öntanımlı olarak sadece değer içeren veriyi görüntüle</sys:String>
-	<sys:String x:Key="LOCCommonChartHideOptions">Kontrol ekranında kart seçeneklerini gizle</sys:String>
-	<sys:String x:Key="LOCCommonControlsAvailable">Desteklenen temalar için mevcut öğeler</sys:String>
-	<sys:String x:Key="LOCCommonControlsPluginButtonShow">Eklenti düğmesini görüntüle</sys:String>
-	<sys:String x:Key="LOCCommonControlsPluginButtonShowInContextMenu">İçerik menüsünde veri görüntüle</sys:String>
-	<sys:String x:Key="LOCCommonControlsPluginViewItemShow">Veriyi oyun listesinde görüntüle</sys:String>
-	<sys:String x:Key="LOCCommonControlsVisibleNoData">Veri yoksa görüntüle</sys:String>
-	<sys:String x:Key="LOCCommonIconStore">Mağaza simgesini göster</sys:String>
-	<sys:String x:Key="LOCCommonMenuInExtensions">Eklentiler alt menüsünde eklentinin menüsünü göster *</sys:String>
-	<sys:String x:Key="LOCCommonSaveColumOrder">Sütun sırasını kaydet</sys:String>
+	<sys:String x:Key="LOCCommonChartAllPeriod">Display all data on chart by default</sys:String>
+	<sys:String x:Key="LOCCommonChartCutPeriod">Display only data with value by default</sys:String>
+	<sys:String x:Key="LOCCommonChartHideOptions">Hide chart options on control</sys:String>
+	<sys:String x:Key="LOCCommonControlsAvailable">Items available for the supported themes</sys:String>
+	<sys:String x:Key="LOCCommonControlsPluginButtonShow">Display the plugin button</sys:String>
+	<sys:String x:Key="LOCCommonControlsPluginButtonShowInContextMenu">Display the data in context menu</sys:String>
+	<sys:String x:Key="LOCCommonControlsPluginViewItemShow">Display the data in games list</sys:String>
+	<sys:String x:Key="LOCCommonControlsVisibleNoData">Display when there is no data</sys:String>
+	<sys:String x:Key="LOCCommonIconStore">Show store icon</sys:String>
+	<sys:String x:Key="LOCCommonMenuInExtensions">Show plugin menu in extensions submenu *</sys:String>
+	<sys:String x:Key="LOCCommonSaveColumOrder">Save column order</sys:String>
 
 	<!-- Integration — appearance -->
-	<sys:String x:Key="LOCCommonIntegration">Görünüm</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButton">Oyun ayrıntılarında eklenti düğmesini görüntüle</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonDetails">Ayrıntıları içeren düğme</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonHeader">Pencere başlık çubuğunda eklenti düğmesini görüntüle</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonIsToggle">Açma kapama düğmesi ile</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">Sadece simge göster</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonOptions">Düğme seçenekleri</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonSide">Yan çubukta eklenti düğmesini görüntüle</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationChartOptions">Çizelge tercihleri</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationInCustomTheme">Kişisel tema bütünleşmesini etkinleştir. (Sadece kişisel tema içinde bütünleştirilmişse)</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationInDescription">Oyun ayrıntılarında eklenti bilgisini görüntüle</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationListOptions">Liste seçenekleri</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationSelectElements">Ayrıntılı görünüm bileşenleri</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationShowTitle">Başlığı göster</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationTopGameDetails">Oyun açıklamasının üstünde göster</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationViewItemOptions">Öğe seçeneklerini görüntüle</sys:String>
+	<sys:String x:Key="LOCCommonIntegration">Appearance</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButton">Show plugin button in game details</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonDetails">Button with details</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonHeader">Display the plugin button in window title bar</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonIsToggle">With a toggle button</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">Only show icon</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonOptions">Button options</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonSide">Display the plugin button in the side bar</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationChartOptions">Chart options</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationInCustomTheme">Enable custom theme integration (Only if integrated in custom theme)</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationInDescription">Show plugin information in game details</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationListOptions">List options</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationSelectElements">Details view components</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationShowTitle">Show title</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationTopGameDetails">Show above game description</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationViewItemOptions">View item options</sys:String>
 
 	<!-- Integration — fullscreen -->
-	<sys:String x:Key="LOCCommonIntegrationFullScreen">Tam ekran</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Tam ekran bütünleşmesini etkinleştir</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationFullScreen">Fullscreen</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Enable fullscreen integration</sys:String>
 
 	<!-- ==================== PROGRESS / STATUS ==================== -->
 
-	<sys:String x:Key="LOCCommonAddingAllTag">Tüm oyunlar için etiket ekleniyor...</sys:String>
-	<sys:String x:Key="LOCCommonClearingAllTag">Veritabanı temizleniyor...</sys:String>
-	<sys:String x:Key="LOCCommonConverting">Dönüştürülüyor, lütfen bekleyin...</sys:String>
-	<sys:String x:Key="LOCCommonGettingAllDatas">Tüm oyunların verileri indiriliyor...</sys:String>
-	<sys:String x:Key="LOCCommonGettingData">Veri indiriliyor...</sys:String>
-	<sys:String x:Key="LOCCommonGettingInstalledDatas">Kurulu oyunların verileri indiriliyor...</sys:String>
-	<sys:String x:Key="LOCCommonGettingNewDatas">Yeni oyunların verileri indiriliyor...</sys:String>
-	<sys:String x:Key="LOCCommonProcessing">İşleniyor, lütfen bekleyin...</sys:String>
-	<sys:String x:Key="LOCCommonRemovingAllTag">Tüm oyunlardaki etiket kaldırılıyor...</sys:String>
+	<sys:String x:Key="LOCCommonAddingAllTag">Adding tag for all games...</sys:String>
+	<sys:String x:Key="LOCCommonClearingAllTag">Clearing database...</sys:String>
+	<sys:String x:Key="LOCCommonConverting">Converting, please wait...</sys:String>
+	<sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games...</sys:String>
+	<sys:String x:Key="LOCCommonGettingData">Downloading data...</sys:String>
+	<sys:String x:Key="LOCCommonGettingInstalledDatas">Downloading data from installed games...</sys:String>
+	<sys:String x:Key="LOCCommonGettingNewDatas">Downloading data from new games...</sys:String>
+	<sys:String x:Key="LOCCommonProcessing">Processing, please wait...</sys:String>
+	<sys:String x:Key="LOCCommonRemovingAllTag">Removing tag from all games...</sys:String>
 
 	<!-- ==================== NOTIFICATIONS & ERRORS ==================== -->
 
 	<sys:String x:Key="LOCCommonCreateLog">Do you want to create a log package?</sys:String>
-	<sys:String x:Key="LOCCommonDataErrorRemove">Eklenti verisi silinirken hata oluştu. Lütfen yeniden deneyin.</sys:String>
-	<sys:String x:Key="LOCCommonDataRemove">Eklenti verisi silindi.</sys:String>
+	<sys:String x:Key="LOCCommonDataErrorRemove">Error removing plugin data. Please try again.</sys:String>
+	<sys:String x:Key="LOCCommonDataRemove">Plugin data has been removed.</sys:String>
 	<sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: user is not authenticated.</sys:String>
 
-	<sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Önbellek dizini silinemiyor:
+	<sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Impossible to delete cache folder:
 {0}</sys:String>
 
-	<sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">{0} üzerinden veri alınırken hata oluştu.
-Lütfen yeniden deneyin.</sys:String>
+	<sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">Error retrieving data from {0}.
+Please try again.</sys:String>
 
 	<sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Using previously saved data for {0} [{1}]
 You must authenticate.</sys:String>
