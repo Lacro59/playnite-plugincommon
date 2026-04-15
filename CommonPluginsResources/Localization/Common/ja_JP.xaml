@@ -214,7 +214,7 @@ Do you want to open the directory?</sys:String>
 
 	<!-- ==================== STORE / AUTHENTICATION ==================== -->
 
-	<sys:String x:Key="LOCCommonAccountConfiguration">Account configuration</sys:String>
+	<sys:String x:Key="LOCCommonAccountConfiguration">アカウント設定</sys:String>
 	<sys:String x:Key="LOCCommonAccountName">アカウント名</sys:String>
 	<sys:String x:Key="LOCCommonAuthenticateLabel">認証</sys:String>
 	<sys:String x:Key="LOCCommonControlConfiguration">Control configuration</sys:String>
