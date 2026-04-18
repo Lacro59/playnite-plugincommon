@@ -1,19 +1,23 @@
-﻿using CommonPlayniteShared;
+using CommonPlayniteShared;
 using CommonPluginsControls.Controls;
 using CommonPluginsShared.Caching;
 using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.Models;
 using CommonPluginsShared.Plugins;
 using CommonPluginsShared.Services;
+//using LiteDB;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -32,7 +36,7 @@ namespace CommonPluginsShared.Collections
 		where TItem : PluginGameEntry
 	{
 		protected static readonly ILogger Logger = LogManager.GetLogger();
-		
+
 		/// <inheritdoc cref="IPluginDatabase.PluginName"/>
 		public string PluginName { get; set; }
 
@@ -45,10 +49,23 @@ namespace CommonPluginsShared.Collections
 		public PluginPaths Paths { get; set; }
 
 		/// <summary>
+		/// Optional callback used to persist plugin settings when they are updated
+		/// from shared UI screens outside the standard Playnite settings lifecycle.
+		/// </summary>
+		public Action PersistSettingsAction { get; set; }
+
+		/// <summary>
 		/// Timeout in milliseconds to wait for the database to finish loading.
 		/// Override to adjust per-plugin (default: 10 000 ms).
 		/// </summary>
 		protected virtual int DatabaseLoadTimeout => 10000;
+
+		private const string LegacyLiteDbMigrationMarkerFileName = ".legacy-litedb-migration.done";
+
+		/// <summary>
+		/// Marker file written after a successful one-shot <see cref="MigrateLegacyJsonItem"/> pass on JSON storage.
+		/// </summary>
+		private const string LegacyJsonModelMigrationMarkerFileName = ".legacy-json-model-migration.done";
 
 		/// <summary>Gets or sets the current game displayed in the active UI panel.</summary>
 		public Game GameContext { get; set; }
@@ -64,7 +81,7 @@ namespace CommonPluginsShared.Collections
 
 		// ── LiteDB backend ────────────────────────────────────────────────────────
 
-		protected LiteDbItemCollection<TItem> _database;
+		protected PluginItemCollection<TItem> _database;
 
 		// ── IsLoaded ─────────────────────────────────────────────────────────────
 
@@ -178,7 +195,7 @@ namespace CommonPluginsShared.Collections
 		}
 
 		/// <summary>Returns the database without throwing on timeout; returns <c>null</c> instead.</summary>
-		protected LiteDbItemCollection<TItem> GetDatabaseSafe()
+		protected PluginItemCollection<TItem> GetDatabaseSafe()
 		{
 			try
 			{
@@ -194,6 +211,67 @@ namespace CommonPluginsShared.Collections
 
 		/// <summary>Returns <c>true</c> if the database is ready for immediate access.</summary>
 		public bool IsDatabaseReady() => IsLoaded && _database != null;
+
+		/// <summary>Returns metadata for the active database file.</summary>
+		public virtual DatabaseBackupInfo GetCurrentDatabaseInfo()
+		{
+			return null;
+		}
+
+		/// <summary>Returns metadata for backup database files.</summary>
+		public virtual IEnumerable<DatabaseBackupInfo> GetDatabaseBackups()
+		{
+			return Enumerable.Empty<DatabaseBackupInfo>();
+		}
+
+		/// <summary>Creates a backup in the plugin database folder.</summary>
+		public virtual string CreateDatabaseBackup()
+		{
+			return null;
+		}
+
+		/// <summary>Restores current database from the selected backup file.</summary>
+		public virtual bool RestoreDatabaseBackup(string backupFilePath)
+		{
+			return false;
+		}
+
+		/// <summary>Deletes a backup file from disk.</summary>
+		public virtual bool DeleteDatabaseBackup(string backupFilePath)
+		{
+			return false;
+		}
+
+		/// <summary>Returns current backup retention count.</summary>
+		public virtual int GetDatabaseBackupMaxCount()
+		{
+			if (PluginSettings != null && PluginSettings.DatabaseBackupMaxCount >= 3)
+			{
+				return PluginSettings.DatabaseBackupMaxCount;
+			}
+
+			return 5;
+		}
+
+		/// <summary>Updates backup retention count in settings and active database instance.</summary>
+		public virtual void SetDatabaseBackupMaxCount(int value)
+		{
+			int normalized = value < 3 ? 3 : value;
+
+			if (PluginSettings != null)
+			{
+				PluginSettings.DatabaseBackupMaxCount = normalized;
+			}
+
+			try
+			{
+				PersistSettingsAction?.Invoke();
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, "Failed to persist plugin settings after DatabaseBackupMaxCount update.");
+			}
+		}
 
 		#endregion
 
@@ -251,8 +329,8 @@ namespace CommonPluginsShared.Collections
 
 
 		/// <summary>
-		/// Opens the LiteDB file, runs the one-shot JSON migration if needed,
-		/// pre-warms the session cache, and calls <see cref="LoadMoreData"/>.
+		/// Opens JSON-backed storage, runs <see cref="RunLegacyJsonModelMigrationOnce"/> when needed,
+		/// then calls <see cref="LoadMoreData"/>.
 		/// SetGameInfo and DeleteDataWithDeletedGame are intentionally deferred
 		/// to <see cref="RunPostLoadMaintenance"/> which runs after IsLoaded is set,
 		/// avoiding a deadlock where WaitForDatabaseLoad (10 s) would expire before
@@ -264,21 +342,10 @@ namespace CommonPluginsShared.Collections
 			{
 				Stopwatch stopWatch = Stopwatch.StartNew();
 
-				string dbPath = Path.Combine(Paths.PluginDatabasePath, PluginName + ".db");
-				_database = new LiteDbItemCollection<TItem>(dbPath);
+				_database = new PluginItemCollection<TItem>(Paths.PluginDatabasePath, API.Instance.Database.Games.CollectionType);
 
-				_database.BackupDatabase(Paths.PluginDatabasePath);
-
-				// JSON → LiteDB one-shot migration (no-op when no JSON files are present).
-				MigrateJsonToLiteDb();
-
-				// Pre-warm must complete before IsLoaded = true so every subsequent Get(id)
-				// is a ConcurrentDictionary lookup, not a LiteDB round-trip.
-				Stopwatch pwSw = Stopwatch.StartNew();
-				int cached = _database.PreWarm();
-				pwSw.Stop();
-				Logger.Info(string.Format(
-					"PreWarm — {0} items cached in {1} ms", cached, pwSw.ElapsedMilliseconds));
+				// One-shot legacy JSON model migration (MigrateLegacyJsonItem), if not already done.
+				RunLegacyJsonModelMigrationOnce();
 
 				LoadMoreData();
 
@@ -290,10 +357,7 @@ namespace CommonPluginsShared.Collections
 					stopWatch.Elapsed.Seconds,
 					stopWatch.Elapsed.Milliseconds / 10));
 
-				// SetGameInfo() and DeleteDataWithDeletedGame() are deferred.
-				// They depend on Playnite's game database being open (up to 30 s wait),
-				// which would exceed WaitForDatabaseLoad's 10 s timeout if run here.
-				// The plugin is fully usable once PreWarm() is done; maintenance runs in background.
+				// Post-load maintenance is deferred to avoid delaying startup.
 				Task.Run(() => RunPostLoadMaintenance());
 
 				return true;
@@ -318,7 +382,7 @@ namespace CommonPluginsShared.Collections
 			{
 				// Synchronises Name / IsSaved / IsDeleted against Playnite's game list.
 				// Internally waits up to 30 s for Playnite's database to open.
-				_database.SetGameInfo();
+				_database.SetGameInfo<T>();
 			}
 			catch (Exception ex)
 			{
@@ -338,98 +402,295 @@ namespace CommonPluginsShared.Collections
 			Logger.Info("RunPostLoadMaintenance — completed.");
 		}
 
-
 		/// <summary>
-		/// One-shot migration from the legacy one-JSON-file-per-game layout to LiteDB.
-		/// Shows a progress dialog while migrating.
-		/// No-op when no JSON files are present.
+		/// Runs a one-shot in-place migration of JSON-backed items via <see cref="MigrateLegacyJsonItem"/>.
+		/// A zip backup of all <c>*.json</c> files in the plugin database folder is created before any rewrite.
+		/// Writes <c>.legacy-json-model-migration.done</c> only when every item migrates without error.
 		/// </summary>
-		private void MigrateJsonToLiteDb()
+		private void RunLegacyJsonModelMigrationOnce()
 		{
-			if (!Directory.Exists(Paths.PluginDatabasePath))
+			try
 			{
-				return;
-			}
-
-			string[] jsonFiles = Directory.GetFiles(Paths.PluginDatabasePath, "*.json");
-			if (jsonFiles.Length == 0)
-			{
-				return;
-			}
-
-			Logger.Info(string.Format(
-				"MigrateJsonToLiteDb — {0} JSON file(s) found, starting migration.",
-				jsonFiles.Length));
-
-			int migrated = 0;
-			int failed = 0;
-
-			GlobalProgressOptions options = new GlobalProgressOptions(
-				string.Format("{0} - {1}", PluginName,
-					ResourceProvider.GetString("LOCCommonMigratingDatabase")))
-			{
-				Cancelable = false,
-				IsIndeterminate = false
-			};
-
-			API.Instance.Dialogs.ActivateGlobalProgress((a) =>
-			{
-				a.ProgressMaxValue = jsonFiles.Length;
-
-				foreach (string file in jsonFiles)
+				if (_database == null || Paths == null || string.IsNullOrEmpty(Paths.PluginDatabasePath))
 				{
-					a.Text = string.Format(
-						"{0} - {1}\n\n{2}/{3}\n{4}",
-						PluginName,
-						ResourceProvider.GetString("LOCCommonMigratingDatabase"),
-						migrated + failed + 1,
-						jsonFiles.Length,
-						Path.GetFileNameWithoutExtension(file));
+					return;
+				}
 
+				string markerPath = Path.Combine(Paths.PluginDatabasePath, LegacyJsonModelMigrationMarkerFileName);
+				if (File.Exists(markerPath))
+				{
+					return;
+				}
+
+				string[] jsonFiles = Directory.GetFiles(Paths.PluginDatabasePath, "*.json");
+				if (jsonFiles.Length == 0)
+				{
+					File.WriteAllText(markerPath, "No JSON file found for legacy model migration.");
+					return;
+				}
+
+				string archivePath = Path.Combine(
+					Paths.PluginDatabasePath,
+					string.Format(
+						"{0}_legacy-json-model-migration_{1:yyyyMMdd_HHmmss}.zip",
+						PluginName,
+						DateTime.UtcNow));
+
+				int archived = CreateMigrationArchive(jsonFiles, archivePath);
+				if (archived != jsonFiles.Length)
+				{
+					Logger.Error(string.Format(
+						"RunLegacyJsonModelMigrationOnce — backup incomplete ({0}/{1}), migration aborted.",
+						archived, jsonFiles.Length));
+					return;
+				}
+
+				int migrated = 0;
+				int failed = 0;
+
+				using (_database.BufferedUpdate())
+				{
+					foreach (TItem item in _database.ToList())
+					{
+						try
+						{
+							MigrateLegacyJsonItem(item, null);
+							EnsureDateTimesUtc(item);
+							item.IsSaved = true;
+							_database.Update(item);
+							migrated++;
+						}
+						catch (Exception ex)
+						{
+							failed++;
+							Logger.Error(ex, string.Format(
+								"RunLegacyJsonModelMigrationOnce — failed for game '{0}' ({1}).",
+								item?.Name, item?.Id));
+						}
+					}
+				}
+
+				if (failed == 0)
+				{
+					File.WriteAllText(markerPath, string.Format(
+						"Completed at {0:u}. Migrated: {1}. Backup: {2}",
+						DateTime.UtcNow, migrated, archivePath));
+				}
+
+				Logger.Info(string.Format(
+					"RunLegacyJsonModelMigrationOnce — completed: {0} migrated, {1} failed.",
+					migrated, failed));
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, "RunLegacyJsonModelMigrationOnce — unexpected error.");
+			}
+		}
+
+		/*
+		/// <summary>
+		/// One-shot migration from legacy LiteDB files to JSON file-per-item storage.
+		/// A zip backup of legacy .db files is created before conversion.
+		/// The migration is marked complete only when every migrated item succeeds.
+		/// </summary>
+		private void MigrateLiteDbToJson()
+		{
+			try
+			{
+				if (_database == null || Paths == null || string.IsNullOrEmpty(Paths.PluginDatabasePath))
+				{
+					return;
+				}
+
+				string markerPath = Path.Combine(Paths.PluginDatabasePath, LegacyLiteDbMigrationMarkerFileName);
+				if (File.Exists(markerPath))
+				{
+					return;
+				}
+
+				string[] liteDbFiles = Directory.GetFiles(Paths.PluginDatabasePath, "*.db");
+				if (liteDbFiles.Length == 0)
+				{
+					File.WriteAllText(markerPath, "No LiteDB file found for migration.");
+					return;
+				}
+
+				string archivePath = Path.Combine(
+					Paths.PluginDatabasePath,
+					string.Format(
+						"{0}_legacy-litedb-migration_{1:yyyyMMdd_HHmmss}.zip",
+						PluginName,
+						DateTime.UtcNow));
+
+				int archived = CreateMigrationArchive(liteDbFiles, archivePath);
+				if (archived != liteDbFiles.Length)
+				{
+					Logger.Error(string.Format(
+						"MigrateLiteDbToJson — backup incomplete ({0}/{1}), migration aborted.",
+						archived, liteDbFiles.Length));
+					return;
+				}
+
+				int migrated = 0;
+				int failed = 0;
+
+				foreach (string dbFile in liteDbFiles)
+				{
 					try
 					{
-						string json = File.ReadAllText(file);
-						TItem item = Serialization.FromJson<TItem>(json);
-
-						if (item == null)
+						using (var legacyDb = new LiteDatabase(dbFile))
 						{
-							Logger.Warn(string.Format(
-								"MigrateJsonToLiteDb — null result for '{0}', skipping.", file));
-							failed++;
-							a.CurrentProgressValue++;
-							continue;
+							LiteCollection<TItem> legacyCollection = legacyDb.GetCollection<TItem>("items");
+							List<TItem> legacyItems = legacyCollection.FindAll().ToList();
+
+							using (_database.BufferedUpdate())
+							{
+								foreach (TItem item in legacyItems)
+								{
+									try
+									{
+										if (item == null || item.Id == Guid.Empty)
+										{
+											failed++;
+											continue;
+										}
+
+										MigrateLegacyJsonItem(item, null);
+										EnsureDateTimesUtc(item);
+										item.IsSaved = true;
+
+										if (_database.ContainsItem(item.Id))
+										{
+											_database.Update(item);
+										}
+										else
+										{
+											_database.Add(item);
+										}
+
+										migrated++;
+									}
+									catch (Exception ex)
+									{
+										failed++;
+										Logger.Error(ex, string.Format(
+											"MigrateLiteDbToJson — failed for game '{0}' ({1}) from '{2}'.",
+											item?.Name, item?.Id, dbFile));
+									}
+								}
+							}
 						}
-
-						item.IsSaved = true;
-						_database.Upsert(item);
-
-						File.Delete(file);
-						migrated++;
 					}
 					catch (Exception ex)
 					{
 						Logger.Error(ex, string.Format(
-							"MigrateJsonToLiteDb — failed on '{0}'.", file));
+							"MigrateLiteDbToJson — failed to read legacy database '{0}'.", dbFile));
 						failed++;
 					}
-
-					a.CurrentProgressValue++;
 				}
-			}, options);
 
-			Logger.Info(string.Format(
-				"MigrateJsonToLiteDb — completed: {0} migrated, {1} failed.",
-				migrated, failed));
+				if (failed == 0)
+				{
+					File.WriteAllText(markerPath, string.Format(
+						"Completed at {0:u}. Migrated: {1}. Backup: {2}",
+						DateTime.UtcNow, migrated, archivePath));
 
-			if (failed > 0)
+					DeleteLegacyLiteDbFiles(liteDbFiles);
+				}
+
+				Logger.Info(string.Format(
+					"MigrateLiteDbToJson — completed: {0} migrated, {1} failed.",
+					migrated, failed));
+			}
+			catch (Exception ex)
 			{
-				API.Instance.Dialogs.ShowMessage(
-					string.Format(
-						ResourceProvider.GetString("LOCCommonMigrationPartialFailure"),
-						failed, jsonFiles.Length),
-					PluginName);
+				Logger.Error(ex, "MigrateLiteDbToJson — unexpected error.");
 			}
 		}
+		*/
+
+		private int CreateMigrationArchive(string[] jsonFiles, string archivePath)
+		{
+			try
+			{
+				int archivedCount = 0;
+				using (FileStream archiveStream = new FileStream(archivePath, System.IO.FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+				using (ZipArchive archive = new ZipArchive(archiveStream, ZipArchiveMode.Create, false))
+				{
+					HashSet<string> usedEntryNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+					foreach (string file in jsonFiles)
+					{
+						string entryName = Path.GetFileName(file);
+						while (!usedEntryNames.Add(entryName))
+						{
+							entryName = string.Format(
+								"{0}_{1}{2}",
+								Path.GetFileNameWithoutExtension(file),
+								Guid.NewGuid().ToString("N"),
+								Path.GetExtension(file));
+						}
+
+						ZipArchiveEntry entry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
+						using (Stream entryStream = entry.Open())
+						using (FileStream fileStream = new FileStream(file, System.IO.FileMode.Open, FileAccess.Read, FileShare.Read))
+						{
+							fileStream.CopyTo(entryStream);
+						}
+						archivedCount++;
+					}
+				}
+
+				Logger.Info(string.Format(
+					"CreateMigrationArchive — archive created: {0} ({1} file(s)).",
+					archivePath, archivedCount));
+				return archivedCount;
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, string.Format(
+					"CreateMigrationArchive — failed to create archive '{0}', migration aborted.",
+					archivePath));
+				return 0;
+			}
+		}
+
+		/// <summary>
+		/// Deletes legacy LiteDB files after a successful migration.
+		/// Errors are logged and do not throw to keep startup resilient.
+		/// </summary>
+		/// <param name="liteDbFiles">Legacy LiteDB file paths to delete.</param>
+		private void DeleteLegacyLiteDbFiles(IEnumerable<string> liteDbFiles)
+		{
+			if (liteDbFiles == null)
+			{
+				return;
+			}
+
+			foreach (string dbFile in liteDbFiles)
+			{
+				try
+				{
+					if (!string.IsNullOrEmpty(dbFile) && File.Exists(dbFile))
+					{
+						File.Delete(dbFile);
+					}
+				}
+				catch (Exception ex)
+				{
+					Logger.Error(ex, string.Format(
+						"MigrateLiteDbToJson — failed to delete legacy database '{0}'.", dbFile));
+				}
+			}
+		}
+
+		/// <summary>
+		/// Override to migrate legacy JSON payloads in memory before they are saved back to disk.
+		/// Called once per item during <see cref="RunLegacyJsonModelMigrationOnce"/> (when the marker file is absent).
+		/// </summary>
+		/// <param name="item">Loaded item to transform in place.</param>
+		/// <param name="progressArgs">Optional progress context; <c>null</c> when migration runs without a progress dialog.</param>
+		protected virtual void MigrateLegacyJsonItem(TItem item, GlobalProgressActionArgs progressArgs) { }
 
 		/// <summary>Override to perform additional plugin-specific initialisation after the base database loads.</summary>
 		protected virtual void LoadMoreData() { }
@@ -449,7 +710,7 @@ namespace CommonPluginsShared.Collections
 
 			API.Instance.Dialogs.ActivateGlobalProgress((a) =>
 			{
-				List<TItem> allItems = _database.FindAll().ToList();
+				List<TItem> allItems = _database.ToList();
 				a.ProgressMaxValue = allItems.Count;
 
 				foreach (TItem item in allItems)
@@ -489,7 +750,7 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Removes database entries whose corresponding Playnite game no longer exists.</summary>
 		public virtual void DeleteDataWithDeletedGame()
 		{
-			List<TItem> orphaned = _database.FindAll()
+			List<TItem> orphaned = _database
 				.Where(x => API.Instance.Database.Games.Get(x.Id) == null)
 				.ToList();
 
@@ -539,7 +800,7 @@ namespace CommonPluginsShared.Collections
 			{
 				return Enumerable.Empty<TItem>();
 			}
-			return _database.FindAll();
+			return _database;
 		}
 
 		/// <summary>
@@ -548,13 +809,13 @@ namespace CommonPluginsShared.Collections
 		/// </summary>
 		public virtual IEnumerable<Game> GetGamesList()
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
 			if (db == null)
 			{
 				yield break;
 			}
 
-			foreach (TItem item in db.FindAll())
+			foreach (TItem item in db)
 			{
 				Game game = API.Instance.Database.Games.Get(item.Id);
 				if (game != null)
@@ -567,19 +828,19 @@ namespace CommonPluginsShared.Collections
 		/// <inheritdoc/>
 		public virtual IEnumerable<Game> GetGamesWithNoData()
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
 			if (db == null)
 			{
 				return Enumerable.Empty<Game>();
 			}
 
-			IEnumerable<Game> withNoData = db.FindAll()
+			IEnumerable<Game> withNoData = db
 				.Where(x => !x.HasData)
 				.Select(x => API.Instance.Database.Games.Get(x.Id))
 				.Where(x => x != null);
 
 			IEnumerable<Game> notInDb = API.Instance.Database.Games
-				.Where(x => !db.Exists(x.Id));
+				.Where(x => !db.ContainsItem(x.Id));
 
 			return withNoData.Union(notInDb).Distinct().Where(x => !x.Hidden);
 		}
@@ -587,13 +848,13 @@ namespace CommonPluginsShared.Collections
 		/// <inheritdoc/>
 		public virtual IEnumerable<Game> GetGamesOldData(int months)
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
 			if (db == null)
 			{
 				return Enumerable.Empty<Game>();
 			}
 
-			return db.Find(x => x.DateLastRefresh <= DateTime.Now.AddMonths(-months))
+			return db.Where(x => x.DateLastRefresh <= DateTime.Now.AddMonths(-months))
 				.Select(x => API.Instance.Database.Games.Get(x.Id))
 				.Where(x => x != null);
 		}
@@ -601,13 +862,13 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Returns a projection of all database entries as DataGame view models.</summary>
 		public virtual IEnumerable<DataGame> GetDataGames()
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
 			if (db == null)
 			{
 				return Enumerable.Empty<DataGame>();
 			}
 
-			return db.FindAll().Select(x => new DataGame
+			return db.Select(x => new DataGame
 			{
 				Id = x.Id,
 				Icon = x.Icon.IsNullOrEmpty() ? x.Icon : API.Instance.Database.GetFullFilePath(x.Icon),
@@ -620,13 +881,13 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Returns database entries that are marked as deleted.</summary>
 		public virtual IEnumerable<DataGame> GetIsolatedDataGames()
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
 			if (db == null)
 			{
 				return Enumerable.Empty<DataGame>();
 			}
 
-			return db.FindAll().Where(x => x.IsDeleted).Select(x => new DataGame
+			return db.Where(x => x.IsDeleted).Select(x => new DataGame
 			{
 				Id = x.Id,
 				Icon = x.Icon.IsNullOrEmpty() ? x.Icon : API.Instance.Database.GetFullFilePath(x.Icon),
@@ -669,7 +930,14 @@ namespace CommonPluginsShared.Collections
 				}
 
 				itemToAdd.IsSaved = true;
-				_database.Upsert(itemToAdd);
+				if (_database.ContainsItem(itemToAdd.Id))
+				{
+					_database.Update(itemToAdd);
+				}
+				else
+				{
+					_database.Add(itemToAdd);
+				}
 
 				DatabaseItemUpdated?.Invoke(this, new ItemUpdatedEventArgs<TItem>(
 					new List<ItemUpdateEvent<TItem>>
@@ -703,7 +971,14 @@ namespace CommonPluginsShared.Collections
 
 				itemToUpdate.IsSaved = true;
 				itemToUpdate.DateLastRefresh = DateTime.Now.ToUniversalTime();
-				_database.Upsert(itemToUpdate);
+				if (_database.ContainsItem(itemToUpdate.Id))
+				{
+					_database.Update(itemToUpdate);
+				}
+				else
+				{
+					_database.Add(itemToUpdate);
+				}
 
 				DatabaseItemUpdated?.Invoke(this, new ItemUpdatedEventArgs<TItem>(
 					new List<ItemUpdateEvent<TItem>>
@@ -753,7 +1028,15 @@ namespace CommonPluginsShared.Collections
 		public virtual bool Remove(Guid id)
 		{
 			RemoveTag(id);
-			bool removed = _database.Remove(id);
+			bool removed = false;
+			try
+			{
+				removed = _database.Remove(id);
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, false, PluginName);
+			}
 
 			if (removed)
 			{
@@ -789,10 +1072,10 @@ namespace CommonPluginsShared.Collections
 
 		// ── Cache accessors ───────────────────────────────────────────────────────
 
-		/// <summary>Returns the item from the LiteDB session cache without any web access.</summary>
+		/// <summary>Returns the item from the in-memory collection without any web access.</summary>
 		public virtual TItem GetOnlyCache(Guid id) => _database?.Get(id);
 
-		/// <summary>Returns the item from the LiteDB session cache without any web access.</summary>
+		/// <summary>Returns the item from the in-memory collection without any web access.</summary>
 		public virtual TItem GetOnlyCache(Game game) => _database?.Get(game.Id);
 
 		/// <summary>Returns a deep clone of the item for <paramref name="id"/>.</summary>
@@ -911,13 +1194,13 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Refreshes all items that currently have data.</summary>
 		public virtual void RefreshAll()
 		{
-			LiteDbItemCollection<TItem> db = GetDatabaseSafe();
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
 			if (db == null)
 			{
 				return;
 			}
 
-			IEnumerable<Guid> ids = db.FindAll()
+			IEnumerable<Guid> ids = db
 				.Where(x => x.HasData)
 				.Select(x => x.Id);
 			Refresh(ids);
@@ -1264,8 +1547,8 @@ namespace CommonPluginsShared.Collections
 		public void RemoveTag(Game game)
 		{
 			if (game?.TagIds == null)
-			{ 
-				return; 
+			{
+				return;
 			}
 
 			StripPluginTags(game);
@@ -1384,7 +1667,7 @@ namespace CommonPluginsShared.Collections
 					{
 						if (x.NewData?.Id != null)
 						{
-							_database.SetGameInfo(x.NewData.Id);
+							_database.SetGameInfo<T>(x.NewData.Id);
 							ActionAfterGames_ItemUpdated(x.OldData, x.NewData);
 						}
 					});
@@ -1449,7 +1732,7 @@ namespace CommonPluginsShared.Collections
 
 		public bool ExtractToCsv()
 		{
-			return PluginExportCsv.ExportToCsv(PluginName, _database.FindAll());
+			return PluginExportCsv.ExportToCsv(PluginName, _database);
 		}
 
 		#endregion
@@ -1555,6 +1838,216 @@ namespace CommonPluginsShared.Collections
 		private bool IsTaggingEnabled() => PluginSettings != null && PluginSettings.EnableTag;
 
 		private bool IsAutoImportOnInstalledEnabled() => PluginSettings != null && PluginSettings.AutoImportOnInstalled;
+
+		/// <summary>
+		/// Normalizes all DateTime values to UTC in the object graph.
+		/// This prevents legacy JSON data with Local/Unspecified kinds from being persisted
+		/// with inconsistent date formats during migration to LiteDB.
+		/// </summary>
+		private static void EnsureDateTimesUtc(object root)
+		{
+			if (root == null)
+			{
+				return;
+			}
+
+			HashSet<object> visited = new HashSet<object>(ReferenceEqualityComparer.Instance);
+			EnsureDateTimesUtcInternal(root, visited);
+		}
+
+		private static void EnsureDateTimesUtcInternal(object current, HashSet<object> visited)
+		{
+			if (current == null)
+			{
+				return;
+			}
+
+			Type currentType = current.GetType();
+			if (IsTerminalType(currentType))
+			{
+				return;
+			}
+
+			if (!currentType.IsValueType)
+			{
+				if (!visited.Add(current))
+				{
+					return;
+				}
+			}
+
+			IDictionary dictionary = current as IDictionary;
+			if (dictionary != null)
+			{
+				NormalizeDictionaryDateTimesToUtc(dictionary, visited);
+				return;
+			}
+
+			IList list = current as IList;
+			if (list != null)
+			{
+				for (int i = 0; i < list.Count; i++)
+				{
+					object listItem = list[i];
+					if (listItem is DateTime)
+					{
+						list[i] = NormalizeDateTimeToUtc((DateTime)listItem);
+					}
+					else
+					{
+						EnsureDateTimesUtcInternal(listItem, visited);
+					}
+				}
+				return;
+			}
+
+			IEnumerable enumerable = current as IEnumerable;
+			if (enumerable != null && !(current is string))
+			{
+				foreach (object entry in enumerable)
+				{
+					EnsureDateTimesUtcInternal(entry, visited);
+				}
+			}
+
+			PropertyInfo[] properties = currentType
+				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+				.Where(p => p.CanRead && p.CanWrite && p.GetIndexParameters().Length == 0)
+				.ToArray();
+
+			foreach (PropertyInfo property in properties)
+			{
+				object value;
+				try
+				{
+					value = property.GetValue(current, null);
+				}
+				catch
+				{
+					continue;
+				}
+
+				if (value == null)
+				{
+					continue;
+				}
+
+				Type propertyType = property.PropertyType;
+				if (propertyType == typeof(DateTime))
+				{
+					property.SetValue(current, NormalizeDateTimeToUtc((DateTime)value), null);
+					continue;
+				}
+
+				if (propertyType == typeof(DateTime?))
+				{
+					DateTime? nullableDate = (DateTime?)value;
+					if (nullableDate.HasValue)
+					{
+						property.SetValue(current, (DateTime?)NormalizeDateTimeToUtc(nullableDate.Value), null);
+					}
+					continue;
+				}
+
+				EnsureDateTimesUtcInternal(value, visited);
+			}
+		}
+
+		private static void NormalizeDictionaryDateTimesToUtc(IDictionary dictionary, HashSet<object> visited)
+		{
+			List<DictionaryEntry> entries = new List<DictionaryEntry>();
+			foreach (DictionaryEntry entry in dictionary)
+			{
+				entries.Add(entry);
+			}
+
+			bool keyChanged = false;
+			List<object> keysToRemove = new List<object>();
+			List<KeyValuePair<object, object>> entriesToAdd = new List<KeyValuePair<object, object>>();
+
+			foreach (DictionaryEntry entry in entries)
+			{
+				object key = entry.Key;
+				object value = entry.Value;
+
+				object normalizedKey = key;
+				if (key is DateTime)
+				{
+					normalizedKey = NormalizeDateTimeToUtc((DateTime)key);
+					if (!Equals(normalizedKey, key))
+					{
+						keyChanged = true;
+					}
+				}
+
+				if (value is DateTime)
+				{
+					dictionary[key] = NormalizeDateTimeToUtc((DateTime)value);
+				}
+				else
+				{
+					EnsureDateTimesUtcInternal(value, visited);
+				}
+
+				if (keyChanged)
+				{
+					keysToRemove.Add(key);
+					entriesToAdd.Add(new KeyValuePair<object, object>(normalizedKey, dictionary[key]));
+					keyChanged = false;
+				}
+			}
+
+			for (int i = 0; i < keysToRemove.Count; i++)
+			{
+				dictionary.Remove(keysToRemove[i]);
+			}
+
+			for (int i = 0; i < entriesToAdd.Count; i++)
+			{
+				dictionary[entriesToAdd[i].Key] = entriesToAdd[i].Value;
+			}
+		}
+
+		private static DateTime NormalizeDateTimeToUtc(DateTime dateTime)
+		{
+			if (dateTime.Kind == DateTimeKind.Utc)
+			{
+				return dateTime;
+			}
+
+			if (dateTime.Kind == DateTimeKind.Unspecified)
+			{
+				return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+			}
+
+			return dateTime.ToUniversalTime();
+		}
+
+		private static bool IsTerminalType(Type type)
+		{
+			return type.IsPrimitive
+				|| type.IsEnum
+				|| type == typeof(string)
+				|| type == typeof(decimal)
+				|| type == typeof(Guid)
+				|| type == typeof(DateTime)
+				|| type == typeof(DateTime?);
+		}
+
+		private sealed class ReferenceEqualityComparer : IEqualityComparer<object>
+		{
+			public static readonly ReferenceEqualityComparer Instance = new ReferenceEqualityComparer();
+
+			public bool Equals(object x, object y)
+			{
+				return ReferenceEquals(x, y);
+			}
+
+			public int GetHashCode(object obj)
+			{
+				return RuntimeHelpers.GetHashCode(obj);
+			}
+		}
 
 		private void NotifyError(string operation, Exception ex)
 		{

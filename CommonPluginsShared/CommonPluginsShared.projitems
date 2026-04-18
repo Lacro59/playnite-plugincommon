@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -11,11 +11,11 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Behaviors\DatePickerCalendar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeLang.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)collections\LiteDbItemCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\LiteDbItemCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDatabaseObject.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)collections\PluginGameCollection.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)collections\PluginGameCollectionWithDetails.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)collections\PluginGameEntry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginGameCollection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginGameCollectionWithDetails.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginGameEntry.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginItemCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginMenus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common.cs" />
@@ -58,6 +58,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)io\IOServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\CheckElement.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\DataGame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\DatabaseBackupInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Folder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ThemeLinearGradient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\SourceLink.cs" />

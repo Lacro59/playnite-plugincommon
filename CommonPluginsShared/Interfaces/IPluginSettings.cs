@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace CommonPluginsShared.Interfaces
 {
@@ -34,6 +34,11 @@ namespace CommonPluginsShared.Interfaces
 		/// when a game is installed.
 		/// </summary>
 		bool AutoImportOnInstalled { get; set; }
+
+		/// <summary>
+		/// Gets or sets the number of backup files retained for the plugin database.
+		/// </summary>
+		int DatabaseBackupMaxCount { get; set; }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether the library updated event should be

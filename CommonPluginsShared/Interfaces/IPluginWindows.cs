@@ -29,5 +29,7 @@ namespace CommonPluginsShared.Services
 		void ShowPluginTransfertData(IEnumerable<DataGame> dataGames);
 
 		void ShowPluginDataWithoutGame(IEnumerable<DataGame> dataGames);
+
+		void ShowDatabaseMaintenance();
 	}
 }

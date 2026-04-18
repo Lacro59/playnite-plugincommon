@@ -1,0 +1,261 @@
+﻿<UserControl
+    x:Class="CommonPluginsControls.Controls.PluginChartNavBar"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:CommonPluginsControls.Controls"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type=local:PluginChartNavBarDataContext, IsDesignTimeCreatable=True}">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </UserControl.Resources>
+
+    <Grid x:Name="PART_Root">
+
+        <!--
+            Root visibility driven by ShowNavBar.
+            Layout: [button strip] [flex spacer] [optional label badge]
+            The entire bar collapses to zero height when ShowNavBar=False,
+            leaving no dead space in the parent layout.
+
+            Button order (left → right):
+              «  First        EA7B  double-left          — jump to absolute start
+              ⟨⟨ PrevPage     EA71  rounded-double-left  — skip −PageSize  (hidden when PageSize=0)
+              ‹  Prev         EAB5  simple-left          — step −1
+              ●  ShowAll      EA7D/EA6F expand/collapse   — toggle full dataset
+              ›  Next         EAB8  simple-right         — step +1
+              ⟩⟩ NextPage     EA72  rounded-double-right — skip +PageSize  (hidden when PageSize=0)
+              »  Last         EA7C  double-right         — jump to absolute end
+
+            Three distinct visual weights create an immediate reading of granularity:
+              sharp-double (First/Last) > rounded-double (PrevPage/NextPage) > simple (Prev/Next)
+        -->
+        <Border Visibility="{Binding ShowNavBar, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Padding="0,2">
+
+            <DockPanel LastChildFill="False">
+
+                <!-- ── Far-right: optional info label badge (e.g. "Week 12") ── -->
+                <!--
+                    Declared before the button strip so DockPanel measures it first
+                    and it stays flush-right regardless of label width.
+                -->
+                <Border DockPanel.Dock="Right"
+                        Style="{DynamicResource NavLabelBadge}"
+                        Margin="6,0,0,0"
+                        Visibility="{Binding HasNavLabel, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="{Binding NavLabel}"
+                               Style="{DynamicResource BaseTextBlockStyle}"
+                               FontSize="{DynamicResource FontSize}"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource GlyphBrush}" />
+                </Border>
+
+                <!-- ── Left: navigation buttons ── -->
+                <StackPanel DockPanel.Dock="Left"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+
+                    <!-- « First — EA7B double-left -->
+                    <Button Style="{DynamicResource NavIconButton}"
+                            ToolTip="{DynamicResource LOCCommonNavFirst}"
+                            Command="{Binding CmdFirst}"
+                            IsEnabled="{Binding CanGoPrev}">
+                        <TextBlock Text="&#xEA7B;"
+                                   Style="{DynamicResource BaseTextBlockStyle}"
+                                   FontFamily="{DynamicResource FontIcoFont}"
+                                   FontSize="{DynamicResource FontSize}"
+                                   Foreground="{DynamicResource GlyphBrush}" />
+                    </Button>
+
+                    <!-- ⟨⟨ PrevPage — EA71 rounded-double-left
+                         Hidden when PageSize=0 (no limit defined). -->
+                    <Button Style="{DynamicResource NavIconButton}"
+                            Command="{Binding CmdPagePrev}"
+                            IsEnabled="{Binding CanGoPrev}"
+                            Visibility="{Binding HasPageButtons, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Button.ToolTip>
+                            <ToolTip Content="{Binding PagePrevToolTip}" />
+                        </Button.ToolTip>
+                        <TextBlock Text="&#xEA71;"
+                                   Style="{DynamicResource BaseTextBlockStyle}"
+                                   FontFamily="{DynamicResource FontIcoFont}"
+                                   FontSize="{DynamicResource FontSize}"
+                                   Foreground="{DynamicResource GlyphBrush}" />
+                    </Button>
+
+                    <!-- ‹ Prev — EAB5 simple-left -->
+                    <Button Style="{DynamicResource NavIconButton}"
+                            ToolTip="{DynamicResource LOCCommonNavPrev}"
+                            Command="{Binding CmdPrev}"
+                            IsEnabled="{Binding CanGoPrev}">
+                        <TextBlock Text="&#xEAB5;"
+                                   Style="{DynamicResource BaseTextBlockStyle}"
+                                   FontFamily="{DynamicResource FontIcoFont}"
+                                   FontSize="{DynamicResource FontSize}"
+                                   Foreground="{DynamicResource GlyphBrush}" />
+                    </Button>
+
+                    <!-- ShowAll toggle — style et glyph pilotés par binding sur ShowAllData -->
+                    <Button x:Name="PART_BtnShowAll" Command="{Binding CmdToggleShowAll}">
+                        <Button.ToolTip>
+                            <ToolTip Content="{Binding ShowAllToolTip}" />
+                        </Button.ToolTip>
+                        <Button.Style>
+                            <!--
+                                BasedOn="{StaticResource NavIconButton}" is intentionally avoided:
+                                StaticResource is resolved at BAML parse time, before Playnite merges
+                                its theme dictionaries, which crashes the VS designer.
+                                We base on the implicit Button type instead and let the runtime
+                                DynamicResource pipeline apply NavIconButton via the theme.
+                            -->
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ShowAllData}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource NormalBrushDark}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock FontFamily="{DynamicResource FontIcoFont}"
+                                   FontSize="{DynamicResource FontSize}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+                                    <!-- EA7D = expand-alt (inactive), EA6F = collapse (active) -->
+                                    <Setter Property="Text" Value="&#xEA7D;" />
+                                    <Setter Property="Foreground" Value="{DynamicResource GlyphBrush}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ShowAllData}" Value="True">
+                                            <Setter Property="Text" Value="&#xEA6F;" />
+                                            <Setter Property="Foreground" Value="{DynamicResource HighlightGlyphBrush}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Button>
+
+                    <!-- › Next — EAB8 simple-right -->
+                    <Button Style="{DynamicResource NavIconButton}"
+                            ToolTip="{DynamicResource LOCCommonNavNext}"
+                            Command="{Binding CmdNext}"
+                            IsEnabled="{Binding CanGoNext}">
+                        <TextBlock Text="&#xEAB8;"
+                                   Style="{DynamicResource BaseTextBlockStyle}"
+                                   FontFamily="{DynamicResource FontIcoFont}"
+                                   FontSize="{DynamicResource FontSize}"
+                                   Foreground="{DynamicResource GlyphBrush}" />
+                    </Button>
+
+                    <!-- ⟩⟩ NextPage — EA72 rounded-double-right
+                         Hidden when PageSize=0 (no limit defined). -->
+                    <Button Style="{DynamicResource NavIconButton}"
+                            Command="{Binding CmdPageNext}"
+                            IsEnabled="{Binding CanGoNext}"
+                            Visibility="{Binding HasPageButtons, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Button.ToolTip>
+                            <ToolTip Content="{Binding PageNextToolTip}" />
+                        </Button.ToolTip>
+                        <TextBlock Text="&#xEA72;"
+                                   Style="{DynamicResource BaseTextBlockStyle}"
+                                   FontFamily="{DynamicResource FontIcoFont}"
+                                   FontSize="{DynamicResource FontSize}"
+                                   Foreground="{DynamicResource GlyphBrush}" />
+                    </Button>
+
+                    <!-- » Last — EA7C double-right -->
+                    <Button Style="{DynamicResource NavIconButton}"
+                            ToolTip="{DynamicResource LOCCommonNavLast}"
+                            Command="{Binding CmdLast}"
+                            IsEnabled="{Binding CanGoNext}">
+                        <TextBlock Text="&#xEA7C;"
+                                   Style="{DynamicResource BaseTextBlockStyle}"
+                                   FontFamily="{DynamicResource FontIcoFont}"
+                                   FontSize="{DynamicResource FontSize}"
+                                   Foreground="{DynamicResource GlyphBrush}" />
+                    </Button>
+
+                    <!-- AxisLimit controls: −  reset  + -->
+                    <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+
+                        <Button Style="{DynamicResource NavIconButton}"
+                                Command="{Binding CmdAxisLimitDecrease}"
+                                IsEnabled="{Binding CanDecreaseAxisLimit}"
+                                ToolTip="{Binding AxisLimitDecreaseToolTip}"
+                                Content="−" />
+
+                        <!-- Reset to default — glyph EE0B in IcoFont -->
+                        <Button Style="{DynamicResource NavIconButton}"
+                                Command="{Binding CmdAxisLimitReset}"
+                                IsEnabled="{Binding CanResetAxisLimit}"
+                                ToolTip="{Binding AxisLimitResetToolTip}">
+                            <TextBlock Text="&#xEE0B;"
+                                       Style="{DynamicResource BaseTextBlockStyle}"
+                                       FontFamily="{DynamicResource FontIcoFont}"
+                                       FontSize="{DynamicResource FontSize}"
+                                       Foreground="{DynamicResource GlyphBrush}" />
+                        </Button>
+
+                        <Button Style="{DynamicResource NavIconButton}"
+                                Command="{Binding CmdAxisLimitIncrease}"
+                                IsEnabled="{Binding CanIncreaseAxisLimit}"
+                                ToolTip="{Binding AxisLimitIncreaseToolTip}"
+                                Content="+" />
+
+                    </StackPanel>
+
+                    <!-- ── Custom toggles (generic collection) ── -->
+                    <!--
+                        Each NavBarToggle in the Toggles collection renders as an icon button.
+                        The first toggle gets a left margin of 30 px to match the AxisLimit group spacing;
+                        subsequent toggles are separated by 6 px.
+                        IsActive drives both background highlight and glyph/foreground via DataTriggers.
+                    -->
+                    <ItemsControl ItemsSource="{Binding Toggles}" Margin="20,0,0,0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding ToggleCommand}" Margin="6,0,0,0">
+                                    <Button.ToolTip>
+                                        <ToolTip Content="{Binding CurrentToolTip}" />
+                                    </Button.ToolTip>
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                    <Setter Property="Background" Value="{DynamicResource NormalBrushDark}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <TextBlock FontFamily="{DynamicResource FontIcoFont}" FontSize="{DynamicResource FontSize}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+                                                <Setter Property="Text" Value="{Binding CurrentIcon}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource GlyphBrush}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                        <Setter Property="Foreground" Value="{DynamicResource HighlightGlyphBrush}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                </StackPanel>
+
+            </DockPanel>
+        </Border>
+
+    </Grid>
+</UserControl>

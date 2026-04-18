@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -72,6 +72,10 @@
     <Compile Include="Controls\ControlPickerGradient.xaml.cs">
       <DependentUpon>ControlPickerGradient.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\NavBarToogle.cs" />
+    <Compile Include="Controls\PluginChartNavBar.xaml.cs">
+      <DependentUpon>PluginChartNavBar.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ProgressBarExtend.xaml.cs">
       <DependentUpon>ProgressBarExtend.xaml</DependentUpon>
     </Compile>
@@ -80,6 +84,9 @@
     </Compile>
     <Compile Include="Controls\SliderWithPointer.xaml.cs">
       <DependentUpon>SliderWithPointer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SourceLinkControl.xaml.cs">
+      <DependentUpon>SourceLinkControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\TextBlockTrimmed.xaml.cs">
       <DependentUpon>TextBlockTrimmed.xaml</DependentUpon>
@@ -90,8 +97,14 @@
     <Compile Include="Controls\MediaElementExtend.xaml.cs">
       <DependentUpon>MediaElementExtend.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\TimePicker.xaml.cs">
+      <DependentUpon>TimePicker.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LiveChartsCommon\CustomerForSingle.cs" />
     <Compile Include="LiveChartsCommon\CustomerForTime.cs" />
+    <Compile Include="LiveChartsCommon\CustomerToolTipForLog.xaml.cs">
+      <DependentUpon>CustomerToolTipForLog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LiveChartsCommon\CustomerToolTipForMultipleSingle.xaml.cs">
       <DependentUpon>CustomerToolTipForMultipleSingle.xaml</DependentUpon>
     </Compile>
@@ -122,7 +135,12 @@
     </Compile>
     <Compile Include="Stores\Steam\PanelViewModel.cs" />
     <Compile Include="ViewsModels\ExportCsvViewModel.cs" />
+    <Compile Include="ViewsModels\DatabaseMaintenanceViewModel.cs" />
+    <Compile Include="ViewsModels\TimePickerViewModel.cs" />
     <Compile Include="ViewsModels\TransfertDataViewModel.cs" />
+    <Compile Include="Views\DatabaseMaintenanceView.xaml.cs">
+      <DependentUpon>DatabaseMaintenanceView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ExportCsvView.xaml.cs">
       <DependentUpon>ExportCsvView.xaml</DependentUpon>
     </Compile>
@@ -155,6 +173,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Controls\PluginChartNavBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Controls\ProgressBarExtend.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -167,6 +189,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\SourceLinkControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Controls\TextBlockTrimmed.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -178,6 +204,14 @@
     <Page Include="Controls\MediaElementExtend.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TimePicker.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LiveChartsCommon\CustomerToolTipForLog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="LiveChartsCommon\CustomerToolTipForMultipleSingle.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -216,6 +250,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\ExportCsvView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\DatabaseMaintenanceView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

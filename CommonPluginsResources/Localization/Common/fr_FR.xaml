@@ -2,9 +2,34 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
 	<sys:String x:Key="LOCCommonMigratingDatabase">Migration de la base de données…</sys:String>
-	<sys:String x:Key="LOCCommonMigrationPartialFailure">Migration completed with {0} error(s) out of {1} file(s).</sys:String>
+	<sys:String x:Key="LOCCommonMigrationPartialFailure">Migration terminée avec {0} erreur(s) sur le(s) fichier(s) {1}</sys:String>
+	<sys:String x:Key="LOCCommonMigrationStepBackup">Sauvegarde de l'ancienne base de données…</sys:String>
+	<sys:String x:Key="LOCCommonMigrationStepMigrate">Migration de l'ancienne base de données…</sys:String>
+	<sys:String x:Key="LOCCommonMigrationStepDeleteLegacy">Suppression de l'ancienne base de données…</sys:String>
 
-	<!-- ==================== TIME UNITS ==================== -->
+    <sys:String x:Key="LOCCommonNavShowByWeeks">Afficher les données par semaine</sys:String>
+    <sys:String x:Key="LOCCommonNavShowByWeeksDisable">Désactiver les données par semaine</sys:String>
+
+    <!-- ==================== CHART NAVIGATION BAR ==================== -->
+
+    <sys:String x:Key="LOCCommonNavFirst">Aller au premier point de données</sys:String>
+    <sys:String x:Key="LOCCommonNavPrev">Période précédente</sys:String>
+    <sys:String x:Key="LOCCommonNavShowAll">Afficher toutes les données</sys:String>
+    <sys:String x:Key="LOCCommonNavShowAllActive">Quitter la vue complète</sys:String>
+    <sys:String x:Key="LOCCommonNavNext">Période suivante</sys:String>
+    <sys:String x:Key="LOCCommonNavLast">Aller au dernier point de données</sys:String>
+    <sys:String x:Key="LOCCommonNavPagePrev">Page précédente</sys:String>
+    <sys:String x:Key="LOCCommonNavPageNext">Page suivante</sys:String>
+    <sys:String x:Key="LOCCommonNavAxisLimitDecrease">Diminuer la limite de l'axe</sys:String>
+    <sys:String x:Key="LOCCommonNavAxisLimitIncrease">Augmenter la limite de l'axe</sys:String>
+    <sys:String x:Key="LOCCommonNavAxisLimitReset">Réinitialiser la limite de l'axe</sys:String>
+
+    <!-- ==================== TimePicker control ==================== -->
+    <sys:String x:Key="LOCCommonTimePickerTooltip">Temps</sys:String>
+    <sys:String x:Key="LOCCommonTimePickerIncrease">Augmenter</sys:String>
+    <sys:String x:Key="LOCCommonTimePickerDecrease">Diminuer</sys:String>
+
+    <!-- ==================== TIME UNITS ==================== -->
 
 	<sys:String x:Key="LOCCommonDay">{0} jour</sys:String>
 	<sys:String x:Key="LOCCommonDays">{0} jours</sys:String>
@@ -24,15 +49,15 @@
 
 	<sys:String x:Key="LOCCommonToday"></sys:String>
 	<sys:String x:Key="LOCCommonNever">Jamais</sys:String>
-	<sys:String x:Key="LOCCommonHourAgo">{0}h ago</sys:String>
+	<sys:String x:Key="LOCCommonHourAgo">il y a {0}h</sys:String>
 	<!-- NOTE: singular and plural share the same format — keep both for translator flexibility -->
-	<sys:String x:Key="LOCCommonHoursAgo">{0}h ago</sys:String>
-	<sys:String x:Key="LOCCommonDayAgo">{0}d ago</sys:String>
-	<sys:String x:Key="LOCCommonDaysAgo">{0}d ago</sys:String>
-	<sys:String x:Key="LOCCommonMonthAgo">{0}mo ago</sys:String>
-	<sys:String x:Key="LOCCommonMonthsAgo">{0}mo ago</sys:String>
-	<sys:String x:Key="LOCCommonYearAgo">{0}y ago</sys:String>
-	<sys:String x:Key="LOCCommonYearsAgo">{0}y ago</sys:String>
+	<sys:String x:Key="LOCCommonHoursAgo">il y a {0}h</sys:String>
+	<sys:String x:Key="LOCCommonDayAgo">il y a {0} jour</sys:String>
+	<sys:String x:Key="LOCCommonDaysAgo">il y a {0} jours</sys:String>
+	<sys:String x:Key="LOCCommonMonthAgo">il y a {0} mois</sys:String>
+	<sys:String x:Key="LOCCommonMonthsAgo">il y a {0} mois</sys:String>
+	<sys:String x:Key="LOCCommonYearAgo">il y a {0} année</sys:String>
+	<sys:String x:Key="LOCCommonYearsAgo">il y a {0} années</sys:String>
 
 	<!-- ==================== DATES ==================== -->
 
@@ -44,11 +69,13 @@
 	<!-- ==================== COMMON LABELS ==================== -->
 
 	<sys:String x:Key="LOCCommonNoData">Pas de données</sys:String>
+	<sys:String x:Key="LOCCommonNoDataAvailable">Aucune donnée disponible</sys:String>
 	<sys:String x:Key="LOCCommonTotal">Total</sys:String>
 	<sys:String x:Key="LOCCommonCut">Tronquer</sys:String>
 	<sys:String x:Key="LOCCommonMargin">Marge</sys:String>
 	<sys:String x:Key="LOCCommonMisc">Divers</sys:String>
 	<sys:String x:Key="LOCCommonDatabase">Base de données</sys:String>
+	<sys:String x:Key="LOCCommonDatabaseMaintenance">Maintenance de la base de données</sys:String>
 	<sys:String x:Key="LOCCommonDimensions">Dimensions</sys:String>
 	<sys:String x:Key="LOCCommonStyles">Styles</sys:String>
 	<sys:String x:Key="LOCCommonTypes">Types</sys:String>
@@ -284,12 +311,34 @@ Veuillez effacer toutes les étiquettes à partir du menu du plugin.</sys:String
 	<sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">Plus d'une entrée de données trouvée pour {0}.
 Veuillez vérifier les paramètres du plugin.</sys:String>
 
-	<!-- ==================== DROPDOWN ITEM LIST (DdItemListSelectionBox) ==================== -->
+    <!-- ==================== DATABASE MAINTENANCE ==================== -->
+
+    <sys:String x:Key="LOCCommonDbMaintenanceCurrentDatabase">Base de données actuelle</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceFile">Fichier :</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceRows">Lignes :</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceSize">Taille du fichier :</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceBackupRetention">Sauvegardes à conserver :</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceLastEntry">Dernière entrée :</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenancePath">Chemin :</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceRefresh">Rafraîchir</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceCreateBackup">Effectuer une sauvegarde</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceDeleteAllData">Supprimer toutes les données du plugin</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceAvailableBackups">Sauvegardes disponibles</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceBackupHint">Sélectionnez une sauvegarde à restaurer ou à supprimer.</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColBackupFile">Fichier de sauvegarde</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColRows">Lignes</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColSize">Taille</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColLastEntry">Dernier accès</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColCreated">Créé</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceDeleteBackup">Effacer la sauvegarde sélectionnée</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceRestoreBackup">Restaurer la sauvegarde sélectionnée</sys:String>
+
+    <!-- ==================== DROPDOWN ITEM LIST (DdItemListSelectionBox) ==================== -->
 
 	<sys:String x:Key="LOCDdItemList_ClearSelection">Effacer la sélection</sys:String>
-	<sys:String x:Key="LOCDdItemList_NoItems">No items available</sys:String>
-	<sys:String x:Key="LOCDdItemList_SearchPlaceholder">Search...</sys:String>
-	<sys:String x:Key="LOCDdItemList_ShowSelectedOnly">Show selected items only</sys:String>
+	<sys:String x:Key="LOCDdItemList_NoItems">Aucun élément disponible</sys:String>
+	<sys:String x:Key="LOCDdItemList_SearchPlaceholder">Recherche...</sys:String>
+	<sys:String x:Key="LOCDdItemList_ShowSelectedOnly">Afficher uniquement les éléments sélectionnés</sys:String>
 
 	<!-- ==================== VARIABLES TOOLTIP ==================== -->
 

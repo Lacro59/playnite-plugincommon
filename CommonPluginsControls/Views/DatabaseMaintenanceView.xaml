@@ -1,0 +1,227 @@
+<UserControl x:Class="CommonPluginsControls.Views.DatabaseMaintenanceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewmodels="clr-namespace:CommonPluginsControls.ViewModels" 
+             xmlns:controlsShared="clr-namespace:CommonPluginsShared.Controls"
+             xmlns:playnitecontrols="clr-namespace:CommonPluginsControls.PlayniteControls"
+             xmlns:converters="clr-namespace:CommonPluginsShared.Converters"
+             d:DataContext="{d:DesignInstance Type=viewmodels:DatabaseMaintenanceViewModel}"
+             mc:Ignorable="d" d:DesignWidth="950"
+             Background="{DynamicResource WindowBackgourndBrush}">
+
+    <UserControl.Resources>
+        <converters:LocalDateTimeConverter x:Key="LocalDateTimeConverter" />
+    </UserControl.Resources>
+
+    <Border Style="{DynamicResource TopSeparatorBorder}">
+        <StackPanel Margin="10">
+
+            <!-- Card: current database info -->
+            <Border Style="{DynamicResource ViewPluginCard}">
+                <StackPanel>
+                    <TextBlock Text="{StaticResource LOCCommonDbMaintenanceCurrentDatabase}"
+                               Style="{DynamicResource SectionHeaderText}"/>
+
+                    <Grid Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="{StaticResource LOCCommonDbMaintenanceFile}"
+                                   Style="{DynamicResource ViewColumnLabelText}"
+                                   Margin="0,0,8,4"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1"
+                                   Text="{Binding CurrentDatabase.FileName}"
+                                   Style="{DynamicResource BaseTextBlockStyle}"
+                                   Margin="0,0,0,4"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0"
+                                   Text="{StaticResource LOCCommonDbMaintenanceRows}"
+                                   Style="{DynamicResource ViewColumnLabelText}"
+                                   Margin="0,0,8,4"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1"
+                                   Text="{Binding CurrentDatabase.TotalRows}"
+                                   Style="{DynamicResource BaseTextBlockStyle}"
+                                   Margin="0,0,0,4"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0"
+                                   Text="{StaticResource LOCCommonDbMaintenanceSize}"
+                                   Style="{DynamicResource ViewColumnLabelText}"
+                                   Margin="0,0,8,4"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1"
+                                   Text="{Binding CurrentDatabase.FileSizeDisplay}"
+                                   Style="{DynamicResource BaseTextBlockStyle}"
+                                   Margin="0,0,0,4"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0"
+                                   Text="{StaticResource LOCCommonDbMaintenanceBackupRetention}"
+                                   Style="{DynamicResource ViewColumnLabelText}"
+                                   Margin="0,0,8,4"/>
+                        <playnitecontrols:NumericBox Grid.Row="3" Grid.Column="1"
+                                                     LongValue="{Binding BackupMaxCount, Mode=TwoWay}"
+                                                     MinLongValue="3"
+                                                     MaxLongValue="99"
+                                                     Width="50"
+                                                     HorizontalAlignment="Left"
+                                                     Margin="0,0,0,4"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0"
+                                   Text="{StaticResource LOCCommonDbMaintenanceLastEntry}"
+                                   Style="{DynamicResource ViewColumnLabelText}"
+                                   Margin="0,0,8,4"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1"
+                                   Style="{DynamicResource BaseTextBlockStyle}"
+                                   Margin="0,0,0,4"
+                                   Text="{Binding CurrentDatabase.LastEntryDate, Converter={StaticResource LocalDateTimeConverter}, TargetNullValue={StaticResource LOCCommonNoData}}"/>
+
+                        <TextBlock Grid.Row="5" Grid.Column="0"
+                                   Text="{StaticResource LOCCommonDbMaintenancePath}"
+                                   Style="{DynamicResource ViewColumnLabelText}"
+                                   Margin="0,0,8,0"/>
+                        <TextBlock Grid.Row="5" Grid.Column="1"
+                                   Text="{Binding CurrentDatabase.FilePath}"
+                                   Style="{DynamicResource BaseTextBlockStyle}"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                        <Button Content="{StaticResource LOCCommonDbMaintenanceRefresh}"
+                                Style="{DynamicResource SecondaryButton}"
+                                Command="{Binding RefreshCommand}"/>
+
+                        <Button Content="{StaticResource LOCCommonDbMaintenanceCreateBackup}"
+                                Style="{DynamicResource SecondaryButton}"
+                                Command="{Binding CreateBackupCommand}"/>
+
+                        <Button Content="{StaticResource LOCCommonDbMaintenanceDeleteAllData}"
+                                Style="{DynamicResource WarningButton}"
+                                Command="{Binding ClearDatabaseCommand}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Card: backup list -->
+            <Border Style="{DynamicResource ViewPluginCard}">
+                <StackPanel>
+                    <TextBlock Text="{StaticResource LOCCommonDbMaintenanceAvailableBackups}"
+                               Style="{DynamicResource SectionHeaderText}"/>
+
+                    <TextBlock Style="{DynamicResource BaseTextBlockStyle}"
+                               Foreground="{DynamicResource TextBrushDarker}"
+                               Text="{StaticResource LOCCommonDbMaintenanceBackupHint}"
+                               Margin="0,0,0,8"/>
+
+                    <controlsShared:ListViewExtend ItemsSource="{Binding Backups}"
+                                                   SelectedItem="{Binding SelectedBackup}"
+                                                   SelectionMode="Single"
+                                                   Height="220"
+                                                   BorderThickness="1"
+                                                   BorderBrush="{DynamicResource NormalBorderBrush}"
+                                                   Background="{DynamicResource ControlBackgroundBrush}"
+                                                   ColumnManagementMenuEnable="False"
+                                                   SortingEnable="True"
+                                                   SortingDefaultDataName="FileDate"
+                                                   SortingSortDirection="Descending">
+
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Width="auto"
+                                                controlsShared:ListViewColumnOptions.SortMemberPath="FileName">
+                                    <GridViewColumnHeader Content="{StaticResource LOCCommonDbMaintenanceColBackupFile}" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding FileName}"
+                                                       Style="{DynamicResource BaseTextBlockStyle}"
+                                                       Padding="8,6"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+
+                                <GridViewColumn Width="auto"
+                                                controlsShared:ListViewColumnOptions.SortMemberPath="TotalRows">
+                                    <GridViewColumnHeader Content="{StaticResource LOCCommonDbMaintenanceColRows}" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding TotalRows}"
+                                                       Style="{DynamicResource BaseTextBlockStyle}"
+                                                       Padding="8,6"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+
+                                <GridViewColumn Width="auto"
+                                                controlsShared:ListViewColumnOptions.SortMemberPath="FileSizeBytes">
+                                    <GridViewColumnHeader Content="{StaticResource LOCCommonDbMaintenanceColSize}" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding FileSizeDisplay}"
+                                                       Style="{DynamicResource BaseTextBlockStyle}"
+                                                       Padding="8,6"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+
+                                <GridViewColumn Width="auto"
+                                                controlsShared:ListViewColumnOptions.SortMemberPath="LastEntryDate">
+                                    <GridViewColumnHeader Content="{StaticResource LOCCommonDbMaintenanceColLastEntry}" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Style="{DynamicResource BaseTextBlockStyle}"
+                                                       Padding="8,6"
+                                                       Text="{Binding LastEntryDate, Converter={StaticResource LocalDateTimeConverter}, TargetNullValue=-}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+
+                                <GridViewColumn Width="auto"
+                                                controlsShared:ListViewColumnOptions.SortMemberPath="FileDate"
+                                                DisplayMemberBinding="{Binding FileDate, Converter={StaticResource LocalDateTimeConverter}}">
+                                    <GridViewColumnHeader Content="{StaticResource LOCCommonDbMaintenanceColCreated}" />
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </controlsShared:ListViewExtend>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                        <Button Content="{StaticResource LOCCommonDbMaintenanceDeleteBackup}"
+                                Style="{DynamicResource WarningButton}"
+                                Command="{Binding DeleteBackupCommand}"/>
+
+                        <Button Content="{StaticResource LOCCommonDbMaintenanceRestoreBackup}"
+                                Style="{DynamicResource PrimaryButton}"
+                                Command="{Binding RestoreBackupCommand}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Footer buttons -->
+            <Border BorderThickness="0,1,0,0"
+                    BorderBrush="{DynamicResource NormalBorderBrush}"
+                    Padding="0,10,0,0"
+                    Margin="0,10,0,0">
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+                    <Button Content="{DynamicResource LOCCancelLabel}"
+                            Style="{DynamicResource SecondaryButton}"
+                            Command="{Binding CancelSettingsCommand}"/>
+                    <Button Content="{DynamicResource LOCSaveLabel}"
+                            Style="{DynamicResource PrimaryButton}"
+                            Command="{Binding SaveSettingsCommand}"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </Border>
+</UserControl>

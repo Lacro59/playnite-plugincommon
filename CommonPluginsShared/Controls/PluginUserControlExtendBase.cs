@@ -223,6 +223,12 @@ namespace CommonPluginsShared.Controls
 		/// </summary>
 		protected virtual void AttachStaticEvents()
 		{
+			// API.Instance is null in the VS Designer — skip all event wiring.
+			if (DesignerProperties.GetIsInDesignMode(this))
+			{
+				return;
+			}
+
 #if DEBUG
 			var timer = new DebugTimer(GetType().Name + ".AttachStaticEvents");
 #endif
@@ -411,6 +417,7 @@ namespace CommonPluginsShared.Controls
 
 		protected virtual void PluginSettings_PropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
+			SetDefaultDataContext();
 			GameContextChanged(null, GameContext);
 		}
 
@@ -427,10 +434,18 @@ namespace CommonPluginsShared.Controls
 			timer.Step("CancelPendingUpdate done");
 #endif
 
+			bool isContextSwitch = CurrentGame?.Id != newContext?.Id;
 			CurrentGame = newContext;
 			UpdateDataTimer.Stop();
-			SetVisibility(Visibility.Collapsed);
-			SetDefaultDataContext();
+
+			// Reset defaults only on actual game switch — re-arms for the same game
+			// (triggered by data/settings changes) skip the reset to avoid redundant
+			// UI flicker and unnecessary work while the timer debounces the burst.
+			if (isContextSwitch)
+			{
+				SetVisibility(Visibility.Collapsed);
+				SetDefaultDataContext();
+			}
 
 #if DEBUG
 			timer.Step("SetDefaultDataContext done");

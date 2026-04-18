@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:CommonPluginsControls.Views"
              xmlns:converters="clr-namespace:CommonPluginsShared.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="600">
+             d:DesignHeight="600" d:DesignWidth="600"
+             Background="{DynamicResource WindowBackgourndBrush}">
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
