@@ -3,8 +3,33 @@
 
 	<sys:String x:Key="LOCCommonMigratingDatabase">Migrating database…</sys:String>
 	<sys:String x:Key="LOCCommonMigrationPartialFailure">Migration completed with {0} error(s) out of {1} file(s).</sys:String>
+	<sys:String x:Key="LOCCommonMigrationStepBackup">Backup of legacy database…</sys:String>
+	<sys:String x:Key="LOCCommonMigrationStepMigrate">Migration of legacy database…</sys:String>
+	<sys:String x:Key="LOCCommonMigrationStepDeleteLegacy">Deleting legacy database…</sys:String>
 
-	<!-- ==================== TIME UNITS ==================== -->
+    <sys:String x:Key="LOCCommonNavShowByWeeks">Show data by weeks</sys:String>
+    <sys:String x:Key="LOCCommonNavShowByWeeksDisable">Disable data by weeks</sys:String>
+
+    <!-- ==================== CHART NAVIGATION BAR ==================== -->
+
+    <sys:String x:Key="LOCCommonNavFirst">Go to first data point</sys:String>
+    <sys:String x:Key="LOCCommonNavPrev">Previous period</sys:String>
+    <sys:String x:Key="LOCCommonNavShowAll">Show all data</sys:String>
+    <sys:String x:Key="LOCCommonNavShowAllActive">Exit full view</sys:String>
+    <sys:String x:Key="LOCCommonNavNext">Next period</sys:String>
+    <sys:String x:Key="LOCCommonNavLast">Go to last data point</sys:String>
+    <sys:String x:Key="LOCCommonNavPagePrev">Previous page</sys:String>
+    <sys:String x:Key="LOCCommonNavPageNext">Next page</sys:String>
+    <sys:String x:Key="LOCCommonNavAxisLimitDecrease">Decrease axis limit</sys:String>
+    <sys:String x:Key="LOCCommonNavAxisLimitIncrease">Increase axis limit</sys:String>
+    <sys:String x:Key="LOCCommonNavAxisLimitReset">Increase axis limit</sys:String>
+
+    <!-- ==================== TimePicker control ==================== -->
+    <sys:String x:Key="LOCCommonTimePickerTooltip">Time</sys:String>
+    <sys:String x:Key="LOCCommonTimePickerIncrease">Increase</sys:String>
+    <sys:String x:Key="LOCCommonTimePickerDecrease">Decrease</sys:String>
+
+    <!-- ==================== TIME UNITS ==================== -->
 
 	<sys:String x:Key="LOCCommonDay">{0} day</sys:String>
 	<sys:String x:Key="LOCCommonDays">{0} days</sys:String>
@@ -44,11 +69,13 @@
 	<!-- ==================== COMMON LABELS ==================== -->
 
 	<sys:String x:Key="LOCCommonNoData">No data</sys:String>
+	<sys:String x:Key="LOCCommonNoDataAvailable">No data available</sys:String>
 	<sys:String x:Key="LOCCommonTotal">Total</sys:String>
 	<sys:String x:Key="LOCCommonCut">Cut</sys:String>
 	<sys:String x:Key="LOCCommonMargin">Margin</sys:String>
 	<sys:String x:Key="LOCCommonMisc">Misc</sys:String>
 	<sys:String x:Key="LOCCommonDatabase">Database</sys:String>
+	<sys:String x:Key="LOCCommonDatabaseMaintenance">Database maintenance</sys:String>
 	<sys:String x:Key="LOCCommonDimensions">Dimensions</sys:String>
 	<sys:String x:Key="LOCCommonStyles">Styles</sys:String>
 	<sys:String x:Key="LOCCommonTypes">Types</sys:String>
@@ -203,7 +230,7 @@ Do you want to open the directory?</sys:String>
 	<sys:String x:Key="LOCCommonUseAuthenticationOption">Use authentication (optional, for more information only)</sys:String>
 
 	<!-- Store error messages -->
-	<sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Configuração incorrecta</sys:String>
+	<sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Bad configuration</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoApiKey">{0}: No API key</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: No configuration found</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticated</sys:String>
@@ -284,7 +311,29 @@ Please clear all tags in the plugin menu.</sys:String>
 	<sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">More than one data entry found for {0}.
 Please check the plugin settings.</sys:String>
 
-	<!-- ==================== DROPDOWN ITEM LIST (DdItemListSelectionBox) ==================== -->
+    <!-- ==================== DATABASE MAINTENANCE ==================== -->
+
+    <sys:String x:Key="LOCCommonDbMaintenanceCurrentDatabase">Current database</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceFile">File:</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceRows">Rows:</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceSize">File size:</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceBackupRetention">Backups to keep:</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceLastEntry">Last entry:</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenancePath">Path:</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceRefresh">Refresh</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceCreateBackup">Create backup</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceDeleteAllData">Delete all plugin data</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceAvailableBackups">Available backups</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceBackupHint">Select a backup to restore or delete.</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColBackupFile">Backup file</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColRows">Rows</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColSize">Size</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColLastEntry">Last entry</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColCreated">Created</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceDeleteBackup">Delete selected backup</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceRestoreBackup">Restore selected backup</sys:String>
+
+    <!-- ==================== DROPDOWN ITEM LIST (DdItemListSelectionBox) ==================== -->
 
 	<sys:String x:Key="LOCDdItemList_ClearSelection">Clear selection</sys:String>
 	<sys:String x:Key="LOCDdItemList_NoItems">No items available</sys:String>
