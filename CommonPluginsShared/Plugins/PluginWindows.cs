@@ -93,5 +93,25 @@ namespace CommonPluginsShared.Plugins
 		{
 			throw new System.NotImplementedException();
 		}
+
+		public virtual void ShowDatabaseMaintenance()
+		{
+			WindowOptions windowOptions = new WindowOptions
+			{
+				ShowMinimizeButton = false,
+				ShowMaximizeButton = false,
+				ShowCloseButton = true,
+				CanBeResizable = true,
+				MinHeight = 500,
+				Width = 980
+			};
+
+			var viewExtension = new DatabaseMaintenanceView(PluginDatabase);
+			Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(
+				string.Format("{0} - {1}", PluginName, ResourceProvider.GetString("LOCCommonDatabase")),
+				viewExtension,
+				windowOptions);
+			windowExtension.ShowDialog();
+		}
 	}
 }

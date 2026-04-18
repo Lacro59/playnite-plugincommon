@@ -587,16 +587,10 @@ namespace CommonPlayniteShared.Database
 						SaveItemData(itemToUpdate);
 					}
 
-					// Update memory instance using fresh deserialized data (ensures lists are correct).
-					loadedItem = Get(itemToUpdate.Id);
-					if (loadedItem != null)
-					{
-						var fresh = isPersistent ? GetItemData(itemToUpdate.Id) : itemToUpdate;
-						if (!ReferenceEquals(fresh, loadedItem))
-						{
-							fresh.CopyDiffTo(loadedItem);
-						}
-					}
+					// Replace in-memory instance with the persisted payload to avoid stale/empty shells.
+					var fresh = isPersistent ? GetItemData(itemToUpdate.Id) : itemToUpdate;
+					loadedItem = fresh ?? itemToUpdate;
+					Items.AddOrUpdate(itemToUpdate.Id, loadedItem, (_, __) => loadedItem);
 				}
 			}
 
@@ -631,11 +625,9 @@ namespace CommonPlayniteShared.Database
 						SaveItemData(item);
 					}
 
-					TItem loadedItem = Get(item.Id);
-					if (!ReferenceEquals(loadedItem, item))
-					{
-						item.CopyDiffTo(loadedItem);
-					}
+					TItem loadedItem = isPersistent ? GetItemData(item.Id) : item;
+					loadedItem = loadedItem ?? item;
+					Items.AddOrUpdate(item.Id, loadedItem, (_, __) => loadedItem);
 
 					updates.Add(new ItemUpdateEvent<TItem>(oldData, loadedItem));
 				}

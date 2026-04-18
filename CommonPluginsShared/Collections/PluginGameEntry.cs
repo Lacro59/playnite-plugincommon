@@ -1,6 +1,5 @@
 using CommonPluginsShared.Commands;
 using CommonPluginsShared.Models;
-using LiteDB;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
@@ -36,14 +35,12 @@ namespace CommonPluginsShared.Collections
 		/// Indicates whether the game has been marked as deleted.
 		/// </summary>
 		[DontSerialize]
-		[BsonIgnore]
 		public bool IsDeleted { get; set; }
 
 		/// <summary>
 		/// Indicates whether the plugin data has been saved.
 		/// </summary>
 		[DontSerialize]
-		[BsonIgnore]
 		public bool IsSaved { get; set; }
 
 		/// <summary>
@@ -51,7 +48,6 @@ namespace CommonPluginsShared.Collections
 		/// Uses cached value for better performance.
 		/// </summary>
 		[DontSerialize]
-		[BsonIgnore]
 		public virtual bool HasData => false;
 
 		/// <summary>
@@ -59,7 +55,6 @@ namespace CommonPluginsShared.Collections
 		/// Uses cached value for better performance.
 		/// </summary>
 		[DontSerialize]
-		[BsonIgnore]
 		public virtual ulong Count => 0;
 
 		private SourceLink _sourcesLink;
@@ -85,7 +80,6 @@ namespace CommonPluginsShared.Collections
 		/// Command to navigate to the associated game in Playnite.
 		/// </summary>
 		[DontSerialize]
-		[BsonIgnore]
 		public RelayCommand<Guid> GoToGame => CommandsNavigation.GoToGame;
 
 		#region Game data
@@ -94,24 +88,23 @@ namespace CommonPluginsShared.Collections
 		/// Gets the Playnite game associated with this plugin data instance.
 		/// </summary>
 		[DontSerialize]
-		[BsonIgnore]
 		internal Game Game => API.Instance.Database.Games.Get(Id);
 
-		[DontSerialize][BsonIgnore] public Guid SourceId => Game?.SourceId ?? default;
-		[DontSerialize][BsonIgnore] public DateTime? LastActivity => Game?.LastActivity;
-		[DontSerialize][BsonIgnore] public bool Hidden => Game?.Hidden ?? default;
-		[DontSerialize][BsonIgnore] public string Icon => Game?.Icon ?? string.Empty;
-		[DontSerialize][BsonIgnore] public string CoverImage => Game?.CoverImage ?? string.Empty;
-		[DontSerialize][BsonIgnore] public string BackgroundImage => Game?.BackgroundImage ?? string.Empty;
-		[DontSerialize][BsonIgnore] public List<Genre> Genres => Game?.Genres;
-		[DontSerialize][BsonIgnore] public List<Tag> Tags => Game?.Tags;
-		[DontSerialize][BsonIgnore] public List<Guid> GenreIds => Game?.GenreIds;
-		[DontSerialize][BsonIgnore] public List<Platform> Platforms => Game?.Platforms;
-		[DontSerialize][BsonIgnore] public ulong Playtime => Game?.Playtime ?? default;
-		[DontSerialize][BsonIgnore] public ulong PlayCount => Game?.PlayCount ?? default;
-		[DontSerialize][BsonIgnore] public bool Favorite => Game?.Favorite ?? default;
-		[DontSerialize][BsonIgnore] public GameSource Source => Game?.Source;
-		[DontSerialize][BsonIgnore] public bool IsInstalled => Game?.IsInstalled ?? default;
+		[DontSerialize] public Guid SourceId => Game?.SourceId ?? default;
+		[DontSerialize] public DateTime? LastActivity => Game?.LastActivity;
+		[DontSerialize] public bool Hidden => Game?.Hidden ?? default;
+		[DontSerialize] public string Icon => Game?.Icon ?? string.Empty;
+		[DontSerialize] public string CoverImage => Game?.CoverImage ?? string.Empty;
+		[DontSerialize] public string BackgroundImage => Game?.BackgroundImage ?? string.Empty;
+		[DontSerialize] public List<Genre> Genres => Game?.Genres;
+		[DontSerialize] public List<Tag> Tags => Game?.Tags;
+		[DontSerialize] public List<Guid> GenreIds => Game?.GenreIds;
+		[DontSerialize] public List<Platform> Platforms => Game?.Platforms;
+		[DontSerialize] public ulong Playtime => Game?.Playtime ?? default;
+		[DontSerialize] public ulong PlayCount => Game?.PlayCount ?? default;
+		[DontSerialize] public bool Favorite => Game?.Favorite ?? default;
+		[DontSerialize] public GameSource Source => Game?.Source;
+		[DontSerialize] public bool IsInstalled => Game?.IsInstalled ?? default;
 
 		#endregion
 

@@ -1,9 +1,13 @@
+/*
 using LiteDB;
+using CommonPluginsShared.Models;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -42,12 +46,12 @@ namespace CommonPluginsShared.Collections
 		private const int DatabasePollIntervalMilliseconds = 200;
 
 		/// <summary>Maximum number of backup files retained by <see cref="BackupDatabase"/>.</summary>
-		private const int MaxBackupCount = 3;
+		private int _maxBackupCount;
 
 		/// <summary>Full path to the .db file; stored for backup file naming.</summary>
 		private readonly string _dbPath;
 
-		private readonly LiteDatabase _db;
+		private LiteDatabase _db;
 
 		/// <summary>
 		/// LiteDB collection handle.
@@ -95,38 +99,104 @@ namespace CommonPluginsShared.Collections
 		/// and seeds the in-memory document counter.
 		/// </summary>
 		/// <param name="dbPath">Full path to the .db file.</param>
-		public LiteDbItemCollection(string dbPath)
+		public LiteDbItemCollection(string dbPath, int maxBackupCount = 5)
 		{
 			_dbPath = dbPath;
+			_maxBackupCount = maxBackupCount < 3 ? 3 : maxBackupCount;
 
-			var connectionString = new ConnectionString(dbPath)
+			InitializeDatabase(dbPath);
+		}
+
+		/// <summary>Gets the number of backups retained on rotation.</summary>
+		public int MaxBackupCount => _maxBackupCount;
+
+		/// <summary>Sets the number of backups retained on rotation.</summary>
+		public void SetBackupRetentionCount(int value)
+		{
+			_maxBackupCount = value < 3 ? 3 : value;
+		}
+
+		private void InitializeDatabase(string dbPath)
+		{
+			void openDb()
 			{
-				// Disabled for write performance. Risk: no crash recovery.
-				// Mitigate with regular BackupDatabase() calls.
-				Journal = false,
+				var connectionString = new ConnectionString(dbPath)
+				{
+					CacheSize = 0,
+					Mode = LiteDB.FileMode.Exclusive
+				};
 
-				// Disable LiteDB's internal page cache; the session cache above handles reads.
-				CacheSize = 0,
+				_db = new LiteDatabase(connectionString);
+				_collection = _db.GetCollection<TItem>("items");
 
-				// Shared mode so external tools (e.g. DB browser) can open the file read-only.
-				Mode = LiteDB.FileMode.Shared
-			};
+				// NOTE: if Id is mapped to _id via [BsonId], this index is redundant.
+				// Kept to guarantee uniqueness regardless of BsonMapper configuration.
+				_collection.EnsureIndex(x => x.Id, unique: true);
+			}
 
-			_db = new LiteDatabase(connectionString);
-			_collection = _db.GetCollection<TItem>("items");
+			void verifyDb()
+			{
+				// Attempt to count and find all to provoke any read exceptions caused by corruption
+				_count = _collection.Count();
+				var allItems = _collection.FindAll().ToList();
+				
+				foreach (var collName in _db.GetCollectionNames().Where(a => a != _collection.Name))
+				{
+					var coll = _db.GetCollection(collName);
+					coll.Count();
+					coll.FindAll().ToList();
+				}
+			}
 
-			// NOTE: if Id is mapped to _id via [BsonId], this index is redundant.
-			// Kept to guarantee uniqueness regardless of BsonMapper configuration.
-			_collection.EnsureIndex(x => x.Id, unique: true);
+			openDb();
 
-			_count = _collection.Count();
+			try
+			{
+				verifyDb();
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, string.Format("DB file {0} is most likely damaged, trying to restore...", dbPath));
+				_sessionCache.Clear();
+				_db?.Dispose();
+
+				// Rename damaged DB
+				string dbName = Path.GetFileNameWithoutExtension(dbPath);
+				string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+				string damagedPath = Path.Combine(Path.GetDirectoryName(dbPath) ?? "", string.Format("{0}_{1}.damaged.db", dbName, timestamp));
+				File.Copy(dbPath, damagedPath, true);
+				Logger.Info(string.Format("Renamed damaged DB to {0}", damagedPath));
+
+				// Find latest backup and restore
+				string backupDir = Path.GetDirectoryName(dbPath) ?? "";  // Assume backups in same dir as dbPath
+				string latestBackup = GetLatestBackupPath(backupDir, dbName);
+				bool restored = false;
+				if (!string.IsNullOrEmpty(latestBackup))
+				{
+					restored = RestoreDatabase(latestBackup);
+					Logger.Info(string.Format("Auto-restore from latest backup {0}: {1}", latestBackup, restored ? "Success" : "Failed"));
+				}
+				else
+				{
+					Logger.Warn("No valid backup found - fallback to empty DB like Playnite.");
+				}
+
+				if (!restored)
+				{
+					Logger.Warn("Recreating an empty database as last resort.");
+					RecreateEmptyDb();  // Use helper from RestoreDatabase
+				}
+
+				// Re-verify after recovery
+				verifyDb();
+			}
 		}
 
 		/// <summary>
 		/// Eagerly loads all items from LiteDB into the session cache.
 		/// Call once at plugin startup, before the UI becomes interactive, to eliminate
 		/// per-item DB round-trips during list rendering.
-		/// Idempotent — subsequent calls return the current cache size immediately.
+		/// Idempotent â€” subsequent calls return the current cache size immediately.
 		/// </summary>
 		/// <returns>
 		/// Number of items loaded into the cache on this call, or 0 if already warmed.
@@ -145,7 +215,7 @@ namespace CommonPluginsShared.Collections
 				loaded++;
 			}
 
-			Logger.Info(string.Format("PreWarm — loaded {0} items into session cache.", loaded));
+			Logger.Info(string.Format("PreWarm â€” loaded {0} items into session cache.", loaded));
 			return loaded;
 		}
 
@@ -181,14 +251,22 @@ namespace CommonPluginsShared.Collections
 				return cached;
 			}
 
-			// Cache miss — fetch from LiteDB and populate the cache for subsequent reads.
-			TItem item = _collection.FindById(new BsonValue(id));
-			if (item != null)
+			// Cache miss â€” fetch from LiteDB and populate the cache for subsequent reads.
+			try
 			{
-				_sessionCache[id] = item;
-			}
+				TItem item = _collection.FindById(new BsonValue(id));
+				if (item != null)
+				{
+					_sessionCache[id] = item;
+				}
 
-			return item;
+				return item;
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, $"Failed to read stored item data for {id}");
+				return null;
+			}
 		}
 
 		/// <summary>
@@ -252,13 +330,20 @@ namespace CommonPluginsShared.Collections
 			}
 
 			// LiteDB Upsert returns true when a new document is inserted, false on update.
-			bool inserted = _collection.Upsert(item);
-			if (inserted)
+			try
 			{
-				Interlocked.Increment(ref _count);
-			}
+				bool inserted = _collection.Upsert(item);
+				if (inserted)
+				{
+					Interlocked.Increment(ref _count);
+				}
 
-			_sessionCache[item.Id] = item;
+				_sessionCache[item.Id] = item;
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, $"Failed to upsert item data for {item.Id}");
+			}
 		}
 
 		/// <summary>
@@ -371,7 +456,7 @@ namespace CommonPluginsShared.Collections
 					Upsert(item);
 
 					Common.LogDebug(true, string.Format(
-						"SetGameInfo — marking item {0} as deleted (game not found).", id));
+						"SetGameInfo â€” marking item {0} as deleted (game not found).", id));
 				}
 			}
 			catch (Exception ex)
@@ -402,7 +487,7 @@ namespace CommonPluginsShared.Collections
 			}
 
 			Common.LogDebug(true, string.Format(
-				"SetGameInfo — bulk update for {0} items.", allItems.Count));
+				"SetGameInfo â€” bulk update for {0} items.", allItems.Count));
 
 			foreach (TItem item in allItems)
 			{
@@ -418,7 +503,7 @@ namespace CommonPluginsShared.Collections
 					{
 						item.IsDeleted = true;
 						Common.LogDebug(true, string.Format(
-							"SetGameInfo — marking item {0} ({1}) as deleted.", item.Id, item.Name));
+							"SetGameInfo â€” marking item {0} ({1}) as deleted.", item.Id, item.Name));
 					}
 
 					// Each Upsert is an individual auto-commit in LiteDB 4.
@@ -433,7 +518,7 @@ namespace CommonPluginsShared.Collections
 			}
 
 			Common.LogDebug(true, string.Format(
-				"SetGameInfo — bulk update completed for {0} items.", allItems.Count));
+				"SetGameInfo â€” bulk update completed for {0} items.", allItems.Count));
 		}
 
 		#endregion
@@ -467,10 +552,10 @@ namespace CommonPluginsShared.Collections
 			string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 			string backupPath = Path.Combine(backupDirectory, string.Format("{0}_{1}.db", dbName, timestamp));
 
-			Logger.Info(string.Format("BackupDatabase — creating backup at '{0}'.", backupPath));
+			Logger.Info(string.Format("BackupDatabase â€” creating backup at '{0}'.", backupPath));
 
 			// Snapshot: read all current documents and write them to a new LiteDB file.
-			// InsertBulk uses an internal batch mechanism — no manual transaction needed here.
+			// InsertBulk uses an internal batch mechanism â€” no manual transaction needed here.
 			List<TItem> allItems = _collection.FindAll().ToList();
 			using (var backupDb = new LiteDatabase(backupPath))
 			{
@@ -483,7 +568,7 @@ namespace CommonPluginsShared.Collections
 			}
 
 			Logger.Info(string.Format(
-				"BackupDatabase — {0} items written to '{1}'.", allItems.Count, backupPath));
+				"BackupDatabase â€” {0} items written to '{1}'.", allItems.Count, backupPath));
 
 			// Remove backup files beyond the MaxBackupCount limit (oldest first).
 			EnforceBackupRotation(backupDirectory, dbName);
@@ -492,60 +577,213 @@ namespace CommonPluginsShared.Collections
 		}
 
 		/// <summary>
-		/// Replaces the entire collection content with data from <paramref name="backupFilePath"/>.
-		/// The current collection is dropped and recreated; the session cache is refreshed on success.
-		/// NOTE: LiteDB 4 has no public transaction API. The restore uses <c>InsertBulk</c> which
-		/// is safe here because the collection is freshly recreated (no duplicates possible).
-		/// FIX (revised) — BeginTrans/Commit/Rollback removed; not available in LiteDB 4.
+		/// Returns metadata about the active database file.
 		/// </summary>
-		/// <param name="backupFilePath">
-		/// Full path to a backup .db file previously created by <see cref="BackupDatabase"/>.
-		/// </param>
-		/// <exception cref="FileNotFoundException">
-		/// Thrown when <paramref name="backupFilePath"/> does not exist.
-		/// </exception>
-		public void RestoreDatabase(string backupFilePath)
+		public DatabaseBackupInfo GetCurrentDatabaseInfo()
 		{
 			ThrowIfDisposed();
 
-			if (!File.Exists(backupFilePath))
+			DateTime? lastEntryDate = null;
+			List<TItem> items = _collection.FindAll().ToList();
+			if (items.Count > 0)
 			{
-				throw new FileNotFoundException("Backup file not found.", backupFilePath);
+				lastEntryDate = items
+					.Where(x => x.DateLastRefresh != default(DateTime))
+					.Select(x => (DateTime?)x.DateLastRefresh)
+					.OrderByDescending(x => x)
+					.FirstOrDefault();
 			}
 
-			Logger.Info(string.Format("RestoreDatabase — restoring from '{0}'.", backupFilePath));
+			return new DatabaseBackupInfo
+			{
+				FilePath = _dbPath,
+				FileName = Path.GetFileName(_dbPath),
+				FileDate = File.Exists(_dbPath) ? File.GetLastWriteTime(_dbPath) : DateTime.MinValue,
+				FileSizeBytes = File.Exists(_dbPath) ? new FileInfo(_dbPath).Length : 0,
+				TotalRows = _count,
+				LastEntryDate = lastEntryDate
+			};
+		}
 
-			// Read the backup first so the source file is not held open during the write phase.
+		/// <summary>
+		/// Lists available backup files and reads metadata from each backup.
+		/// </summary>
+		public IEnumerable<DatabaseBackupInfo> GetBackupInfos(string backupDirectory)
+		{
+			ThrowIfDisposed();
+
+			if (string.IsNullOrEmpty(backupDirectory) || !Directory.Exists(backupDirectory))
+			{
+				return Enumerable.Empty<DatabaseBackupInfo>();
+			}
+
+			string dbName = Path.GetFileNameWithoutExtension(_dbPath);
+			string pattern = string.Format("{0}_*.db", dbName);
+			string[] backupFiles = Directory.GetFiles(backupDirectory, pattern)
+				.OrderByDescending(x => x)
+				.ToArray();
+
+			return backupFiles.Select(CreateBackupInfo).ToList();
+		}
+
+		/// <summary>
+		/// Deletes a backup file from disk.
+		/// </summary>
+		public bool DeleteBackup(string backupFilePath)
+		{
+			ThrowIfDisposed();
+
+			if (string.IsNullOrEmpty(backupFilePath) || !File.Exists(backupFilePath))
+			{
+				return false;
+			}
+
+			try
+			{
+				File.Delete(backupFilePath);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, string.Format("DeleteBackup failed for '{0}'.", backupFilePath));
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Forces restoration from backup, handling all states: missing/corrupt main DB or backup.
+		/// Logs detailed states; recreates empty DB as last resort.
+		/// </summary>
+		/// <param name="backupFilePath">Path to backup .db (must exist and be valid for full restore).</param>
+		/// <returns>true if DB is now usable (restored or empty), false on total failure.</returns>
+		public bool RestoreDatabase(string backupFilePath)
+		{
+			ThrowIfDisposed();
+
+			if (string.IsNullOrEmpty(backupFilePath))
+			{
+				Logger.Error("RestoreDatabase: backupFilePath is null or empty.");
+				return false;
+			}
+
+			bool backupExists = File.Exists(backupFilePath);
+			Logger.Info(string.Format("RestoreDatabase: Backup exists: {0}", backupExists ? "Yes" : "No"));
+
+			if (!backupExists)
+			{
+				Logger.Warn("RestoreDatabase: No backup - recreating empty DB.");
+				RecreateEmptyDb();
+				return true;  // Empty DB is usable
+			}
+
+			// Test backup validity first
 			List<TItem> backupItems;
-			using (var backupDb = new LiteDatabase(backupFilePath))
+			using (var testBackup = new LiteDatabase(backupFilePath))
 			{
-				LiteCollection<TItem> backupCollection = backupDb.GetCollection<TItem>("items");
-				backupItems = backupCollection.FindAll().ToList();
+				var testColl = testBackup.GetCollection<TItem>("items");
+				backupItems = testColl.FindAll().ToList();
 			}
+			Logger.Info(string.Format("RestoreDatabase: Backup valid with {0} items.", backupItems.Count));
 
-			// Drop the current collection for a clean slate, then recreate it.
-			_db.DropCollection("items");
-			_collection = _db.GetCollection<TItem>("items");
-			_collection.EnsureIndex(x => x.Id, unique: true);
-			_sessionCache.Clear();
-
-			if (backupItems.Count > 0)
+			try
 			{
-				// InsertBulk is available in LiteDB 4 and safe here: collection was just recreated.
-				// It batches writes internally for better performance than individual Insert calls.
-				_collection.InsertBulk(backupItems);
+				// Force clean restore (drop current, even if corrupt)
+				_db.DropCollection("items");
+				_collection = _db.GetCollection<TItem>("items");
+				_collection.EnsureIndex(x => x.Id, unique: true);
 
-				// Populate the session cache with the restored data.
+				_sessionCache.Clear();
+
+				if (backupItems.Count > 0)
+				{
+					_collection.InsertBulk(backupItems);
+				}
+
 				foreach (TItem item in backupItems)
 				{
 					_sessionCache[item.Id] = item;
 				}
+				Interlocked.Exchange(ref _count, backupItems.Count);
+
+				Logger.Info(string.Format("RestoreDatabase: Successfully restored {0} items from backup.", backupItems.Count));
+				return true;
 			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, "RestoreDatabase: Write failed - recreating empty DB as fallback.");
+				RecreateEmptyDb();
+				return true;  // Empty DB usable
+			}
+		}
 
-			Interlocked.Exchange(ref _count, backupItems.Count);
+		/// <summary>Private helper: recreates empty collection (like Playnite fallback).</summary>
+		private void RecreateEmptyDb()
+		{
+			try
+			{
+				_db.DropCollection("items");
+				_collection = _db.GetCollection<TItem>("items");
+				_collection.EnsureIndex(x => x.Id, unique: true);
+				_sessionCache.Clear();
+				Interlocked.Exchange(ref _count, 0);
+				Logger.Info("RestoreDatabase: Empty DB recreated.");
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, "RestoreDatabase: Cannot even recreate empty DB.");
+				throw;  // Fatal: instance unusable
+			}
+		}
 
-			Logger.Info(string.Format(
-				"RestoreDatabase — restored {0} items successfully.", backupItems.Count));
+		/// <summary>Gets path to latest backup file (highest timestamp) in directory.</summary>
+		private string GetLatestBackupPath(string backupDir, string dbName)
+		{
+			string pattern = string.Format("{0}*.db", dbName);
+			var backups = Directory.GetFiles(backupDir, pattern)
+								  .OrderByDescending(f => f)  // Lexico = chrono (yyyyMMddHHmmss)
+								  .ToArray();
+			return backups.Length > 0 ? backups[0] : null;
+		}
+
+		private DatabaseBackupInfo CreateBackupInfo(string backupFilePath)
+		{
+			try
+			{
+				using (var backupDb = new LiteDatabase(backupFilePath))
+				{
+					var backupCollection = backupDb.GetCollection<TItem>("items");
+					List<TItem> items = backupCollection.FindAll().ToList();
+
+					DateTime? lastEntryDate = items
+						.Where(x => x.DateLastRefresh != default(DateTime))
+						.Select(x => (DateTime?)x.DateLastRefresh)
+						.OrderByDescending(x => x)
+						.FirstOrDefault();
+
+					return new DatabaseBackupInfo
+					{
+						FilePath = backupFilePath,
+						FileName = Path.GetFileName(backupFilePath),
+						FileDate = File.GetLastWriteTime(backupFilePath),
+						FileSizeBytes = new FileInfo(backupFilePath).Length,
+						TotalRows = items.Count,
+						LastEntryDate = lastEntryDate
+					};
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, string.Format("Unable to read backup metadata for '{0}'.", backupFilePath));
+				return new DatabaseBackupInfo
+				{
+					FilePath = backupFilePath,
+					FileName = Path.GetFileName(backupFilePath),
+					FileDate = File.Exists(backupFilePath) ? File.GetLastWriteTime(backupFilePath) : DateTime.MinValue,
+					FileSizeBytes = File.Exists(backupFilePath) ? new FileInfo(backupFilePath).Length : 0,
+					TotalRows = 0,
+					LastEntryDate = null
+				};
+			}
 		}
 
 		#endregion
@@ -557,7 +795,7 @@ namespace CommonPluginsShared.Collections
 		/// Reads all <c>*.json</c> files from <paramref name="jsonDirectory"/>, deserialises them,
 		/// bulk-inserts into LiteDB via <see cref="UpsertBatch"/> (single transaction),
 		/// then deletes the successfully migrated JSON files.
-		/// Safe to call multiple times — no-op when no JSON files are present.
+		/// Safe to call multiple times â€” no-op when no JSON files are present.
 		/// </summary>
 		/// <param name="jsonDirectory">Directory that previously contained one JSON file per game.</param>
 		public void MigrateFromJson(string jsonDirectory)
@@ -576,7 +814,7 @@ namespace CommonPluginsShared.Collections
 			}
 
 			Logger.Info(string.Format(
-				"MigrateFromJson — migrating {0} JSON files from '{1}'.",
+				"MigrateFromJson â€” migrating {0} JSON files from '{1}'.",
 				jsonFiles.Length, jsonDirectory));
 
 			var items = new List<TItem>(jsonFiles.Length);
@@ -595,7 +833,7 @@ namespace CommonPluginsShared.Collections
 				}
 				catch (Exception ex)
 				{
-					Logger.Error(ex, string.Format("MigrateFromJson — failed to read '{0}'.", file));
+					Logger.Error(ex, string.Format("MigrateFromJson â€” failed to read '{0}'.", file));
 					failedFiles.Add(file);
 				}
 			}
@@ -617,12 +855,12 @@ namespace CommonPluginsShared.Collections
 				catch (Exception ex)
 				{
 					Logger.Warn(string.Format(
-						"MigrateFromJson — could not delete '{0}': {1}", file, ex.Message));
+						"MigrateFromJson â€” could not delete '{0}': {1}", file, ex.Message));
 				}
 			}
 
 			Logger.Info(string.Format(
-				"MigrateFromJson — done: {0} migrated, {1} failed.",
+				"MigrateFromJson â€” done: {0} migrated, {1} failed.",
 				items.Count, failedFiles.Count));
 		}
 
@@ -652,7 +890,7 @@ namespace CommonPluginsShared.Collections
 			}
 
 			Common.LogDebug(true, string.Format(
-				"WaitForDatabase — waiting before '{0}'.", operationName));
+				"WaitForDatabase â€” waiting before '{0}'.", operationName));
 
 			int elapsed = 0;
 
@@ -667,7 +905,7 @@ namespace CommonPluginsShared.Collections
 				var ex = new TimeoutException(string.Format(
 					"Timed out waiting for Playnite database ({0} ms).", DatabaseOpenTimeoutMilliseconds));
 				Common.LogError(ex, false, string.Format(
-					"{0} aborted — database did not open in time.", operationName));
+					"{0} aborted â€” database did not open in time.", operationName));
 				return false;
 			}
 
@@ -699,20 +937,20 @@ namespace CommonPluginsShared.Collections
 				.OrderByDescending(f => f)
 				.ToArray();
 
-			// Files at index >= MaxBackupCount are older than the retained window.
-			for (int i = MaxBackupCount; i < allBackups.Length; i++)
+			// Files at index >= _maxBackupCount are older than the retained window.
+			for (int i = _maxBackupCount; i < allBackups.Length; i++)
 			{
 				try
 				{
 					File.Delete(allBackups[i]);
 					Logger.Info(string.Format(
-						"BackupDatabase — removed old backup '{0}' (limit: {1}).",
-						allBackups[i], MaxBackupCount));
+						"BackupDatabase â€” removed old backup '{0}' (limit: {1}).",
+						allBackups[i], _maxBackupCount));
 				}
 				catch (Exception ex)
 				{
 					Logger.Warn(string.Format(
-						"BackupDatabase — could not delete old backup '{0}': {1}",
+						"BackupDatabase â€” could not delete old backup '{0}': {1}",
 						allBackups[i], ex.Message));
 				}
 			}
@@ -721,3 +959,4 @@ namespace CommonPluginsShared.Collections
 		#endregion
 	}
 }
+*/

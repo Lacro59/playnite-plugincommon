@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -40,6 +40,13 @@ namespace CommonPluginsControls.LiveChartsCommon
                         DateTime First = DatesPeriodes.Find(x => x.Week == WeekNumber)?.Monday ?? default(DateTime);
                         DateTime Last = DatesPeriodes.Find(x => x.Week == WeekNumber)?.Sunday ?? default(DateTime);
                         DataTitleInfo = "[" + First.ToString(Constants.DateUiFormat) + " - " + Last.ToString(Constants.DateUiFormat) + "]";
+                    }
+                }
+                else if (_data?.Points?.Count > 0 && _data.Points[0].ChartPoint.Instance is CustomerForTime cust)
+                {
+                    if (!string.IsNullOrEmpty(cust.SecondaryName))
+                    {
+                        DataTitleInfo = cust.SecondaryName;
                     }
                 }
                 OnPropertyChanged("DataTitle");

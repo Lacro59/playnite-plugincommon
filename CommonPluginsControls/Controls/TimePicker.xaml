@@ -16,7 +16,7 @@
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Foreground"   Value="{DynamicResource TextBrushDarker}" />
             <Setter Property="FontFamily"   Value="{DynamicResource FontIcoFont}" />
-            <Setter Property="FontSize"     Value="{DynamicResource FontSize}" />
+            <Setter Property="FontSize"     Value="25" />
             <Setter Property="Padding"      Value="4,2" />
             <Setter Property="Cursor"       Value="Hand" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -96,7 +96,7 @@
             <TextBlock Style="{DynamicResource BaseTextBlockStyle}"
                        Text="&#xEC4E;"
                        FontFamily="{DynamicResource FontIcoFont}"
-                       FontSize="{DynamicResource FontSize}"
+                       FontSize="30"
                        Foreground="{DynamicResource TextBrushDarker}"
                        VerticalAlignment="Center"
                        Margin="0,0,10,0"
