@@ -327,18 +327,18 @@ Veuillez vérifier les paramètres du plugin.</sys:String>
     <sys:String x:Key="LOCCommonDbMaintenanceBackupHint">Sélectionnez une sauvegarde à restaurer ou à supprimer.</sys:String>
     <sys:String x:Key="LOCCommonDbMaintenanceColBackupFile">Fichier de sauvegarde</sys:String>
     <sys:String x:Key="LOCCommonDbMaintenanceColRows">Lignes</sys:String>
-    <sys:String x:Key="LOCCommonDbMaintenanceColSize">Size</sys:String>
-    <sys:String x:Key="LOCCommonDbMaintenanceColLastEntry">Last entry</sys:String>
-    <sys:String x:Key="LOCCommonDbMaintenanceColCreated">Created</sys:String>
-    <sys:String x:Key="LOCCommonDbMaintenanceDeleteBackup">Delete selected backup</sys:String>
-    <sys:String x:Key="LOCCommonDbMaintenanceRestoreBackup">Restore selected backup</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColSize">Taille</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColLastEntry">Dernier accès</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceColCreated">Créé</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceDeleteBackup">Effacer la sauvegarde sélectionnée</sys:String>
+    <sys:String x:Key="LOCCommonDbMaintenanceRestoreBackup">Restaurer la sauvegarde sélectionnée</sys:String>
 
     <!-- ==================== DROPDOWN ITEM LIST (DdItemListSelectionBox) ==================== -->
 
 	<sys:String x:Key="LOCDdItemList_ClearSelection">Effacer la sélection</sys:String>
-	<sys:String x:Key="LOCDdItemList_NoItems">No items available</sys:String>
-	<sys:String x:Key="LOCDdItemList_SearchPlaceholder">Search...</sys:String>
-	<sys:String x:Key="LOCDdItemList_ShowSelectedOnly">Show selected items only</sys:String>
+	<sys:String x:Key="LOCDdItemList_NoItems">Aucun élément disponible</sys:String>
+	<sys:String x:Key="LOCDdItemList_SearchPlaceholder">Recherche...</sys:String>
+	<sys:String x:Key="LOCDdItemList_ShowSelectedOnly">Afficher uniquement les éléments sélectionnés</sys:String>
 
 	<!-- ==================== VARIABLES TOOLTIP ==================== -->
 
