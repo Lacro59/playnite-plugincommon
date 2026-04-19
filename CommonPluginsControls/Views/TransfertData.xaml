@@ -79,7 +79,7 @@
             <!-- ─────────────────────────────────────────────────────────────
                  Bottom action bar
                  ───────────────────────────────────────────────────────────── -->
-            <Border Style="{StaticResource TopSeparatorBorder}"
+            <Border Style="{DynamicResource TopSeparatorBorder}"
                     DockPanel.Dock="Bottom"
                     Margin="0,14,0,0">
                 <DockPanel LastChildFill="False" Margin="0,10,0,0">

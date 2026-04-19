@@ -16,7 +16,7 @@
         <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter" />
     </UserControl.Resources>
 
-    <Border Style="{StaticResource TopSeparatorBorder}">
+    <Border Style="{DynamicResource TopSeparatorBorder}">
 
         <Grid Margin="15">
             <Grid.RowDefinitions>

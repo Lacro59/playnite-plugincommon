@@ -12,7 +12,7 @@
 
     </UserControl.Resources>
 
-    <Border Style="{StaticResource TopSeparatorBorder}">
+    <Border Style="{DynamicResource TopSeparatorBorder}">
 
         <Grid MaxWidth="900" MinWidth="650">
             <DockPanel LastChildFill="True" Margin="20">
