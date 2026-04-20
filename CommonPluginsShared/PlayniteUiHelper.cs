@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using Playnite.SDK;
 
 namespace CommonPluginsShared
@@ -51,7 +53,7 @@ namespace CommonPluginsShared
             windowExtension.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             windowExtension.Content = viewExtension;
 
-            ApplyWindowDimensions(windowExtension, viewExtension, windowOptions);
+            ApplyWindowDimensions(windowExtension, viewExtension, windowOptions, windowExtension.Owner);
             ApplyWindowConstraints(windowExtension, windowOptions);
 
             windowExtension.PreviewKeyDown += HandleEsc;
@@ -78,13 +80,14 @@ namespace CommonPluginsShared
         /// Applies window dimensions independently based on available sources.
         /// Priority: WindowOptions > ViewExtension explicit size > ViewExtension min size > SizeToContent
         /// </summary>
-        private static void ApplyWindowDimensions(Window window, UserControl viewExtension, WindowOptions windowOptions)
+        private static void ApplyWindowDimensions(Window window, UserControl viewExtension, WindowOptions windowOptions, Window owner)
         {
             bool widthSet = false;
             bool heightSet = false;
 
-            double screenWidth = SystemParameters.WorkArea.Width;
-            double screenHeight = SystemParameters.WorkArea.Height;
+            Rect workArea = GetOwnerWorkArea(owner);
+            double screenWidth = workArea.Width;
+            double screenHeight = workArea.Height;
 
             // ----- WIDTH -----
             if (windowOptions.Width > 0)
@@ -143,6 +146,39 @@ namespace CommonPluginsShared
             {
                 window.SizeToContent = SizeToContent.Height;
             }
+        }
+
+        /// <summary>
+        /// Gets work area bounds for the monitor containing the owner window.
+        /// Returns dimensions in WPF DIPs to keep percent sizing DPI-aware.
+        /// </summary>
+        private static Rect GetOwnerWorkArea(Window owner)
+        {
+            Rect defaultWorkArea = SystemParameters.WorkArea;
+            if (owner == null)
+            {
+                return defaultWorkArea;
+            }
+
+            IntPtr ownerHandle = new WindowInteropHelper(owner).Handle;
+            if (ownerHandle == IntPtr.Zero)
+            {
+                return defaultWorkArea;
+            }
+
+            System.Windows.Forms.Screen ownerScreen = System.Windows.Forms.Screen.FromHandle(ownerHandle);
+            Rectangle workingAreaPixels = ownerScreen.WorkingArea;
+
+            PresentationSource ownerSource = PresentationSource.FromVisual(owner);
+            if (ownerSource?.CompositionTarget == null)
+            {
+                return defaultWorkArea;
+            }
+
+            System.Windows.Point topLeftDip = ownerSource.CompositionTarget.TransformFromDevice.Transform(new System.Windows.Point(workingAreaPixels.Left, workingAreaPixels.Top));
+			System.Windows.Point bottomRightDip = ownerSource.CompositionTarget.TransformFromDevice.Transform(new System.Windows.Point(workingAreaPixels.Right, workingAreaPixels.Bottom));
+
+            return new Rect(topLeftDip, bottomRightDip);
         }
 
 
