@@ -377,6 +377,10 @@ namespace CommonPluginsShared.Collections
 		private void RunPostLoadMaintenance()
 		{
 			Logger.Info("RunPostLoadMaintenance — started.");
+			Logger.Info(string.Format(
+				"RunPostLoadMaintenance — Playnite DB open: {0}, plugin DB item count: {1}.",
+				API.Instance?.Database?.IsOpen == true,
+				_database?.Count ?? 0));
 
 			try
 			{
@@ -750,9 +754,18 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Removes database entries whose corresponding Playnite game no longer exists.</summary>
 		public virtual void DeleteDataWithDeletedGame()
 		{
+			Logger.Info(string.Format(
+				"DeleteDataWithDeletedGame — started. Playnite DB open: {0}, current plugin DB item count: {1}.",
+				API.Instance?.Database?.IsOpen == true,
+				_database?.Count ?? 0));
+
 			List<TItem> orphaned = _database
 				.Where(x => API.Instance.Database.Games.Get(x.Id) == null)
 				.ToList();
+
+			Logger.Info(string.Format(
+				"DeleteDataWithDeletedGame — identified {0} orphaned item(s).",
+				orphaned.Count));
 
 			foreach (TItem item in orphaned)
 			{
@@ -760,6 +773,11 @@ namespace CommonPluginsShared.Collections
 					"Deleting orphaned data: {0} ({1})", item.Name, item.Id));
 				_database.Remove(item.Id);
 			}
+
+			Logger.Info(string.Format(
+				"DeleteDataWithDeletedGame — completed. Removed: {0}. Remaining plugin DB item count: {1}.",
+				orphaned.Count,
+				_database?.Count ?? 0));
 		}
 
 		#endregion
