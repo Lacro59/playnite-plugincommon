@@ -61,7 +61,7 @@
 
 	<!-- ==================== DATES ==================== -->
 
-	<sys:String x:Key="LOCCommonDateData">Date of data</sys:String>
+	<sys:String x:Key="LOCCommonDateData">تاريخ البيانات</sys:String>
 	<sys:String x:Key="LOCCommonStartDate">Start date</sys:String>
 	<sys:String x:Key="LOCCommonLastUpdate">Last update</sys:String>
 	<sys:String x:Key="LOCCommonSince">Since</sys:String>
@@ -70,40 +70,40 @@
 
 	<sys:String x:Key="LOCCommonNoData">No data</sys:String>
 	<sys:String x:Key="LOCCommonNoDataAvailable">No data available</sys:String>
-	<sys:String x:Key="LOCCommonTotal">Total</sys:String>
+	<sys:String x:Key="LOCCommonTotal">الإجما</sys:String>
 	<sys:String x:Key="LOCCommonCut">Cut</sys:String>
 	<sys:String x:Key="LOCCommonMargin">Margin</sys:String>
 	<sys:String x:Key="LOCCommonMisc">Misc</sys:String>
-	<sys:String x:Key="LOCCommonDatabase">Database</sys:String>
+	<sys:String x:Key="LOCCommonDatabase">قاعدة البيانات</sys:String>
 	<sys:String x:Key="LOCCommonDatabaseMaintenance">Database maintenance</sys:String>
-	<sys:String x:Key="LOCCommonDimensions">Dimensions</sys:String>
-	<sys:String x:Key="LOCCommonStyles">Styles</sys:String>
-	<sys:String x:Key="LOCCommonTypes">Types</sys:String>
-	<sys:String x:Key="LOCCommonProgression">Progression</sys:String>
+	<sys:String x:Key="LOCCommonDimensions">الأبعاد</sys:String>
+	<sys:String x:Key="LOCCommonStyles">الأنماط</sys:String>
+	<sys:String x:Key="LOCCommonTypes">الأنواع</sys:String>
+	<sys:String x:Key="LOCCommonProgression">الت</sys:String>
 	<sys:String x:Key="LOCCommonCompleted">Completed</sys:String>
 	<sys:String x:Key="LOCCommonGameTime">Game time</sys:String>
 
 	<!-- ==================== SORTING ==================== -->
 
 	<sys:String x:Key="LOCCommonDefaultSorting">Default game list sorting</sys:String>
-	<sys:String x:Key="LOCCommonSortByDate">Sort by date</sys:String>
-	<sys:String x:Key="LOCCommonSortByScore">Sort by score</sys:String>
+	<sys:String x:Key="LOCCommonSortByDate">فرز حسب التاريخ</sys:String>
+	<sys:String x:Key="LOCCommonSortByScore">فرز حسب النتيجة</sys:String>
 
 	<!-- ==================== PLAYTIME RANGES ==================== -->
 
-	<sys:String x:Key="LOCCommon0to1">00 to 01 hours</sys:String>
-	<sys:String x:Key="LOCCommon1to5">01 to 05 hours</sys:String>
-	<sys:String x:Key="LOCCommon5to10">05 to 10 hours</sys:String>
-	<sys:String x:Key="LOCCommon10to20">10 to 20 hours</sys:String>
-	<sys:String x:Key="LOCCommon20to30">20 to 30 hours</sys:String>
-	<sys:String x:Key="LOCCommon30to40">30 to 40 hours</sys:String>
-	<sys:String x:Key="LOCCommon40to50">40 to 50 hours</sys:String>
-	<sys:String x:Key="LOCCommon50to60">50 to 60 hours</sys:String>
-	<sys:String x:Key="LOCCommon60to70">60 to 70 hours</sys:String>
-	<sys:String x:Key="LOCCommon70to80">70 to 80 hours</sys:String>
-	<sys:String x:Key="LOCCommon80to90">80 to 90 hours</sys:String>
-	<sys:String x:Key="LOCCommon90to100">90 to 100 hours</sys:String>
-	<sys:String x:Key="LOCCommon100plus">100 hours and more</sys:String>
+	<sys:String x:Key="LOCCommon0to1">00 إلى 01 ساع</sys:String>
+	<sys:String x:Key="LOCCommon1to5">01 إلى 05 ساعات</sys:String>
+	<sys:String x:Key="LOCCommon5to10">05 إلى 10 ساعات</sys:String>
+	<sys:String x:Key="LOCCommon10to20">10 إلى 20 ساع</sys:String>
+	<sys:String x:Key="LOCCommon20to30">20 إلى 30 ساع</sys:String>
+	<sys:String x:Key="LOCCommon30to40">30 إلى 40 ساع</sys:String>
+	<sys:String x:Key="LOCCommon40to50">40 إلى 50 ساع</sys:String>
+	<sys:String x:Key="LOCCommon50to60">50 إلى 60 ساع</sys:String>
+	<sys:String x:Key="LOCCommon60to70">60 إلى 70 ساع</sys:String>
+	<sys:String x:Key="LOCCommon70to80">70 إلى 80 ساع</sys:String>
+	<sys:String x:Key="LOCCommon80to90">80 إلى 90 ساع</sys:String>
+	<sys:String x:Key="LOCCommon90to100">90 إلى 100 ساع</sys:String>
+	<sys:String x:Key="LOCCommon100plus">100 ساعة و أكثر</sys:String>
 
 	<!-- ==================== FILTERS ==================== -->
 
@@ -118,7 +118,7 @@
 	<sys:String x:Key="LOCCommonRecentlyAdded">Recently added</sys:String>
 	<sys:String x:Key="LOCCommonSaveFilters">Save current filters</sys:String>
 	<sys:String x:Key="LOCCommonSearchByName">Search by name...</sys:String>
-	<sys:String x:Key="LOCCommonSelectFilters">Select filters</sys:String>
+	<sys:String x:Key="LOCCommonSelectFilters">اختيار التص</sys:String>
 	<sys:String x:Key="LOCCommonTimeFilters">Time-based filters</sys:String>
 	<sys:String x:Key="LOCCommonUsedFilteredGames">Currently filtered games used</sys:String>
 	<sys:String x:Key="LOCCommonAdditionalOptions">Additional options</sys:String>
@@ -128,27 +128,27 @@
 	<sys:String x:Key="LOCCommonClearSelection">Clear Selection</sys:String>
 	<sys:String x:Key="LOCCommonRefreshSelected">Refresh Selected</sys:String>
 	<sys:String x:Key="LOCCommonSelected">Selected:</sys:String>
-	<sys:String x:Key="LOCCommonSelectGames">Select games</sys:String>
-	<sys:String x:Key="LOCCommonSelectVariable">Select variable</sys:String>
+	<sys:String x:Key="LOCCommonSelectGames">حدد الألعا</sys:String>
+	<sys:String x:Key="LOCCommonSelectVariable">اختر المتغير</sys:String>
 	<sys:String x:Key="LOCCommonTotalFound">Total found</sys:String>
 
 	<!-- ==================== DATA MANAGEMENT ==================== -->
 
 	<sys:String x:Key="LOCCommonAddManually">Add manually</sys:String>
-	<sys:String x:Key="LOCCommonRefreshGameData">Refresh data</sys:String>
-	<sys:String x:Key="LOCCommonRefreshAllData">Refresh all data</sys:String>
-	<sys:String x:Key="LOCCommonDeleteGameData">Delete data</sys:String>
-	<sys:String x:Key="LOCCommonDeletePluginData">Delete plugin data</sys:String>
-	<sys:String x:Key="LOCCommonClearAllDatas">Delete data from all games</sys:String>
+	<sys:String x:Key="LOCCommonRefreshGameData">تحديث البيانات</sys:String>
+	<sys:String x:Key="LOCCommonRefreshAllData">تحديث جميع البيانات</sys:String>
+	<sys:String x:Key="LOCCommonDeleteGameData">حذف البيانات</sys:String>
+	<sys:String x:Key="LOCCommonDeletePluginData">حذف بيانات الإضافة</sys:String>
+	<sys:String x:Key="LOCCommonClearAllDatas">حذف بيانات جميع الألعاب</sys:String>
 	<sys:String x:Key="LOCCommonViewNoData">View games without plugin data</sys:String>
 	<sys:String x:Key="LOCCommonSelectData">Download data for selected games</sys:String>
-	<sys:String x:Key="LOCCommonDownloadPluginData">Download plugin data...</sys:String>
-	<sys:String x:Key="LOCCommonGetAllDatas">Download data for all games</sys:String>
+	<sys:String x:Key="LOCCommonDownloadPluginData">تحميل بيانات الإضافة...</sys:String>
+	<sys:String x:Key="LOCCommonGetAllDatas">تحميل بيانات جميع الألعا</sys:String>
 	<sys:String x:Key="LOCCommonIsolatedPluginData">Isolated plugin data</sys:String>
 
 	<!-- ==================== TAG MANAGEMENT ==================== -->
 
-	<sys:String x:Key="LOCCommonAddAllTags">Add tag for all games</sys:String>
+	<sys:String x:Key="LOCCommonAddAllTags">إضافة علامة لجميع الألعا</sys:String>
 	<sys:String x:Key="LOCCommonAddTagAuto">Automatic tag addition with data addition</sys:String>
 	<sys:String x:Key="LOCCommonAddTPlugin">Add plugin tag...</sys:String>
 	<sys:String x:Key="LOCCommonRemoveAllTags">Remove plugin tag</sys:String>
@@ -173,9 +173,9 @@
 
 	<!-- ==================== FOLDER & FILE MANAGEMENT ==================== -->
 
-	<sys:String x:Key="LOCCommonAddFolder">Add folder</sys:String>
-	<sys:String x:Key="LOCCommonRemoveFolder">Remove folder</sys:String>
-	<sys:String x:Key="LOCCommonAddFilePattern">Add file pattern</sys:String>
+	<sys:String x:Key="LOCCommonAddFolder">إضافة مج</sys:String>
+	<sys:String x:Key="LOCCommonRemoveFolder">ازالة مج</sys:String>
+	<sys:String x:Key="LOCCommonAddFilePattern">إضافة نمط ا</sys:String>
 
 	<!-- ==================== IMPORT / EXPORT ==================== -->
 
@@ -183,7 +183,7 @@
 	<sys:String x:Key="LOCCommonAutoImportOnInstalled">Automatically import for installed games</sys:String>
 	<sys:String x:Key="LOCCommonImporting">Importing...</sys:String>
 	<sys:String x:Key="LOCCommonExport">Export</sys:String>
-	<sys:String x:Key="LOCCommonExportData">Export data</sys:String>
+	<sys:String x:Key="LOCCommonExportData">تصدير البيانات</sys:String>
 	<sys:String x:Key="LOCCommonExportSettings">CSV export settings</sys:String>
 	<sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} data has been exported.
 Do you want to open the directory?</sys:String>
@@ -215,15 +215,15 @@ Do you want to open the directory?</sys:String>
 	<!-- ==================== STORE / AUTHENTICATION ==================== -->
 
 	<sys:String x:Key="LOCCommonAccountConfiguration">Account configuration</sys:String>
-	<sys:String x:Key="LOCCommonAccountName">Account Name</sys:String>
+	<sys:String x:Key="LOCCommonAccountName">اسم الحسا</sys:String>
 	<sys:String x:Key="LOCCommonAuthenticateLabel">Authenticate</sys:String>
 	<sys:String x:Key="LOCCommonControlConfiguration">Control configuration</sys:String>
 	<sys:String x:Key="LOCCommonGetAccountID">Get account ID</sys:String>
 	<sys:String x:Key="LOCCommonHasApiKey">Has API key</sys:String>
 	<sys:String x:Key="LOCCommonIsPrivate">Is private</sys:String>
-	<sys:String x:Key="LOCCommonLoggedIn">User is authenticated</sys:String>
+	<sys:String x:Key="LOCCommonLoggedIn">تم مصادقة المستخ</sys:String>
 	<sys:String x:Key="LOCCommonLoginChecking">Checking authentication status…</sys:String>
-	<sys:String x:Key="LOCCommonNotLoggedIn">Requires authentication</sys:String>
+	<sys:String x:Key="LOCCommonNotLoggedIn">يتطلب المصا</sys:String>
 	<sys:String x:Key="LOCCommonNotLoggedInError">Failed to authenticate user</sys:String>
 	<sys:String x:Key="LOCCommonPrivateChecking">Checking private status…</sys:String>
 	<sys:String x:Key="LOCCommonUseAuthentication">Use authentication</sys:String>
@@ -231,12 +231,12 @@ Do you want to open the directory?</sys:String>
 
 	<!-- Store error messages -->
 	<sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Bad configuration</sys:String>
-	<sys:String x:Key="LOCCommonStoreNoApiKey">{0}: No API key</sys:String>
+	<sys:String x:Key="LOCCommonStoreNoApiKey">{0}: لا يوجد مفتاح API</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: No configuration found</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticated</sys:String>
 
 	<!-- Ignored items -->
-	<sys:String x:Key="LOCCommonIgnoredItems">Ignored items</sys:String>
+	<sys:String x:Key="LOCCommonIgnoredItems">العناصر الم</sys:String>
 	<sys:String x:Key="LOCCommonInputItemIgnore">Input the item to ignore</sys:String>
 	<sys:String x:Key="LOCCommonNotIgnoredItems">Not ignored items</sys:String>
 
@@ -250,52 +250,52 @@ Do you want to open the directory?</sys:String>
 	<sys:String x:Key="LOCCommonControlsPluginButtonShowInContextMenu">Display the data in context menu</sys:String>
 	<sys:String x:Key="LOCCommonControlsPluginViewItemShow">Display the data in games list</sys:String>
 	<sys:String x:Key="LOCCommonControlsVisibleNoData">Display when there is no data</sys:String>
-	<sys:String x:Key="LOCCommonIconStore">Show store icon</sys:String>
+	<sys:String x:Key="LOCCommonIconStore">إظهار أيقونة المتجر</sys:String>
 	<sys:String x:Key="LOCCommonMenuInExtensions">Show plugin menu in extensions submenu *</sys:String>
-	<sys:String x:Key="LOCCommonSaveColumOrder">Save column order</sys:String>
+	<sys:String x:Key="LOCCommonSaveColumOrder">حفظ ترتيب الأع</sys:String>
 
 	<!-- Integration — appearance -->
-	<sys:String x:Key="LOCCommonIntegration">Appearance</sys:String>
+	<sys:String x:Key="LOCCommonIntegration">إعدادات المظهر</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButton">Show plugin button in game details</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonDetails">Button with details</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonHeader">Display the plugin button in window title bar</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonIsToggle">With a toggle button</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">Only show icon</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonDetails">زر بتفاص</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonHeader">عرض زر الإضافة في شريط عنوان النافذ</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonIsToggle">باستخدام زر الت</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">إظهار الأيقونة فقط</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButtonOptions">Button options</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonSide">Display the plugin button in the side bar</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonSide">عرض زر الإضافة في الشريط الجا</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationChartOptions">Chart options</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationInCustomTheme">Enable custom theme integration (Only if integrated in custom theme)</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationInCustomTheme">تمكين تكامل السمة المخصصة (فقط إذا تم إدماجها في السمة المخصصة)</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationInDescription">Show plugin information in game details</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationListOptions">List options</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationListOptions">خيارات القائ</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationSelectElements">Details view components</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationShowTitle">Show title</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationShowTitle">إظهار العنوا</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationTopGameDetails">Show above game description</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationViewItemOptions">View item options</sys:String>
 
 	<!-- Integration — fullscreen -->
-	<sys:String x:Key="LOCCommonIntegrationFullScreen">Fullscreen</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Enable fullscreen integration</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationFullScreen">ملء الشاش</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationFullScreenEnable">تمكين تكامل ملء الشاش</sys:String>
 
 	<!-- ==================== PROGRESS / STATUS ==================== -->
 
 	<sys:String x:Key="LOCCommonAddingAllTag">Adding tag for all games...</sys:String>
-	<sys:String x:Key="LOCCommonClearingAllTag">Clearing database...</sys:String>
-	<sys:String x:Key="LOCCommonConverting">Converting, please wait...</sys:String>
+	<sys:String x:Key="LOCCommonClearingAllTag">مسح قاعدة البيانات...</sys:String>
+	<sys:String x:Key="LOCCommonConverting">جاري التحويل، الرجاء الانتظار...</sys:String>
 	<sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games...</sys:String>
-	<sys:String x:Key="LOCCommonGettingData">Downloading data...</sys:String>
+	<sys:String x:Key="LOCCommonGettingData">جارٍ تحميل البيانات...</sys:String>
 	<sys:String x:Key="LOCCommonGettingInstalledDatas">Downloading data from installed games...</sys:String>
 	<sys:String x:Key="LOCCommonGettingNewDatas">Downloading data from new games...</sys:String>
-	<sys:String x:Key="LOCCommonProcessing">Processing, please wait...</sys:String>
+	<sys:String x:Key="LOCCommonProcessing">جارٍ، الرجاء الانتظار...</sys:String>
 	<sys:String x:Key="LOCCommonRemovingAllTag">Removing tag from all games...</sys:String>
 
 	<!-- ==================== NOTIFICATIONS & ERRORS ==================== -->
 
-	<sys:String x:Key="LOCCommonCreateLog">Do you want to create a log package?</sys:String>
+	<sys:String x:Key="LOCCommonCreateLog">Do you want create a log package?</sys:String>
 	<sys:String x:Key="LOCCommonDataErrorRemove">Error removing plugin data. Please try again.</sys:String>
-	<sys:String x:Key="LOCCommonDataRemove">Plugin data has been removed.</sys:String>
+	<sys:String x:Key="LOCCommonDataRemove">تم إزالة بيانات الإضافة.</sys:String>
 	<sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: user is not authenticated.</sys:String>
 
-	<sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Impossible to delete cache folder:
+	<sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">لا يمكن حذف مجلد الذاكرة المؤقتة:
 {0}</sys:String>
 
 	<sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">Error retrieving data from {0}.
