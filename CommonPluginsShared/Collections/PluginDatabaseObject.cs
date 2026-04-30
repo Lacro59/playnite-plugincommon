@@ -59,6 +59,7 @@ namespace CommonPluginsShared.Collections
 		/// Override to adjust per-plugin (default: 10 000 ms).
 		/// </summary>
 		protected virtual int DatabaseLoadTimeout => 10000;
+		private const int PlayniteDatabaseOpenTimeoutMilliseconds = 30000;
 
 		private const string LegacyLiteDbMigrationMarkerFileName = ".legacy-litedb-migration.done";
 
@@ -382,6 +383,12 @@ namespace CommonPluginsShared.Collections
 				API.Instance?.Database?.IsOpen == true,
 				_database?.Count ?? 0));
 
+			if (!WaitForPlayniteDatabaseOpen("RunPostLoadMaintenance"))
+			{
+				Logger.Warn("RunPostLoadMaintenance — skipped because Playnite DB did not open within timeout.");
+				return;
+			}
+
 			try
 			{
 				// Synchronises Name / IsSaved / IsDeleted against Playnite's game list.
@@ -395,6 +402,12 @@ namespace CommonPluginsShared.Collections
 
 			try
 			{
+				if (API.Instance?.Database?.IsOpen != true)
+				{
+					Logger.Warn("RunPostLoadMaintenance — skipping DeleteDataWithDeletedGame because Playnite DB is not open.");
+					return;
+				}
+
 				// An exception here would have silently aborted LoadDatabase() and kept IsLoaded = false.
 				DeleteDataWithDeletedGame();
 			}
@@ -404,6 +417,43 @@ namespace CommonPluginsShared.Collections
 			}
 
 			Logger.Info("RunPostLoadMaintenance — completed.");
+		}
+
+		/// <summary>
+		/// Waits until the Playnite database is open before running maintenance operations
+		/// that rely on API.Instance.Database.Games lookups.
+		/// </summary>
+		private bool WaitForPlayniteDatabaseOpen(string operationName)
+		{
+			if (API.Instance?.Database?.IsOpen == true)
+			{
+				return true;
+			}
+
+			Logger.Info(string.Format(
+				"{0} — waiting for Playnite DB to open (timeout: {1} ms).",
+				operationName,
+				PlayniteDatabaseOpenTimeoutMilliseconds));
+
+			int elapsed = 0;
+			const int pollInterval = 100;
+
+			while (API.Instance?.Database?.IsOpen != true && elapsed < PlayniteDatabaseOpenTimeoutMilliseconds)
+			{
+				Thread.Sleep(pollInterval);
+				elapsed += pollInterval;
+			}
+
+			bool isOpen = API.Instance?.Database?.IsOpen == true;
+			if (!isOpen)
+			{
+				Logger.Warn(string.Format(
+					"{0} — Playnite DB did not open within {1} ms.",
+					operationName,
+					PlayniteDatabaseOpenTimeoutMilliseconds));
+			}
+
+			return isOpen;
 		}
 
 		/// <summary>
