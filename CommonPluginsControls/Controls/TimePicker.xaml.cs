@@ -2,6 +2,7 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace CommonPluginsControls.Controls
@@ -125,6 +126,45 @@ namespace CommonPluginsControls.Controls
             {
                 e.Handled = true;
                 tb.Focus();
+            }
+        }
+
+        /// <summary>
+        /// Commits typed digits to the view model. Text boxes use OneWay display bindings, so
+        /// keyboard input must be applied explicitly (spinner commands update the VM directly).
+        /// </summary>
+        private void NumericField_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            var tb = sender as TextBox;
+            if (tb == null)
+            {
+                return;
+            }
+
+            var tag = tb.Tag as string;
+            if (string.IsNullOrEmpty(tag))
+            {
+                return;
+            }
+
+            var text = (tb.Text ?? string.Empty).Trim();
+            if (text.Length == 0 || !int.TryParse(text, out var value))
+            {
+                BindingOperations.GetBindingExpression(tb, TextBox.TextProperty)?.UpdateTarget();
+                return;
+            }
+
+            if (string.Equals(tag, "Hours", StringComparison.Ordinal))
+            {
+                _vm.Hours = value;
+            }
+            else if (string.Equals(tag, "Minutes", StringComparison.Ordinal))
+            {
+                _vm.Minutes = value;
+            }
+            else if (string.Equals(tag, "Seconds", StringComparison.Ordinal))
+            {
+                _vm.Seconds = value;
             }
         }
 
