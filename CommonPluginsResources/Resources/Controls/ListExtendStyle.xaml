@@ -35,8 +35,14 @@
     <!-- ── ListView: TextBlock (primary) ────────────────────────────────────── -->
     <Style x:Key="ListExtendStyleTextBlock"
            TargetType="{x:Type TextBlock}"
-           BasedOn="{StaticResource BaseTextBlockStyle}">
+           BasedOn="{StaticResource {x:Type TextBlock}}">
+        <Setter Property="FontSize"   Value="{DynamicResource FontSize}" />
+        <Setter Property="FontFamily" Value="{DynamicResource FontFamily}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
         <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5" />
+            </Trigger>
             <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}},
                                            Path=IsSelected,
                                            FallbackValue=False}"
@@ -55,9 +61,14 @@
     -->
     <Style x:Key="ListExtendStyleTextBlockDarker"
            TargetType="{x:Type TextBlock}"
-           BasedOn="{StaticResource BaseTextBlockStyle}">
+           BasedOn="{StaticResource {x:Type TextBlock}}">
+        <Setter Property="FontSize"   Value="{DynamicResource FontSize}" />
+        <Setter Property="FontFamily" Value="{DynamicResource FontFamily}" />
         <Setter Property="Foreground" Value="{DynamicResource TextBrushDarker}" />
         <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5" />
+            </Trigger>
             <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListViewItem}},
                                            Path=IsSelected,
                                            FallbackValue=False}"
@@ -88,8 +99,14 @@
     <!-- ── ListBox: TextBlock (primary) ─────────────────────────────────────── -->
     <Style x:Key="ListBoxExtendStyleTextBlock"
            TargetType="{x:Type TextBlock}"
-           BasedOn="{StaticResource BaseTextBlockStyle}">
+           BasedOn="{StaticResource {x:Type TextBlock}}">
+        <Setter Property="FontSize"   Value="{DynamicResource FontSize}" />
+        <Setter Property="FontFamily" Value="{DynamicResource FontFamily}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
         <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5" />
+            </Trigger>
             <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
                                            Path=IsSelected,
                                            FallbackValue=False}"
@@ -104,9 +121,14 @@
     <!-- ── ListBox: TextBlock (secondary / muted) ───────────────────────────── -->
     <Style x:Key="ListBoxExtendStyleTextBlockDarker"
            TargetType="{x:Type TextBlock}"
-           BasedOn="{StaticResource BaseTextBlockStyle}">
+           BasedOn="{StaticResource {x:Type TextBlock}}">
+        <Setter Property="FontSize"   Value="{DynamicResource FontSize}" />
+        <Setter Property="FontFamily" Value="{DynamicResource FontFamily}" />
         <Setter Property="Foreground" Value="{DynamicResource TextBrushDarker}" />
         <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5" />
+            </Trigger>
             <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
                                            Path=IsSelected,
                                            FallbackValue=False}"
