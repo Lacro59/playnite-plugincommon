@@ -3,24 +3,43 @@
 
     <!-- SECTION: TEXT STYLES -->
 
-    <Style x:Key="SectionHeaderText" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+    <Style x:Key="SectionHeaderText" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+        <Setter Property="FontFamily" Value="{DynamicResource FontFamily}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
         <Setter Property="FontSize"   Value="14" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Margin"     Value="0,0,0,8" />
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
-    <Style x:Key="ViewColumnLabelText" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+    <Style x:Key="ViewColumnLabelText" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+        <Setter Property="FontFamily"        Value="{DynamicResource FontFamily}" />
         <Setter Property="FontSize"          Value="14" />
         <Setter Property="FontWeight"        Value="SemiBold" />
         <Setter Property="Foreground"        Value="{DynamicResource TextBrushDarker}" />
         <Setter Property="VerticalAlignment" Value="Center" />
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
-    <Style x:Key="ViewColumnValueText" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
-        <Setter Property="FontSize"          Value="13" />
+    <Style x:Key="ViewColumnValueText" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+        <Setter Property="FontFamily"        Value="{DynamicResource FontFamily}" />
         <Setter Property="Foreground"        Value="{DynamicResource TextBrush}" />
+        <Setter Property="FontSize"          Value="13" />
         <Setter Property="TextWrapping"      Value="Wrap" />
         <Setter Property="VerticalAlignment" Value="Center" />
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <!-- SECTION: RADIO BUTTON -->
@@ -424,57 +443,19 @@
 
     <!-- ==================== NAV ICON BUTTON ==================== -->
     <!--
-        Compact fixed-size (32×32) button for chart navigation bars.
-        Inherits FontIcoFont, Cursor, FontSize, and base ModernButton template from IconButton.
-        Overrides: fixed Width/Height, border visibility, and hover/disabled triggers
-        to match the Playnite sidebar button visual design.
-        IsEnabled=False: opacity drops to 0.35 (stricter than IconButton's 0.5,
-        intentional — signals "navigation locked" in ShowAllData mode).
+        Compact fixed-size (32x32) button for chart navigation bars.
+        Keep only layout/typography constraints and inherit visual states/colors
+        from the active Playnite theme button style.
     -->
     <Style x:Key="NavIconButton" TargetType="Button" BasedOn="{StaticResource IconButton}">
         <Setter Property="Width"           Value="32" />
         <Setter Property="Height"          Value="32" />
         <Setter Property="Margin"          Value="2,0" />
-        <Setter Property="Foreground"      Value="{DynamicResource GlyphBrush}" />
-        <Setter Property="BorderBrush"     Value="{DynamicResource NormalBorderBrush}" />
-        <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border x:Name="Bd"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="{DynamicResource ControlCornerRadius}"
-                        Padding="{TemplateBinding Padding}">
-                        <ContentPresenter HorizontalAlignment="Center"
-                                          VerticalAlignment="Center" />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <!-- Hover: filled background + accent border -->
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bd" Property="Background"  Value="{DynamicResource HoverBrush}" />
-                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource GlyphBrush}" />
-                        </Trigger>
-                        <!-- Press: slight fade -->
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Bd" Property="Opacity" Value="0.65" />
-                        </Trigger>
-                        <!-- Disabled: stronger fade than IconButton (0.35 vs 0.5)
-                             — signals navigation locked in ShowAllData mode -->
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Opacity" Value="0.35" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
     </Style>
 
-    <!-- NavIconButton active variant: accent border + filled background when toggled ON (ShowAllData). -->
+    <!-- NavIconButton active variant keeps an optional accent without replacing theme triggers. -->
     <Style x:Key="NavIconButtonActive" TargetType="Button" BasedOn="{StaticResource NavIconButton}">
         <Setter Property="BorderBrush" Value="{DynamicResource GlyphBrush}" />
-        <Setter Property="Background"  Value="{DynamicResource HoverBrush}" />
     </Style>
 
     <!--
@@ -487,9 +468,9 @@
     </Style>
 
     <!--
-        NavToggleButton — ToggleButton counterpart of NavIconButton.
-        Same 32×32 fixed size, same hover/press/disabled visual contract.
-        Uses CommonFont by default; override FontFamily for IcoFont glyphs.
+        NavToggleButton — compact ToggleButton for navigation labels/icons.
+        Keep sizing/typography constraints only and inherit visual states/colors
+        from the active Playnite theme ToggleButton style.
     -->
     <Style x:Key="NavToggleButton" TargetType="ToggleButton"
            BasedOn="{StaticResource {x:Type ToggleButton}}">
@@ -499,45 +480,7 @@
         <Setter Property="Margin"          Value="2,0" />
         <Setter Property="FontFamily"      Value="{DynamicResource CommonFont}" />
         <Setter Property="FontSize"        Value="{DynamicResource FontSizeLarge}" />
-        <Setter Property="Foreground"      Value="{DynamicResource GlyphBrush}" />
-        <Setter Property="BorderBrush"     Value="{DynamicResource NormalBorderBrush}" />
-        <Setter Property="BorderThickness" Value="{DynamicResource ControlBorderThickness}" />
         <Setter Property="Cursor"          Value="Hand" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ToggleButton">
-                    <Border x:Name="Bd"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="{DynamicResource ControlCornerRadius}"
-                        Padding="{TemplateBinding Padding}">
-                        <ContentPresenter HorizontalAlignment="Center"
-                                          VerticalAlignment="Center" />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <!-- Hover: filled background + accent border -->
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bd" Property="Background"  Value="{DynamicResource HoverBrush}" />
-                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource GlyphBrush}" />
-                        </Trigger>
-                        <!-- Checked (toggled on): persistent accent fill -->
-                        <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Bd" Property="Background"  Value="{DynamicResource HoverBrush}" />
-                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource GlyphBrush}" />
-                        </Trigger>
-                        <!-- Press: slight fade -->
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Bd" Property="Opacity" Value="0.65" />
-                        </Trigger>
-                        <!-- Disabled: stronger fade — signals "locked" state -->
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Opacity" Value="0.35" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
     </Style>
 
     <!--

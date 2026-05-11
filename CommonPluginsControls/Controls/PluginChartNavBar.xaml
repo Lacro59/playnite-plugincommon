@@ -49,8 +49,7 @@
                     <TextBlock Text="{Binding NavLabel}"
                                Style="{DynamicResource BaseTextBlockStyle}"
                                FontSize="{DynamicResource FontSize}"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource GlyphBrush}" />
+                               FontWeight="SemiBold" />
                 </Border>
 
                 <!-- ── Left: navigation buttons ── -->
@@ -66,8 +65,7 @@
                         <TextBlock Text="&#xEA7B;"
                                    Style="{DynamicResource BaseTextBlockStyle}"
                                    FontFamily="{DynamicResource FontIcoFont}"
-                                   FontSize="{DynamicResource FontSize}"
-                                   Foreground="{DynamicResource GlyphBrush}" />
+                                   FontSize="{DynamicResource FontSize}" />
                     </Button>
 
                     <!-- ⟨⟨ PrevPage — EA71 rounded-double-left
@@ -82,8 +80,7 @@
                         <TextBlock Text="&#xEA71;"
                                    Style="{DynamicResource BaseTextBlockStyle}"
                                    FontFamily="{DynamicResource FontIcoFont}"
-                                   FontSize="{DynamicResource FontSize}"
-                                   Foreground="{DynamicResource GlyphBrush}" />
+                                   FontSize="{DynamicResource FontSize}" />
                     </Button>
 
                     <!-- ‹ Prev — EAB5 simple-left -->
@@ -94,8 +91,7 @@
                         <TextBlock Text="&#xEAB5;"
                                    Style="{DynamicResource BaseTextBlockStyle}"
                                    FontFamily="{DynamicResource FontIcoFont}"
-                                   FontSize="{DynamicResource FontSize}"
-                                   Foreground="{DynamicResource GlyphBrush}" />
+                                   FontSize="{DynamicResource FontSize}" />
                     </Button>
 
                     <!-- ShowAll toggle — style et glyph pilotés par binding sur ShowAllData -->
@@ -104,20 +100,7 @@
                             <ToolTip Content="{Binding ShowAllToolTip}" />
                         </Button.ToolTip>
                         <Button.Style>
-                            <!--
-                                BasedOn="{StaticResource NavIconButton}" is intentionally avoided:
-                                StaticResource is resolved at BAML parse time, before Playnite merges
-                                its theme dictionaries, which crashes the VS designer.
-                                We base on the implicit Button type instead and let the runtime
-                                DynamicResource pipeline apply NavIconButton via the theme.
-                            -->
-                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ShowAllData}" Value="True">
-                                        <Setter Property="Background" Value="{DynamicResource NormalBrushDark}" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}" />
                         </Button.Style>
                         <TextBlock FontFamily="{DynamicResource FontIcoFont}"
                                    FontSize="{DynamicResource FontSize}">
@@ -125,11 +108,9 @@
                                 <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
                                     <!-- EA7D = expand-alt (inactive), EA6F = collapse (active) -->
                                     <Setter Property="Text" Value="&#xEA7D;" />
-                                    <Setter Property="Foreground" Value="{DynamicResource GlyphBrush}" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ShowAllData}" Value="True">
                                             <Setter Property="Text" Value="&#xEA6F;" />
-                                            <Setter Property="Foreground" Value="{DynamicResource HighlightGlyphBrush}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -145,8 +126,7 @@
                         <TextBlock Text="&#xEAB8;"
                                    Style="{DynamicResource BaseTextBlockStyle}"
                                    FontFamily="{DynamicResource FontIcoFont}"
-                                   FontSize="{DynamicResource FontSize}"
-                                   Foreground="{DynamicResource GlyphBrush}" />
+                                   FontSize="{DynamicResource FontSize}" />
                     </Button>
 
                     <!-- ⟩⟩ NextPage — EA72 rounded-double-right
@@ -161,8 +141,7 @@
                         <TextBlock Text="&#xEA72;"
                                    Style="{DynamicResource BaseTextBlockStyle}"
                                    FontFamily="{DynamicResource FontIcoFont}"
-                                   FontSize="{DynamicResource FontSize}"
-                                   Foreground="{DynamicResource GlyphBrush}" />
+                                   FontSize="{DynamicResource FontSize}" />
                     </Button>
 
                     <!-- » Last — EA7C double-right -->
@@ -173,8 +152,7 @@
                         <TextBlock Text="&#xEA7C;"
                                    Style="{DynamicResource BaseTextBlockStyle}"
                                    FontFamily="{DynamicResource FontIcoFont}"
-                                   FontSize="{DynamicResource FontSize}"
-                                   Foreground="{DynamicResource GlyphBrush}" />
+                                   FontSize="{DynamicResource FontSize}" />
                     </Button>
 
                     <!-- AxisLimit controls: −  reset  + -->
@@ -194,8 +172,7 @@
                             <TextBlock Text="&#xEE0B;"
                                        Style="{DynamicResource BaseTextBlockStyle}"
                                        FontFamily="{DynamicResource FontIcoFont}"
-                                       FontSize="{DynamicResource FontSize}"
-                                       Foreground="{DynamicResource GlyphBrush}" />
+                                       FontSize="{DynamicResource FontSize}" />
                         </Button>
 
                         <Button Style="{DynamicResource NavIconButton}"
@@ -227,23 +204,12 @@
                                     </Button.ToolTip>
                                     <Button.Style>
                                         <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                    <Setter Property="Background" Value="{DynamicResource NormalBrushDark}" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
                                         </Style>
                                     </Button.Style>
                                     <TextBlock FontFamily="{DynamicResource FontIcoFont}" FontSize="{DynamicResource FontSize}">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
                                                 <Setter Property="Text" Value="{Binding CurrentIcon}" />
-                                                <Setter Property="Foreground" Value="{DynamicResource GlyphBrush}" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                        <Setter Property="Foreground" Value="{DynamicResource HighlightGlyphBrush}" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>

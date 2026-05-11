@@ -73,7 +73,7 @@
 	<sys:String x:Key="LOCCommonTotal">Total</sys:String>
 	<sys:String x:Key="LOCCommonCut">Cut</sys:String>
 	<sys:String x:Key="LOCCommonMargin">Margin</sys:String>
-	<sys:String x:Key="LOCCommonMisc">Misc</sys:String>
+	<sys:String x:Key="LOCCommonMisc">其他</sys:String>
 	<sys:String x:Key="LOCCommonDatabase">Database</sys:String>
 	<sys:String x:Key="LOCCommonDatabaseMaintenance">Database maintenance</sys:String>
 	<sys:String x:Key="LOCCommonDimensions">Dimensions</sys:String>
@@ -128,16 +128,16 @@
 	<sys:String x:Key="LOCCommonClearSelection">Clear Selection</sys:String>
 	<sys:String x:Key="LOCCommonRefreshSelected">Refresh Selected</sys:String>
 	<sys:String x:Key="LOCCommonSelected">Selected:</sys:String>
-	<sys:String x:Key="LOCCommonSelectGames">Select games</sys:String>
+	<sys:String x:Key="LOCCommonSelectGames">選擇遊戲</sys:String>
 	<sys:String x:Key="LOCCommonSelectVariable">Select variable</sys:String>
 	<sys:String x:Key="LOCCommonTotalFound">Total found</sys:String>
 
 	<!-- ==================== DATA MANAGEMENT ==================== -->
 
-	<sys:String x:Key="LOCCommonAddManually">Add manually</sys:String>
-	<sys:String x:Key="LOCCommonRefreshGameData">Refresh data</sys:String>
-	<sys:String x:Key="LOCCommonRefreshAllData">Refresh all data</sys:String>
-	<sys:String x:Key="LOCCommonDeleteGameData">Delete data</sys:String>
+	<sys:String x:Key="LOCCommonAddManually">手動添加</sys:String>
+	<sys:String x:Key="LOCCommonRefreshGameData">刷新數據</sys:String>
+	<sys:String x:Key="LOCCommonRefreshAllData">刷新全部數據</sys:String>
+	<sys:String x:Key="LOCCommonDeleteGameData">刪除數據</sys:String>
 	<sys:String x:Key="LOCCommonDeletePluginData">Delete plugin data</sys:String>
 	<sys:String x:Key="LOCCommonClearAllDatas">Delete data from all games</sys:String>
 	<sys:String x:Key="LOCCommonViewNoData">View games without plugin data</sys:String>
@@ -215,15 +215,15 @@ Do you want to open the directory?</sys:String>
 	<!-- ==================== STORE / AUTHENTICATION ==================== -->
 
 	<sys:String x:Key="LOCCommonAccountConfiguration">Account configuration</sys:String>
-	<sys:String x:Key="LOCCommonAccountName">Account Name</sys:String>
-	<sys:String x:Key="LOCCommonAuthenticateLabel">Authenticate</sys:String>
+	<sys:String x:Key="LOCCommonAccountName">帳戶名稱</sys:String>
+	<sys:String x:Key="LOCCommonAuthenticateLabel">驗證帳戶</sys:String>
 	<sys:String x:Key="LOCCommonControlConfiguration">Control configuration</sys:String>
 	<sys:String x:Key="LOCCommonGetAccountID">Get account ID</sys:String>
 	<sys:String x:Key="LOCCommonHasApiKey">Has API key</sys:String>
 	<sys:String x:Key="LOCCommonIsPrivate">Is private</sys:String>
-	<sys:String x:Key="LOCCommonLoggedIn">User is authenticated</sys:String>
+	<sys:String x:Key="LOCCommonLoggedIn">帳戶已驗證</sys:String>
 	<sys:String x:Key="LOCCommonLoginChecking">Checking authentication status…</sys:String>
-	<sys:String x:Key="LOCCommonNotLoggedIn">Requires authentication</sys:String>
+	<sys:String x:Key="LOCCommonNotLoggedIn">需要驗證</sys:String>
 	<sys:String x:Key="LOCCommonNotLoggedInError">Failed to authenticate user</sys:String>
 	<sys:String x:Key="LOCCommonPrivateChecking">Checking private status…</sys:String>
 	<sys:String x:Key="LOCCommonUseAuthentication">Use authentication</sys:String>
@@ -255,7 +255,7 @@ Do you want to open the directory?</sys:String>
 	<sys:String x:Key="LOCCommonSaveColumOrder">Save column order</sys:String>
 
 	<!-- Integration — appearance -->
-	<sys:String x:Key="LOCCommonIntegration">Appearance</sys:String>
+	<sys:String x:Key="LOCCommonIntegration">外觀</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButton">Show plugin button in game details</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButtonDetails">Button with details</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButtonHeader">Display the plugin button in window title bar</sys:String>
@@ -290,7 +290,7 @@ Do you want to open the directory?</sys:String>
 
 	<!-- ==================== NOTIFICATIONS & ERRORS ==================== -->
 
-	<sys:String x:Key="LOCCommonCreateLog">Do you want to create a log package?</sys:String>
+	<sys:String x:Key="LOCCommonCreateLog">Do you want create a log package?</sys:String>
 	<sys:String x:Key="LOCCommonDataErrorRemove">Error removing plugin data. Please try again.</sys:String>
 	<sys:String x:Key="LOCCommonDataRemove">Plugin data has been removed.</sys:String>
 	<sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: user is not authenticated.</sys:String>

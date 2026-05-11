@@ -109,9 +109,11 @@
                         ToolTip="{DynamicResource LOCCommonTimePickerIncrease}" />
 
                 <TextBox Style="{StaticResource TimeDigitBox}"
+                         Tag="Hours"
                          Text="{Binding ViewModel.HoursDisplay, ElementName=TimePickerRoot, Mode=OneWay}"
                          PreviewTextInput="NumericField_PreviewTextInput"
                          GotKeyboardFocus="NumericField_GotKeyboardFocus"
+                         LostKeyboardFocus="NumericField_LostKeyboardFocus"
                          PreviewMouseLeftButtonDown="NumericField_PreviewMouseLeftButtonDown"
                          MouseWheel="Hours_OnMouseWheel" />
 
@@ -136,9 +138,11 @@
                         ToolTip="{DynamicResource LOCCommonTimePickerIncrease}" />
 
                 <TextBox Style="{StaticResource TimeDigitBox}"
+                         Tag="Minutes"
                          Text="{Binding ViewModel.MinutesDisplay, ElementName=TimePickerRoot, Mode=OneWay}"
                          PreviewTextInput="NumericField_PreviewTextInput"
                          GotKeyboardFocus="NumericField_GotKeyboardFocus"
+                         LostKeyboardFocus="NumericField_LostKeyboardFocus"
                          PreviewMouseLeftButtonDown="NumericField_PreviewMouseLeftButtonDown"
                          MouseWheel="Minutes_OnMouseWheel" />
 
@@ -176,9 +180,11 @@
                                 ToolTip="{DynamicResource LOCCommonTimePickerIncrease}" />
 
                         <TextBox Style="{StaticResource TimeDigitBox}"
+                                 Tag="Seconds"
                                  Text="{Binding ViewModel.SecondsDisplay, ElementName=TimePickerRoot, Mode=OneWay}"
                                  PreviewTextInput="NumericField_PreviewTextInput"
                                  GotKeyboardFocus="NumericField_GotKeyboardFocus"
+                                 LostKeyboardFocus="NumericField_LostKeyboardFocus"
                                  PreviewMouseLeftButtonDown="NumericField_PreviewMouseLeftButtonDown"
                                  MouseWheel="Seconds_OnMouseWheel" />
 
