@@ -12,6 +12,9 @@ using System.Threading;
 
 namespace CommonPluginsShared
 {
+    /// <summary>
+    /// Encrypts, stores, and retrieves HTTP cookies for plugin WebView authentication flows.
+    /// </summary>
     public class CookiesTools
     {
         internal ILogger Logger => LogManager.GetLogger();
@@ -57,6 +60,11 @@ namespace CommonPluginsShared
 
         #region Methods
 
+        /// <summary>
+        /// Loads encrypted cookies from disk for the configured client.
+        /// Expired cookies are removed before returning.
+        /// </summary>
+        /// <returns>The stored cookie list, or an empty list when none are available.</returns>
         public List<HttpCookie> GetStoredCookies()
         {
             string message = $"No stored cookies for {ClientName}";
@@ -101,6 +109,11 @@ namespace CommonPluginsShared
             return storedCookies;
         }
 
+        /// <summary>
+        /// Encrypts and persists the provided cookies to the configured storage file.
+        /// </summary>
+        /// <param name="httpCookies">Cookies to save. Nothing is written when null or empty.</param>
+        /// <returns><c>true</c> when cookies were saved; otherwise <c>false</c>.</returns>
         public bool SetStoredCookies(List<HttpCookie> httpCookies)
         {
             try
@@ -129,8 +142,11 @@ namespace CommonPluginsShared
         }
 
         /// <summary>
-        /// Retrieve cookies from WebView, optionally filtered by domain and optionally deleting them.
+        /// Retrieves cookies from a WebView, optionally filtered by domain and optionally deleting them.
         /// </summary>
+        /// <param name="deleteCookies">When <c>true</c>, clears domain cookies from the WebView after extraction.</param>
+        /// <param name="webView">Optional WebView instance. An offscreen view is created when null.</param>
+        /// <returns>Filtered cookies for the configured domains.</returns>
         public List<HttpCookie> GetWebCookies(bool deleteCookies = false, IWebView webView = null)
         {
             bool createdLocally = webView == null;
@@ -159,9 +175,28 @@ namespace CommonPluginsShared
         }
 
         /// <summary>
-        /// Retrieve new cookies from specified URLs using a WebView, optionally deleting them.
+        /// Navigates to the specified URLs in a WebView and returns cookies set by those pages.
+        /// Uses a default post-navigation delay of 1000 ms.
         /// </summary>
+        /// <param name="urls">Absolute URLs to visit in order.</param>
+        /// <param name="deleteCookies">When <c>true</c>, clears domain cookies from the WebView after extraction.</param>
+        /// <param name="webView">Optional WebView instance. An offscreen view is created when null.</param>
+        /// <returns>Filtered cookies for the configured domains.</returns>
         public List<HttpCookie> GetNewWebCookies(List<string> urls, bool deleteCookies = false, IWebView webView = null)
+        {
+            return GetNewWebCookies(urls, deleteCookies, webView, 1000);
+        }
+
+        /// <summary>
+        /// Navigates to the specified URLs in a WebView and returns cookies set by those pages.
+        /// Stored cookies are injected into the WebView before navigation.
+        /// </summary>
+        /// <param name="urls">Absolute URLs to visit in order.</param>
+        /// <param name="deleteCookies">When <c>true</c>, clears domain cookies from the WebView after extraction.</param>
+        /// <param name="webView">Optional WebView instance. An offscreen view is created when null.</param>
+        /// <param name="waitAfterNavigateMs">Delay in milliseconds after each navigation before reading cookies. Use 0 to skip the wait.</param>
+        /// <returns>Filtered cookies for the configured domains, or an empty list on failure.</returns>
+        public List<HttpCookie> GetNewWebCookies(List<string> urls, bool deleteCookies, IWebView webView, int waitAfterNavigateMs)
         {
             bool createdLocally = webView == null;
 
@@ -184,10 +219,14 @@ namespace CommonPluginsShared
                     webView.SetCookies("https://" + domain, cookie);
                 });
 
+                int waitMs = waitAfterNavigateMs < 0 ? 0 : waitAfterNavigateMs;
                 urls.ForEach(url =>
                 {
                     webView.NavigateAndWait(url);
-                    Thread.Sleep(1000);
+                    if (waitMs > 0)
+                    {
+                        Thread.Sleep(waitMs);
+                    }
                 });
 
                 return ExtractCookies(webView, deleteCookies);
