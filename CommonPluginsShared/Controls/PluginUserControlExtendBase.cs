@@ -20,10 +20,25 @@ namespace CommonPluginsShared.Controls
 	/// </summary>
 	public class PluginUserControlExtendBase : PluginUserControl
 	{
+		/// <summary>
+		/// Upper bound for debounced updates. If <see cref="RestartTimer"/> keeps resetting the
+		/// short delay timer, <see cref="_updateDeadlineTimer"/> still fires once per burst.
+		/// </summary>
+		private const int MaxUpdateDelayMs = 250;
+
+		/// <summary>
+		/// Coalesces rapid <see cref="INotifyPropertyChanged"/> bursts from plugin settings
+		/// (many properties × many control instances) into a single refresh wave.
+		/// </summary>
+		private const int SettingsCoalesceDelayMs = 50;
+
 		protected static readonly ILogger Logger = LogManager.GetLogger();
 		protected virtual IDataContext controlDataContext { get; set; }
 		protected DispatcherTimer UpdateDataTimer { get; set; }
 		protected Game CurrentGame { get; set; }
+
+		private readonly DispatcherTimer _updateDeadlineTimer;
+		private int _scheduledUpdateGeneration;
 
 		private static readonly object _initLock = new object();
 		private static readonly Dictionary<Type, bool> _typeEventsInitialized = new Dictionary<Type, bool>();
@@ -31,6 +46,9 @@ namespace CommonPluginsShared.Controls
 		private static readonly Dictionary<string, bool> _pluginEventsAttached = new Dictionary<string, bool>();
 		private static readonly List<WeakReference<PluginUserControlExtendBase>> _instances =
 			new List<WeakReference<PluginUserControlExtendBase>>();
+
+		private static readonly object _settingsCoalesceLock = new object();
+		private static DispatcherTimer _settingsCoalesceTimer;
 
 		#region Dependency Properties
 
@@ -139,6 +157,12 @@ namespace CommonPluginsShared.Controls
 				Interval = TimeSpan.FromMilliseconds(Delay)
 			};
 			UpdateDataTimer.Tick += UpdateDataEvent;
+
+			_updateDeadlineTimer = new DispatcherTimer
+			{
+				Interval = TimeSpan.FromMilliseconds(MaxUpdateDelayMs)
+			};
+			_updateDeadlineTimer.Tick += UpdateDeadlineEvent;
 
 #if DEBUG
 			timer.Step("DispatcherTimer created");
@@ -256,8 +280,45 @@ namespace CommonPluginsShared.Controls
 		{
 			return (sender, e) =>
 			{
-				NotifyAllInstances(instance => instance.PluginSettings_PropertyChanged(sender, e));
+				ScheduleCoalescedSettingsRefresh();
 			};
+		}
+
+		/// <summary>
+		/// Coalesces plugin settings <see cref="PropertyChanged"/> notifications before refreshing controls.
+		/// </summary>
+		private static void ScheduleCoalescedSettingsRefresh()
+		{
+			Dispatcher dispatcher = Application.Current?.Dispatcher;
+			if (dispatcher == null)
+			{
+				return;
+			}
+
+			lock (_settingsCoalesceLock)
+			{
+				if (_settingsCoalesceTimer == null)
+				{
+					_settingsCoalesceTimer = new DispatcherTimer
+					{
+						Interval = TimeSpan.FromMilliseconds(SettingsCoalesceDelayMs)
+					};
+					_settingsCoalesceTimer.Tick += OnSettingsCoalesceTick;
+				}
+
+				_settingsCoalesceTimer.Stop();
+				_settingsCoalesceTimer.Start();
+			}
+		}
+
+		private static void OnSettingsCoalesceTick(object sender, EventArgs e)
+		{
+			lock (_settingsCoalesceLock)
+			{
+				_settingsCoalesceTimer?.Stop();
+			}
+
+			NotifyAllInstances(instance => instance.ApplyCoalescedSettingsRefresh());
 		}
 
 		/// <summary>
@@ -306,7 +367,7 @@ namespace CommonPluginsShared.Controls
 
 			if (updatedIds.Contains(GameContext.Id))
 			{
-				GameContextChanged(null, GameContext);
+				ScheduleDataRefresh("database-item-updated");
 			}
 		}
 
@@ -318,7 +379,7 @@ namespace CommonPluginsShared.Controls
 		{
 			if (GameContext != null)
 			{
-				GameContextChanged(null, GameContext);
+				ScheduleDataRefresh("database-collection-changed");
 			}
 		}
 
@@ -369,7 +430,14 @@ namespace CommonPluginsShared.Controls
 				{
 					foreach (PluginUserControlExtendBase instance in alive)
 					{
-						try { action(instance); } catch { }
+						try
+						{
+							action(instance);
+						}
+						catch (Exception ex)
+						{
+							instance.LogNotifyAllInstancesFailure(ex);
+						}
 					}
 				}, DispatcherPriority.Background);
 			}
@@ -385,7 +453,14 @@ namespace CommonPluginsShared.Controls
 					{
 						foreach (PluginUserControlExtendBase instance in groupList)
 						{
-							try { action(instance); } catch { }
+							try
+							{
+								action(instance);
+							}
+							catch (Exception ex)
+							{
+								instance.LogNotifyAllInstancesFailure(ex);
+							}
 						}
 					}, DispatcherPriority.Background);
 				}
@@ -397,7 +472,8 @@ namespace CommonPluginsShared.Controls
 		/// </summary>
 		private void PluginUserControlExtendBase_Unloaded(object sender, RoutedEventArgs e)
 		{
-			UpdateDataTimer.Stop();
+			StopUpdateTimers();
+			LogControlTrace("Unloaded");
 			lock (_initLock)
 			{
 				for (int i = _instances.Count - 1; i >= 0; i--)
@@ -417,14 +493,22 @@ namespace CommonPluginsShared.Controls
 
 		protected virtual void PluginSettings_PropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
+			ApplyCoalescedSettingsRefresh();
+		}
+
+		/// <summary>
+		/// Applies plugin settings to the control and schedules a debounced data refresh.
+		/// </summary>
+		private void ApplyCoalescedSettingsRefresh()
+		{
 			SetDefaultDataContext();
-			GameContextChanged(null, GameContext);
+			ScheduleDataRefresh("settings-changed");
 		}
 
 		public override void GameContextChanged(Game oldContext, Game newContext)
 		{
 #if DEBUG
-			var timer = new DebugTimer(string.Format("{0}.GameContextChanged(game='{1}')", GetType().Name, newContext?.Name ?? "null"));
+			var timer = new DebugTimer(string.Format("{0}.GameContextChanged(game='{1}')", GetInstanceDiagnosticId(), newContext?.Name ?? "null"));
 #endif
 
 			// Cancel any in-flight update for the previous game
@@ -436,6 +520,8 @@ namespace CommonPluginsShared.Controls
 
 			bool isContextSwitch = CurrentGame?.Id != newContext?.Id;
 			CurrentGame = newContext;
+			// Stop only the short debounce timer — do not stop the deadline timer here or
+			// bursts of GameContextChanged (virtualized list, NotifyAllInstances) prevent it from ever firing.
 			UpdateDataTimer.Stop();
 
 			// Reset defaults only on actual game switch — re-arms for the same game
@@ -445,10 +531,25 @@ namespace CommonPluginsShared.Controls
 			{
 				SetVisibility(Visibility.Collapsed);
 				SetDefaultDataContext();
-			}
-
 #if DEBUG
-			timer.Step("SetDefaultDataContext done");
+				timer.Step("SetDefaultDataContext done (context switch)");
+#endif
+
+				// Leading edge: show data as soon as the UI thread can, without waiting for debounce/settings noise.
+				Guid targetGameId = newContext.Id;
+				Dispatcher.BeginInvoke((Action)(async () =>
+				{
+					if (CurrentGame?.Id == targetGameId && GameContext?.Id == targetGameId)
+					{
+						await RunScheduledUpdateAsync("context-switch-immediate");
+					}
+				}), DispatcherPriority.Loaded);
+			}
+#if DEBUG
+			else
+			{
+				timer.Step("SetDefaultDataContext skipped (same game)");
+			}
 #endif
 
 			MustDisplay = AlwaysShow || controlDataContext.IsActivated;
@@ -461,7 +562,17 @@ namespace CommonPluginsShared.Controls
 				return;
 			}
 
-			RestartTimer();
+			// Virtualized list views fire GameContextChanged repeatedly for the selected game
+			// without changing the id — skip when the control is already showing that game.
+			if (!isContextSwitch && IsSameGameAlreadyDisplayed(newContext))
+			{
+#if DEBUG
+				timer.Stop("early exit (same game, already visible)");
+#endif
+				return;
+			}
+
+			RestartTimer(isContextSwitch ? "context-switch" : "context-refresh");
 
 #if DEBUG
 			timer.Stop("timer restarted");
@@ -480,7 +591,8 @@ namespace CommonPluginsShared.Controls
 				ItemUpdateEvent<Game> updated = e.UpdatedItems.Find(x => x.NewData.Id == GameContext.Id);
 				if (updated?.NewData != null)
 				{
-					GameContextChanged(null, updated.NewData);
+					CurrentGame = updated.NewData;
+					ScheduleDataRefresh("playnite-game-updated");
 				}
 			});
 		}
@@ -503,26 +615,64 @@ namespace CommonPluginsShared.Controls
 		{
 			if (Visibility != value)
 			{
+				LogControlTrace("Visibility", string.Format("{0} -> {1}", Visibility, value));
 				Visibility = value;
 			}
 		}
 
 		private async void UpdateDataEvent(object sender, EventArgs e)
 		{
-			await UpdateDataAsync();
+			await RunScheduledUpdateAsync("debounce-timer");
+		}
+
+		private async void UpdateDeadlineEvent(object sender, EventArgs e)
+		{
+			_updateDeadlineTimer.Stop();
+			LogControlIssue("Anti-starvation deadline fired (debounce timer did not complete in time)");
+			await RunScheduledUpdateAsync("deadline-timer");
+		}
+
+		private async Task RunScheduledUpdateAsync(string source)
+		{
+			int generationAtStart = _scheduledUpdateGeneration;
+			LogControlTrace("Update scheduled", string.Format("source={0}, generation={1}, game='{2}'",
+				source,
+				generationAtStart,
+				GameContext?.Name ?? "null"));
+
+			try
+			{
+				await UpdateDataAsync();
+
+				if (generationAtStart != _scheduledUpdateGeneration)
+				{
+					LogControlTrace("Update finished but generation advanced",
+						string.Format("started={0}, current={1}", generationAtStart, _scheduledUpdateGeneration));
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, string.Format("{0} UpdateDataAsync failed (source={1}, generation={2})",
+					GetInstanceDiagnosticId(),
+					source,
+					generationAtStart));
+			}
 		}
 
 		public virtual async Task UpdateDataAsync()
 		{
 #if DEBUG
-			var timer = new DebugTimer(GetType().Name + ".UpdateDataAsync(base)");
+			var timer = new DebugTimer(GetInstanceDiagnosticId() + ".UpdateDataAsync(base)");
 #endif
 
-			UpdateDataTimer.Stop();
+			StopUpdateTimers();
 
 			if (GameContext == null || CurrentGame == null || GameContext.Id != CurrentGame.Id)
 			{
 				SetVisibility(Visibility.Collapsed);
+				LogControlIssue(string.Format("UpdateDataAsync aborted: context mismatch (GameContext={0}, CurrentGame={1})",
+					FormatGameId(GameContext),
+					FormatGameId(CurrentGame)));
 #if DEBUG
 				timer.Stop("early exit (context mismatch)");
 #endif
@@ -535,6 +685,8 @@ namespace CommonPluginsShared.Controls
 				SetVisibility(MustDisplay ? Visibility.Visible : Visibility.Collapsed);
 			}, DispatcherPriority.Render);
 
+			LogControlTrace("UpdateDataAsync(base) completed", string.Format("visibility={0}", Visibility));
+
 #if DEBUG
 			timer.Stop();
 #endif
@@ -543,10 +695,114 @@ namespace CommonPluginsShared.Controls
 		/// <summary>Kept for backward compatibility with controls that override the single-argument form.</summary>
 		public virtual void SetData(Game newContext) { }
 
+		/// <summary>
+		/// Schedules a debounced data refresh without running the full
+		/// <see cref="GameContextChanged"/> collapse/reset path.
+		/// </summary>
+		/// <param name="reason">Caller label for diagnostics.</param>
+		protected void ScheduleDataRefresh(string reason)
+		{
+			MustDisplay = AlwaysShow || (controlDataContext?.IsActivated ?? false);
+
+			if (!(controlDataContext?.IsActivated ?? false) || GameContext == null || !MustDisplay)
+			{
+				return;
+			}
+
+			RestartTimer(reason);
+		}
+
+		/// <summary>
+		/// Returns whether the control is already bound to <paramref name="newContext"/> and visible.
+		/// </summary>
+		protected bool IsSameGameAlreadyDisplayed(Game newContext)
+		{
+			return newContext != null
+				&& GameContext != null
+				&& newContext.Id == GameContext.Id
+				&& CurrentGame != null
+				&& newContext.Id == CurrentGame.Id
+				&& Visibility == Visibility.Visible;
+		}
+
 		public void RestartTimer()
 		{
+			RestartTimer(null);
+		}
+
+		/// <summary>
+		/// Restarts the debounced update timer and arms a sliding deadline timer.
+		/// </summary>
+		/// <param name="reason">Optional caller label for diagnostics.</param>
+		protected void RestartTimer(string reason)
+		{
+			_scheduledUpdateGeneration++;
 			UpdateDataTimer.Stop();
 			UpdateDataTimer.Start();
+
+			// Only slide the deadline on game-context work — settings/database bursts must not delay display.
+			bool slideDeadline = reason == "context-switch" || reason == "context-refresh";
+			if (slideDeadline)
+			{
+				_updateDeadlineTimer.Stop();
+				_updateDeadlineTimer.Start();
+			}
+			else if (!_updateDeadlineTimer.IsEnabled)
+			{
+				_updateDeadlineTimer.Start();
+			}
+
+			LogControlTrace("RestartTimer", string.Format("reason={0}, generation={1}, delay={2}ms, deadline={3}ms, slideDeadline={4}",
+				reason ?? "unspecified",
+				_scheduledUpdateGeneration,
+				Delay,
+				MaxUpdateDelayMs,
+				slideDeadline));
+		}
+
+		/// <summary>Stops debounce and anti-starvation timers.</summary>
+		protected void StopUpdateTimers()
+		{
+			UpdateDataTimer?.Stop();
+			_updateDeadlineTimer?.Stop();
+		}
+
+		/// <summary>Stable per-instance id for diagnostic logs (type name + hash code).</summary>
+		protected string GetInstanceDiagnosticId()
+		{
+			return string.Format("{0}#{1:X8}", GetType().Name, GetHashCode());
+		}
+
+		/// <summary>Verbose trace — DEBUG builds only, marked as ignored in the log file.</summary>
+		protected void LogControlTrace(string phase, string detail = null)
+		{
+			string message = detail == null
+				? string.Format("[{0}] {1}", GetInstanceDiagnosticId(), phase)
+				: string.Format("[{0}] {1} — {2}", GetInstanceDiagnosticId(), phase, detail);
+			Common.LogDebug(true, message);
+		}
+
+		/// <summary>
+		/// Important diagnostic — logged in DEBUG and Release at debug level without the [Ignored] prefix.
+		/// </summary>
+		protected void LogControlIssue(string message)
+		{
+			Common.LogDebug(false, string.Format("[{0}] {1}", GetInstanceDiagnosticId(), message));
+		}
+
+		private void LogNotifyAllInstancesFailure(Exception ex)
+		{
+			Logger.Error(ex, string.Format("{0} NotifyAllInstances handler failed", GetInstanceDiagnosticId()));
+		}
+
+		protected static string FormatGameId(Game game)
+		{
+			if (game == null)
+			{
+				return "null";
+			}
+
+			return string.Format("'{0}' ({1})", game.Name ?? "?", game.Id);
 		}
 	}
 }
