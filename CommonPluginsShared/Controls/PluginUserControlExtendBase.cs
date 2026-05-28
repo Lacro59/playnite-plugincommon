@@ -102,7 +102,7 @@ namespace CommonPluginsShared.Controls
 
 				if (!mustDisplay)
 				{
-					obj.SetVisibility(Visibility.Collapsed);
+					obj.SetVisibility(obj.AlwaysShow ? Visibility.Visible : Visibility.Collapsed);
 				}
 			}
 		}
