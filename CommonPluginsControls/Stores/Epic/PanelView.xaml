@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:CommonPluginsControls.Stores.Steam" 
              xmlns:stores="clr-namespace:CommonPluginsStores" 
              xmlns:enumerations="clr-namespace:CommonPluginsStores.Models.Enumerations" 
-             xmlns:pcmd="clr-namespace:CommonPluginsShared" 
+             xmlns:pcmd="clr-namespace:CommonPluginsShared"
+             xmlns:pcmdCommands="clr-namespace:CommonPluginsShared.Commands" 
              xmlns:converters="clr-namespace:CommonPlayniteShared.Converters"
              d:DataContext="{d:DesignInstance Type=local:PanelViewModel, IsDesignTimeCreatable=True}"
              mc:Ignorable="d" d:DesignWidth="600">
@@ -151,7 +152,7 @@
                                 <TextBox Text="{Binding User.UserId}" Width="250" Margin="0,0,10,0" TextChanged="TextBox_TextChanged" />
                                 <TextBlock VerticalAlignment="Center">
                                     <Hyperlink NavigateUri="https://www.epicgames.com/account/personal"
-                                               Command="{x:Static pcmd:Commands.NavigateUrl}"
+                                               Command="{x:Static pcmdCommands:CommandsNavigation.NavigateUrl}"
                                                CommandParameter="{Binding NavigateUri, RelativeSource={RelativeSource Self}}">
                                         <Run Text="{DynamicResource LOCCommonGetAccountID}" />
                                     </Hyperlink>
