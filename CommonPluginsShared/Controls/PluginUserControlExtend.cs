@@ -96,10 +96,10 @@ namespace CommonPluginsShared.Controls
 		public override async Task UpdateDataAsync()
 		{
 #if DEBUG
-			var timer = new DebugTimer(GetType().Name + ".UpdateDataAsync");
+			var timer = new DebugTimer(GetInstanceDiagnosticId() + ".UpdateDataAsync");
 #endif
 
-			UpdateDataTimer.Stop();
+			StopUpdateTimers();
 
 			_updateCts = new CancellationTokenSource();
 			CancellationToken cancellationToken = _updateCts.Token;
@@ -107,6 +107,9 @@ namespace CommonPluginsShared.Controls
 			if (GameContext == null || CurrentGame == null || GameContext.Id != CurrentGame.Id)
 			{
 				SetVisibility(Visibility.Collapsed);
+				LogControlIssue(string.Format("UpdateDataAsync aborted: context mismatch (GameContext={0}, CurrentGame={1})",
+					FormatGameId(GameContext),
+					FormatGameId(CurrentGame)));
 #if DEBUG
 				timer.Stop("early exit (context mismatch)");
 #endif
@@ -128,6 +131,7 @@ namespace CommonPluginsShared.Controls
 
 			if (cancellationToken.IsCancellationRequested || GameContext == null || GameContext.Id != gameId)
 			{
+				LogControlIssue(string.Format("UpdateDataAsync aborted: cancelled or context changed during lookup (gameId={0})", gameId));
 #if DEBUG
 				timer.Stop("cancelled or context changed during lookup, abort");
 #endif
@@ -137,6 +141,9 @@ namespace CommonPluginsShared.Controls
 			if (pluginGameData == null)
 			{
 				SetVisibility(AlwaysShow ? Visibility.Visible : Visibility.Collapsed);
+				LogControlIssue(string.Format("UpdateDataAsync: no cache entry for '{0}', visibility={1}",
+					gameSnapshot.Name,
+					Visibility));
 #if DEBUG
 				timer.Stop(string.Format("no entry, visibility={0}", Visibility));
 #endif
@@ -146,6 +153,9 @@ namespace CommonPluginsShared.Controls
 			if (!pluginGameData.HasData)
 			{
 				SetVisibility(AlwaysShow ? Visibility.Visible : Visibility.Collapsed);
+				LogControlIssue(string.Format("UpdateDataAsync: cache entry without data for '{0}', visibility={1}",
+					gameSnapshot.Name,
+					Visibility));
 #if DEBUG
 				timer.Stop(string.Format("no data, visibility={0}", Visibility));
 #endif
@@ -159,6 +169,8 @@ namespace CommonPluginsShared.Controls
 #endif
 
 			await SetDataAsync(gameSnapshot, pluginGameData, cancellationToken);
+
+			LogControlTrace("UpdateDataAsync completed", string.Format("game='{0}', visibility={1}", gameSnapshot.Name, Visibility));
 
 #if DEBUG
 			timer.Stop();

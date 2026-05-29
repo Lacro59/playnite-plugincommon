@@ -546,19 +546,8 @@ namespace CommonPluginsShared.Controls
             {
                 try
                 {
-					var result = FindGridViewColumnWithIndex(SortingDefaultDataName);
-					var header = result.Item1;
-					var index = result.Item2;
-
-					if (header != null && index >= 0)
+					if (ApplyConfiguredSort())
                     {
-                        ListSortDirection direction = SortingSortDirection;
-                        Sort(SortingDefaultDataName, direction);
-
-                        _lastHeaderClicked = header;
-                        _lastDirection = direction;
-
-                        UpdateHeaderCaret(header, direction);
                         _isInitialSortApplied = true;
                     }
                 }
@@ -730,7 +719,9 @@ namespace CommonPluginsShared.Controls
                     return;
                 }
 
-                if (_lastHeaderClicked == column.Header as GridViewColumnHeader)
+                GridViewColumnHeader sortedHeader = column.Header as GridViewColumnHeader;
+                GridViewColumnHeader sortedDisplayHeader = ResolveDisplayHeader(sortedHeader) ?? sortedHeader;
+                if (_lastHeaderClicked == sortedHeader || _lastHeaderClicked == sortedDisplayHeader)
                 {
                     _lastHeaderClicked = null;
                     _lastDirection = null;
@@ -890,26 +881,15 @@ namespace CommonPluginsShared.Controls
         /// <returns>The GridViewColumnHeader if found, otherwise null.</returns>
         private GridViewColumnHeader FindGridViewColumn(string dataName)
         {
-            if (this.View != null && this.View is GridView)
+            try
             {
-                try
-                {
-                    GridView gridView = this.View as GridView;
-                    foreach (GridViewColumn gridViewColumn in gridView.Columns)
-                    {
-                        string property = GetColumnSortKey(gridViewColumn);
-                        if (property == dataName)
-                        {
-                            return gridViewColumn.Header as GridViewColumnHeader;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false);
-                }
+                return FindSortColumnHeader(dataName);
             }
-            return null;
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                return null;
+            }
         }
 
         /// <summary>
@@ -919,28 +899,187 @@ namespace CommonPluginsShared.Controls
         /// <returns>A tuple containing the header and its index, or (null, -1) if not found.</returns>
         private Tuple<GridViewColumnHeader, int> FindGridViewColumnWithIndex(string dataName)
         {
-            if (this.View != null && this.View is GridView)
+            try
             {
-                try
+                GridViewColumnHeader header = FindSortColumnHeader(dataName);
+                if (header?.Column == null || !(this.View is GridView gridView))
                 {
-                    GridView gridView = this.View as GridView;
-                    for (int i = 0; i < gridView.Columns.Count; i++)
+                    return Tuple.Create<GridViewColumnHeader, int>(null, -1);
+                }
+
+                int index = gridView.Columns.IndexOf(header.Column);
+                return Tuple.Create(header, index);
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                return Tuple.Create<GridViewColumnHeader, int>(null, -1);
+            }
+        }
+
+        /// <summary>
+        /// Returns true when the column is a visible sort target (not a zero-width proxy column).
+        /// </summary>
+        private static bool IsVisibleSortColumn(GridViewColumn column)
+        {
+            if (column == null)
+            {
+                return false;
+            }
+
+            double width = column.Width;
+            return double.IsNaN(width) || width > 0;
+        }
+
+        /// <summary>
+        /// Maps a proxy <see cref="GridViewColumnHeaderExtend"/> header to the visible header that displays the sort caret.
+        /// </summary>
+        private GridViewColumnHeader ResolveDisplayHeader(GridViewColumnHeader header)
+        {
+            if (header == null)
+            {
+                return null;
+            }
+
+            if (header is GridViewColumnHeaderExtend extend)
+            {
+                string sortKey = GetColumnSortKey(extend.Column);
+                GridViewColumnHeader visibleHeader = FindSortColumnHeaderBySortKey(sortKey, extend);
+                if (visibleHeader != null)
+                {
+                    return visibleHeader;
+                }
+
+                if (extend.RefIndex >= 0 && this.View is GridView gridView && extend.RefIndex < gridView.Columns.Count)
+                {
+                    GridViewColumnHeader mappedHeader = gridView.Columns[extend.RefIndex].Header as GridViewColumnHeader;
+                    if (mappedHeader != null && !(mappedHeader is GridViewColumnHeaderExtend))
                     {
-                        var gridViewColumn = gridView.Columns[i];
-                        string property = GetColumnSortKey(gridViewColumn);
-                        if (property == dataName)
-                        {
-							return Tuple.Create(gridViewColumn.Header as GridViewColumnHeader, i);
-						}
+                        return mappedHeader;
                     }
                 }
-                catch (Exception ex)
+            }
+
+            return header;
+        }
+
+        /// <summary>
+        /// Finds the visible header for a sort key, skipping zero-width proxy columns when possible.
+        /// </summary>
+        private GridViewColumnHeader FindSortColumnHeaderBySortKey(string sortKey, GridViewColumnHeader excludeHeader = null)
+        {
+            if (sortKey.IsNullOrEmpty() || !(this.View is GridView gridView))
+            {
+                return null;
+            }
+
+            GridViewColumnHeader proxyFallback = null;
+            foreach (GridViewColumn column in gridView.Columns)
+            {
+                if (!GetColumnSortKey(column).IsEqual(sortKey))
                 {
-                    Common.LogError(ex, false);
+                    continue;
+                }
+
+                GridViewColumnHeader header = column.Header as GridViewColumnHeader;
+                if (header == null || header == excludeHeader)
+                {
+                    continue;
+                }
+
+                if (header is GridViewColumnHeaderExtend)
+                {
+                    if (proxyFallback == null)
+                    {
+                        proxyFallback = header;
+                    }
+
+                    continue;
+                }
+
+                if (!IsVisibleSortColumn(column))
+                {
+                    continue;
+                }
+
+                return header;
+            }
+
+            foreach (GridViewColumn column in gridView.Columns)
+            {
+                GridViewColumnHeader header = column.Header as GridViewColumnHeader;
+                if (header == null || header is GridViewColumnHeaderExtend || header == excludeHeader)
+                {
+                    continue;
+                }
+
+                if ((header.Tag as string).IsEqual(sortKey) && IsVisibleSortColumn(column))
+                {
+                    return header;
                 }
             }
-			return Tuple.Create<GridViewColumnHeader, int>(null, -1);
-		}
+
+            return proxyFallback;
+        }
+
+        /// <summary>
+        /// Finds the visible sortable header for a property path or header tag.
+        /// </summary>
+        private GridViewColumnHeader FindSortColumnHeader(string dataName)
+        {
+            if (dataName.IsNullOrEmpty() || !(this.View is GridView gridView))
+            {
+                return null;
+            }
+
+            GridViewColumnHeader proxyFallback = null;
+            foreach (GridViewColumn column in gridView.Columns)
+            {
+                if (!GetColumnSortKey(column).IsEqual(dataName))
+                {
+                    continue;
+                }
+
+                GridViewColumnHeader header = column.Header as GridViewColumnHeader;
+                if (header == null)
+                {
+                    continue;
+                }
+
+                if (header is GridViewColumnHeaderExtend)
+                {
+                    if (proxyFallback == null)
+                    {
+                        proxyFallback = header;
+                    }
+
+                    continue;
+                }
+
+                if (!IsVisibleSortColumn(column))
+                {
+                    continue;
+                }
+
+                return header;
+            }
+
+            foreach (GridViewColumn column in gridView.Columns)
+            {
+                GridViewColumnHeader header = column.Header as GridViewColumnHeader;
+                if (header == null || header is GridViewColumnHeaderExtend)
+                {
+                    continue;
+                }
+
+                if ((header.Tag as string).IsEqual(dataName) && IsVisibleSortColumn(column))
+                {
+                    return header;
+                }
+            }
+
+            return ResolveDisplayHeader(proxyFallback);
+        }
 
         /// <summary>
         /// Resolves the sort key for a column.
@@ -1008,7 +1147,9 @@ namespace CommonPluginsShared.Controls
                                 direction = ListSortDirection.Ascending;
                             }
 
-                            if (_lastHeaderClicked != null && headerClicked != _lastHeaderClicked)
+                            GridViewColumnHeader displayHeaderClicked = ResolveDisplayHeader(headerClicked) ?? headerClicked;
+
+                            if (_lastHeaderClicked != null && _lastHeaderClicked != displayHeaderClicked)
                             {
                                 direction = ListSortDirection.Ascending;
                             }
@@ -1021,24 +1162,7 @@ namespace CommonPluginsShared.Controls
                                     return;
                                 }
 
-                                Sort(sortBy, direction);
-
-                                if (_lastHeaderClicked != null)
-                                {
-                                    RestoreHeaderContent(_lastHeaderClicked);
-                                }
-
-                                // Show caret
-                                UpdateHeaderCaret(headerClicked, direction);
-
-                                // Remove arrow from previously sorted header
-                                if (_lastHeaderClicked != null && _lastHeaderClicked != headerClicked)
-                                {
-                                    _lastHeaderClicked.Column.HeaderTemplate = null;
-                                }
-
-                                _lastHeaderClicked = headerClicked;
-                                _lastDirection = direction;
+                                ApplySortToHeader(headerClicked, sortBy, direction);
                             }
                         }
                     }
@@ -1142,6 +1266,66 @@ namespace CommonPluginsShared.Controls
                     header.Content = label.Content;
                 }
             }
+        }
+
+        /// <summary>
+        /// Applies sort from <see cref="SortingDefaultDataName"/> and <see cref="SortingSortDirection"/>,
+        /// clearing any previous header caret.
+        /// </summary>
+        /// <returns>True when sort was applied.</returns>
+        public bool ApplyConfiguredSort()
+        {
+            if (!SortingEnable || SortingDefaultDataName.IsNullOrEmpty() || !(this.View is GridView))
+            {
+                return false;
+            }
+
+            try
+            {
+                GridViewColumnHeader header = FindSortColumnHeader(SortingDefaultDataName);
+                if (header == null)
+                {
+                    return false;
+                }
+
+                ApplySortToHeader(header, SortingDefaultDataName, SortingSortDirection);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Sorts by the given header, updates the caret, and tracks the display header.
+        /// </summary>
+        private void ApplySortToHeader(GridViewColumnHeader header, string sortDataName, ListSortDirection direction)
+        {
+            if (header == null)
+            {
+                return;
+            }
+
+            GridViewColumnHeader displayHeader = ResolveDisplayHeader(header) ?? header;
+
+            if (_lastHeaderClicked != null && _lastHeaderClicked != displayHeader)
+            {
+                RestoreHeaderContent(_lastHeaderClicked);
+            }
+
+            string sortBy = ResolveSortBy(header);
+            if (sortBy.IsNullOrEmpty())
+            {
+                sortBy = sortDataName;
+            }
+
+            Sort(sortBy, direction);
+            UpdateHeaderCaret(header, direction);
+
+            _lastHeaderClicked = displayHeader;
+            _lastDirection = direction;
         }
 
         /// <summary>
