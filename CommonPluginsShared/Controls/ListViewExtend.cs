@@ -546,17 +546,8 @@ namespace CommonPluginsShared.Controls
             {
                 try
                 {
-					GridViewColumnHeader header = FindSortColumnHeader(SortingDefaultDataName);
-
-					if (header != null)
+					if (ApplyConfiguredSort())
                     {
-                        ListSortDirection direction = SortingSortDirection;
-                        Sort(SortingDefaultDataName, direction);
-
-                        _lastHeaderClicked = ResolveDisplayHeader(header) ?? header;
-                        _lastDirection = direction;
-
-                        UpdateHeaderCaret(header, direction);
                         _isInitialSortApplied = true;
                     }
                 }
@@ -1171,17 +1162,7 @@ namespace CommonPluginsShared.Controls
                                     return;
                                 }
 
-                                Sort(sortBy, direction);
-
-                                if (_lastHeaderClicked != null && _lastHeaderClicked != displayHeaderClicked)
-                                {
-                                    RestoreHeaderContent(_lastHeaderClicked);
-                                }
-
-                                UpdateHeaderCaret(headerClicked, direction);
-
-                                _lastHeaderClicked = displayHeaderClicked;
-                                _lastDirection = direction;
+                                ApplySortToHeader(headerClicked, sortBy, direction);
                             }
                         }
                     }
@@ -1285,6 +1266,66 @@ namespace CommonPluginsShared.Controls
                     header.Content = label.Content;
                 }
             }
+        }
+
+        /// <summary>
+        /// Applies sort from <see cref="SortingDefaultDataName"/> and <see cref="SortingSortDirection"/>,
+        /// clearing any previous header caret.
+        /// </summary>
+        /// <returns>True when sort was applied.</returns>
+        public bool ApplyConfiguredSort()
+        {
+            if (!SortingEnable || SortingDefaultDataName.IsNullOrEmpty() || !(this.View is GridView))
+            {
+                return false;
+            }
+
+            try
+            {
+                GridViewColumnHeader header = FindSortColumnHeader(SortingDefaultDataName);
+                if (header == null)
+                {
+                    return false;
+                }
+
+                ApplySortToHeader(header, SortingDefaultDataName, SortingSortDirection);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Sorts by the given header, updates the caret, and tracks the display header.
+        /// </summary>
+        private void ApplySortToHeader(GridViewColumnHeader header, string sortDataName, ListSortDirection direction)
+        {
+            if (header == null)
+            {
+                return;
+            }
+
+            GridViewColumnHeader displayHeader = ResolveDisplayHeader(header) ?? header;
+
+            if (_lastHeaderClicked != null && _lastHeaderClicked != displayHeader)
+            {
+                RestoreHeaderContent(_lastHeaderClicked);
+            }
+
+            string sortBy = ResolveSortBy(header);
+            if (sortBy.IsNullOrEmpty())
+            {
+                sortBy = sortDataName;
+            }
+
+            Sort(sortBy, direction);
+            UpdateHeaderCaret(header, direction);
+
+            _lastHeaderClicked = displayHeader;
+            _lastDirection = direction;
         }
 
         /// <summary>
