@@ -31,19 +31,19 @@
 
     <!-- ==================== TIME UNITS ==================== -->
 
-	<sys:String x:Key="LOCCommonDay">{0} dia</sys:String>
-	<sys:String x:Key="LOCCommonDays">{0} dias</sys:String>
-	<sys:String x:Key="LOCCommonHours">Horas</sys:String>
-	<sys:String x:Key="LOCCommonMonth">{0} mês</sys:String>
-	<sys:String x:Key="LOCCommonMonths">{0} meses</sys:String>
-	<sys:String x:Key="LOCCommonYear">{0} ano</sys:String>
-	<sys:String x:Key="LOCCommonYears">{0} anos</sys:String>
+	<sys:String x:Key="LOCCommonDay">{0} day</sys:String>
+	<sys:String x:Key="LOCCommonDays">{0} days</sys:String>
+	<sys:String x:Key="LOCCommonHours">Hours</sys:String>
+	<sys:String x:Key="LOCCommonMonth">{0} month</sys:String>
+	<sys:String x:Key="LOCCommonMonths">{0} months</sys:String>
+	<sys:String x:Key="LOCCommonYear">{0} year</sys:String>
+	<sys:String x:Key="LOCCommonYears">{0} years</sys:String>
 
 	<!-- Labels (standalone, without format parameter) -->
-	<sys:String x:Key="LOCCommonMonthLabel">Mês</sys:String>
-	<sys:String x:Key="LOCCommonMonthsLabel">Meses</sys:String>
-	<sys:String x:Key="LOCCommonYearLabel">Ano</sys:String>
-	<sys:String x:Key="LOCCommonYearsLabel">Anos</sys:String>
+	<sys:String x:Key="LOCCommonMonthLabel">Month</sys:String>
+	<sys:String x:Key="LOCCommonMonthsLabel">Months</sys:String>
+	<sys:String x:Key="LOCCommonYearLabel">Year</sys:String>
+	<sys:String x:Key="LOCCommonYearsLabel">Years</sys:String>
 
 	<!-- ==================== RELATIVE TIME ==================== -->
 
@@ -61,66 +61,66 @@
 
 	<!-- ==================== DATES ==================== -->
 
-	<sys:String x:Key="LOCCommonDateData">Data dos dados</sys:String>
-	<sys:String x:Key="LOCCommonStartDate">Data inicial</sys:String>
-	<sys:String x:Key="LOCCommonLastUpdate">Última atualização</sys:String>
-	<sys:String x:Key="LOCCommonSince">Desde</sys:String>
+	<sys:String x:Key="LOCCommonDateData">Date of data</sys:String>
+	<sys:String x:Key="LOCCommonStartDate">Start date</sys:String>
+	<sys:String x:Key="LOCCommonLastUpdate">Last update</sys:String>
+	<sys:String x:Key="LOCCommonSince">Since</sys:String>
 
 	<!-- ==================== COMMON LABELS ==================== -->
 
-	<sys:String x:Key="LOCCommonNoData">Sem dados</sys:String>
+	<sys:String x:Key="LOCCommonNoData">No data</sys:String>
 	<sys:String x:Key="LOCCommonNoDataAvailable">Não há dados disponíveis</sys:String>
 	<sys:String x:Key="LOCCommonTotal">Total</sys:String>
-	<sys:String x:Key="LOCCommonCut">Recortar</sys:String>
-	<sys:String x:Key="LOCCommonMargin">Margem</sys:String>
-	<sys:String x:Key="LOCCommonMisc">Diversos</sys:String>
-	<sys:String x:Key="LOCCommonDatabase">Banco de dados</sys:String>
+	<sys:String x:Key="LOCCommonCut">Cut</sys:String>
+	<sys:String x:Key="LOCCommonMargin">Margin</sys:String>
+	<sys:String x:Key="LOCCommonMisc">Misc</sys:String>
+	<sys:String x:Key="LOCCommonDatabase">Database</sys:String>
 	<sys:String x:Key="LOCCommonDatabaseMaintenance">Manutenção do banco de dados</sys:String>
-	<sys:String x:Key="LOCCommonDimensions">Dimensões</sys:String>
-	<sys:String x:Key="LOCCommonStyles">Estilos</sys:String>
-	<sys:String x:Key="LOCCommonTypes">Tipos</sys:String>
-	<sys:String x:Key="LOCCommonProgression">Progressão</sys:String>
-	<sys:String x:Key="LOCCommonCompleted">Concluído</sys:String>
-	<sys:String x:Key="LOCCommonGameTime">Tempo de jogo</sys:String>
+	<sys:String x:Key="LOCCommonDimensions">Dimensions</sys:String>
+	<sys:String x:Key="LOCCommonStyles">Styles</sys:String>
+	<sys:String x:Key="LOCCommonTypes">Types</sys:String>
+	<sys:String x:Key="LOCCommonProgression">Progression</sys:String>
+	<sys:String x:Key="LOCCommonCompleted">Completed</sys:String>
+	<sys:String x:Key="LOCCommonGameTime">Game time</sys:String>
 
 	<!-- ==================== SORTING ==================== -->
 
-	<sys:String x:Key="LOCCommonDefaultSorting">Classificação padrão da lista de jogos</sys:String>
-	<sys:String x:Key="LOCCommonSortByDate">Ordenar por data</sys:String>
-	<sys:String x:Key="LOCCommonSortByScore">Ordenar por Nota</sys:String>
+	<sys:String x:Key="LOCCommonDefaultSorting">Default game list sorting</sys:String>
+	<sys:String x:Key="LOCCommonSortByDate">Sort by date</sys:String>
+	<sys:String x:Key="LOCCommonSortByScore">Sort by score</sys:String>
 
 	<!-- ==================== PLAYTIME RANGES ==================== -->
 
-	<sys:String x:Key="LOCCommon0to1">00 a 01 horas</sys:String>
-	<sys:String x:Key="LOCCommon1to5">01 a 05 horas</sys:String>
-	<sys:String x:Key="LOCCommon5to10">05 a 10 horas</sys:String>
-	<sys:String x:Key="LOCCommon10to20">10 a 20 horas</sys:String>
-	<sys:String x:Key="LOCCommon20to30">20 a 30 horas</sys:String>
-	<sys:String x:Key="LOCCommon30to40">30 a 40 horas</sys:String>
-	<sys:String x:Key="LOCCommon40to50">40 a 50 horas</sys:String>
-	<sys:String x:Key="LOCCommon50to60">50 a 60 horas</sys:String>
-	<sys:String x:Key="LOCCommon60to70">60 a 70 horas</sys:String>
-	<sys:String x:Key="LOCCommon70to80">70 a 80 horas</sys:String>
-	<sys:String x:Key="LOCCommon80to90">80 a 90 horas</sys:String>
-	<sys:String x:Key="LOCCommon90to100">90 a 100 horas</sys:String>
-	<sys:String x:Key="LOCCommon100plus">100 horas ou mais</sys:String>
+	<sys:String x:Key="LOCCommon0to1">00 to 01 hours</sys:String>
+	<sys:String x:Key="LOCCommon1to5">01 to 05 hours</sys:String>
+	<sys:String x:Key="LOCCommon5to10">05 to 10 hours</sys:String>
+	<sys:String x:Key="LOCCommon10to20">10 to 20 hours</sys:String>
+	<sys:String x:Key="LOCCommon20to30">20 to 30 hours</sys:String>
+	<sys:String x:Key="LOCCommon30to40">30 to 40 hours</sys:String>
+	<sys:String x:Key="LOCCommon40to50">40 to 50 hours</sys:String>
+	<sys:String x:Key="LOCCommon50to60">50 to 60 hours</sys:String>
+	<sys:String x:Key="LOCCommon60to70">60 to 70 hours</sys:String>
+	<sys:String x:Key="LOCCommon70to80">70 to 80 hours</sys:String>
+	<sys:String x:Key="LOCCommon80to90">80 to 90 hours</sys:String>
+	<sys:String x:Key="LOCCommon90to100">90 to 100 hours</sys:String>
+	<sys:String x:Key="LOCCommon100plus">100 hours and more</sys:String>
 
 	<!-- ==================== FILTERS ==================== -->
 
 	<sys:String x:Key="LOCCommonAllPlatforms">Todas as Plataformas</sys:String>
 	<sys:String x:Key="LOCCommonAllSources">Todas as fontes</sys:String>
-	<sys:String x:Key="LOCCommonDefaultFilters">Restaurar filtros padrão</sys:String>
+	<sys:String x:Key="LOCCommonDefaultFilters">Restore default filters</sys:String>
 	<sys:String x:Key="LOCCommonGameSource">Fonte do jogo</sys:String>
 	<sys:String x:Key="LOCCommonInstallationStatus">Status da instalação</sys:String>
-	<sys:String x:Key="LOCCommonMissingData">Etiquetar jogos faltando dados</sys:String>
-	<sys:String x:Key="LOCCommonOldData">Dados antigos</sys:String>
-	<sys:String x:Key="LOCCommonOnlyMissing">Apenas faltando</sys:String>
-	<sys:String x:Key="LOCCommonRecentlyAdded">Adicionado Recentemente</sys:String>
-	<sys:String x:Key="LOCCommonSaveFilters">Salvar os filtros atuais</sys:String>
+	<sys:String x:Key="LOCCommonMissingData">Tag games missing data</sys:String>
+	<sys:String x:Key="LOCCommonOldData">Old data</sys:String>
+	<sys:String x:Key="LOCCommonOnlyMissing">Only missing</sys:String>
+	<sys:String x:Key="LOCCommonRecentlyAdded">Recently added</sys:String>
+	<sys:String x:Key="LOCCommonSaveFilters">Save current filters</sys:String>
 	<sys:String x:Key="LOCCommonSearchByName">Pesquisar por nome...</sys:String>
-	<sys:String x:Key="LOCCommonSelectFilters">Selecionar filtros</sys:String>
+	<sys:String x:Key="LOCCommonSelectFilters">Select filters</sys:String>
 	<sys:String x:Key="LOCCommonTimeFilters">Filtros baseados em tempo</sys:String>
-	<sys:String x:Key="LOCCommonUsedFilteredGames">Jogos filtrados atualmente em uso</sys:String>
+	<sys:String x:Key="LOCCommonUsedFilteredGames">Currently filtered games used</sys:String>
 	<sys:String x:Key="LOCCommonAdditionalOptions">Opções adicionais</sys:String>
 
 	<!-- ==================== LIST ACTIONS ==================== -->
@@ -128,30 +128,30 @@
 	<sys:String x:Key="LOCCommonClearSelection">Limpar Seleção</sys:String>
 	<sys:String x:Key="LOCCommonRefreshSelected">Atualizar Selecionados</sys:String>
 	<sys:String x:Key="LOCCommonSelected">Selecionado:</sys:String>
-	<sys:String x:Key="LOCCommonSelectGames">Selecionar Jogos</sys:String>
-	<sys:String x:Key="LOCCommonSelectVariable">Selecionar variável</sys:String>
-	<sys:String x:Key="LOCCommonTotalFound">Total encontrado</sys:String>
+	<sys:String x:Key="LOCCommonSelectGames">Select games</sys:String>
+	<sys:String x:Key="LOCCommonSelectVariable">Select variable</sys:String>
+	<sys:String x:Key="LOCCommonTotalFound">Total found</sys:String>
 
 	<!-- ==================== DATA MANAGEMENT ==================== -->
 
-	<sys:String x:Key="LOCCommonAddManually">Adicionar manualmente</sys:String>
-	<sys:String x:Key="LOCCommonRefreshGameData">Atualizar dados</sys:String>
-	<sys:String x:Key="LOCCommonRefreshAllData">Atualizar todos os dados</sys:String>
-	<sys:String x:Key="LOCCommonDeleteGameData">Apagar dados</sys:String>
-	<sys:String x:Key="LOCCommonDeletePluginData">Excluir dados do plugin</sys:String>
-	<sys:String x:Key="LOCCommonClearAllDatas">Apagar dados de todos os jogos</sys:String>
-	<sys:String x:Key="LOCCommonViewNoData">Ver jogos sem dados do plugin</sys:String>
-	<sys:String x:Key="LOCCommonSelectData">Baixar dados dos jogos selecionados</sys:String>
-	<sys:String x:Key="LOCCommonDownloadPluginData">Baixar dados do plugin...</sys:String>
-	<sys:String x:Key="LOCCommonGetAllDatas">Baixar dados para todos os jogos</sys:String>
-	<sys:String x:Key="LOCCommonIsolatedPluginData">Dados do plugin isolados</sys:String>
+	<sys:String x:Key="LOCCommonAddManually">Add manually</sys:String>
+	<sys:String x:Key="LOCCommonRefreshGameData">Refresh data</sys:String>
+	<sys:String x:Key="LOCCommonRefreshAllData">Refresh all data</sys:String>
+	<sys:String x:Key="LOCCommonDeleteGameData">Delete data</sys:String>
+	<sys:String x:Key="LOCCommonDeletePluginData">Delete plugin data</sys:String>
+	<sys:String x:Key="LOCCommonClearAllDatas">Delete data from all games</sys:String>
+	<sys:String x:Key="LOCCommonViewNoData">View games without plugin data</sys:String>
+	<sys:String x:Key="LOCCommonSelectData">Download data for selected games</sys:String>
+	<sys:String x:Key="LOCCommonDownloadPluginData">Download plugin data...</sys:String>
+	<sys:String x:Key="LOCCommonGetAllDatas">Download data for all games</sys:String>
+	<sys:String x:Key="LOCCommonIsolatedPluginData">Isolated plugin data</sys:String>
 
 	<!-- ==================== TAG MANAGEMENT ==================== -->
 
-	<sys:String x:Key="LOCCommonAddAllTags">Adicionar tag para todos os jogos</sys:String>
-	<sys:String x:Key="LOCCommonAddTagAuto">Adição automática de tags com adição de dados</sys:String>
-	<sys:String x:Key="LOCCommonAddTPlugin">Adicionar tag de plugin...</sys:String>
-	<sys:String x:Key="LOCCommonRemoveAllTags">Remover tag de plugin</sys:String>
+	<sys:String x:Key="LOCCommonAddAllTags">Add tag for all games</sys:String>
+	<sys:String x:Key="LOCCommonAddTagAuto">Automatic tag addition with data addition</sys:String>
+	<sys:String x:Key="LOCCommonAddTPlugin">Add plugin tag...</sys:String>
+	<sys:String x:Key="LOCCommonRemoveAllTags">Remove plugin tag</sys:String>
 
 	<!-- Settings section -->
 	<sys:String x:Key="LOCCommonAddTag">Adicionar etiqueta indicando configuração suportada</sys:String>
@@ -173,23 +173,23 @@
 
 	<!-- ==================== FOLDER & FILE MANAGEMENT ==================== -->
 
-	<sys:String x:Key="LOCCommonAddFolder">Adicionar pasta</sys:String>
-	<sys:String x:Key="LOCCommonRemoveFolder">Remover pasta</sys:String>
-	<sys:String x:Key="LOCCommonAddFilePattern">Adicionar padrão de arquivo</sys:String>
+	<sys:String x:Key="LOCCommonAddFolder">Add folder</sys:String>
+	<sys:String x:Key="LOCCommonRemoveFolder">Remove folder</sys:String>
+	<sys:String x:Key="LOCCommonAddFilePattern">Add file pattern</sys:String>
 
 	<!-- ==================== IMPORT / EXPORT ==================== -->
 
 	<sys:String x:Key="LOCCommonAutoImport">Importar dados automaticamente quando a biblioteca for atualizada (somente novos)</sys:String>
-	<sys:String x:Key="LOCCommonAutoImportOnInstalled">Importar automaticamente para os jogos instalados</sys:String>
-	<sys:String x:Key="LOCCommonImporting">Importando...</sys:String>
+	<sys:String x:Key="LOCCommonAutoImportOnInstalled">Automatically import for installed games</sys:String>
+	<sys:String x:Key="LOCCommonImporting">Importing...</sys:String>
 	<sys:String x:Key="LOCCommonExport">Exportar</sys:String>
-	<sys:String x:Key="LOCCommonExportData">Exportar dados</sys:String>
+	<sys:String x:Key="LOCCommonExportData">Export data</sys:String>
 	<sys:String x:Key="LOCCommonExportSettings">Configurações de exportação CSV</sys:String>
-	<sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} dados foram exportados.
-Você quer abrir o diretório?</sys:String>
-	<sys:String x:Key="LOCCommonExtractToCsv">Extrair dados do plugin para CSV</sys:String>
-	<sys:String x:Key="LOCCommonExtractAllToCsv">Extraia todos os dados do plugin para CSV (muito longo)</sys:String>
-	<sys:String x:Key="LOCCommonExtracting">Extraindo...</sys:String>
+	<sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} data has been exported.
+Do you want to open the directory?</sys:String>
+	<sys:String x:Key="LOCCommonExtractToCsv">Extract plugin data to CSV</sys:String>
+	<sys:String x:Key="LOCCommonExtractAllToCsv">Extract all plugin data to CSV (very long)</sys:String>
+	<sys:String x:Key="LOCCommonExtracting">Extracting...</sys:String>
 	<sys:String x:Key="LOCCommonProcessingExtraction">Extraindo dados...</sys:String>
 	<sys:String x:Key="LOCCommonSeparator">Separador de campos:</sys:String>
 	<sys:String x:Key="LOCCommonExportOutputFile">Arquivo de saída</sys:String>
@@ -206,109 +206,109 @@ Você quer abrir o diretório?</sys:String>
 
 	<!-- ==================== TRANSFER ==================== -->
 
-	<sys:String x:Key="LOCCommonTransfer">Transferir</sys:String>
-	<sys:String x:Key="LOCCommonTransferPluginData">Transferir dados do plugin</sys:String>
-	<sys:String x:Key="LOCCommonSelectTransferData">Selecionando os dados para transferir</sys:String>
-	<sys:String x:Key="LOCCommonMergedOrErased">Mesclar em vez de limpar</sys:String>
-	<sys:String x:Key="LOCCommonErasedWarning">Atenção, os dados do destino serão substituídos!</sys:String>
+	<sys:String x:Key="LOCCommonTransfer">Transfer</sys:String>
+	<sys:String x:Key="LOCCommonTransferPluginData">Transfer plugin data</sys:String>
+	<sys:String x:Key="LOCCommonSelectTransferData">Selecting the data to transfer</sys:String>
+	<sys:String x:Key="LOCCommonMergedOrErased">Merged instead of clearing</sys:String>
+	<sys:String x:Key="LOCCommonErasedWarning">Be careful, the target data will be overwritten!</sys:String>
 
 	<!-- ==================== STORE / AUTHENTICATION ==================== -->
 
-	<sys:String x:Key="LOCCommonAccountConfiguration">Configuração de conta</sys:String>
-	<sys:String x:Key="LOCCommonAccountName">Nome da conta</sys:String>
-	<sys:String x:Key="LOCCommonAuthenticateLabel">Autenticar</sys:String>
-	<sys:String x:Key="LOCCommonControlConfiguration">Configuração de controle</sys:String>
-	<sys:String x:Key="LOCCommonGetAccountID">Obter ID da conta</sys:String>
-	<sys:String x:Key="LOCCommonHasApiKey">Possui chave de API</sys:String>
-	<sys:String x:Key="LOCCommonIsPrivate">É privado</sys:String>
-	<sys:String x:Key="LOCCommonLoggedIn">Usuário autenticado</sys:String>
-	<sys:String x:Key="LOCCommonLoginChecking">Verificando status da autenticação…</sys:String>
-	<sys:String x:Key="LOCCommonNotLoggedIn">Requer autenticação</sys:String>
-	<sys:String x:Key="LOCCommonNotLoggedInError">Falha ao autenticar usuário</sys:String>
-	<sys:String x:Key="LOCCommonPrivateChecking">Verificando status privado…</sys:String>
-	<sys:String x:Key="LOCCommonUseAuthentication">Usar autenticação</sys:String>
-	<sys:String x:Key="LOCCommonUseAuthenticationOption">Usar autenticação (opcional, para mais informação apenas)</sys:String>
+	<sys:String x:Key="LOCCommonAccountConfiguration">Account configuration</sys:String>
+	<sys:String x:Key="LOCCommonAccountName">Account Name</sys:String>
+	<sys:String x:Key="LOCCommonAuthenticateLabel">Authenticate</sys:String>
+	<sys:String x:Key="LOCCommonControlConfiguration">Control configuration</sys:String>
+	<sys:String x:Key="LOCCommonGetAccountID">Get account ID</sys:String>
+	<sys:String x:Key="LOCCommonHasApiKey">Tem chave API</sys:String>
+	<sys:String x:Key="LOCCommonIsPrivate">Is private</sys:String>
+	<sys:String x:Key="LOCCommonLoggedIn">User is authenticated</sys:String>
+	<sys:String x:Key="LOCCommonLoginChecking">Checking authentication status…</sys:String>
+	<sys:String x:Key="LOCCommonNotLoggedIn">Requires authentication</sys:String>
+	<sys:String x:Key="LOCCommonNotLoggedInError">Failed to authenticate user</sys:String>
+	<sys:String x:Key="LOCCommonPrivateChecking">Checking private status…</sys:String>
+	<sys:String x:Key="LOCCommonUseAuthentication">Use authentication</sys:String>
+	<sys:String x:Key="LOCCommonUseAuthenticationOption">Use authentication (optional, for more information only)</sys:String>
 
 	<!-- Store error messages -->
-	<sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Configuração inválida</sys:String>
-	<sys:String x:Key="LOCCommonStoreNoApiKey">{0}: Nenhuma chave de API</sys:String>
-	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: Nenhuma configuração encontrada</sys:String>
+	<sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Bad configuration</sys:String>
+	<sys:String x:Key="LOCCommonStoreNoApiKey">{0}: No API key</sys:String>
+	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: No configuration found</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: usuário não está autenticado</sys:String>
 
 	<!-- Ignored items -->
-	<sys:String x:Key="LOCCommonIgnoredItems">Itens ignorados</sys:String>
-	<sys:String x:Key="LOCCommonInputItemIgnore">Insira o item para ignorar</sys:String>
-	<sys:String x:Key="LOCCommonNotIgnoredItems">Itens não ignorados</sys:String>
+	<sys:String x:Key="LOCCommonIgnoredItems">Ignored items</sys:String>
+	<sys:String x:Key="LOCCommonInputItemIgnore">Input the item to ignore</sys:String>
+	<sys:String x:Key="LOCCommonNotIgnoredItems">Not ignored items</sys:String>
 
 	<!-- ==================== SETTINGS / INTEGRATION ==================== -->
 
-	<sys:String x:Key="LOCCommonChartAllPeriod">Mostrar todos os dados no gráfico por padrão</sys:String>
-	<sys:String x:Key="LOCCommonChartCutPeriod">Exibir apenas dados com valor por padrão</sys:String>
-	<sys:String x:Key="LOCCommonChartHideOptions">Ocultar opções de gráfico no controle</sys:String>
-	<sys:String x:Key="LOCCommonControlsAvailable">Itens disponíveis para os temas suportados</sys:String>
-	<sys:String x:Key="LOCCommonControlsPluginButtonShow">Exibir o botão de plugin</sys:String>
-	<sys:String x:Key="LOCCommonControlsPluginButtonShowInContextMenu">Exibir os dados no menu de contexto</sys:String>
-	<sys:String x:Key="LOCCommonControlsPluginViewItemShow">Exibir os dados na lista de jogos</sys:String>
-	<sys:String x:Key="LOCCommonControlsVisibleNoData">Exibir quando não há dados</sys:String>
-	<sys:String x:Key="LOCCommonIconStore">Mostrar ícone da loja</sys:String>
-	<sys:String x:Key="LOCCommonMenuInExtensions">Mostrar menu de plugins no submenu de extensões *</sys:String>
-	<sys:String x:Key="LOCCommonSaveColumOrder">Salvar ordem das colunas</sys:String>
+	<sys:String x:Key="LOCCommonChartAllPeriod">Display all data on chart by default</sys:String>
+	<sys:String x:Key="LOCCommonChartCutPeriod">Display only data with value by default</sys:String>
+	<sys:String x:Key="LOCCommonChartHideOptions">Hide chart options on control</sys:String>
+	<sys:String x:Key="LOCCommonControlsAvailable">Items available for the supported themes</sys:String>
+	<sys:String x:Key="LOCCommonControlsPluginButtonShow">Display the plugin button</sys:String>
+	<sys:String x:Key="LOCCommonControlsPluginButtonShowInContextMenu">Display the data in context menu</sys:String>
+	<sys:String x:Key="LOCCommonControlsPluginViewItemShow">Display the data in games list</sys:String>
+	<sys:String x:Key="LOCCommonControlsVisibleNoData">Display when there is no data</sys:String>
+	<sys:String x:Key="LOCCommonIconStore">Show store icon</sys:String>
+	<sys:String x:Key="LOCCommonMenuInExtensions">Show plugin menu in extensions submenu *</sys:String>
+	<sys:String x:Key="LOCCommonSaveColumOrder">Save column order</sys:String>
 
 	<!-- Integration — appearance -->
-	<sys:String x:Key="LOCCommonIntegration">Aparência</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButton">Ativar botão do plugin nas informações do jogo</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonDetails">Botão com detalhes</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonHeader">Exibir o botão de plugin na barra de título da janela</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonIsToggle">Com um botão seletor</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">Mostrar apenas o ícone</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonOptions">Botão opções</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonSide">Exibir o botão de plugin na barra lateral</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationChartOptions">Opções de gráfico</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationInCustomTheme">Ativar integração com tema customizado (Apenas se estiver integrado ao tema customizado)</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationInDescription">Mostrar informações do plugin nas informações do jogo</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationListOptions">Opções de lista</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationSelectElements">Componentes da visualização de detalhes</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationShowTitle">Mostrar título</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationTopGameDetails">Mostrar acima da descrição do jogo</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationViewItemOptions">Ver opções de itens</sys:String>
+	<sys:String x:Key="LOCCommonIntegration">Appearance</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButton">Show plugin button in game details</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonDetails">Button with details</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonHeader">Display the plugin button in window title bar</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonIsToggle">With a toggle button</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">Only show icon</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonOptions">Button options</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonSide">Display the plugin button in the side bar</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationChartOptions">Chart options</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationInCustomTheme">Enable custom theme integration (Only if integrated in custom theme)</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationInDescription">Show plugin information in game details</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationListOptions">List options</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationSelectElements">Details view components</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationShowTitle">Show title</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationTopGameDetails">Show above game description</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationViewItemOptions">View item options</sys:String>
 
 	<!-- Integration — fullscreen -->
-	<sys:String x:Key="LOCCommonIntegrationFullScreen">Tela cheia</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Ativar integração de tela cheia</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationFullScreen">Fullscreen</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationFullScreenEnable">Enable fullscreen integration</sys:String>
 
 	<!-- ==================== PROGRESS / STATUS ==================== -->
 
-	<sys:String x:Key="LOCCommonAddingAllTag">Adicionando tags para todos os jogos...</sys:String>
-	<sys:String x:Key="LOCCommonClearingAllTag">Limpando banco de dados...</sys:String>
-	<sys:String x:Key="LOCCommonConverting">Convertendo, por favor aguarde...</sys:String>
-	<sys:String x:Key="LOCCommonGettingAllDatas">Baixando dados para todos os jogos...</sys:String>
-	<sys:String x:Key="LOCCommonGettingData">Baixando dados...</sys:String>
-	<sys:String x:Key="LOCCommonGettingInstalledDatas">Baixando dados dos jogos instalados...</sys:String>
-	<sys:String x:Key="LOCCommonGettingNewDatas">Baixando dados de novos jogos...</sys:String>
-	<sys:String x:Key="LOCCommonProcessing">Processando, aguarde...</sys:String>
-	<sys:String x:Key="LOCCommonRemovingAllTag">Removendo tags de todos os jogos...</sys:String>
+	<sys:String x:Key="LOCCommonAddingAllTag">Adding tag for all games...</sys:String>
+	<sys:String x:Key="LOCCommonClearingAllTag">Clearing database...</sys:String>
+	<sys:String x:Key="LOCCommonConverting">Converting, please wait...</sys:String>
+	<sys:String x:Key="LOCCommonGettingAllDatas">Downloading data for all games...</sys:String>
+	<sys:String x:Key="LOCCommonGettingData">Downloading data...</sys:String>
+	<sys:String x:Key="LOCCommonGettingInstalledDatas">Downloading data from installed games...</sys:String>
+	<sys:String x:Key="LOCCommonGettingNewDatas">Downloading data from new games...</sys:String>
+	<sys:String x:Key="LOCCommonProcessing">Processing, please wait...</sys:String>
+	<sys:String x:Key="LOCCommonRemovingAllTag">Removing tag from all games...</sys:String>
 
 	<!-- ==================== NOTIFICATIONS & ERRORS ==================== -->
 
 	<sys:String x:Key="LOCCommonCreateLog">Deseja criar um pacote de log?</sys:String>
-	<sys:String x:Key="LOCCommonDataErrorRemove">Erro ao remover dados do plugin. Por favor, tente novamente.</sys:String>
-	<sys:String x:Key="LOCCommonDataRemove">Os dados do plugin foram apagados.</sys:String>
-	<sys:String x:Key="LOCCommonPluginNoAuthenticate">{0} usuário não autenticado</sys:String>
+	<sys:String x:Key="LOCCommonDataErrorRemove">Error removing plugin data. Please try again.</sys:String>
+	<sys:String x:Key="LOCCommonDataRemove">Plugin data has been removed.</sys:String>
+	<sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: usuário não está autenticado.</sys:String>
 
-	<sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Impossível excluir pasta de cache:
+	<sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Impossible to delete cache folder:
 {0}</sys:String>
 
-	<sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">Erro ao recuperar dados de {0}.
-Por favor, tente novamente.</sys:String>
+	<sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">Error retrieving data from {0}.
+Please try again.</sys:String>
 
-	<sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Use dados salvos antigos para {0} [{1}]
+	<sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Usando dados salvos antigos para {0} [{1}]
 Você deve autenticar.</sys:String>
 
 	<sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Erro adicionando a tag com {0}.
 Por favor, limpe todas as tags no menu de plugins.</sys:String>
 	<sys:String x:Key="LOCCommonNotificationTagBatchError" xml:space="preserve">{0} erro(s) ocorreram durante a adição de etiquetas. Verifique o log para detalhes.</sys:String>
 
-	<sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">Mais de 1 dado encontrado para {0}. Por favor, chegue os ajustes o plugin.</sys:String>
+	<sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">Mais de um dado encontrado para {0}. Por favor, cheque as configurações do plugin.</sys:String>
 
     <!-- ==================== DATABASE MAINTENANCE ==================== -->
 
@@ -349,20 +349,25 @@ Por favor, limpe todas as tags no menu de plugins.</sys:String>
 {ImageNameNoExt} - Nome do arquivo ISO/ROM do jogo sem extensão
 {PlayniteDir} - Diretório de Instalação do Playnite
 {Name} - Nome do Jogo
-       
-Variáveis de nuvem podem ser usadas para adicionar uma expressão dinâmica:        
+
+Variáveis de nuvem:
 {DropboxFolder}
-       
-Variáveis do Steam podem ser usadas para adicionar uma expressão dinâmica:        
-{SteamId} - Id de usuário do Steam
+{OneDriveFolder}
+
+Variáveis do Steam:
+{SteamId} - ID de usuário do Steam
+{SteamAccountId} - ID de conta Steam
 {SteamInstallDir} - Diretório de instalação do Steam
 {SteamScreenshotsDir} - Diretório de capturas de tela do Steam
-       
-Variáveis da Ubisoft Connect podem ser usadas para adicionar uma expressão dinâmica:        
+
+Variáveis da Ubisoft Connect:
 {UbisoftInstallDir} - Diretório de instalação da Ubisoft
 {UbisoftScreenshotsDir} - Diretório de capturas de tela da Ubisoft
-            
-Variáveis do Windows podem ser usadas para adicionar uma expressão dinâmica:        
+
+Variáveis do RetroArch:
+{RetroArchScreenshotsDir} - Diretório de capturas de tela do RetroArch
+
+Variáveis do Windows:
 {WinDir}
 {AllUsersProfile}
 {AppData}
@@ -378,6 +383,6 @@ Variáveis do Windows podem ser usadas para adicionar uma expressão dinâmica:
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)</sys:String>
+{ProgramFiles(x86)} - Diretório de Arquivos de Programas de 32-bit</sys:String>
 
 </ResourceDictionary>
