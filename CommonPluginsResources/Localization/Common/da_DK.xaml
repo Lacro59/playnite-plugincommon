@@ -290,7 +290,7 @@ Do you want to open the directory?</sys:String>
 
 	<!-- ==================== NOTIFICATIONS & ERRORS ==================== -->
 
-	<sys:String x:Key="LOCCommonCreateLog">Do you want create a log package?</sys:String>
+	<sys:String x:Key="LOCCommonCreateLog">Do you want to create a log package?</sys:String>
 	<sys:String x:Key="LOCCommonDataErrorRemove">Error removing plugin data. Please try again.</sys:String>
 	<sys:String x:Key="LOCCommonDataRemove">Plugin data has been removed.</sys:String>
 	<sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: user is not authenticated.</sys:String>
