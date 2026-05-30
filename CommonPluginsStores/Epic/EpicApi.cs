@@ -302,7 +302,7 @@ namespace CommonPluginsStores.Epic
 				CurrentAccountInfos = accountInfos;
 				SaveCurrentUser();
 				SetStoredCookies(GetWebCookies());
-				Logger.Info($"{ClientName} logged");
+				LogInfo("logged");
 			}
 		}
 

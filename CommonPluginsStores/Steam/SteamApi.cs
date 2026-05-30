@@ -394,7 +394,7 @@ namespace CommonPluginsStores.Steam
                 CurrentAccountInfos = accountInfos;
                 SaveCurrentUser();
 
-                Logger.Info($"{ClientName} logged");
+                LogInfo("logged");
             }
 		}
 

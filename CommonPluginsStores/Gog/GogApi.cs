@@ -160,7 +160,7 @@ namespace CommonPluginsStores.Gog
                     SaveCurrentUser();
                     //_ = GetCurrentAccountInfos();
 
-                    Logger.Info($"{ClientName} logged");
+                    LogInfo("logged");
                 }
             }
             else
@@ -192,7 +192,7 @@ namespace CommonPluginsStores.Gog
                     SaveCurrentUser();
                     _ = GetCurrentAccountInfos();
 
-                    Logger.Info($"{ClientName} logged");
+                    LogInfo("logged");
                 }
             }
             catch (Exception ex)
@@ -720,7 +720,7 @@ namespace CommonPluginsStores.Gog
                     }
                     else
                     {
-                        Logger.Warn($"No dlc data for {el.Id}");
+                        LogWarn($"No DLC data for {el.Id}");
                     }
                 }
                 catch (Exception ex)
