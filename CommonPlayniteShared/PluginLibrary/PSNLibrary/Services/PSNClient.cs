@@ -175,7 +175,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
                 string mobileCode;
                 try
                 {
-                    var mobileCodeResponse = await httpClient.GetAsync(mobileCodeUrl);
+                    var mobileCodeResponse = await httpClient.GetAsync(mobileCodeUrl).ConfigureAwait(false);
                     mobileCode = HttpUtility.ParseQueryString(mobileCodeResponse.Headers.Location.Query)["code"];
                 }
                 catch
@@ -183,7 +183,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
                     TryRefreshCookies();
                     try
                     {
-                        var mobileCodeResponse = await httpClient.GetAsync(mobileCodeUrl);
+                        var mobileCodeResponse = await httpClient.GetAsync(mobileCodeUrl).ConfigureAwait(false);
                         mobileCode = HttpUtility.ParseQueryString(mobileCodeResponse.Headers.Location.Query)["code"];
                     }
                     catch
@@ -201,8 +201,8 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
                 requestMessage.Content = new FormUrlEncodedContent(requestMessageForm);
                 requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", mobileTokenAuth);
 
-                var mobileTokenResponse = await httpClient.SendAsync(requestMessage);
-                var strResponse = await mobileTokenResponse.Content.ReadAsStringAsync();
+                var mobileTokenResponse = await httpClient.SendAsync(requestMessage).ConfigureAwait(false);
+                var strResponse = await mobileTokenResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
                 mobileToken = Serialization.FromJson<MobileTokens>(strResponse);
                 return true;
             }
@@ -236,10 +236,10 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
             }
             else
             {
-                if (!await GetIsUserLoggedIn())
+                if (!await GetIsUserLoggedIn().ConfigureAwait(false))
                 {
                     TryRefreshCookies();
-                    if (!await GetIsUserLoggedIn())
+                    if (!await GetIsUserLoggedIn().ConfigureAwait(false))
                     {
                         throw new Exception("User is not authenticated.");
                     }
@@ -247,7 +247,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
                     {
                         if (mobileToken == null)
                         {
-                            if (!await getMobileToken())
+                            if (!await getMobileToken().ConfigureAwait(false))
                             {
                                 throw new Exception("User is not authenticated.");
                             }
@@ -258,7 +258,7 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
                 {
                     if (mobileToken == null)
                     {
-                        if (!await getMobileToken())
+                        if (!await getMobileToken().ConfigureAwait(false))
                         {
                             throw new Exception("User is not authenticated.");
                         }
@@ -276,8 +276,8 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
             using (var httpClient = new HttpClient(handler))
             {
                 httpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-apollo-operation-name", "pn_psn");
-                var resp = httpClient.GetAsync(playedListUrl).GetAwaiter().GetResult();
-                var strResponse = await resp.Content.ReadAsStringAsync();
+                var resp = await httpClient.GetAsync(playedListUrl).ConfigureAwait(false);
+                var strResponse = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var titles_part = Serialization.FromJson<PlayedTitles>(strResponse);
                 titles.AddRange(titles_part.data.gameLibraryTitlesRetrieve.games);
             }
@@ -301,8 +301,8 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
                 {
                     object[] args = { offset, pageRequestLimit };
                     httpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-apollo-operation-name", "pn_psn");
-                    var resp = httpClient.GetAsync(gameListUrl.Format(offset + pageRequestLimit, pageRequestLimit)).GetAwaiter().GetResult();
-                    var strResponse = await resp.Content.ReadAsStringAsync();
+                    var resp = await httpClient.GetAsync(gameListUrl.Format(offset + pageRequestLimit, pageRequestLimit)).ConfigureAwait(false);
+                    var strResponse = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var titles_part = Serialization.FromJson<AccountTitles>(strResponse);
                     titles.AddRange(titles_part.data.purchasedTitlesRetrieve.games);
                     offset = titles_part.data.purchasedTitlesRetrieve.pageInfo.offset;
@@ -329,8 +329,8 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
                 {
                     HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("get"), playedMobileListUrl.Format(offset));
                     requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", mobileToken.access_token);
-                    var resp = await httpClient.SendAsync(requestMessage);
-                    var strResponse = await resp.Content.ReadAsStringAsync();
+                    var resp = await httpClient.SendAsync(requestMessage).ConfigureAwait(false);
+                    var strResponse = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var titles_part = Serialization.FromJson<PlayedTitlesMobile>(strResponse);
                     titles.AddRange(titles_part.titles);
                     offset = titles_part.nextOffset;
@@ -356,8 +356,8 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
                 {
                     HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("get"), trophiesMobileUrl.Format(offset));
                     requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", mobileToken.access_token);
-                    var resp = await httpClient.SendAsync(requestMessage);
-                    var strResponse = await resp.Content.ReadAsStringAsync();
+                    var resp = await httpClient.SendAsync(requestMessage).ConfigureAwait(false);
+                    var strResponse = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var titles_part = Serialization.FromJson<TrophyTitlesMobile>(strResponse);
                     titles.AddRange(titles_part.trophyTitles);
                     offset = titles_part.nextOffset;
@@ -383,8 +383,8 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
                 {
                     HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod("get"), trophiesWithIdsMobileUrl.Format(string.Join(",", titleIdsArray.Skip(offset).Take(querySize))));
                     requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", mobileToken.access_token);
-                    var resp = await httpClient.SendAsync(requestMessage);
-                    var strResponse = await resp.Content.ReadAsStringAsync();
+                    var resp = await httpClient.SendAsync(requestMessage).ConfigureAwait(false);
+                    var strResponse = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var titles_part = Serialization.FromJson<TrophyTitlesWithIdsMobile>(strResponse);
                     titles.AddRange(titles_part.titles);
                     offset = offset + querySize;
@@ -433,8 +433,8 @@ namespace CommonPlayniteShared.PluginLibrary.PSNLibrary.Services
                 using (var httpClient = new HttpClient(handler))
                 {
                     httpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-apollo-operation-name", "pn_psn");
-                    var resp = httpClient.GetAsync(gameListUrl.Format(0, 24)).GetAwaiter().GetResult();
-                    var strResponse = await resp.Content.ReadAsStringAsync();
+                    var resp = await httpClient.GetAsync(gameListUrl.Format(0, 24)).ConfigureAwait(false);
+                    var strResponse = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
                     if (Serialization.TryFromJson<AccountTitlesErrorResponse>(strResponse, out var error) && error.data.purchasedTitlesRetrieve == null)
                     {
                         return false;
