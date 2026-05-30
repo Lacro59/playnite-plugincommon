@@ -78,6 +78,9 @@ namespace CommonPluginsStores.Steam
 
 		private static string UrlSteamGameSearch => UrlStore + @"/api/storesearch/?term={0}&cc={1}&l={1}";
 
+		private static string UrlSteamAppIdListGames => @"https://raw.githubusercontent.com/jsnli/steamappidlist/master/data/games_appid.json";
+		private static string UrlSteamAppIdListDlc => @"https://raw.githubusercontent.com/jsnli/steamappidlist/master/data/dlc_appid.json";
+
 		#endregion
 
 		private List<SteamApp> _steamApps;
@@ -86,7 +89,8 @@ namespace CommonPluginsStores.Steam
 		/// <summary>
 		/// Cached list of all Steam applications.
 		/// Automatically loads from cache if available and not expired (3 days),
-		/// otherwise fetches from Steam API and caches the result.
+		/// otherwise fetches from the Steam API (when authenticated) or from the public
+		/// steamappidlist repository (games + DLC) and caches the result.
 		/// </summary>
 		protected List<SteamApp> SteamApps
 		{
@@ -105,20 +109,17 @@ namespace CommonPluginsStores.Steam
 						List<SteamApp> steamAppsNew = null;
 
 						// Determine retrieval method
-						if (CurrentAccountInfos == null || CurrentAccountInfos.ApiKey.IsNullOrEmpty())
+						if (!(StoreToken?.Token.IsNullOrEmpty() ?? true))
 						{
-							if (!(StoreToken?.Token.IsNullOrEmpty() ?? true))
-							{
-								steamAppsNew = GetSteamAppsByWebToken();
-							}
-							else
-							{
-								Logger.Warn("Steam API key and web token are both missing - cannot fetch app list");
-							}
+							steamAppsNew = GetSteamAppsByWebToken();
+						}
+						else if (CurrentAccountInfos != null && !CurrentAccountInfos.ApiKey.IsNullOrEmpty() && IsUserLoggedIn)
+						{
+							steamAppsNew = SteamKit.GetAppList(CurrentAccountInfos.ApiKey);
 						}
 						else
 						{
-							steamAppsNew = SteamKit.GetAppList(CurrentAccountInfos.ApiKey);
+							steamAppsNew = GetSteamAppsFromPublicAppIdList();
 						}
 
 						// 3. Load existing cache to merge with new data
@@ -2085,6 +2086,59 @@ namespace CommonPluginsStores.Steam
 			{
 				Common.LogError(ex, false, true, PluginName);
 				IsUserLoggedIn = false;
+				return null;
+			}
+		}
+
+		/// <summary>
+		/// Loads the Steam app list from the public steamappidlist repository (games + DLC merged).
+		/// Used when the user is not authenticated via web token or API key session.
+		/// </summary>
+		private List<SteamApp> GetSteamAppsFromPublicAppIdList()
+		{
+			try
+			{
+				Logger.Info("Loading Steam app list from public steamappidlist repository");
+
+				string gamesJson = Web.DownloadStringData(UrlSteamAppIdListGames).GetAwaiter().GetResult();
+				string dlcJson = Web.DownloadStringData(UrlSteamAppIdListDlc).GetAwaiter().GetResult();
+
+				List<SteamApp> games = string.IsNullOrWhiteSpace(gamesJson)
+					? new List<SteamApp>()
+					: Serialization.FromJson<List<SteamApp>>(gamesJson) ?? new List<SteamApp>();
+				List<SteamApp> dlcs = string.IsNullOrWhiteSpace(dlcJson)
+					? new List<SteamApp>()
+					: Serialization.FromJson<List<SteamApp>>(dlcJson) ?? new List<SteamApp>();
+
+				var merged = new List<SteamApp>(games.Count + dlcs.Count);
+				var seenAppIds = new HashSet<uint>();
+
+				foreach (SteamApp app in games.Concat(dlcs))
+				{
+					if (app == null || !seenAppIds.Add(app.AppId))
+					{
+						continue;
+					}
+
+					merged.Add(new SteamApp
+					{
+						AppId = app.AppId,
+						Name = app.Name
+					});
+				}
+
+				if (merged.Count == 0)
+				{
+					Logger.Warn("Public Steam app list is empty");
+					return null;
+				}
+
+				Logger.Info($"Loaded {merged.Count} Steam apps from public repository");
+				return merged;
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, true, PluginName);
 				return null;
 			}
 		}
