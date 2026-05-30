@@ -71,17 +71,20 @@
                 <Button Content="{DynamicResource LOCCommonAuthenticateLabel}"
                         Style="{StaticResource PrimaryButton}"
                         Margin="0,0,8,0"
+                        IsEnabled="{Binding CanLogin}"
                         Command="{Binding LoginCommand}" />
 
                 <Button Content="{DynamicResource LOCEpicAuthenticateAlternativeLabel}"
                         Style="{StaticResource SecondaryButton}"
                         Margin="0,0,8,0"
+                        IsEnabled="{Binding CanLogin}"
                         Command="{Binding LoginAlternativeCommand}"
                         Visibility="{Binding HasAlternativeLogin, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                 <Button Content="{DynamicResource LOCCommonClearSession}"
                         Style="{StaticResource SecondaryButton}"
                         ToolTip="{DynamicResource LOCCommonClearSessionDescription}"
+                        IsEnabled="{Binding CanLogout}"
                         Command="{Binding ClearSessionCommand}" />
             </StackPanel>
         </StackPanel>

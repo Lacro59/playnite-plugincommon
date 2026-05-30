@@ -180,6 +180,7 @@ namespace CommonPluginsControls.Stores.Models
         /// </summary>
         public void RefreshAuthStatus()
         {
+            _authProvider?.RefreshAuthCommandStates();
             NotifyAuthStatusProperties();
         }
 

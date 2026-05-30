@@ -18,8 +18,7 @@ namespace CommonPluginsControls.Stores.GameJolt
             {
                 _storeApi = value;
                 OnPropertyChanged(nameof(StoreApi));
-                OnPropertyChanged(nameof(User));
-                OnPropertyChanged(nameof(AuthStatus));
+                NotifyAuthStatusChanged();
             }
         }
 
@@ -53,14 +52,17 @@ namespace CommonPluginsControls.Stores.GameJolt
 
         public AuthStatus AuthStatus => StoreApi == null ? AuthStatus.Failed : StoreApi.IsUserLoggedIn ? AuthStatus.Ok : AuthStatus.AuthRequired;
 
+        public bool CanLogin => AuthStatus != AuthStatus.Ok && AuthStatus != AuthStatus.Checking;
+
+        public bool CanLogout => AuthStatus == AuthStatus.Ok;
+
         public RelayCommand<object> LoginCommand => new RelayCommand<object>((a) =>
         {
             try
             {
                 StoreSettingsLog.LoginRequested(StoreApi);
                 StoreApi.Login();
-                OnPropertyChanged(nameof(AuthStatus));
-                OnPropertyChanged(nameof(User));
+                NotifyAuthStatusChanged();
                 StoreSettingsLog.LoginCompleted(StoreApi, AuthStatus);
             }
             catch (Exception ex)
@@ -76,8 +78,7 @@ namespace CommonPluginsControls.Stores.GameJolt
             {
                 StoreSettingsLog.LogoutRequested(StoreApi);
                 StoreApi?.ClearSession();
-                OnPropertyChanged(nameof(AuthStatus));
-                OnPropertyChanged(nameof(User));
+                NotifyAuthStatusChanged();
                 StoreSettingsLog.LogoutCompleted(StoreApi, AuthStatus);
             }
             catch (Exception ex)
@@ -90,13 +91,26 @@ namespace CommonPluginsControls.Stores.GameJolt
         public void ResetIsUserLoggedIn()
         {
             StoreApi?.ResetIsUserLoggedIn();
-            OnPropertyChanged(nameof(AuthStatus));
+            NotifyAuthStatusChanged();
+        }
+
+        public void RefreshAuthCommandStates()
+        {
+            NotifyAuthStatusChanged();
         }
 
         private void NotifyAuthUiProperties()
         {
             OnPropertyChanged(nameof(ShowConnectionSection));
             OnPropertyChanged(nameof(IsManualAccountEntryEnabled));
+        }
+
+        private void NotifyAuthStatusChanged()
+        {
+            OnPropertyChanged(nameof(AuthStatus));
+            OnPropertyChanged(nameof(CanLogin));
+            OnPropertyChanged(nameof(CanLogout));
+            OnPropertyChanged(nameof(User));
         }
     }
 }

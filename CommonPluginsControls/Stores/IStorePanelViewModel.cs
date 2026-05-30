@@ -16,5 +16,20 @@ namespace CommonPluginsControls.Stores
         /// Gets a value indicating whether the connection UI is shown for this store.
         /// </summary>
         bool ShowConnectionSection { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the sign-in action is available.
+        /// </summary>
+        bool CanLogin { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the log out action is available.
+        /// </summary>
+        bool CanLogout { get; }
+
+        /// <summary>
+        /// Refreshes auth status and command availability bindings.
+        /// </summary>
+        void RefreshAuthCommandStates();
     }
 }
