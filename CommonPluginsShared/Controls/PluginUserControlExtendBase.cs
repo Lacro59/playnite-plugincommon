@@ -536,14 +536,17 @@ namespace CommonPluginsShared.Controls
 #endif
 
 				// Leading edge: show data as soon as the UI thread can, without waiting for debounce/settings noise.
-				Guid targetGameId = newContext.Id;
-				Dispatcher.BeginInvoke((Action)(async () =>
+				if (newContext != null)
 				{
-					if (CurrentGame?.Id == targetGameId && GameContext?.Id == targetGameId)
+					Guid targetGameId = newContext.Id;
+					Dispatcher.BeginInvoke((Action)(async () =>
 					{
-						await RunScheduledUpdateAsync("context-switch-immediate");
-					}
-				}), DispatcherPriority.Loaded);
+						if (CurrentGame?.Id == targetGameId && GameContext?.Id == targetGameId)
+						{
+							await RunScheduledUpdateAsync("context-switch-immediate");
+						}
+					}), DispatcherPriority.Loaded);
+				}
 			}
 #if DEBUG
 			else
