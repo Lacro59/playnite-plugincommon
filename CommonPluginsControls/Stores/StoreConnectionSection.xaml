@@ -1,0 +1,89 @@
+<UserControl x:Class="CommonPluginsControls.Stores.StoreConnectionSection"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:enumerations="clr-namespace:CommonPluginsStores.Models.Enumerations"
+             xmlns:converters="clr-namespace:CommonPlayniteShared.Converters"
+             mc:Ignorable="d"
+             d:DesignWidth="500">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="StorePanelResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Border Style="{StaticResource SectionBorder}"
+            Visibility="{Binding ShowConnectionSection, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <StackPanel>
+            <TextBlock Style="{StaticResource SectionHeaderText}"
+                       Text="{DynamicResource LOCCommonConnection}" />
+
+            <Border Style="{StaticResource StoreAuthStatusBadge}">
+                <Border.Tag>
+                    <PriorityBinding>
+                        <Binding Path="AuthStatus" IsAsync="True" />
+                        <Binding Source="{x:Static enumerations:AuthStatus.Checking}" />
+                    </PriorityBinding>
+                </Border.Tag>
+
+                <TextBlock>
+                    <TextBlock.Tag>
+                        <PriorityBinding>
+                            <Binding Path="AuthStatus" IsAsync="True" />
+                            <Binding Source="{x:Static enumerations:AuthStatus.Checking}" />
+                        </PriorityBinding>
+                    </TextBlock.Tag>
+
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource StoreAuthStatusBadgeText}">
+                            <Style.Triggers>
+                                <Trigger Property="Tag" Value="{x:Static enumerations:AuthStatus.Checking}">
+                                    <Setter Property="Text" Value="{DynamicResource LOCCommonLoginChecking}" />
+                                </Trigger>
+                                <Trigger Property="Tag" Value="{x:Static enumerations:AuthStatus.Ok}">
+                                    <Setter Property="Text" Value="{DynamicResource LOCCommonLoggedIn}" />
+                                </Trigger>
+                                <Trigger Property="Tag" Value="{x:Static enumerations:AuthStatus.AuthRequired}">
+                                    <Setter Property="Text" Value="{DynamicResource LOCCommonNotLoggedIn}" />
+                                </Trigger>
+                                <Trigger Property="Tag" Value="{x:Static enumerations:AuthStatus.PrivateAccount}">
+                                    <Setter Property="Text" Value="{DynamicResource LOCSteamRequiresApiKey}" />
+                                </Trigger>
+                                <Trigger Property="Tag" Value="{x:Static enumerations:AuthStatus.Failed}">
+                                    <Setter Property="Text" Value="{DynamicResource LOCCommonNotLoggedInError}" />
+                                </Trigger>
+                                <Trigger Property="Tag" Value="{x:Static enumerations:AuthStatus.Unknown}">
+                                    <Setter Property="Text" Value="" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Border>
+
+            <StackPanel Orientation="Horizontal">
+                <Button Content="{DynamicResource LOCCommonAuthenticateLabel}"
+                        Style="{StaticResource PrimaryButton}"
+                        Margin="0,0,8,0"
+                        Command="{Binding LoginCommand}" />
+
+                <Button Content="{DynamicResource LOCEpicAuthenticateAlternativeLabel}"
+                        Style="{StaticResource SecondaryButton}"
+                        Margin="0,0,8,0"
+                        Command="{Binding LoginAlternativeCommand}"
+                        Visibility="{Binding HasAlternativeLogin, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                <Button Content="{DynamicResource LOCCommonClearSession}"
+                        Style="{StaticResource SecondaryButton}"
+                        ToolTip="{DynamicResource LOCCommonClearSessionDescription}"
+                        Command="{Binding ClearSessionCommand}" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

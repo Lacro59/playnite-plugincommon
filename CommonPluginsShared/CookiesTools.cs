@@ -142,6 +142,57 @@ namespace CommonPluginsShared
         }
 
         /// <summary>
+        /// Deletes the encrypted cookie file for this client, if it exists.
+        /// </summary>
+        public void ClearStoredCookies()
+        {
+            if (File.Exists(FileCookies))
+            {
+                FileSystem.DeleteFile(FileCookies);
+                Logger.Info($"{ClientName} stored cookies file deleted");
+                Common.LogDebug(true, $"{ClientName} ClearStoredCookies: {FileCookies}");
+            }
+            else
+            {
+                Common.LogDebug(true, $"{ClientName} ClearStoredCookies: no cookie file found");
+            }
+        }
+
+        /// <summary>
+        /// Clears cookies for configured domains from an offscreen WebView.
+        /// </summary>
+        public void ClearDomainCookies()
+        {
+            if (CookiesDomains == null || !CookiesDomains.Any())
+            {
+                Common.LogDebug(true, $"{ClientName} ClearDomainCookies: no domains configured");
+                return;
+            }
+
+            IWebView webView = null;
+
+            try
+            {
+                webView = API.Instance.WebViews.CreateOffscreenView();
+                Logger.Info($"{ClientName} clearing WebView cookies for {CookiesDomains.Count} domain(s)");
+
+                foreach (string domain in CookiesDomains)
+                {
+                    webView.DeleteDomainCookies(domain);
+                    Common.LogDebug(true, $"{ClientName} ClearDomainCookies: {domain}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, $"{ClientName} ClearDomainCookies failed");
+            }
+            finally
+            {
+                webView?.Dispose();
+            }
+        }
+
+        /// <summary>
         /// Retrieves cookies from a WebView, optionally filtered by domain and optionally deleting them.
         /// </summary>
         /// <param name="deleteCookies">When <c>true</c>, clears domain cookies from the WebView after extraction.</param>

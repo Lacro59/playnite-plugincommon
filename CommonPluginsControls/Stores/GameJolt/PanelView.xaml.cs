@@ -98,7 +98,7 @@ namespace CommonPluginsControls.Stores.GameJolt
             }
         }
 
-        private void Expander_Loaded(object sender, RoutedEventArgs e)
+        private void PanelView_Loaded(object sender, RoutedEventArgs e)
         {
             IsStarted = true;
         }

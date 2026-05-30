@@ -8,6 +8,7 @@ using CommonPluginsShared.Extensions;
 using CommonPluginsShared.IO;
 using CommonPluginsShared.Models;
 using CommonPluginsStores.Models;
+using CommonPluginsStores.Models.Enumerations;
 using CommonPluginsStores.Models.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Data;
@@ -351,6 +352,70 @@ namespace CommonPluginsStores
 		public void ResetIsUserLoggedIn()
         {
             isUserLoggedIn = null;
+        }
+
+        /// <summary>
+        /// Clears stored authentication data and session profile fields for the current account.
+        /// Manual identifiers (user id, API key) are preserved.
+        /// </summary>
+        public virtual void ClearSession()
+        {
+            Logger.Info($"{ClientNameLog} ClearSession started");
+
+            try
+            {
+                CookiesTools.ClearStoredCookies();
+                CookiesTools.ClearDomainCookies();
+                ClearStoredToken();
+                ClearSessionProfileFields();
+                IsUserLoggedIn = false;
+                SaveCurrentUser();
+                Logger.Info($"{ClientNameLog} ClearSession completed");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, $"{ClientNameLog} ClearSession failed");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Deletes the stored authentication token file and in-memory token cache.
+        /// </summary>
+        protected void ClearStoredToken()
+        {
+            _storeToken = null;
+
+            if (File.Exists(FileToken))
+            {
+                FileSystem.DeleteFile(FileToken);
+                Logger.Info($"{ClientNameLog} stored token file deleted");
+                Common.LogDebug(true, $"{ClientNameLog} ClearStoredToken: {FileToken}");
+            }
+            else
+            {
+                Common.LogDebug(true, $"{ClientNameLog} ClearStoredToken: no token file found");
+            }
+        }
+
+        /// <summary>
+        /// Clears profile fields populated by an authenticated session.
+        /// </summary>
+        protected void ClearSessionProfileFields()
+        {
+            AccountInfos user = CurrentAccountInfos;
+
+            if (user == null)
+            {
+                Logger.Warn($"{ClientNameLog} ClearSession: no current account to update");
+                return;
+            }
+
+            user.Avatar = null;
+            user.Link = null;
+            user.Pseudo = null;
+            user.AccountStatus = AccountStatus.Unknown;
+            Common.LogDebug(true, $"{ClientNameLog} ClearSession: session profile fields cleared");
         }
 
         /// <summary>

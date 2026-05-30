@@ -217,6 +217,8 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 	<sys:String x:Key="LOCCommonAccountConfiguration">Configuration du compte</sys:String>
 	<sys:String x:Key="LOCCommonAccountName">Nom du compte</sys:String>
 	<sys:String x:Key="LOCCommonAuthenticateLabel">Connexion</sys:String>
+	<sys:String x:Key="LOCCommonClearSession">Déconnexion</sys:String>
+	<sys:String x:Key="LOCCommonClearSessionDescription">Se déconnecte du compte store. L'identifiant de compte et la clé API sont conservés.</sys:String>
 	<sys:String x:Key="LOCCommonControlConfiguration">Configuration du contrôle</sys:String>
 	<sys:String x:Key="LOCCommonGetAccountID">Obtenir l'ID du compte</sys:String>
 	<sys:String x:Key="LOCCommonHasApiKey">Possède une clé API</sys:String>

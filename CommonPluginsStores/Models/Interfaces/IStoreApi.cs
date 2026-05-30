@@ -26,6 +26,11 @@
         void ResetIsUserLoggedIn();
 
         /// <summary>
+        /// Clears stored authentication data (cookies, tokens) and session profile fields.
+        /// </summary>
+        void ClearSession();
+
+        /// <summary>
         /// Sets the language or locale used by the store API.
         /// </summary>
         /// <param name="locale">The locale code, e.g., 'en-US'.</param>
