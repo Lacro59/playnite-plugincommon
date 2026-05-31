@@ -235,7 +235,7 @@ namespace CommonPluginsShared
         /// <returns>Filtered cookies for the configured domains.</returns>
         public List<HttpCookie> GetNewWebCookies(List<string> urls, bool deleteCookies = false, IWebView webView = null)
         {
-            return GetNewWebCookies(urls, deleteCookies, webView, 1000);
+            return GetNewWebCookies(urls, deleteCookies, webView, 1000, null);
         }
 
         /// <summary>
@@ -248,6 +248,23 @@ namespace CommonPluginsShared
         /// <param name="waitAfterNavigateMs">Delay in milliseconds after each navigation before reading cookies. Use 0 to skip the wait.</param>
         /// <returns>Filtered cookies for the configured domains, or an empty list on failure.</returns>
         public List<HttpCookie> GetNewWebCookies(List<string> urls, bool deleteCookies, IWebView webView, int waitAfterNavigateMs)
+        {
+            return GetNewWebCookies(urls, deleteCookies, webView, waitAfterNavigateMs, null);
+        }
+
+        /// <summary>
+        /// Navigates to the specified URLs in a WebView and returns cookies set by those pages.
+        /// </summary>
+        /// <param name="urls">Absolute URLs to visit in order.</param>
+        /// <param name="deleteCookies">When <c>true</c>, clears domain cookies from the WebView after extraction.</param>
+        /// <param name="webView">Optional WebView instance. An offscreen view is created when null.</param>
+        /// <param name="waitAfterNavigateMs">Delay in milliseconds after each navigation before reading cookies. Use 0 to skip the wait.</param>
+        /// <param name="cookiesToInject">
+        /// Cookies to inject before navigation. When <c>null</c>, all stored cookies are injected.
+        /// Pass an empty list to skip injection.
+        /// </param>
+        /// <returns>Filtered cookies for the configured domains, or an empty list on failure.</returns>
+        public List<HttpCookie> GetNewWebCookies(List<string> urls, bool deleteCookies, IWebView webView, int waitAfterNavigateMs, List<HttpCookie> cookiesToInject)
         {
             bool createdLocally = webView == null;
 
@@ -263,16 +280,31 @@ namespace CommonPluginsShared
                     webView = API.Instance.WebViews.CreateOffscreenView(webViewSettings);
                 }
 
-                List<HttpCookie> oldCookies = GetStoredCookies();
-                oldCookies?.ForEach(cookie =>
+                List<HttpCookie> injectCookies = cookiesToInject ?? GetStoredCookies();
+                if (injectCookies != null && injectCookies.Count > 0)
                 {
-                    string domain = cookie.Domain.StartsWith(".") ? cookie.Domain.Substring(1) : cookie.Domain;
-                    webView.SetCookies("https://" + domain, cookie);
-                });
+                    Common.LogDebug(true, $"{ClientName} GetNewWebCookies: injecting {injectCookies.Count} cookie(s) before navigation");
+                    foreach (HttpCookie cookie in injectCookies)
+                    {
+                        if (cookie == null)
+                        {
+                            continue;
+                        }
+
+                        string domain = cookie.Domain.StartsWith(".") ? cookie.Domain.Substring(1) : cookie.Domain;
+                        Common.LogDebug(true, $"{ClientName} GetNewWebCookies: SetCookies domain='{domain}' name='{cookie.Name}'");
+                        webView.SetCookies("https://" + domain, cookie);
+                    }
+                }
+                else
+                {
+                    Common.LogDebug(true, $"{ClientName} GetNewWebCookies: skipping cookie injection");
+                }
 
                 int waitMs = waitAfterNavigateMs < 0 ? 0 : waitAfterNavigateMs;
                 urls.ForEach(url =>
                 {
+                    Common.LogDebug(true, $"{ClientName} GetNewWebCookies: NavigateAndWait url='{url}'");
                     webView.NavigateAndWait(url);
                     if (waitMs > 0)
                     {
