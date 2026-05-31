@@ -68,7 +68,7 @@
 
 	<!-- ==================== COMMON LABELS ==================== -->
 
-	<sys:String x:Key="LOCCommonNoData">Ingen data</sys:String>
+	<sys:String x:Key="LOCCommonNoData">No data</sys:String>
 	<sys:String x:Key="LOCCommonNoDataAvailable">No data available</sys:String>
 	<sys:String x:Key="LOCCommonTotal">Total</sys:String>
 	<sys:String x:Key="LOCCommonCut">Cut</sys:String>
@@ -112,13 +112,13 @@
 	<sys:String x:Key="LOCCommonDefaultFilters">Restore default filters</sys:String>
 	<sys:String x:Key="LOCCommonGameSource">Game source</sys:String>
 	<sys:String x:Key="LOCCommonInstallationStatus">Installation status</sys:String>
-	<sys:String x:Key="LOCCommonMissingData">Merk spill som mangler data</sys:String>
+	<sys:String x:Key="LOCCommonMissingData">Tag games missing data</sys:String>
 	<sys:String x:Key="LOCCommonOldData">Old data</sys:String>
-	<sys:String x:Key="LOCCommonOnlyMissing">Bare manglende</sys:String>
+	<sys:String x:Key="LOCCommonOnlyMissing">Only missing</sys:String>
 	<sys:String x:Key="LOCCommonRecentlyAdded">Recently added</sys:String>
 	<sys:String x:Key="LOCCommonSaveFilters">Save current filters</sys:String>
 	<sys:String x:Key="LOCCommonSearchByName">Search by name...</sys:String>
-	<sys:String x:Key="LOCCommonSelectFilters">Velg filtre</sys:String>
+	<sys:String x:Key="LOCCommonSelectFilters">Select filters</sys:String>
 	<sys:String x:Key="LOCCommonTimeFilters">Time-based filters</sys:String>
 	<sys:String x:Key="LOCCommonUsedFilteredGames">Currently filtered games used</sys:String>
 	<sys:String x:Key="LOCCommonAdditionalOptions">Additional options</sys:String>
@@ -129,7 +129,7 @@
 	<sys:String x:Key="LOCCommonRefreshSelected">Refresh Selected</sys:String>
 	<sys:String x:Key="LOCCommonSelected">Selected:</sys:String>
 	<sys:String x:Key="LOCCommonSelectGames">Select games</sys:String>
-	<sys:String x:Key="LOCCommonSelectVariable">Velg variabel</sys:String>
+	<sys:String x:Key="LOCCommonSelectVariable">Select variable</sys:String>
 	<sys:String x:Key="LOCCommonTotalFound">Total found</sys:String>
 
 	<!-- ==================== DATA MANAGEMENT ==================== -->
@@ -290,7 +290,7 @@ Do you want to open the directory?</sys:String>
 
 	<!-- ==================== NOTIFICATIONS & ERRORS ==================== -->
 
-	<sys:String x:Key="LOCCommonCreateLog">Do you want create a log package?</sys:String>
+	<sys:String x:Key="LOCCommonCreateLog">Do you want to create a log package?</sys:String>
 	<sys:String x:Key="LOCCommonDataErrorRemove">Error removing plugin data. Please try again.</sys:String>
 	<sys:String x:Key="LOCCommonDataRemove">Plugin data has been removed.</sys:String>
 	<sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: user is not authenticated.</sys:String>
@@ -304,8 +304,8 @@ Please try again.</sys:String>
 	<sys:String x:Key="LOCCommonNotificationOldData" xml:space="preserve">Using previously saved data for {0} [{1}]
 You must authenticate.</sys:String>
 
-	<sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Feil ved tilordning av tag til {0}.
-Fjern alle taggene i programtillegg-menyen.</sys:String>
+	<sys:String x:Key="LOCCommonNotificationTagError" xml:space="preserve">Error adding tag with {0}.
+Please clear all tags in the plugin menu.</sys:String>
 	<sys:String x:Key="LOCCommonNotificationTagBatchError" xml:space="preserve">{0} error(s) occurred while adding tags. Check the log for details.</sys:String>
 
 	<sys:String x:Key="LOCCommonNotificationTooMuchData" xml:space="preserve">More than one data entry found for {0}.

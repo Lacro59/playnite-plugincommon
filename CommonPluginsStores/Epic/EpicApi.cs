@@ -302,7 +302,7 @@ namespace CommonPluginsStores.Epic
 				CurrentAccountInfos = accountInfos;
 				SaveCurrentUser();
 				SetStoredCookies(GetWebCookies());
-				Logger.Info($"{ClientName} logged");
+				LogInfo("logged");
 			}
 		}
 
@@ -326,13 +326,13 @@ namespace CommonPluginsStores.Epic
 				{
 					try
 					{
-						await Task.Delay(1000);
-						CurrentAccountInfos.IsPrivate = !await CheckIsPublic(accountInfos);
+						await Task.Delay(1000).ConfigureAwait(false);
+						CurrentAccountInfos.IsPrivate = !await CheckIsPublic(accountInfos).ConfigureAwait(false);
 						CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
 
 						if (CurrentAccountInfos.Pseudo.IsNullOrEmpty())
 						{
-							EpicAccountResponse epicAccountResponse = await GetAccountInfo(accountInfos.UserId);
+							EpicAccountResponse epicAccountResponse = await GetAccountInfo(accountInfos.UserId).ConfigureAwait(false);
 							CurrentAccountInfos.Pseudo = epicAccountResponse?.DisplayName;
 							SaveCurrentUser();
 						}
@@ -380,7 +380,7 @@ namespace CommonPluginsStores.Epic
 				{
 					try
 					{
-						EpicAccountResponse epicAccountResponse = await GetAccountInfo(x.AccountId);
+						EpicAccountResponse epicAccountResponse = await GetAccountInfo(x.AccountId).ConfigureAwait(false);
 						string pseudo = epicAccountResponse?.DisplayName ?? x.AccountId ?? string.Empty;
 						return new AccountInfos
 						{
@@ -1068,7 +1068,7 @@ namespace CommonPluginsStores.Epic
 			{
 				accountInfos.AccountStatus = AccountStatus.Checking;
 				string url = string.Format(UrlAccountProfileUS, accountInfos.UserId);
-				var pageSource = await Web.DownloadSourceDataWebView(url);
+				var pageSource = await Web.DownloadSourceDataWebView(url).ConfigureAwait(false);
 				string source = pageSource.Item1;
 				return !source.Contains("This profile is unavailable", StringComparison.OrdinalIgnoreCase);
 			}
@@ -1921,15 +1921,15 @@ namespace CommonPluginsStores.Epic
 					httpClient.DefaultRequestHeaders.Add("Authorization", token.Type + " " + token.Token);
 				}
 
-				var response = await httpClient.GetAsync(url);
-				var str = await response.Content.ReadAsStringAsync();
+				var response = await httpClient.GetAsync(url).ConfigureAwait(false);
+				var str = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
 				if (Serialization.TryFromJson(str, out ErrorResponse error) && !string.IsNullOrEmpty(error.errorCode))
 				{
 					if (error.errorCode.IndexOf("authentication", StringComparison.OrdinalIgnoreCase) >= 0
 						|| error.errorCode.IndexOf("invalid_token", StringComparison.OrdinalIgnoreCase) >= 0)
 					{
-						var retryResult = await TryRefreshAndRetry<T>(url, token);
+						var retryResult = await TryRefreshAndRetry<T>(url, token).ConfigureAwait(false);
 						if (retryResult == null)
 						{
 							Logger.Error($"[EpicApi] Authentication refresh failed for request {url}");
@@ -1996,8 +1996,8 @@ namespace CommonPluginsStores.Epic
 						httpClient.DefaultRequestHeaders.Add("Authorization", StoreToken.Type + " " + StoreToken.Token);
 					}
 
-					HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content);
-					string str = await response.Content.ReadAsStringAsync();
+					HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content).ConfigureAwait(false);
+					string str = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
 					if (!response.IsSuccessStatusCode)
 					{
@@ -2051,7 +2051,7 @@ namespace CommonPluginsStores.Epic
 					IncludeSubItems = includeSubItems
 				}
 			};
-			return await QueryGraphQL<CatalogOfferResponse>(query);
+			return await QueryGraphQL<CatalogOfferResponse>(query).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -2077,7 +2077,7 @@ namespace CommonPluginsStores.Epic
 					Locale = CodeLang.GetEpicLang(Locale)
 				}
 			};
-			return await QueryGraphQL<GetMappingByPageSlugResponse>(query);
+			return await QueryGraphQL<GetMappingByPageSlugResponse>(query).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -2116,7 +2116,7 @@ namespace CommonPluginsStores.Epic
 					WithPrice     = withPrice
 				}
 			};
-			return await QueryGraphQL<SearchStoreResponse>(query);
+			return await QueryGraphQL<SearchStoreResponse>(query).ConfigureAwait(false);
 		}
 
 
@@ -2144,7 +2144,7 @@ namespace CommonPluginsStores.Epic
 					SortDir = "DESC"
 				}
 			};
-			return await QueryGraphQL<AddonsByNamespaceResponse>(query);
+			return await QueryGraphQL<AddonsByNamespaceResponse>(query).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -2161,7 +2161,7 @@ namespace CommonPluginsStores.Epic
 					PageType = pageType
 				}
 			};
-			return await QueryGraphQL<CatalogMappingsResponse>(query);
+			return await QueryGraphQL<CatalogMappingsResponse>(query).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -2179,7 +2179,7 @@ namespace CommonPluginsStores.Epic
 					Locale = CodeLang.GetCountryFromFirst(Locale)
 				}
 			};
-			return await QueryGraphQL<AchievementResponse>(query);
+			return await QueryGraphQL<AchievementResponse>(query).ConfigureAwait(false);
 		}
 
 		#endregion
@@ -2205,7 +2205,7 @@ namespace CommonPluginsStores.Epic
 				string refreshToken = token?.RefreshToken ?? StoreToken?.RefreshToken;
 				if (!string.IsNullOrEmpty(refreshToken))
 				{
-					await _tokenRefreshSemaphore.WaitAsync();
+					await _tokenRefreshSemaphore.WaitAsync().ConfigureAwait(false);
 					try
 					{
 						if (StoreToken == null || StoreToken.Token.IsNullOrEmpty() || StoreToken.RefreshToken == refreshToken)
@@ -2224,8 +2224,8 @@ namespace CommonPluginsStores.Epic
 									httpClient2.DefaultRequestHeaders.Add("Authorization", authType2 + " " + StoreToken.Token);
 								}
 
-								var retryResp = await httpClient2.GetAsync(url);
-								var retryStr = await retryResp.Content.ReadAsStringAsync();
+								var retryResp = await httpClient2.GetAsync(url).ConfigureAwait(false);
+								var retryStr = await retryResp.Content.ReadAsStringAsync().ConfigureAwait(false);
 
 								if (Serialization.TryFromJson(retryStr, out ErrorResponse retryError) && !string.IsNullOrEmpty(retryError.errorCode))
 								{
@@ -2270,7 +2270,7 @@ namespace CommonPluginsStores.Epic
 		private async Task<EpicFriendsSummary> GetFriendsSummary()
 		{
 			string url = string.Format(UrlFriendsSummary, CurrentAccountInfos.UserId);
-			Tuple<string, EpicFriendsSummary> data = await InvokeRequest<EpicFriendsSummary>(url);
+			Tuple<string, EpicFriendsSummary> data = await InvokeRequest<EpicFriendsSummary>(url).ConfigureAwait(false);
 			return data?.Item2;
 		}
 
@@ -2282,7 +2282,7 @@ namespace CommonPluginsStores.Epic
 		private async Task<EpicAccountResponse> GetAccountInfo(string id)
 		{
 			string url = string.Format(UrlAccount, id);
-			Tuple<string, EpicAccountResponse> data = await InvokeRequest<EpicAccountResponse>(url, StoreToken);
+			Tuple<string, EpicAccountResponse> data = await InvokeRequest<EpicAccountResponse>(url, StoreToken).ConfigureAwait(false);
 			return data?.Item2;
 		}
 
@@ -2301,7 +2301,7 @@ namespace CommonPluginsStores.Epic
 					OfferId = offerId
 				}
 			};
-			return await QueryGraphQL<EntitledOfferItemsResponse>(query);
+			return await QueryGraphQL<EntitledOfferItemsResponse>(query).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -2318,7 +2318,7 @@ namespace CommonPluginsStores.Epic
 					PageType = pageType
 				}
 			};
-			return await QueryGraphQL<WishlistResponse>(query);
+			return await QueryGraphQL<WishlistResponse>(query).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -2340,7 +2340,7 @@ namespace CommonPluginsStores.Epic
 					SandboxId = sandboxId
 				}
 			};
-			return await QueryGraphQL<PlayerAchievementBySandboxResponse>(query);
+			return await QueryGraphQL<PlayerAchievementBySandboxResponse>(query).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -2359,7 +2359,7 @@ namespace CommonPluginsStores.Epic
 					ProductId = productId
 				}
 			};
-			return await QueryGraphQL<PlayerProfileAchievementsByProductIdResponse>(query);
+			return await QueryGraphQL<PlayerProfileAchievementsByProductIdResponse>(query).ConfigureAwait(false);
 		}
 
 		#endregion

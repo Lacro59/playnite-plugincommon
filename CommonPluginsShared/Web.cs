@@ -341,7 +341,7 @@ namespace CommonPluginsShared
                             uri += "?" + urlParams[1];
                         }
 
-                        return await DownloadStringDataKeepParam(uri);
+                        return await DownloadStringDataKeepParam(uri).ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
@@ -368,7 +368,7 @@ namespace CommonPluginsShared
 
                     Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
 
-                    return await DownloadStringDataKeepParam(redirectUri.ToString());
+                    return await DownloadStringDataKeepParam(redirectUri.ToString()).ConfigureAwait(false);
                 }
                 else
                 {
@@ -627,7 +627,7 @@ namespace CommonPluginsShared
                         }
 
                         Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", urlNew));
-                        return await DownloadStringData(urlNew, cookies, userAgent, keepParam, redirectDepth + 1);
+                        return await DownloadStringData(urlNew, cookies, userAgent, keepParam, redirectDepth + 1).ConfigureAwait(false);
                     }
                     else
                     {
@@ -810,7 +810,7 @@ namespace CommonPluginsShared
                 });
 
                 webView.NavigateAndWait(url);
-                return await webView.GetPageTextAsync();
+                return await webView.GetPageTextAsync().ConfigureAwait(false);
             }
         }
 
@@ -856,8 +856,8 @@ namespace CommonPluginsShared
             {
                 client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-                var response = await client.PostAsync(url, content);
-                var str = await response.Content.ReadAsStringAsync();
+                var response = await client.PostAsync(url, content).ConfigureAwait(false);
+                var str = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 return str;
             }
         }
@@ -867,8 +867,8 @@ namespace CommonPluginsShared
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
-                var response = await client.PostAsync(url, content);
-                var str = await response.Content.ReadAsStringAsync();
+                var response = await client.PostAsync(url, content).ConfigureAwait(false);
+                var str = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 return str;
             }
         }
@@ -1010,7 +1010,7 @@ namespace CommonPluginsShared
 
                                 try
                                 {
-                                    await webViewOffscreen.EvaluateScriptAsync("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
+                                    await webViewOffscreen.EvaluateScriptAsync("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})").ConfigureAwait(false);
                                     break;
                                 }
                                 catch (Exception ex)
@@ -1018,7 +1018,7 @@ namespace CommonPluginsShared
                                     if (ex.Message.Contains("V8Context"))
                                     {
                                         Common.LogDebug(true, $"DownloadWebView: V8Context not ready for 'webdriver' override, retrying... ({i + 1}/10)");
-                                        await Task.Delay(500, cts.Token);
+                                        await Task.Delay(500, cts.Token).ConfigureAwait(false);
                                     }
                                     else
                                     {
@@ -1035,7 +1035,7 @@ namespace CommonPluginsShared
                                  try
                                  {
                                      // Initial delay to allow navigation to start
-                                     await Task.Delay(500, cts.Token);
+                                     await Task.Delay(500, cts.Token).ConfigureAwait(false);
                                      
                                      int consecutiveErrors = 0;
 
@@ -1075,7 +1075,7 @@ namespace CommonPluginsShared
                                                     : $"return {{ ready: isComplete && !!document.querySelector({safeSelector}), cf: false }}; ") +
                                                 "})()";
 
-                                             var jsResult = await webViewOffscreen.EvaluateScriptAsync(script);
+                                             var jsResult = await webViewOffscreen.EvaluateScriptAsync(script).ConfigureAwait(false);
                                              
                                              bool isFound = false;
                                              bool isCf = false;
@@ -1126,7 +1126,7 @@ namespace CommonPluginsShared
                                                  // Diagnostic logging when target not found and not obviously CF
                                                  try
                                                  {
-                                                     var diagResult = await webViewOffscreen.EvaluateScriptAsync("(function() { return { title: document.title, len: document.body ? document.body.innerText.length : 0, state: document.readyState }; })()");
+                                                     var diagResult = await webViewOffscreen.EvaluateScriptAsync("(function() { return { title: document.title, len: document.body ? document.body.innerText.length : 0, state: document.readyState }; })()").ConfigureAwait(false);
                                                      if (diagResult?.Success == true && diagResult.Result != null)
                                                      {
                                                          Common.LogDebug(true, $"DownloadWebView Polling: {Serialization.ToJson(diagResult.Result)} (URL: {url})");
@@ -1157,7 +1157,7 @@ namespace CommonPluginsShared
                                              }
                                          }
                                          
-                                         await Task.Delay(500, cts.Token);
+                                         await Task.Delay(500, cts.Token).ConfigureAwait(false);
                                      }
                                  }
                                  catch (OperationCanceledException)
@@ -1226,7 +1226,7 @@ namespace CommonPluginsShared
                     // 4. Get content
                     if (cancellationToken.IsCancellationRequested) return new Tuple<string, List<HttpCookie>>(string.Empty, null);
 
-                    string data = getSource ? await webViewOffscreen.GetPageSourceAsync() : await webViewOffscreen.GetPageTextAsync();
+                    string data = getSource ? await webViewOffscreen.GetPageSourceAsync().ConfigureAwait(false) : await webViewOffscreen.GetPageTextAsync().ConfigureAwait(false);
 
                     // 5. Get cookies
                     List<HttpCookie> refreshedCookies = null;
@@ -1259,12 +1259,12 @@ namespace CommonPluginsShared
 
         public static async Task<Tuple<string, List<HttpCookie>>> DownloadJsonDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null, CancellationToken cancellationToken = default)
         {
-            return await DownloadWebView(false, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, elementToWaitFor, cancellationToken);
+            return await DownloadWebView(false, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, elementToWaitFor, cancellationToken).ConfigureAwait(false);
         }
 
         public static async Task<Tuple<string, List<HttpCookie>>> DownloadSourceDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null, CancellationToken cancellationToken = default)
         {
-            return await DownloadWebView(true, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, elementToWaitFor, cancellationToken);
+            return await DownloadWebView(true, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, elementToWaitFor, cancellationToken).ConfigureAwait(false);
         }
 
 

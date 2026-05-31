@@ -1,0 +1,141 @@
+<UserControl x:Class="CommonPluginsControls.Stores.StoresSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CommonPluginsControls.Stores"
+             xmlns:converters="clr-namespace:CommonPlayniteShared.Converters"
+             mc:Ignorable="d"
+             d:DesignWidth="700"
+             d:DesignHeight="450">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="StorePanelResources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter" />
+            <converters:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter" />
+
+            <Style x:Key="StoreNavigationListBoxItem" TargetType="ListBoxItem">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="4,2" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListBoxItem">
+                            <Border x:Name="ItemBorder"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{DynamicResource GlyphBrush}"
+                                    BorderThickness="0,0,0,0"
+                                    CornerRadius="{DynamicResource ControlCornerRadius}"
+                                    Padding="10,8">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource HoverBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource HoverBrush}" />
+                                    <Setter TargetName="ItemBorder" Property="BorderThickness" Value="3,0,0,0" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220" />
+            <ColumnDefinition Width="16" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Navigation -->
+        <Border Grid.Column="0"
+                Style="{StaticResource SectionBorder}"
+                Padding="0,8">
+            <ListBox ItemsSource="{Binding VisibleStoresView}"
+                     SelectedItem="{Binding SelectedEntry, Mode=TwoWay}"
+                     ItemContainerStyle="{StaticResource StoreNavigationListBoxItem}"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Style="{StaticResource BaseTextBlockStyle}"
+                                       Text="{Binding StoreIcon}"
+                                       FontFamily="{DynamicResource CommonFont}"
+                                       FontSize="20"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Visibility="{Binding HasStoreIcon, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                            <StackPanel Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,4,0">
+                                <TextBlock Style="{StaticResource BaseTextBlockStyle}"
+                                           FontWeight="SemiBold"
+                                           Text="{Binding DisplayName}"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Style="{StaticResource BaseTextBlockStyle}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextBrushDarker}"
+                                           Text="{Binding Subtitle}"
+                                           TextTrimming="CharacterEllipsis"
+                                           Visibility="{Binding Subtitle, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}" />
+                            </StackPanel>
+
+                            <Ellipse Grid.Column="2"
+                                     Style="{StaticResource StoreNavAuthStatusDot}"
+                                     Tag="{Binding AuthStatus}"
+                                     Visibility="{Binding ShowAuthStatusIndicator, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Ellipse.ToolTip>
+                                    <ToolTip>
+                                        <TextBlock Tag="{Binding AuthStatus}"
+                                                   Style="{StaticResource StoreNavAuthStatusToolTipText}" />
+                                    </ToolTip>
+                                </Ellipse.ToolTip>
+                            </Ellipse>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+
+        <!-- Detail -->
+        <Border Grid.Column="2"
+                Style="{StaticResource SectionBorder}"
+                Visibility="{Binding HasSelectedEntry, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          Padding="0">
+                <Grid x:Name="PART_DetailHost" />
+            </ScrollViewer>
+        </Border>
+
+        <TextBlock Grid.Column="2"
+                   Style="{StaticResource BaseTextBlockStyle}"
+                   Foreground="{DynamicResource TextBrushDarker}"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
+                   Text="{DynamicResource LOCCommonStoresNoStoreSelected}"
+                   Visibility="{Binding HasSelectedEntry, Converter={StaticResource InvertedBooleanToVisibilityConverter}}" />
+    </Grid>
+</UserControl>

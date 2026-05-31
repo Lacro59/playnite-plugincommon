@@ -1,4 +1,5 @@
-﻿using CommonPluginsShared;
+﻿using CommonPlayniteShared.Commands;
+using CommonPluginsShared;
 using Playnite.SDK;
 using System;
 using System.Windows;
@@ -11,6 +12,9 @@ namespace CommonPluginsShared.Commands
     /// </summary>
     public static class CommandsNavigation
     {
+        /// <summary>Opens a URL in the default browser.</summary>
+        public static RelayCommand<object> NavigateUrl => GlobalCommands.NavigateUrlCommand;
+
         /// <summary>
         /// Selects a game in the Playnite library view by its ID and switches to library view.
         /// </summary>

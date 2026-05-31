@@ -88,7 +88,7 @@ namespace CommonPluginsStores.Ea
                 SaveCurrentUser();
                 //_ = GetCurrentAccountInfos();
 
-                Logger.Info($"{ClientName} logged");
+                LogInfo("logged");
             }
             else
             {
@@ -368,14 +368,14 @@ namespace CommonPluginsStores.Ea
         private async Task<ResponseIdentity> GetIdentity()
         {
             QueryIdentity query = new QueryIdentity();
-            ResponseIdentity data = await GetGraphQl<ResponseIdentity>(UrlGraphQL, query);
+            ResponseIdentity data = await GetGraphQl<ResponseIdentity>(UrlGraphQL, query).ConfigureAwait(false);
             return data;
         }
 
         private async Task<ResponseFriends> GetFriends()
         {
             QueryFriends query = new QueryFriends();
-            ResponseFriends data = await GetGraphQl<ResponseFriends>(UrlGraphQL, query);
+            ResponseFriends data = await GetGraphQl<ResponseFriends>(UrlGraphQL, query).ConfigureAwait(false);
             return data;
         }
 
@@ -389,7 +389,7 @@ namespace CommonPluginsStores.Ea
 
             QueryOwnedGameProducts query = new QueryOwnedGameProducts();
             query.variables.locale = CodeLang.GetCountryFromLast(Locale);
-            data = await GetGraphQl<ResponseOwnedGameProducts>(UrlGraphQL, query);
+            data = await GetGraphQl<ResponseOwnedGameProducts>(UrlGraphQL, query).ConfigureAwait(false);
             FileDataService.SaveData(PathOwnedGameProductsCache, data);
             return data;
         }
@@ -407,7 +407,7 @@ namespace CommonPluginsStores.Ea
             query.variables.offerId = offerId;
             query.variables.playerPsd = playerPsd;
             query.variables.locale = CodeLang.GetCountryFromLast(Locale);
-            data = await GetGraphQl<ResponseAchievements>(UrlGraphQL, query);
+            data = await GetGraphQl<ResponseAchievements>(UrlGraphQL, query).ConfigureAwait(false);
             FileDataService.SaveData(cachePath, data);
             return data;
         }
@@ -416,7 +416,7 @@ namespace CommonPluginsStores.Ea
         {
             QueryRecentGames query = new QueryRecentGames();
             query.variables.gameSlugs = gameSlugs;
-            ResponseRecentGames data = await GetGraphQl<ResponseRecentGames>(UrlGraphQL, query);
+            ResponseRecentGames data = await GetGraphQl<ResponseRecentGames>(UrlGraphQL, query).ConfigureAwait(false);
             return data;
         }
 
@@ -427,7 +427,7 @@ namespace CommonPluginsStores.Ea
             try
             {
                 StringContent content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
-                string response = await Web.PostStringData(url, StoreToken?.Token, content);
+                string response = await Web.PostStringData(url, StoreToken?.Token, content).ConfigureAwait(false);
                 T data = Serialization.FromJson<T>(response);
                 return data;
             }
