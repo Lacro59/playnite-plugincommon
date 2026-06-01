@@ -66,6 +66,11 @@ namespace CommonPluginsStores.Epic
 		// Semaphore to ensure only one token refresh is performed at a time.
 		private readonly SemaphoreSlim _tokenRefreshSemaphore = new SemaphoreSlim(1, 1);
 
+		/// <summary>Minimum delay between Epic catalog/store HTTP calls (~5 requests per second).</summary>
+		private static readonly TimeSpan ApiRequestMinInterval = TimeSpan.FromMilliseconds(200);
+
+		private readonly RequestRateLimiter _apiRateLimiter = new RequestRateLimiter(ApiRequestMinInterval);
+
 		#region URLs
 
 		private static string UrlBase => @"https://www.epicgames.com";
@@ -601,7 +606,7 @@ namespace CommonPluginsStores.Epic
 								id = gameWishlist.OfferId + "|" + gameWishlist.Namespace;
 								name = WebUtility.HtmlDecode(gameWishlist.Offer.Title);
 								image = gameWishlist.Offer.KeyImages?.FirstOrDefault(x => x.Type.IsEqual("Thumbnail"))?.Url;
-								released = gameWishlist.Offer.EffectiveDate.ToUniversalTime();
+								released = gameWishlist.Offer.EffectiveDate?.ToUniversalTime();
 								added = gameWishlist.Created.ToUniversalTime();
 								link = gameWishlist.Offer?.CatalogNs?.Mappings?.FirstOrDefault()?.PageSlug;
 
@@ -751,11 +756,23 @@ namespace CommonPluginsStores.Epic
 		// TODO: Must be tested in production before relying on this method.
 		public override ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos)
 		{
+			if (id.IsNullOrEmpty())
+			{
+				Logger.Warn("EpicApi.GetDlcInfos: namespace id is null or empty.");
+				return null;
+			}
+
 			try
 			{
+				Common.LogDebug(true, $"EpicApi.GetDlcInfos: querying addons for namespace '{id}'");
 				string localLang = CodeLang.GetEpicLang(Locale);
 				ObservableCollection<DlcInfos> dlcs = new ObservableCollection<DlcInfos>();
 				AddonsByNamespaceResponse addonsByNamespaceResponse = QueryAddonsByNamespace(id).GetAwaiter().GetResult();
+
+				if (addonsByNamespaceResponse == null)
+				{
+					Common.LogDebug(true, $"EpicApi.GetDlcInfos: QueryAddonsByNamespace returned null for namespace '{id}' (see GraphQL logs above).");
+				}
 
 				if (addonsByNamespaceResponse?.Data?.Catalog?.CatalogOffers?.Elements == null)
 				{
@@ -1901,6 +1918,33 @@ namespace CommonPluginsStores.Epic
 		#region HTTP / GraphQL — Anonymous (no authentication required)
 
 		/// <summary>
+		/// Applies <see cref="_apiRateLimiter"/> before catalog, library and GraphQL HTTP calls.
+		/// </summary>
+		private async Task WaitForApiRateLimitAsync()
+		{
+			await _apiRateLimiter.WaitAsync().ConfigureAwait(false);
+		}
+
+		/// <summary>
+		/// Returns a single-line, length-limited preview of an HTTP response body for logging.
+		/// </summary>
+		private static string FormatGraphQLResponsePreview(string response, int maxLength = 300)
+		{
+			if (response.IsNullOrEmpty())
+			{
+				return "(empty)";
+			}
+
+			string normalized = response.Replace("\r", " ").Replace("\n", " ").Trim();
+			if (normalized.Length <= maxLength)
+			{
+				return normalized;
+			}
+
+			return normalized.Substring(0, maxLength) + "...";
+		}
+
+		/// <summary>
 		/// Sends a GET request and deserializes the JSON response to <typeparamref name="T"/>.
 		/// On authentication errors, attempts a single token refresh and retries via <see cref="TryRefreshAndRetry{T}"/>.
 		/// When called without a token, the request is sent anonymously.
@@ -1913,6 +1957,8 @@ namespace CommonPluginsStores.Epic
 		/// </returns>
 		private async Task<Tuple<string, T>> InvokeRequest<T>(string url, StoreToken token = null) where T : class
 		{
+			await WaitForApiRateLimitAsync().ConfigureAwait(false);
+
 			using (var httpClient = new HttpClient())
 			{
 				httpClient.DefaultRequestHeaders.Clear();
@@ -1950,8 +1996,8 @@ namespace CommonPluginsStores.Epic
 					}
 					catch (Exception ex)
 					{
-						Logger.Error(str);
-						Common.LogError(ex, false, true, PluginName);
+						Common.LogDebug(true, $"[EpicApi] GET {url}: HTTP {(int)response.StatusCode}, preview='{FormatGraphQLResponsePreview(str)}'");
+						Common.LogError(ex, false, true, PluginName, $"Failed to deserialize GET response - {FormatGraphQLResponsePreview(str)}");
 						return null;
 					}
 				}
@@ -1974,6 +2020,8 @@ namespace CommonPluginsStores.Epic
 		{
 			try
 			{
+				await WaitForApiRateLimitAsync().ConfigureAwait(false);
+
 				var queryType = queryObject.GetType();
 				string operationName = queryType.GetProperty("OperationName")?.GetValue(queryObject) as string;
 				string query = queryType.GetProperty("Query")?.GetValue(queryObject) as string;
@@ -1998,6 +2046,11 @@ namespace CommonPluginsStores.Epic
 
 					HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content).ConfigureAwait(false);
 					string str = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+					string contentType = response.Content.Headers.ContentType?.ToString() ?? "(none)";
+
+					Common.LogDebug(true,
+						$"[EpicApi.GraphQL] {operationName}: HTTP {(int)response.StatusCode} {response.StatusCode}, " +
+						$"Content-Type={contentType}, length={str?.Length ?? 0}, needsAuth={needsAuth}, url={UrlGraphQL}");
 
 					if (!response.IsSuccessStatusCode)
 					{
@@ -2008,9 +2061,11 @@ namespace CommonPluginsStores.Epic
 						}
 						else
 						{
-							Logger.Error($"[GraphQL] HTTP Error {response.StatusCode}: {operationName} - {str}");
+							Logger.Error($"[GraphQL] HTTP Error {response.StatusCode}: {operationName} - {FormatGraphQLResponsePreview(str)}");
 						}
 
+						Common.LogDebug(true,
+							$"[EpicApi.GraphQL] {operationName}: HTTP error body preview='{FormatGraphQLResponsePreview(str)}'");
 						return null;
 					}
 
@@ -2020,7 +2075,16 @@ namespace CommonPluginsStores.Epic
 					}
 					else if (ex != null)
 					{
-						Common.LogError(ex, false, false, PluginName, $"Failed to deserialize response - {operationName}");
+						Common.LogDebug(true,
+							$"[EpicApi.GraphQL] {operationName}: JSON parse failed, firstChar='{(str != null && str.Length > 0 ? str[0].ToString() : "?")}', " +
+							$"preview='{FormatGraphQLResponsePreview(str)}'");
+						Common.LogError(ex, false, false, PluginName,
+							$"Failed to deserialize GraphQL response - {operationName}: {FormatGraphQLResponsePreview(str)}");
+					}
+					else
+					{
+						Common.LogDebug(true,
+							$"[EpicApi.GraphQL] {operationName}: TryFromJson returned false without exception, preview='{FormatGraphQLResponsePreview(str)}'");
 					}
 
 					return null;
@@ -2215,6 +2279,8 @@ namespace CommonPluginsStores.Epic
 
 						if (StoreToken != null && !StoreToken.Token.IsNullOrEmpty())
 						{
+							await WaitForApiRateLimitAsync().ConfigureAwait(false);
+
 							using (var httpClient2 = new HttpClient())
 							{
 								httpClient2.DefaultRequestHeaders.Clear();
