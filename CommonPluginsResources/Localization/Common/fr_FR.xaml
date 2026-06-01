@@ -215,16 +215,20 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 	<!-- ==================== STORE / AUTHENTICATION ==================== -->
 
 	<sys:String x:Key="LOCCommonAccountConfiguration">Configuration du compte</sys:String>
+	<sys:String x:Key="LOCCommonAccountSection">Compte</sys:String>
 	<sys:String x:Key="LOCCommonAccountName">Nom du compte</sys:String>
+	<sys:String x:Key="LOCCommonClearSession">Déconnexion</sys:String>
+	<sys:String x:Key="LOCCommonClearSessionDescription">Se déconnecte du compte store. L'identifiant de compte et la clé API sont conservés.</sys:String>
+	<sys:String x:Key="LOCCommonConnection">Authentification</sys:String>
 	<sys:String x:Key="LOCCommonAuthenticateLabel">Connexion</sys:String>
 	<sys:String x:Key="LOCCommonControlConfiguration">Configuration du contrôle</sys:String>
 	<sys:String x:Key="LOCCommonGetAccountID">Obtenir l'ID du compte</sys:String>
 	<sys:String x:Key="LOCCommonHasApiKey">Possède une clé API</sys:String>
 	<sys:String x:Key="LOCCommonIsPrivate">Est privé</sys:String>
-	<sys:String x:Key="LOCCommonLoggedIn">Utilisateur connecté</sys:String>
-	<sys:String x:Key="LOCCommonLoginChecking">Vérification du statut d'authentification…</sys:String>
-	<sys:String x:Key="LOCCommonNotLoggedIn">Authentification requise</sys:String>
-	<sys:String x:Key="LOCCommonNotLoggedInError">Impossible d'authentifier l'utilisateur</sys:String>
+	<sys:String x:Key="LOCCommonLoggedIn">Connecté</sys:String>
+	<sys:String x:Key="LOCCommonLoginChecking">Vérification en cours…</sys:String>
+	<sys:String x:Key="LOCCommonNotLoggedIn">Connexion requise</sys:String>
+	<sys:String x:Key="LOCCommonNotLoggedInError">Échec de la connexion</sys:String>
 	<sys:String x:Key="LOCCommonPrivateChecking">Vérification du statut privé…</sys:String>
 	<sys:String x:Key="LOCCommonUseAuthentication">Utiliser l'authentification</sys:String>
 	<sys:String x:Key="LOCCommonUseAuthenticationOption">Utiliser l'authentification (optionnelle, pour plus d'informations seulement)</sys:String>
@@ -234,6 +238,12 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoApiKey">{0} : Aucune clé API</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0} : Aucune configuration trouvée</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0} : l'utilisateur n'est pas authentifié</sys:String>
+	<sys:String x:Key="LOCCommonStoresLaunchers">Stores &amp; Launchers</sys:String>
+	<sys:String x:Key="LOCCommonStoresConsolesMobile">Console &amp; Mobile</sys:String>
+	<sys:String x:Key="LOCCommonStoreSteam">Steam</sys:String>
+	<sys:String x:Key="LOCCommonStoreEpic">Epic Games</sys:String>
+	<sys:String x:Key="LOCCommonStoreGog">GOG</sys:String>
+	<sys:String x:Key="LOCCommonStoresNoStoreSelected">Select a store to configure authentication.</sys:String>
 
 	<!-- Ignored items -->
 	<sys:String x:Key="LOCCommonIgnoredItems">Éléments ignorés</sys:String>
