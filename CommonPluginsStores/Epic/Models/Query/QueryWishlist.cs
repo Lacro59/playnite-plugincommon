@@ -123,7 +123,7 @@ namespace CommonPluginsStores.Epic.Models.Query
             public string OfferType { get; set; }
 
             [SerializationPropertyName("effectiveDate")]
-            public DateTime EffectiveDate { get; set; }
+            public DateTime? EffectiveDate { get; set; }
 
             [SerializationPropertyName("expiryDate")]
             public string ExpiryDate { get; set; }
