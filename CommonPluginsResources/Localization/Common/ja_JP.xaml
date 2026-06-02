@@ -215,7 +215,11 @@
 	<!-- ==================== STORE / AUTHENTICATION ==================== -->
 
 	<sys:String x:Key="LOCCommonAccountConfiguration">アカウント設定</sys:String>
+	<sys:String x:Key="LOCCommonAccountSection">アカウント</sys:String>
 	<sys:String x:Key="LOCCommonAccountName">アカウント名</sys:String>
+	<sys:String x:Key="LOCCommonClearSession">ログアウト</sys:String>
+	<sys:String x:Key="LOCCommonClearSessionDescription">ストアアカウントからログアウトします。アカウント ID と API キーは保持されます。</sys:String>
+	<sys:String x:Key="LOCCommonConnection">接続</sys:String>
 	<sys:String x:Key="LOCCommonAuthenticateLabel">認証</sys:String>
 	<sys:String x:Key="LOCCommonControlConfiguration">コントロール設定</sys:String>
 	<sys:String x:Key="LOCCommonGetAccountID">アカウント ID を取得</sys:String>
@@ -234,6 +238,12 @@
 	<sys:String x:Key="LOCCommonStoreNoApiKey">{0}：API キーがありません</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0}：設定が見つかりません</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}：ユーザーが認証されていません</sys:String>
+	<sys:String x:Key="LOCCommonStoresLaunchers">ストアとランチャー</sys:String>
+	<sys:String x:Key="LOCCommonStoresConsolesMobile">コンソールとモバイル</sys:String>
+	<sys:String x:Key="LOCCommonStoreSteam">Steam</sys:String>
+	<sys:String x:Key="LOCCommonStoreEpic">Epic Games</sys:String>
+	<sys:String x:Key="LOCCommonStoreGog">GOG</sys:String>
+	<sys:String x:Key="LOCCommonStoresNoStoreSelected">認証を設定するストアを選択してください。</sys:String>
 
 	<!-- Ignored items -->
 	<sys:String x:Key="LOCCommonIgnoredItems">無視する項目</sys:String>
