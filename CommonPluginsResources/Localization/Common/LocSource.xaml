@@ -218,16 +218,20 @@ Do you want to open the directory?</sys:String>
 	<!-- ==================== STORE / AUTHENTICATION ==================== -->
 
 	<sys:String x:Key="LOCCommonAccountConfiguration">Account configuration</sys:String>
+	<sys:String x:Key="LOCCommonAccountSection">Account</sys:String>
 	<sys:String x:Key="LOCCommonAccountName">Account Name</sys:String>
-	<sys:String x:Key="LOCCommonAuthenticateLabel">Authenticate</sys:String>
+	<sys:String x:Key="LOCCommonClearSession">Log out</sys:String>
+	<sys:String x:Key="LOCCommonClearSessionDescription">Signs out of the store account. Account ID and API key are kept.</sys:String>
+	<sys:String x:Key="LOCCommonConnection">Connection</sys:String>
+	<sys:String x:Key="LOCCommonAuthenticateLabel">Sign in</sys:String>
 	<sys:String x:Key="LOCCommonControlConfiguration">Control configuration</sys:String>
 	<sys:String x:Key="LOCCommonGetAccountID">Get account ID</sys:String>
 	<sys:String x:Key="LOCCommonHasApiKey">Has API key</sys:String>
 	<sys:String x:Key="LOCCommonIsPrivate">Is private</sys:String>
-	<sys:String x:Key="LOCCommonLoggedIn">User is authenticated</sys:String>
-	<sys:String x:Key="LOCCommonLoginChecking">Checking authentication status…</sys:String>
-	<sys:String x:Key="LOCCommonNotLoggedIn">Requires authentication</sys:String>
-	<sys:String x:Key="LOCCommonNotLoggedInError">Failed to authenticate user</sys:String>
+	<sys:String x:Key="LOCCommonLoggedIn">Connected</sys:String>
+	<sys:String x:Key="LOCCommonLoginChecking">Checking connection…</sys:String>
+	<sys:String x:Key="LOCCommonNotLoggedIn">Sign in required</sys:String>
+	<sys:String x:Key="LOCCommonNotLoggedInError">Sign in failed</sys:String>
 	<sys:String x:Key="LOCCommonPrivateChecking">Checking private status…</sys:String>
 	<sys:String x:Key="LOCCommonUseAuthentication">Use authentication</sys:String>
 	<sys:String x:Key="LOCCommonUseAuthenticationOption">Use authentication (optional, for more information only)</sys:String>
@@ -237,6 +241,12 @@ Do you want to open the directory?</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoApiKey">{0}: No API key</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: No configuration found</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: user is not authenticated</sys:String>
+	<sys:String x:Key="LOCCommonStoresLaunchers">Stores &amp; Launchers</sys:String>
+	<sys:String x:Key="LOCCommonStoresConsolesMobile">Console &amp; Mobile</sys:String>
+	<sys:String x:Key="LOCCommonStoreSteam">Steam</sys:String>
+	<sys:String x:Key="LOCCommonStoreEpic">Epic Games</sys:String>
+	<sys:String x:Key="LOCCommonStoreGog">GOG</sys:String>
+	<sys:String x:Key="LOCCommonStoresNoStoreSelected">Select a store to configure authentication.</sys:String>
 
 	<!-- Ignored items -->
 	<sys:String x:Key="LOCCommonIgnoredItems">Ignored items</sys:String>

@@ -8,6 +8,7 @@ using CommonPluginsShared.Extensions;
 using CommonPluginsShared.IO;
 using CommonPluginsShared.Models;
 using CommonPluginsStores.Models;
+using CommonPluginsStores.Models.Enumerations;
 using CommonPluginsStores.Models.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Data;
@@ -125,6 +126,44 @@ namespace CommonPluginsStores
         /// Gets the client name formatted for logging (no whitespace).
         /// </summary>
         protected string ClientNameLog { get; }
+
+        /// <summary>
+        /// Prefixes a log message with the store client name (for example "[GOG] message").
+        /// </summary>
+        /// <param name="message">Log message body without client prefix.</param>
+        /// <returns>Formatted message for extension log filtering.</returns>
+        protected string FormatLogMessage(string message)
+        {
+            return $"[{ClientName}] {message}";
+        }
+
+        /// <summary>
+        /// Writes an info log entry prefixed with the store client name.
+        /// </summary>
+        /// <param name="message">Log message body without client prefix.</param>
+        protected void LogInfo(string message)
+        {
+            Logger.Info(FormatLogMessage(message));
+        }
+
+        /// <summary>
+        /// Writes a warning log entry prefixed with the store client name.
+        /// </summary>
+        /// <param name="message">Log message body without client prefix.</param>
+        protected void LogWarn(string message)
+        {
+            Logger.Warn(FormatLogMessage(message));
+        }
+
+        /// <summary>
+        /// Writes an error log entry prefixed with the store client name.
+        /// </summary>
+        /// <param name="ex">Exception to log.</param>
+        /// <param name="message">Log message body without client prefix.</param>
+        protected void LogError(Exception ex, string message)
+        {
+            Logger.Error(ex, FormatLogMessage(message));
+        }
 
         /// <summary>
         /// Gets or sets the locale for data retrieval (default: en_US).
@@ -306,11 +345,11 @@ namespace CommonPluginsStores
 				}
 				catch (Exception ex)
 				{
-					Common.LogError(ex, false, $"Failed to load saved token for {ClientName}");
+					Common.LogError(ex, false, FormatLogMessage("Failed to load saved token"));
 				}
 			}
 
-			Logger.Warn($"No stored token for {ClientName}");
+			LogWarn("No stored token");
 			return null;
 		}
 
@@ -330,12 +369,12 @@ namespace CommonPluginsStores
 				}
 				else
 				{
-					Logger.Warn($"No token saved for {PluginName}");
+					LogWarn("No token saved");
 				}
 			}
 			catch (Exception ex)
 			{
-				Common.LogError(ex, false, "Failed to save token");
+				Common.LogError(ex, false, FormatLogMessage("Failed to save token"));
 			}
 
 			return false;
@@ -351,6 +390,70 @@ namespace CommonPluginsStores
 		public void ResetIsUserLoggedIn()
         {
             isUserLoggedIn = null;
+        }
+
+        /// <summary>
+        /// Clears stored authentication data and session profile fields for the current account.
+        /// Manual identifiers (user id, API key) are preserved.
+        /// </summary>
+        public virtual void ClearSession()
+        {
+            LogInfo("ClearSession started");
+
+            try
+            {
+                CookiesTools.ClearStoredCookies();
+                CookiesTools.ClearDomainCookies();
+                ClearStoredToken();
+                ClearSessionProfileFields();
+                IsUserLoggedIn = false;
+                SaveCurrentUser();
+                LogInfo("ClearSession completed");
+            }
+            catch (Exception ex)
+            {
+                LogError(ex, "ClearSession failed");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Deletes the stored authentication token file and in-memory token cache.
+        /// </summary>
+        protected void ClearStoredToken()
+        {
+            _storeToken = null;
+
+            if (File.Exists(FileToken))
+            {
+                FileSystem.DeleteFile(FileToken);
+                LogInfo("Stored token file deleted");
+                Common.LogDebug(true, FormatLogMessage($"ClearStoredToken: {FileToken}"));
+            }
+            else
+            {
+                Common.LogDebug(true, FormatLogMessage("ClearStoredToken: no token file found"));
+            }
+        }
+
+        /// <summary>
+        /// Clears profile fields populated by an authenticated session.
+        /// </summary>
+        protected void ClearSessionProfileFields()
+        {
+            AccountInfos user = CurrentAccountInfos;
+
+            if (user == null)
+            {
+                LogWarn("ClearSession: no current account to update");
+                return;
+            }
+
+            user.Avatar = null;
+            user.Link = null;
+            user.Pseudo = null;
+            user.AccountStatus = AccountStatus.Unknown;
+            Common.LogDebug(true, FormatLogMessage("ClearSession: session profile fields cleared"));
         }
 
         /// <summary>
@@ -422,7 +525,7 @@ namespace CommonPluginsStores
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false, true, PluginName, $"Failed to load {ClientName} user.");
+                    Common.LogError(ex, false, true, PluginName, FormatLogMessage("Failed to load user"));
                 }
             }
 
@@ -696,7 +799,7 @@ namespace CommonPluginsStores
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, true, PluginName);
+                Common.LogError(ex, false, true, PluginName, FormatLogMessage("Failed to check DLC ownership"));
                 return false;
             }
         }
@@ -713,7 +816,7 @@ namespace CommonPluginsStores
         {
             LocalDateTimeConverter localDateTimeConverter = new LocalDateTimeConverter();
             string formatedDateLastWrite = localDateTimeConverter.Convert(dateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
-            Logger.Warn($"Use saved UserData - {formatedDateLastWrite}");
+            LogWarn($"Using saved user data from {formatedDateLastWrite}");
             API.Instance.Notifications.Add(new NotificationMessage(
                 $"{PluginName}-{ClientNameLog}-LoadFileData",
                 $"{PluginName}" + Environment.NewLine
@@ -733,7 +836,7 @@ namespace CommonPluginsStores
 		public virtual void ShowNotificationUserNoAuthenticate()
         {
             string message = string.Format(ResourceProvider.GetString("LOCCommonStoresNoAuthenticate"), ClientName);
-            Logger.Warn($"{ClientName}: User is not authenticated");
+            LogWarn("User is not authenticated");
 
             API.Instance.Notifications.Add(new NotificationMessage(
                 $"{PluginName}-{ClientName.RemoveWhiteSpace()}-noauthenticate",
@@ -755,7 +858,7 @@ namespace CommonPluginsStores
                     }
                     catch (Exception ex)
                     {
-                        Common.LogError(ex, false, true, PluginName);
+                        Common.LogError(ex, false, true, PluginName, FormatLogMessage("Failed to open plugin settings from authentication notification"));
                     }
                 }
             ));

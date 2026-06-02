@@ -179,6 +179,21 @@ namespace CommonPluginsShared
             return Normalize(playniteLanguage);
         }
 
+        /// <summary>
+        /// Legacy alias kept for store clients that still call <see cref="GetEaLang"/>.
+        /// </summary>
+        public static string GetOriginLang(string playniteLanguage) => GetEaLang(playniteLanguage);
+
+        /// <summary>
+        /// Returns the country portion of a Playnite language code (for example "en_US" → "US").
+        /// </summary>
+        public static string GetEpicLangCountry(string playniteLanguage)
+        {
+            playniteLanguage = Normalize(playniteLanguage);
+            string[] parts = playniteLanguage.Split('_');
+            return parts.Length > 1 ? parts[1] : "US";
+        }
+
         // -------------------------
         // Epic Games
         // -------------------------

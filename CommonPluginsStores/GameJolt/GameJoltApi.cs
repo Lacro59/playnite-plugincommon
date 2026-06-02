@@ -279,7 +279,7 @@ namespace CommonPluginsStores.GameJolt
                                     SaveCurrentUser();
                                     //_ = GetCurrentAccountInfos();
 
-                                    Logger.Info($"{ClientName} logged");
+                                    LogInfo("logged");
 
                                     webView.NavigateAndWait(CurrentAccountInfos.Link);
                                 }

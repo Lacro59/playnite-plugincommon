@@ -31,7 +31,7 @@ namespace CommonPluginsStores.Epic.Models
         public string Description { get; set; }
 
         [SerializationPropertyName("effectiveDate")]
-        public DateTime EffectiveDate { get; set; }
+        public DateTime? EffectiveDate { get; set; }
 
         [SerializationPropertyName("expiryDate")]
         public object ExpiryDate { get; set; }
@@ -73,7 +73,7 @@ namespace CommonPluginsStores.Epic.Models
         public object PublisherDisplayName { get; set; }
 
         [SerializationPropertyName("releaseDate")]
-        public DateTime ReleaseDate { get; set; }
+        public DateTime? ReleaseDate { get; set; }
 
         [SerializationPropertyName("urlSlug")]
         public string UrlSlug { get; set; }
@@ -100,7 +100,7 @@ namespace CommonPluginsStores.Epic.Models
         public List<object> OfferMappings { get; set; }
 
         [SerializationPropertyName("pcReleaseDate")]
-        public DateTime PcReleaseDate { get; set; }
+        public DateTime? PcReleaseDate { get; set; }
 
         [SerializationPropertyName("prePurchase")]
         public object PrePurchase { get; set; }

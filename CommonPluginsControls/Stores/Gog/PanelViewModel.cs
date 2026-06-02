@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using CommonPluginsStores;
+﻿using CommonPluginsControls.Stores;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Enumerations;
 using CommonPluginsStores.Models.Interfaces;
 using Playnite.SDK;
+using System;
+using System.Collections.Generic;
 
 namespace CommonPluginsControls.Stores.Gog
 {
-    public class PanelViewModel : ObservableObject
+    public class PanelViewModel : ObservableObject, IStorePanelViewModel
     {
         private IStoreApi _storeApi;
         internal IStoreApi StoreApi
@@ -23,31 +18,99 @@ namespace CommonPluginsControls.Stores.Gog
             {
                 _storeApi = value;
                 OnPropertyChanged(nameof(StoreApi));
-                OnPropertyChanged(nameof(User));
-                OnPropertyChanged(nameof(AuthStatus));
+                NotifyAuthStatusChanged();
             }
         }
+
         public AccountInfos User => StoreApi?.CurrentAccountInfos;
 
         private bool useAuth = true;
-        public bool UseAuth { get => useAuth; set => SetValue(ref useAuth, value); }
+        public bool UseAuth
+        {
+            get => useAuth;
+            set
+            {
+                SetValue(ref useAuth, value);
+                NotifyAuthUiProperties();
+            }
+        }
 
         private bool forceAuth = false;
-        public bool ForceAuth { get => forceAuth; set => SetValue(ref forceAuth, value); }
+        public bool ForceAuth
+        {
+            get => forceAuth;
+            set
+            {
+                SetValue(ref forceAuth, value);
+                NotifyAuthUiProperties();
+            }
+        }
+
+        public bool ShowConnectionSection => ForceAuth || UseAuth;
+
+        public bool IsManualAccountEntryEnabled => !ForceAuth && !UseAuth;
 
         public AuthStatus AuthStatus => StoreApi == null ? AuthStatus.Failed : StoreApi.IsUserLoggedIn ? AuthStatus.Ok : AuthStatus.AuthRequired;
 
+        public bool CanLogin => AuthStatus != AuthStatus.Ok && AuthStatus != AuthStatus.Checking;
+
+        public bool CanLogout => AuthStatus == AuthStatus.Ok;
+
         public RelayCommand<object> LoginCommand => new RelayCommand<object>((a) =>
         {
-            StoreApi.Login();
-            OnPropertyChanged(nameof(AuthStatus));
-            OnPropertyChanged(nameof(User));
+            try
+            {
+                StoreSettingsLog.LoginRequested(StoreApi);
+                StoreApi.Login();
+                NotifyAuthStatusChanged();
+                StoreSettingsLog.LoginCompleted(StoreApi, AuthStatus);
+            }
+            catch (Exception ex)
+            {
+                StoreSettingsLog.Error(ex, "GOG login failed");
+                throw;
+            }
+        });
+
+        public RelayCommand<object> ClearSessionCommand => new RelayCommand<object>((a) =>
+        {
+            try
+            {
+                StoreSettingsLog.LogoutRequested(StoreApi);
+                StoreApi?.ClearSession();
+                NotifyAuthStatusChanged();
+                StoreSettingsLog.LogoutCompleted(StoreApi, AuthStatus);
+            }
+            catch (Exception ex)
+            {
+                StoreSettingsLog.Error(ex, "GOG logout failed");
+                throw;
+            }
         });
 
         public void ResetIsUserLoggedIn()
         {
-            StoreApi.ResetIsUserLoggedIn();
+            StoreApi?.ResetIsUserLoggedIn();
+            NotifyAuthStatusChanged();
+        }
+
+        public void RefreshAuthCommandStates()
+        {
+            NotifyAuthStatusChanged();
+        }
+
+        private void NotifyAuthUiProperties()
+        {
+            OnPropertyChanged(nameof(ShowConnectionSection));
+            OnPropertyChanged(nameof(IsManualAccountEntryEnabled));
+        }
+
+        private void NotifyAuthStatusChanged()
+        {
             OnPropertyChanged(nameof(AuthStatus));
+            OnPropertyChanged(nameof(CanLogin));
+            OnPropertyChanged(nameof(CanLogout));
+            OnPropertyChanged(nameof(User));
         }
     }
 }
