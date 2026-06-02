@@ -77,6 +77,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\TraceInfos.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteExtended\PluginExtended.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteTools.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RequestRateLimiter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)plugins\PluginSettingsViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)plugins\PluginWindows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SystemInfo\SystemServices.cs" />
