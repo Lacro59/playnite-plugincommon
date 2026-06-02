@@ -215,11 +215,11 @@
 	<!-- ==================== STORE / AUTHENTICATION ==================== -->
 
 	<sys:String x:Key="LOCCommonAccountConfiguration">Настройка аккаунта</sys:String>
-	<sys:String x:Key="LOCCommonAccountSection">Account</sys:String>
+	<sys:String x:Key="LOCCommonAccountSection">Аккаунт</sys:String>
 	<sys:String x:Key="LOCCommonAccountName">Имя аккаунта</sys:String>
-	<sys:String x:Key="LOCCommonClearSession">Log out</sys:String>
-	<sys:String x:Key="LOCCommonClearSessionDescription">Signs out of the store account. Account ID and API key are kept.</sys:String>
-	<sys:String x:Key="LOCCommonConnection">Connection</sys:String>
+	<sys:String x:Key="LOCCommonClearSession">Выйти</sys:String>
+	<sys:String x:Key="LOCCommonClearSessionDescription">Выход из аккаунта магазина. ID аккаунта и ключ API сохраняются.</sys:String>
+	<sys:String x:Key="LOCCommonConnection">Подключение</sys:String>
 	<sys:String x:Key="LOCCommonAuthenticateLabel">Аутентификация</sys:String>
 	<sys:String x:Key="LOCCommonControlConfiguration">Проверка конфигурации</sys:String>
 	<sys:String x:Key="LOCCommonGetAccountID">Получить ID аккаунта</sys:String>
@@ -238,12 +238,12 @@
 	<sys:String x:Key="LOCCommonStoreNoApiKey">{0}: Нет ключа API</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: Конфигурация не найдена</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: пользователь не прошел аутентификацию</sys:String>
-	<sys:String x:Key="LOCCommonStoresLaunchers">Stores &amp; Launchers</sys:String>
-	<sys:String x:Key="LOCCommonStoresConsolesMobile">Console &amp; Mobile</sys:String>
+	<sys:String x:Key="LOCCommonStoresLaunchers">Магазины &amp; Лаунчеры</sys:String>
+	<sys:String x:Key="LOCCommonStoresConsolesMobile">Консоль &amp; Мобильные</sys:String>
 	<sys:String x:Key="LOCCommonStoreSteam">Steam</sys:String>
 	<sys:String x:Key="LOCCommonStoreEpic">Epic Games</sys:String>
 	<sys:String x:Key="LOCCommonStoreGog">GOG</sys:String>
-	<sys:String x:Key="LOCCommonStoresNoStoreSelected">Select a store to configure authentication.</sys:String>
+	<sys:String x:Key="LOCCommonStoresNoStoreSelected">Выберите магазин для настройки аутентификации.</sys:String>
 
 	<!-- Ignored items -->
 	<sys:String x:Key="LOCCommonIgnoredItems">Игнорируемые элементы</sys:String>
