@@ -26,6 +26,15 @@ namespace CommonPluginsStores.Gog
     // https://gogapidocs.readthedocs.io/en/latest/
     public class GogApi : StoreApi
     {
+        /// <summary>Minimum delay between GOG HTTP calls to reduce throttling.</summary>
+        private static readonly TimeSpan ApiRequestMinInterval = TimeSpan.FromMilliseconds(300);
+        private readonly RequestRateLimiter _apiRateLimiter = new RequestRateLimiter(ApiRequestMinInterval);
+
+        private void WaitForApiRateLimit()
+        {
+            _apiRateLimiter.WaitAsync().GetAwaiter().GetResult();
+        }
+
         #region Urls
 
         private static string UrlAccountInfo => @"https://menu.gog.com/v1/account/basic";
@@ -212,7 +221,7 @@ namespace CommonPluginsStores.Gog
             {
                 _ = Task.Run(() =>
                 {
-                    Thread.Sleep(1000);
+                    WaitForApiRateLimit();
                     ProfileUserGalaxy profileUserGalaxy = GetAccountInfoByGalaxyUserId(long.Parse(CurrentAccountInfos.UserId));
 
                     if (profileUserGalaxy != null)
@@ -439,6 +448,7 @@ namespace CommonPluginsStores.Gog
                     else
                     {
                         Logger.Warn($"Error 401 - Wait and retry");
+                        Common.LogDebug(true, $"[GogApi] 401/access_denied for game {id}, waiting 5000ms before single retry.");
                         Thread.Sleep(5000);
                         return GetAchievementsPrivate(id, accountInfos, true);
                     }

@@ -36,6 +36,83 @@ namespace CommonPluginsStores.Steam
 {
     public class SteamApi : StoreApi
     {
+		/// <summary>Minimum delay between Steam store HTTP calls (~200 requests / 5 minutes).</summary>
+		private static readonly TimeSpan ApiRequestMinInterval = TimeSpan.FromMilliseconds(1200);
+
+		private static readonly object AppDetailsPauseLock = new object();
+		private static DateTime _appDetailsPausedUntilUtc = DateTime.MinValue;
+
+		private readonly RequestRateLimiter _apiRateLimiter = new RequestRateLimiter(ApiRequestMinInterval);
+
+		private void WaitForApiRateLimit()
+		{
+			_apiRateLimiter.WaitAsync().GetAwaiter().GetResult();
+		}
+
+		/// <summary>
+		/// Waits for a global Steam store cooldown after a rate-limit response, then applies per-request throttling.
+		/// </summary>
+		private void WaitForStoreAppDetailsAccess()
+		{
+			TimeSpan pauseRemaining;
+			lock (AppDetailsPauseLock)
+			{
+				pauseRemaining = _appDetailsPausedUntilUtc - DateTime.UtcNow;
+			}
+
+			if (pauseRemaining > TimeSpan.Zero)
+			{
+				Common.LogDebug(true, $"[SteamApi] Steam store cooldown: waiting {pauseRemaining.TotalSeconds:F0}s before next appdetails call.");
+				Thread.Sleep(pauseRemaining);
+			}
+
+			WaitForApiRateLimit();
+		}
+
+		/// <summary>
+		/// Extends the global pause window after Steam returns a rate-limited appdetails payload.
+		/// </summary>
+		/// <param name="retryAttempt">Current retry index (1-based).</param>
+		private static void ApplyStoreRateLimitCooldown(int retryAttempt)
+		{
+			int pauseSeconds = Math.Min(120, 90 + (15 * (retryAttempt - 1)));
+			lock (AppDetailsPauseLock)
+			{
+				DateTime until = DateTime.UtcNow.AddSeconds(pauseSeconds);
+				if (until > _appDetailsPausedUntilUtc)
+				{
+					_appDetailsPausedUntilUtc = until;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Parses a Steam store application ID (unsigned 32-bit integer).
+		/// </summary>
+		private static bool TryParseSteamAppId(string id, out uint appId)
+		{
+			appId = 0;
+			return !id.IsNullOrEmpty()
+				&& uint.TryParse(id, NumberStyles.Integer, CultureInfo.InvariantCulture, out appId);
+		}
+
+		/// <summary>
+		/// Logs and notifies when a game Store ID cannot be used with the Steam store API.
+		/// </summary>
+		private void NotifyInvalidSteamAppId(string id)
+		{
+			string safeId = id ?? string.Empty;
+			LogWarn($"Invalid Steam App ID '{safeId}': Store ID is not a valid numeric Steam application ID.");
+			string notificationText = string.Format(
+				CultureInfo.CurrentCulture,
+				ResourceProvider.GetString("LOCCommonStoresInvalidSteamAppId"),
+				safeId);
+			API.Instance.Notifications.Add(new NotificationMessage(
+				$"{PluginName}-steam-invalid-appid",
+				$"{PluginName}{Environment.NewLine}{notificationText}",
+				NotificationType.Error));
+		}
+
 		#region Urls
 
 		private static string SteamDbDlc => "https://steamdb.info/app/{0}/dlc/";
@@ -571,7 +648,7 @@ namespace CommonPluginsStores.Steam
         {
             try
             {
-                if (!uint.TryParse(id, out uint appId))
+                if (!TryParseSteamAppId(id, out uint appId))
                 {
                     return new ObservableCollection<GameAchievement>();
                 }
@@ -703,7 +780,13 @@ namespace CommonPluginsStores.Steam
         {
             try
             {
-                StoreAppDetailsResult storeAppDetailsResult = GetAppDetails(uint.Parse(id), 1);
+				if (!TryParseSteamAppId(id, out uint appId))
+				{
+					NotifyInvalidSteamAppId(id);
+					return null;
+				}
+
+                StoreAppDetailsResult storeAppDetailsResult = GetAppDetails(appId, 1);
                 if (storeAppDetailsResult?.data == null)
                 {
                     return null;
@@ -758,7 +841,12 @@ namespace CommonPluginsStores.Steam
 
             if (data?.Item2 == null)
             {
-                ObservableCollection<GameAchievement> gameAchievements = GetAchievementsSchema(uint.Parse(id));
+				if (!TryParseSteamAppId(id, out uint appId))
+				{
+					return new Tuple<string, ObservableCollection<GameAchievement>>(id, new ObservableCollection<GameAchievement>());
+				}
+
+                ObservableCollection<GameAchievement> gameAchievements = GetAchievementsSchema(appId);
 
                 data = new Tuple<string, ObservableCollection<GameAchievement>>(id, gameAchievements);
                 data?.Item2?.ForEach(x =>
@@ -1172,6 +1260,46 @@ namespace CommonPluginsStores.Steam
 
         #region Steam Api
 
+        /// <summary>
+        /// Returns true when the HTTP body looks like JSON (store appdetails and similar endpoints).
+        /// </summary>
+        private static bool LooksLikeJsonResponse(string response)
+        {
+            if (string.IsNullOrWhiteSpace(response))
+            {
+                return false;
+            }
+
+            char first = response.TrimStart()[0];
+            return first == '{' || first == '[';
+        }
+
+        /// <summary>
+        /// Detects Steam store rate limiting (typically a short body such as "null").
+        /// </summary>
+        private static bool IsSteamStoreRateLimitedResponse(string response)
+        {
+            if (string.IsNullOrWhiteSpace(response))
+            {
+                return true;
+            }
+
+            if (response.Length >= 25)
+            {
+                return false;
+            }
+
+            string trimmed = response.Trim();
+            if (trimmed.Equals("null", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return !LooksLikeJsonResponse(response);
+        }
+
+        private const int MaxAppDetailsRateLimitRetries = 3;
+
         public StoreAppDetailsResult GetAppDetails(uint appId, int retryCount)
         {
             string cachePath = Path.Combine(PathAppsData, $"{appId}.json");
@@ -1179,9 +1307,35 @@ namespace CommonPluginsStores.Steam
 
             if (storeAppDetailsResult == null)
             {
-                Thread.Sleep(1000); // Prevent http 429
+                Common.LogDebug(true, $"[SteamApi] Cache miss for app {appId}, request throttled to {ApiRequestMinInterval.TotalMilliseconds}ms.");
+                WaitForStoreAppDetailsAccess();
                 string url = string.Format(UrlApiGameDetails, appId, CodeLang.GetSteamLang(Locale));
                 string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
+
+                if (IsSteamStoreRateLimitedResponse(response))
+                {
+                    string preview = response == null ? "(null)" : response.Trim();
+                    Common.LogDebug(true, $"[SteamApi] Steam store rate limit for app {appId}: response='{preview}'.");
+
+                    if (retryCount <= MaxAppDetailsRateLimitRetries)
+                    {
+                        ApplyStoreRateLimitCooldown(retryCount);
+                        LogWarn($"Steam store rate limit for app {appId}, retry {retryCount}/{MaxAppDetailsRateLimitRetries}.");
+                        return GetAppDetails(appId, retryCount + 1);
+                    }
+
+                    LogWarn($"Steam store rate limit for app {appId}: giving up after {MaxAppDetailsRateLimitRetries} retries.");
+                    return null;
+                }
+
+                if (!LooksLikeJsonResponse(response))
+                {
+                    string firstByte = response != null && response.Length > 0
+                        ? string.Format("0x{0:X2}", (byte)response[0])
+                        : "empty";
+                    LogWarn($"Unexpected appdetails payload for {appId}: length={response?.Length ?? 0}, firstByte={firstByte}.");
+                    return null;
+                }
 
                 if (Serialization.TryFromJson(response, out Dictionary<string, StoreAppDetailsResult> parsedData, out Exception ex) && parsedData != null)
                 {
@@ -1190,21 +1344,12 @@ namespace CommonPluginsStores.Steam
                 }
                 else if (ex != null)
                 {
+                    LogWarn($"appdetails JSON parse failed for {appId} (length={response.Length}).");
                     Common.LogError(ex, false, false, PluginName);
                 }
                 else
                 {
-                    if (response.Length < 25 && retryCount < 11)
-                    {
-                        Thread.Sleep(20000 * retryCount);
-                        Logger.Warn($"Api limit for Steam with {appId} - {retryCount}");
-                        retryCount++;
-                        return GetAppDetails(appId, retryCount);
-                    }
-                    else if (retryCount == 10)
-                    {
-                        Logger.Warn($"Api limit exced for Steam with {appId}");
-                    }
+                    Logger.Warn($"appdetails response for {appId} could not be parsed (no exception, missing key).");
                     return null;
                 }
             }
@@ -2284,7 +2429,7 @@ namespace CommonPluginsStores.Steam
         {
             try
             {
-                Thread.Sleep(1000);
+                WaitForApiRateLimit();
                 string data = Web.DownloadStringData(string.Format(SteamDbExtensionAchievements, appId)).GetAwaiter().GetResult();
                 if (Serialization.TryFromJson(data, out ExtensionsAchievements extensionsAchievementse))
                 {

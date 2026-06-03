@@ -15,7 +15,6 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Threading;
 using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.PCGamingWiki
@@ -23,12 +22,20 @@ namespace CommonPluginsStores.PCGamingWiki
 	public class PCGamingWikiApi
 	{
 		internal static readonly ILogger Logger = LogManager.GetLogger();
+		/// <summary>Minimum delay between PCGamingWiki HTTP calls to reduce throttling.</summary>
+		private static readonly TimeSpan ApiRequestMinInterval = TimeSpan.FromMilliseconds(500);
 
 		internal string PluginName { get; }
 		internal string ClientName => "PCGamingWiki";
 		internal ExternalPlugin PluginLibrary { get; }
 
 		private SteamApi SteamApi { get; }
+		private readonly RequestRateLimiter _apiRateLimiter = new RequestRateLimiter(ApiRequestMinInterval);
+
+		private void WaitForApiRateLimit()
+		{
+			_apiRateLimiter.WaitAsync().GetAwaiter().GetResult();
+		}
 
 		#region Urls
 
@@ -71,13 +78,15 @@ namespace CommonPluginsStores.PCGamingWiki
 				if (appId != 0)
 				{
 					url = string.Format(UrlWithSteamId, appId);
-					Thread.Sleep(500);
+					Common.LogDebug(true, $"[PCGamingWikiApi] Trying appid lookup for {game.Name} ({appId}) with throttled request.");
+					WaitForApiRateLimit();
 					string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
 					if (!response.Contains("search results", StringComparison.OrdinalIgnoreCase))
 					{
 						Logger.Info($"Url for PCGamingWiki find for {game.Name} - {url}");
 						return url;
 					}
+					Logger.Warn($"PCGamingWiki appid lookup returned search page for {game.Name} ({appId}), using fallback strategies.");
 				}
 
 				#endregion

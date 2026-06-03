@@ -43,10 +43,6 @@ namespace CommonPluginsStores
         private readonly Lazy<ObservableCollection<AccountInfos>> _lazyFriends;
         private readonly Lazy<ObservableCollection<AccountGameInfos>> _lazyGames;
 
-		private readonly SemaphoreSlim _rateLimiter = new SemaphoreSlim(1, 1);
-		private DateTime _lastApiCall = DateTime.MinValue;
-		internal int MinApiCallIntervalMs = 500;
-
 		#region Account data
 
 		/// <summary>
@@ -931,25 +927,5 @@ namespace CommonPluginsStores
             _gamesCache.Clear();
             _dlcsCache.Clear();
         }
-
-
-		private async Task<T> WithRateLimitAsync<T>(Func<Task<T>> apiCall)
-		{
-			await _rateLimiter.WaitAsync();
-			try
-			{
-				var elapsed = (DateTime.Now - _lastApiCall).TotalMilliseconds;
-				if (elapsed < MinApiCallIntervalMs)
-				{
-					await Task.Delay(MinApiCallIntervalMs - (int)elapsed);
-				}
-				_lastApiCall = DateTime.Now;
-				return await apiCall();
-			}
-			finally
-			{
-				_rateLimiter.Release();
-			}
-		}
 	}
 }

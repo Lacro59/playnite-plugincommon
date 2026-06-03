@@ -9,13 +9,19 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Threading;
 
 namespace CommonPluginsStores.Steam
 {
     public class SteamKit
     {
         internal static readonly ILogger Logger = LogManager.GetLogger();
+        private static readonly TimeSpan ApiRequestMinInterval = TimeSpan.FromMilliseconds(100);
+        private static readonly RequestRateLimiter ApiRateLimiter = new RequestRateLimiter(ApiRequestMinInterval);
+
+        private static void WaitForApiRateLimit()
+        {
+            ApiRateLimiter.WaitAsync().GetAwaiter().GetResult();
+        }
 
         #region Urls
         private static string UrlAchievementImg => @"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/{0}/{1}";
@@ -29,7 +35,7 @@ namespace CommonPluginsStores.Steam
 		[Obsolete("Used GetAppList(apiKey)")]
 		public static List<SteamApp> GetAppList()
         {
-            Thread.Sleep(100);
+            WaitForApiRateLimit();
             try
             {
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("ISteamApps"))
@@ -88,7 +94,7 @@ namespace CommonPluginsStores.Steam
         public static List<SteamApp> GetAppList(string apiKey, uint last_appid = 0)
 
         {
-            Thread.Sleep(100);
+            WaitForApiRateLimit();
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -114,6 +120,7 @@ namespace CommonPluginsStores.Steam
                     uint.TryParse(results?.Children?.Where(x => x.Name == "last_appid").FirstOrDefault()?.Value, out last_appid);
                     if (last_appid != 0)
                     {
+                        Common.LogDebug(true, $"[SteamKit] GetAppList pagination continues from last_appid={last_appid}.");
                         appList.AddRange(GetAppList(apiKey, last_appid));
                     }
 
@@ -133,7 +140,7 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamFriend> GetFriendList(string apiKey, ulong steamId)
         {
-            Thread.Sleep(100);
+            WaitForApiRateLimit();
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -167,7 +174,7 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamPlayer> GetPlayerSummaries(string apiKey, List<ulong> steamIds)
         {
-            Thread.Sleep(100);
+            WaitForApiRateLimit();
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -216,7 +223,7 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamGame> GetOwnedGames(string apiKey, ulong steamId)
         {
-            Thread.Sleep(100);
+            WaitForApiRateLimit();
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -264,7 +271,7 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamAchievement> GetGameAchievements(uint appId, string language)
         {
-            Thread.Sleep(100);
+            WaitForApiRateLimit();
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -315,7 +322,7 @@ namespace CommonPluginsStores.Steam
 
         public static SteamSchema GetSchemaForGame(string apiKey, uint appId, string language)
         {
-            Thread.Sleep(100);
+            WaitForApiRateLimit();
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -362,7 +369,7 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamStats> GetUserStatsForGame(string apiKey, uint appId, ulong steamId)
         {
-            Thread.Sleep(100);
+            WaitForApiRateLimit();
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -401,7 +408,7 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamPlayerAchievement> GetPlayerAchievements(string apiKey, uint appId, ulong steamId, string language)
         {
-            Thread.Sleep(100);
+            WaitForApiRateLimit();
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -460,7 +467,7 @@ namespace CommonPluginsStores.Steam
 
         public static bool CheckGameIsPrivate(string apiKey, uint appId, ulong steamId)
         {
-            Thread.Sleep(100);
+            WaitForApiRateLimit();
             try
             {
                 Logger.Info($"CheckGameIsPrivate({appId})");

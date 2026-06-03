@@ -767,22 +767,28 @@ namespace CommonPluginsShared.Collections
 				List<TItem> allItems = _database.ToList();
 				a.ProgressMaxValue = allItems.Count;
 
-				foreach (TItem item in allItems)
+				ExecuteWithPlayniteBufferedUpdates(() =>
 				{
-					try
+					using (_database.BufferedUpdate())
 					{
-						RemoveTag(item.Id);
-						_database.Remove(item.Id);
-						Common.LogDebug(true, string.Format("ClearDatabase — removed item {0} ({1})", item.Id, item.Name));
-						removedCount++;
-						a.CurrentProgressValue++;
+						foreach (TItem item in allItems)
+						{
+							try
+							{
+								RemoveTag(item.Id);
+								_database.Remove(item.Id);
+								Common.LogDebug(true, string.Format("ClearDatabase — removed item {0} ({1})", item.Id, item.Name));
+								removedCount++;
+								a.CurrentProgressValue++;
+							}
+							catch (Exception ex)
+							{
+								isOk = false;
+								Common.LogError(ex, false, string.Format("Error clearing {0} — {1}", item.Id, item.Name), false, PluginName);
+							}
+						}
 					}
-					catch (Exception ex)
-					{
-						isOk = false;
-						Common.LogError(ex, false, string.Format("Error clearing {0} — {1}", item.Id, item.Name), false, PluginName);
-					}
-				}
+				});
 
 				Logger.Info(string.Format("ClearDatabase — {0}/{1} items removed successfully.", removedCount, allItems.Count));
 
@@ -817,11 +823,14 @@ namespace CommonPluginsShared.Collections
 				"DeleteDataWithDeletedGame — identified {0} orphaned item(s).",
 				orphaned.Count));
 
-			foreach (TItem item in orphaned)
+			using (_database.BufferedUpdate())
 			{
-				Logger.Info(string.Format(
-					"Deleting orphaned data: {0} ({1})", item.Name, item.Id));
-				_database.Remove(item.Id);
+				foreach (TItem item in orphaned)
+				{
+					Logger.Info(string.Format(
+						"Deleting orphaned data: {0} ({1})", item.Name, item.Id));
+					_database.Remove(item.Id);
+				}
 			}
 
 			Logger.Info(string.Format(
@@ -1223,39 +1232,52 @@ namespace CommonPluginsShared.Collections
 
 			API.Instance.Dialogs.ActivateGlobalProgress((a) =>
 			{
-				Stopwatch stopWatch = Stopwatch.StartNew();
-				a.ProgressMaxValue = idList.Count;
-
-				foreach (Guid id in idList)
+				try
 				{
-					if (a.CancelToken.IsCancellationRequested)
+					ExecuteWithPlayniteBufferedUpdates(() =>
 					{
-						break;
-					}
+						using (_database.BufferedUpdate())
+						{
+							Stopwatch stopWatch = Stopwatch.StartNew();
+							a.ProgressMaxValue = idList.Count;
 
-					Game game = API.Instance.Database.Games.Get(id);
-					a.Text = BuildProgressText(message, a.CurrentProgressValue, idList.Count, game);
+							foreach (Guid id in idList)
+							{
+								if (a.CancelToken.IsCancellationRequested)
+								{
+									break;
+								}
 
-					try
-					{
-						Thread.Sleep(100);
-						RefreshNoLoader(id, a.CancelToken);
-					}
-					catch (Exception ex)
-					{
-						Common.LogError(ex, false, true, PluginName);
-					}
+								Game game = API.Instance.Database.Games.Get(id);
+								a.Text = BuildProgressText(message, a.CurrentProgressValue, idList.Count, game);
 
-					a.CurrentProgressValue++;
+								try
+								{
+									Thread.Sleep(100);
+									RefreshNoLoader(id, a.CancelToken);
+								}
+								catch (Exception ex)
+								{
+									Common.LogError(ex, false, true, PluginName);
+								}
+
+								a.CurrentProgressValue++;
+							}
+
+							stopWatch.Stop();
+							TimeSpan ts = stopWatch.Elapsed;
+							Logger.Info(string.Format(
+								"Refresh(){0} — {1:00}:{2:00}.{3:00} for {4}/{5} items",
+								a.CancelToken.IsCancellationRequested ? " (canceled)" : string.Empty,
+								ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
+								a.CurrentProgressValue, idList.Count));
+						}
+					});
 				}
-
-				stopWatch.Stop();
-				TimeSpan ts = stopWatch.Elapsed;
-				Logger.Info(string.Format(
-					"Refresh(){0} — {1:00}:{2:00}.{3:00} for {4}/{5} items",
-					a.CancelToken.IsCancellationRequested ? " (canceled)" : string.Empty,
-					ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
-					a.CurrentProgressValue, idList.Count));
+				catch (Exception ex)
+				{
+					Common.LogError(ex, false, false, PluginName);
+				}
 			}, options);
 		}
 
@@ -1278,7 +1300,7 @@ namespace CommonPluginsShared.Collections
 		public virtual void RefreshNoLoader(Guid id, CancellationToken cancellationToken = default)
 		{
 			Game game = API.Instance.Database.Games.Get(id);
-			Logger.Info(string.Format("RefreshNoLoader — {0} ({1})", game?.Name, id));
+			Logger.Info(string.Format("RefreshNoLoader — {0} ({1} - {2})", game?.Name, id, game?.GameId));
 
 			TItem cached = Get(id, true);
 			TItem webItem = GetWeb(id);
@@ -1532,68 +1554,63 @@ namespace CommonPluginsShared.Collections
 
 				try
 				{
-					API.Instance.Database.BeginBufferUpdate();
-					API.Instance.Database.Games.BeginBufferUpdate();
-
-					Stopwatch stopWatch = Stopwatch.StartNew();
-					a.ProgressMaxValue = idList.Count;
-
-					foreach (Guid id in idList)
+					ExecuteWithPlayniteBufferedUpdates(() =>
 					{
-						if (a.CancelToken.IsCancellationRequested) break;
+						Stopwatch stopWatch = Stopwatch.StartNew();
+						a.ProgressMaxValue = idList.Count;
 
-						Game game = API.Instance.Database.Games.Get(id);
-						if (game == null)
+						foreach (Guid id in idList)
 						{
-							a.CurrentProgressValue++;
-							continue;
-						}
+							if (a.CancelToken.IsCancellationRequested) break;
 
-						a.Text = BuildProgressText(message, a.CurrentProgressValue, idList.Count, game);
-
-						try
-						{
-							StripPluginTags(game);
-							bool modified = AppendPluginTag(game);
-							if (modified)
+							Game game = API.Instance.Database.Games.Get(id);
+							if (game == null)
 							{
-								PersistGameUpdate(game);
+								a.CurrentProgressValue++;
+								continue;
 							}
+
+							a.Text = BuildProgressText(message, a.CurrentProgressValue, idList.Count, game);
+
+							try
+							{
+								StripPluginTags(game);
+								bool modified = AppendPluginTag(game);
+								if (modified)
+								{
+									PersistGameUpdate(game);
+								}
+							}
+							catch (Exception ex)
+							{
+								errorCount++;
+								Common.LogError(ex, false, false, PluginName);
+							}
+
+							a.CurrentProgressValue++;
 						}
-						catch (Exception ex)
+
+						stopWatch.Stop();
+						TimeSpan ts = stopWatch.Elapsed;
+						Logger.Info(string.Format(
+							"AddTag {0} {1:00}:{2:00}.{3:000} for {4}/{5} items",
+							a.CancelToken.IsCancellationRequested ? "canceled" : string.Empty,
+							ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
+							a.CurrentProgressValue, idList.Count));
+
+						if (errorCount > 0)
 						{
-							errorCount++;
-							Common.LogError(ex, false, false, PluginName);
+							API.Instance.Notifications.Add(new NotificationMessage(
+								string.Format("{0}-AddTag-Error", PluginName),
+								string.Format(ResourceProvider.GetString("LOCCommonNotificationTagBatchError"), errorCount),
+								NotificationType.Error,
+								() => PlayniteTools.CreateLogPackage(PluginName)));
 						}
-
-						a.CurrentProgressValue++;
-					}
-
-					stopWatch.Stop();
-					TimeSpan ts = stopWatch.Elapsed;
-					Logger.Info(string.Format(
-						"AddTag {0} {1:00}:{2:00}.{3:000} for {4}/{5} items",
-						a.CancelToken.IsCancellationRequested ? "canceled" : string.Empty,
-						ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
-						a.CurrentProgressValue, idList.Count));
-
-					if (errorCount > 0)
-					{
-						API.Instance.Notifications.Add(new NotificationMessage(
-							string.Format("{0}-AddTag-Error", PluginName),
-							string.Format(ResourceProvider.GetString("LOCCommonNotificationTagBatchError"), errorCount),
-							NotificationType.Error,
-							() => PlayniteTools.CreateLogPackage(PluginName)));
-					}
+					});
 				}
 				catch (Exception ex)
 				{
 					Common.LogError(ex, false, false, PluginName);
-				}
-				finally
-				{
-					API.Instance.Database.Games.EndBufferUpdate();
-					API.Instance.Database.EndBufferUpdate();
 				}
 			}, options);
 		}
@@ -1655,53 +1672,48 @@ namespace CommonPluginsShared.Collections
 				try
 				{
 					Logger.Info("RemoveTagAllGame() started.");
-					API.Instance.Database.BeginBufferUpdate();
-					API.Instance.Database.Games.BeginBufferUpdate();
-
-					Stopwatch stopWatch = Stopwatch.StartNew();
-					List<Game> playniteDb = API.Instance.Database.Games
-						.Where(x => !x.Hidden)
-						.ToList();
-					a.ProgressMaxValue = playniteDb.Count;
-
-					foreach (Game game in playniteDb)
+					ExecuteWithPlayniteBufferedUpdates(() =>
 					{
-						if (a.CancelToken.IsCancellationRequested)
+						Stopwatch stopWatch = Stopwatch.StartNew();
+						List<Game> playniteDb = API.Instance.Database.Games
+							.Where(x => !x.Hidden)
+							.ToList();
+						a.ProgressMaxValue = playniteDb.Count;
+
+						foreach (Game game in playniteDb)
 						{
-							break;
+							if (a.CancelToken.IsCancellationRequested)
+							{
+								break;
+							}
+
+							a.Text = BuildProgressText(
+								message, a.CurrentProgressValue, playniteDb.Count, game);
+
+							try
+							{
+								RemoveTag(game);
+							}
+							catch (Exception ex)
+							{
+								Common.LogError(ex, false, false, PluginName);
+							}
+
+							a.CurrentProgressValue++;
 						}
 
-						a.Text = BuildProgressText(
-							message, a.CurrentProgressValue, playniteDb.Count, game);
-
-						try
-						{
-							RemoveTag(game);
-						}
-						catch (Exception ex)
-						{
-							Common.LogError(ex, false, false, PluginName);
-						}
-
-						a.CurrentProgressValue++;
-					}
-
-					stopWatch.Stop();
-					TimeSpan ts = stopWatch.Elapsed;
-					Logger.Info(string.Format(
-						"RemoveTagAllGame(){0} — {1:00}:{2:00}.{3:00} for {4}/{5} items",
-						a.CancelToken.IsCancellationRequested ? " (canceled)" : string.Empty,
-						ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
-						a.CurrentProgressValue, playniteDb.Count));
+						stopWatch.Stop();
+						TimeSpan ts = stopWatch.Elapsed;
+						Logger.Info(string.Format(
+							"RemoveTagAllGame(){0} — {1:00}:{2:00}.{3:00} for {4}/{5} items",
+							a.CancelToken.IsCancellationRequested ? " (canceled)" : string.Empty,
+							ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
+							a.CurrentProgressValue, playniteDb.Count));
+					});
 				}
 				catch (Exception ex)
 				{
 					Common.LogError(ex, false, false, PluginName);
-				}
-				finally
-				{
-					API.Instance.Database.Games.EndBufferUpdate();
-					API.Instance.Database.EndBufferUpdate();
 				}
 			}, options);
 		}
@@ -1886,6 +1898,25 @@ namespace CommonPluginsShared.Collections
 		#endregion
 
 		#region Private utilities
+
+		/// <summary>
+		/// Runs <paramref name="action"/> while Playnite database change notifications are buffered,
+		/// so bulk operations (tags, refresh, and similar) trigger a single UI refresh at the end.
+		/// </summary>
+		private static void ExecuteWithPlayniteBufferedUpdates(Action action)
+		{
+			API.Instance.Database.BeginBufferUpdate();
+			API.Instance.Database.Games.BeginBufferUpdate();
+			try
+			{
+				action();
+			}
+			finally
+			{
+				API.Instance.Database.Games.EndBufferUpdate();
+				API.Instance.Database.EndBufferUpdate();
+			}
+		}
 
 		private static string BuildProgressText(
 			string message, double current, int total, Game game)
