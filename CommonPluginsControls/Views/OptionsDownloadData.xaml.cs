@@ -1,4 +1,5 @@
-﻿using CommonPluginsShared.Interfaces;
+﻿using CommonPluginsShared;
+using CommonPluginsShared.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Models;
 using System;
@@ -11,7 +12,7 @@ using System.Windows.Controls;
 namespace CommonPluginsControls.Controls
 {
     /// <summary>
-    /// Logique d'interaction pour OptionsDownloadData.xaml
+    /// Interaction logic for OptionsDownloadData.xaml
     /// </summary>
     public partial class OptionsDownloadData : UserControl
     {
@@ -34,6 +35,8 @@ namespace CommonPluginsControls.Controls
             {
                 PART_TagMissing.Visibility = Visibility.Collapsed;
             }
+
+            UpdateDependentControls();
         }
 
 
@@ -88,10 +91,77 @@ namespace CommonPluginsControls.Controls
 
             if ((bool)PART_OldData.IsChecked)
             {
-                FilteredGames = PluginDatabase.GetGamesOldData(months).ToList();
+                HashSet<Guid> oldDataIds = new HashSet<Guid>(
+                    PluginDatabase.GetGamesOldData(months).Select(x => x.Id));
+                FilteredGames = FilteredGames.Where(x => oldDataIds.Contains(x.Id)).ToList();
             }
 
+            LogDownloadFilters(months);
+
             ((Window)Parent).Close();
+        }
+
+        private void LogDownloadFilters(int months)
+        {
+            string gameSource = "AllGames";
+            if (PART_Filtred.IsChecked == true)
+            {
+                gameSource = "Filtered";
+            }
+            else if (PART_Selected.IsChecked == true)
+            {
+                gameSource = "Selected";
+            }
+
+            var installationFilters = new List<string>();
+            if (PART_GamesInstalled.IsChecked == true)
+            {
+                installationFilters.Add("Installed");
+            }
+
+            if (PART_GamesNotInstalled.IsChecked == true)
+            {
+                installationFilters.Add("NotInstalled");
+            }
+
+            if (PART_GamesFavorite.IsChecked == true)
+            {
+                installationFilters.Add("Favorite");
+            }
+
+            var timeFilters = new List<string>();
+            if (PART_OldData.IsChecked == true)
+            {
+                timeFilters.Add("OldData");
+            }
+
+            if (PART_GamesRecentlyPlayed.IsChecked == true)
+            {
+                timeFilters.Add("RecentlyPlayed");
+            }
+
+            if (PART_GamesRecentlyAdded.IsChecked == true)
+            {
+                timeFilters.Add("RecentlyAdded");
+            }
+
+            string installation = installationFilters.Count > 0
+                ? string.Join(", ", installationFilters)
+                : "(none)";
+            string time = timeFilters.Count > 0
+                ? string.Join(", ", timeFilters)
+                : "(none)";
+            int gameCount = FilteredGames?.Count ?? 0;
+
+            Common.LogDebug(true, string.Format(
+                "[OptionsDownloadData] GameSource={0}, Installation={1}, Time={2}, Months={3}, TagMissing={4}, OnlyMissing={5}, Games={6}",
+                gameSource,
+                installation,
+                time,
+                months,
+                PART_TagMissing.IsChecked == true,
+                PART_OnlyMissing.IsChecked == true,
+                gameCount));
         }
 
 
@@ -110,10 +180,19 @@ namespace CommonPluginsControls.Controls
             return (bool)PART_OnlyMissing.IsChecked;
         }
 
-        private void RadioButton_Checked(object sender, RoutedEventArgs e)
+        private void FilterRadio_Checked(object sender, RoutedEventArgs e)
         {
-            Part_MonthSelect.IsEnabled = (bool)PART_OldData.IsChecked || (bool)PART_GamesRecentlyAdded.IsChecked || (bool)PART_GamesRecentlyPlayed.IsChecked;
-            PART_OnlyMissing.IsEnabled = !(bool)PART_OldData.IsChecked;
+            UpdateDependentControls();
+        }
+
+        private void UpdateDependentControls()
+        {
+            bool useMonthFilter = PART_OldData.IsChecked == true
+                || PART_GamesRecentlyAdded.IsChecked == true
+                || PART_GamesRecentlyPlayed.IsChecked == true;
+
+            Part_MonthSelect.IsEnabled = useMonthFilter;
+            PART_OnlyMissing.IsEnabled = PART_OldData.IsChecked != true;
         }
     }
 }
