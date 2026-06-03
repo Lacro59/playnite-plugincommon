@@ -94,6 +94,7 @@ namespace CommonPluginsStores.Steam
         public static List<SteamApp> GetAppList(string apiKey, uint last_appid = 0)
 
         {
+            Common.LogDebug(true, $"[SteamKit] GetAppList entry last_appid={last_appid}, apiKeyLength={apiKey?.Length ?? 0}.");
             WaitForApiRateLimit();
             try
             {
@@ -124,11 +125,13 @@ namespace CommonPluginsStores.Steam
                         appList.AddRange(GetAppList(apiKey, last_appid));
                     }
 
+                    Common.LogDebug(true, $"[SteamKit] GetAppList success count={appList.Count}, last_appid={last_appid}.");
                     return appList;
                 }
             }
             catch (Exception ex)
             {
+                Common.LogDebug(true, $"[SteamKit] GetAppList failed: {ex.GetType().Name} - {ex.Message}");
                 Common.LogError(ex, false);
                 return null;
             }
@@ -140,6 +143,7 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamFriend> GetFriendList(string apiKey, ulong steamId)
         {
+            Common.LogDebug(true, $"[SteamKit] GetFriendList entry steamId={steamId}, apiKeyLength={apiKey?.Length ?? 0}, interface=ISteamUser/GetFriendList/v1.");
             WaitForApiRateLimit();
             try
             {
@@ -161,11 +165,13 @@ namespace CommonPluginsStores.Steam
                             FriendSince = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(data["friend_since"].AsInteger()),
                         });
                     }
+                    Common.LogDebug(true, $"[SteamKit] GetFriendList success count={friendList.Count}.");
                     return friendList;
                 }
             }
             catch (Exception ex)
             {
+                Common.LogDebug(true, $"[SteamKit] GetFriendList failed: {ex.GetType().Name} - {ex.Message}");
                 Common.LogError(ex, false);
                 return null;
             }
@@ -174,6 +180,8 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamPlayer> GetPlayerSummaries(string apiKey, List<ulong> steamIds)
         {
+            int steamIdsCount = steamIds?.Count ?? 0;
+            Common.LogDebug(true, $"[SteamKit] GetPlayerSummaries entry steamIdsCount={steamIdsCount}, apiKeyLength={apiKey?.Length ?? 0}, interface=ISteamUser/GetPlayerSummaries/v2, argKey=steamIds.");
             WaitForApiRateLimit();
             try
             {
@@ -207,11 +215,13 @@ namespace CommonPluginsStores.Steam
                             TimeCreated = data["timecreated"].AsInteger()
                         });
                     }
+                    Common.LogDebug(true, $"[SteamKit] GetPlayerSummaries success count={friendList.Count}.");
                     return friendList;
                 }
             }
             catch (Exception ex)
             {
+                Common.LogDebug(true, $"[SteamKit] GetPlayerSummaries failed: {ex.GetType().Name} - {ex.Message}");
                 Common.LogError(ex, false);
                 return null;
             }
@@ -223,6 +233,7 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamGame> GetOwnedGames(string apiKey, ulong steamId)
         {
+            Common.LogDebug(true, $"[SteamKit] GetOwnedGames entry steamId={steamId}, apiKeyLength={apiKey?.Length ?? 0}, interface=IPlayerService/GetOwnedGames/v1.");
             WaitForApiRateLimit();
             try
             {
@@ -253,11 +264,13 @@ namespace CommonPluginsStores.Steam
                             HasLeaderboards = data["has_leaderboards"].AsBoolean()
                         });
                     }
+                    Common.LogDebug(true, $"[SteamKit] GetOwnedGames success count={ownedGames.Count}.");
                     return ownedGames;
                 }
             }
             catch (Exception ex)
             {
+                Common.LogDebug(true, $"[SteamKit] GetOwnedGames failed: {ex.GetType().Name} - {ex.Message}");
                 Common.LogError(ex, false);
                 return null;
             }

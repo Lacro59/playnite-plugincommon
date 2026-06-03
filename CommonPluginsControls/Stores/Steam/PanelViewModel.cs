@@ -25,7 +25,15 @@ namespace CommonPluginsControls.Stores.Steam
         public AccountInfos User => StoreApi?.CurrentAccountInfos;
 
         private bool useApi = true;
-        public bool UseApi { get => useApi; set => SetValue(ref useApi, value); }
+        public bool UseApi
+        {
+            get => useApi;
+            set
+            {
+                SetValue(ref useApi, value);
+                OnPropertyChanged(nameof(ShowApiKeyField));
+            }
+        }
 
         private bool useAuth = true;
         public bool UseAuth
@@ -52,6 +60,11 @@ namespace CommonPluginsControls.Stores.Steam
         public bool ShowConnectionSection => ForceAuth || UseAuth;
 
         public bool IsManualAccountEntryEnabled => !ForceAuth && !UseAuth;
+
+        /// <summary>
+        /// API key field is only shown when authentication is optional and API mode is enabled.
+        /// </summary>
+        public bool ShowApiKeyField => !ForceAuth && UseApi;
 
         public AuthStatus AuthStatus => StoreApi == null ? AuthStatus.Failed : StoreApi.IsUserLoggedIn ? AuthStatus.Ok : AuthStatus.AuthRequired;
 
@@ -106,6 +119,7 @@ namespace CommonPluginsControls.Stores.Steam
         {
             OnPropertyChanged(nameof(ShowConnectionSection));
             OnPropertyChanged(nameof(IsManualAccountEntryEnabled));
+            OnPropertyChanged(nameof(ShowApiKeyField));
         }
 
         private void NotifyAuthStatusChanged()

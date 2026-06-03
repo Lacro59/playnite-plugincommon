@@ -145,7 +145,10 @@ namespace CommonPluginsStores.Gog
             bool isLogged = CheckIsUserLoggedIn();
             if (isLogged)
             {
-                _ = SetStoredCookies(GetNewWebCookies(new List<string> { CurrentAccountInfos.Link }));
+                if (GetStoredCookies() == null || GetStoredCookies().Count == 0)
+                {
+                    _ = SetStoredCookies(GetNewWebCookies(new List<string> { CurrentAccountInfos.Link }));
+                }
 
                 string response = Web.DownloadStringData(UrlAccountInfo, GetStoredCookies()).GetAwaiter().GetResult();
                 _ = Serialization.TryFromJson(response, out AccountBasicResponse accountBasicResponse);

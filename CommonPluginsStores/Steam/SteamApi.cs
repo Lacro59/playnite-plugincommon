@@ -188,14 +188,17 @@ namespace CommonPluginsStores.Steam
 						// Determine retrieval method
 						if (!(StoreToken?.Token.IsNullOrEmpty() ?? true))
 						{
+							Common.LogDebug(true, "[SteamApi] GetSteamAppsList route=WebToken.");
 							steamAppsNew = GetSteamAppsByWebToken();
 						}
-						else if (CurrentAccountInfos != null && !CurrentAccountInfos.ApiKey.IsNullOrEmpty() && IsUserLoggedIn)
+						else if (StoreSettings.UseApi && CurrentAccountInfos != null && !CurrentAccountInfos.ApiKey.IsNullOrEmpty() && IsUserLoggedIn)
 						{
+							Common.LogDebug(true, $"[SteamApi] GetSteamAppsList route=SteamKit.GetAppList, UseApi={StoreSettings.UseApi}, apiKeyLength={CurrentAccountInfos.ApiKey.Length}.");
 							steamAppsNew = SteamKit.GetAppList(CurrentAccountInfos.ApiKey);
 						}
 						else
 						{
+							Common.LogDebug(true, $"[SteamApi] GetSteamAppsList route=PublicAppIdList, HasApiKey={!(CurrentAccountInfos?.ApiKey.IsNullOrEmpty() ?? true)}, IsLoggedIn={IsUserLoggedIn}.");
 							steamAppsNew = GetSteamAppsFromPublicAppIdList();
 						}
 
@@ -538,17 +541,34 @@ namespace CommonPluginsStores.Steam
 		/// Automatically fetches updated profile data including avatar, username, and privacy status.
 		/// </summary>
 		/// <returns>AccountInfos object with current user details, or a new empty AccountInfos if not logged in</returns>
+		/// <summary>
+		/// Whether account profile enrichment should use web session/cookies instead of the Steam Web API key.
+		/// Aligns with routing used for friends and game lists.
+		/// </summary>
+		private bool ShouldUseWebForAccountProfile(AccountInfos accountInfos)
+		{
+			return StoreSettings.UseAuth || !StoreSettings.UseApi || accountInfos?.ApiKey.IsNullOrEmpty() != false;
+		}
+
 		protected override AccountInfos GetCurrentAccountInfos()
         {
             AccountInfos accountInfos = LoadCurrentUser();
+            if (accountInfos != null && !StoreSettings.UseApi)
+            {
+                accountInfos.ApiKey = string.Empty;
+            }
+
             if (!accountInfos?.UserId?.IsNullOrEmpty() ?? false)
             {
+                bool useWebProfile = ShouldUseWebForAccountProfile(accountInfos);
+                Common.LogDebug(true, $"[SteamApi] GetCurrentAccountInfos scheduled background refresh UserId={accountInfos.UserId}, UseApi={StoreSettings.UseApi}, UseAuth={StoreSettings.UseAuth}, ForceAuth={StoreSettings.ForceAuth}, route={(useWebProfile ? "Web" : "Api")}.");
                 _ = Task.Run(() =>
                 {
                     Thread.Sleep(1000);
 
-                    if (CurrentAccountInfos.ApiKey.IsNullOrEmpty())
+                    if (ShouldUseWebForAccountProfile(accountInfos))
                     {
+                        Common.LogDebug(true, "[SteamApi] GetCurrentAccountInfos route=Web profile scrape.");
                         string response = Web.DownloadStringData(string.Format(UrlProfileById, accountInfos.UserId), GetStoredCookies()).GetAwaiter().GetResult();
                         AccountInfos newAccountInfos = GetAccountInfosFromRgProfileData(response);
 
@@ -563,21 +583,30 @@ namespace CommonPluginsStores.Steam
 							CurrentAccountInfos.Avatar = newAccountInfos.Avatar;
                             CurrentAccountInfos.Pseudo = newAccountInfos.Pseudo;
                             CurrentAccountInfos.Link = newAccountInfos.Link;
+                            Common.LogDebug(true, "[SteamApi] GetCurrentAccountInfos web scrape updated profile fields.");
 						}
                     }
                     else if (ulong.TryParse(accountInfos.UserId, out ulong steamId))
                     {
+                        Common.LogDebug(true, $"[SteamApi] GetCurrentAccountInfos route=GetPlayerSummaries, steamId={steamId}.");
                         ObservableCollection<AccountInfos> playerSummaries = GetPlayerSummaries(new List<ulong> { steamId });
                         CurrentAccountInfos.Avatar = playerSummaries?.FirstOrDefault().Avatar ?? CurrentAccountInfos.Avatar;
                         CurrentAccountInfos.Pseudo = playerSummaries?.FirstOrDefault().Pseudo ?? CurrentAccountInfos.Pseudo;
                         CurrentAccountInfos.Link = playerSummaries?.FirstOrDefault().Link ?? CurrentAccountInfos.Link;
+                        Common.LogDebug(true, $"[SteamApi] GetCurrentAccountInfos GetPlayerSummaries resultCount={playerSummaries?.Count ?? 0}.");
+                    }
+                    else
+                    {
+                        Common.LogDebug(true, $"[SteamApi] GetCurrentAccountInfos skipped API path: UserId not a valid steamId64 ({accountInfos.UserId}).");
                     }
 
                     CurrentAccountInfos.IsPrivate = !CheckIsPublic(accountInfos).GetAwaiter().GetResult();
                     CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
+                    Common.LogDebug(true, $"[SteamApi] GetCurrentAccountInfos background refresh done IsPrivate={CurrentAccountInfos.IsPrivate}.");
                 });
                 return accountInfos;
             }
+            Common.LogDebug(true, "[SteamApi] GetCurrentAccountInfos no UserId, returning empty current account.");
             return new AccountInfos { IsCurrent = true };
         }
 
@@ -593,9 +622,12 @@ namespace CommonPluginsStores.Steam
                 ObservableCollection<AccountInfos> accountInfos = null;
                 if (CurrentAccountInfos != null && CurrentAccountInfos.IsCurrent)
                 {
-                    accountInfos = StoreSettings.UseAuth || CurrentAccountInfos.IsPrivate || !StoreSettings.UseApi || CurrentAccountInfos.ApiKey.IsNullOrEmpty()
+                    bool useWeb = StoreSettings.UseAuth || CurrentAccountInfos.IsPrivate || !StoreSettings.UseApi || CurrentAccountInfos.ApiKey.IsNullOrEmpty();
+                    Common.LogDebug(true, $"[SteamApi] GetCurrentFriendsInfos route={(useWeb ? "Web" : "Api")}, UseAuth={StoreSettings.UseAuth}, UseApi={StoreSettings.UseApi}, IsPrivate={CurrentAccountInfos.IsPrivate}, HasApiKey={!CurrentAccountInfos.ApiKey.IsNullOrEmpty()}.");
+                    accountInfos = useWeb
                         ? GetCurrentFriendsInfosByWeb()
                         : GetCurrentFriendsInfosByApi();
+                    Common.LogDebug(true, $"[SteamApi] GetCurrentFriendsInfos resultCount={accountInfos?.Count ?? 0}.");
                 }
                 return accountInfos;
             }
@@ -623,7 +655,9 @@ namespace CommonPluginsStores.Steam
             {
                 if (CurrentAccountInfos != null && CurrentAccountInfos.IsCurrent)
                 {
-                    ObservableCollection<AccountGameInfos> accountGameInfos = StoreSettings.UseAuth || CurrentAccountInfos.IsPrivate || !StoreSettings.UseApi || CurrentAccountInfos.ApiKey.IsNullOrEmpty()
+                    bool useWeb = StoreSettings.UseAuth || CurrentAccountInfos.IsPrivate || !StoreSettings.UseApi || CurrentAccountInfos.ApiKey.IsNullOrEmpty();
+                    Common.LogDebug(true, $"[SteamApi] GetAccountGamesInfos route={(useWeb ? "WebToken" : "Api")}, UserId={accountInfos?.UserId}, UseAuth={StoreSettings.UseAuth}, UseApi={StoreSettings.UseApi}, IsPrivate={CurrentAccountInfos.IsPrivate}, HasApiKey={!CurrentAccountInfos.ApiKey.IsNullOrEmpty()}.");
+                    ObservableCollection<AccountGameInfos> accountGameInfos = useWeb
                         ? GetAccountGamesInfosByWebToken(accountInfos)
                         : GetAccountGamesInfosByApi(accountInfos);
                     return accountGameInfos;
@@ -1844,8 +1878,11 @@ namespace CommonPluginsStores.Steam
 
         private ObservableCollection<AccountInfos> GetPlayerSummaries(List<ulong> steamIds)
         {
+            int steamIdsCount = steamIds?.Count ?? 0;
+            bool hasApiKey = !CurrentAccountInfos.ApiKey.IsNullOrEmpty();
+            Common.LogDebug(true, $"[SteamApi] GetPlayerSummaries entry steamIdsCount={steamIdsCount}, HasApiKey={hasApiKey}.");
             ObservableCollection<AccountInfos> playerSummaries = null;
-            if (steamIds?.Count > 0 && !CurrentAccountInfos.ApiKey.IsNullOrEmpty())
+            if (steamIdsCount > 0 && hasApiKey)
             {
                 List<SteamPlayer> steamPlayerSummaries = SteamKit.GetPlayerSummaries(CurrentAccountInfos.ApiKey, steamIds);
                 playerSummaries = steamPlayerSummaries?.Select(x => new AccountInfos
@@ -1855,12 +1892,18 @@ namespace CommonPluginsStores.Steam
                     Pseudo = x.PersonaName,
                     Link = x.ProfileUrl
                 }).ToObservable();
+                Common.LogDebug(true, $"[SteamApi] GetPlayerSummaries mapped resultCount={playerSummaries?.Count ?? 0}.");
+            }
+            else
+            {
+                Common.LogDebug(true, "[SteamApi] GetPlayerSummaries skipped (empty steamIds or missing API key).");
             }
             return playerSummaries;
         }
 
         private ObservableCollection<AccountGameInfos> GetAccountGamesInfosByApi(AccountInfos accountInfos)
         {
+            Common.LogDebug(true, $"[SteamApi] GetAccountGamesInfosByApi entry UserId={accountInfos?.UserId}.");
             ObservableCollection<AccountGameInfos> accountGameInfos = null;
             if (!CurrentAccountInfos.ApiKey.IsNullOrEmpty() && ulong.TryParse(accountInfos.UserId, out ulong steamId))
             {
@@ -1887,17 +1930,24 @@ namespace CommonPluginsStores.Steam
 
                     accountGameInfos.Add(gameInfos);
                 });
+                Common.LogDebug(true, $"[SteamApi] GetAccountGamesInfosByApi success gameCount={accountGameInfos.Count}.");
+            }
+            else
+            {
+                Common.LogDebug(true, "[SteamApi] GetAccountGamesInfosByApi skipped (missing API key or invalid UserId).");
             }
             return accountGameInfos;
         }
 
         private ObservableCollection<AccountInfos> GetCurrentFriendsInfosByApi()
         {
+            Common.LogDebug(true, $"[SteamApi] GetCurrentFriendsInfosByApi entry UserId={CurrentAccountInfos?.UserId}.");
             ObservableCollection<AccountInfos> currentFriendsInfos = null;
             if (!CurrentAccountInfos.ApiKey.IsNullOrEmpty() && ulong.TryParse(CurrentAccountInfos.UserId, out ulong steamId))
             {
                 List<SteamFriend> friendList = SteamKit.GetFriendList(CurrentAccountInfos.ApiKey, steamId);
                 List<ulong> steamIds = friendList?.Select(x => x.SteamId)?.ToList() ?? new List<ulong>();
+                Common.LogDebug(true, $"[SteamApi] GetCurrentFriendsInfosByApi GetFriendList count={friendList?.Count ?? 0}, requesting summaries for {steamIds.Count} steamIds.");
                 currentFriendsInfos = GetPlayerSummaries(steamIds);
 
                 friendList?.ForEach(x =>
@@ -1908,6 +1958,11 @@ namespace CommonPluginsStores.Steam
                         userInfos.DateAdded = x.FriendSince;
                     }
                 });
+                Common.LogDebug(true, $"[SteamApi] GetCurrentFriendsInfosByApi success friendCount={currentFriendsInfos?.Count ?? 0}.");
+            }
+            else
+            {
+                Common.LogDebug(true, "[SteamApi] GetCurrentFriendsInfosByApi skipped (missing API key or invalid UserId).");
             }
             return currentFriendsInfos;
         }
