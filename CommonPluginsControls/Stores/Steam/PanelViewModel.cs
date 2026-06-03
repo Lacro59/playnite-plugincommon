@@ -1,133 +1,41 @@
-﻿using CommonPluginsControls.Stores;
-using CommonPluginsStores.Models;
-using CommonPluginsStores.Models.Enumerations;
-using CommonPluginsStores.Models.Interfaces;
-using Playnite.SDK;
-using System;
-using System.Collections.Generic;
+﻿using CommonPluginsStores.Models.Enumerations;
 
 namespace CommonPluginsControls.Stores.Steam
 {
-    public class PanelViewModel : ObservableObject, IStorePanelViewModel
+    public class PanelViewModel : StorePanelViewModelBase
     {
-        private IStoreApi _storeApi;
-        internal IStoreApi StoreApi
-        {
-            get => _storeApi;
-            set
-            {
-                _storeApi = value;
-                OnPropertyChanged(nameof(StoreApi));
-                NotifyAuthStatusChanged();
-            }
-        }
+        private bool _useApi = true;
 
-        public AccountInfos User => StoreApi?.CurrentAccountInfos;
-
-        private bool useApi = true;
         public bool UseApi
         {
-            get => useApi;
+            get => _useApi;
             set
             {
-                SetValue(ref useApi, value);
+                SetValue(ref _useApi, value);
                 OnPropertyChanged(nameof(ShowApiKeyField));
+                OnPropertyChanged(nameof(IsApiKeyEntryEnabled));
             }
         }
-
-        private bool useAuth = true;
-        public bool UseAuth
-        {
-            get => useAuth;
-            set
-            {
-                SetValue(ref useAuth, value);
-                NotifyAuthUiProperties();
-            }
-        }
-
-        private bool forceAuth = false;
-        public bool ForceAuth
-        {
-            get => forceAuth;
-            set
-            {
-                SetValue(ref forceAuth, value);
-                NotifyAuthUiProperties();
-            }
-        }
-
-        public bool ShowConnectionSection => ForceAuth || UseAuth;
-
-        public bool IsManualAccountEntryEnabled => !ForceAuth && !UseAuth;
 
         /// <summary>
         /// API key field is only shown when authentication is optional and API mode is enabled.
         /// </summary>
         public bool ShowApiKeyField => !ForceAuth && UseApi;
 
-        public AuthStatus AuthStatus => StoreApi == null ? AuthStatus.Failed : StoreApi.IsUserLoggedIn ? AuthStatus.Ok : AuthStatus.AuthRequired;
+        /// <summary>
+        /// API key can be edited when optional API mode is active (private profiles with API key).
+        /// </summary>
+        public bool IsApiKeyEntryEnabled => !ForceAuth && UseApi;
 
-        public bool CanLogin => AuthStatus != AuthStatus.Ok && AuthStatus != AuthStatus.Checking;
+        protected override string LoginErrorContext => "Steam login failed";
 
-        public bool CanLogout => AuthStatus == AuthStatus.Ok;
+        protected override string LogoutErrorContext => "Steam logout failed";
 
-        public RelayCommand<object> LoginCommand => new RelayCommand<object>((a) =>
+        protected override void NotifyAuthUiProperties()
         {
-            try
-            {
-                StoreSettingsLog.LoginRequested(StoreApi);
-                StoreApi.Login();
-                NotifyAuthStatusChanged();
-                StoreSettingsLog.LoginCompleted(StoreApi, AuthStatus);
-            }
-            catch (Exception ex)
-            {
-                StoreSettingsLog.Error(ex, "Steam login failed");
-                throw;
-            }
-        });
-
-        public RelayCommand<object> ClearSessionCommand => new RelayCommand<object>((a) =>
-        {
-            try
-            {
-                StoreSettingsLog.LogoutRequested(StoreApi);
-                StoreApi?.ClearSession();
-                NotifyAuthStatusChanged();
-                StoreSettingsLog.LogoutCompleted(StoreApi, AuthStatus);
-            }
-            catch (Exception ex)
-            {
-                StoreSettingsLog.Error(ex, "Steam logout failed");
-                throw;
-            }
-        });
-
-        public void ResetIsUserLoggedIn()
-        {
-            StoreApi?.ResetIsUserLoggedIn();
-            NotifyAuthStatusChanged();
-        }
-
-        public void RefreshAuthCommandStates()
-        {
-            NotifyAuthStatusChanged();
-        }
-
-        private void NotifyAuthUiProperties()
-        {
-            OnPropertyChanged(nameof(ShowConnectionSection));
-            OnPropertyChanged(nameof(IsManualAccountEntryEnabled));
+            base.NotifyAuthUiProperties();
             OnPropertyChanged(nameof(ShowApiKeyField));
-        }
-
-        private void NotifyAuthStatusChanged()
-        {
-            OnPropertyChanged(nameof(AuthStatus));
-            OnPropertyChanged(nameof(CanLogin));
-            OnPropertyChanged(nameof(CanLogout));
-            OnPropertyChanged(nameof(User));
+            OnPropertyChanged(nameof(IsApiKeyEntryEnabled));
         }
     }
 }

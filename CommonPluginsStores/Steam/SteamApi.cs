@@ -550,13 +550,18 @@ namespace CommonPluginsStores.Steam
 			return StoreSettings.UseAuth || !StoreSettings.UseApi || accountInfos?.ApiKey.IsNullOrEmpty() != false;
 		}
 
+		/// <summary>
+		/// Whether this plugin instance may call the Steam Web API using the stored key.
+		/// </summary>
+		private bool IsSteamWebApiKeyActive(AccountInfos accountInfos)
+		{
+			return StoreSettings.UseApi && accountInfos != null && !accountInfos.ApiKey.IsNullOrEmpty();
+		}
+
 		protected override AccountInfos GetCurrentAccountInfos()
         {
             AccountInfos accountInfos = LoadCurrentUser();
-            if (accountInfos != null && !StoreSettings.UseApi)
-            {
-                accountInfos.ApiKey = string.Empty;
-            }
+            // ApiKey is kept in memory and on disk for shared StoresData (other plugins may use it when UseApi is enabled).
 
             if (!accountInfos?.UserId?.IsNullOrEmpty() ?? false)
             {
@@ -1879,10 +1884,10 @@ namespace CommonPluginsStores.Steam
         private ObservableCollection<AccountInfos> GetPlayerSummaries(List<ulong> steamIds)
         {
             int steamIdsCount = steamIds?.Count ?? 0;
-            bool hasApiKey = !CurrentAccountInfos.ApiKey.IsNullOrEmpty();
-            Common.LogDebug(true, $"[SteamApi] GetPlayerSummaries entry steamIdsCount={steamIdsCount}, HasApiKey={hasApiKey}.");
+            bool useSteamWebApi = IsSteamWebApiKeyActive(CurrentAccountInfos);
+            Common.LogDebug(true, $"[SteamApi] GetPlayerSummaries entry steamIdsCount={steamIdsCount}, UseSteamWebApi={useSteamWebApi}.");
             ObservableCollection<AccountInfos> playerSummaries = null;
-            if (steamIdsCount > 0 && hasApiKey)
+            if (steamIdsCount > 0 && useSteamWebApi)
             {
                 List<SteamPlayer> steamPlayerSummaries = SteamKit.GetPlayerSummaries(CurrentAccountInfos.ApiKey, steamIds);
                 playerSummaries = steamPlayerSummaries?.Select(x => new AccountInfos

@@ -11,7 +11,8 @@ namespace CommonPluginsStores.Models
         private bool _useApi;
 
         /// <summary>
-        /// Gets or sets a value indicating whether to use the API.
+        /// Gets or sets a value indicating whether to use the Steam Web API key (<see cref="AccountInfos.ApiKey"/>).
+        /// Only <see cref="Steam.SteamApi"/> reads this flag; other stores ignore it.
         /// Default is <c>false</c>.
         /// </summary>
         public bool UseApi { get => _useApi; set => SetValue(ref _useApi, value); }

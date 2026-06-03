@@ -70,7 +70,8 @@ namespace CommonPluginsStores.Models
         public AccountStatus AccountStatus { get => _accountStatus; set => SetValue(ref _accountStatus, value); }
 
         /// <summary>
-        /// Gets or sets the API key associated with this account.
+        /// Gets or sets the Steam Web API key for this account (Steam store only).
+        /// Persisted in shared <c>StoresData/*_User.dat</c>; other stores do not use this field.
         /// </summary>
         public string ApiKey { get; set; }
     }
