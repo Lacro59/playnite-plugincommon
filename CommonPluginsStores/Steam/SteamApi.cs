@@ -396,7 +396,20 @@ namespace CommonPluginsStores.Steam
 						return cachedAuth.Value;
 					}
 
-					Common.LogDebug(true, "[SteamApi] GetIsUserLoggedIn fast-path: no user data cache, returning false until background check.");
+					if (TryGetAuthStatusFromStoredCookies())
+					{
+						Common.LogDebug(true, "[SteamApi] GetIsUserLoggedIn fast-path (stored cookies): isLogged=true until background verification.");
+						return true;
+					}
+
+					bool? cachedToken = TryGetAuthStatusFromStoredToken();
+					if (cachedToken == true)
+					{
+						Common.LogDebug(true, "[SteamApi] GetIsUserLoggedIn fast-path (stored token): isLogged=true until background verification.");
+						return true;
+					}
+
+					Common.LogDebug(true, "[SteamApi] GetIsUserLoggedIn fast-path: no session hint (cache, cookies, or token), returning false until background check.");
 					return false;
 				}
 
@@ -498,6 +511,42 @@ namespace CommonPluginsStores.Steam
 		}
 
 		/// <summary>
+		/// Runs a full owned-apps check after web login so userdata cache and <see cref="IsUserLoggedIn"/> match the saved session.
+		/// </summary>
+		private void RefreshSessionAfterLogin()
+		{
+			if (CurrentAccountInfos == null)
+			{
+				LogWarn("Post-login verification skipped: no account profile saved.");
+				IsUserLoggedIn = false;
+				return;
+			}
+
+			bool hasCookies = TryGetAuthStatusFromStoredCookies();
+			bool hasToken = !(StoreToken?.Token.IsNullOrEmpty() ?? true);
+			Common.LogDebug(true, $"[SteamApi] Post-login verification: hasCookies={hasCookies}, hasToken={hasToken}.");
+
+			if (!hasCookies && !hasToken)
+			{
+				LogWarn("Post-login verification skipped: web view did not yield cookies or token.");
+				IsUserLoggedIn = false;
+				return;
+			}
+
+			BeginFullLoginCheck();
+			try
+			{
+				bool verified = VerifyUserLoggedInWithAuth();
+				IsUserLoggedIn = verified;
+				LogInfo($"Post-login verification completed: isLogged={verified}.");
+			}
+			finally
+			{
+				EndFullLoginCheck();
+			}
+		}
+
+		/// <summary>
 		/// Opens a web view for Steam login and captures authentication credentials.
 		/// Saves the authenticated user information and cookies upon successful login.
 		/// </summary>
@@ -531,6 +580,8 @@ namespace CommonPluginsStores.Steam
 					_ = SetStoredCookies(GetWebCookies(false, view));
 					view.Dispose();
 				}
+
+				RefreshSessionAfterLogin();
 			}
         }
 
@@ -1383,22 +1434,45 @@ namespace CommonPluginsStores.Steam
             try
             {
                 List<HttpCookie> cookies = GetStoredCookies();
-                string result = Web.DownloadStringData(UrlUserData, cookies, Web.UserAgent, true).GetAwaiter().GetResult();
-                if (Serialization.TryFromJson(result, out SteamUserData userData, out Exception ex) && userData?.RgOwnedApps?.Count > 0)
+                if (cookies == null || cookies.Count == 0)
                 {
-                    SaveUserData(userData);
+                    LogWarn("GetUserData skipped: no stored cookies.");
+                    return null;
                 }
-                else
+
+                string result = Web.DownloadStringData(UrlUserData, cookies, Web.UserAgent, true).GetAwaiter().GetResult();
+                if (Serialization.TryFromJson(result, out SteamUserData userData, out Exception ex))
                 {
+                    int ownedCount = userData?.RgOwnedApps?.Count ?? 0;
+                    if (ownedCount > 0)
+                    {
+                        SaveUserData(userData);
+                        Common.LogDebug(true, $"[SteamApi] GetUserData: ownedApps={ownedCount}.");
+                    }
+                    else
+                    {
+                        Common.LogDebug(true, $"[SteamApi] GetUserData: response parsed but ownedApps=0 (payloadLength={result?.Length ?? 0}).");
+                    }
+
                     if (ex != null)
                     {
                         Common.LogError(ex, false, false, PluginName);
                     }
+
+                    return userData;
                 }
-                return userData;
+
+                LogWarn($"GetUserData: could not parse userdata response (payloadLength={result?.Length ?? 0}).");
+                if (ex != null)
+                {
+                    Common.LogError(ex, false, false, PluginName);
+                }
+
+                return null;
             }
             catch (WebException ex)
             {
+                LogWarn($"GetUserData failed: {ex.Status} - {ex.Message}");
                 Common.LogError(ex, false, true, PluginName);
                 return null;
             }
