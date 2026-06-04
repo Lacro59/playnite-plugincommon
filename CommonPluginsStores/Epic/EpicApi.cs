@@ -223,30 +223,38 @@ namespace CommonPluginsStores.Epic
 		{
 			if (CurrentAccountInfos == null)
 			{
+				Common.LogDebug(true, "[EpicApi] GetIsUserLoggedIn: no CurrentAccountInfos.");
 				return false;
 			}
 
 			if (!CurrentAccountInfos.IsPrivate && !StoreSettings.UseAuth)
 			{
-				if (StoreToken == null)
-				{
-					StoreToken = GetStoredToken();
-				}
-
-				if (StoreToken != null)
-				{
-					CheckIsUserLoggedIn();
-				}
-
-				return !CurrentAccountInfos.UserId.IsNullOrEmpty();
+				bool hasUserId = !CurrentAccountInfos.UserId.IsNullOrEmpty();
+				Common.LogDebug(true, $"[EpicApi] GetIsUserLoggedIn public account: hasUserId={hasUserId}.");
+				return hasUserId;
 			}
 
+			if (!ForceFullLoginCheck)
+			{
+				bool? cachedAuth = TryGetAuthStatusFromStoredToken();
+				if (cachedAuth.HasValue)
+				{
+					Common.LogDebug(true, $"[EpicApi] GetIsUserLoggedIn fast-path (stored token): isLogged={cachedAuth.Value}.");
+					return cachedAuth.Value;
+				}
+
+				Common.LogDebug(true, "[EpicApi] GetIsUserLoggedIn fast-path: no stored token, returning false until background check.");
+				return false;
+			}
+
+			Common.LogDebug(true, "[EpicApi] GetIsUserLoggedIn: full API verification.");
 			bool isLogged = CheckIsUserLoggedIn();
 			if (!isLogged)
 			{
 				StoreToken = null;
 			}
 
+			Common.LogDebug(true, $"[EpicApi] GetIsUserLoggedIn full verification result: isLogged={isLogged}.");
 			return isLogged;
 		}
 

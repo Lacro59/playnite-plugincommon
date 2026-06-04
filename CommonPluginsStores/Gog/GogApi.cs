@@ -134,15 +134,51 @@ namespace CommonPluginsStores.Gog
         {
             if (CurrentAccountInfos == null)
             {
+                Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn: no CurrentAccountInfos.");
                 return false;
             }
 
             if (!CurrentAccountInfos.IsPrivate && !StoreSettings.UseAuth)
             {
-                return !CurrentAccountInfos.UserId.IsNullOrEmpty();
+                bool hasUserId = !CurrentAccountInfos.UserId.IsNullOrEmpty();
+                Common.LogDebug(true, $"[GogApi] GetIsUserLoggedIn public account: hasUserId={hasUserId}.");
+                return hasUserId;
             }
 
+            if (!ForceFullLoginCheck)
+            {
+                bool hasCookies = TryGetAuthStatusFromStoredCookies();
+                bool hasSavedUser = TryGetAuthStatusFromSavedUser();
+                if (hasCookies || hasSavedUser)
+                {
+                    Common.LogDebug(true, $"[GogApi] GetIsUserLoggedIn fast-path: hasCookies={hasCookies}, hasSavedUser={hasSavedUser}, isLogged=true.");
+                    return true;
+                }
+
+                bool? cachedToken = TryGetAuthStatusFromStoredToken();
+                if (cachedToken.HasValue)
+                {
+                    Common.LogDebug(true, $"[GogApi] GetIsUserLoggedIn fast-path (stored token): isLogged={cachedToken.Value}.");
+                    return cachedToken.Value;
+                }
+
+                Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn fast-path: no local session hint, returning false until background check.");
+                return false;
+            }
+
+            Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn: full network verification.");
+            bool verified = VerifyGogUserLoggedIn();
+            Common.LogDebug(true, $"[GogApi] GetIsUserLoggedIn full verification result: isLogged={verified}.");
+            return verified;
+        }
+
+        /// <summary>
+        /// Validates GOG session via account API and refreshes stored token and profile fields.
+        /// </summary>
+        private bool VerifyGogUserLoggedIn()
+        {
             bool isLogged = CheckIsUserLoggedIn();
+            Common.LogDebug(true, $"[GogApi] VerifyGogUserLoggedIn CheckIsUserLoggedIn={isLogged}.");
             if (isLogged)
             {
                 if (GetStoredCookies() == null || GetStoredCookies().Count == 0)
@@ -170,7 +206,6 @@ namespace CommonPluginsStores.Gog
                     };
 
                     SaveCurrentUser();
-                    //_ = GetCurrentAccountInfos();
 
                     LogInfo("logged");
                 }

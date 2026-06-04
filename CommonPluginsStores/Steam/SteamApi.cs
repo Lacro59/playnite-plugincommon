@@ -40,7 +40,11 @@ namespace CommonPluginsStores.Steam
 		private static readonly TimeSpan ApiRequestMinInterval = TimeSpan.FromMilliseconds(1200);
 
 		private static readonly object AppDetailsPauseLock = new object();
+		private static readonly object SteamUserDataFileSync = new object();
 		private static DateTime _appDetailsPausedUntilUtc = DateTime.MinValue;
+
+		/// <summary>Fresh user-data cache window used for auth status (minutes).</summary>
+		private const int UserDataAuthCacheMinutes = 10;
 
 		private readonly RequestRateLimiter _apiRateLimiter = new RequestRateLimiter(ApiRequestMinInterval);
 
@@ -316,65 +320,128 @@ namespace CommonPluginsStores.Steam
 
 		/// <summary>
 		/// Checks if the user is currently logged in to Steam.
-		/// Attempts multiple verification methods including token refresh if initial check fails.
+		/// Uses on-disk user data when available; performs network verification only when required.
 		/// </summary>
 		/// <returns>True if user is authenticated and logged in, false otherwise</returns>
 		protected override bool GetIsUserLoggedIn()
         {
             if (CurrentAccountInfos == null)
             {
+                Common.LogDebug(true, "[SteamApi] GetIsUserLoggedIn: no CurrentAccountInfos.");
                 return false;
             }
 
             if (StoreSettings.UseAuth)
             {
-                SteamUserData userData = GetUserData();
-                bool isLogged = userData?.RgOwnedApps?.Count > 0;
-                if (!isLogged)
-                {
-                    Thread.Sleep(2000);
-                    userData = GetUserData();
-                    isLogged = userData?.RgOwnedApps?.Count > 0;
+				if (!ForceFullLoginCheck)
+				{
+					bool? cachedAuth = TryGetAuthStatusFromUserDataCache();
+					if (cachedAuth.HasValue)
+					{
+						Common.LogDebug(true, $"[SteamApi] GetIsUserLoggedIn fast-path (user data cache): isLogged={cachedAuth.Value}.");
+						return cachedAuth.Value;
+					}
 
-                    // renew
-                    if (!isLogged)
-                    {
-                        string url = string.Format(UrlRefreshToken, CurrentAccountInfos.Link);
+					Common.LogDebug(true, "[SteamApi] GetIsUserLoggedIn fast-path: no user data cache, returning false until background check.");
+					return false;
+				}
 
-                        Thread.Sleep(250);
-                        List<HttpCookie> cookies = GetNewWebCookies(new List<string> { url, "https://steamcommunity.com/my", UrlStore });
-                        _ = SetStoredCookies(cookies);
-                        userData = GetUserData();
-                        isLogged = userData?.RgOwnedApps?.Count > 0;
-
-                        if (!isLogged)
-                        {
-                            Thread.Sleep(250);
-                            cookies = GetNewWebCookies(new List<string> { url, "https://steamcommunity.com/my", UrlStore }, true);
-                            _ = SetStoredCookies(cookies);
-                            userData = GetUserData();
-                            isLogged = userData?.RgOwnedApps?.Count > 0;
-                        }
-
-                        if (!isLogged)
-                        {
-                            Thread.Sleep(250);
-                            cookies = GetNewWebCookies(new List<string> { url, "https://steamcommunity.com/my", UrlStore }, true);
-                            _ = SetStoredCookies(cookies);
-                            userData = GetUserData();
-                            isLogged = userData?.RgOwnedApps?.Count > 0;
-                        }
-                    }
-                }
-                return isLogged;
+				Common.LogDebug(true, "[SteamApi] GetIsUserLoggedIn: full network verification (UseAuth).");
+				bool verified = VerifyUserLoggedInWithAuth();
+				Common.LogDebug(true, $"[SteamApi] GetIsUserLoggedIn full verification result: isLogged={verified}.");
+				return verified;
             }
 
+            Common.LogDebug(true, "[SteamApi] GetIsUserLoggedIn: public profile check (no UseAuth).");
             Task<bool> withId = IsProfilePublic(string.Format(UrlProfileById, CurrentAccountInfos.UserId), GetStoredCookies());
             Task<bool> withPersona = IsProfilePublic(string.Format(UrlProfileByName, CurrentAccountInfos.Pseudo), GetStoredCookies());
             Task.WaitAll(withId, withPersona);
 
             return withId.Result || withPersona.Result;
         }
+
+		/// <summary>
+		/// Reads cached Steam user data to determine login status without network I/O.
+		/// </summary>
+		/// <returns>True or false when cache is conclusive; null when no cache file is available.</returns>
+		private bool? TryGetAuthStatusFromUserDataCache()
+		{
+			lock (SteamUserDataFileSync)
+			{
+				SteamUserData freshCache = FileDataService.LoadData<SteamUserData>(FileUserData, UserDataAuthCacheMinutes);
+				if (freshCache != null)
+				{
+					bool isLogged = HasOwnedApps(freshCache);
+					Common.LogDebug(true, $"[SteamApi] Auth cache hit (fresh, {UserDataAuthCacheMinutes}m): ownedApps={freshCache.RgOwnedApps?.Count ?? 0}, isLogged={isLogged}.");
+					return isLogged;
+				}
+
+				SteamUserData anyAgeCache = FileDataService.LoadData<SteamUserData>(FileUserData, -1);
+				if (anyAgeCache != null)
+				{
+					bool isLogged = HasOwnedApps(anyAgeCache);
+					Common.LogDebug(true, $"[SteamApi] Auth cache hit (any age): ownedApps={anyAgeCache.RgOwnedApps?.Count ?? 0}, isLogged={isLogged}.");
+					return isLogged;
+				}
+			}
+
+			Common.LogDebug(true, "[SteamApi] Auth cache miss: no Steam_UserData.json data.");
+			return null;
+		}
+
+		private static bool HasOwnedApps(SteamUserData userData)
+		{
+			return userData?.RgOwnedApps?.Count > 0;
+		}
+
+		/// <summary>
+		/// Verifies Steam web session via owned-apps endpoint, with cookie refresh retries.
+		/// </summary>
+		private bool VerifyUserLoggedInWithAuth()
+		{
+			SteamUserData userData = GetUserData();
+			bool isLogged = HasOwnedApps(userData);
+			Common.LogDebug(true, $"[SteamApi] VerifyUserLoggedInWithAuth initial attempt: ownedApps={userData?.RgOwnedApps?.Count ?? 0}, isLogged={isLogged}.");
+			if (!isLogged)
+			{
+				Common.LogDebug(true, "[SteamApi] VerifyUserLoggedInWithAuth: retry after 2s.");
+				Thread.Sleep(2000);
+				userData = GetUserData();
+				isLogged = HasOwnedApps(userData);
+
+				if (!isLogged)
+				{
+					Common.LogDebug(true, "[SteamApi] VerifyUserLoggedInWithAuth: refreshing cookies and retrying.");
+					string url = string.Format(UrlRefreshToken, CurrentAccountInfos.Link);
+
+					Thread.Sleep(250);
+					List<HttpCookie> cookies = GetNewWebCookies(new List<string> { url, "https://steamcommunity.com/my", UrlStore });
+					_ = SetStoredCookies(cookies);
+					userData = GetUserData();
+					isLogged = HasOwnedApps(userData);
+
+					if (!isLogged)
+					{
+						Thread.Sleep(250);
+						cookies = GetNewWebCookies(new List<string> { url, "https://steamcommunity.com/my", UrlStore }, true);
+						_ = SetStoredCookies(cookies);
+						userData = GetUserData();
+						isLogged = HasOwnedApps(userData);
+					}
+
+					if (!isLogged)
+					{
+						Thread.Sleep(250);
+						cookies = GetNewWebCookies(new List<string> { url, "https://steamcommunity.com/my", UrlStore }, true);
+						_ = SetStoredCookies(cookies);
+						userData = GetUserData();
+						isLogged = HasOwnedApps(userData);
+					}
+				}
+			}
+
+			return isLogged;
+		}
 
 		/// <summary>
 		/// Opens a web view for Steam login and captures authentication credentials.
@@ -1278,8 +1345,17 @@ namespace CommonPluginsStores.Steam
                 return;
             }
 
-            FileSystem.PrepareSaveFile(FileUserData);
-            File.WriteAllText(FileUserData, Serialization.ToJson(userData));
+            lock (SteamUserDataFileSync)
+            {
+                if (FileDataService.SaveData(FileUserData, userData))
+                {
+                    Common.LogDebug(true, $"[SteamApi] SaveUserData: persisted {userData.RgOwnedApps?.Count ?? 0} owned app(s) to '{FileUserData}'.");
+                }
+                else
+                {
+                    LogWarn($"Could not persist Steam user data to '{FileUserData}' (file may be in use by another process).");
+                }
+            }
         }
 
         private string ParseDescription(string description)

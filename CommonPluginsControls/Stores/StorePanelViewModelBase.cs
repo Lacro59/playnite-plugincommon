@@ -1,3 +1,4 @@
+using CommonPluginsShared;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Enumerations;
 using CommonPluginsStores.Models.Interfaces;
@@ -5,6 +6,7 @@ using Playnite.SDK;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading;
 
 namespace CommonPluginsControls.Stores
 {
@@ -17,6 +19,7 @@ namespace CommonPluginsControls.Stores
         private INotifyPropertyChanged _accountInfosNotify;
         private bool _useAuth = true;
         private bool _forceAuth;
+        private int _authRefreshGeneration;
 
         internal IStoreApi StoreApi
         {
@@ -26,6 +29,7 @@ namespace CommonPluginsControls.Stores
                 _storeApi = value;
                 OnPropertyChanged(nameof(StoreApi));
                 NotifyAuthStatusChanged();
+                ScheduleBackgroundAuthRefresh();
             }
         }
 
@@ -79,11 +83,40 @@ namespace CommonPluginsControls.Stores
         {
             StoreApi?.ResetIsUserLoggedIn();
             NotifyAuthStatusChanged();
+            ScheduleBackgroundAuthRefresh();
         }
 
         public void RefreshAuthCommandStates()
         {
             NotifyAuthStatusChanged();
+            ScheduleBackgroundAuthRefresh();
+        }
+
+        /// <summary>
+        /// Runs a full login check off the UI thread and refreshes auth bindings when it completes.
+        /// </summary>
+        private void ScheduleBackgroundAuthRefresh()
+        {
+            IStoreApi storeApi = StoreApi;
+            if (storeApi == null)
+            {
+                Common.LogDebug(true, "[StorePanel] ScheduleBackgroundAuthRefresh skipped: StoreApi is null.");
+                return;
+            }
+
+            int generation = Interlocked.Increment(ref _authRefreshGeneration);
+            Common.LogDebug(true, $"[StorePanel] ScheduleBackgroundAuthRefresh generation={generation}, store={storeApi.GetType().Name}.");
+            storeApi.RefreshIsUserLoggedInInBackground(() =>
+            {
+                if (generation != _authRefreshGeneration || !ReferenceEquals(StoreApi, storeApi))
+                {
+                    Common.LogDebug(true, $"[StorePanel] Background auth refresh discarded (generation={generation}, current={_authRefreshGeneration}).");
+                    return;
+                }
+
+                Common.LogDebug(true, $"[StorePanel] Background auth refresh applied for {storeApi.GetType().Name}, AuthStatus={AuthStatus}.");
+                NotifyAuthStatusChanged();
+            });
         }
 
         protected abstract string LoginErrorContext { get; }
@@ -106,6 +139,7 @@ namespace CommonPluginsControls.Stores
                 }
 
                 NotifyAuthStatusChanged();
+                ScheduleBackgroundAuthRefresh();
                 StoreSettingsLog.LoginCompleted(StoreApi, AuthStatus);
             }
             catch (Exception ex)
@@ -122,6 +156,7 @@ namespace CommonPluginsControls.Stores
                 StoreSettingsLog.LogoutRequested(StoreApi);
                 StoreApi?.ClearSession();
                 NotifyAuthStatusChanged();
+                ScheduleBackgroundAuthRefresh();
                 StoreSettingsLog.LogoutCompleted(StoreApi, AuthStatus);
             }
             catch (Exception ex)

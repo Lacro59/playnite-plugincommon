@@ -1,4 +1,6 @@
-﻿namespace CommonPluginsStores.Models.Interfaces
+﻿using System;
+
+namespace CommonPluginsStores.Models.Interfaces
 {
     /// <summary>
     /// Represents the API contract for a store plugin.
@@ -24,6 +26,12 @@
         /// Resets the user login status.
         /// </summary>
         void ResetIsUserLoggedIn();
+
+        /// <summary>
+        /// Re-evaluates login status on a background thread and invokes <paramref name="onCompleted"/> on the UI thread.
+        /// </summary>
+        /// <param name="onCompleted">Optional callback after the check finishes.</param>
+        void RefreshIsUserLoggedInInBackground(Action onCompleted = null);
 
         /// <summary>
         /// Clears stored authentication data (cookies, tokens) and session profile fields.

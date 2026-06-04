@@ -93,6 +93,12 @@ namespace CommonPluginsStores
         public StoreSettings StoreSettings { get; set; } = new StoreSettings();
 
         private bool? isUserLoggedIn;
+        private bool _forceFullLoginCheck;
+
+        /// <summary>
+        /// When true, <see cref="GetIsUserLoggedIn"/> must run a full verification (network), not cache shortcuts.
+        /// </summary>
+        protected bool ForceFullLoginCheck => _forceFullLoginCheck;
 
         /// <summary>
         /// Gets or sets whether the user is logged in.
@@ -387,6 +393,93 @@ namespace CommonPluginsStores
         {
             isUserLoggedIn = null;
         }
+
+		/// <summary>
+		/// Re-evaluates login status on a background thread and invokes <paramref name="onCompleted"/> on the UI thread.
+		/// </summary>
+		/// <param name="onCompleted">Optional callback after the check finishes (UI thread).</param>
+		public void RefreshIsUserLoggedInInBackground(Action onCompleted = null)
+		{
+			Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: scheduling full login check."));
+			Task.Run(() =>
+			{
+				try
+				{
+					BeginFullLoginCheck();
+					ResetIsUserLoggedIn();
+					bool isLoggedIn = IsUserLoggedIn;
+					Common.LogDebug(true, FormatLogMessage($"RefreshIsUserLoggedInInBackground: full check completed, IsUserLoggedIn={isLoggedIn}."));
+				}
+				catch (Exception ex)
+				{
+					LogError(ex, "RefreshIsUserLoggedInInBackground failed");
+				}
+				finally
+				{
+					EndFullLoginCheck();
+				}
+
+				if (onCompleted != null)
+				{
+					Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: notifying UI."));
+					API.Instance.MainView.UIDispatcher?.BeginInvoke(onCompleted);
+				}
+			});
+		}
+
+		/// <summary>
+		/// Enables full login verification for the current background refresh.
+		/// </summary>
+		protected virtual void BeginFullLoginCheck()
+		{
+			_forceFullLoginCheck = true;
+		}
+
+		/// <summary>
+		/// Disables full login verification after a background refresh.
+		/// </summary>
+		protected virtual void EndFullLoginCheck()
+		{
+			_forceFullLoginCheck = false;
+		}
+
+		/// <summary>
+		/// Reads persisted OAuth token metadata without calling store APIs.
+		/// </summary>
+		/// <returns>True or false when a token file exists; null when absent.</returns>
+		protected bool? TryGetAuthStatusFromStoredToken()
+		{
+			StoreToken token = StoreToken ?? GetStoredToken();
+			if (token == null)
+			{
+				return null;
+			}
+
+			if (token.Token.IsNullOrEmpty() && token.RefreshToken.IsNullOrEmpty())
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// Returns true when HTTP cookies were persisted for this store client.
+		/// </summary>
+		protected bool TryGetAuthStatusFromStoredCookies()
+		{
+			List<Playnite.SDK.HttpCookie> cookies = GetStoredCookies();
+			return cookies != null && cookies.Count > 0;
+		}
+
+		/// <summary>
+		/// Returns true when encrypted user profile data exists from a prior session.
+		/// </summary>
+		protected bool TryGetAuthStatusFromSavedUser()
+		{
+			AccountInfos savedUser = LoadCurrentUser();
+			return savedUser != null && !savedUser.UserId.IsNullOrEmpty();
+		}
 
         /// <summary>
         /// Clears stored authentication data and session profile fields for the current account.
