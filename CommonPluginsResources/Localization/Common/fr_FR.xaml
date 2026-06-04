@@ -238,6 +238,7 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoApiKey">{0} : Aucune clé API</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0} : Aucune configuration trouvée</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0} : l'utilisateur n'est pas authentifié</sys:String>
+	<sys:String x:Key="LOCCommonStoresInvalidSteamAppId">Invalid Steam App ID &quot;{0}&quot;. The game's Store ID in Playnite must be a numeric Steam application ID (for example 220 for Half-Life 2).</sys:String>
 	<sys:String x:Key="LOCCommonStoresLaunchers">Stores &amp; Launchers</sys:String>
 	<sys:String x:Key="LOCCommonStoresConsolesMobile">Console &amp; Mobile</sys:String>
 	<sys:String x:Key="LOCCommonStoreSteam">Steam</sys:String>
