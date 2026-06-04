@@ -238,6 +238,7 @@
 	<sys:String x:Key="LOCCommonStoreNoApiKey">{0}: Нет ключа API</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: Конфигурация не найдена</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: пользователь не прошел аутентификацию</sys:String>
+	<sys:String x:Key="LOCCommonStoresInvalidSteamAppId">Invalid Steam App ID &quot;{0}&quot;. The game's Store ID in Playnite must be a numeric Steam application ID (for example 220 for Half-Life 2).</sys:String>
 	<sys:String x:Key="LOCCommonStoresLaunchers">Магазины &amp; Лаунчеры</sys:String>
 	<sys:String x:Key="LOCCommonStoresConsolesMobile">Консоль &amp; Мобильные</sys:String>
 	<sys:String x:Key="LOCCommonStoreSteam">Steam</sys:String>
