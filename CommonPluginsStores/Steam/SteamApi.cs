@@ -101,20 +101,74 @@ namespace CommonPluginsStores.Steam
 		}
 
 		/// <summary>
-		/// Logs and notifies when a game Store ID cannot be used with the Steam store API.
+		/// Finds a Playnite library game whose store ID matches the given value.
 		/// </summary>
-		private void NotifyInvalidSteamAppId(string id)
+		/// <param name="storeId">Store ID to match against <see cref="Game.GameId"/>.</param>
+		/// <returns>The first matching game, or null if none is found.</returns>
+		private static Game FindPlayniteGameByStoreId(string storeId)
+		{
+			if (storeId.IsNullOrEmpty())
+			{
+				return null;
+			}
+
+			return API.Instance.Database.Games.FirstOrDefault(g => g.GameId.IsEqual(storeId));
+		}
+
+		/// <summary>
+		/// Logs and notifies when a game Store ID cannot be used with the Steam store API.
+		/// When a matching Playnite game is known, the notification selects that game on click.
+		/// </summary>
+		/// <param name="id">Invalid store ID value.</param>
+		/// <param name="playniteGame">Playnite game associated with the store ID, if known.</param>
+		private void NotifyInvalidSteamAppId(string id, Game playniteGame = null)
 		{
 			string safeId = id ?? string.Empty;
-			LogWarn($"Invalid Steam App ID '{safeId}': Store ID is not a valid numeric Steam application ID.");
-			string notificationText = string.Format(
-				CultureInfo.CurrentCulture,
-				ResourceProvider.GetString("LOCCommonStoresInvalidSteamAppId"),
-				safeId);
-			API.Instance.Notifications.Add(new NotificationMessage(
-				$"{PluginName}-steam-invalid-appid",
-				$"{PluginName}{Environment.NewLine}{notificationText}",
-				NotificationType.Error));
+			Game game = playniteGame ?? FindPlayniteGameByStoreId(safeId);
+
+			string notificationText;
+			if (game != null)
+			{
+				LogWarn($"Invalid Steam App ID '{safeId}' for game '{game.Name}': Store ID is not a valid numeric Steam application ID.");
+				notificationText = string.Format(
+					CultureInfo.CurrentCulture,
+					ResourceProvider.GetString("LOCCommonStoresInvalidSteamAppIdForGame"),
+					game.Name,
+					safeId);
+			}
+			else
+			{
+				LogWarn($"Invalid Steam App ID '{safeId}': Store ID is not a valid numeric Steam application ID.");
+				notificationText = string.Format(
+					CultureInfo.CurrentCulture,
+					ResourceProvider.GetString("LOCCommonStoresInvalidSteamAppId"),
+					safeId);
+			}
+
+			string notificationId = game != null
+				? $"{PluginName}-steam-invalid-appid-{game.Id}"
+				: $"{PluginName}-steam-invalid-appid";
+
+			if (game != null)
+			{
+				Guid gameId = game.Id;
+				API.Instance.Notifications.Add(new NotificationMessage(
+					notificationId,
+					$"{PluginName}{Environment.NewLine}{notificationText}",
+					NotificationType.Error,
+					() =>
+					{
+						API.Instance.MainView.SelectGame(gameId);
+						API.Instance.MainView.SwitchToLibraryView();
+					}));
+			}
+			else
+			{
+				API.Instance.Notifications.Add(new NotificationMessage(
+					notificationId,
+					$"{PluginName}{Environment.NewLine}{notificationText}",
+					NotificationType.Error));
+			}
 		}
 
 		#region Urls
@@ -872,7 +926,7 @@ namespace CommonPluginsStores.Steam
 		/// <returns>GameInfos object with game details</returns>
 		public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
         {
-            return GetGameInfos(id, accountInfos);
+            return GetGameInfos(id, accountInfos, false, null);
         }
 
 		/// <summary>
@@ -882,13 +936,13 @@ namespace CommonPluginsStores.Steam
 		/// <param name="accountInfos">Account information for ownership checks</param>
 		/// <param name="minimalInfos">If true, returns only basic info without detailed DLC data</param>
 		/// <returns>GameInfos object with game details</returns>
-		private GameInfos GetGameInfos(string id, AccountInfos accountInfos, bool minimalInfos = false)
+		private GameInfos GetGameInfos(string id, AccountInfos accountInfos, bool minimalInfos = false, Game playniteGame = null)
         {
             try
             {
 				if (!TryParseSteamAppId(id, out uint appId))
 				{
-					NotifyInvalidSteamAppId(id);
+					NotifyInvalidSteamAppId(id, playniteGame);
 					return null;
 				}
 
@@ -974,7 +1028,19 @@ namespace CommonPluginsStores.Steam
 		/// <returns>Collection of DlcInfos objects</returns>
 		public override ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos)
         {
-            GameInfos gameInfos = GetGameInfos(id, accountInfos);
+            return GetDlcInfos(id, accountInfos, null);
+        }
+
+		/// <summary>
+		/// Gets DLC information for a specific game, with optional Playnite game context for error reporting.
+		/// </summary>
+		/// <param name="id">Steam App ID of the base game</param>
+		/// <param name="accountInfos">Account information for ownership checks</param>
+		/// <param name="playniteGame">Playnite game used for invalid Store ID notifications</param>
+		/// <returns>Collection of DlcInfos objects</returns>
+		public ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos, Game playniteGame)
+        {
+            GameInfos gameInfos = GetGameInfos(id, accountInfos, false, playniteGame);
             return gameInfos?.Dlcs ?? new ObservableCollection<DlcInfos>();
         }
 

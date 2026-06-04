@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -265,16 +266,36 @@ namespace CommonPluginsShared
 
 			message = string.Format("{0}|{1}|{2}", message, trace.FileName, trace.LineNumber);
 
+			bool isHttpNotFound = IsHttpNotFoundException(ex);
+			if (isHttpNotFound)
+			{
+				showNotification = false;
+			}
+
 #if DEBUG
-			Logger.Error(ex, message);
+			if (isHttpNotFound && !isIgnored)
+			{
+				Logger.Warn(ex, message);
+			}
+			else
+			{
+				Logger.Error(ex, message);
+			}
 #else
             if (!isIgnored)
             {
-                Logger.Error(ex, message);
+				if (isHttpNotFound)
+				{
+					Logger.Warn(ex, message);
+				}
+				else
+				{
+					Logger.Error(ex, message);
+				}
             }
 #endif
 
-			// Do not show notifications for ignored errors.
+			// Do not show notifications for ignored errors or HTTP 404 (logged as warning only).
 			if (!showNotification || isIgnored)
 			{
 				return;
@@ -294,6 +315,37 @@ namespace CommonPluginsShared
 					notificationText,
 					NotificationType.Error,
 					() => PlayniteTools.CreateLogPackage(pluginName)));
+		}
+
+		/// <summary>
+		/// Returns true when the exception (or its inner exceptions) represents an HTTP 404 Not Found response.
+		/// </summary>
+		/// <param name="ex">Exception to inspect.</param>
+		/// <returns>True for HTTP 404 failures.</returns>
+		private static bool IsHttpNotFoundException(Exception ex)
+		{
+			if (ex == null)
+			{
+				return false;
+			}
+
+			var webException = ex as WebException;
+			if (webException?.Response is HttpWebResponse httpResponse)
+			{
+				return httpResponse.StatusCode == HttpStatusCode.NotFound;
+			}
+
+			if (!ex.Message.IsNullOrEmpty())
+			{
+				if (ex.Message.IndexOf("404", StringComparison.OrdinalIgnoreCase) >= 0
+					|| ex.Message.IndexOf("Not Found", StringComparison.OrdinalIgnoreCase) >= 0
+					|| ex.Message.IndexOf("Introuvable", StringComparison.OrdinalIgnoreCase) >= 0)
+				{
+					return true;
+				}
+			}
+
+			return IsHttpNotFoundException(ex.InnerException);
 		}
 
 		/// <summary>
