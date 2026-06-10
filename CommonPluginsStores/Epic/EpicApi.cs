@@ -1814,7 +1814,12 @@ namespace CommonPluginsStores.Epic
 			Asset asset = GetAssets()?.FirstOrDefault(a => a.AppName.IsEqual(game.GameId));
 			if (asset == null)
 			{
-				Logger.Warn($"EpicApi.GetAssetFromGame: No asset found for GameId '{game.GameId}'.");
+				Common.LogDebug(true, $"EpicApi.GetAssetFromGame: no library asset for GameId '{game.GameId}'.");
+			}
+			else
+			{
+				Common.LogDebug(true,
+					$"EpicApi.GetAssetFromGame: matched GameId '{game.GameId}' → namespace='{asset.Namespace}', catalogItemId='{asset.CatalogItemId}'.");
 			}
 
 			return asset;
@@ -1829,10 +1834,42 @@ namespace CommonPluginsStores.Epic
 		/// </summary>
 		/// <param name="game">The Playnite game to resolve.</param>
 		/// <returns>The Epic namespace string, or null when no asset is found.</returns>
-		/// <remarks>⚠️ Requires authentication (calls <see cref="GetAssets"/>). For an anonymous alternative use <see cref="GetNamespaceFromGameAnonymous"/>.</remarks>
+		/// <remarks>
+		/// Tries the authenticated library asset list first, then falls back to
+		/// <see cref="GetNamespaceFromGameAnonymous"/> when no asset matches <see cref="Game.GameId"/>.
+		/// </remarks>
 		public string GetNamespaceFromGame(Game game)
 		{
-			return GetAssetFromGame(game)?.Namespace;
+			if (game == null)
+			{
+				Logger.Warn("EpicApi.GetNamespaceFromGame: game is null.");
+				return null;
+			}
+
+			Asset asset = GetAssetFromGame(game);
+			if (asset != null && !asset.Namespace.IsNullOrEmpty())
+			{
+				Common.LogDebug(true,
+					$"EpicApi.GetNamespaceFromGame: resolved via library asset for '{game.Name}' (GameId='{game.GameId}') → '{asset.Namespace}'.");
+				return asset.Namespace;
+			}
+
+			Common.LogDebug(true,
+				$"EpicApi.GetNamespaceFromGame: no library asset for '{game.Name}' (GameId='{game.GameId}'), trying anonymous resolution.");
+
+			string @namespace = GetNamespaceFromGameAnonymous(game);
+			if (@namespace.IsNullOrEmpty())
+			{
+				Common.LogDebug(true,
+					$"EpicApi.GetNamespaceFromGame: all resolution paths failed for '{game.Name}' (GameId='{game.GameId}').");
+			}
+			else
+			{
+				Common.LogDebug(true,
+					$"EpicApi.GetNamespaceFromGame: anonymous fallback succeeded for '{game.Name}' → '{@namespace}'.");
+			}
+
+			return @namespace;
 		}
 
 		/// <summary>
@@ -2006,11 +2043,22 @@ namespace CommonPluginsStores.Epic
 
 			if (result?.Data?.Catalog?.CatalogNs?.Mappings?.FirstOrDefault()?.PageSlug == null)
 			{
+				Common.LogDebug(true, $"EpicApi.GetProductSlug: cache miss for namespace '{@namespace}', querying catalog mappings.");
 				result = QueryCatalogMappings(@namespace).GetAwaiter().GetResult();
 				FileDataService.SaveData(cacheFile, result);
 			}
+			else
+			{
+				Common.LogDebug(true, $"EpicApi.GetProductSlug: cache hit for namespace '{@namespace}'.");
+			}
 
-			return result?.Data?.Catalog?.CatalogNs?.Mappings?.FirstOrDefault()?.PageSlug;
+			string pageSlug = result?.Data?.Catalog?.CatalogNs?.Mappings?.FirstOrDefault()?.PageSlug;
+			if (pageSlug.IsNullOrEmpty())
+			{
+				Common.LogDebug(true, $"EpicApi.GetProductSlug: no pageSlug mapping for namespace '{@namespace}'.");
+			}
+
+			return pageSlug;
 		}
 
 		/// <summary>
@@ -2020,7 +2068,7 @@ namespace CommonPluginsStores.Epic
 		/// Resolution order:
 		/// <list type="number">
 		///   <item>Game Links → store URL → slug → <see cref="GetNamespaceFromSlug"/></item>
-		///   <item>Normalized game name → <see cref="GetProductSlug"/> → <see cref="GetNamespaceFromSlug"/></item>
+		///   <item>Normalized game name → <see cref="QuerySearchStore"/> → namespace (or slug → <see cref="GetNamespaceFromSlug"/>)</item>
 		/// </list>
 		/// Falls back to null when all paths fail.
 		/// </para>
@@ -2038,12 +2086,22 @@ namespace CommonPluginsStores.Epic
 			string slugFromLinks = GetUrlSlugFromGameLinks(game);
 			if (!slugFromLinks.IsNullOrEmpty())
 			{
+				Common.LogDebug(true,
+					$"EpicApi.GetNamespaceFromGameAnonymous: Epic store link slug='{slugFromLinks}' for '{game.Name}' (GameId='{game.GameId}').");
 				string ns = GetNamespaceFromSlug(slugFromLinks);
 				if (!ns.IsNullOrEmpty())
 				{
 					Logger.Info($"EpicApi.GetNamespaceFromGameAnonymous: resolved via Links for '{game.GameId}' → {ns}");
 					return ns;
 				}
+
+				Common.LogDebug(true,
+					$"EpicApi.GetNamespaceFromGameAnonymous: slug '{slugFromLinks}' did not resolve to a namespace.");
+			}
+			else
+			{
+				Common.LogDebug(true,
+					$"EpicApi.GetNamespaceFromGameAnonymous: no Epic store link slug for '{game.Name}' (GameId='{game.GameId}').");
 			}
 
 			string normalizedName = PlayniteTools.NormalizeGameName(
@@ -2052,19 +2110,78 @@ namespace CommonPluginsStores.Epic
 
 			if (!normalizedName.IsNullOrEmpty())
 			{
-				string slugFromName = GetProductSlug(normalizedName);
-				if (!slugFromName.IsNullOrEmpty())
+				string nsFromSearch = ResolveNamespaceFromStoreSearch(normalizedName);
+				if (!nsFromSearch.IsNullOrEmpty())
 				{
-					string ns = GetNamespaceFromSlug(slugFromName);
-					if (!ns.IsNullOrEmpty())
-					{
-						Logger.Info($"EpicApi.GetNamespaceFromGameAnonymous: resolved via Name for '{game.GameId}' → {ns}");
-						return ns;
-					}
+					Logger.Info($"EpicApi.GetNamespaceFromGameAnonymous: resolved via store search for '{game.GameId}' → {nsFromSearch}");
+					return nsFromSearch;
 				}
 			}
 
 			Logger.Warn($"EpicApi.GetNamespaceFromGameAnonymous: could not resolve namespace for '{game.GameId}'.");
+			return null;
+		}
+
+		/// <summary>
+		/// Searches the Epic store catalog by keywords and returns the sandbox namespace
+		/// of the best matching offer.
+		/// </summary>
+		/// <param name="normalizedName">Normalized game name used as search keywords.</param>
+		/// <returns>The namespace string, or null when no suitable match is found.</returns>
+		/// <remarks>Does not require authentication — uses public GraphQL search.</remarks>
+		private string ResolveNamespaceFromStoreSearch(string normalizedName)
+		{
+			if (normalizedName.IsNullOrEmpty())
+			{
+				return null;
+			}
+
+			Common.LogDebug(true, $"EpicApi.ResolveNamespaceFromStoreSearch: keywords='{normalizedName}'.");
+
+			SearchStoreResponse response = QuerySearchStore(normalizedName).GetAwaiter().GetResult();
+			List<SearchStoreResponse.Element> elements = response?.Data?.Catalog?.SearchStore?.Elements;
+			if (elements == null || elements.Count == 0)
+			{
+				Common.LogDebug(true, $"EpicApi.ResolveNamespaceFromStoreSearch: no results for '{normalizedName}'.");
+				return null;
+			}
+
+			Common.LogDebug(true,
+				$"EpicApi.ResolveNamespaceFromStoreSearch: {elements.Count} result(s) for '{normalizedName}'.");
+
+			SearchStoreResponse.Element match = elements.FirstOrDefault(e =>
+				string.Equals(
+					PlayniteTools.NormalizeGameName(e.Title ?? string.Empty),
+					normalizedName,
+					StringComparison.OrdinalIgnoreCase));
+
+			if (match == null)
+			{
+				match = elements[0];
+				Common.LogDebug(true,
+					$"EpicApi.ResolveNamespaceFromStoreSearch: no exact title match, using first result title='{match.Title}'.");
+			}
+			else
+			{
+				Common.LogDebug(true,
+					$"EpicApi.ResolveNamespaceFromStoreSearch: exact title match '{match.Title}'.");
+			}
+
+			if (!match.Namespace.IsNullOrEmpty())
+			{
+				return match.Namespace;
+			}
+
+			string slug = match.ProductSlug ?? match.UrlSlug;
+			if (!slug.IsNullOrEmpty())
+			{
+				Common.LogDebug(true,
+					$"EpicApi.ResolveNamespaceFromStoreSearch: namespace empty, resolving via slug='{slug}'.");
+				return GetNamespaceFromSlug(slug);
+			}
+
+			Common.LogDebug(true,
+				$"EpicApi.ResolveNamespaceFromStoreSearch: result has no namespace or slug, title='{match.Title}'.");
 			return null;
 		}
 
@@ -2093,16 +2210,23 @@ namespace CommonPluginsStores.Epic
 
 			try
 			{
+				Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: resolving slug='{slug}'.");
+
 				string cacheFile = Path.Combine(PathAppsData, Paths.GetSafePathName($"mapping_{slug}.json"));
 				GetMappingByPageSlugResponse result = FileDataService.LoadData<GetMappingByPageSlugResponse>(cacheFile, -1);
 
 				if (result == null)
 				{
+					Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: cache miss for slug='{slug}', querying page mapping.");
 					result = QueryMappingByPageSlug(slug).GetAwaiter().GetResult();
 					if (result != null)
 					{
 						FileDataService.SaveData(cacheFile, result);
 					}
+				}
+				else
+				{
+					Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: cache hit for slug='{slug}'.");
 				}
 
 				var mapping = result?.Data?.StorePageMapping?.Mapping;
@@ -2115,6 +2239,7 @@ namespace CommonPluginsStores.Epic
 				// SandboxId is the canonical namespace identifier.
 				if (!mapping.SandboxId.IsNullOrEmpty())
 				{
+					Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: resolved slug='{slug}' via SandboxId → '{mapping.SandboxId}'.");
 					return mapping.SandboxId;
 				}
 
@@ -2122,6 +2247,7 @@ namespace CommonPluginsStores.Epic
 				string nsFromOffer = mapping.Mappings?.Offer?.Namespace;
 				if (!nsFromOffer.IsNullOrEmpty())
 				{
+					Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: resolved slug='{slug}' via Offer.Namespace → '{nsFromOffer}'.");
 					return nsFromOffer;
 				}
 
@@ -2129,6 +2255,7 @@ namespace CommonPluginsStores.Epic
 				string nsFromPrePurchase = mapping.Mappings?.PrePurchaseOffer?.Namespace;
 				if (!nsFromPrePurchase.IsNullOrEmpty())
 				{
+					Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: resolved slug='{slug}' via PrePurchaseOffer.Namespace → '{nsFromPrePurchase}'.");
 					return nsFromPrePurchase;
 				}
 
