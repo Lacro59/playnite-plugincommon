@@ -66,6 +66,9 @@ namespace CommonPluginsStores.Epic
 		// Semaphore to ensure only one token refresh is performed at a time.
 		private readonly SemaphoreSlim _tokenRefreshSemaphore = new SemaphoreSlim(1, 1);
 
+		private int _isHandlingLoading = 0;
+		private int _pendingLoginCheck = 0;
+
 		/// <summary>Minimum delay between Epic catalog/store HTTP calls (~5 requests per second).</summary>
 		private static readonly TimeSpan ApiRequestMinInterval = TimeSpan.FromMilliseconds(200);
 
@@ -267,9 +270,18 @@ namespace CommonPluginsStores.Epic
 		{
 			try
 			{
+				long operationGeneration = BeginAuthOperation();
 				ResetIsUserLoggedIn();
-				EpicLogin();
-				SetUserAfterLogin();
+				bool tokenObtained = EpicLogin(operationGeneration);
+				if (!tokenObtained && IsAuthOperationCurrent(operationGeneration))
+				{
+					tokenObtained = OfferAndRunAlternativeLogin(operationGeneration);
+				}
+
+				if (tokenObtained)
+				{
+					CompleteLoginAfterTokenExchange();
+				}
 			}
 			catch (Exception ex)
 			{
@@ -286,9 +298,12 @@ namespace CommonPluginsStores.Epic
 		{
 			try
 			{
+				long operationGeneration = BeginAuthOperation();
 				ResetIsUserLoggedIn();
-				EpicLoginAlternative();
-				SetUserAfterLogin();
+				if (EpicLoginAlternative(operationGeneration))
+				{
+					CompleteLoginAfterTokenExchange();
+				}
 			}
 			catch (Exception ex)
 			{
@@ -299,24 +314,59 @@ namespace CommonPluginsStores.Epic
 		/// <summary>
 		/// Persists account information and cookies once a valid <see cref="StoreToken"/> has been obtained.
 		/// </summary>
-		private void SetUserAfterLogin()
+		/// <returns><c>true</c> when account data was saved; otherwise <c>false</c>.</returns>
+		private bool SetUserAfterLogin()
 		{
-			if (StoreToken != null)
+			if (StoreToken == null || StoreToken.Token.IsNullOrEmpty() || StoreToken.AccountId.IsNullOrEmpty())
 			{
-				AccountInfos accountInfos = new AccountInfos
-				{
-					UserId = StoreToken.AccountId,
-					Pseudo = StoreToken.AccountId.IsEqual(CurrentAccountInfos.UserId) ? CurrentAccountInfos.Pseudo : string.Empty,
-					Link = string.Format(UrlAccountProfile, StoreToken.AccountId),
-					IsPrivate = true,
-					IsCurrent = true
-				};
-
-				CurrentAccountInfos = accountInfos;
-				SaveCurrentUser();
-				SetStoredCookies(GetWebCookies());
-				LogInfo("logged");
+				Common.LogDebug(true, "[EpicApi] SetUserAfterLogin skipped: no valid store token.");
+				return false;
 			}
+
+			string pseudo = string.Empty;
+			if (CurrentAccountInfos != null
+				&& !CurrentAccountInfos.UserId.IsNullOrEmpty()
+				&& StoreToken.AccountId.IsEqual(CurrentAccountInfos.UserId))
+			{
+				pseudo = CurrentAccountInfos.Pseudo;
+			}
+
+			if (pseudo.IsNullOrEmpty())
+			{
+				EpicAccountResponse epicAccount = GetAccountInfo(StoreToken.AccountId).GetAwaiter().GetResult();
+				pseudo = epicAccount?.DisplayName ?? string.Empty;
+				Common.LogDebug(true, $"[EpicApi] SetUserAfterLogin resolved display name: hasPseudo={!pseudo.IsNullOrEmpty()}.");
+			}
+
+			AccountInfos accountInfos = new AccountInfos
+			{
+				UserId = StoreToken.AccountId,
+				Pseudo = pseudo,
+				Link = string.Format(UrlAccountProfile, StoreToken.AccountId),
+				IsPrivate = true,
+				IsCurrent = true,
+				AccountStatus = AccountStatus.Private
+			};
+
+			CurrentAccountInfos = accountInfos;
+			SaveCurrentUser();
+			SetStoredCookies(GetWebCookies());
+			LogInfo("logged");
+			return true;
+		}
+
+		/// <summary>
+		/// Finalizes Epic login when OAuth token exchange succeeded.
+		/// </summary>
+		private void CompleteLoginAfterTokenExchange()
+		{
+			if (!SetUserAfterLogin())
+			{
+				return;
+			}
+
+			IsUserLoggedIn = true;
+			_ = GetCurrentAccountInfos();
 		}
 
 		#endregion
@@ -335,24 +385,29 @@ namespace CommonPluginsStores.Epic
 			AccountInfos accountInfos = LoadCurrentUser();
 			if (!accountInfos?.UserId?.IsNullOrEmpty() ?? false)
 			{
-				_ = Task.Run(async () =>
+				Common.LogDebug(true, $"[EpicApi] GetCurrentAccountInfos scheduled background refresh UserId={accountInfos.UserId}, Pseudo={accountInfos.Pseudo}.");
+				_ = Task.Run(() =>
 				{
 					try
 					{
-						await Task.Delay(1000).ConfigureAwait(false);
-						CurrentAccountInfos.IsPrivate = !await CheckIsPublic(accountInfos).ConfigureAwait(false);
+						bool isPublic = CheckIsPublic(CurrentAccountInfos).GetAwaiter().GetResult();
+						CurrentAccountInfos.IsPrivate = !isPublic;
 						CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
 
 						if (CurrentAccountInfos.Pseudo.IsNullOrEmpty())
 						{
-							EpicAccountResponse epicAccountResponse = await GetAccountInfo(accountInfos.UserId).ConfigureAwait(false);
+							EpicAccountResponse epicAccountResponse = GetAccountInfo(accountInfos.UserId).GetAwaiter().GetResult();
 							CurrentAccountInfos.Pseudo = epicAccountResponse?.DisplayName;
-							SaveCurrentUser();
 						}
+
+						SaveCurrentUser();
+						Common.LogDebug(true, $"[EpicApi] GetCurrentAccountInfos background refresh done IsPrivate={CurrentAccountInfos.IsPrivate}, Pseudo={CurrentAccountInfos.Pseudo}, AccountStatus={CurrentAccountInfos.AccountStatus}.");
 					}
 					catch (Exception ex)
 					{
 						Common.LogError(ex, false, true, PluginName);
+						CurrentAccountInfos.IsPrivate = true;
+						CurrentAccountInfos.AccountStatus = AccountStatus.Private;
 					}
 				});
 
@@ -1053,9 +1108,16 @@ namespace CommonPluginsStores.Epic
 		/// and stores the result via <see cref="SetToken"/>.
 		/// </summary>
 		/// <param name="authorizationCode">The one-time authorization code returned by Epic's OAuth redirect.</param>
-		private void AuthenticateUsingAuthCode(string authorizationCode)
+		/// <returns><c>true</c> when a valid token was stored; otherwise <c>false</c>.</returns>
+		private bool AuthenticateUsingAuthCode(string authorizationCode)
 		{
-			StoreToken = null;
+			if (authorizationCode.IsNullOrWhiteSpace())
+			{
+				Common.LogDebug(true, "[EpicApi] AuthenticateUsingAuthCode skipped: empty authorization code.");
+				return false;
+			}
+
+			ClearInMemoryStoreToken();
 			using (HttpClient httpClient = new HttpClient())
 			{
 				httpClient.DefaultRequestHeaders.Clear();
@@ -1066,9 +1128,17 @@ namespace CommonPluginsStores.Epic
 					content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
 					HttpResponseMessage response = httpClient.PostAsync(UrlAccountAuth, content).GetAwaiter().GetResult();
 					string respContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-					SetToken(respContent);
+					if (!SetToken(respContent))
+					{
+						Common.LogDebug(true, "[EpicApi] AuthenticateUsingAuthCode failed: invalid OAuth response.");
+						return false;
+					}
 				}
 			}
+
+			bool success = StoreToken != null && !StoreToken.Token.IsNullOrEmpty();
+			Common.LogDebug(true, $"[EpicApi] AuthenticateUsingAuthCode completed: success={success}.");
+			return success;
 		}
 
 		/// <summary>
@@ -1085,17 +1155,18 @@ namespace CommonPluginsStores.Epic
 		{
 			if (accountInfos == null || accountInfos.UserId.IsNullOrEmpty())
 			{
-				Logger.Info("[EpicApi] CheckIsPublic: accountInfos or UserId is null.");
+				Common.LogDebug(true, "[EpicApi] CheckIsPublic skipped: missing account user id.");
 				return false;
 			}
 
 			try
 			{
-				accountInfos.AccountStatus = AccountStatus.Checking;
 				string url = string.Format(UrlAccountProfileUS, accountInfos.UserId);
+				Common.LogDebug(true, $"[EpicApi] CheckIsPublic started: userId={accountInfos.UserId}.");
 				var pageSource = await Web.DownloadSourceDataWebView(url).ConfigureAwait(false);
-				string source = pageSource.Item1;
-				return !source.Contains("This profile is unavailable", StringComparison.OrdinalIgnoreCase);
+				bool isPublic = !pageSource.Item1.Contains("This profile is unavailable", StringComparison.OrdinalIgnoreCase);
+				Common.LogDebug(true, $"[EpicApi] CheckIsPublic completed: isPublic={isPublic}.");
+				return isPublic;
 			}
 			catch (Exception ex)
 			{
@@ -1205,10 +1276,84 @@ namespace CommonPluginsStores.Epic
 		}
 
 		/// <summary>
+		/// Returns true when the URL is the Epic OAuth localhost callback.
+		/// </summary>
+		private static bool IsEpicOAuthCallbackUrl(string url)
+		{
+			return !url.IsNullOrWhiteSpace()
+				&& url.IndexOf("localhost", StringComparison.OrdinalIgnoreCase) >= 0;
+		}
+
+		/// <summary>
+		/// Tries to read the OAuth authorization code from the callback URL query string.
+		/// </summary>
+		private static bool TryExtractAuthorizationCodeFromUrl(string url, out string authorizationCode)
+		{
+			authorizationCode = null;
+			if (url.IsNullOrWhiteSpace())
+			{
+				return false;
+			}
+
+			int codeIndex = url.IndexOf("code=", StringComparison.OrdinalIgnoreCase);
+			if (codeIndex < 0)
+			{
+				return false;
+			}
+
+			int valueStart = codeIndex + 5;
+			int valueEnd = url.IndexOf('&', valueStart);
+			if (valueEnd < 0)
+			{
+				valueEnd = url.Length;
+			}
+
+			string code = url.Substring(valueStart, valueEnd - valueStart).Trim();
+			if (code.IsNullOrEmpty())
+			{
+				return false;
+			}
+
+			authorizationCode = Uri.UnescapeDataString(code);
+			return true;
+		}
+
+		/// <summary>
+		/// Tries to read the OAuth authorization code from the callback page HTML.
+		/// </summary>
+		private static bool TryExtractAuthorizationCodeFromPageSource(string pageSource, out string authorizationCode)
+		{
+			authorizationCode = null;
+			if (pageSource.IsNullOrEmpty())
+			{
+				return false;
+			}
+
+			Match match = Regex.Match(
+				pageSource,
+				@"localhost[/\\]+launcher[/\\]+authorized\?code=([a-zA-Z0-9_-]+)",
+				RegexOptions.IgnoreCase);
+			if (!match.Success)
+			{
+				match = Regex.Match(pageSource, @"[?&]code=([a-zA-Z0-9_-]+)", RegexOptions.IgnoreCase);
+			}
+
+			if (!match.Success)
+			{
+				return false;
+			}
+
+			authorizationCode = match.Groups[1].Value;
+			return !authorizationCode.IsNullOrEmpty();
+		}
+
+		/// <summary>
 		/// Opens a Playnite WebView to the Epic login page, intercepts the OAuth redirect
 		/// and extracts the authorization code from the callback URL.
 		/// </summary>
-		private void EpicLogin()
+		/// <param name="operationGeneration">Auth generation captured when login started.</param>
+		/// <returns><c>true</c> when the OAuth token exchange succeeded; otherwise <c>false</c>.</returns>
+		private bool EpicLogin(long operationGeneration)
 		{
 			var loggedIn = false;
 			var authorizationCode = string.Empty;
@@ -1222,38 +1367,135 @@ namespace CommonPluginsStores.Epic
 			{
 				webView.LoadingChanged += async (s, e) =>
 				{
-					var pageText = await webView.GetPageTextAsync();
-					if (!pageText.IsNullOrEmpty() && pageText.Contains(@"localhost") && !e.IsLoading)
-					{
-						var source = await webView.GetPageSourceAsync();
-						var matches = Regex.Matches(source, @"localhost\/launcher\/authorized\?code=([a-zA-Z0-9]+)", RegexOptions.IgnoreCase);
-						if (matches.Count > 0)
-						{
-							authorizationCode = matches[0].Groups[1].Value;
-							loggedIn = true;
-						}
+					string urlAtEvent = webView.GetCurrentAddress();
+					Common.LogDebug(true, $"[EpicApi] Auth webview LoadingChanged: isLoading={e.IsLoading}, url={FormatAuthWebViewUrlForLog(urlAtEvent)}.");
 
-						webView.Close();
+					if (e.IsLoading)
+					{
+						return;
+					}
+
+					if (Interlocked.Exchange(ref _isHandlingLoading, 1) == 1)
+					{
+						Interlocked.Exchange(ref _pendingLoginCheck, 1);
+						Common.LogDebug(true, "[EpicApi] Auth webview LoadingChanged: deferred (handler already running).");
+						return;
+					}
+
+					try
+					{
+						do
+						{
+							Interlocked.Exchange(ref _pendingLoginCheck, 0);
+
+							if (!IsAuthOperationCurrent(operationGeneration))
+							{
+								Common.LogDebug(true, "[EpicApi] Auth webview login check aborted: superseded auth operation.");
+								return;
+							}
+
+							await Task.Delay(300);
+
+							if (!IsAuthOperationCurrent(operationGeneration))
+							{
+								Common.LogDebug(true, "[EpicApi] Auth webview login check aborted after delay: superseded auth operation.");
+								return;
+							}
+
+							try
+							{
+								string capturedCode = await TryCompleteEpicLoginFromWebViewAsync(webView).ConfigureAwait(false);
+								if (capturedCode == null)
+								{
+									continue;
+								}
+
+								if (!capturedCode.IsNullOrEmpty())
+								{
+									authorizationCode = capturedCode;
+									loggedIn = true;
+									Common.LogDebug(true, "[EpicApi] Auth webview authorization code captured, closing.");
+								}
+								else
+								{
+									Common.LogDebug(true, "[EpicApi] Auth webview localhost page detected but authorization code not found, closing.");
+								}
+
+								webView.Close();
+							}
+							catch (Exception ex)
+							{
+								Common.LogError(ex, false, true, PluginName);
+							}
+						}
+						while (Interlocked.Exchange(ref _pendingLoginCheck, 0) == 1);
+					}
+					finally
+					{
+						_isHandlingLoading = 0;
 					}
 				};
 
 				CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
+				Common.LogDebug(true, $"[EpicApi] Auth webview opening, initialNavigate={FormatAuthWebViewUrlForLog(UrlLogin)}.");
 				webView.Navigate(UrlLogin);
 				_ = webView.OpenDialog();
+				Common.LogDebug(true, $"[EpicApi] Auth webview closed, finalUrl={FormatAuthWebViewUrlForLog(webView.GetCurrentAddress())}, loggedIn={loggedIn}, hasAuthCode={!authorizationCode.IsNullOrEmpty()}.");
 			}
 
-			if (!loggedIn)
+			if (!loggedIn || !IsAuthOperationCurrent(operationGeneration))
 			{
-				return;
+				Common.LogDebug(true, $"[EpicApi] EpicLogin aborted: loggedIn={loggedIn}, operationCurrent={IsAuthOperationCurrent(operationGeneration)}.");
+				return false;
 			}
 
-			if (string.IsNullOrEmpty(authorizationCode))
+			if (authorizationCode.IsNullOrEmpty())
 			{
 				Logger.Error("Failed to get login exchange key for Epic account.");
-				return;
+				return false;
 			}
 
-			AuthenticateUsingAuthCode(authorizationCode);
+			return AuthenticateUsingAuthCode(authorizationCode);
+		}
+
+		/// <summary>
+		/// Attempts to extract the OAuth authorization code from the auth WebView.
+		/// </summary>
+		/// <returns>
+		/// The authorization code when found; an empty string when the callback page
+		/// was reached without a code; null when the page is not a callback yet.
+		/// </returns>
+		private async Task<string> TryCompleteEpicLoginFromWebViewAsync(IWebView webView)
+		{
+			string url = webView.GetCurrentAddress();
+			Common.LogDebug(true, $"[EpicApi] Auth webview post-delay check, url={FormatAuthWebViewUrlForLog(url)}.");
+
+			if (TryExtractAuthorizationCodeFromUrl(url, out string codeFromUrl))
+			{
+				Common.LogDebug(true, "[EpicApi] Auth webview authorization code extracted from URL.");
+				return codeFromUrl;
+			}
+
+			if (!IsEpicOAuthCallbackUrl(url))
+			{
+				string pageText = await webView.GetPageTextAsync().ConfigureAwait(false);
+				bool hasLocalhostCallback = !pageText.IsNullOrEmpty() && pageText.Contains(@"localhost");
+				Common.LogDebug(true, $"[EpicApi] Auth webview callback check: hasLocalhostCallback={hasLocalhostCallback}.");
+
+				if (!hasLocalhostCallback)
+				{
+					return null;
+				}
+			}
+
+			string pageSource = await webView.GetPageSourceAsync().ConfigureAwait(false);
+			if (TryExtractAuthorizationCodeFromPageSource(pageSource, out string codeFromPage))
+			{
+				Common.LogDebug(true, "[EpicApi] Auth webview authorization code extracted from page source.");
+				return codeFromPage;
+			}
+
+			return IsEpicOAuthCallbackUrl(url) ? string.Empty : null;
 		}
 
 		/// <summary>
@@ -1261,8 +1503,11 @@ namespace CommonPluginsStores.Epic
 		/// opens the Epic authorization URL in the default browser and
 		/// prompts the user to paste the resulting code into a dialog.
 		/// </summary>
-		private void EpicLoginAlternative()
+		/// <param name="operationGeneration">Auth generation captured when login started.</param>
+		/// <returns><c>true</c> when the OAuth token exchange succeeded; otherwise <c>false</c>.</returns>
+		private bool EpicLoginAlternative(long operationGeneration)
 		{
+			Common.LogDebug(true, "[EpicApi] Alternative auth flow started.");
 			_ = API.Instance.Dialogs.ShowMessage(
 				ResourceProvider.GetString("LOCEpicAlternativeAuthInstructions"), "",
 				System.Windows.MessageBoxButton.OK,
@@ -1271,12 +1516,74 @@ namespace CommonPluginsStores.Epic
 			_ = ProcessStarter.StartUrl(UrlAuthCode);
 			StringSelectionDialogResult res = API.Instance.Dialogs.SelectString("LOCEpicAuthCodeInputMessage", "", "");
 
-			if (!res.Result || res.SelectedString.IsNullOrWhiteSpace())
+			if (!res.Result || res.SelectedString.IsNullOrWhiteSpace() || !IsAuthOperationCurrent(operationGeneration))
 			{
-				return;
+				Common.LogDebug(true, "[EpicApi] Alternative auth aborted: cancelled, empty input, or superseded auth operation.");
+				return false;
 			}
 
-			AuthenticateUsingAuthCode(res.SelectedString.Trim().Trim('"'));
+			string normalizedCode = NormalizeAuthorizationCodeInput(res.SelectedString);
+			if (normalizedCode.IsNullOrEmpty())
+			{
+				Common.LogDebug(true, "[EpicApi] Alternative auth aborted: could not parse authorization code from input.");
+				return false;
+			}
+
+			return AuthenticateUsingAuthCode(normalizedCode);
+		}
+
+		/// <summary>
+		/// Prompts the user to try manual authorization code entry after a failed WebView login.
+		/// </summary>
+		/// <param name="operationGeneration">Auth generation captured when login started.</param>
+		/// <returns><c>true</c> when alternative auth produced a valid token; otherwise <c>false</c>.</returns>
+		private bool OfferAndRunAlternativeLogin(long operationGeneration)
+		{
+			System.Windows.MessageBoxResult response = API.Instance.Dialogs.ShowMessage(
+				ResourceProvider.GetString("LOCEpicWebViewLoginFailedOfferAlternative"),
+				PluginName,
+				System.Windows.MessageBoxButton.YesNo,
+				System.Windows.MessageBoxImage.Question);
+
+			if (response != System.Windows.MessageBoxResult.Yes)
+			{
+				Common.LogDebug(true, "[EpicApi] Alternative login declined after WebView failure.");
+				return false;
+			}
+
+			Common.LogDebug(true, "[EpicApi] Alternative login offered after WebView failure.");
+			return EpicLoginAlternative(operationGeneration);
+		}
+
+		/// <summary>
+		/// Normalizes user-provided authorization input (raw code, redirect URL, or JSON snippet).
+		/// </summary>
+		private static string NormalizeAuthorizationCodeInput(string rawInput)
+		{
+			if (rawInput.IsNullOrWhiteSpace())
+			{
+				return null;
+			}
+
+			string input = rawInput.Trim().Trim('"').Trim();
+			if (TryExtractAuthorizationCodeFromUrl(input, out string codeFromUrl))
+			{
+				return codeFromUrl;
+			}
+
+			Match jsonMatch = Regex.Match(input, @"""authorizationCode""\s*:\s*""([^""]+)""", RegexOptions.IgnoreCase);
+			if (jsonMatch.Success)
+			{
+				return jsonMatch.Groups[1].Value;
+			}
+
+			Match keyValueMatch = Regex.Match(input, @"authorizationCode\s*[=:]\s*([a-zA-Z0-9_-]+)", RegexOptions.IgnoreCase);
+			if (keyValueMatch.Success)
+			{
+				return keyValueMatch.Groups[1].Value;
+			}
+
+			return input;
 		}
 
 		/// <summary>
@@ -1306,7 +1613,8 @@ namespace CommonPluginsStores.Epic
 		/// <see cref="StoreToken"/>. Persists it via <see cref="SetStoredToken"/>.
 		/// </summary>
 		/// <param name="respContent">Raw JSON body of the OAuth token endpoint response.</param>
-		private void SetToken(string respContent)
+		/// <returns><c>true</c> when the token was deserialized and stored; otherwise <c>false</c>.</returns>
+		private bool SetToken(string respContent)
 		{
 			if (Serialization.TryFromJson(respContent, out OauthResponse oauthResponse, out Exception exception))
 			{
@@ -1320,11 +1628,17 @@ namespace CommonPluginsStores.Epic
 					RefreshExpireAt = oauthResponse.refresh_expires_at
 				};
 				SetStoredToken(StoreToken);
+				Common.LogDebug(true, $"[EpicApi] SetToken succeeded: hasAccountId={!StoreToken.AccountId.IsNullOrEmpty()}, hasToken={!StoreToken.Token.IsNullOrEmpty()}.");
+				return true;
 			}
-			else if (exception != null)
+
+			if (exception != null)
 			{
 				Common.LogError(exception, false, false, PluginName);
 			}
+
+			Common.LogDebug(true, "[EpicApi] SetToken failed: invalid OAuth response.");
+			return false;
 		}
 
 		/// <summary>

@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace CommonPluginsControls.Stores
 {
@@ -199,10 +201,40 @@ namespace CommonPluginsControls.Stores
 
         private void AccountInfos_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == nameof(AccountInfos.AccountStatus))
+            if (!ShouldRefreshUserBinding(e.PropertyName))
             {
+                return;
+            }
+
+            NotifyUserBindingChanged();
+        }
+
+        private static bool ShouldRefreshUserBinding(string propertyName)
+        {
+            return string.IsNullOrEmpty(propertyName)
+                || propertyName == nameof(AccountInfos.AccountStatus)
+                || propertyName == nameof(AccountInfos.Pseudo)
+                || propertyName == nameof(AccountInfos.Avatar)
+                || propertyName == nameof(AccountInfos.Link)
+                || propertyName == nameof(AccountInfos.UserId);
+        }
+
+        private void NotifyUserBindingChanged()
+        {
+            void notify()
+            {
+                OnPropertyChanged(nameof(User));
                 NotifyAccountEntryUi();
             }
+
+            Dispatcher dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher != null && !dispatcher.CheckAccess())
+            {
+                dispatcher.BeginInvoke(DispatcherPriority.DataBind, new Action(notify));
+                return;
+            }
+
+            notify();
         }
 
         private void NotifyAccountEntryUi()

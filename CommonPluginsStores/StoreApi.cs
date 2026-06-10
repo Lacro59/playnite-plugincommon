@@ -94,6 +94,8 @@ namespace CommonPluginsStores
 
         private bool? isUserLoggedIn;
         private bool _forceFullLoginCheck;
+        private long _authOperationGeneration;
+        private long _authCheckGeneration;
 
         /// <summary>
         /// When true, <see cref="GetIsUserLoggedIn"/> must run a full verification (network), not cache shortcuts.
@@ -238,6 +240,14 @@ namespace CommonPluginsStores
 			}
         }
 
+		/// <summary>
+		/// Clears the in-memory token without deleting the persisted token file.
+		/// </summary>
+		protected void ClearInMemoryStoreToken()
+		{
+			_storeToken = null;
+		}
+
         /// <summary>
         /// Gets the external plugin instance reference.
         /// </summary>
@@ -335,51 +345,56 @@ namespace CommonPluginsStores
 
         protected virtual StoreToken GetStoredToken() 
         {
-			if (File.Exists(FileToken))
+			lock (FileSystem.GetPathSyncRoot(FileToken))
 			{
-				try
+				if (File.Exists(FileToken))
 				{
-					return Serialization.FromJson<StoreToken>(
-						Encryption.DecryptFromFile(
-							FileToken,
-							Encoding.UTF8,
-							WindowsIdentity.GetCurrent().User.Value));
+					try
+					{
+						return Serialization.FromJson<StoreToken>(
+							Encryption.DecryptFromFile(
+								FileToken,
+								Encoding.UTF8,
+								WindowsIdentity.GetCurrent().User.Value));
+					}
+					catch (Exception ex)
+					{
+						Common.LogError(ex, false, FormatLogMessage("Failed to load saved token"));
+					}
 				}
-				catch (Exception ex)
-				{
-					Common.LogError(ex, false, FormatLogMessage("Failed to load saved token"));
-				}
-			}
 
-			LogWarn("No stored token");
-			return null;
+				LogWarn("No stored token");
+				return null;
+			}
 		}
 
         protected virtual bool SetStoredToken(StoreToken token)
 		{
-			try
+			lock (FileSystem.GetPathSyncRoot(FileToken))
 			{
-				if (token != null)
+				try
 				{
-					FileSystem.CreateDirectory(Path.GetDirectoryName(FileToken));
-					Encryption.EncryptToFile(
-						FileToken,
-						Serialization.ToJson(token),
-						Encoding.UTF8,
-						WindowsIdentity.GetCurrent().User.Value);
-					return true;
+					if (token != null)
+					{
+						Encryption.EncryptToFileSafe(
+							FileToken,
+							Serialization.ToJson(token),
+							Encoding.UTF8,
+							WindowsIdentity.GetCurrent().User.Value);
+						return true;
+					}
+					else
+					{
+						LogWarn("No token saved");
+					}
 				}
-				else
+				catch (Exception ex)
 				{
-					LogWarn("No token saved");
+					Common.LogError(ex, false, FormatLogMessage("Failed to save token"));
 				}
-			}
-			catch (Exception ex)
-			{
-				Common.LogError(ex, false, FormatLogMessage("Failed to save token"));
-			}
 
-			return false;
+				return false;
+			}
 		}
 
 		#endregion
@@ -400,14 +415,33 @@ namespace CommonPluginsStores
 		/// <param name="onCompleted">Optional callback after the check finishes (UI thread).</param>
 		public void RefreshIsUserLoggedInInBackground(Action onCompleted = null)
 		{
-			Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: scheduling full login check."));
+			long operationGeneration = Interlocked.Read(ref _authOperationGeneration);
+			Common.LogDebug(true, FormatLogMessage($"RefreshIsUserLoggedInInBackground: scheduling full login check, generation={operationGeneration}."));
 			Task.Run(() =>
 			{
+				if (!IsAuthOperationCurrent(operationGeneration))
+				{
+					Common.LogDebug(true, FormatLogMessage($"RefreshIsUserLoggedInInBackground: aborted before start (generation={operationGeneration}, current={Interlocked.Read(ref _authOperationGeneration)})."));
+					return;
+				}
+
 				try
 				{
-					BeginFullLoginCheck();
+					BeginFullLoginCheck(operationGeneration);
 					ResetIsUserLoggedIn();
+					if (!IsAuthCheckCurrent())
+					{
+						Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: aborted after reset (superseded auth operation)."));
+						return;
+					}
+
 					bool isLoggedIn = IsUserLoggedIn;
+					if (!IsAuthCheckCurrent())
+					{
+						Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: result discarded (superseded auth operation)."));
+						return;
+					}
+
 					Common.LogDebug(true, FormatLogMessage($"RefreshIsUserLoggedInInBackground: full check completed, IsUserLoggedIn={isLoggedIn}."));
 				}
 				catch (Exception ex)
@@ -428,11 +462,39 @@ namespace CommonPluginsStores
 		}
 
 		/// <summary>
+		/// Invalidates in-flight auth checks and returns the new operation generation.
+		/// </summary>
+		protected long BeginAuthOperation()
+		{
+			long generation = Interlocked.Increment(ref _authOperationGeneration);
+			Common.LogDebug(true, FormatLogMessage($"BeginAuthOperation: generation={generation}."));
+			return generation;
+		}
+
+		/// <summary>
+		/// Returns true when <paramref name="operationGeneration"/> is still the active auth generation.
+		/// </summary>
+		protected bool IsAuthOperationCurrent(long operationGeneration)
+		{
+			return operationGeneration == Interlocked.Read(ref _authOperationGeneration);
+		}
+
+		/// <summary>
+		/// Returns true when the current full-login check has not been superseded.
+		/// </summary>
+		protected bool IsAuthCheckCurrent()
+		{
+			return IsAuthOperationCurrent(_authCheckGeneration);
+		}
+
+		/// <summary>
 		/// Enables full login verification for the current background refresh.
 		/// </summary>
-		protected virtual void BeginFullLoginCheck()
+		/// <param name="operationGeneration">Auth generation captured when the check started.</param>
+		protected virtual void BeginFullLoginCheck(long operationGeneration)
 		{
 			_forceFullLoginCheck = true;
+			_authCheckGeneration = operationGeneration;
 		}
 
 		/// <summary>
@@ -441,6 +503,7 @@ namespace CommonPluginsStores
 		protected virtual void EndFullLoginCheck()
 		{
 			_forceFullLoginCheck = false;
+			_authCheckGeneration = 0;
 		}
 
 		/// <summary>
@@ -483,11 +546,12 @@ namespace CommonPluginsStores
 
         /// <summary>
         /// Clears stored authentication data and session profile fields for the current account.
-        /// Manual identifiers (user id, API key) are preserved.
+        /// Manual store settings such as the Steam Web API key are preserved.
         /// </summary>
         public virtual void ClearSession()
         {
             LogInfo("ClearSession started");
+            _ = BeginAuthOperation();
 
             try
             {
@@ -513,15 +577,18 @@ namespace CommonPluginsStores
         {
             _storeToken = null;
 
-            if (File.Exists(FileToken))
+            lock (FileSystem.GetPathSyncRoot(FileToken))
             {
-                FileSystem.DeleteFile(FileToken);
-                LogInfo("Stored token file deleted");
-                Common.LogDebug(true, FormatLogMessage($"ClearStoredToken: {FileToken}"));
-            }
-            else
-            {
-                Common.LogDebug(true, FormatLogMessage("ClearStoredToken: no token file found"));
+                if (File.Exists(FileToken))
+                {
+                    FileSystem.DeleteFileSafe(FileToken);
+                    LogInfo("Stored token file deleted");
+                    Common.LogDebug(true, FormatLogMessage($"ClearStoredToken: {FileToken}"));
+                }
+                else
+                {
+                    Common.LogDebug(true, FormatLogMessage("ClearStoredToken: no token file found"));
+                }
             }
         }
 
@@ -538,11 +605,20 @@ namespace CommonPluginsStores
                 return;
             }
 
+            user.UserId = null;
             user.Avatar = null;
             user.Link = null;
             user.Pseudo = null;
             user.AccountStatus = AccountStatus.Unknown;
-            Common.LogDebug(true, FormatLogMessage("ClearSession: session profile fields cleared"));
+            Common.LogDebug(true, FormatLogMessage("ClearSession: session profile fields cleared (UserId, Pseudo, avatar, link)"));
+        }
+
+        /// <summary>
+        /// Returns true when persisted account data should be kept after session identifiers were cleared.
+        /// </summary>
+        protected static bool HasPersistedManualAccountData(AccountInfos accountInfos)
+        {
+            return accountInfos != null && !accountInfos.ApiKey.IsNullOrEmpty();
         }
 
         /// <summary>
@@ -568,6 +644,32 @@ namespace CommonPluginsStores
         public void SetForceAuth(bool forceAuth)
         {
             StoreSettings.ForceAuth = forceAuth;
+        }
+
+        /// <summary>
+        /// Strips query strings from auth WebView URLs before logging.
+        /// </summary>
+        /// <param name="url">Full WebView address.</param>
+        /// <returns>Path-only URL safe for logs, or a fallback label.</returns>
+        protected static string FormatAuthWebViewUrlForLog(string url)
+        {
+            if (url.IsNullOrEmpty())
+            {
+                return "(empty)";
+            }
+
+            try
+            {
+                if (Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
+                {
+                    return uri.GetLeftPart(UriPartial.Path);
+                }
+            }
+            catch
+            {
+            }
+
+            return url;
         }
 
         /// <summary>
@@ -600,25 +702,28 @@ namespace CommonPluginsStores
         /// <returns>AccountInfos object or null if loading fails</returns>
         protected AccountInfos LoadCurrentUser()
         {
-            if (FileSystem.FileExists(FileUser))
+            lock (FileSystem.GetPathSyncRoot(FileUser))
             {
-                try
+                if (FileSystem.FileExists(FileUser))
                 {
-                    string user = Encryption.DecryptFromFile(
-                        FileUser,
-                        Encoding.UTF8,
-                        WindowsIdentity.GetCurrent().User.Value);
+                    try
+                    {
+                        string user = Encryption.DecryptFromFile(
+                            FileUser,
+                            Encoding.UTF8,
+                            WindowsIdentity.GetCurrent().User.Value);
 
-                    _ = Serialization.TryFromJson(user, out AccountInfos accountInfos);
-                    return accountInfos;
+                        _ = Serialization.TryFromJson(user, out AccountInfos accountInfos);
+                        return accountInfos;
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, true, PluginName, FormatLogMessage("Failed to load user"));
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, true, PluginName, FormatLogMessage("Failed to load user"));
-                }
+
+                return null;
             }
-
-            return null;
         }
 
         /// <summary>
@@ -633,12 +738,14 @@ namespace CommonPluginsStores
         {
             if (CurrentAccountInfos != null)
             {
-                FileSystem.PrepareSaveFile(FileUser);
-                Encryption.EncryptToFile(
-                    FileUser,
-                    Serialization.ToJson(CurrentAccountInfos),
-                    Encoding.UTF8,
-                    WindowsIdentity.GetCurrent().User.Value);
+                lock (FileSystem.GetPathSyncRoot(FileUser))
+                {
+                    Encryption.EncryptToFileSafe(
+                        FileUser,
+                        Serialization.ToJson(CurrentAccountInfos),
+                        Encoding.UTF8,
+                        WindowsIdentity.GetCurrent().User.Value);
+                }
             }
         }
 
@@ -689,6 +796,13 @@ namespace CommonPluginsStores
             {
                 return accountInfos;
             }
+
+            if (HasPersistedManualAccountData(accountInfos))
+            {
+                accountInfos.IsCurrent = true;
+                return accountInfos;
+            }
+
             return new AccountInfos { IsCurrent = true };
         }
 

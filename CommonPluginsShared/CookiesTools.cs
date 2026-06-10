@@ -72,35 +72,38 @@ namespace CommonPluginsShared
 
             if (File.Exists(FileCookies))
             {
-                for (int i = 0; i < 5; i++)
+                lock (FileSystem.GetPathSyncRoot(FileCookies))
                 {
-                    try
+                    for (int i = 0; i < 5; i++)
                     {
-                        var decrypted = Encryption.DecryptFromFile(
-                            FileCookies,
-                            Encoding.UTF8,
-                            WindowsIdentity.GetCurrent().User.Value);
-
-                        storedCookies = Serialization.FromJson<List<HttpCookie>>(decrypted);
-
-                        storedCookies.RemoveAll(x => x.Expires != null && (DateTime)x.Expires <= DateTime.Now);
-                        return storedCookies;
-                    }
-                    catch (CryptographicException ex)
-                    {
-                        Common.LogError(ex, false, $"Failed to load saved cookies for {ClientName} (CryptographicException)");
-                        FileSystem.DeleteFile(FileCookies);
-                        return storedCookies;
-                    }
-                    catch (Exception ex)
-                    {
-                        if (i == 4)
+                        try
                         {
-                            Common.LogError(ex, false, $"Failed to load saved cookies for {ClientName}");
+                            var decrypted = Encryption.DecryptFromFile(
+                                FileCookies,
+                                Encoding.UTF8,
+                                WindowsIdentity.GetCurrent().User.Value);
+
+                            storedCookies = Serialization.FromJson<List<HttpCookie>>(decrypted);
+
+                            storedCookies.RemoveAll(x => x.Expires != null && (DateTime)x.Expires <= DateTime.Now);
+                            return storedCookies;
+                        }
+                        catch (CryptographicException ex)
+                        {
+                            Common.LogError(ex, false, $"Failed to load saved cookies for {ClientName} (CryptographicException)");
                             FileSystem.DeleteFile(FileCookies);
                             return storedCookies;
                         }
-                        Thread.Sleep(500);
+                        catch (Exception ex)
+                        {
+                            if (i == 4)
+                            {
+                                Common.LogError(ex, false, $"Failed to load saved cookies for {ClientName}");
+                                FileSystem.DeleteFile(FileCookies);
+                                return storedCookies;
+                            }
+                            Thread.Sleep(500);
+                        }
                     }
                 }
             }
@@ -116,29 +119,32 @@ namespace CommonPluginsShared
         /// <returns><c>true</c> when cookies were saved; otherwise <c>false</c>.</returns>
         public bool SetStoredCookies(List<HttpCookie> httpCookies)
         {
-            try
+            lock (FileSystem.GetPathSyncRoot(FileCookies))
             {
-                if (httpCookies != null && httpCookies.Any())
+                try
                 {
-                    FileSystem.CreateDirectory(Path.GetDirectoryName(FileCookies));
-                    Encryption.EncryptToFile(
-                        FileCookies,
-                        Serialization.ToJson(httpCookies),
-                        Encoding.UTF8,
-                        WindowsIdentity.GetCurrent().User.Value);
-                    return true;
+                    httpCookies = FilterCookiesByDomains(httpCookies);
+                    if (httpCookies != null && httpCookies.Any())
+                    {
+                        Encryption.EncryptToFileSafe(
+                            FileCookies,
+                            Serialization.ToJson(httpCookies),
+                            Encoding.UTF8,
+                            WindowsIdentity.GetCurrent().User.Value);
+                        return true;
+                    }
+                    else
+                    {
+                        Logger.Warn($"No cookies saved for {PluginName}");
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    Logger.Warn($"No cookies saved for {PluginName}");
+                    Common.LogError(ex, false, "Failed to save cookies");
                 }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, "Failed to save cookies");
-            }
 
-            return false;
+                return false;
+            }
         }
 
         /// <summary>
@@ -329,20 +335,74 @@ namespace CommonPluginsShared
         }
 
         /// <summary>
+        /// Keeps only cookies whose domain matches the configured store domains.
+        /// </summary>
+        /// <param name="httpCookies">Raw cookies from a WebView or HTTP client.</param>
+        /// <returns>Filtered cookie list.</returns>
+        public List<HttpCookie> FilterCookiesByDomains(List<HttpCookie> httpCookies)
+        {
+            if (httpCookies == null || httpCookies.Count == 0)
+            {
+                return new List<HttpCookie>();
+            }
+
+            return httpCookies.Where(cookie => cookie != null && IsCookieDomainAllowed(cookie.Domain)).ToList();
+        }
+
+        /// <summary>
         /// Internal utility method to extract cookies from WebView, filtered and optionally cleared.
         /// </summary>
         private List<HttpCookie> ExtractCookies(IWebView webView, bool deleteCookies)
         {
-            List<HttpCookie> httpCookies = CookiesDomains?.Count > 0
-                ? webView.GetCookies()?.Where(x => CookiesDomains.Any(y => y.Contains(x?.Domain, StringComparison.OrdinalIgnoreCase)))?.ToList() ?? new List<HttpCookie>()
-                : webView.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName, StringComparison.OrdinalIgnoreCase) ?? false)?.ToList() ?? new List<HttpCookie>();
+            List<HttpCookie> httpCookies = FilterCookiesByDomains(webView.GetCookies()?.ToList());
 
-            if (deleteCookies)
+            if (deleteCookies && CookiesDomains != null)
             {
                 CookiesDomains.ForEach(x => webView.DeleteDomainCookies(x));
             }
 
             return httpCookies;
+        }
+
+        private bool IsCookieDomainAllowed(string cookieDomain)
+        {
+            if (string.IsNullOrEmpty(cookieDomain))
+            {
+                return false;
+            }
+
+            if (CookiesDomains == null || CookiesDomains.Count == 0)
+            {
+                return cookieDomain.IndexOf(ClientName, StringComparison.OrdinalIgnoreCase) >= 0;
+            }
+
+            foreach (string allowedDomain in CookiesDomains)
+            {
+                if (CookieDomainMatches(cookieDomain, allowedDomain))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool CookieDomainMatches(string cookieDomain, string allowedDomain)
+        {
+            if (string.IsNullOrEmpty(allowedDomain))
+            {
+                return false;
+            }
+
+            string normalizedCookieDomain = cookieDomain.TrimStart('.');
+            string normalizedAllowedDomain = allowedDomain.TrimStart('.');
+
+            if (normalizedCookieDomain.Equals(normalizedAllowedDomain, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return normalizedCookieDomain.EndsWith("." + normalizedAllowedDomain, StringComparison.OrdinalIgnoreCase);
         }
 
         #endregion
