@@ -28,6 +28,11 @@ namespace CommonPluginsControls.Stores
             get => _storeApi;
             set
             {
+                if (ReferenceEquals(_storeApi, value))
+                {
+                    return;
+                }
+
                 _storeApi = value;
                 OnPropertyChanged(nameof(StoreApi));
                 NotifyAuthStatusChanged();
@@ -91,6 +96,11 @@ namespace CommonPluginsControls.Stores
         public void RefreshAuthCommandStates()
         {
             NotifyAuthStatusChanged();
+        }
+
+        /// <inheritdoc />
+        public void RequestBackgroundAuthRefresh()
+        {
             ScheduleBackgroundAuthRefresh();
         }
 

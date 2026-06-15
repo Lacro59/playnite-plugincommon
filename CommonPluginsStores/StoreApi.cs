@@ -96,6 +96,10 @@ namespace CommonPluginsStores
         private bool _forceFullLoginCheck;
         private long _authOperationGeneration;
         private long _authCheckGeneration;
+        private readonly object _loginRefreshSync = new object();
+        private Task _pendingLoginRefreshTask = Task.CompletedTask;
+        private readonly List<Action> _loginRefreshCallbacks = new List<Action>();
+        private int _loginRefreshResolutionDepth;
 
         /// <summary>
         /// When true, <see cref="GetIsUserLoggedIn"/> must run a full verification (network), not cache shortcuts.
@@ -104,16 +108,21 @@ namespace CommonPluginsStores
 
         /// <summary>
         /// Gets or sets whether the user is logged in.
+        /// Blocks until any in-flight <see cref="RefreshIsUserLoggedInInBackground"/> completes.
         /// </summary>
         public bool IsUserLoggedIn
         {
             get
             {
-                isUserLoggedIn = isUserLoggedIn ?? GetIsUserLoggedIn();
-                return (bool)isUserLoggedIn;
+                WaitForPendingLoginRefresh();
+                return ResolveIsUserLoggedIn();
             }
 
-            set => SetValue(ref isUserLoggedIn, value);
+            set
+            {
+                WaitForPendingLoginRefresh();
+                SetValue(ref isUserLoggedIn, value);
+            }
         }
 
         /// <summary>
@@ -332,12 +341,16 @@ namespace CommonPluginsStores
 
         /// <summary>
         /// Get new cookies from specific URLs.
+        /// Serialized per store client so concurrent auth checks do not open competing WebViews.
         /// </summary>
         /// <param name="urls">List of URLs to retrieve cookies from</param>
         /// <param name="deleteCookies">Whether to delete cookies after retrieval</param>
         /// <param name="webView">Optional WebView instance to use</param>
         /// <returns>List of new HTTP cookies</returns>
-        protected virtual List<Playnite.SDK.HttpCookie> GetNewWebCookies(List<string> urls, bool deleteCookies = false, IWebView webView = null) => CookiesTools.GetNewWebCookies(urls, deleteCookies, webView);
+        protected virtual List<Playnite.SDK.HttpCookie> GetNewWebCookies(List<string> urls, bool deleteCookies = false, IWebView webView = null)
+        {
+            return CookiesTools.GetNewWebCookiesSerialized(urls, deleteCookies, webView);
+        }
 
 		#endregion
 
@@ -410,55 +423,159 @@ namespace CommonPluginsStores
         }
 
 		/// <summary>
-		/// Re-evaluates login status on a background thread and invokes <paramref name="onCompleted"/> on the UI thread.
+		/// Blocks the caller until any queued background login refresh finishes.
+		/// Skipped while the current thread is resolving login inside a refresh worker.
+		/// </summary>
+		private void WaitForPendingLoginRefresh()
+		{
+			if (_loginRefreshResolutionDepth > 0)
+			{
+				return;
+			}
+
+			Task pendingTask;
+			lock (_loginRefreshSync)
+			{
+				pendingTask = _pendingLoginRefreshTask;
+			}
+
+			if (pendingTask != null && !pendingTask.IsCompleted)
+			{
+				Common.LogDebug(true, FormatLogMessage("IsUserLoggedIn: waiting for pending background login refresh."));
+				pendingTask.GetAwaiter().GetResult();
+			}
+		}
+
+		/// <summary>
+		/// Resolves and caches login status without waiting on a pending background refresh.
+		/// </summary>
+		/// <returns>True when the user is authenticated for the current store session.</returns>
+		private bool ResolveIsUserLoggedIn()
+		{
+			_loginRefreshResolutionDepth++;
+			try
+			{
+				if (!isUserLoggedIn.HasValue)
+				{
+					isUserLoggedIn = GetIsUserLoggedIn();
+				}
+
+				return isUserLoggedIn.Value;
+			}
+			finally
+			{
+				_loginRefreshResolutionDepth--;
+			}
+		}
+
+		/// <summary>
+		/// Re-evaluates login status on a background thread and invokes queued callbacks on the UI thread.
+		/// Concurrent requests are coalesced into a single in-flight refresh.
+		/// Callers reading <see cref="IsUserLoggedIn"/> wait until the refresh task completes.
 		/// </summary>
 		/// <param name="onCompleted">Optional callback after the check finishes (UI thread).</param>
 		public void RefreshIsUserLoggedInInBackground(Action onCompleted = null)
 		{
 			long operationGeneration = Interlocked.Read(ref _authOperationGeneration);
-			Common.LogDebug(true, FormatLogMessage($"RefreshIsUserLoggedInInBackground: scheduling full login check, generation={operationGeneration}."));
-			Task.Run(() =>
+			TaskCompletionSource<object> refreshCompleted;
+			Task previousGate;
+
+			lock (_loginRefreshSync)
 			{
-				if (!IsAuthOperationCurrent(operationGeneration))
+				if (!_pendingLoginRefreshTask.IsCompleted)
 				{
-					Common.LogDebug(true, FormatLogMessage($"RefreshIsUserLoggedInInBackground: aborted before start (generation={operationGeneration}, current={Interlocked.Read(ref _authOperationGeneration)})."));
+					if (onCompleted != null)
+					{
+						_loginRefreshCallbacks.Add(onCompleted);
+					}
+
+					Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: coalesced with in-flight refresh."));
 					return;
-				}
-
-				try
-				{
-					BeginFullLoginCheck(operationGeneration);
-					ResetIsUserLoggedIn();
-					if (!IsAuthCheckCurrent())
-					{
-						Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: aborted after reset (superseded auth operation)."));
-						return;
-					}
-
-					bool isLoggedIn = IsUserLoggedIn;
-					if (!IsAuthCheckCurrent())
-					{
-						Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: result discarded (superseded auth operation)."));
-						return;
-					}
-
-					Common.LogDebug(true, FormatLogMessage($"RefreshIsUserLoggedInInBackground: full check completed, IsUserLoggedIn={isLoggedIn}."));
-				}
-				catch (Exception ex)
-				{
-					LogError(ex, "RefreshIsUserLoggedInInBackground failed");
-				}
-				finally
-				{
-					EndFullLoginCheck();
 				}
 
 				if (onCompleted != null)
 				{
-					Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: notifying UI."));
-					API.Instance.MainView.UIDispatcher?.BeginInvoke(onCompleted);
+					_loginRefreshCallbacks.Add(onCompleted);
 				}
-			});
+
+				Common.LogDebug(true, FormatLogMessage($"RefreshIsUserLoggedInInBackground: scheduling full login check, generation={operationGeneration}."));
+
+				refreshCompleted = new TaskCompletionSource<object>();
+				previousGate = _pendingLoginRefreshTask;
+				_pendingLoginRefreshTask = refreshCompleted.Task;
+			}
+
+			previousGate.ContinueWith(_ =>
+			{
+				try
+				{
+					if (!IsAuthOperationCurrent(operationGeneration))
+					{
+						Common.LogDebug(true, FormatLogMessage($"RefreshIsUserLoggedInInBackground: aborted before start (generation={operationGeneration}, current={Interlocked.Read(ref _authOperationGeneration)})."));
+						return;
+					}
+
+					try
+					{
+						BeginFullLoginCheck(operationGeneration);
+						ResetIsUserLoggedIn();
+						if (!IsAuthCheckCurrent())
+						{
+							Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: aborted after reset (superseded auth operation)."));
+							return;
+						}
+
+						bool isLoggedIn = ResolveIsUserLoggedIn();
+						if (!IsAuthCheckCurrent())
+						{
+							Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: result discarded (superseded auth operation)."));
+							return;
+						}
+
+						Common.LogDebug(true, FormatLogMessage($"RefreshIsUserLoggedInInBackground: full check completed, IsUserLoggedIn={isLoggedIn}."));
+					}
+					catch (Exception ex)
+					{
+						LogError(ex, "RefreshIsUserLoggedInInBackground failed");
+					}
+					finally
+					{
+						EndFullLoginCheck();
+					}
+				}
+				finally
+				{
+					refreshCompleted.TrySetResult(null);
+					NotifyLoginRefreshCallbacks();
+				}
+			}, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
+		}
+
+		/// <summary>
+		/// Invokes and clears callbacks registered for the completed login refresh.
+		/// </summary>
+		private void NotifyLoginRefreshCallbacks()
+		{
+			List<Action> callbacks;
+			lock (_loginRefreshSync)
+			{
+				if (_loginRefreshCallbacks.Count == 0)
+				{
+					return;
+				}
+
+				callbacks = new List<Action>(_loginRefreshCallbacks);
+				_loginRefreshCallbacks.Clear();
+			}
+
+			Common.LogDebug(true, FormatLogMessage($"RefreshIsUserLoggedInInBackground: notifying UI ({callbacks.Count} callback(s))."));
+			foreach (Action callback in callbacks)
+			{
+				if (callback != null)
+				{
+					API.Instance.MainView.UIDispatcher?.BeginInvoke(callback);
+				}
+			}
 		}
 
 		/// <summary>
@@ -542,6 +659,21 @@ namespace CommonPluginsStores
 		{
 			AccountInfos savedUser = LoadCurrentUser();
 			return savedUser != null && !savedUser.UserId.IsNullOrEmpty();
+		}
+
+		/// <summary>
+		/// Returns true when persisted cookies or a non-empty OAuth token exist for web auth verification.
+		/// Saved user profile data alone is not sufficient.
+		/// </summary>
+		protected bool HasSessionCredentialsForAuth()
+		{
+			if (TryGetAuthStatusFromStoredCookies())
+			{
+				return true;
+			}
+
+			bool? tokenAuth = TryGetAuthStatusFromStoredToken();
+			return tokenAuth == true;
 		}
 
         /// <summary>

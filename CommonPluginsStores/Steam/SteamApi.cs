@@ -429,10 +429,17 @@ namespace CommonPluginsStores.Steam
 
 		/// <summary>
 		/// Reads cached Steam user data to determine login status without network I/O.
+		/// Requires stored cookies or a token so stale on-disk userdata cannot report a logged-in session alone.
 		/// </summary>
-		/// <returns>True or false when cache is conclusive; null when no cache file is available.</returns>
+		/// <returns>True or false when cache is conclusive; null when no cache file is available or session credentials are missing.</returns>
 		private bool? TryGetAuthStatusFromUserDataCache()
 		{
+			if (!HasSessionCredentialsForAuth())
+			{
+				Common.LogDebug(true, "[SteamApi] Auth cache ignored: no stored cookies or token.");
+				return null;
+			}
+
 			lock (SteamUserDataFileSync)
 			{
 				SteamUserData freshCache = FileDataService.LoadData<SteamUserData>(FileUserData, UserDataAuthCacheMinutes);

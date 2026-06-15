@@ -19,6 +19,9 @@ namespace CommonPluginsShared
     {
         internal ILogger Logger => LogManager.GetLogger();
 
+        private static readonly object WebCookieLocksSync = new object();
+        private static readonly Dictionary<string, object> WebCookieLocksByClient = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
         #region Properties
 
         /// <summary>
@@ -233,6 +236,57 @@ namespace CommonPluginsShared
 
         /// <summary>
         /// Navigates to the specified URLs in a WebView and returns cookies set by those pages.
+        /// Only one refresh per store client runs at a time across the process.
+        /// </summary>
+        /// <param name="urls">Absolute URLs to visit in order.</param>
+        /// <param name="deleteCookies">When <c>true</c>, clears domain cookies from the WebView after extraction.</param>
+        /// <param name="webView">Optional WebView instance. An offscreen view is created when null.</param>
+        /// <returns>Filtered cookies for the configured domains.</returns>
+        public List<HttpCookie> GetNewWebCookiesSerialized(List<string> urls, bool deleteCookies = false, IWebView webView = null)
+        {
+            return GetNewWebCookiesSerialized(urls, deleteCookies, webView, 1000, null);
+        }
+
+        /// <summary>
+        /// Navigates to the specified URLs in a WebView and returns cookies set by those pages.
+        /// Only one refresh per store client runs at a time across the process.
+        /// </summary>
+        /// <param name="urls">Absolute URLs to visit in order.</param>
+        /// <param name="deleteCookies">When <c>true</c>, clears domain cookies from the WebView after extraction.</param>
+        /// <param name="webView">Optional WebView instance. An offscreen view is created when null.</param>
+        /// <param name="waitAfterNavigateMs">Delay in milliseconds after each navigation before reading cookies. Use 0 to skip the wait.</param>
+        /// <param name="cookiesToInject">
+        /// Cookies to inject before navigation. When <c>null</c>, all stored cookies are injected.
+        /// Pass an empty list to skip injection.
+        /// </param>
+        /// <returns>Filtered cookies for the configured domains, or an empty list on failure.</returns>
+        public List<HttpCookie> GetNewWebCookiesSerialized(List<string> urls, bool deleteCookies, IWebView webView, int waitAfterNavigateMs, List<HttpCookie> cookiesToInject)
+        {
+            object sync = GetWebCookieLock(ClientName);
+            bool lockTaken = false;
+
+            try
+            {
+                Monitor.TryEnter(sync, ref lockTaken);
+                if (!lockTaken)
+                {
+                    Common.LogDebug(true, $"{ClientName} GetNewWebCookies: waiting for in-flight WebView cookie refresh.");
+                    Monitor.Enter(sync, ref lockTaken);
+                }
+
+                return GetNewWebCookies(urls, deleteCookies, webView, waitAfterNavigateMs, cookiesToInject);
+            }
+            finally
+            {
+                if (lockTaken)
+                {
+                    Monitor.Exit(sync);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Navigates to the specified URLs in a WebView and returns cookies set by those pages.
         /// Uses a default post-navigation delay of 1000 ms.
         /// </summary>
         /// <param name="urls">Absolute URLs to visit in order.</param>
@@ -403,6 +457,20 @@ namespace CommonPluginsShared
             }
 
             return normalizedCookieDomain.EndsWith("." + normalizedAllowedDomain, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static object GetWebCookieLock(string clientName)
+        {
+            lock (WebCookieLocksSync)
+            {
+                if (!WebCookieLocksByClient.TryGetValue(clientName, out object sync))
+                {
+                    sync = new object();
+                    WebCookieLocksByClient[clientName] = sync;
+                }
+
+                return sync;
+            }
         }
 
         #endregion

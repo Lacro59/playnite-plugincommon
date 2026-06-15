@@ -148,19 +148,28 @@ namespace CommonPluginsStores.Gog
 
             if (!ForceFullLoginCheck)
             {
-                bool hasCookies = TryGetAuthStatusFromStoredCookies();
-                bool hasSavedUser = TryGetAuthStatusFromSavedUser();
-                if (hasCookies || hasSavedUser)
+                if (TryGetAuthStatusFromStoredCookies())
                 {
-                    Common.LogDebug(true, $"[GogApi] GetIsUserLoggedIn fast-path: hasCookies={hasCookies}, hasSavedUser={hasSavedUser}, isLogged=true.");
+                    Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn fast-path (stored cookies): isLogged=true until background verification.");
                     return true;
                 }
 
                 bool? cachedToken = TryGetAuthStatusFromStoredToken();
-                if (cachedToken.HasValue)
+                if (cachedToken == true)
                 {
-                    Common.LogDebug(true, $"[GogApi] GetIsUserLoggedIn fast-path (stored token): isLogged={cachedToken.Value}.");
-                    return cachedToken.Value;
+                    Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn fast-path (stored token): isLogged=true until background verification.");
+                    return true;
+                }
+
+                if (cachedToken == false)
+                {
+                    Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn fast-path (stored token): isLogged=false.");
+                    return false;
+                }
+
+                if (TryGetAuthStatusFromSavedUser())
+                {
+                    Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn fast-path: saved user ignored without cookies or token.");
                 }
 
                 Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn fast-path: no local session hint, returning false until background check.");

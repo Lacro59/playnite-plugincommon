@@ -72,6 +72,7 @@ namespace CommonPluginsControls.Stores
 
         /// <summary>
         /// Refreshes store visibility and selection after external state changes.
+        /// UI bindings only; network auth checks are scheduled by store panel binding or <see cref="RequestStoresAuthRefresh"/>.
         /// </summary>
         public void RefreshStores()
         {
@@ -84,6 +85,17 @@ namespace CommonPluginsControls.Stores
 
             _viewModel.RefreshVisibleStores();
             UpdateSelectedPanelVisibility();
+        }
+
+        /// <summary>
+        /// Schedules a background auth refresh for each registered store panel.
+        /// </summary>
+        public void RequestStoresAuthRefresh()
+        {
+            foreach (StoreSettingsEntry entry in _viewModel.Stores)
+            {
+                entry.RequestAuthRefresh();
+            }
         }
 
         private void StoresSettingsView_Loaded(object sender, RoutedEventArgs e)
