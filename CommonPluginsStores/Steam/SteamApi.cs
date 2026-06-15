@@ -1349,6 +1349,21 @@ namespace CommonPluginsStores.Steam
 		#region Steam
 
 		/// <summary>
+		/// Resolves the Steam AppId for <paramref name="game"/>.
+		/// Native Steam library games use <see cref="Game.GameId"/>; all other sources delegate to <see cref="GetAppId"/>.
+		/// </summary>
+		public uint ResolveAppId(Game game)
+		{
+			if (game.PluginId == GetPluginId(ExternalPlugin.SteamLibrary)
+				&& uint.TryParse(game.GameId, out uint nativeAppId))
+			{
+				return nativeAppId;
+			}
+
+			return GetAppId(game);
+		}
+
+		/// <summary>
 		/// Get AppId from Steam store with a game.
 		/// </summary>
 		/// <param name="game"></param>

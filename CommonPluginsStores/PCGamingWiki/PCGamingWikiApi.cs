@@ -41,97 +41,55 @@ namespace CommonPluginsStores.PCGamingWiki
 
 		private string UrlBase => @"https://pcgamingwiki.com";
 		private string UrlWithSteamId => UrlBase + @"/api/appid.php?appid={0}";
-		private string UrlPCGamingWikiSearch => UrlBase + @"/w/index.php?search=";
 		private string UrlPCGamingWikiSearchWithApi => UrlBase + @"/w/api.php?action=opensearch&format=json&formatversion=2&search={0}&namespace=0&limit=10";
 		
 		#endregion
 
-		public PCGamingWikiApi(string pluginName, ExternalPlugin pluginLibrary)
+		public PCGamingWikiApi(string pluginName, ExternalPlugin pluginLibrary, SteamApi steamApi = null)
 		{
 			PluginName = pluginName;
 			PluginLibrary = pluginLibrary;
-			SteamApi = new SteamApi(PluginName, ExternalPlugin.CheckLocalizations);
+			SteamApi = steamApi ?? new SteamApi(PluginName, pluginLibrary);
 		}
 
 		/// <summary>
-		/// Get the url for PCGamingWiki from url on Game or with Steam appId or with a search on website.
+		/// Resolves the best PCGamingWiki page URL for <paramref name="game"/>.
+		/// Order: direct wiki link, Steam AppId redirect, then opensearch.
 		/// </summary>
-		public string FindGoodUrl(Game game)
+		/// <param name="game">Target game.</param>
+		/// <param name="steamAppId">
+		/// Optional pre-resolved Steam AppId. When zero and the AppId step runs,
+		/// <see cref="SteamApi.ResolveAppId"/> is called and the result is written back
+		/// so callers can reuse it for a Steam fallback without a second lookup.
+		/// </param>
+		/// <param name="steamAppIdLookupAttempted">
+		/// Set to <see langword="true"/> once <see cref="SteamApi.ResolveAppId"/> has run
+		/// during the AppId lookup step, allowing callers to skip a redundant Steam fallback lookup.
+		/// </param>
+		public string FindGoodUrl(Game game, ref uint steamAppId, ref bool steamAppIdLookupAttempted)
 		{
 			try
 			{
-				string url = string.Empty;
-
-				#region With Steam appId
-
-				uint appId = 0;
-
-				if (game.PluginId == GetPluginId(ExternalPlugin.SteamLibrary))
+				string directUrl = GetDirectPcgwLink(game);
+				if (!directUrl.IsNullOrEmpty())
 				{
-					appId = uint.Parse(game.GameId);
-				}
-				else
-				{
-					appId = SteamApi.GetAppId(game);
+					Logger.Info($"Url for PCGamingWiki find for {game.Name} - {directUrl}");
+					return directUrl;
 				}
 
-				if (appId != 0)
+				string appIdUrl = TryGetUrlFromSteamAppId(game, ref steamAppId, ref steamAppIdLookupAttempted);
+				if (!appIdUrl.IsNullOrEmpty())
 				{
-					url = string.Format(UrlWithSteamId, appId);
-					Common.LogDebug(true, $"[PCGamingWikiApi] Trying appid lookup for {game.Name} ({appId}) with throttled request.");
-					WaitForApiRateLimit();
-					string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
-					if (!response.Contains("search results", StringComparison.OrdinalIgnoreCase))
-					{
-						Logger.Info($"Url for PCGamingWiki find for {game.Name} - {url}");
-						return url;
-					}
-					Logger.Warn($"PCGamingWiki appid lookup returned search page for {game.Name} ({appId}), using fallback strategies.");
+					Logger.Info($"Url for PCGamingWiki find for {game.Name} - {appIdUrl}");
+					return appIdUrl;
 				}
 
-				#endregion
-
-				#region With game links
-
-				url = game.Links?
-					.FirstOrDefault(link =>
-						link.Url.Contains("pcgamingwiki", StringComparison.OrdinalIgnoreCase) &&
-						!link.Url.StartsWith(UrlPCGamingWikiSearch, StringComparison.OrdinalIgnoreCase))
-					?.Url;
-
-				if (!url.IsNullOrEmpty())
+				string searchUrl = TryGetUrlFromPcgwSearch(game);
+				if (!searchUrl.IsNullOrEmpty())
 				{
-					Logger.Info($"Url for PCGamingWiki find for {game.Name} - {url}");
-					return url;
+					Logger.Info($"Url for PCGamingWiki find for {game.Name} - {searchUrl}");
+					return searchUrl;
 				}
-
-				#endregion
-
-				#region With PCGamingWiki search
-
-				string name = PlayniteTools.NormalizeGameName(game.Name);
-
-				if (game.ReleaseDate != null)
-				{
-					url = string.Format(UrlPCGamingWikiSearchWithApi,
-						WebUtility.UrlEncode(name + $" ({((ReleaseDate)game.ReleaseDate).Year})"));
-					url = GetWithSearchApi(url);
-					if (!url.IsNullOrEmpty())
-					{
-						Logger.Info($"Url for PCGamingWiki find for {game.Name} - {url}");
-						return url;
-					}
-				}
-
-				url = string.Format(UrlPCGamingWikiSearchWithApi, WebUtility.UrlEncode(name));
-				url = GetWithSearchApi(url);
-				if (!url.IsNullOrEmpty())
-				{
-					Logger.Info($"Url for PCGamingWiki find for {game.Name} - {url}");
-					return url;
-				}
-
-				#endregion
 			}
 			catch (Exception ex)
 			{
@@ -211,6 +169,76 @@ namespace CommonPluginsStores.PCGamingWiki
 		}
 
 		#region Private helpers
+
+		private string GetDirectPcgwLink(Game game)
+		{
+			return game.Links?
+				.Where(link =>
+					link.Url.Contains("pcgamingwiki", StringComparison.OrdinalIgnoreCase) &&
+					!IsPcgwSearchUrl(link.Url))
+				.Select(link => link.Url)
+				.FirstOrDefault();
+		}
+
+		/// <summary>
+		/// Returns <see langword="true"/> for PCGamingWiki search URLs (not article pages),
+		/// regardless of scheme or host casing.
+		/// </summary>
+		private static bool IsPcgwSearchUrl(string url)
+		{
+			return !url.IsNullOrEmpty()
+				&& url.IndexOf("/w/index.php?search=", StringComparison.OrdinalIgnoreCase) >= 0;
+		}
+
+		private string TryGetUrlFromSteamAppId(Game game, ref uint steamAppId, ref bool steamAppIdLookupAttempted)
+		{
+			if (!steamAppIdLookupAttempted)
+			{
+				if (steamAppId == 0)
+				{
+					steamAppId = SteamApi.ResolveAppId(game);
+				}
+
+				steamAppIdLookupAttempted = true;
+			}
+
+			if (steamAppId == 0)
+			{
+				return string.Empty;
+			}
+
+			string url = string.Format(UrlWithSteamId, steamAppId);
+			Common.LogDebug(true, $"[PCGamingWikiApi] Trying appid lookup for {game.Name} ({steamAppId}) with throttled request.");
+			WaitForApiRateLimit();
+			string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
+			if (!response.Contains("search results", StringComparison.OrdinalIgnoreCase))
+			{
+				return url;
+			}
+
+			Logger.Warn($"PCGamingWiki appid lookup returned search page for {game.Name} ({steamAppId}), using fallback strategies.");
+			return string.Empty;
+		}
+
+		private string TryGetUrlFromPcgwSearch(Game game)
+		{
+			string name = PlayniteTools.NormalizeGameName(game.Name);
+
+			if (game.ReleaseDate != null)
+			{
+				string urlWithYear = string.Format(
+					UrlPCGamingWikiSearchWithApi,
+					WebUtility.UrlEncode(name + $" ({((ReleaseDate)game.ReleaseDate).Year})"));
+				string result = GetWithSearchApi(urlWithYear);
+				if (!result.IsNullOrEmpty())
+				{
+					return result;
+				}
+			}
+
+			string url = string.Format(UrlPCGamingWikiSearchWithApi, WebUtility.UrlEncode(name));
+			return GetWithSearchApi(url);
+		}
 
 		private void ParseRow(string dataTitle, string dataMinimum, string dataRecommended, GameRequirements target)
 		{
