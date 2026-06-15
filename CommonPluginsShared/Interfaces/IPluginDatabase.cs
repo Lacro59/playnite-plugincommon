@@ -33,6 +33,9 @@ namespace CommonPluginsShared.Interfaces
 		/// </summary>
 		Action PersistSettingsAction { get; set; }
 
+		/// <summary>Gets plugin settings used for library game filtering.</summary>
+		IPluginSettings FilterSettings { get; }
+
 		/// <summary>Initialize the database.</summary>
 		Task<bool> InitializeDatabase();
 

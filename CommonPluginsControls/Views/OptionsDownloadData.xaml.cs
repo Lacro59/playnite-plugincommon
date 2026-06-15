@@ -96,6 +96,18 @@ namespace CommonPluginsControls.Controls
                 FilteredGames = FilteredGames.Where(x => oldDataIds.Contains(x.Id)).ToList();
             }
 
+            if (PluginDatabase.FilterSettings != null)
+            {
+                int beforeLibraryFilter = FilteredGames?.Count ?? 0;
+                FilteredGames = PlayniteTools.FilterLibraryGames(FilteredGames, PluginDatabase.FilterSettings).ToList();
+                Common.LogDebug(true, string.Format(
+                    "[LibraryFilter] OptionsDownloadData: {0} -> {1} games after library filter (IncludeEmulatedGames={2}, SourceFilter={3})",
+                    beforeLibraryFilter,
+                    FilteredGames.Count,
+                    PluginDatabase.FilterSettings.IncludeEmulatedGames,
+                    PlayniteTools.FormatSourceFilterForLog(PluginDatabase.FilterSettings)));
+            }
+
             LogDownloadFilters(months);
 
             ((Window)Parent).Close();

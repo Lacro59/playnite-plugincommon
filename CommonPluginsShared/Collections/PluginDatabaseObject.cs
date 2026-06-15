@@ -43,6 +43,9 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Gets or sets the strongly-typed plugin settings view model.</summary>
 		public TSettings PluginSettings { get; set; }
 
+		/// <inheritdoc/>
+		public IPluginSettings FilterSettings => PluginSettings;
+
 		public PluginExportCsv<TItem> PluginExportCsv { get; set; }
 
 		/// <summary>Gets or sets plugin-specific paths (database, cache, installation directory).</summary>
@@ -919,7 +922,7 @@ namespace CommonPluginsShared.Collections
 			IEnumerable<Game> notInDb = API.Instance.Database.Games
 				.Where(x => !db.ContainsItem(x.Id));
 
-			return withNoData.Union(notInDb).Distinct().Where(x => !x.Hidden);
+			return FilterLibraryGames(withNoData.Union(notInDb).Distinct());
 		}
 
 		/// <inheritdoc/>
@@ -931,9 +934,9 @@ namespace CommonPluginsShared.Collections
 				return Enumerable.Empty<Game>();
 			}
 
-			return db.Where(x => x.DateLastRefresh <= DateTime.Now.AddMonths(-months))
+			return FilterLibraryGames(db.Where(x => x.DateLastRefresh <= DateTime.Now.AddMonths(-months))
 				.Select(x => API.Instance.Database.Games.Get(x.Id))
-				.Where(x => x != null);
+				.Where(x => x != null));
 		}
 
 		/// <summary>Returns a projection of all database entries as DataGame view models.</summary>
@@ -1221,7 +1224,7 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Refreshes a batch of games with a cancellable progress dialog.</summary>
 		public virtual void Refresh(IEnumerable<Guid> ids, string message)
 		{
-			List<Guid> idList = ids.ToList();
+			List<Guid> idList = FilterLibraryGameIds(ids).ToList();
 
 			GlobalProgressOptions options = new GlobalProgressOptions(
 				string.Format("{0} - {1}", PluginName, message))
@@ -1300,6 +1303,13 @@ namespace CommonPluginsShared.Collections
 		public virtual void RefreshNoLoader(Guid id, CancellationToken cancellationToken = default)
 		{
 			Game game = API.Instance.Database.Games.Get(id);
+			string exclusionReason = PlayniteTools.GetLibraryFilterExclusionReason(game, PluginSettings);
+			if (exclusionReason != null)
+			{
+				PlayniteTools.LogLibraryFilterExclusion(string.Format("{0}.RefreshNoLoader", PluginName), game, exclusionReason);
+				return;
+			}
+
 			Logger.Info(string.Format("RefreshNoLoader — {0} ({1} - {2})", game?.Name, id, game?.GameId));
 
 			TItem cached = Get(id, true);
@@ -1324,8 +1334,8 @@ namespace CommonPluginsShared.Collections
 		public virtual void RefreshInstalled()
 		{
 			Logger.Info("RefreshInstalled() started.");
-			IEnumerable<Guid> ids = API.Instance.Database.Games
-				.Where(x => x.IsInstalled && !x.Hidden)
+			IEnumerable<Guid> ids = FilterLibraryGames(
+					API.Instance.Database.Games.Where(x => x.IsInstalled))
 				.Select(x => x.Id);
 			Logger.Info(string.Format(
 				"RefreshInstalled — {0} game(s) queued.", ids.Count()));
@@ -1353,8 +1363,8 @@ namespace CommonPluginsShared.Collections
 				? PluginSettings.LastAutoLibUpdateAssetsDownload
 				: DateTime.Now.AddMonths(-1);
 
-			IEnumerable<Guid> ids = API.Instance.Database.Games
-				.Where(x => x.Added != null && x.Added > since)
+			IEnumerable<Guid> ids = FilterLibraryGames(
+					API.Instance.Database.Games.Where(x => x.Added != null && x.Added > since))
 				.Select(x => x.Id);
 
 			Logger.Info(string.Format("RefreshRecent — {0} game(s) queued.", ids.Count()));
@@ -1494,8 +1504,7 @@ namespace CommonPluginsShared.Collections
 		public void AddTagAllGames()
 		{
 			Logger.Info("AddTagAllGame() started.");
-			IEnumerable<Guid> ids = API.Instance.Database.Games
-				.Where(x => !x.Hidden)
+			IEnumerable<Guid> ids = FilterLibraryGames(API.Instance.Database.Games)
 				.Select(x => x.Id);
 			AddTag(ids, string.Format("{0} - {1}", PluginName,
 				ResourceProvider.GetString("LOCCommonAddingAllTag")));
@@ -1937,6 +1946,75 @@ namespace CommonPluginsShared.Collections
 		private bool IsTaggingEnabled() => PluginSettings != null && PluginSettings.EnableTag;
 
 		private bool IsAutoImportOnInstalledEnabled() => PluginSettings != null && PluginSettings.AutoImportOnInstalled;
+
+		/// <summary>
+		/// Returns <c>true</c> when <paramref name="game"/> should be included in library-wide plugin operations.
+		/// </summary>
+		protected bool ShouldIncludeLibraryGame(Game game, bool includeHidden = false)
+			=> PlayniteTools.ShouldIncludeLibraryGame(game, PluginSettings, includeHidden);
+
+		/// <summary>
+		/// Filters games using the active plugin library filter settings.
+		/// </summary>
+		protected IEnumerable<Game> FilterLibraryGames(IEnumerable<Game> games, bool includeHidden = false)
+			=> PlayniteTools.FilterLibraryGames(games, PluginSettings, includeHidden);
+
+		/// <summary>
+		/// Filters game identifiers, resolving each game from the Playnite database.
+		/// </summary>
+		protected IEnumerable<Guid> FilterLibraryGameIds(IEnumerable<Guid> ids)
+		{
+			if (ids == null)
+			{
+				return Enumerable.Empty<Guid>();
+			}
+
+			List<Guid> idList = ids as List<Guid> ?? ids.ToList();
+			List<Guid> included = new List<Guid>(idList.Count);
+			int excludedEmulated = 0;
+			int excludedHidden = 0;
+			int excludedSource = 0;
+
+			foreach (Guid id in idList)
+			{
+				Game game = API.Instance.Database.Games.Get(id);
+				if (game == null)
+				{
+					continue;
+				}
+
+				string reason = PlayniteTools.GetLibraryFilterExclusionReason(game, PluginSettings);
+				if (reason == null)
+				{
+					included.Add(id);
+					continue;
+				}
+
+				if (reason == "hidden")
+				{
+					excludedHidden++;
+				}
+				else if (reason == "emulated")
+				{
+					excludedEmulated++;
+				}
+				else if (reason == "source")
+				{
+					excludedSource++;
+				}
+			}
+
+			PlayniteTools.LogLibraryFilterSummary(
+				string.Format("{0}.FilterLibraryGameIds", PluginName),
+				idList.Count,
+				included.Count,
+				PluginSettings,
+				excludedEmulated,
+				excludedHidden,
+				excludedSource);
+
+			return included;
+		}
 
 		/// <summary>
 		/// Normalizes all DateTime values to UTC in the object graph.

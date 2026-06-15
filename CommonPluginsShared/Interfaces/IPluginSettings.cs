@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace CommonPluginsShared.Interfaces
 {
@@ -46,5 +47,28 @@ namespace CommonPluginsShared.Interfaces
 		/// <para>Not serialized — runtime state only.</para>
 		/// </summary>
 		bool PreventLibraryUpdatedOnStart { get; set; }
+
+		/// <summary>
+		/// Gets or sets a value indicating whether emulated games are included in plugin
+		/// library operations (refresh, import, tags, selection dialogs).
+		/// </summary>
+		bool IncludeEmulatedGames { get; set; }
+
+		/// <summary>
+		/// Gets or sets how source-based library filtering is applied.
+		/// </summary>
+		SourceFilterMode LibrarySourceFilterMode { get; set; }
+
+		/// <summary>
+		/// Gets or sets normalized source names included when <see cref="LibrarySourceFilterMode"/> is <see cref="SourceFilterMode.Whitelist"/>.
+		/// Values are compared against <c>PlayniteTools.GetSourceName</c>.
+		/// </summary>
+		List<string> EnabledSources { get; set; }
+
+		/// <summary>
+		/// Gets or sets normalized source names excluded when <see cref="LibrarySourceFilterMode"/> is <see cref="SourceFilterMode.Blacklist"/>.
+		/// Values are compared against <c>PlayniteTools.GetSourceName</c>.
+		/// </summary>
+		List<string> ExcludedSources { get; set; }
 	}
 }
