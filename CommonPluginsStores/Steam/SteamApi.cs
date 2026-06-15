@@ -1843,6 +1843,10 @@ namespace CommonPluginsStores.Steam
 				{
 					result.Recommended = ParseSteamRequirementHtml(pcRequirements.recommended, false);
 				}
+				else if (ContainsEmbeddedRecommendedSection(pcRequirements.minimum))
+				{
+					result.Recommended = ParseSteamRequirementHtml(pcRequirements.minimum, false);
+				}
 
 				result.SourceLink = new SourceLink
 				{
@@ -1860,109 +1864,353 @@ namespace CommonPluginsStores.Steam
 			}
 		}
 
+		private static bool ContainsEmbeddedRecommendedSection(string html)
+		{
+			return !html.IsNullOrEmpty()
+				&& html.IndexOf("<strong>Recommended", StringComparison.OrdinalIgnoreCase) > -1;
+		}
+
 		private static RequirementEntry ParseSteamRequirementHtml(string html, bool isMinimum)
 		{
 			RequirementEntry entry = new RequirementEntry { IsMinimum = isMinimum };
 
-			HtmlParser parser = new HtmlParser();
-			IHtmlDocument document = parser.Parse(html);
-
-			foreach (IElement element in document.QuerySelectorAll("li"))
+			if (html.IsNullOrEmpty())
 			{
-				Common.LogDebug(true, $"SteamApi.ParseSteamRequirementHtml - {element.InnerHtml}");
+				return entry;
+			}
 
-				if (element.InnerHtml.Contains("TBD", StringComparison.InvariantCultureIgnoreCase))
-				{
-					continue;
-				}
+			string sectionHtml = ExtractRequirementSectionHtml(html, isMinimum);
+			HtmlParser parser = new HtmlParser();
+			IHtmlDocument document = parser.Parse(sectionHtml);
+			IHtmlCollection<IElement> listItems = document.QuerySelectorAll("li");
 
-				if (element.InnerHtml.IndexOf("<strong>OS") > -1)
+			if (listItems.Length > 0)
+			{
+				foreach (IElement element in listItems)
 				{
-					ParseOs(element.InnerHtml, entry);
+					Common.LogDebug(true, $"SteamApi.ParseSteamRequirementHtml - {element.InnerHtml}");
+					ParseRequirementListItem(element.InnerHtml, entry);
 				}
-				else if (element.InnerHtml.IndexOf("<strong>Processor") > -1)
-				{
-					ParseCpu(element.InnerHtml, entry);
-				}
-				else if (element.InnerHtml.IndexOf("<strong>Memory") > -1)
-				{
-					entry.Ram = ParseMemorySize(element.InnerHtml);
-				}
-				else if (element.InnerHtml.IndexOf("<strong>Graphics") > -1)
-				{
-					ParseGpu(element.InnerHtml, entry);
-				}
-				else if (element.InnerHtml.IndexOf("<strong>DirectX") > -1)
-				{
-					ParseDirectX(element.InnerHtml, entry);
-				}
-				else if (element.InnerHtml.IndexOf("<strong>Storage") > -1
-					  || element.InnerHtml.IndexOf("<strong>Hard Drive") > -1)
-				{
-					entry.Storage = ParseStorageSize(element.InnerHtml);
-				}
+			}
+			else
+			{
+				ParseLegacyRequirementHtml(document, sectionHtml, entry);
 			}
 
 			return entry;
 		}
 
-		private static void ParseOs(string html, RequirementEntry entry)
+		private static string ExtractRequirementSectionHtml(string html, bool isMinimum)
 		{
-			string os = Regex.Replace(html, "<[^>]*>", string.Empty)
-				.ToLower()
-				.Replace("\t", " ")
-				.Replace("os: ", string.Empty)
-				.Replace("os *: ", string.Empty)
-				.Replace("pc/ms-dos 5.0", string.Empty)
-				.Replace("(64-bit required)", string.Empty)
-				.Replace("(32/64-bit)", string.Empty)
-				.Replace("with platform update for  7 ( versions only)", string.Empty)
-				.Replace("(vista+ probably works)", string.Empty)
-				.Replace("win ", string.Empty)
-				.Replace("windows", string.Empty)
-				.Replace("microsoft", string.Empty)
-				.Replace(", 32-bit", string.Empty)
-				.Replace(", 32bit", string.Empty)
-				.Replace(", 64-bit", string.Empty)
-				.Replace(", 64bit", string.Empty)
-				.Replace("®", string.Empty)
-				.Replace("™", string.Empty)
-				.Replace("+", string.Empty)
-				.Replace("and above", string.Empty)
-				.Replace("x32", string.Empty)
-				.Replace("and", string.Empty)
-				.Replace("x64", string.Empty)
-				.Replace("32-bit", string.Empty)
-				.Replace("32bit", string.Empty)
-				.Replace("32 bit", string.Empty)
-				.Replace("64-bit", string.Empty)
-				.Replace("64bit", string.Empty)
-				.Replace("64 bit", string.Empty)
-				.Replace("latest service pack", string.Empty)
-				.Replace("32-bit/64-bit", string.Empty)
-				.Replace("32bit/64bit", string.Empty)
-				.Replace("64-bit operating system required", string.Empty)
-				.Replace("32-bit operating system required", string.Empty)
-				.Replace(" operating system required", string.Empty)
-				.Replace("operating system required", string.Empty)
-				.Replace(" equivalent or better", string.Empty)
-				.Replace(" or equivalent.", string.Empty)
-				.Replace(" or equivalent", string.Empty)
-				.Replace(" or newer", string.Empty)
-				.Replace("or newer", string.Empty)
-				.Replace("or later", string.Empty)
-				.Replace("or higher", string.Empty)
-				.Replace("()", string.Empty)
-				.Trim();
+			int recommendedIndex = html.IndexOf("<strong>Recommended", StringComparison.OrdinalIgnoreCase);
+			if (recommendedIndex < 0)
+			{
+				return html;
+			}
 
-			if (os.Trim() == "(/)" || os.Trim().IsNullOrEmpty())
+			return isMinimum
+				? html.Substring(0, recommendedIndex)
+				: html.Substring(recommendedIndex);
+		}
+
+		private static void ParseRequirementListItem(string innerHtml, RequirementEntry entry)
+		{
+			if (innerHtml.Contains("TBD", StringComparison.InvariantCultureIgnoreCase))
 			{
 				return;
 			}
 
-			foreach (string token in os.Replace(",", "¤").Replace(" or ", "¤").Replace("/", "¤").Split('¤'))
+			switch (DetectRequirementField(innerHtml))
 			{
-				string t = token.Trim();
+				case SteamRequirementField.Os:
+					ParseOs(innerHtml, entry);
+					break;
+				case SteamRequirementField.Cpu:
+					ParseCpu(innerHtml, entry);
+					break;
+				case SteamRequirementField.Ram:
+					entry.RamSource = StripRequirementHtml(innerHtml);
+					break;
+				case SteamRequirementField.Gpu:
+					ParseGpu(innerHtml, entry);
+					break;
+				case SteamRequirementField.DirectX:
+					ParseDirectX(innerHtml, entry);
+					break;
+				case SteamRequirementField.Storage:
+					entry.StorageSource = StripRequirementHtml(innerHtml);
+					break;
+			}
+		}
+
+		private static void ParseLegacyRequirementHtml(IHtmlDocument document, string sectionHtml, RequirementEntry entry)
+		{
+			bool parsedParagraph = false;
+
+			foreach (IElement paragraph in document.QuerySelectorAll("p"))
+			{
+				string innerHtml = paragraph.InnerHtml;
+				if (innerHtml.IsNullOrEmpty()
+					|| innerHtml.Contains("TBD", StringComparison.InvariantCultureIgnoreCase)
+					|| innerHtml.IndexOf("Supported Video Chipsets", StringComparison.OrdinalIgnoreCase) > -1)
+				{
+					continue;
+				}
+
+				if (DetectRequirementField(innerHtml) != SteamRequirementField.Unknown)
+				{
+					ParseRequirementListItem(innerHtml, entry);
+					parsedParagraph = true;
+					continue;
+				}
+
+				string plainText = StripRequirementHtml(innerHtml);
+				if (plainText.IndexOf(';') > -1)
+				{
+					ParseSemicolonInlineRequirements(plainText, entry);
+					parsedParagraph = true;
+				}
+				else if (plainText.IndexOf(',') > -1)
+				{
+					ParseCommaSeparatedRequirements(plainText, entry);
+					parsedParagraph = true;
+				}
+			}
+
+			if (!parsedParagraph && !entry.HasData)
+			{
+				string plainText = StripRequirementHtml(sectionHtml);
+				if (plainText.IndexOf(';') > -1)
+				{
+					ParseSemicolonInlineRequirements(plainText, entry);
+				}
+				else if (plainText.IndexOf(',') > -1)
+				{
+					ParseCommaSeparatedRequirements(plainText, entry);
+				}
+			}
+		}
+
+		private static void ParseSemicolonInlineRequirements(string text, RequirementEntry entry)
+		{
+			foreach (string segment in text.Split(';'))
+			{
+				string part = segment.Trim();
+				if (part.IsNullOrEmpty())
+				{
+					continue;
+				}
+
+				switch (DetectInlineRequirementField(part))
+				{
+					case SteamRequirementField.Os:
+						ParseOs(part, entry);
+						break;
+					case SteamRequirementField.Cpu:
+						ParseCpu(part, entry);
+						break;
+					case SteamRequirementField.Ram:
+						entry.RamSource = StripInlineLabel(part);
+						break;
+					case SteamRequirementField.Gpu:
+						ParseGpu(part, entry);
+						break;
+					case SteamRequirementField.DirectX:
+						ParseDirectX(part, entry);
+						break;
+					case SteamRequirementField.Storage:
+						entry.StorageSource = StripInlineLabel(part);
+						break;
+				}
+			}
+		}
+
+		private static void ParseCommaSeparatedRequirements(string text, RequirementEntry entry)
+		{
+			text = Regex.Replace(text, @"(?i)^(?:minimum|recommended)\s*:\s*", string.Empty).Trim();
+
+			foreach (string segment in text.Split(','))
+			{
+				string part = segment.Trim();
+				if (part.IsNullOrEmpty()
+					|| part.Equals("Mouse", StringComparison.OrdinalIgnoreCase)
+					|| part.Equals("Keyboard", StringComparison.OrdinalIgnoreCase)
+					|| part.IndexOf("Internet Connection", StringComparison.OrdinalIgnoreCase) > -1)
+				{
+					continue;
+				}
+
+				switch (DetectInlineRequirementField(part))
+				{
+					case SteamRequirementField.Os:
+						ParseOs(part, entry);
+						break;
+					case SteamRequirementField.Cpu:
+						ParseCpu(part, entry);
+						break;
+					case SteamRequirementField.Ram:
+						if (entry.RamSource.IsNullOrEmpty())
+						{
+							entry.RamSource = part;
+						}
+						break;
+					case SteamRequirementField.Gpu:
+						ParseGpu(part, entry);
+						break;
+					case SteamRequirementField.DirectX:
+						ParseDirectX(part, entry);
+						break;
+					case SteamRequirementField.Storage:
+						if (entry.StorageSource.IsNullOrEmpty())
+						{
+							entry.StorageSource = part;
+						}
+						break;
+				}
+			}
+		}
+
+		private static SteamRequirementField DetectRequirementField(string innerHtml)
+		{
+			string lower = innerHtml.ToLowerInvariant();
+
+			if (lower.IndexOf("<strong>os", StringComparison.Ordinal) > -1)
+			{
+				return SteamRequirementField.Os;
+			}
+
+			if (lower.IndexOf("<strong>processor", StringComparison.Ordinal) > -1
+				|| lower.IndexOf("<strong>cpu", StringComparison.Ordinal) > -1)
+			{
+				return SteamRequirementField.Cpu;
+			}
+
+			if (lower.IndexOf("<strong>memory", StringComparison.Ordinal) > -1
+				|| lower.IndexOf("<strong>ram", StringComparison.Ordinal) > -1)
+			{
+				return SteamRequirementField.Ram;
+			}
+
+			if (lower.IndexOf("<strong>graphics", StringComparison.Ordinal) > -1
+				|| lower.IndexOf("<strong>video card", StringComparison.Ordinal) > -1
+				|| lower.IndexOf("<strong>video", StringComparison.Ordinal) > -1)
+			{
+				return SteamRequirementField.Gpu;
+			}
+
+			if (lower.IndexOf("<strong>directx", StringComparison.Ordinal) > -1)
+			{
+				return SteamRequirementField.DirectX;
+			}
+
+			if (lower.IndexOf("<strong>storage", StringComparison.Ordinal) > -1
+				|| lower.IndexOf("<strong>hard drive", StringComparison.Ordinal) > -1
+				|| lower.IndexOf("<strong>hard disk", StringComparison.Ordinal) > -1
+				|| lower.IndexOf("<strong>dlc size", StringComparison.Ordinal) > -1)
+			{
+				return SteamRequirementField.Storage;
+			}
+
+			return SteamRequirementField.Unknown;
+		}
+
+		private static SteamRequirementField DetectInlineRequirementField(string text)
+		{
+			string lower = text.ToLowerInvariant();
+
+			if (Regex.IsMatch(lower, @"^\s*os\b"))
+			{
+				return SteamRequirementField.Os;
+			}
+
+			if (Regex.IsMatch(lower, @"^\s*cpu\s*:")
+				|| Regex.IsMatch(lower, @"\b\d+\s*(mhz|ghz)\s*processor\b")
+				|| (Regex.IsMatch(lower, @"\b(pentium|athlon|core i|ryzen|celeron|dual[\s-]?core|quad[\s-]?core)\b")
+					&& !lower.Contains("video card")))
+			{
+				return SteamRequirementField.Cpu;
+			}
+
+			if (Regex.IsMatch(lower, @"^\s*ram\s*:")
+				|| Regex.IsMatch(lower, @"\b\d+\s*mb\s*ram\b")
+				|| Regex.IsMatch(lower, @"\b\d+\s*gb\s*ram\b")
+				|| lower.Contains("system ram"))
+			{
+				return SteamRequirementField.Ram;
+			}
+
+			if (Regex.IsMatch(lower, @"^\s*directx\s*\d")
+				|| Regex.IsMatch(lower, @"^\s*directx\d"))
+			{
+				return SteamRequirementField.DirectX;
+			}
+
+			if (lower.Contains("free hard disk")
+				|| lower.Contains("hard drive")
+				|| lower.Contains("disk space")
+				|| lower.Contains("free uncompressed hard drive")
+				|| Regex.IsMatch(lower, @"^\s*storage\s*:"))
+			{
+				return SteamRequirementField.Storage;
+			}
+
+			if (lower.Contains("video card")
+				|| lower.Contains("3d accelerated")
+				|| lower.Contains("geforce")
+				|| lower.Contains("radeon")
+				|| lower.Contains("discrete video")
+				|| lower.Contains("graphics card")
+				|| lower.Contains("nvidia")
+				|| lower.Contains(" amd "))
+			{
+				return SteamRequirementField.Gpu;
+			}
+
+			if (lower.Contains("windows")
+				|| Regex.IsMatch(lower, @"\bwin(dows)?\s*(xp|7|8|10|11|2000|vista)\b"))
+			{
+				return SteamRequirementField.Os;
+			}
+
+			if (lower.Contains("directx"))
+			{
+				return SteamRequirementField.DirectX;
+			}
+
+			return SteamRequirementField.Unknown;
+		}
+
+		private static string StripInlineLabel(string text)
+		{
+			return Regex.Replace(text, @"(?i)^(?:os|cpu|ram|storage|free hard disk space|hard disk space|hard drive)\s*:\s*", string.Empty).Trim();
+		}
+
+		private enum SteamRequirementField
+		{
+			Unknown,
+			Os,
+			Cpu,
+			Ram,
+			Gpu,
+			DirectX,
+			Storage
+		}
+
+		private static void ParseOs(string html, RequirementEntry entry)
+		{
+			string os = Regex.Replace(html, "<[^>]*>", string.Empty)
+				.Replace("\t", " ")
+				.Trim();
+
+			if (os.IsNullOrEmpty())
+			{
+				return;
+			}
+
+			foreach (string token in os.Replace(",", "¤").Replace(";", "¤").Replace(" or ", "¤").Replace("/", "¤").Split('¤'))
+			{
+				string t = Regex.Replace(token.Trim(), @"[\uFFFD\?]+", string.Empty).Trim();
+				t = Regex.Replace(t, @"(?i)^os\s*[*]?\s*:\s*", string.Empty).Trim();
 				if (!t.IsNullOrEmpty())
 				{
 					entry.Os.Add(t);
@@ -1976,6 +2224,8 @@ namespace CommonPluginsStores.Steam
 				.Replace("\t", " ")
 				.Replace("<strong>Processor:</strong>", string.Empty)
 				.Replace("<strong>Processor: </strong>", string.Empty)
+				.Replace("<strong>CPU:</strong>", string.Empty)
+				.Replace("<strong>CPU: </strong>", string.Empty)
 				.Replace("&nbsp;", string.Empty)
 				.Replace("GHz, or better)", "GHz)")
 				.Replace("Requires a 64-bit processor and operating system", string.Empty)
@@ -2015,13 +2265,16 @@ namespace CommonPluginsStores.Steam
 				.Trim();
 
 			cpu = Regex.Replace(cpu, "<[^>]*>", string.Empty);
+			cpu = Regex.Replace(cpu, @"[\uFFFD\?]+", string.Empty);
+			cpu = Regex.Replace(cpu, @"(?i)^processor\s*:\s*", string.Empty);
+			cpu = Regex.Replace(cpu, @"(?i)^cpu\s*:\s*", string.Empty);
 			cpu = Regex.Replace(cpu, @", ~?(\d+(\.\d+)?)", " $1", RegexOptions.IgnoreCase);
 			cpu = Regex.Replace(cpu, @"(\d+),(\d+ GHz)", "$1.$2", RegexOptions.IgnoreCase);
 			cpu = Regex.Replace(cpu, @"(\d+),(\d+) - (\d+ GHz)", "$3", RegexOptions.IgnoreCase);
 			cpu = Regex.Replace(cpu, @"(\d+)GHz", "$1 GHz", RegexOptions.IgnoreCase);
 			cpu = Regex.Replace(cpu, @"(\d+)k", "$1K", RegexOptions.IgnoreCase);
 			cpu = Regex.Replace(cpu, @"(\d+\.\d+)\+ (GHz)", "$1 $2", RegexOptions.IgnoreCase);
-			cpu = Regex.Replace(cpu, @"(,|\/|\sor\s|\sand\s|\|)", "¤", RegexOptions.IgnoreCase);
+			cpu = Regex.Replace(cpu, @"(,|\/|\sor\s|\sand\s|\||;)", "¤", RegexOptions.IgnoreCase);
 
 			foreach (string token in cpu.Split('¤'))
 			{
@@ -2044,7 +2297,7 @@ namespace CommonPluginsStores.Steam
 			gpu = Regex.Replace(gpu, @"DX\d+ Compliant", string.Empty, RegexOptions.IgnoreCase);
 			gpu = Regex.Replace(gpu, @"de \d+ GB", string.Empty, RegexOptions.IgnoreCase);
 			gpu = Regex.Replace(gpu, @"GPU (\d+)GB VRAM", "GPU $1 GB VRAM", RegexOptions.IgnoreCase);
-			gpu = Regex.Replace(gpu, @"(,|with)?\s*(\d+)\s*(GB|MB)(\s* system ram)?", " ($2 $3)", RegexOptions.IgnoreCase);
+			gpu = Regex.Replace(gpu, @"(,|with)?\s*(\d+)\s*(GB|MB|GO)(\s* system ram)?", " ($2 $3)", RegexOptions.IgnoreCase);
 			gpu = Regex.Replace(gpu, @"\(A minimum of \(\d+ GB\) of VRAM\)", string.Empty, RegexOptions.IgnoreCase);
 
 			gpu = gpu.Replace("\t", " ")
@@ -2077,8 +2330,6 @@ namespace CommonPluginsStores.Steam
 				.Replace("3D with TnL support and", string.Empty)
 				.Replace(" compatible", string.Empty)
 				.Replace("of addressable memory", string.Empty)
-				.Replace("Any", string.Empty)
-				.Replace("any", string.Empty)
 				.Replace("/Nvidia", " / Nvidia")
 				.Replace("or AMD equivalent", string.Empty)
 				.Replace("(Requires support for SSE)", string.Empty)
@@ -2105,6 +2356,14 @@ namespace CommonPluginsStores.Steam
 				.Replace(" memory recommended", string.Empty)
 				.Replace("e.g.", string.Empty)
 				.Replace("Laptop integrated ", string.Empty)
+				.Replace("Integrated graphics", string.Empty, StringComparison.OrdinalIgnoreCase)
+				.Replace("Integrated", string.Empty, StringComparison.OrdinalIgnoreCase)
+				.Replace("Dedicated graphics", string.Empty, StringComparison.OrdinalIgnoreCase)
+				.Replace("Dedicated", string.Empty, StringComparison.OrdinalIgnoreCase)
+				.Replace("Discreet video card", string.Empty, StringComparison.OrdinalIgnoreCase)
+				.Replace("Discrete video card", string.Empty, StringComparison.OrdinalIgnoreCase)
+				.Replace("Discreet graphics card", string.Empty, StringComparison.OrdinalIgnoreCase)
+				.Replace("Discrete graphics card", string.Empty, StringComparison.OrdinalIgnoreCase)
 				.Replace("GPU 1GB VRAM", "GPU 1 GB VRAM")
 				.Replace("8GB Memory 8 GB RAM", "(8 GB)")
 				.Replace(" or more and should be a DirectX 9-compatible with support for Pixel Shader 3.0", string.Empty)
@@ -2131,15 +2390,15 @@ namespace CommonPluginsStores.Steam
 
 			gpu = Regex.Replace(gpu, @"(gb|mb)(\))?\s*\+", "$1$2", RegexOptions.IgnoreCase);
 			gpu = Regex.Replace(gpu, @" - (\d+) (gb|mb)", " ($1 $2)", RegexOptions.IgnoreCase);
-			gpu = gpu.Replace(",", "¤").Replace(" or ", "¤").Replace(" OR ", "¤")
+			gpu = gpu.Replace(",", "¤").Replace(";", "¤").Replace(" or ", "¤").Replace(" OR ", "¤")
 					 .Replace(" / ", "¤").Replace(" /", "¤").Replace(" | ", "¤");
 
 			foreach (string token in gpu.Split('¤'))
 			{
-				string t = token.Trim();
+				string t = Regex.Replace(token.Trim(), @"[\uFFFD\?]+", string.Empty).Trim();
 				if (t.IsNullOrEmpty()) { continue; }
 
-				if (t.ToLower().IndexOf("nvidia") > -1 || t.ToLower().IndexOf("amd") > -1 || t.ToLower().IndexOf("intel") > -1)
+				if (IsKnownGpuBrandToken(t))
 				{
 					entry.Gpu.Add(Regex.Replace(t, @"\(\d+\s*(mb|gb)\)", string.Empty, RegexOptions.IgnoreCase).Trim());
 				}
@@ -2166,8 +2425,31 @@ namespace CommonPluginsStores.Steam
 			}
 		}
 
+		private static bool IsKnownGpuBrandToken(string token)
+		{
+			string lower = token.ToLowerInvariant();
+
+			return lower.IndexOf("nvidia") > -1
+				|| lower.IndexOf("amd") > -1
+				|| lower.IndexOf("intel") > -1
+				|| lower.IndexOf("ati") > -1
+				|| Regex.IsMatch(lower, @"\b(gtx|rtx|rx\s*\d|geforce|radeon|r[579]\s*[- ]?\d|hd\s+radeon|gt\s*\d)\b");
+		}
+
 		private static void ParseDirectX(string html, RequirementEntry entry)
 		{
+			Match versionMatch = Regex.Match(html, @"Version\s*(\d+)", RegexOptions.IgnoreCase);
+			if (versionMatch.Success && int.TryParse(versionMatch.Groups[1].Value, out int parsedVersion))
+			{
+				string dx = $"DirectX {parsedVersion}";
+				if (entry.Gpu.Find(x => x.IsEqual(dx)) == null)
+				{
+					entry.Gpu.Add(dx);
+				}
+
+				return;
+			}
+
 			int[] versions = { 8, 9, 10, 11, 12 };
 			foreach (int version in versions)
 			{
@@ -2179,53 +2461,11 @@ namespace CommonPluginsStores.Steam
 			}
 		}
 
-		/// <summary>Parses "NNN MB/GB" or "NNN.N GB/MB" from a raw HTML element string into bytes.</summary>
-		private static double ParseMemorySize(string html)
+		private static string StripRequirementHtml(string html)
 		{
-			string ram = Regex.Match(html.ToLower()
+			return Regex.Replace(html ?? string.Empty, "<[^>]*>", string.Empty)
 				.Replace("\t", " ")
-				.Replace("<strong>memory:</strong>", string.Empty)
-				.Replace("<strong>memory: </strong>", string.Empty),
-				@"\d+((.|,)\d+)?[ ]?(mb|gb)").ToString().Trim();
-
-			// Keep highest value when multiple sizes appear (e.g. "4/8 GB")
-			ram = ram.Split('/')[ram.Split('/').Length - 1];
-			return ParseSizeString(ram);
-		}
-
-		private static double ParseStorageSize(string html)
-		{
-			string storage = Regex.Match(html.ToLower()
-				.Replace("\t", " ")
-				.Replace("<strong>storage:</strong>", string.Empty)
-				.Replace("<strong>storage: </strong>", string.Empty)
-				.Replace("<strong>hard drive:</strong>", string.Empty)
-				.Replace("<strong>hard drive: </strong>", string.Empty),
-				@"\d+((.|,)\d+)?[ ]?(mb|gb)").ToString().Trim();
-
-			return ParseSizeString(storage);
-		}
-
-		/// <summary>Converts a "NNN MB" / "NNN.N GB" string to bytes as double.</summary>
-		private static double ParseSizeString(string sizeToken)
-		{
-			if (sizeToken.IndexOf("mb", StringComparison.OrdinalIgnoreCase) > -1)
-			{
-				double.TryParse(
-					sizeToken.ToLower().Replace("mb", string.Empty)
-						.Replace(".", CultureInfo.CurrentCulture.NumberFormat.CurrencyDecimalSeparator).Trim(),
-					out double mb);
-				return 1024.0 * 1024 * mb;
-			}
-			if (sizeToken.IndexOf("gb", StringComparison.OrdinalIgnoreCase) > -1)
-			{
-				double.TryParse(
-					sizeToken.ToLower().Replace("gb", string.Empty)
-						.Replace(".", CultureInfo.CurrentCulture.NumberFormat.CurrencyDecimalSeparator).Trim(),
-					out double gb);
-				return 1024.0 * 1024 * 1024 * gb;
-			}
-			return 0;
+				.Trim();
 		}
 
 		/// <summary>

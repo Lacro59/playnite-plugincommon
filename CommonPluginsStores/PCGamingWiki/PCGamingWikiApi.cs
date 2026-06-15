@@ -255,22 +255,28 @@ namespace CommonPluginsStores.PCGamingWiki
 					break;
 
 				case "system memory (ram)":
-					if (!dataMinimum.IsNullOrEmpty()) target.Minimum.Ram = ParseSize(dataMinimum);
-					// Note: original code used dataMinimum for recommended — bug preserved intentionally; fix if needed.
-					if (!dataRecommended.IsNullOrEmpty()) target.Recommended.Ram = ParseSize(dataRecommended);
+					if (!dataMinimum.IsNullOrEmpty()) target.Minimum.RamSource = StripPlainText(dataMinimum);
+					if (!dataRecommended.IsNullOrEmpty()) target.Recommended.RamSource = StripPlainText(dataRecommended);
 					break;
 
 				case "storage drive (hdd/ssd)":
-					if (!dataMinimum.IsNullOrEmpty()) target.Minimum.Storage = ParseSize(dataMinimum);
-					if (!dataRecommended.IsNullOrEmpty()) target.Recommended.Storage = ParseSize(dataRecommended);
+					if (!dataMinimum.IsNullOrEmpty()) target.Minimum.StorageSource = StripPlainText(dataMinimum);
+					if (!dataRecommended.IsNullOrEmpty()) target.Recommended.StorageSource = StripPlainText(dataRecommended);
 					break;
 
 				case "video card (gpu)":
-					if (!dataMinimum.IsNullOrEmpty()) target.Minimum.Gpu = ParseGpu(dataMinimum);
-					if (!dataRecommended.IsNullOrEmpty()) target.Recommended.Gpu = ParseGpu(dataRecommended);
+					if (!dataMinimum.IsNullOrEmpty()) target.Minimum.Gpu.AddRange(ParseGpu(dataMinimum));
+					if (!dataRecommended.IsNullOrEmpty()) target.Recommended.Gpu.AddRange(ParseGpu(dataRecommended));
 					break;
 
 				default:
+					if (dataTitle.IndexOf("directx", StringComparison.OrdinalIgnoreCase) >= 0
+						|| dataTitle.IndexOf("direct3d", StringComparison.OrdinalIgnoreCase) >= 0)
+					{
+						ParseDirectXRow(dataTitle, dataMinimum, dataRecommended, target);
+						break;
+					}
+
 					Logger.Warn($"PCGamingWikiApi - No handler for sysreq field: {dataTitle}");
 					break;
 			}
@@ -323,18 +329,8 @@ namespace CommonPluginsStores.PCGamingWiki
 			data = data.Replace("<br>", "¤");
 			data = Regex.Replace(data, @"<[^>]*>", string.Empty, RegexOptions.IgnoreCase);
 
-			data = data
-				.Replace("Anything made in the last decade", string.Empty)
-				.Replace("(latest service pack)", string.Empty)
-				.Replace("(1803 or later)", string.Empty)
-				.Replace(" (Only inclusive until patch 1.16.1. Patch 1.17+ Needs XP and greater.)", string.Empty)
-				.Replace("Windows", string.Empty)
-				.Replace("10 October 2018 Update", string.Empty)
-				.Replace("(DXR)", string.Empty)
-				.Replace("or better", string.Empty)
-				.Replace(",", "¤").Replace(" or ", "¤").Replace("/", "¤");
-
-			return data.Split('¤')
+			return data.Replace(",", "¤").Replace(" or ", "¤").Replace("/", "¤")
+				.Split('¤')
 				.Select(x => x.Trim())
 				.Where(x => !x.IsNullOrEmpty())
 				.ToList();
@@ -388,38 +384,35 @@ namespace CommonPluginsStores.PCGamingWiki
 			return result;
 		}
 
-		/// <summary>
-		/// Parses a RAM or storage size string into bytes.
-		/// Handles MB and GB suffixes.
-		/// </summary>
-		private static long ParseSize(string data)
+		private static void ParseDirectXRow(string dataTitle, string dataMinimum, string dataRecommended, GameRequirements target)
 		{
-			data = data.ToLower()
-				.Replace("ram mb ram", string.Empty)
-				.Replace("ram", string.Empty)
+			string titleToken = StripPlainText(dataTitle);
+			if (!titleToken.IsNullOrEmpty())
+			{
+				target.Minimum.Gpu.Add(titleToken);
+				if (!dataRecommended.IsNullOrEmpty())
+				{
+					target.Recommended.Gpu.Add(titleToken);
+				}
+			}
+
+			if (!dataMinimum.IsNullOrEmpty())
+			{
+				target.Minimum.Gpu.AddRange(ParseGpu(dataMinimum));
+			}
+
+			if (!dataRecommended.IsNullOrEmpty())
+			{
+				target.Recommended.Gpu.AddRange(ParseGpu(dataRecommended));
+			}
+		}
+
+		private static string StripPlainText(string data)
+		{
+			data = data.Replace("<br>", " ");
+			return Regex.Replace(data ?? string.Empty, @"<[^>]*>", string.Empty, RegexOptions.IgnoreCase)
+				.Replace("\t", " ")
 				.Trim();
-
-			if (data.Contains("mb"))
-			{
-				data = data.Substring(0, data.IndexOf("mb", StringComparison.Ordinal));
-				double.TryParse(
-					NormalizeDecimalSeparator(data),
-					NumberStyles.Any, CultureInfo.CurrentCulture,
-					out double value);
-				return (long)(1024L * 1024 * value);
-			}
-
-			if (data.Contains("gb"))
-			{
-				data = data.Substring(0, data.IndexOf("gb", StringComparison.Ordinal));
-				double.TryParse(
-					NormalizeDecimalSeparator(data),
-					NumberStyles.Any, CultureInfo.CurrentCulture,
-					out double value);
-				return (long)(1024L * 1024 * 1024 * value);
-			}
-
-			return 0;
 		}
 
 		private static List<string> ParseGpu(string data)
@@ -451,16 +444,12 @@ namespace CommonPluginsStores.PCGamingWiki
 				.Replace("(DXR)", string.Empty)
 				.Replace("TnL support", string.Empty)
 				.Replace("Integrated graphics, monitor with resolution of 1280x720.", "1280x720")
-				.Replace("Integrated graphics", string.Empty)
-				.Replace("Integrated", string.Empty).Replace("Dedicated", string.Empty)
 				.Replace("+ compatible", string.Empty).Replace("compatible", string.Empty)
 				.Replace("that supports DirectDraw at 640x480 resolution, 256 colors", string.Empty)
 				.Replace("or higher", string.Empty)
 				.Replace("capable GPU", string.Empty)
 				.Replace("  ", " ")
 				.Replace(" / ", "¤").Replace(" or ", "¤").Replace(", ", "¤");
-
-			data = Regex.Replace(data, @"DX(\d+)[+]?", "DirectX $1");
 
 			List<string> result = data.Split('¤')
 				.Select(x => x.Trim())
@@ -478,14 +467,6 @@ namespace CommonPluginsStores.PCGamingWiki
 			}).ToList();
 
 			return result;
-		}
-
-		private static string NormalizeDecimalSeparator(string value)
-		{
-			return value
-				.Replace(".", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)
-				.Replace(",", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)
-				.Trim();
 		}
 
 		#endregion

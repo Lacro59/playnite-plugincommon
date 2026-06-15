@@ -2885,8 +2885,8 @@ namespace CommonPluginsStores.Epic
 		/// Maps a single Epic <see cref="Detail"/> entry into the appropriate field
 		/// of <paramref name="minimum"/> and <paramref name="recommended"/>.
 		/// <para>
-		/// Epic encodes all requirement values as plain strings. RAM and Storage are parsed
-		/// from human-readable size strings (e.g. "8 GB", "50 GB") into bytes.
+		/// Epic encodes all requirement values as plain strings. RAM and storage source
+		/// fields are parsed into bytes during plugin normalisation.
 		/// Unrecognised titles (e.g. "DirectX", "Sound Card") are silently skipped.
 		/// </para>
 		/// </summary>
@@ -2920,15 +2920,15 @@ namespace CommonPluginsStores.Epic
 			else if (string.Equals(title, "Memory", StringComparison.OrdinalIgnoreCase)
 				|| string.Equals(title, "RAM", StringComparison.OrdinalIgnoreCase))
 			{
-				minimum.Ram = ParseSizeToBytes(detail.Minimum);
-				recommended.Ram = ParseSizeToBytes(detail.Recommended);
+				minimum.RamSource = detail.Minimum?.Trim();
+				recommended.RamSource = detail.Recommended?.Trim();
 			}
 			else if (string.Equals(title, "Storage", StringComparison.OrdinalIgnoreCase)
 				|| string.Equals(title, "Hard Drive", StringComparison.OrdinalIgnoreCase)
 				|| string.Equals(title, "Hard disk space", StringComparison.OrdinalIgnoreCase))
 			{
-				minimum.Storage = ParseSizeToBytes(detail.Minimum);
-				recommended.Storage = ParseSizeToBytes(detail.Recommended);
+				minimum.StorageSource = detail.Minimum?.Trim();
+				recommended.StorageSource = detail.Recommended?.Trim();
 			}
 		}
 
@@ -2940,48 +2940,6 @@ namespace CommonPluginsStores.Epic
 			if (!value.IsNullOrEmpty())
 			{
 				list.Add(value.Trim());
-			}
-		}
-
-		/// <summary>
-		/// Parses a human-readable size string into bytes.
-		/// Handles formats such as "8 GB", "8192 MB", "50GB".
-		/// Returns 0 when the input is null, empty, or cannot be parsed.
-		/// </summary>
-		private static double ParseSizeToBytes(string value)
-		{
-			if (value.IsNullOrEmpty())
-			{
-				return 0;
-			}
-
-			string normalised = value.Trim().Replace("\u00A0", " ");
-			int unitStart = normalised.Length;
-
-			while (unitStart > 0 && (char.IsLetter(normalised[unitStart - 1]) || normalised[unitStart - 1] == ' '))
-			{
-				unitStart--;
-			}
-
-			string numericPart = normalised.Substring(0, unitStart).Trim();
-			string unit = normalised.Substring(unitStart).Trim().ToUpperInvariant();
-
-			if (!double.TryParse(
-				numericPart,
-				System.Globalization.NumberStyles.Any,
-				System.Globalization.CultureInfo.InvariantCulture,
-				out double number))
-			{
-				return 0;
-			}
-
-			switch (unit)
-			{
-				case "TB": return number * 1024L * 1024 * 1024 * 1024;
-				case "GB": return number * 1024L * 1024 * 1024;
-				case "MB": return number * 1024L * 1024;
-				case "KB": return number * 1024L;
-				default: return number;
 			}
 		}
 
