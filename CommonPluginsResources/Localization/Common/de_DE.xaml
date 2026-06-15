@@ -181,6 +181,8 @@
 
 	<sys:String x:Key="LOCCommonAutoImport">Daten automatisch importieren, wenn Bibliothek aktualisiert wird (nur neue Elemente)</sys:String>
 	<sys:String x:Key="LOCCommonAutoImportOnInstalled">Automatically import for installed games</sys:String>
+	<sys:String x:Key="LOCCommonLibraryFiltersSectionTitle">Library filters</sys:String>
+	<sys:String x:Key="LOCCommonIncludeEmulatedGames">Include emulated games in plugin operations</sys:String>
 	<sys:String x:Key="LOCCommonImporting">Importing...</sys:String>
 	<sys:String x:Key="LOCCommonExport">Export</sys:String>
 	<sys:String x:Key="LOCCommonExportData">Export data</sys:String>
