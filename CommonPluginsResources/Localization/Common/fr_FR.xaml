@@ -181,8 +181,8 @@
 
 	<sys:String x:Key="LOCCommonAutoImport">Importer automatiquement les données lorsque la bibliothèque est mise à jour (uniquement les nouveaux éléments)</sys:String>
 	<sys:String x:Key="LOCCommonAutoImportOnInstalled">Importer automatiquement pour les jeux installés</sys:String>
-	<sys:String x:Key="LOCCommonLibraryFiltersSectionTitle">Library filters</sys:String>
-	<sys:String x:Key="LOCCommonIncludeEmulatedGames">Include emulated games in plugin operations</sys:String>
+	<sys:String x:Key="LOCCommonLibraryFiltersSectionTitle">Filtres de bibliothèques</sys:String>
+	<sys:String x:Key="LOCCommonIncludeEmulatedGames">Inclure les jeux émulés dans le champ d'opération du plugin</sys:String>
 	<sys:String x:Key="LOCCommonImporting">Importation en cours...</sys:String>
 	<sys:String x:Key="LOCCommonExport">Exporter</sys:String>
 	<sys:String x:Key="LOCCommonExportData">Exporter les données</sys:String>
@@ -240,14 +240,14 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoApiKey">{0} : Aucune clé API</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0} : Aucune configuration trouvée</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0} : l'utilisateur n'est pas authentifié</sys:String>
-	<sys:String x:Key="LOCCommonStoresInvalidSteamAppId">Invalid Steam App ID &quot;{0}&quot;. The game's Store ID in Playnite must be a numeric Steam application ID (for example 220 for Half-Life 2).</sys:String>
-	<sys:String x:Key="LOCCommonStoresInvalidSteamAppIdForGame">Invalid Steam App ID &quot;{1}&quot; for game &quot;{0}&quot;. The game's Store ID in Playnite must be a numeric Steam application ID (for example 220 for Half-Life 2).</sys:String>
-	<sys:String x:Key="LOCCommonStoresLaunchers">Stores &amp; Launchers</sys:String>
-	<sys:String x:Key="LOCCommonStoresConsolesMobile">Console &amp; Mobile</sys:String>
+	<sys:String x:Key="LOCCommonStoresInvalidSteamAppId">ID d'application Steam invalide &quot;{0}&quot;. L'ID indiqué dans Playnite doit correspondre à l'ID de l'application Steam (Par exemple : 220 est l'ID Steam de Half-Life 2).</sys:String>
+	<sys:String x:Key="LOCCommonStoresInvalidSteamAppIdForGame">ID d'application Steam invalide &quot;{1}&quot; pour ce jeu : &quot;{0}&quot;. L'ID indiqué dans Playnite doit correspondre à l'ID de l'application Steam (Par exemple : 220 est l'ID Steam de Half-Life 2).</sys:String>
+	<sys:String x:Key="LOCCommonStoresLaunchers">Magasins et clients de jeu</sys:String>
+	<sys:String x:Key="LOCCommonStoresConsolesMobile">Consoles et Mobiles</sys:String>
 	<sys:String x:Key="LOCCommonStoreSteam">Steam</sys:String>
 	<sys:String x:Key="LOCCommonStoreEpic">Epic Games</sys:String>
 	<sys:String x:Key="LOCCommonStoreGog">GOG</sys:String>
-	<sys:String x:Key="LOCCommonStoresNoStoreSelected">Select a store to configure authentication.</sys:String>
+	<sys:String x:Key="LOCCommonStoresNoStoreSelected">Sélectionnez un magasin pour configurer son authentification.</sys:String>
 
 	<!-- Ignored items -->
 	<sys:String x:Key="LOCCommonIgnoredItems">Éléments ignorés</sys:String>
@@ -356,33 +356,33 @@ Veuillez vérifier les paramètres du plugin.</sys:String>
 
 	<!-- ==================== VARIABLES TOOLTIP ==================== -->
 
-	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
-{InstallDir} - Game installation directory
-{InstallDirName} - Installation folder name
-{ImagePath} - Game ISO/ROM path if set
-{ImageName} - Game ISO/ROM file name
-{ImageNameNoExt} - Game ISO/ROM file name without extension
-{PlayniteDir} - Playnite installation directory
-{Name} - Game name
+	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Les variables suivantes peuvent être utilisées :
+{InstallDir} - Répertoire d'installation du jeu
+{InstallDirName} - Nom du répertoire d'installation
+{ImagePath} - Chemin de l'ISO/ROM
+{ImageName} - Nom de l'ISO/ROM contenant le jeu
+{ImageNameNoExt} - ISO/ROM sans extension de fichier
+{PlayniteDir} - Répertoire d'installation de Playnite
+{Name} - Nom du jeu
 
-Cloud variables:
+Variables de Cloud :
 {DropboxFolder}
 {OneDriveFolder}
 
-Steam variables:
-{SteamId} - Steam user ID
-{SteamAccountId} - Steam account ID
-{SteamInstallDir} - Steam installation directory
-{SteamScreenshotsDir} - Steam screenshots directory
+Variables Steam :
+{SteamId} - ID d'utilisateur Steam
+{SteamAccountId} - ID du compte Steam
+{SteamInstallDir} - Répertoire d'installation du client Steam
+{SteamScreenshotsDir} - Répertoire des captures d'écran Steam
 
-Ubisoft Connect variables:
-{UbisoftInstallDir} - Ubisoft installation directory
-{UbisoftScreenshotsDir} - Ubisoft screenshots directory
+Variables Ubisoft Connect :
+{UbisoftInstallDir} - Répertoire d'installation du client Ubisoft
+{UbisoftScreenshotsDir} - Répertoire des captures d'écran Ubisoft Connect
 
-RetroArch variables:
-{RetroArchScreenshotsDir} - RetroArch screenshots directory
+Variables RetroArch :
+{RetroArchScreenshotsDir} - Répertoire des captures d'écran génerées par Retroarch
 
-Windows variables:
+Variables du système Windows :
 {WinDir}
 {AllUsersProfile}
 {AppData}
@@ -398,6 +398,6 @@ Windows variables:
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)} - 32-bit Program Files directory</sys:String>
+{ProgramFiles(x86)} - Répertoire commun aux applications 32 Bits</sys:String>
 
 </ResourceDictionary>
