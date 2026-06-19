@@ -413,6 +413,13 @@ namespace CommonPluginsStores.Steam
 					return false;
 				}
 
+				bool? freshCachedAuth = TryGetAuthStatusFromUserDataCache(freshOnly: true);
+				if (freshCachedAuth.HasValue)
+				{
+					Common.LogDebug(true, $"[SteamApi] GetIsUserLoggedIn: full verification skipped (fresh user data cache, {UserDataAuthCacheMinutes}m).");
+					return freshCachedAuth.Value;
+				}
+
 				Common.LogDebug(true, "[SteamApi] GetIsUserLoggedIn: full network verification (UseAuth).");
 				bool verified = VerifyUserLoggedInWithAuth();
 				Common.LogDebug(true, $"[SteamApi] GetIsUserLoggedIn full verification result: isLogged={verified}.");
@@ -432,7 +439,7 @@ namespace CommonPluginsStores.Steam
 		/// Requires stored cookies or a token so stale on-disk userdata cannot report a logged-in session alone.
 		/// </summary>
 		/// <returns>True or false when cache is conclusive; null when no cache file is available or session credentials are missing.</returns>
-		private bool? TryGetAuthStatusFromUserDataCache()
+		private bool? TryGetAuthStatusFromUserDataCache(bool freshOnly = false)
 		{
 			if (!HasSessionCredentialsForAuth())
 			{
@@ -448,6 +455,12 @@ namespace CommonPluginsStores.Steam
 					bool isLogged = HasOwnedApps(freshCache);
 					Common.LogDebug(true, $"[SteamApi] Auth cache hit (fresh, {UserDataAuthCacheMinutes}m): ownedApps={freshCache.RgOwnedApps?.Count ?? 0}, isLogged={isLogged}.");
 					return isLogged;
+				}
+
+				if (freshOnly)
+				{
+					Common.LogDebug(true, "[SteamApi] Auth cache miss: no fresh Steam_UserData.json data.");
+					return null;
 				}
 
 				SteamUserData anyAgeCache = FileDataService.LoadData<SteamUserData>(FileUserData, -1);

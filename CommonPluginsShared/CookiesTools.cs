@@ -67,8 +67,9 @@ namespace CommonPluginsShared
         /// Loads encrypted cookies from disk for the configured client.
         /// Expired cookies are removed before returning.
         /// </summary>
+        /// <param name="warnIfMissing">When true, logs a warning if the cookie file is absent.</param>
         /// <returns>The stored cookie list, or an empty list when none are available.</returns>
-        public List<HttpCookie> GetStoredCookies()
+        public List<HttpCookie> GetStoredCookies(bool warnIfMissing = true)
         {
             string message = $"No stored cookies for {ClientName}";
             List<HttpCookie> storedCookies = new List<HttpCookie>();
@@ -111,7 +112,11 @@ namespace CommonPluginsShared
                 }
             }
 
-            Logger.Warn(message);
+            if (warnIfMissing)
+            {
+                Logger.Warn(message);
+            }
+
             return storedCookies;
         }
 

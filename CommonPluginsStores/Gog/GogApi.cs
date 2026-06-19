@@ -167,11 +167,6 @@ namespace CommonPluginsStores.Gog
                     return false;
                 }
 
-                if (TryGetAuthStatusFromSavedUser())
-                {
-                    Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn fast-path: saved user ignored without cookies or token.");
-                }
-
                 Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn fast-path: no local session hint, returning false until background check.");
                 return false;
             }
@@ -305,18 +300,20 @@ namespace CommonPluginsStores.Gog
             AccountInfos accountInfos = LoadCurrentUser();
             if (!accountInfos?.UserId?.IsNullOrEmpty() ?? false)
             {
-                Common.LogDebug(true, $"[GogApi] GetCurrentAccountInfos scheduled background refresh UserId={accountInfos.UserId}, Pseudo={accountInfos.Pseudo}.");
+                AccountInfos refreshTarget = accountInfos;
+                string userId = refreshTarget.UserId;
+                Common.LogDebug(true, $"[GogApi] GetCurrentAccountInfos scheduled background refresh UserId={userId}, Pseudo={refreshTarget.Pseudo}.");
                 _ = Task.Run(() =>
                 {
                     try
                     {
                         WaitForApiRateLimit();
-                        ProfileUserGalaxy profileUserGalaxy = GetAccountInfoByGalaxyUserId(long.Parse(CurrentAccountInfos.UserId));
+                        ProfileUserGalaxy profileUserGalaxy = GetAccountInfoByGalaxyUserId(long.Parse(userId));
 
                         if (profileUserGalaxy != null)
                         {
-                            CurrentAccountInfos.Avatar = $"{UrlImage}/{profileUserGalaxy.Avatar.GogImageId}.jpg";
-                            CurrentAccountInfos.Pseudo = profileUserGalaxy.Username;
+                            refreshTarget.Avatar = $"{UrlImage}/{profileUserGalaxy.Avatar.GogImageId}.jpg";
+                            refreshTarget.Pseudo = profileUserGalaxy.Username;
                             Common.LogDebug(true, $"[GogApi] GetCurrentAccountInfos galaxy profile updated: Pseudo={profileUserGalaxy.Username}.");
                         }
                         else
@@ -324,23 +321,57 @@ namespace CommonPluginsStores.Gog
                             Logger.Warn("No GOG profile found for Galaxy user id.");
                         }
 
-                        bool isPublic = CheckIsPublic(CurrentAccountInfos).GetAwaiter().GetResult();
-                        CurrentAccountInfos.IsPrivate = !isPublic;
-                        CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
-                        SaveCurrentUser();
-                        Common.LogDebug(true, $"[GogApi] GetCurrentAccountInfos background refresh done IsPrivate={CurrentAccountInfos.IsPrivate}, Pseudo={CurrentAccountInfos.Pseudo}, AccountStatus={CurrentAccountInfos.AccountStatus}.");
+                        bool isPublic = CheckIsPublic(refreshTarget).GetAwaiter().GetResult();
+                        refreshTarget.IsPrivate = !isPublic;
+                        refreshTarget.AccountStatus = refreshTarget.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
+                        ApplyGogAccountBackgroundRefresh(refreshTarget, userId);
                     }
                     catch (Exception ex)
                     {
                         Common.LogError(ex, false, true, PluginName);
-                        CurrentAccountInfos.IsPrivate = true;
-                        CurrentAccountInfos.AccountStatus = AccountStatus.Private;
+                        refreshTarget.IsPrivate = true;
+                        refreshTarget.AccountStatus = AccountStatus.Private;
+                        ApplyGogAccountBackgroundRefresh(refreshTarget, userId);
                     }
                 });
                 return accountInfos;
             }
 
             return new AccountInfos { IsCurrent = true };
+        }
+
+        /// <summary>
+        /// Publishes a completed background account refresh when the active session still matches.
+        /// </summary>
+        /// <param name="refreshTarget">Account fields gathered on a background thread.</param>
+        /// <param name="userId">Galaxy user id captured when the refresh was scheduled.</param>
+        private void ApplyGogAccountBackgroundRefresh(AccountInfos refreshTarget, string userId)
+        {
+            void apply()
+            {
+                AccountInfos current = CurrentAccountInfos;
+                if (current == null || !userId.IsEqual(current.UserId))
+                {
+                    Common.LogDebug(true, "[GogApi] GetCurrentAccountInfos background refresh discarded (account changed).");
+                    return;
+                }
+
+                current.Avatar = refreshTarget.Avatar;
+                current.Pseudo = refreshTarget.Pseudo;
+                current.IsPrivate = refreshTarget.IsPrivate;
+                current.AccountStatus = refreshTarget.AccountStatus;
+                SaveCurrentUser();
+                Common.LogDebug(true, $"[GogApi] GetCurrentAccountInfos background refresh done IsPrivate={current.IsPrivate}, Pseudo={current.Pseudo}, AccountStatus={current.AccountStatus}.");
+            }
+
+            var dispatcher = API.Instance?.MainView?.UIDispatcher;
+            if (dispatcher != null && !dispatcher.CheckAccess())
+            {
+                dispatcher.BeginInvoke(new Action(apply));
+                return;
+            }
+
+            apply();
         }
 
         protected override ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
@@ -1052,7 +1083,7 @@ namespace CommonPluginsStores.Gog
 
         private AccountBasicResponse GetAccountByAuthInfo()
         {
-            string response = Web.DownloadStringData(UrlAccountInfo, GetStoredCookies()).GetAwaiter().GetResult();
+            string response = Web.DownloadStringData(UrlAccountInfo, PeekStoredCookies()).GetAwaiter().GetResult();
             _ = Serialization.TryFromJson(response, out AccountBasicResponse accountBasicResponse);
             return accountBasicResponse;
         }

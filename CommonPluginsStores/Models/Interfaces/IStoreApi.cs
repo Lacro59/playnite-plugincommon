@@ -18,6 +18,16 @@ namespace CommonPluginsStores.Models.Interfaces
         bool IsUserLoggedIn { get; set; }
 
         /// <summary>
+        /// Gets whether a background login refresh is in progress.
+        /// </summary>
+        bool IsLoginRefreshInProgress { get; }
+
+        /// <summary>
+        /// Gets login status for UI bindings without blocking on background refresh or forcing full network verification.
+        /// </summary>
+        bool IsUserLoggedInForDisplay { get; }
+
+        /// <summary>
         /// Gets or sets the current account information.
         /// </summary>
         AccountInfos CurrentAccountInfos { get; set; }

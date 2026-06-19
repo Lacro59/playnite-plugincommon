@@ -75,8 +75,23 @@ namespace CommonPluginsControls.Stores
         /// </summary>
         public bool ShowGetAccountIdLink => IsManualAccountEntryEnabled;
 
-        public AuthStatus AuthStatus =>
-            StoreApi == null ? AuthStatus.Failed : StoreApi.IsUserLoggedIn ? AuthStatus.Ok : AuthStatus.AuthRequired;
+        public AuthStatus AuthStatus
+        {
+            get
+            {
+                if (StoreApi == null)
+                {
+                    return AuthStatus.Failed;
+                }
+
+                if (StoreApi.IsLoginRefreshInProgress)
+                {
+                    return AuthStatus.Checking;
+                }
+
+                return StoreApi.IsUserLoggedInForDisplay ? AuthStatus.Ok : AuthStatus.AuthRequired;
+            }
+        }
 
         public bool CanLogin => AuthStatus != AuthStatus.Ok && AuthStatus != AuthStatus.Checking;
 
@@ -129,6 +144,7 @@ namespace CommonPluginsControls.Stores
                 Common.LogDebug(true, $"[StorePanel] Background auth refresh applied for {storeApi.GetType().Name}, AuthStatus={AuthStatus}.");
                 NotifyAuthStatusChanged();
             });
+            NotifyAuthStatusChanged();
         }
 
         protected abstract string LoginErrorContext { get; }

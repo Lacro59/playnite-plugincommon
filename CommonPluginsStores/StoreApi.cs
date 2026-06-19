@@ -100,28 +100,60 @@ namespace CommonPluginsStores
         private Task _pendingLoginRefreshTask = Task.CompletedTask;
         private readonly List<Action> _loginRefreshCallbacks = new List<Action>();
         private int _loginRefreshResolutionDepth;
+        private int _displayOnlyResolutionDepth;
 
         /// <summary>
         /// When true, <see cref="GetIsUserLoggedIn"/> must run a full verification (network), not cache shortcuts.
+        /// Suppressed while resolving <see cref="IsUserLoggedInForDisplay"/>.
         /// </summary>
-        protected bool ForceFullLoginCheck => _forceFullLoginCheck;
+        protected bool ForceFullLoginCheck => _forceFullLoginCheck && _displayOnlyResolutionDepth == 0;
 
         /// <summary>
         /// Gets or sets whether the user is logged in.
-        /// Blocks until any in-flight <see cref="RefreshIsUserLoggedInInBackground"/> completes.
+        /// Does not block on in-flight <see cref="RefreshIsUserLoggedInInBackground"/>; use cached or fast-path status instead.
         /// </summary>
         public bool IsUserLoggedIn
         {
-            get
-            {
-                WaitForPendingLoginRefresh();
-                return ResolveIsUserLoggedIn();
-            }
+            get => ResolveIsUserLoggedIn();
 
             set
             {
                 WaitForPendingLoginRefresh();
                 SetValue(ref isUserLoggedIn, value);
+            }
+        }
+
+        /// <inheritdoc />
+        public bool IsLoginRefreshInProgress
+        {
+            get
+            {
+                lock (_loginRefreshSync)
+                {
+                    return !_pendingLoginRefreshTask.IsCompleted;
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public bool IsUserLoggedInForDisplay
+        {
+            get
+            {
+                if (isUserLoggedIn.HasValue)
+                {
+                    return isUserLoggedIn.Value;
+                }
+
+                _displayOnlyResolutionDepth++;
+                try
+                {
+                    return GetIsUserLoggedIn();
+                }
+                finally
+                {
+                    _displayOnlyResolutionDepth--;
+                }
             }
         }
 
@@ -325,6 +357,13 @@ namespace CommonPluginsStores
         protected virtual List<Playnite.SDK.HttpCookie> GetStoredCookies() => CookiesTools.GetStoredCookies();
 
         /// <summary>
+        /// Reads stored cookies without logging when the cookie file is missing.
+        /// Used for auth status probes during settings UI binding.
+        /// </summary>
+        /// <returns>List of stored HTTP cookies, or an empty list when none are available.</returns>
+        protected List<Playnite.SDK.HttpCookie> PeekStoredCookies() => CookiesTools.GetStoredCookies(warnIfMissing: false);
+
+        /// <summary>
         /// Save the last identified cookies stored.
         /// </summary>
         /// <param name="httpCookies">The HTTP cookies to store</param>
@@ -356,7 +395,14 @@ namespace CommonPluginsStores
 
 		#region Token
 
-        protected virtual StoreToken GetStoredToken() 
+        protected virtual StoreToken GetStoredToken() => LoadStoredToken(warnIfMissing: true);
+
+        /// <summary>
+        /// Loads the persisted OAuth token from disk.
+        /// </summary>
+        /// <param name="warnIfMissing">When true, logs a warning if the token file is absent.</param>
+        /// <returns>The stored token, or null when missing or invalid.</returns>
+        protected StoreToken LoadStoredToken(bool warnIfMissing)
         {
 			lock (FileSystem.GetPathSyncRoot(FileToken))
 			{
@@ -375,8 +421,11 @@ namespace CommonPluginsStores
 						Common.LogError(ex, false, FormatLogMessage("Failed to load saved token"));
 					}
 				}
+				else if (warnIfMissing)
+				{
+					LogWarn("No stored token");
+				}
 
-				LogWarn("No stored token");
 				return null;
 			}
 		}
@@ -396,10 +445,8 @@ namespace CommonPluginsStores
 							WindowsIdentity.GetCurrent().User.Value);
 						return true;
 					}
-					else
-					{
-						LogWarn("No token saved");
-					}
+
+					Common.LogDebug(true, FormatLogMessage("Session token cleared (nothing to save)."));
 				}
 				catch (Exception ex)
 				{
@@ -471,7 +518,7 @@ namespace CommonPluginsStores
 		/// <summary>
 		/// Re-evaluates login status on a background thread and invokes queued callbacks on the UI thread.
 		/// Concurrent requests are coalesced into a single in-flight refresh.
-		/// Callers reading <see cref="IsUserLoggedIn"/> wait until the refresh task completes.
+		/// UI bindings should use <see cref="IsUserLoggedInForDisplay"/> and <see cref="IsLoginRefreshInProgress"/>.
 		/// </summary>
 		/// <param name="onCompleted">Optional callback after the check finishes (UI thread).</param>
 		public void RefreshIsUserLoggedInInBackground(Action onCompleted = null)
@@ -518,20 +565,30 @@ namespace CommonPluginsStores
 					try
 					{
 						BeginFullLoginCheck(operationGeneration);
-						ResetIsUserLoggedIn();
-						if (!IsAuthCheckCurrent())
+						if (!IsAuthOperationCurrent(operationGeneration))
 						{
-							Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: aborted after reset (superseded auth operation)."));
+							Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: aborted after BeginFullLoginCheck (superseded auth operation)."));
 							return;
 						}
 
-						bool isLoggedIn = ResolveIsUserLoggedIn();
+						bool isLoggedIn;
+						_loginRefreshResolutionDepth++;
+						try
+						{
+							isLoggedIn = GetIsUserLoggedIn();
+						}
+						finally
+						{
+							_loginRefreshResolutionDepth--;
+						}
+
 						if (!IsAuthCheckCurrent())
 						{
 							Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: result discarded (superseded auth operation)."));
 							return;
 						}
 
+						SetValue(ref isUserLoggedIn, isLoggedIn);
 						Common.LogDebug(true, FormatLogMessage($"RefreshIsUserLoggedInInBackground: full check completed, IsUserLoggedIn={isLoggedIn}."));
 					}
 					catch (Exception ex)
@@ -629,7 +686,7 @@ namespace CommonPluginsStores
 		/// <returns>True or false when a token file exists; null when absent.</returns>
 		protected bool? TryGetAuthStatusFromStoredToken()
 		{
-			StoreToken token = StoreToken ?? GetStoredToken();
+			StoreToken token = _storeToken ?? LoadStoredToken(warnIfMissing: false);
 			if (token == null)
 			{
 				return null;
@@ -648,7 +705,7 @@ namespace CommonPluginsStores
 		/// </summary>
 		protected bool TryGetAuthStatusFromStoredCookies()
 		{
-			List<Playnite.SDK.HttpCookie> cookies = GetStoredCookies();
+			List<Playnite.SDK.HttpCookie> cookies = PeekStoredCookies();
 			return cookies != null && cookies.Count > 0;
 		}
 

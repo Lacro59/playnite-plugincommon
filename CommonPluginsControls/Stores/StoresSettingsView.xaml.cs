@@ -101,7 +101,8 @@ namespace CommonPluginsControls.Stores
         private void StoresSettingsView_Loaded(object sender, RoutedEventArgs e)
         {
             StoreSettingsLog.Debug("StoresSettingsView loaded");
-            RefreshStores();
+            _viewModel.RefreshVisibleStores();
+            UpdateSelectedPanelVisibility();
         }
 
         private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
