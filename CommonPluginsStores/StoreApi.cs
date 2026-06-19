@@ -320,7 +320,7 @@ namespace CommonPluginsStores
             _gamesCache = new SmartCache<ObservableCollection<AccountGameInfos>>();
             _dlcsCache = new SmartCache<ObservableCollection<GameDlcOwned>>();
 
-            _lazyAccount = new Lazy<AccountInfos>(() => _accountCache.GetOrSet("current_account", GetCurrentAccountInfos, TimeSpan.FromHours(24)));
+            _lazyAccount = CreateAccountInfosLazy();
             _lazyFriends = new Lazy<ObservableCollection<AccountInfos>>(() => _friendsCache.GetOrSet("current_friends", GetCurrentFriendsInfos, TimeSpan.FromMinutes(30)));
             _lazyGames = new Lazy<ObservableCollection<AccountGameInfos>>(() => _gamesCache.GetOrSet("current_games", () => GetAccountGamesInfos(CurrentAccountInfos), TimeSpan.FromMinutes(30)));
 
@@ -733,6 +733,20 @@ namespace CommonPluginsStores
 			return tokenAuth == true;
 		}
 
+        /// <inheritdoc />
+        public void ReloadAccountInfos()
+        {
+            _accountCache.Clear();
+            SetValue(ref _lazyAccount, CreateAccountInfosLazy(), nameof(CurrentAccountInfos));
+            isUserLoggedIn = null;
+            Common.LogDebug(true, FormatLogMessage("ReloadAccountInfos: account cache invalidated."));
+        }
+
+        private Lazy<AccountInfos> CreateAccountInfosLazy()
+        {
+            return new Lazy<AccountInfos>(() => _accountCache.GetOrSet("current_account", GetCurrentAccountInfos, TimeSpan.FromHours(24)));
+        }
+
         /// <summary>
         /// Clears stored authentication data and session profile fields for the current account.
         /// Manual store settings such as the Steam Web API key are preserved.
@@ -748,6 +762,7 @@ namespace CommonPluginsStores
                 CookiesTools.ClearDomainCookies();
                 ClearStoredToken();
                 ClearSessionProfileFields();
+                SetSessionLoggedOutByUser();
                 IsUserLoggedIn = false;
                 SaveCurrentUser();
                 LogInfo("ClearSession completed");
@@ -800,6 +815,36 @@ namespace CommonPluginsStores
             user.Pseudo = null;
             user.AccountStatus = AccountStatus.Unknown;
             Common.LogDebug(true, FormatLogMessage("ClearSession: session profile fields cleared (UserId, Pseudo, avatar, link)"));
+        }
+
+        /// <summary>
+        /// Marks the account as explicitly logged out so stores can suppress automatic SSO re-authentication.
+        /// </summary>
+        protected void SetSessionLoggedOutByUser()
+        {
+            AccountInfos user = CurrentAccountInfos;
+            if (user == null)
+            {
+                LogWarn("ClearSession: no current account to persist logged-out flag");
+                return;
+            }
+
+            user.SessionLoggedOutByUser = true;
+            Common.LogDebug(true, FormatLogMessage("ClearSession: session logged-out flag set (SSO refresh suppressed)."));
+        }
+
+        /// <inheritdoc />
+        public void PrepareExplicitLogin()
+        {
+            AccountInfos user = CurrentAccountInfos;
+            if (user == null || !user.SessionLoggedOutByUser)
+            {
+                return;
+            }
+
+            user.SessionLoggedOutByUser = false;
+            SaveCurrentUser();
+            Common.LogDebug(true, FormatLogMessage("PrepareExplicitLogin: session logged-out flag cleared."));
         }
 
         /// <summary>

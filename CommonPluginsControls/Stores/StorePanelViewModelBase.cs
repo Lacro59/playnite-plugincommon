@@ -158,11 +158,13 @@ namespace CommonPluginsControls.Stores
                 if (useAlternative)
                 {
                     StoreSettingsLog.LoginAlternativeRequested(StoreApi);
+                    StoreApi?.PrepareExplicitLogin();
                     StoreApi.LoginAlternative();
                 }
                 else
                 {
                     StoreSettingsLog.LoginRequested(StoreApi);
+                    StoreApi?.PrepareExplicitLogin();
                     StoreApi.Login();
                 }
 
@@ -184,7 +186,6 @@ namespace CommonPluginsControls.Stores
                 StoreSettingsLog.LogoutRequested(StoreApi);
                 StoreApi?.ClearSession();
                 NotifyAuthStatusChanged();
-                ScheduleBackgroundAuthRefresh();
                 StoreSettingsLog.LogoutCompleted(StoreApi, AuthStatus);
             }
             catch (Exception ex)

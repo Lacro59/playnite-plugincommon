@@ -74,5 +74,12 @@ namespace CommonPluginsStores.Models
         /// Persisted in shared <c>StoresData/*_User.dat</c>; other stores do not use this field.
         /// </summary>
         public string ApiKey { get; set; }
+
+        private bool _sessionLoggedOutByUser;
+
+        /// <summary>
+        /// When true, automatic SSO cookie refresh is suppressed until the user authenticates explicitly.
+        /// </summary>
+        public bool SessionLoggedOutByUser { get => _sessionLoggedOutByUser; set => SetValue(ref _sessionLoggedOutByUser, value); }
     }
 }

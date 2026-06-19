@@ -196,6 +196,7 @@ namespace CommonPluginsStores.Steam
         private static string UrlProfileLogin => UrlSteamCommunity + @"/login/home/?goto=";
         private static string UrlProfileById => UrlSteamCommunity + @"/profiles/{0}";
         private static string UrlProfileByName => UrlSteamCommunity + @"/id/{0}";
+        private static string UrlProfileMy => UrlSteamCommunity + @"/my";
         private static string UrlFriends => UrlSteamCommunity + @"/profiles/{0}/friends";
         private static string UrlProfileGamesById => UrlProfileById + @"/games/?tab=all";
         private static string UrlProfilById => UrlProfileById + @"/stats/{1}?tab=achievements&l={2}";
@@ -517,6 +518,12 @@ namespace CommonPluginsStores.Steam
 
 				if (!isLogged)
 				{
+					if (CurrentAccountInfos?.SessionLoggedOutByUser == true)
+					{
+						Common.LogDebug(true, "[SteamApi] VerifyUserLoggedInWithAuth: SSO cookie refresh skipped (user logged out explicitly).");
+						return false;
+					}
+
 					Common.LogDebug(true, "[SteamApi] VerifyUserLoggedInWithAuth: refreshing cookies and retrying.");
 					string url = string.Format(UrlRefreshToken, CurrentAccountInfos.Link);
 
@@ -546,7 +553,68 @@ namespace CommonPluginsStores.Steam
 				}
 			}
 
+			if (isLogged)
+			{
+				EnsureAccountProfileFromAuthenticatedSession();
+			}
+
 			return isLogged;
+		}
+
+		/// <summary>
+		/// Restores <see cref="AccountInfos"/> from the authenticated community profile when cookies exist but UserId was cleared (e.g. after logout).
+		/// </summary>
+		private void EnsureAccountProfileFromAuthenticatedSession()
+		{
+			AccountInfos user = CurrentAccountInfos;
+			if (user != null && !user.UserId.IsNullOrEmpty())
+			{
+				return;
+			}
+
+			if (!TryGetAuthStatusFromStoredCookies())
+			{
+				Common.LogDebug(true, "[SteamApi] EnsureAccountProfileFromAuthenticatedSession skipped: no stored cookies.");
+				return;
+			}
+
+			try
+			{
+				Common.LogDebug(true, "[SteamApi] EnsureAccountProfileFromAuthenticatedSession: scraping profile from community /my.");
+				string response = Web.DownloadStringData(UrlProfileMy, GetStoredCookies()).GetAwaiter().GetResult();
+				AccountInfos scraped = GetAccountInfosFromRgProfileData(response);
+				if (scraped == null || scraped.UserId.IsNullOrEmpty())
+				{
+					Common.LogDebug(true, "[SteamApi] EnsureAccountProfileFromAuthenticatedSession: profile scrape failed.");
+					return;
+				}
+
+				if (user == null)
+				{
+					scraped.IsCurrent = true;
+					CurrentAccountInfos = scraped;
+					user = scraped;
+				}
+				else
+				{
+					string apiKey = user.ApiKey;
+					user.UserId = scraped.UserId;
+					user.Pseudo = scraped.Pseudo;
+					user.Avatar = scraped.Avatar;
+					user.Link = scraped.Link;
+					if (!apiKey.IsNullOrEmpty())
+					{
+						user.ApiKey = apiKey;
+					}
+				}
+
+				SaveCurrentUser();
+				Common.LogDebug(true, $"[SteamApi] EnsureAccountProfileFromAuthenticatedSession: profile restored UserId={user.UserId}, Pseudo={user.Pseudo}.");
+			}
+			catch (Exception ex)
+			{
+				LogError(ex, "EnsureAccountProfileFromAuthenticatedSession failed");
+			}
 		}
 
 		private bool TryRefreshSteamCookies(string refreshUrl, bool deleteCookies, out SteamUserData userData, out bool isLogged)
@@ -639,12 +707,41 @@ namespace CommonPluginsStores.Steam
 		{
 			if (CurrentAccountInfos == null || CurrentAccountInfos.UserId.IsNullOrEmpty())
 			{
+				EnsureAccountProfileFromAuthenticatedSession();
+			}
+
+			if (CurrentAccountInfos == null || CurrentAccountInfos.UserId.IsNullOrEmpty())
+			{
 				Common.LogDebug(true, "[SteamApi] RefreshAccountInfosAfterLogin skipped: no account profile.");
 				return;
 			}
 
 			Common.LogDebug(true, "[SteamApi] RefreshAccountInfosAfterLogin: scheduling profile enrichment.");
 			_ = GetCurrentAccountInfos();
+		}
+
+		/// <summary>
+		/// Clears stored Steam session data including cached owned-apps userdata.
+		/// </summary>
+		public override void ClearSession()
+		{
+			base.ClearSession();
+			ClearStoredUserData();
+		}
+
+		/// <summary>
+		/// Deletes cached Steam owned-apps data so logout cannot be inferred from stale on-disk userdata.
+		/// </summary>
+		private void ClearStoredUserData()
+		{
+			lock (SteamUserDataFileSync)
+			{
+				if (File.Exists(FileUserData))
+				{
+					FileSystem.DeleteFileSafe(FileUserData);
+					Common.LogDebug(true, $"[SteamApi] ClearStoredUserData: deleted '{FileUserData}'.");
+				}
+			}
 		}
 
 		/// <summary>

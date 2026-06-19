@@ -49,6 +49,16 @@ namespace CommonPluginsStores.Models.Interfaces
         void ClearSession();
 
         /// <summary>
+        /// Clears the persisted logged-out flag so an explicit login can restore the session.
+        /// </summary>
+        void PrepareExplicitLogin();
+
+        /// <summary>
+        /// Invalidates in-memory account cache and reloads profile data from persistent storage on next access.
+        /// </summary>
+        void ReloadAccountInfos();
+
+        /// <summary>
         /// Sets the language or locale used by the store API.
         /// </summary>
         /// <param name="locale">The locale code, e.g., 'en-US'.</param>
