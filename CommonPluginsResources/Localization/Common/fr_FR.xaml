@@ -47,7 +47,7 @@
 
 	<!-- ==================== RELATIVE TIME ==================== -->
 
-	<sys:String x:Key="LOCCommonToday"></sys:String>
+	<sys:String x:Key="LOCCommonToday">Aujourd'hui</sys:String>
 	<sys:String x:Key="LOCCommonNever">Jamais</sys:String>
 	<sys:String x:Key="LOCCommonHourAgo">il y a {0}h</sys:String>
 	<!-- NOTE: singular and plural share the same format — keep both for translator flexibility -->
@@ -223,8 +223,6 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 	<sys:String x:Key="LOCCommonClearSessionDescription">Se déconnecte du compte store. L'identifiant de compte et la clé API sont conservés.</sys:String>
 	<sys:String x:Key="LOCCommonConnection">Authentification</sys:String>
 	<sys:String x:Key="LOCCommonAuthenticateLabel">Connexion</sys:String>
-	<sys:String x:Key="LOCCommonClearSession">Déconnexion</sys:String>
-	<sys:String x:Key="LOCCommonClearSessionDescription">Se déconnecte du compte store. L'identifiant de compte et la clé API sont conservés.</sys:String>
 	<sys:String x:Key="LOCCommonControlConfiguration">Configuration du contrôle</sys:String>
 	<sys:String x:Key="LOCCommonGetAccountID">Obtenir l'ID du compte</sys:String>
 	<sys:String x:Key="LOCCommonHasApiKey">Possède une clé API</sys:String>
@@ -244,12 +242,12 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0} : l'utilisateur n'est pas authentifié</sys:String>
 	<sys:String x:Key="LOCCommonStoresInvalidSteamAppId">ID d'application Steam "{0}" invalide. L'ID du store du jeu dans Playnite doit être un identifiant d'application Steam numérique (par exemple 220 pour Half-Life 2).</sys:String>
 	<sys:String x:Key="LOCCommonStoresInvalidSteamAppIdForGame">ID d'application Steam "{1}" invalide pour le jeu "{0}". L'ID du store du jeu dans Playnite doit être un identifiant d'application Steam numérique (par exemple 220 pour Half-Life 2).</sys:String>
-	<sys:String x:Key="LOCCommonStoresLaunchers">Stores &amp; Launchers</sys:String>
-	<sys:String x:Key="LOCCommonStoresConsolesMobile">Console &amp; Mobile</sys:String>
+	<sys:String x:Key="LOCCommonStoresLaunchers">Boutiques et lanceurs</sys:String>
+	<sys:String x:Key="LOCCommonStoresConsolesMobile">Console et mobile</sys:String>
 	<sys:String x:Key="LOCCommonStoreSteam">Steam</sys:String>
 	<sys:String x:Key="LOCCommonStoreEpic">Epic Games</sys:String>
 	<sys:String x:Key="LOCCommonStoreGog">GOG</sys:String>
-	<sys:String x:Key="LOCCommonStoresNoStoreSelected">Select a store to configure authentication.</sys:String>
+	<sys:String x:Key="LOCCommonStoresNoStoreSelected">Sélectionnez une boutique pour configurer l'authentification.</sys:String>
 
 	<!-- Ignored items -->
 	<sys:String x:Key="LOCCommonIgnoredItems">Éléments ignorés</sys:String>
@@ -358,33 +356,33 @@ Veuillez vérifier les paramètres du plugin.</sys:String>
 
 	<!-- ==================== VARIABLES TOOLTIP ==================== -->
 
-	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
-{InstallDir} - Game installation directory
-{InstallDirName} - Installation folder name
-{ImagePath} - Game ISO/ROM path if set
-{ImageName} - Game ISO/ROM file name
-{ImageNameNoExt} - Game ISO/ROM file name without extension
-{PlayniteDir} - Playnite installation directory
-{Name} - Game name
+	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Des variables spéciales peuvent être utilisées pour ajouter une chaîne dynamique :
+{InstallDir} - Répertoire d'installation du jeu
+{InstallDirName} - Nom du dossier d'installation
+{ImagePath} - Chemin ISO/ROM du jeu si défini
+{ImageName} - Nom du fichier ISO/ROM du jeu
+{ImageNameNoExt} - Nom du fichier ISO/ROM du jeu sans extension
+{PlayniteDir} - Répertoire d'installation de Playnite
+{Name} - Nom du jeu
 
-Cloud variables:
+Variables cloud :
 {DropboxFolder}
 {OneDriveFolder}
 
-Steam variables:
-{SteamId} - Steam user ID
-{SteamAccountId} - Steam account ID
-{SteamInstallDir} - Steam installation directory
-{SteamScreenshotsDir} - Steam screenshots directory
+Variables Steam :
+{SteamId} - ID utilisateur Steam
+{SteamAccountId} - ID de compte Steam
+{SteamInstallDir} - Répertoire d'installation Steam
+{SteamScreenshotsDir} - Répertoire des captures d'écran Steam
 
-Ubisoft Connect variables:
-{UbisoftInstallDir} - Ubisoft installation directory
-{UbisoftScreenshotsDir} - Ubisoft screenshots directory
+Variables Ubisoft Connect :
+{UbisoftInstallDir} - Répertoire d'installation Ubisoft
+{UbisoftScreenshotsDir} - Répertoire des captures d'écran Ubisoft
 
-RetroArch variables:
-{RetroArchScreenshotsDir} - RetroArch screenshots directory
+Variables RetroArch :
+{RetroArchScreenshotsDir} - Répertoire des captures d'écran RetroArch
 
-Windows variables:
+Variables Windows :
 {WinDir}
 {AllUsersProfile}
 {AppData}
@@ -400,6 +398,6 @@ Windows variables:
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)} - 32-bit Program Files directory</sys:String>
+{ProgramFiles(x86)} - Répertoire Program Files 32 bits</sys:String>
 
 </ResourceDictionary>
