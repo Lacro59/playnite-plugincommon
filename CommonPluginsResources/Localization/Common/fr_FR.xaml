@@ -181,6 +181,8 @@
 
 	<sys:String x:Key="LOCCommonAutoImport">Importer automatiquement les données lorsque la bibliothèque est mise à jour (uniquement les nouveaux éléments)</sys:String>
 	<sys:String x:Key="LOCCommonAutoImportOnInstalled">Importer automatiquement pour les jeux installés</sys:String>
+	<sys:String x:Key="LOCCommonLibraryFiltersSectionTitle">Filtres de bibliothèque</sys:String>
+	<sys:String x:Key="LOCCommonIncludeEmulatedGames">Inclure les jeux émulés dans les opérations du plugin</sys:String>
 	<sys:String x:Key="LOCCommonImporting">Importation en cours...</sys:String>
 	<sys:String x:Key="LOCCommonExport">Exporter</sys:String>
 	<sys:String x:Key="LOCCommonExportData">Exporter les données</sys:String>
@@ -240,6 +242,8 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoApiKey">{0} : Aucune clé API</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0} : Aucune configuration trouvée</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0} : l'utilisateur n'est pas authentifié</sys:String>
+	<sys:String x:Key="LOCCommonStoresInvalidSteamAppId">ID d'application Steam "{0}" invalide. L'ID du store du jeu dans Playnite doit être un identifiant d'application Steam numérique (par exemple 220 pour Half-Life 2).</sys:String>
+	<sys:String x:Key="LOCCommonStoresInvalidSteamAppIdForGame">ID d'application Steam "{1}" invalide pour le jeu "{0}". L'ID du store du jeu dans Playnite doit être un identifiant d'application Steam numérique (par exemple 220 pour Half-Life 2).</sys:String>
 	<sys:String x:Key="LOCCommonStoresLaunchers">Stores &amp; Launchers</sys:String>
 	<sys:String x:Key="LOCCommonStoresConsolesMobile">Console &amp; Mobile</sys:String>
 	<sys:String x:Key="LOCCommonStoreSteam">Steam</sys:String>
