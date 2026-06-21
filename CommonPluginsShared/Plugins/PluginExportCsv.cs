@@ -54,7 +54,7 @@ namespace CommonPluginsShared.Plugins
 				Width = 500,
 				MinHeight = 500
 			};
-			var window = PlayniteUiHelper.CreateExtensionWindow(ResourceProvider.GetString("LOCCommonExport"), view, windowOptions);
+			var window = PlayniteUiHelper.CreateExtensionWindow(GetExportWindowTitle(pluginName), view, windowOptions);
 			window.ShowDialog();
 
 			// 3. If the user confirmed AND selected an output file
@@ -155,6 +155,15 @@ namespace CommonPluginsShared.Plugins
 			return string.Format("{0}\n{1}\n{2}/{3}",
 				ResourceProvider.GetString("LOCCommonProcessingExtraction"),
 				item.Game?.Name ?? "Unknown", current + 1, total);
+		}
+
+		/// <summary>
+		/// Returns the title for the CSV export configuration window.
+		/// </summary>
+		/// <param name="pluginName">Plugin display name passed from the caller.</param>
+		protected virtual string GetExportWindowTitle(string pluginName)
+		{
+			return ResourceProvider.GetString("LOCCommonExport");
 		}
 
 		/// <summary>
