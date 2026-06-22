@@ -1,26 +1,20 @@
 ﻿using CommonPlayniteShared.Common;
-using CommonPlayniteShared.Common.Web;
 using CommonPlayniteShared.PluginLibrary.OriginLibrary.Models;
 using CommonPlayniteShared.PluginLibrary.OriginLibrary.Services;
-using CommonPlayniteShared.PluginLibrary.SteamLibrary.SteamShared;
 using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
-using CommonPluginsShared.Models;
-using CommonPluginsStores.Ea.Models;
 using CommonPluginsStores.Ea.Models.Query;
-using CommonPluginsStores.Epic.Models.Query;
 using CommonPluginsStores.Models;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static CommonPluginsShared.PlayniteTools;
 
@@ -47,6 +41,7 @@ namespace CommonPluginsStores.Ea
 
         private string AppsListPath { get; }
         private string PathOwnedGameProductsCache { get; }
+        private string PathOfferIdToGameSlugCache { get; }
 
         #endregion
 
@@ -57,6 +52,7 @@ namespace CommonPluginsStores.Ea
             FileSystem.DeleteFile(AppsListPath);
 
             PathOwnedGameProductsCache = Path.Combine(PathStoresData, "EA_OwnedGameProducts.json");
+            PathOfferIdToGameSlugCache = Path.Combine(PathStoresData, "EA_OfferIdToGameSlug.json");
         }
 
         #region Configuration
@@ -67,31 +63,32 @@ namespace CommonPluginsStores.Ea
             if (isLogged)
             {
                 AuthTokenResponse accessToken = OriginAPI.GetAccessToken();
-                AuthToken = new StoreToken
+                StoreToken = new StoreToken
                 { 
                     Token = accessToken.access_token,
                     Type = accessToken.token_type
                 };
 
-ResponseIdentity responseIdentity = GetIdentity().GetAwaiter().GetResult();
-CurrentAccountInfos = new AccountInfos
-{
-    UserId    = responseIdentity.Data.Me.Player.Pd,
-    ClientId  = responseIdentity.Data.Me.Player.Psd,
-    Pseudo    = responseIdentity.Data.Me.Player.DisplayName,
-    Link      = string.Empty,
-    Avatar    = responseIdentity?.Data?.Me?.Player?.Avatar?.Medium?.Path ?? string.Empty,
-    IsPrivate = true,
-    IsCurrent = true
-};
-                SaveCurrentUser();
-                _ = GetCurrentAccountInfos();
+                ResponseIdentity responseIdentity = GetIdentity().GetAwaiter().GetResult();
+                CurrentAccountInfos = new AccountInfos
+                {
+                    UserId    = responseIdentity.Data.Me.Player.Pd,
+                    ClientId  = responseIdentity.Data.Me.Player.Psd,
+                    Pseudo    = responseIdentity.Data.Me.Player.DisplayName,
+                    Link      = string.Empty,
+                    Avatar    = responseIdentity?.Data?.Me?.Player?.Avatar?.Medium?.Path ?? string.Empty,
+                    IsPrivate = true,
+                    IsCurrent = true
+                };
 
-                Logger.Info($"{ClientName} logged");
+                SaveCurrentUser();
+                //_ = GetCurrentAccountInfos();
+
+                LogInfo("logged");
             }
             else
             {
-                AuthToken = null;
+                StoreToken = null;
             }
 
             return isLogged;
@@ -249,18 +246,23 @@ CurrentAccountInfos = new AccountInfos
         #region Game
 
         /// <summary>
-        /// <summary>
         /// Get game informations.
         /// Override in derived classes if detailed game information is supported.
         /// </summary>
-        /// <param name="id">Game identifier (gameSlug)</param>
+        /// <param name="id">Game identifier (Origin offer id from Playnite)</param>
         /// <param name="accountInfos">Account information</param>
         /// <returns>Game information object or null</returns>
         public override GameInfos GetGameInfos(string id, AccountInfos accountInfos)
         {
             try
             {
-                Models.GameStoreDataResponse gameStoreDataResponse = GetStoreData(id);
+                string gameSlug = ResolveGameSlug(id);
+                if (gameSlug.IsNullOrEmpty())
+                {
+                    return null;
+                }
+
+                Models.GameStoreDataResponse gameStoreDataResponse = GetStoreData(gameSlug);
                 if (gameStoreDataResponse == null)
                 {
                     return null;
@@ -272,7 +274,7 @@ CurrentAccountInfos = new AccountInfos
                     Id2 = string.Empty,
                     Name = gameStoreDataResponse.Name,
                     Link = gameStoreDataResponse.Logo?.TargetUrl,
-                    Image = gameStoreDataResponse.HeroImage.Ar16X9,
+                    Image = gameStoreDataResponse.HeroImage?.Ar16X9,
                     Description = gameStoreDataResponse.ShortDescription
                 };
 
@@ -344,17 +346,111 @@ CurrentAccountInfos = new AccountInfos
 
         #region EA
 
+        /// <summary>
+        /// Resolves an Origin offer id to the EA drop-api game slug.
+        /// </summary>
+        /// <param name="offerId">Origin offer id (Playnite game id).</param>
+        /// <returns>Game slug, or null if it cannot be resolved.</returns>
+        private string ResolveGameSlug(string offerId)
+        {
+            if (offerId.IsNullOrEmpty())
+            {
+                return null;
+            }
+
+            Dictionary<string, string> cachedMappings = FileDataService.LoadData<Dictionary<string, string>>(PathOfferIdToGameSlugCache, 1440);
+            if (cachedMappings == null)
+            {
+                cachedMappings = new Dictionary<string, string>();
+            }
+
+            string cachedSlug;
+            if (cachedMappings.TryGetValue(offerId, out cachedSlug) && !cachedSlug.IsNullOrEmpty())
+            {
+                return cachedSlug;
+            }
+
+            string gameSlug = TryResolveGameSlugFromOwnedGameProducts(offerId);
+            if (gameSlug.IsNullOrEmpty())
+            {
+                gameSlug = TryResolveGameSlugFromOriginEntitlements(offerId);
+            }
+
+            if (!gameSlug.IsNullOrEmpty())
+            {
+                cachedMappings[offerId] = gameSlug;
+                FileDataService.SaveData(PathOfferIdToGameSlugCache, cachedMappings);
+            }
+
+            return gameSlug;
+        }
+
+        private string TryResolveGameSlugFromOwnedGameProducts(string offerId)
+        {
+            ResponseOwnedGameProducts responseOwnedGameProducts = GetOwnedGameProducts().GetAwaiter().GetResult();
+            ItemOwnedGameProducts ownedItem = responseOwnedGameProducts?.Data?.Me?.OwnedGameProducts?.Items?
+                .FirstOrDefault(x => x.OriginOfferId.IsEqual(offerId));
+
+            return ownedItem?.Product?.GameSlug;
+        }
+
+        private string TryResolveGameSlugFromOriginEntitlements(string offerId)
+        {
+            if (!IsUserLoggedIn || StoreToken == null)
+            {
+                return null;
+            }
+
+            AuthTokenResponse token = new AuthTokenResponse
+            {
+                access_token = StoreToken.Token,
+                token_type = StoreToken.Type
+            };
+
+            AccountInfoResponse accountInfo = OriginAPI.GetAccountInfo(token);
+            if (accountInfo?.pid == null)
+            {
+                return null;
+            }
+
+            List<AccountEntitlementsResponse.Entitlement> entitlements = OriginAPI.GetOwnedGames(accountInfo.pid.pidId, token);
+            AccountEntitlementsResponse.Entitlement entitlement = entitlements?
+                .FirstOrDefault(x => x.offerId.IsEqual(offerId));
+
+            return GetGameSlugFromOfferPath(entitlement?.offerPath);
+        }
+
+        /// <summary>
+        /// Extracts the game slug from an Origin offer path (/franchise/game-slug/edition).
+        /// </summary>
+        private static string GetGameSlugFromOfferPath(string offerPath)
+        {
+            if (offerPath.IsNullOrEmpty())
+            {
+                return null;
+            }
+
+            Match match = Regex.Match(offerPath, @"\/[^\/]+\/([^\/]+)\/");
+            if (match.Success)
+            {
+                return match.Groups[1].Value;
+            }
+
+            return null;
+        }
+
         private Models.GameStoreDataResponse GetStoreData(string gameSlug)
         {
             string cachePath = Path.Combine(PathAppsData, $"{gameSlug}.json");
-            Models.GameStoreDataResponse gameStoreDataResponse = LoadData<Models.GameStoreDataResponse>(cachePath, 1440);
+            Models.GameStoreDataResponse gameStoreDataResponse = FileDataService.LoadData<Models.GameStoreDataResponse>(cachePath, 1440);
 
-            if (gameStoreDataResponse == null)
+            if (gameStoreDataResponse?.Name.IsNullOrEmpty() ?? true)
             {
-                string url = string.Format(UrlGameData, gameSlug, CodeLang.GetCountryFromLast(Locale));
-                string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
+                string lang = CodeLang.GetCountryFromFirst(Locale);
+                string url = string.Format(UrlGameData, gameSlug, lang);
+                string response = Task.Run(async () => await Web.DownloadStringData(url)).GetAwaiter().GetResult();
                 Serialization.TryFromJson(response, out gameStoreDataResponse);
-                SaveData(cachePath, gameStoreDataResponse);
+				FileDataService.SaveData(cachePath, gameStoreDataResponse);
             }
 
             return gameStoreDataResponse;
@@ -367,37 +463,37 @@ CurrentAccountInfos = new AccountInfos
         private async Task<ResponseIdentity> GetIdentity()
         {
             QueryIdentity query = new QueryIdentity();
-            ResponseIdentity data = await GetGraphQl<ResponseIdentity>(UrlGraphQL, query);
+            ResponseIdentity data = await GetGraphQl<ResponseIdentity>(UrlGraphQL, query).ConfigureAwait(false);
             return data;
         }
 
         private async Task<ResponseFriends> GetFriends()
         {
             QueryFriends query = new QueryFriends();
-            ResponseFriends data = await GetGraphQl<ResponseFriends>(UrlGraphQL, query);
+            ResponseFriends data = await GetGraphQl<ResponseFriends>(UrlGraphQL, query).ConfigureAwait(false);
             return data;
         }
 
         private async Task<ResponseOwnedGameProducts> GetOwnedGameProducts()
         {
-            ResponseOwnedGameProducts data = LoadData<ResponseOwnedGameProducts>(PathOwnedGameProductsCache, 10);
-            if (data?.Data?.Me?.OwnedGameProducts?.Items?.Count > 0)
+            ResponseOwnedGameProducts data = FileDataService.LoadData<ResponseOwnedGameProducts>(PathOwnedGameProductsCache, 10);
+            if (data?.Data?.Me?.OwnedGameProducts?.Items != null && data?.Data?.Me?.OwnedGameProducts?.Items?.Count > 0)
             {
                 return data;
             }
 
             QueryOwnedGameProducts query = new QueryOwnedGameProducts();
             query.variables.locale = CodeLang.GetCountryFromLast(Locale);
-            data = await GetGraphQl<ResponseOwnedGameProducts>(UrlGraphQL, query);
-            SaveData(PathOwnedGameProductsCache, data);
+            data = await GetGraphQl<ResponseOwnedGameProducts>(UrlGraphQL, query).ConfigureAwait(false);
+            FileDataService.SaveData(PathOwnedGameProductsCache, data);
             return data;
         }
 
         private async Task<ResponseAchievements> GetAchievements(string offerId, string playerPsd)
         {
             string cachePath = Path.Combine(PathAchievementsData, $"{offerId}-{playerPsd}.json");
-            ResponseAchievements data = LoadData<ResponseAchievements>(cachePath, 10);
-            if (data?.Data?.Achievements?.FirstOrDefault()?.AchievementsData?.Count > 0)
+            ResponseAchievements data = FileDataService.LoadData<ResponseAchievements>(cachePath, 10);
+            if (data?.Data?.Achievements?.FirstOrDefault()?.AchievementsData != null && data?.Data?.Achievements?.FirstOrDefault()?.AchievementsData?.Count > 0)
             {
                 return data;
             }
@@ -406,8 +502,8 @@ CurrentAccountInfos = new AccountInfos
             query.variables.offerId = offerId;
             query.variables.playerPsd = playerPsd;
             query.variables.locale = CodeLang.GetCountryFromLast(Locale);
-            data = await GetGraphQl<ResponseAchievements>(UrlGraphQL, query);
-            SaveData(cachePath, data);
+            data = await GetGraphQl<ResponseAchievements>(UrlGraphQL, query).ConfigureAwait(false);
+            FileDataService.SaveData(cachePath, data);
             return data;
         }
 
@@ -415,7 +511,7 @@ CurrentAccountInfos = new AccountInfos
         {
             QueryRecentGames query = new QueryRecentGames();
             query.variables.gameSlugs = gameSlugs;
-            ResponseRecentGames data = await GetGraphQl<ResponseRecentGames>(UrlGraphQL, query);
+            ResponseRecentGames data = await GetGraphQl<ResponseRecentGames>(UrlGraphQL, query).ConfigureAwait(false);
             return data;
         }
 
@@ -426,7 +522,7 @@ CurrentAccountInfos = new AccountInfos
             try
             {
                 StringContent content = new StringContent(Serialization.ToJson(query), Encoding.UTF8, "application/json");
-                string response = await Web.PostStringData(url, AuthToken?.Token, content);
+                string response = await Web.PostStringData(url, StoreToken?.Token, content).ConfigureAwait(false);
                 T data = Serialization.FromJson<T>(response);
                 return data;
             }

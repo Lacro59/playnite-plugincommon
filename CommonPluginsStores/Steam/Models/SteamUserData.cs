@@ -6,16 +6,16 @@ namespace CommonPluginsStores.Steam.Models
     public class SteamUserData
     {
         [SerializationPropertyName("rgWishlist")]
-        public List<int> RgWishlist { get; set; }
+        public List<uint> RgWishlist { get; set; }
 
         [SerializationPropertyName("rgOwnedPackages")]
-        public List<int> RgOwnedPackages { get; set; }
+        public List<uint> RgOwnedPackages { get; set; }
 
         [SerializationPropertyName("rgOwnedApps")]
-        public List<int> RgOwnedApps { get; set; }
+        public List<uint> RgOwnedApps { get; set; }
 
         [SerializationPropertyName("rgFollowedApps")]
-        public List<int> RgFollowedApps { get; set; }
+        public List<uint> RgFollowedApps { get; set; }
 
         [SerializationPropertyName("rgMasterSubApps")]
         public List<object> RgMasterSubApps { get; set; }

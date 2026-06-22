@@ -2,10 +2,13 @@
 using CommonPlayniteShared;
 using CommonPlayniteShared.Common;
 using CommonPluginsShared;
+using CommonPluginsShared.Caching;
 using CommonPluginsShared.Converters;
 using CommonPluginsShared.Extensions;
+using CommonPluginsShared.IO;
 using CommonPluginsShared.Models;
 using CommonPluginsStores.Models;
+using CommonPluginsStores.Models.Enumerations;
 using CommonPluginsStores.Models.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Data;
@@ -17,6 +20,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Principal;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using static CommonPluginsShared.PlayniteTools;
 
@@ -28,7 +32,7 @@ namespace CommonPluginsStores
     /// </summary>
     public abstract class StoreApi : ObservableObject, IStoreApi, IStoreApiInternal
     {
-        protected static ILogger Logger => LogManager.GetLogger();
+        protected static readonly ILogger Logger = LogManager.GetLogger();
 
         private readonly SmartCache<AccountInfos> _accountCache;
         private readonly SmartCache<ObservableCollection<AccountInfos>> _friendsCache;
@@ -39,13 +43,17 @@ namespace CommonPluginsStores
         private readonly Lazy<ObservableCollection<AccountInfos>> _lazyFriends;
         private readonly Lazy<ObservableCollection<AccountGameInfos>> _lazyGames;
 
-        #region Account data
+		private readonly SemaphoreSlim _rateLimiter = new SemaphoreSlim(1, 1);
+		private DateTime _lastApiCall = DateTime.MinValue;
+		internal int MinApiCallIntervalMs = 500;
 
-        /// <summary>
-        /// Get the current account information for the user.
-        /// Caches the result for reuse.
-        /// </summary>
-        public AccountInfos CurrentAccountInfos
+		#region Account data
+
+		/// <summary>
+		/// Get the current account information for the user.
+		/// Caches the result for reuse.
+		/// </summary>
+		public AccountInfos CurrentAccountInfos
         {
             get => _lazyAccount.Value;
             set => SetValue(ref _lazyAccount, new Lazy<AccountInfos>(() => value), nameof(CurrentAccountInfos));
@@ -120,6 +128,44 @@ namespace CommonPluginsStores
         protected string ClientNameLog { get; }
 
         /// <summary>
+        /// Prefixes a log message with the store client name (for example "[GOG] message").
+        /// </summary>
+        /// <param name="message">Log message body without client prefix.</param>
+        /// <returns>Formatted message for extension log filtering.</returns>
+        protected string FormatLogMessage(string message)
+        {
+            return $"[{ClientName}] {message}";
+        }
+
+        /// <summary>
+        /// Writes an info log entry prefixed with the store client name.
+        /// </summary>
+        /// <param name="message">Log message body without client prefix.</param>
+        protected void LogInfo(string message)
+        {
+            Logger.Info(FormatLogMessage(message));
+        }
+
+        /// <summary>
+        /// Writes a warning log entry prefixed with the store client name.
+        /// </summary>
+        /// <param name="message">Log message body without client prefix.</param>
+        protected void LogWarn(string message)
+        {
+            Logger.Warn(FormatLogMessage(message));
+        }
+
+        /// <summary>
+        /// Writes an error log entry prefixed with the store client name.
+        /// </summary>
+        /// <param name="ex">Exception to log.</param>
+        /// <param name="message">Log message body without client prefix.</param>
+        protected void LogError(Exception ex, string message)
+        {
+            Logger.Error(ex, FormatLogMessage(message));
+        }
+
+        /// <summary>
         /// Gets or sets the locale for data retrieval (default: en_US).
         /// </summary>
         protected string Locale { get; set; } = "en_US";
@@ -164,10 +210,31 @@ namespace CommonPluginsStores
         /// </summary>
         protected CookiesTools CookiesTools { get; }
 
-        /// <summary>
-        /// Gets or sets the authentication token for API requests.
-        /// </summary>
-        protected StoreToken AuthToken { get; set; }
+        protected FileDataService FileDataService { get; }
+
+        protected string FileToken { get; }
+
+        private StoreToken _storeToken;
+
+		/// <summary>
+		/// Gets or sets the authentication token for API requests.
+		/// </summary>
+		protected StoreToken StoreToken 
+        {
+            get
+            {
+                if (_storeToken == null)
+                {
+                    _storeToken = GetStoredToken();
+				}
+                return _storeToken;
+            }
+            set
+            {
+                _storeToken = value;
+                _ = SetStoredToken(_storeToken);
+			}
+        }
 
         /// <summary>
         /// Gets the external plugin instance reference.
@@ -211,6 +278,7 @@ namespace CommonPluginsStores
             PathStoresData = Path.Combine(PlaynitePaths.ExtensionsDataPath, "StoresData");
             FileUser = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_User.dat"));
             FileCookies = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_Cookies.dat"));
+            FileToken = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_Token.dat"));
             FileGamesDlcsOwned = Path.Combine(PathStoresData, CommonPlayniteShared.Common.Paths.GetSafePathName($"{ClientNameLog}_GamesDlcsOwned.json"));
 
             CookiesTools = new CookiesTools(
@@ -218,6 +286,11 @@ namespace CommonPluginsStores
                 ClientName,
                 FileCookies,
                 CookiesDomains);
+
+            FileDataService = new FileDataService(PluginName, ClientName)
+            {
+                ShowNotificationOldDataHandler = ShowNotificationOldData
+            };
 
             FileSystem.CreateDirectory(PathStoresData);
         }
@@ -228,14 +301,14 @@ namespace CommonPluginsStores
         /// Read the last identified cookies stored.
         /// </summary>
         /// <returns>List of stored HTTP cookies</returns>
-        protected virtual List<HttpCookie> GetStoredCookies() => CookiesTools.GetStoredCookies();
+        protected virtual List<Playnite.SDK.HttpCookie> GetStoredCookies() => CookiesTools.GetStoredCookies();
 
         /// <summary>
         /// Save the last identified cookies stored.
         /// </summary>
         /// <param name="httpCookies">The HTTP cookies to store</param>
         /// <returns>True if cookies were saved successfully</returns>
-        protected virtual bool SetStoredCookies(List<HttpCookie> httpCookies) => CookiesTools.SetStoredCookies(httpCookies);
+        protected virtual bool SetStoredCookies(List<Playnite.SDK.HttpCookie> httpCookies) => CookiesTools.SetStoredCookies(httpCookies);
 
         /// <summary>
         /// Get cookies in WebView or another method.
@@ -243,7 +316,7 @@ namespace CommonPluginsStores
         /// <param name="deleteCookies">Whether to delete cookies after retrieval</param>
         /// <param name="webView">Optional WebView instance to use</param>
         /// <returns>List of HTTP cookies from web source</returns>
-        protected virtual List<HttpCookie> GetWebCookies(bool deleteCookies = false, IWebView webView = null) => CookiesTools.GetWebCookies(deleteCookies, webView);
+        protected virtual List<Playnite.SDK.HttpCookie> GetWebCookies(bool deleteCookies = false, IWebView webView = null) => CookiesTools.GetWebCookies(deleteCookies, webView);
 
         /// <summary>
         /// Get new cookies from specific URLs.
@@ -252,18 +325,135 @@ namespace CommonPluginsStores
         /// <param name="deleteCookies">Whether to delete cookies after retrieval</param>
         /// <param name="webView">Optional WebView instance to use</param>
         /// <returns>List of new HTTP cookies</returns>
-        protected virtual List<HttpCookie> GetNewWebCookies(List<string> urls, bool deleteCookies = false, IWebView webView = null) => CookiesTools.GetNewWebCookies(urls, deleteCookies, webView);
+        protected virtual List<Playnite.SDK.HttpCookie> GetNewWebCookies(List<string> urls, bool deleteCookies = false, IWebView webView = null) => CookiesTools.GetNewWebCookies(urls, deleteCookies, webView);
 
-        #endregion
+		#endregion
 
-        #region Configuration
+		#region Token
 
-        /// <summary>
-        /// Resets the cached login status, forcing a re-check on next access.
-        /// </summary>
-        public void ResetIsUserLoggedIn()
+        protected virtual StoreToken GetStoredToken() 
+        {
+			if (File.Exists(FileToken))
+			{
+				try
+				{
+					return Serialization.FromJson<StoreToken>(
+						Encryption.DecryptFromFile(
+							FileToken,
+							Encoding.UTF8,
+							WindowsIdentity.GetCurrent().User.Value));
+				}
+				catch (Exception ex)
+				{
+					Common.LogError(ex, false, FormatLogMessage("Failed to load saved token"));
+				}
+			}
+
+			LogWarn("No stored token");
+			return null;
+		}
+
+        protected virtual bool SetStoredToken(StoreToken token)
+		{
+			try
+			{
+				if (token != null)
+				{
+					FileSystem.CreateDirectory(Path.GetDirectoryName(FileToken));
+					Encryption.EncryptToFile(
+						FileToken,
+						Serialization.ToJson(token),
+						Encoding.UTF8,
+						WindowsIdentity.GetCurrent().User.Value);
+					return true;
+				}
+				else
+				{
+					LogWarn("No token saved");
+				}
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, FormatLogMessage("Failed to save token"));
+			}
+
+			return false;
+		}
+
+		#endregion
+
+		#region Configuration
+
+		/// <summary>
+		/// Resets the cached login status, forcing a re-check on next access.
+		/// </summary>
+		public void ResetIsUserLoggedIn()
         {
             isUserLoggedIn = null;
+        }
+
+        /// <summary>
+        /// Clears stored authentication data and session profile fields for the current account.
+        /// Manual identifiers (user id, API key) are preserved.
+        /// </summary>
+        public virtual void ClearSession()
+        {
+            LogInfo("ClearSession started");
+
+            try
+            {
+                CookiesTools.ClearStoredCookies();
+                CookiesTools.ClearDomainCookies();
+                ClearStoredToken();
+                ClearSessionProfileFields();
+                IsUserLoggedIn = false;
+                SaveCurrentUser();
+                LogInfo("ClearSession completed");
+            }
+            catch (Exception ex)
+            {
+                LogError(ex, "ClearSession failed");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Deletes the stored authentication token file and in-memory token cache.
+        /// </summary>
+        protected void ClearStoredToken()
+        {
+            _storeToken = null;
+
+            if (File.Exists(FileToken))
+            {
+                FileSystem.DeleteFile(FileToken);
+                LogInfo("Stored token file deleted");
+                Common.LogDebug(true, FormatLogMessage($"ClearStoredToken: {FileToken}"));
+            }
+            else
+            {
+                Common.LogDebug(true, FormatLogMessage("ClearStoredToken: no token file found"));
+            }
+        }
+
+        /// <summary>
+        /// Clears profile fields populated by an authenticated session.
+        /// </summary>
+        protected void ClearSessionProfileFields()
+        {
+            AccountInfos user = CurrentAccountInfos;
+
+            if (user == null)
+            {
+                LogWarn("ClearSession: no current account to update");
+                return;
+            }
+
+            user.Avatar = null;
+            user.Link = null;
+            user.Pseudo = null;
+            user.AccountStatus = AccountStatus.Unknown;
+            Common.LogDebug(true, FormatLogMessage("ClearSession: session profile fields cleared"));
         }
 
         /// <summary>
@@ -335,7 +525,7 @@ namespace CommonPluginsStores
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false, true, PluginName, $"Failed to load {ClientName} user.");
+                    Common.LogError(ex, false, true, PluginName, FormatLogMessage("Failed to load user"));
                 }
             }
 
@@ -413,7 +603,11 @@ namespace CommonPluginsStores
             return new AccountInfos { IsCurrent = true };
         }
 
-        public async Task<AccountInfos> GetCurrentAccountInfosAsync()
+		/// <summary>
+		/// Asynchronously retrieves the current user's account information.
+		/// </summary>
+		/// <returns>Task that returns the current account information</returns>
+		public async Task<AccountInfos> GetCurrentAccountInfosAsync()
         {
             return await Task.Run(() => GetCurrentAccountInfos());
         }
@@ -444,7 +638,12 @@ namespace CommonPluginsStores
         /// <returns>Collection of user's game information</returns>
         public abstract ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos);
 
-        public async Task<ObservableCollection<AccountGameInfos>> GetAccountGamesInfosAsync(AccountInfos accountInfos)
+		/// <summary>
+		/// Asynchronously retrieves the user's games list.
+		/// </summary>
+		/// <param name="accountInfos">Account information for the user</param>
+		/// <returns>Task that returns a collection of user's game information</returns>
+		public async Task<ObservableCollection<AccountGameInfos>> GetAccountGamesInfosAsync(AccountInfos accountInfos)
         {
             Guard.Against.Null(accountInfos, nameof(accountInfos));
             return await Task.Run(() => GetAccountGamesInfos(accountInfos));
@@ -459,7 +658,13 @@ namespace CommonPluginsStores
         /// <returns>Collection of game achievements or null</returns>
         public virtual ObservableCollection<GameAchievement> GetAchievements(string id, AccountInfos accountInfos) => null;
 
-        public async Task<ObservableCollection<GameAchievement>> GetAchievementsAsync(string id, AccountInfos accountInfos)
+		/// <summary>
+		/// Asynchronously retrieves a list of a game's achievements with a user's possessions.
+		/// </summary>
+		/// <param name="id">Game identifier</param>
+		/// <param name="accountInfos">Account information</param>
+		/// <returns>Task that returns a collection of game achievements or null</returns>
+		public async Task<ObservableCollection<GameAchievement>> GetAchievementsAsync(string id, AccountInfos accountInfos)
         {
             Guard.Against.NullOrWhiteSpace(id, nameof(id));
             Guard.Against.Null(accountInfos, nameof(accountInfos));
@@ -527,7 +732,13 @@ namespace CommonPluginsStores
         /// <returns>Collection of DLC information or null</returns>
         public virtual ObservableCollection<DlcInfos> GetDlcInfos(string id, AccountInfos accountInfos) => null;
 
-        public async Task<ObservableCollection<DlcInfos>> GetDlcInfosAsync(string id, AccountInfos accountInfos)
+		/// <summary>
+		/// Asynchronously retrieves DLC information for a game.
+		/// </summary>
+		/// <param name="id">Game identifier</param>
+		/// <param name="accountInfos">Account information</param>
+		/// <returns>Task that returns a collection of DLC information or null</returns>
+		public async Task<ObservableCollection<DlcInfos>> GetDlcInfosAsync(string id, AccountInfos accountInfos)
         {
             Guard.Against.NullOrWhiteSpace(id, nameof(id));
             Guard.Against.Null(accountInfos, nameof(accountInfos));
@@ -545,7 +756,7 @@ namespace CommonPluginsStores
         /// <returns>Collection of owned games and DLC or null</returns>
         private ObservableCollection<GameDlcOwned> LoadGamesDlcsOwned(bool onlyNow = true)
         {
-            return LoadData<ObservableCollection<GameDlcOwned>>(FileGamesDlcsOwned, onlyNow ? 5 : 0);
+            return FileDataService.LoadData<ObservableCollection<GameDlcOwned>>(FileGamesDlcsOwned, onlyNow ? 5 : 0);
         }
 
         /// <summary>
@@ -555,17 +766,7 @@ namespace CommonPluginsStores
         /// <returns>True if save was successful, false otherwise</returns>
         private bool SaveGamesDlcsOwned(ObservableCollection<GameDlcOwned> gamesDlcsOwned)
         {
-            try
-            {
-                FileSystem.PrepareSaveFile(FileGamesDlcsOwned);
-                File.WriteAllText(FileGamesDlcsOwned, Serialization.ToJson(gamesDlcsOwned));
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-                return false;
-            }
+            return FileDataService.SaveData(FileGamesDlcsOwned, gamesDlcsOwned);
         }
 
         /// <summary>
@@ -575,7 +776,11 @@ namespace CommonPluginsStores
         /// <returns>Collection of owned games and DLC or null</returns>
         protected virtual ObservableCollection<GameDlcOwned> GetGamesDlcsOwned() => null;
 
-        public async Task<ObservableCollection<GameDlcOwned>> GetGamesDlcsOwnedAsync()
+		/// <summary>
+		/// Asynchronously retrieves the current list of owned games and DLC from the store.
+		/// </summary>
+		/// <returns>Task that returns a collection of owned games and DLC or null</returns>
+		public async Task<ObservableCollection<GameDlcOwned>> GetGamesDlcsOwnedAsync()
         {
             return await Task.Run(() => GetGamesDlcsOwned());
         }
@@ -594,12 +799,14 @@ namespace CommonPluginsStores
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, true, PluginName);
+                Common.LogError(ex, false, true, PluginName, FormatLogMessage("Failed to check DLC ownership"));
                 return false;
             }
         }
 
         #endregion
+
+        #region Notifications
 
         /// <summary>
         /// Shows a notification to the user about using old cached data.
@@ -609,9 +816,9 @@ namespace CommonPluginsStores
         {
             LocalDateTimeConverter localDateTimeConverter = new LocalDateTimeConverter();
             string formatedDateLastWrite = localDateTimeConverter.Convert(dateLastWrite, null, null, CultureInfo.CurrentCulture).ToString();
-            Logger.Warn($"Use saved UserData - {formatedDateLastWrite}");
+            LogWarn($"Using saved user data from {formatedDateLastWrite}");
             API.Instance.Notifications.Add(new NotificationMessage(
-                $"{PluginName}-{ClientNameLog}-LoadGamesDlcsOwned",
+                $"{PluginName}-{ClientNameLog}-LoadFileData",
                 $"{PluginName}" + Environment.NewLine
                     + string.Format(ResourceProvider.GetString("LOCCommonNotificationOldData"), ClientName, formatedDateLastWrite),
                 NotificationType.Info,
@@ -622,6 +829,42 @@ namespace CommonPluginsStores
                 }
             ));
         }
+
+		/// <summary>
+		/// Shows a notification to the user indicating no authentication has been performed.
+		/// </summary>
+		public virtual void ShowNotificationUserNoAuthenticate()
+        {
+            string message = string.Format(ResourceProvider.GetString("LOCCommonStoresNoAuthenticate"), ClientName);
+            LogWarn("User is not authenticated");
+
+            API.Instance.Notifications.Add(new NotificationMessage(
+                $"{PluginName}-{ClientName.RemoveWhiteSpace()}-noauthenticate",
+                $"{PluginName}\r\n{message}",
+                NotificationType.Error,
+                () =>
+                {
+                    try
+                    {
+                        ShowPluginSettings(PluginLibrary);
+                        // TODO
+                        /*
+                        foreach (GenericAchievements achievementProvider in SuccessStoryDatabase.AchievementProviders.Values)
+                        {
+                            achievementProvider.ResetCachedConfigurationValidationResult();
+                            achievementProvider.ResetCachedIsConnectedResult();
+                        }
+                        */
+                    }
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, true, PluginName, FormatLogMessage("Failed to open plugin settings from authentication notification"));
+                    }
+                }
+            ));
+        }
+
+        #endregion
 
         /// <summary>
         /// Calculates gamer score based on achievement rarity percentage.
@@ -670,106 +913,6 @@ namespace CommonPluginsStores
         }
 
         /// <summary>
-        /// Generic method to load data from file with optional age validation.
-        /// </summary>
-        /// <typeparam name="T">Type of data to load</typeparam>
-        /// <param name="filePath">Path to the data file</param>
-        /// <param name="minutes">Maximum age in minutes (0 to ignore age, positive to validate freshness)</param>
-        /// <returns>Loaded data of type T or null if loading fails or data is too old</returns>
-        protected T LoadData<T>(string filePath, int minutes) where T : class
-        {
-            Guard.Against.NullOrWhiteSpace(filePath, nameof(filePath));
-
-            if (!File.Exists(filePath))
-            {
-                return null;
-            }
-
-            try
-            {
-                DateTime dateLastWrite = File.GetLastWriteTime(filePath);
-
-                if (minutes > 0 && dateLastWrite.AddMinutes(minutes) <= DateTime.Now)
-                {
-                    return null;
-                }
-
-                if (minutes == 0)
-                {
-                    ShowNotificationOldData(dateLastWrite);
-                }
-
-                return Serialization.FromJsonFile<T>(filePath);
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-                return null;
-            }
-        }
-
-        protected async Task<T> LoadDataAsync<T>(string filePath, int minutes) where T : class
-        {
-            Guard.Against.NullOrWhiteSpace(filePath, nameof(filePath));
-
-            if (!File.Exists(filePath))
-            {
-                return null;
-            }
-
-            try
-            {
-                var fileInfo = new FileInfo(filePath);
-                DateTime dateLastWrite = fileInfo.LastWriteTime;
-
-                if (minutes > 0 && dateLastWrite.AddMinutes(minutes) <= DateTime.Now)
-                {
-                    return null;
-                }
-
-                if (minutes == 0)
-                {
-                    ShowNotificationOldData(dateLastWrite);
-                }
-
-                return await Task.Run(() => Serialization.FromJsonFile<T>(filePath));
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-                return null;
-            }
-        }
-
-        protected bool SaveData<T>(string filePath, T data) where T : class
-        {
-            Guard.Against.NullOrWhiteSpace(filePath, nameof(filePath));
-            try
-            {
-                if (data == null)
-                {
-                    return false;
-                }
-
-                FileSystem.PrepareSaveFile(filePath);
-                if (data is string s)
-                {
-                    File.WriteAllText(filePath, s);
-                }
-                else
-                {
-                    File.WriteAllText(filePath, Serialization.ToJson(data));
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-                return false;
-            }
-        }
-
-        /// <summary>
         /// Purges all cached data including apps and achievements.
         /// </summary>
         public void PurgeCache()
@@ -778,12 +921,35 @@ namespace CommonPluginsStores
             FileSystem.DeleteDirectory(PathAchievementsData);
         }
 
-        public void ClearCache()
+		/// <summary>
+		/// Clears all in-memory cache collections.
+		/// </summary>
+		public void ClearCache()
         {
             _accountCache.Clear();
             _friendsCache.Clear();
             _gamesCache.Clear();
             _dlcsCache.Clear();
         }
-    }
+
+
+		private async Task<T> WithRateLimitAsync<T>(Func<Task<T>> apiCall)
+		{
+			await _rateLimiter.WaitAsync();
+			try
+			{
+				var elapsed = (DateTime.Now - _lastApiCall).TotalMilliseconds;
+				if (elapsed < MinApiCallIntervalMs)
+				{
+					await Task.Delay(MinApiCallIntervalMs - (int)elapsed);
+				}
+				_lastApiCall = DateTime.Now;
+				return await apiCall();
+			}
+			finally
+			{
+				_rateLimiter.Release();
+			}
+		}
+	}
 }

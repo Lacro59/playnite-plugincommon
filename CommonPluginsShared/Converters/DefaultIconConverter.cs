@@ -1,54 +1,44 @@
 ﻿using CommonPlayniteShared;
 using Playnite.SDK;
 using System;
-using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
-using System.Text.RegularExpressions;
-using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Markup;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace CommonPluginsShared.Converters
 {
+    /// <summary>
+    /// Returns the default game icon if the input value (icon path) is missing or invalid.
+    /// Checks if file exists, or tries to resolve it relative to Playnite database.
+    /// </summary>
     public class DefaultIconConverter : IValueConverter
     {
-        public object Convert(object value, Type TargetType, object parameter, CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             try
             {
-                if (value == null || (value is string && ((string)value).IsNullOrEmpty()))
+                if (value == null || (value is string strVal && strVal.IsNullOrEmpty()))
                 {
-                    if (ResourceProvider.GetResource("DefaultGameIcon") != null)
-                    {
-                        return ResourceProvider.GetResource("DefaultGameIcon");
-                    }
+                    return GetDefaultIcon();
                 }
-                else
+
+                if (value is string path)
                 {
-                    if (!(value is string))
+                    if (File.Exists(path))
                     {
-                        return value;
+                        return path;
                     }
 
-                    if (!File.Exists((string)value))
+                    string fullPath = API.Instance?.Database?.GetFullFilePath(path);
+                    if (!string.IsNullOrEmpty(fullPath) && File.Exists(fullPath))
                     {
-                        if (File.Exists(API.Instance.Database.GetFullFilePath((string)value)))
-                        { 
-                            return API.Instance.Database.GetFullFilePath((string)value);
-                        }
-                        else
-                        {
-                            if (ResourceProvider.GetResource("DefaultGameIcon") != null)
-                            {
-                                return ResourceProvider.GetResource("DefaultGameIcon");
-                            }
-                        }
+                        return fullPath;
                     }
+
+                    return GetDefaultIcon();
                 }
+
+                return value;
             }
             catch (Exception ex)
             {
@@ -58,9 +48,18 @@ namespace CommonPluginsShared.Converters
             return value;
         }
 
+        private object GetDefaultIcon()
+        {
+            if (ResourceProvider.GetResource("DefaultGameIcon") != null)
+            {
+                return ResourceProvider.GetResource("DefaultGameIcon");
+            }
+            return null;
+        }
+
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
     }
 }

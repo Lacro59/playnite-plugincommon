@@ -10,14 +10,13 @@ namespace CommonPluginsShared.Extensions
     public static class StringExtensions
     {
         /// <summary>
-        /// Decodes HTML strings and normalizes their whitespace (no more non-breaking spaces, f.e.)
+        /// Decodes HTML strings and normalizes their whitespace.
+        /// Replaces newlines in HTML with Environment.NewLine and trims the result.
         /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
         public static string HtmlDecode(this string input)
         {
-            if (input == null)
-                return null;
+            if (string.IsNullOrEmpty(input))
+                return input;
 
             return Regex.Replace(WebUtility.HtmlDecode(input), @"\s+", match =>
             {
@@ -28,8 +27,14 @@ namespace CommonPluginsShared.Extensions
             }).Trim();
         }
 
+        /// <summary>
+        /// Removes diacritics (accents) from the string.
+        /// </summary>
         public static string RemoveDiacritics(this string text)
         {
+            if (string.IsNullOrEmpty(text))
+                return text;
+
             string normalizedString = text.Normalize(NormalizationForm.FormD);
             StringBuilder stringBuilder = new StringBuilder();
 
@@ -38,38 +43,57 @@ namespace CommonPluginsShared.Extensions
                 UnicodeCategory unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
                 if (unicodeCategory != UnicodeCategory.NonSpacingMark)
                 {
-                    _ = stringBuilder.Append(c);
+                    stringBuilder.Append(c);
                 }
             }
 
             return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
 
-
+        /// <summary>
+        /// Removes all whitespace characters from the string.
+        /// </summary>
         public static string RemoveWhiteSpace(this string text)
         {
+            if (string.IsNullOrEmpty(text))
+                return text;
+
             return Regex.Replace(text, @"\s+", "");
         }
 
-
-        public static bool IsEqual(this string source, string text, bool Normalize = false)
+        /// <summary>
+        /// Compares two strings for equality with optional normalization.
+        /// Using PlayniteTools.NormalizeGameName if Normalize is true.
+        /// </summary>
+        public static bool IsEqual(this string source, string text, bool normalize = false)
         {
             try
             {
-                return string.IsNullOrEmpty(source) || string.IsNullOrEmpty(text)
-                    ? false
-                    : Normalize
-                    ? PlayniteTools.NormalizeGameName(source).Trim().ToLower() == PlayniteTools.NormalizeGameName(text).Trim().ToLower()
-                    : source.Trim().ToLower() == text.Trim().ToLower();
+                if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(text))
+                {
+                    return false;
+                }
+
+                if (normalize)
+                {
+                    return string.Equals(
+                        PlayniteTools.NormalizeGameName(source).Trim(),
+                        PlayniteTools.NormalizeGameName(text).Trim(),
+                        StringComparison.OrdinalIgnoreCase);
+                }
+
+                return string.Equals(source.Trim(), text.Trim(), StringComparison.OrdinalIgnoreCase);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Common.LogError(ex, false);
                 return false;
             }
         }
 
-
+        /// <summary>
+        /// Escapes the string for use in a URI.
+        /// </summary>
         public static string EscapeDataString(this string str)
         {
             if (string.IsNullOrEmpty(str))

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommonPluginsShared.UI;
+using System;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,16 +9,43 @@ namespace CommonPluginsShared.Controls
     public class ListBoxExtend : ListBox
     {
         #region HeightStretch
+
+        /// <summary>
+        /// Dependency property for HeightStretch.
+        /// </summary>
         public static readonly DependencyProperty HeightStretchProperty;
-        public bool HeightStretch { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the ListView should stretch to fill the available height.
+        /// </summary>
+        public bool HeightStretch
+        {
+            get => HeightStretchProperty == null || (bool)GetValue(HeightStretchProperty);
+            set => SetValue(HeightStretchProperty, value);
+        }
+
         #endregion
 
         #region WidthStretch
+
+        /// <summary>
+        /// Dependency property for WidthStretch.
+        /// </summary>
         public static readonly DependencyProperty WidthStretchProperty;
-        public bool WidthStretch { get; set; }
-        #endregion  
+
+        /// <summary>
+        /// Gets or sets whether the ListView should stretch to fill the available width.
+        /// </summary>
+        public bool WidthStretch
+        {
+            get => WidthStretchProperty == null || (bool)GetValue(WidthStretchProperty);
+            set => SetValue(WidthStretchProperty, value);
+        }
+
+        #endregion
 
         #region BubblingScrollEvents
+
         public bool BubblingScrollEvents
         {
             get => (bool)GetValue(BubblingScrollEventsProperty);
@@ -32,19 +60,19 @@ namespace CommonPluginsShared.Controls
 
         private static void BubblingScrollEventsChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
-            ListBoxExtend obj = sender as ListBoxExtend;
-            if (obj != null && e.NewValue != e.OldValue)
+            if (sender is ListBoxExtend obj && e.NewValue != e.OldValue)
             {
                 if ((bool)e.NewValue)
                 {
-                    obj.PreviewMouseWheel += UI.HandlePreviewMouseWheel;
+                    obj.PreviewMouseWheel += UIHelper.HandlePreviewMouseWheel;
                 }
                 else
                 {
-                    obj.PreviewMouseWheel -= UI.HandlePreviewMouseWheel;
+                    obj.PreviewMouseWheel -= UIHelper.HandlePreviewMouseWheel;
                 }
             }
         }
+
         #endregion
 
 

@@ -11,7 +11,7 @@ namespace CommonPluginsStores
 {
     public class UplayAPI
     {
-        private static ILogger Logger => LogManager.GetLogger();
+        private static readonly ILogger Logger = LogManager.GetLogger();
 
 
         public UplayAPI()

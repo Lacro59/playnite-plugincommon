@@ -5,6 +5,7 @@ using CommonPlayniteShared.Common;
 using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Models;
+using CommonPluginsShared.Utilities;
 using CommonPluginsStores.Gog.Models;
 using CommonPluginsStores.Models;
 using CommonPluginsStores.Models.Enumerations;
@@ -77,6 +78,7 @@ namespace CommonPluginsStores.Gog
         private UserDataOwned UserDataOwned => LoadUserDataOwned() ?? GetUserDataOwnedData() ?? LoadUserDataOwned(false);
 
         private AccountBasicResponse _accountBasic;
+        private int _isHandlingLoading = 0;
         private AccountBasicResponse AccountBasic
         {
             get
@@ -138,7 +140,7 @@ namespace CommonPluginsStores.Gog
 
                 string response = Web.DownloadStringData(UrlAccountInfo, GetStoredCookies()).GetAwaiter().GetResult();
                 _ = Serialization.TryFromJson(response, out AccountBasicResponse accountBasicResponse);
-                AuthToken = new StoreToken
+                StoreToken = new StoreToken
                 {
                     Token = accountBasicResponse.AccessToken
                 };
@@ -154,15 +156,16 @@ namespace CommonPluginsStores.Gog
                         IsPrivate = true,
                         IsCurrent = true
                     };
-                    SaveCurrentUser();
-                    _ = GetCurrentAccountInfos();
 
-                    Logger.Info($"{ClientName} logged");
+                    SaveCurrentUser();
+                    //_ = GetCurrentAccountInfos();
+
+                    LogInfo("logged");
                 }
             }
             else
             {
-                AuthToken = null;
+                StoreToken = null;
             }
 
             return isLogged;
@@ -189,7 +192,7 @@ namespace CommonPluginsStores.Gog
                     SaveCurrentUser();
                     _ = GetCurrentAccountInfos();
 
-                    Logger.Info($"{ClientName} logged");
+                    LogInfo("logged");
                 }
             }
             catch (Exception ex)
@@ -212,11 +215,18 @@ namespace CommonPluginsStores.Gog
                     Thread.Sleep(1000);
                     ProfileUserGalaxy profileUserGalaxy = GetAccountInfoByGalaxyUserId(long.Parse(CurrentAccountInfos.UserId));
 
-                    CurrentAccountInfos.Avatar = $"{UrlImage}/{profileUserGalaxy.Avatar.GogImageId}.jpg";
-                    CurrentAccountInfos.Pseudo = profileUserGalaxy.Username;
+                    if (profileUserGalaxy != null)
+                    {
+                        CurrentAccountInfos.Avatar = $"{UrlImage}/{profileUserGalaxy.Avatar.GogImageId}.jpg";
+                        CurrentAccountInfos.Pseudo = profileUserGalaxy.Username;
 
-                    CurrentAccountInfos.IsPrivate = !CheckIsPublic(CurrentAccountInfos).GetAwaiter().GetResult();
-                    CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
+                        CurrentAccountInfos.IsPrivate = !CheckIsPublic(CurrentAccountInfos).GetAwaiter().GetResult();
+                        CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
+                    }
+                    else
+                    {
+                        Logger.Warn($"No GOG profil found");
+                    }
                 });
                 return accountInfos;
             }
@@ -240,7 +250,7 @@ namespace CommonPluginsStores.Gog
                     return null;
                 }
 
-                string jsonDataString = Tools.GetJsonInString(reponse, "window.profilesData.profileUserFriends[ ]?=[ ]?");
+                string jsonDataString = UtilityTools.GetJsonInString(reponse, "window.profilesData.profileUserFriends[ ]?=[ ]?");
                 _ = Serialization.TryFromJson(jsonDataString, out List<ProfileUserFriends> profileUserFriends);
 
                 if (profileUserFriends == null)
@@ -391,7 +401,7 @@ namespace CommonPluginsStores.Gog
             try
             {
                 string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Locale).ToLower());
-                string response = Web.DownloadStringData(url, AuthToken?.Token, urlLang).GetAwaiter().GetResult();
+                string response = Web.DownloadStringData(url, StoreToken?.Token, urlLang).GetAwaiter().GetResult();
 
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
                 if (!response.IsNullOrEmpty() && Serialization.TryFromJson(response, out Achievements achievements) && achievements?.TotalCount > 0)
@@ -448,8 +458,9 @@ namespace CommonPluginsStores.Gog
             {
                 string url = string.Format(UrlUserGameAchievements, accountInfos.Pseudo, id, accountInfos.UserId);
                 string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Locale));
+                Logger.Info($"GetAchievementsPublic: GameId={id}");
                 string response = Web.DownloadStringDataWithUrlBefore(url, urlLang).GetAwaiter().GetResult();
-                string jsonDataString = Tools.GetJsonInString(response, "(?<=window.profilesData.achievements\\s=\\s)");
+                string jsonDataString = UtilityTools.GetJsonInString(response, "(?<=window.profilesData.achievements\\s=\\s)");
 
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
                 if (!jsonDataString.IsNullOrEmpty() && Serialization.TryFromJson(jsonDataString, out dynamic data))
@@ -501,7 +512,7 @@ namespace CommonPluginsStores.Gog
             if (accountInfos != null)
             {
                 string response;
-                bool HasError = false;
+                bool hasError = false;
                 ObservableCollection<AccountWishlist> data = new ObservableCollection<AccountWishlist>();
 
                 // With api
@@ -509,48 +520,45 @@ namespace CommonPluginsStores.Gog
                 {
                     try
                     {
-                        using (IWebView WebViewOffscreen = API.Instance.WebViews.CreateOffscreenView())
-                        {
-                            WebViewOffscreen.NavigateAndWait(UrlApiWishlist);
-                            response = WebViewOffscreen.GetPageText();
+                        var pageText = Web.DownloadJsonDataWebView(UrlApiWishlist).GetAwaiter().GetResult();
+						response = pageText.Item1;
 
-                            if (Serialization.TryFromJson(response, out WishlistResult wishlistResult))
-                            {
-                                foreach (dynamic gameWishlist in wishlistResult.Wishlist)
-                                {
-                                    if ((bool)gameWishlist.Value)
-                                    {
-                                        string StoreId = gameWishlist.Name;
-                                        GameInfos gameInfos = GetGameInfos(StoreId, null);
-                                        if (gameInfos != null)
-                                        {
-                                            data.Add(new AccountWishlist
-                                            {
-                                                Id = gameInfos.Id,
-                                                Name = gameInfos.Name,
-                                                Link = gameInfos.Link,
-                                                Released = gameInfos.Released,
-                                                Added = null,
-                                                Image = gameInfos.Image
-                                            });
-                                        }
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                Logger.Warn($"GOG is disconnected");
-                            }
-                        }
-                    }
+						if (Serialization.TryFromJson(response, out WishlistResult wishlistResult))
+						{
+							foreach (dynamic gameWishlist in wishlistResult.Wishlist)
+							{
+								if ((bool)gameWishlist.Value)
+								{
+									string StoreId = gameWishlist.Name;
+									GameInfos gameInfos = GetGameInfos(StoreId, null);
+									if (gameInfos != null)
+									{
+										data.Add(new AccountWishlist
+										{
+											Id = gameInfos.Id,
+											Name = gameInfos.Name,
+											Link = gameInfos.Link,
+											Released = gameInfos.Released,
+											Added = null,
+											Image = gameInfos.Image
+										});
+									}
+								}
+							}
+						}
+						else
+						{
+							Logger.Warn($"GOG is disconnected");
+						}
+					}
                     catch (Exception ex)
                     {
                         Common.LogError(ex, false, true, PluginName);
-                        HasError = true;
+                        hasError = true;
                     }
                 }
 
-                if (!HasError && data.Count > 0)
+                if (!hasError && data.Count > 0)
                 {
                     return data;
                 }
@@ -558,39 +566,36 @@ namespace CommonPluginsStores.Gog
                 // Without Api
                 try
                 {
-                    using (IWebView WebViewOffscreen = API.Instance.WebViews.CreateOffscreenView())
-                    {
-                        WebViewOffscreen.NavigateAndWait(string.Format(UrlWishlist, accountInfos.Pseudo));
-                        response = WebViewOffscreen.GetPageSource();
+                    var pageSource = Web.DownloadSourceDataWebView(string.Format(UrlWishlist, accountInfos.Pseudo)).GetAwaiter().GetResult();
+					response = pageSource.Item1;
 
-                        // Get game information for wishlist
-                        if (!response.IsNullOrEmpty())
-                        {
-                            HtmlParser parser = new HtmlParser();
-                            IHtmlDocument HtmlRequirement = parser.Parse(response);
+					// Get game information for wishlist
+					if (!response.IsNullOrEmpty())
+					{
+						HtmlParser parser = new HtmlParser();
+						IHtmlDocument HtmlRequirement = parser.Parse(response);
 
-                            foreach (IElement el in HtmlRequirement.QuerySelectorAll(".product-row-wrapper .product-state-holder"))
-                            {
-                                string StoreId = el.GetAttribute("gog-product");
-                                GameInfos gameInfos = GetGameInfos(StoreId, null);
-                                if (gameInfos != null)
-                                {
-                                    data.Add(new AccountWishlist
-                                    {
-                                        Id = gameInfos.Id,
-                                        Name = gameInfos.Name,
-                                        Link = gameInfos.Link,
-                                        Released = gameInfos.Released,
-                                        Added = null,
-                                        Image = gameInfos.Image
-                                    });
-                                }
-                            }
-                        }
+						foreach (IElement el in HtmlRequirement.QuerySelectorAll(".product-row-wrapper .product-state-holder"))
+						{
+							string StoreId = el.GetAttribute("gog-product");
+							GameInfos gameInfos = GetGameInfos(StoreId, null);
+							if (gameInfos != null)
+							{
+								data.Add(new AccountWishlist
+								{
+									Id = gameInfos.Id,
+									Name = gameInfos.Name,
+									Link = gameInfos.Link,
+									Released = gameInfos.Released,
+									Added = null,
+									Image = gameInfos.Image
+								});
+							}
+						}
+					}
 
-                        return data;
-                    }
-                }
+					return data;
+				}
                 catch (Exception ex)
                 {
                     Common.LogError(ex, false, $"Error in {ClientName} wishlist", true, PluginName);
@@ -606,12 +611,9 @@ namespace CommonPluginsStores.Gog
             {
                 try
                 {
-                    using (IWebView WebViewOffscreen = API.Instance.WebViews.CreateOffscreenView())
-                    {
-                        WebViewOffscreen.NavigateAndWait(string.Format(UrlApiRemoveWishlist, id));
-                        return WebViewOffscreen.GetPageSource().ToLower().IndexOf("unable to remove product from wishlist") == -1;
-                    }
-                }
+                    var pageSource = Web.DownloadSourceDataWebView(string.Format(UrlApiRemoveWishlist, id)).GetAwaiter().GetResult();
+					return pageSource.Item1.IndexOf("unable to remove product from wishlist", StringComparison.InvariantCultureIgnoreCase) == -1;
+				}
                 catch (Exception ex)
                 {
                     Common.LogError(ex, false, $"Error remove {id} in {ClientName} wishlist", true, PluginName);
@@ -718,7 +720,7 @@ namespace CommonPluginsStores.Gog
                     }
                     else
                     {
-                        Logger.Warn($"No dlc data for {el.Id}");
+                        LogWarn($"No DLC data for {el.Id}");
                     }
                 }
                 catch (Exception ex)
@@ -830,25 +832,52 @@ namespace CommonPluginsStores.Gog
             {
                 webView.LoadingChanged += async (s, e) =>
                 {
-                    string url = webView.GetCurrentAddress();
-                    if (!url.EndsWith("#openlogin"))
+                    if (Interlocked.Exchange(ref _isHandlingLoading, 1) == 1) return;
+
+                    try
                     {
-                        bool loggedIn = await Task.Run(() =>
+                        // Delay to avoid blocking UI and ensure page has time to initialize
+                        await Task.Delay(500);
+
+                        try
                         {
-                            using (IWebView webViewBackground = API.Instance.WebViews.CreateOffscreenView())
+                            string url = webView.GetCurrentAddress();
+                            string obscuredUrl = url;
+                            try
                             {
-                                webViewBackground.NavigateAndWait(UrlAccountInfo);
-                                string stringInfo = webViewBackground.GetPageText();
-                                _ = Serialization.TryFromJson(stringInfo, out AccountBasicResponse accountBasicResponse);
-                                AccountBasic = accountBasicResponse;
-                                return AccountBasic?.IsLoggedIn ?? false;
+                                if (Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
+                                {
+                                    obscuredUrl = uri.GetLeftPart(UriPartial.Path);
+                                }
                             }
-                        });
-                        if (loggedIn)
-                        {
-                            _ = SetStoredCookies(GetWebCookies());
-                            webView.Close();
+                            catch { }
+                            
+                            Logger.Info($"GogLogin: Checking Url={obscuredUrl}");
+
+                            if (!url.EndsWith("#openlogin"))
+                            {
+                                var cookies = webView.GetCookies();
+                                if (cookies?.Any(x => x.Domain?.Contains("gog.com") == true) ?? false)
+                                {
+                                    string response = await Web.DownloadStringData(UrlAccountInfo, cookies);
+                                    if (Serialization.TryFromJson(response, out AccountBasicResponse accountBasicResponse) && (accountBasicResponse?.IsLoggedIn ?? false))
+                                    {
+                                        Logger.Info("GogLogin: Login successful, saving cookies...");
+                                        AccountBasic = accountBasicResponse;
+                                        _ = SetStoredCookies(cookies);
+                                        webView.Close();
+                                    }
+                                }
+                            }
                         }
+                        catch (Exception ex)
+                        {
+                            Common.LogError(ex, false, true, PluginName);
+                        }
+                    }
+                    finally
+                    {
+                        _isHandlingLoading = 0;
                     }
                 };
 
@@ -868,7 +897,7 @@ namespace CommonPluginsStores.Gog
         private ProfileUser GetAccountInfoByPseudo(string pseudo)
         {
             string reponse = Web.DownloadStringData(string.Format(UrlUser, pseudo), GetStoredCookies()).GetAwaiter().GetResult();
-            string jsonDataString = Tools.GetJsonInString(reponse, @"window.profilesData.currentUser[ ]?=[ ]?");
+            string jsonDataString = UtilityTools.GetJsonInString(reponse, @"window.profilesData.currentUser[ ]?=[ ]?");
             _ = Serialization.TryFromJson(jsonDataString, out ProfileUser profileUser);
             return profileUser;
         }
@@ -883,7 +912,7 @@ namespace CommonPluginsStores.Gog
         public ProductApiDetail GetProductDetail(string id)
         {
             string cachePath = Path.Combine(PathAppsData, $"{id}.json");
-            ProductApiDetail productApiDetail = LoadData<ProductApiDetail>(cachePath, 1440);
+            ProductApiDetail productApiDetail = FileDataService.LoadData<ProductApiDetail>(cachePath, 1440);
 
             if (productApiDetail == null)
             {
@@ -896,7 +925,7 @@ namespace CommonPluginsStores.Gog
                         ManageException($"No data for {id}", ex, response.Contains("404"));
                     }
 
-                    SaveData(cachePath, productApiDetail);
+					FileDataService.SaveData(cachePath, productApiDetail);
                 }
             }
 
@@ -935,7 +964,7 @@ namespace CommonPluginsStores.Gog
         {
             try
             {
-                string data = Web.DownloadStringData(UrlUserOwned, AuthToken.Token).GetAwaiter().GetResult();
+                string data = Web.DownloadStringData(UrlUserOwned, StoreToken.Token).GetAwaiter().GetResult();
                 if (Serialization.TryFromJson(data, out UserDataOwned userDataOwned))
                 {
                     SaveUserDataOwned(userDataOwned);

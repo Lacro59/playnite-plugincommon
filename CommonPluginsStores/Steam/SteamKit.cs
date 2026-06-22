@@ -1,4 +1,5 @@
 ﻿using CommonPluginsShared;
+using CommonPluginsStores.Steam.Models;
 using CommonPluginsStores.Steam.Models.SteamKit;
 using Playnite.SDK;
 using Playnite.SDK.Data;
@@ -6,6 +7,7 @@ using SteamKit2;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -13,27 +15,94 @@ namespace CommonPluginsStores.Steam
 {
     public class SteamKit
     {
-        internal static ILogger Logger => LogManager.GetLogger();
+        internal static readonly ILogger Logger = LogManager.GetLogger();
 
         #region Urls
         private static string UrlAchievementImg => @"https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/{0}/{1}";
 
         private static string UrlApi => @"https://api.steampowered.com";
         private static string UrlGetGameAchievements => UrlApi + @"/IPlayerService/GetGameAchievements/v1/?appid={0}&language={1}";
-        #endregion
+		#endregion
 
+		#region ISteamApps
 
-        #region ISteamApps
-        public static List<SteamApp> GetAppList()
+		[Obsolete("Used GetAppList(apiKey)")]
+		public static List<SteamApp> GetAppList()
         {
             Thread.Sleep(100);
             try
             {
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("ISteamApps"))
                 {
+                    KeyValue results = steamInterface.Call("GetAppList", 2, null);
+
+                    KeyValue applistNode = null;
+                    if (results != null)
+                    {
+                        applistNode = results["applist"] ?? results.Children?.FirstOrDefault(x => x.Name == "applist");
+                    }
+
+                    KeyValue appsNode = applistNode?["apps"] ?? applistNode?.Children?.FirstOrDefault(x => x.Name == "apps");
+
+                    var apps = new List<SteamApp>();
+                    if (appsNode?.Children != null)
+                    {
+                        foreach (KeyValue app in appsNode.Children)
+                        {
+                            // Each child node should contain 'appid' and 'name'
+                            try
+                            {
+                                var idToken = app["appid"];
+                                var nameToken = app["name"];
+                                if (idToken != null && nameToken != null)
+                                {
+                                    apps.Add(new SteamApp
+                                    {
+                                        AppId = idToken.AsUnsignedInteger(),
+                                        Name = nameToken.AsString()
+                                    });
+                                }
+                            }
+                            catch (Exception exApp)
+                            {
+                                // Skip malformed entries but log at debug level so we can investigate if it becomes an issue
+                                Logger.Debug($"Skipping malformed Steam app entry: {exApp.Message}");
+                            }
+                        }
+                    }
+
+                    return apps;
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false);
+                return null;
+            }
+        }
+
+        #endregion
+
+        #region IStoreService
+
+        public static List<SteamApp> GetAppList(string apiKey, uint last_appid = 0)
+
+        {
+            Thread.Sleep(100);
+            try
+            {
+                Dictionary<string, string> args = new Dictionary<string, string>
+                {
+                    ["include_dlc"] = "true",
+                    ["max_results"] = "50000",
+                    ["last_appid"] = last_appid.ToString()
+                };
+
+                using (WebAPI.Interface steamInterface = WebAPI.GetInterface("IStoreService", apiKey))
+                {
                     List<SteamApp> appList = new List<SteamApp>();
-                    KeyValue results = steamInterface.Call("GetAppList", 2);
-                    foreach (KeyValue data in results["apps"].Children)
+                    KeyValue results = steamInterface.Call("GetAppList", 1, args);
+                    foreach (KeyValue data in results?.Children?.FirstOrDefault()?.Children)
                     {
                         appList.Add(new SteamApp
                         {
@@ -41,6 +110,13 @@ namespace CommonPluginsStores.Steam
                             Name = data["name"].AsString()
                         });
                     }
+
+                    uint.TryParse(results?.Children?.Where(x => x.Name == "last_appid").FirstOrDefault()?.Value, out last_appid);
+                    if (last_appid != 0)
+                    {
+                        appList.AddRange(GetAppList(apiKey, last_appid));
+                    }
+
                     return appList;
                 }
             }
@@ -50,9 +126,11 @@ namespace CommonPluginsStores.Steam
                 return null;
             }
         }
+
         #endregion
 
         #region ISteamUser
+
         public static List<SteamFriend> GetFriendList(string apiKey, ulong steamId)
         {
             Thread.Sleep(100);
@@ -87,7 +165,7 @@ namespace CommonPluginsStores.Steam
         }
 
 
-        public static List<SteamPlayerSummaries> GetPlayerSummaries(string apiKey, List<ulong> steamIds)
+        public static List<SteamPlayer> GetPlayerSummaries(string apiKey, List<ulong> steamIds)
         {
             Thread.Sleep(100);
             try
@@ -99,18 +177,18 @@ namespace CommonPluginsStores.Steam
 
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("ISteamUser", apiKey))
                 {
-                    List<SteamPlayerSummaries> friendList = new List<SteamPlayerSummaries>();
+                    List<SteamPlayer> friendList = new List<SteamPlayer>();
                     KeyValue results = steamInterface.Call("GetPlayerSummaries", 2, args);
                     foreach (KeyValue data in results["players"].Children)
                     {
-                        friendList.Add(new SteamPlayerSummaries
-                        {
+                        friendList.Add(new SteamPlayer
+						{
                             Avatar = data["avatar"].AsString(),
                             AvatarFull = data["avatarfull"].AsString(),
                             AvatarHash = data["avatarhash"].AsString(),
                             AvatarMedium = data["avatarmedium"].AsString(),
                             CommunityVisibilityState = data["communityvisibilitystate"].AsInteger(),
-                            LastLogoff = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(data["lastlogoff"].AsInteger()),
+                            LastLogOff = data["lastlogoff"].AsInteger(),
                             LocCountryCode = data["loccountrycode"].AsString(),
                             PersonaName = data["personaname"].AsString(),
                             PersonaState = data["personastate"].AsInteger(),
@@ -118,8 +196,8 @@ namespace CommonPluginsStores.Steam
                             PrimaryClanId = data["primaryclanid"].AsString(),
                             ProfileState = data["profilestate"].AsInteger(),
                             ProfileUrl = data["profileurl"].AsString(),
-                            SteamId = data["steamid"].AsString(),
-                            TimeCreated = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(data["timecreated"].AsInteger())
+                            SteamId = data["steamid"].AsUnsignedLong(),
+                            TimeCreated = data["timecreated"].AsInteger()
                         });
                     }
                     return friendList;
@@ -131,10 +209,12 @@ namespace CommonPluginsStores.Steam
                 return null;
             }
         }
+
         #endregion
 
         #region IPlayerService
-        public static List<SteamOwnedGame> GetOwnedGames(string apiKey, ulong steamId)
+
+        public static List<SteamGame> GetOwnedGames(string apiKey, ulong steamId)
         {
             Thread.Sleep(100);
             try
@@ -144,30 +224,22 @@ namespace CommonPluginsStores.Steam
                     ["steamId"] = steamId.ToString(),
                     ["include_appinfo"] = "1",
                     ["include_played_free_games"] = "1",
-                    ["include_extended_appinfo"] = "1"
+                    ["include_extended_appinfo"] = "1" 
                 };
 
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("IPlayerService", apiKey))
                 {
-                    List<SteamOwnedGame> ownedGames = new List<SteamOwnedGame>();
+                    List<SteamGame> ownedGames = new List<SteamGame>();
                     KeyValue results = steamInterface.Call("GetOwnedGames", 1, args);
                     foreach (KeyValue data in results["games"].Children)
                     {
-                        ownedGames.Add(new SteamOwnedGame
-                        {
-                            Appid = data["appid"].AsInteger(),
+                        ownedGames.Add(new SteamGame
+						{
+                            AppId = data["appid"].AsUnsignedInteger(),
                             Name = data["name"].AsString(),
                             ImgIconUrl = data["img_icon_url"].AsString(),
                             HasCommunityVisibleStats = data["has_community_visible_stats"].AsBoolean(),
-                            PlaytimeDeckForever = data["playtime_deck_forever"].AsInteger(),
-                            PlaytimeDisconnected = data["playtime_disconnected"].AsInteger(),
-                            PlaytimeForever = data["playtime_forever"].AsInteger(),
-                            Playtime2weeks = data["playtime_2weeks"].AsInteger(),
-                            PlaytimeLinuxForever = data["playtime_linux_forever"].AsInteger(),
-                            PlaytimeMacForever = data["playtime_mac_forever"].AsInteger(),
-                            PlaytimeWindowsForever = data["playtime_windows_forever"].AsInteger(),
-                            RtimeLastPlayed = data["rtime_last_played"].AsInteger() == 0 ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(data["rtime_last_played"].AsInteger()),
-                            CapsuleFilename = data["capsule_filename"].AsString(),
+                            PlaytimeForever = data["playtime_forever"].AsInteger(),CapsuleFilename = data["capsule_filename"].AsString(),
                             HasWorkshop = data["has_workshop"].AsBoolean(),
                             HasMarket = data["has_market"].AsBoolean(),
                             HasDlc = data["has_dlc"].AsBoolean(),
@@ -185,12 +257,12 @@ namespace CommonPluginsStores.Steam
         }
 
 
-        public static List<SteamAchievements> GetGameAchievements(uint appId)
+        public static List<SteamAchievement> GetGameAchievements(uint appId)
         {
             return GetGameAchievements(appId, "english");
         }
 
-        public static List<SteamAchievements> GetGameAchievements(uint appId, string language)
+        public static List<SteamAchievement> GetGameAchievements(uint appId, string language)
         {
             Thread.Sleep(100);
             try
@@ -203,51 +275,25 @@ namespace CommonPluginsStores.Steam
 
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("IPlayerService"))
                 {
-                    List<SteamAchievements> achievementLists = new List<SteamAchievements>();
+                    List<SteamAchievement> achievementLists = new List<SteamAchievement>();
                     KeyValue results = steamInterface.Call("GetGameAchievements", 1, args);
 
-                    // By moment, SteamKit return nothing
-                    if (results["achievements"].Children.Count == 0)
+                    if (results["achievements"].Children.Count != 0)
                     {
-                        string data = Web.DownloadStringData(string.Format(UrlGetGameAchievements, appId, language)).GetAwaiter().GetResult();
-                        if (Serialization.TryFromJson(data, out Models.SteamAchievements steamAchievements))
-                        {
-                            steamAchievements.Response?.Achievements?.ForEach(x =>
-                            {
-                                achievementLists.Add(new SteamAchievements
-                                {
-                                    Hidden = x.Hidden,
-                                    Icon = x.Icon.IsNullOrEmpty() ? string.Empty : string.Format(UrlAchievementImg, appId, x.Icon),
-                                    IconGray = x.IconGray.IsNullOrEmpty() ? string.Empty : string.Format(UrlAchievementImg, appId, x.IconGray),
-                                    InternalName = x.InternalName,
-                                    LocalizedDesc = x.LocalizedDesc,
-                                    LocalizedName = x.LocalizedName,
-                                    PlayerPercentUnlocked = x.PlayerPercentUnlocked.IsNullOrEmpty() ? 100 : float.Parse(x.PlayerPercentUnlocked.Replace(".", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)),
-                                });
-                            });
-                        }
-
-                        if (achievementLists.Count > 0)
-                        {
-                            Common.LogDebug(true, $"GetGameAchievements by old method for {appId}");
-                        }
-                    }
-                    else
-                    {
-                        foreach (KeyValue data in results["achievements"].Children)
-                        {
-                            achievementLists.Add(new SteamAchievements
-                            {
-                                Hidden = data["hidden"].AsBoolean(),
-                                Icon = string.IsNullOrEmpty(data["icon"].AsString()) ? string.Empty : string.Format(UrlAchievementImg, appId, data["icon"].AsString()),
-                                IconGray = string.IsNullOrEmpty(data["icon_gray"].AsString()) ? string.Empty : string.Format(UrlAchievementImg, appId, data["icon_gray"].AsString()),
-                                InternalName = data["internal_name"].AsString(),
-                                LocalizedDesc = data["localized_desc"].AsString(),
-                                LocalizedName = data["localized_name"].AsString(),
-                                PlayerPercentUnlocked = string.IsNullOrEmpty(data["player_percent_unlocked"].AsString()) ? 100 : float.Parse(data["player_percent_unlocked"].AsString().Replace(".", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)),
-                            });
-                        }
-                    }
+						foreach (KeyValue data in results["achievements"].Children)
+						{
+							achievementLists.Add(new SteamAchievement
+							{
+								Hidden = data["hidden"].AsBoolean(),
+								Icon = string.IsNullOrEmpty(data["icon"].AsString()) ? string.Empty : string.Format(UrlAchievementImg, appId, data["icon"].AsString()),
+								IconGray = string.IsNullOrEmpty(data["icon_gray"].AsString()) ? string.Empty : string.Format(UrlAchievementImg, appId, data["icon_gray"].AsString()),
+								InternalName = data["internal_name"].AsString(),
+								LocalizedDesc = data["localized_desc"].AsString(),
+								LocalizedName = data["localized_name"].AsString(),
+								PlayerPercentUnlocked = string.IsNullOrEmpty(data["player_percent_unlocked"].AsString()) ? "100" : data["player_percent_unlocked"].AsString(),
+							});
+						}
+					}
                     return achievementLists;
                 }
             }
@@ -257,9 +303,11 @@ namespace CommonPluginsStores.Steam
                 return null;
             }
         }
+
         #endregion
 
         #region ISteamUserStats
+
         public static SteamSchema GetSchemaForGame(string apiKey, uint appId)
         {
             return GetSchemaForGame(apiKey, appId, "english");
@@ -435,6 +483,8 @@ namespace CommonPluginsStores.Steam
                 return ex.Message.Contains("403");
             }
         }
+
         #endregion
+
     }
 }

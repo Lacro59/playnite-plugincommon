@@ -1,8 +1,10 @@
-﻿using System;
+﻿using CommonPluginsShared.UI;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace CommonPluginsShared.Controls
 {
@@ -41,7 +43,7 @@ namespace CommonPluginsShared.Controls
 
         private static void UpdateExpanderArrow(Expander expander, bool visible)
         {
-            foreach (TextBlock el in UI.FindVisualChildren<TextBlock>(expander))
+            foreach (TextBlock el in UIHelper.FindVisualChildren<TextBlock>(expander))
             {
                 if (el.Name == "DownArrow")
                 {
@@ -59,6 +61,45 @@ namespace CommonPluginsShared.Controls
                 {
                     el.Visibility = Visibility.Hidden;
                 }
+            }
+        }
+        #endregion
+
+        #region HideExpanderHeader AttachedProperty
+        [AttachedPropertyBrowsableForType(typeof(Expander))]
+        public static bool GetHideExpanderHeader(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(HideExpanderHeaderProperty);
+        }
+
+        [AttachedPropertyBrowsableForType(typeof(Expander))]
+        public static void SetHideExpanderHeader(DependencyObject obj, bool value)
+        {
+            obj.SetValue(HideExpanderHeaderProperty, value);
+        }
+
+        public static readonly DependencyProperty HideExpanderHeaderProperty =
+            DependencyProperty.RegisterAttached("HideExpanderHeader", typeof(bool), typeof(ExpanderAttachedProperties), new UIPropertyMetadata(false, OnHideExpanderHeaderChanged));
+
+        private static void OnHideExpanderHeaderChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
+        {
+            Expander expander = (Expander)o;
+
+            if (expander.IsLoaded)
+            {
+                UpdateExpanderHeader(expander, (bool)e.NewValue);
+            }
+            else
+            {
+                expander.Loaded += new RoutedEventHandler((x, y) => UpdateExpanderHeader(expander, (bool)e.NewValue));
+            }
+        }
+
+        private static void UpdateExpanderHeader(Expander expander, bool hideHeader)
+        {
+            foreach (ToggleButton toggleButton in UIHelper.FindVisualChildren<ToggleButton>(expander))
+            {
+                toggleButton.Visibility = hideHeader ? Visibility.Collapsed : Visibility.Visible;
             }
         }
         #endregion

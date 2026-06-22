@@ -1,1321 +1,2131 @@
-﻿using CommonPlayniteShared;
-using CommonPlayniteShared.Common;
+using CommonPlayniteShared;
 using CommonPluginsControls.Controls;
+using CommonPluginsShared.Caching;
 using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.Models;
+using CommonPluginsShared.Plugins;
+using CommonPluginsShared.Services;
+//using LiteDB;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
-using System.Text;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Threading;
 
 namespace CommonPluginsShared.Collections
 {
-    /// <summary>
-    /// Abstract class representing a plugin database object.
-    /// </summary>
-    /// <typeparam name="TSettings">Type of settings.</typeparam>
-    /// <typeparam name="TDatabase">Type of database.</typeparam>
-    /// <typeparam name="TItem">Type of database item.</typeparam>
-    /// <typeparam name="T">Type of data.</typeparam>
-    public abstract class PluginDatabaseObject<TSettings, TDatabase, TItem, T> : ObservableObject, IPluginDatabase
-        where TSettings : ISettings
-        where TDatabase : PluginItemCollection<TItem>
-        where TItem : PluginDataBaseGameBase
-    {
-        protected static ILogger Logger => LogManager.GetLogger();
-
-        public TSettings PluginSettings { get; set; }
-        public UI UI { get; set; } = new UI();
-        public string PluginName { get; set; }
-        public PluginPaths Paths { get; set; }
-        public TDatabase Database { get; set; }
-        public Game GameContext { get; set; }
-
-        protected string TagBefore { get; set; } = string.Empty;
-        protected IEnumerable<Tag> PluginTags => GetPluginTags();
-
-        private bool _isLoaded = false;
-        public bool IsLoaded { get => _isLoaded; set => SetValue(ref _isLoaded, value); }
-        public bool IsViewOpen { get; set; } = false;
-        public bool TagMissing { get; set; } = false;
-
-        private IEnumerable<Guid> PreviousIds { get; set; } = new List<Guid>();
-
-
-
-
-
-        /// <summary>
-        /// Constructor for PluginDatabaseObject.
-        /// </summary>
-        /// <param name="pluginSettings">Plugin settings.</param>
-        /// <param name="pluginName">Name of the plugin.</param>
-        /// <param name="pluginUserDataPath">Path for plugin user data.</param>
-        protected PluginDatabaseObject(TSettings pluginSettings, string pluginName, string pluginUserDataPath)
-        {
-            PluginSettings = pluginSettings;
-            PluginName = pluginName;
-
-            Paths = new PluginPaths
-            {
-                PluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-                PluginUserDataPath = pluginUserDataPath,
-                PluginDatabasePath = Path.Combine(pluginUserDataPath, pluginName),
-                PluginCachePath = Path.Combine(PlaynitePaths.DataCachePath, pluginName),
-            };
-            HttpFileCachePlugin.CacheDirectory = Paths.PluginCachePath;
-
-            FileSystem.CreateDirectory(Paths.PluginDatabasePath);
-            FileSystem.CreateDirectory(Paths.PluginCachePath);
-
-            API.Instance.Database.Games.ItemUpdated += Games_ItemUpdated;
-            API.Instance.Database.Games.ItemCollectionChanged += Games_ItemCollectionChanged;
-        }
-
-
-        #region Database Initialization and Management
-
-        /// <summary>
-        /// Initializes the database.
-        /// </summary>
-        /// <returns>Task with a boolean indicating success.</returns>
-        public Task<bool> InitializeDatabase()
-        {
-            return Task.Run(() =>
-            {
-                if (IsLoaded)
-                {
-                    Logger.Info($"Database is already initialized");
-                    return true;
-                }
-
-                IsLoaded = LoadDatabase();
-
-                if (IsLoaded)
-                {
-                    Database.ItemCollectionChanged += Database_ItemCollectionChanged;
-                    Database.ItemUpdated += Database_ItemUpdated;
-                }
-
-                return IsLoaded;
-            });
-        }
-
-        /// <summary>
-        /// Loads the plugin's database using the provided generic types.
-        /// </summary>
-        /// <returns>True if the database was loaded successfully.</returns>
-        protected bool LoadDatabase()
-        {
-            try
-            {
-                // Start timing the database loading
-                Stopwatch stopWatch = new Stopwatch();
-                stopWatch.Start();
-
-                // Create a new database instance using the plugin's path
-                Database = typeof(TDatabase).CrateInstance<TDatabase>(Paths.PluginDatabasePath, GameDatabaseCollection.Uknown);
-
-                // Populate or refresh internal game information
-                Database.SetGameInfo<T>();
-
-                // Delete game deleted in Playnite
-                DeleteDataWithDeletedGame();
-
-                stopWatch.Stop();
-
-                // Log the elapsed time and number of items loaded
-                TimeSpan ts = stopWatch.Elapsed;
-                Logger.Info(string.Format(
-                    "LoadDatabase with {0} items - {1:00}:{2:00}.{3:00}",
-                    Database.Count,
-                    ts.Minutes,
-                    ts.Seconds,
-                    ts.Milliseconds / 10));
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Clears the database.
-        /// </summary>
-        /// <returns>True if the database was cleared successfully.</returns>
-        public bool ClearDatabase()
-        {
-            bool IsOk = true;
-
-            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}")
-            {
-                Cancelable = false,
-                IsIndeterminate = false
-            };
-
-            _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
-            {
-                a.ProgressMaxValue = Database.Items.Count();
-                Database.Items.ForEach(x =>
-                {
-                    try
-                    {
-                        _ = Remove(x.Key);
-                        a.CurrentProgressValue++;
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, false, $"Error on {x.Key} - {x.Value.Name}", false, PluginName);
-                        IsOk = false;
-                    }
-                });
-
-            }, globalProgressOptions);
-
-            return IsOk;
-        }
-
-        /// <summary>
-        /// Deletes data associated with deleted games.
-        /// </summary>
-        public virtual void DeleteDataWithDeletedGame()
-        {
-            IEnumerable<KeyValuePair<Guid, TItem>> GamesDeleted = Database.Items.Where(x => API.Instance.Database.Games.Get(x.Key) == null).Select(x => x);
-            GamesDeleted.ForEach(x =>
-            {
-                Logger.Info($"Delete data for missing game: {x.Value.Name} - {x.Key}");
-                _ = Database.Remove(x.Key);
-            });
-        }
-
-
-        private void Database_ItemUpdated(object sender, ItemUpdatedEventArgs<TItem> e)
-        {
-            if (GameContext == null)
-            {
-                return;
-            }
-
-            // Publish changes for the currently displayed game if updated
-            ItemUpdateEvent<TItem> ActualItem = e.UpdatedItems.Find(x => x.NewData.Id == GameContext.Id);
-            if (ActualItem?.NewData?.Id != null)
-            {
-                SetThemesResources(GameContext);
-            }
-        }
-
-        private void Database_ItemCollectionChanged(object sender, ItemCollectionChangedEventArgs<TItem> e)
-        {
-            if (GameContext != null)
-            {
-                SetThemesResources(GameContext);
-            }
-        }
-
-
-        /// <summary>
-        /// Opens a dialog window to select and filter games for data download.
-        /// Refreshes the selected games based on the filter criteria.
-        /// </summary>
-        public virtual void GetSelectData()
-        {
-            // Create and display a dialog window for selecting data download options.
-            OptionsDownloadData View = new OptionsDownloadData(this);
-            Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(PluginName + " - " + ResourceProvider.GetString("LOCCommonSelectData"), View);
-            _ = windowExtension.ShowDialog();
-
-            // Retrieve the filtered list of games and the option to include only games with missing data.
-            List<Game> playniteDb = View.GetFilteredGames();
-            bool onlyMissing = View.GetOnlyMissing();
-
-            if (playniteDb == null)
-            {
-                return;
-            }
-
-            // Filter the list to include only games with missing data if the option is selected.
-            if (onlyMissing)
-            {
-                playniteDb = playniteDb.FindAll(x => !Get(x.Id, true).HasData);
-            }
-
-            // Refresh the data for the selected games.
-            Refresh(playniteDb.Select(x => x.Id));
-        }
-
-        /// <summary>
-        /// Retrieves a list of all games present in the database.
-        /// </summary>
-        /// <returns>An enumerable collection of games.</returns>
-        public virtual IEnumerable<Game> GetGamesList()
-        {
-            foreach (KeyValuePair<Guid, TItem> item in Database.Items)
-            {
-                Game game = API.Instance.Database.Games.Get(item.Key);
-                if (game != null)
-                {
-                    yield return game;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Retrieves a list of games that have no associated data in the database.
-        /// </summary>
-        /// <returns>An enumerable collection of games with no data.</returns>
-        public virtual IEnumerable<Game> GetGamesWithNoData()
-        {
-            // Get games with no data in the database.
-            IEnumerable<Game> gamesWithNoData = Database.Items.Where(x => !x.Value.HasData).Select(x => API.Instance.Database.Games.Get(x.Key)).Where(x => x != null);
-            // Get games that are not present in the database.
-            IEnumerable<Game> gamesNotInDb = API.Instance.Database.Games.Where(x => !Database.Items.Any(y => y.Key == x.Id));
-            // Merge and distinct the lists to avoid duplicates.
-            IEnumerable<Game> mergedList = gamesWithNoData.Union(gamesNotInDb).Distinct();
-            // Return games that are not hidden.
-            return mergedList.Where(x => !x.Hidden);
-        }
-
-        /// <summary>
-        /// Retrieves a list of games with old data that hasn't been refreshed in the specified number of months.
-        /// </summary>
-        /// <param name="months">The number of months to consider data as old.</param>
-        /// <returns>An enumerable collection of games with old data.</returns>
-        public virtual IEnumerable<Game> GetGamesOldData(int months)
-        {
-            // Get games with data older than the specified number of months.
-            IEnumerable<Game> gamesOldData = Database.Items.Where(x => x.Value.DateLastRefresh <= DateTime.Now.AddMonths(-months)).Select(x => API.Instance.Database.Games.Get(x.Key)).Where(x => x != null);
-            return gamesOldData;
-        }
-
-        /// <summary>
-        /// Retrieves a list of data games with their associated information.
-        /// </summary>
-        /// <returns>An enumerable collection of data games.</returns>
-        public virtual IEnumerable<DataGame> GetDataGames()
-        {
-            return Database.Items.Select(x => new DataGame
-            {
-                Id = x.Value.Id,
-                Icon = x.Value.Icon.IsNullOrEmpty() ? x.Value.Icon : API.Instance.Database.GetFullFilePath(x.Value.Icon),
-                Name = x.Value.Name,
-                IsDeleted = x.Value.IsDeleted,
-                CountData = x.Value.Count
-            }).Distinct();
-        }
-
-        /// <summary>
-        /// Retrieves a list of isolated data games that are marked as deleted.
-        /// </summary>
-        /// <returns>An enumerable collection of isolated data games.</returns>
-        public virtual IEnumerable<DataGame> GetIsolatedDataGames()
-        {
-            return Database.Items.Where(x => x.Value.IsDeleted).Select(x => new DataGame
-            {
-                Id = x.Value.Id,
-                Icon = x.Value.Icon.IsNullOrEmpty() ? x.Value.Icon : API.Instance.Database.GetFullFilePath(x.Value.Icon),
-                Name = x.Value.Name,
-                IsDeleted = x.Value.IsDeleted,
-                CountData = x.Value.Count
-            }).Distinct();
-        }
-
-        #endregion
-
-
-        #region Database Item Methods
-
-        /// <summary>
-        /// Gets a default item for a game.
-        /// </summary>
-        /// <param name="id">Game ID.</param>
-        /// <returns>Default item.</returns>
-        public virtual TItem GetDefault(Guid id)
-        {
-            Game game = API.Instance.Database.Games.Get(id);
-            return game == null ? null : GetDefault(game);
-        }
-
-        /// <summary>
-        /// Gets a default item for a game.
-        /// </summary>
-        /// <param name="game">Game.</param>
-        /// <returns>Default item.</returns>
-        public virtual TItem GetDefault(Game game)
-        {
-            TItem newItem = typeof(TItem).CrateInstance<TItem>();
-
-            newItem.Id = game.Id;
-            newItem.Name = game.Name;
-            newItem.IsSaved = false;
-
-            return newItem;
-        }
-
-        /// <summary>
-        /// Adds an item to the database.
-        /// </summary>
-        /// <param name="itemToAdd">Item to add.</param>
-        public virtual void Add(TItem itemToAdd)
-        {
-            try
-            {
-                if (itemToAdd == null)
-                {
-                    Logger.Warn("itemToAdd is null in Add()");
-                    return;
-                }
-
-                itemToAdd.IsSaved = true;
-                Application.Current.Dispatcher?.Invoke(() => Database?.Add(itemToAdd), DispatcherPriority.Send);
-
-                // If tag system
-                object Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
-                PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
-
-                if (propertyInfo != null && (bool)propertyInfo.GetValue(Settings))
-                {
-                    Common.LogDebug(true, $"RemoveTag & AddTag for {itemToAdd.Name} with {itemToAdd.Id}");
-                    RemoveTag(itemToAdd.Id);
-                    AddTag(itemToAdd.Id);
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, false, PluginName);
-                API.Instance.Notifications.Add(new NotificationMessage(
-                    $"{PluginName}-Error-Add",
-                    $"{PluginName}" + Environment.NewLine + $"{ex.Message}",
-                    NotificationType.Error,
-                    () => PlayniteTools.CreateLogPackage(PluginName)
-                ));
-            }
-        }
-
-        /// <summary>
-        /// Updates an item in the database.
-        /// </summary>
-        /// <param name="itemToUpdate">Item to update.</param>
-        public virtual void Update(TItem itemToUpdate)
-        {
-            try
-            {
-                if (itemToUpdate == null)
-                {
-                    Logger.Warn("itemToAdd is null in Update()");
-                    return;
-                }
-
-                itemToUpdate.IsSaved = true;
-                itemToUpdate.DateLastRefresh = DateTime.Now.ToUniversalTime();
-                _ = Database?.Items.TryUpdate(itemToUpdate.Id, itemToUpdate, Get(itemToUpdate.Id, true));
-                Application.Current.Dispatcher?.Invoke(() => Database?.Update(itemToUpdate), DispatcherPriority.Send);
-
-                // If tag system
-                object Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
-                PropertyInfo propertyInfo = Settings.GetType().GetProperty("EnableTag");
-
-                if (propertyInfo != null && (bool)propertyInfo.GetValue(Settings))
-                {
-                    Common.LogDebug(true, $"RemoveTag & AddTag for {itemToUpdate.Name} with {itemToUpdate.Id}");
-                    RemoveTag(itemToUpdate.Id);
-                    AddTag(itemToUpdate.Id);
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, false, PluginName);
-                API.Instance.Notifications.Add(new NotificationMessage(
-                    $"{PluginName}-Error-Update",
-                    $"{PluginName}" + Environment.NewLine + $"{ex.Message}",
-                    NotificationType.Error,
-                    () => PlayniteTools.CreateLogPackage(PluginName)
-                ));
-            }
-        }
-
-        /// <summary>
-        /// Adds or updates an item in the database.
-        /// </summary>
-        /// <param name="item">Item to add or update.</param>
-        public virtual void AddOrUpdate(TItem item)
-        {
-            if (item == null)
-            {
-                Logger.Warn("item is null in AddOrUpdate()");
-                return;
-            }
-
-            TItem itemCached = GetOnlyCache(item.Id);
-            if (itemCached == null)
-            {
-                Add(item);
-            }
-            else
-            {
-                Update(item);
-            }
-        }
-
-        /// <summary>
-        /// Refreshes data for a game.
-        /// </summary>
-        /// <param name="game">Game to refresh.</param>
-        public void Refresh(Game game) => Refresh(game.Id);
-
-        /// <summary>
-        /// Refreshes data for a game ID.
-        /// </summary>
-        /// <param name="id">Game ID to refresh.</param>
-        public void Refresh(Guid id)
-        {
-            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}")
-            {
-                Cancelable = false,
-                IsIndeterminate = true
-            };
-
-            _ = API.Instance.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
-            {
-                RefreshNoLoader(id);
-            }, globalProgressOptions);
-        }
-
-        /// <summary>
-        /// Refreshes data for a list of game IDs.
-        /// </summary>
-        /// <param name="ids">List of game IDs to refresh.</param>
-        public void Refresh(IEnumerable<Guid> ids)
-        {
-            Logger.Info("Refresh() started");
-            Refresh(ids, ResourceProvider.GetString("LOCCommonProcessing"));
-        }
-
-        /// <summary>
-        /// Refreshes data for a list of game IDs with a custom message.
-        /// </summary>
-        /// <param name="ids">List of game IDs to refresh.</param>
-        /// <param name="message">Custom message.</param>
-        public virtual void Refresh(IEnumerable<Guid> ids, string message)
-        {
-            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {message}")
-            {
-                Cancelable = true,
-                IsIndeterminate = ids.Count() == 1
-            };
-
-            _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
-            {
-                API.Instance.Database.BeginBufferUpdate();
-                Database.BeginBufferUpdate();
-
-                Stopwatch stopWatch = new Stopwatch();
-                stopWatch.Start();
-
-                a.ProgressMaxValue = ids.Count();
-
-                foreach (Guid id in ids)
-                {
-                    Game game = API.Instance.Database.Games.Get(id);
-                    a.Text = $"{PluginName} - {message}"
-                        + (ids.Count() == 1 ? string.Empty : "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}")
-                        + "\n" + game?.Name + (game?.Source == null ? string.Empty : $" ({game?.Source.Name})");
-
-                    if (a.CancelToken.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    try
-                    {
-                        Thread.Sleep(100);
-                        RefreshNoLoader(id);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, false, true, PluginName);
-                    }
-
-                    a.CurrentProgressValue++;
-                }
-
-                stopWatch.Stop();
-                TimeSpan ts = stopWatch.Elapsed;
-                Logger.Info($"Task Refresh(){(a.CancelToken.IsCancellationRequested ? " canceled" : string.Empty)} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{ids.Count()} items");
-
-                Database.EndBufferUpdate();
-                API.Instance.Database.EndBufferUpdate();
-            }, globalProgressOptions);
-        }
-
-        /// <summary>
-        /// Refreshes data for a game ID without a loader.
-        /// </summary>
-        /// <param name="id">Game ID to refresh.</param>
-        public virtual void RefreshNoLoader(Guid id)
-        {
-            Game game = API.Instance.Database.Games.Get(id);
-            Logger.Info($"RefreshNoLoader({game?.Name} - {game?.Id})");
-
-            TItem loadedItem = Get(id, true);
-            TItem webItem = GetWeb(id);
-
-            if (webItem != null && !ReferenceEquals(loadedItem, webItem))
-            {
-                Update(webItem);
-            }
-            else
-            {
-                webItem = loadedItem;
-            }
-
-            ActionAfterRefresh(webItem);
-        }
-
-        [Obsolete("Used Refresh(ids)")]
-        public virtual void RefreshWithNoData(IEnumerable<Guid> ids) => Refresh(ids);
-
-        /// <summary>
-        /// Refreshes data for installed games.
-        /// </summary>
-        public virtual void RefreshInstalled()
-        {
-            Logger.Info("RefreshInstalled() started");
-            IEnumerable<Guid> ids = API.Instance.Database.Games.Where(x => x.IsInstalled && !x.Hidden).Select(x => x.Id);
-            Logger.Info($"RefreshInstalled found {ids.Count()} game(s) that need updating");
-            Refresh(ids, ResourceProvider.GetString("LOCCommonGettingInstalledDatas"));
-        }
-
-        /// <summary>
-        /// Refreshes data for a list of installed game IDs.
-        /// </summary>
-        /// <param name="ids">List of game IDs to refresh.</param>
-        public virtual void RefreshInstalled(IEnumerable<Guid> ids)
-        {
-            Logger.Info("RefreshInstalled() started");
-            Refresh(ids, ResourceProvider.GetString("LOCCommonGettingInstalledDatas"));
-        }
-
-        /// <summary>
-        /// Refreshes data for recently added games.
-        /// </summary>
-        public virtual void RefreshRecent()
-        {
-            Logger.Info("RefreshRecent() started");
-            object Settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
-            PropertyInfo propertyInfo = Settings.GetType().GetProperty("LastAutoLibUpdateAssetsDownload");
-            DateTime LastAutoLibUpdateAssetsDownload;
-            if (propertyInfo == null)
-            {
-                Logger.Warn($"No LastAutoLibUpdateAssetsDownload find");
-                LastAutoLibUpdateAssetsDownload = DateTime.Now.AddMonths(-1);
-            }
-            else
-            {
-                LastAutoLibUpdateAssetsDownload = (DateTime)propertyInfo.GetValue(Settings);
-            }
-
-            IEnumerable<Guid> ids = API.Instance.Database.Games
-                .Where(x => x.Added != null && x.Added > LastAutoLibUpdateAssetsDownload)
-                .Select(x => x.Id);
-            Logger.Info($"RefreshRecent found {ids.Count()} game(s) that need updating");
-            Refresh(ids, ResourceProvider.GetString("LOCCommonGettingNewDatas"));
-        }
-
-        /// <summary>
-        /// Action to perform after refreshing an item.
-        /// </summary>
-        /// <param name="item">Item that was refreshed.</param>
-        public virtual void ActionAfterRefresh(TItem item)
-        {
-        }
-
-        /// <summary>
-        /// Merges data from one game to another.
-        /// </summary>
-        /// <param name="fromId">Source game ID.</param>
-        /// <param name="toId">Destination game ID.</param>
-        /// <returns>Merged item.</returns>
-        public virtual PluginDataBaseGameBase MergeData(Guid fromId, Guid toId) => null;
-
-        /// <summary>
-        /// Removes a game from the database.
-        /// </summary>
-        /// <param name="game">Game to remove.</param>
-        /// <returns>True if the game was removed successfully.</returns>
-        public virtual bool Remove(Game game) => Remove(game.Id);
-
-        /// <summary>
-        /// Removes a game from the database by ID.
-        /// </summary>
-        /// <param name="id">Game ID to remove.</param>
-        /// <returns>True if the game was removed successfully.</returns>
-        public virtual bool Remove(Guid id)
-        {
-            RemoveTag(id);
-            return Database.Items.ContainsKey(id) && (bool)API.Instance.MainView.UIDispatcher?.Invoke(() => { return Database.Remove(id); });
-        }
-
-        /// <summary>
-        /// Removes a list of games from the database by IDs.
-        /// </summary>
-        /// <param name="ids">List of game IDs to remove.</param>
-        /// <returns>True if the games were removed successfully.</returns>
-        public virtual bool Remove(IEnumerable<Guid> ids)
-        {
-            Logger.Info($"Remove() started");
-            API.Instance.Database.Games.BeginBufferUpdate();
-            Database.BeginBufferUpdate();
-
-            foreach (Guid id in ids)
-            {
-                try
-                {
-                    _ = Remove(id);
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, true, PluginName);
-                }
-            }
-
-            API.Instance.Database.Games.EndBufferUpdate();
-            Database.EndBufferUpdate();
-
-            return true;
-        }
-
-        /// <summary>
-        /// Gets an item from the cache by ID.
-        /// </summary>
-        /// <param name="id">Item ID.</param>
-        /// <returns>Item from the cache.</returns>
-        public virtual TItem GetOnlyCache(Guid id) => Database?.Get(id);
-
-        /// <summary>
-        /// Gets an item from the cache by game.
-        /// </summary>
-        /// <param name="game">Game.</param>
-        /// <returns>Item from the cache.</returns>
-        public virtual TItem GetOnlyCache(Game game) => Database?.Get(game.Id);
-
-        /// <summary>
-        /// Gets a clone of an item by ID.
-        /// </summary>
-        /// <param name="id">Item ID.</param>
-        /// <returns>Cloned item.</returns>
-        public virtual TItem GetClone(Guid id) => Serialization.GetClone(Get(id, true, false));
-
-        /// <summary>
-        /// Gets a clone of an item by game.
-        /// </summary>
-        /// <param name="game">Game.</param>
-        /// <returns>Cloned item.</returns>
-        public virtual TItem GetClone(Game game) => Serialization.GetClone(Get(game, true, false));
-
-        /// <summary>
-        /// Gets an item by ID.
-        /// </summary>
-        /// <param name="id">Item ID.</param>
-        /// <param name="onlyCache">Whether to use only cache.</param>
-        /// <param name="force">Whether to force refresh.</param>
-        /// <returns>Item.</returns>
-        public abstract TItem Get(Guid id, bool onlyCache = false, bool force = false);
-
-        /// <summary>
-        /// Gets an item by game.
-        /// </summary>
-        /// <param name="game">Game.</param>
-        /// <param name="onlyCache">Whether to use only cache.</param>
-        /// <param name="force">Whether to force refresh.</param>
-        /// <returns>Item.</returns>
-        public virtual TItem Get(Game game, bool onlyCache = false, bool force = false) => Get(game.Id, onlyCache, force);
-
-        /// <summary>
-        /// Gets an item by game.
-        /// </summary>
-        /// <param name="game">Game.</param>
-        /// <param name="onlyCache">Whether to use only cache.</param>
-        /// <param name="force">Whether to force refresh.</param>
-        /// <returns>Item.</returns>
-        PluginDataBaseGameBase IPluginDatabase.Get(Game game, bool onlyCache, bool force) => Get(game, onlyCache, force);
-
-        /// <summary>
-        /// Gets an item by ID.
-        /// </summary>
-        /// <param name="id">Item ID.</param>
-        /// <param name="onlyCache">Whether to use only cache.</param>
-        /// <param name="force">Whether to force refresh.</param>
-        /// <returns>Item.</returns>
-        PluginDataBaseGameBase IPluginDatabase.Get(Guid id, bool onlyCache, bool force) => Get(id, onlyCache, force);
-
-        /// <summary>
-        /// Gets a clone of an item by game.
-        /// </summary>
-        /// <param name="game">Game.</param>
-        /// <returns>Cloned item.</returns>
-        PluginDataBaseGameBase IPluginDatabase.GetClone(Game game) => GetClone(game);
-
-        /// <summary>
-        /// Gets a clone of an item by ID.
-        /// </summary>
-        /// <param name="id">Item ID.</param>
-        /// <returns>Cloned item.</returns>
-        PluginDataBaseGameBase IPluginDatabase.GetClone(Guid id) => GetClone(id);
-
-        /// <summary>
-        /// Adds or updates an item in the database.
-        /// </summary>
-        /// <param name="item">Item to add or update.</param>
-        void IPluginDatabase.AddOrUpdate(PluginDataBaseGameBase item) => AddOrUpdate((TItem)item);
-
-        /// <summary>
-        /// Gets an item from the web by ID.
-        /// </summary>
-        /// <param name="id">Item ID.</param>
-        /// <returns>Item from the web.</returns>
-        public virtual TItem GetWeb(Guid id) => null;
-
-        /// <summary>
-        /// Gets an item from the web by game.
-        /// </summary>
-        /// <param name="game">Game.</param>
-        /// <returns>Item from the web.</returns>
-        public virtual TItem GetWeb(Game game) => GetWeb(game.Id);
-
-        #endregion
-
-        #region Tag System
-
-        /// <summary>
-        /// Gets plugin tags.
-        /// </summary>
-        /// <returns>List of plugin tags.</returns>
-        private IEnumerable<Tag> GetPluginTags()
-        {
-            IEnumerable<Tag> PluginTags = new List<Tag>();
-            if (!TagBefore.IsNullOrEmpty())
-            {
-                PluginTags = API.Instance.Database.Tags?.Where(x => (bool)x.Name?.StartsWith(TagBefore))?.ToList() ?? new List<Tag>();
-            }
-            return PluginTags;
-        }
-
-        /// <summary>
-        /// Checks if a tag exists and creates it if it doesn't.
-        /// </summary>
-        /// <param name="tagName">Tag name.</param>
-        /// <returns>Tag ID.</returns>
-        internal Guid? CheckTagExist(string tagName)
-        {
-            string completTagName = TagBefore.IsNullOrEmpty() ? tagName : TagBefore + " " + tagName;
-            Guid? findGoodPluginTags = PluginTags.FirstOrDefault(x => x.Name == completTagName)?.Id;
-            if (findGoodPluginTags == null)
-            {
-                API.Instance.Database.Tags.Add(new Tag { Name = completTagName });
-                findGoodPluginTags = PluginTags.FirstOrDefault(x => x.Name == completTagName).Id;
-            }
-            return findGoodPluginTags;
-        }
-
-        /// <summary>
-        /// Adds a "No Data" tag.
-        /// </summary>
-        /// <returns>Tag ID.</returns>
-        public Guid? AddNoDataTag()
-        {
-            return CheckTagExist($"{ResourceProvider.GetString("LOCNoData")}");
-        }
-
-        /// <summary>
-        /// Adds a tag to a game.
-        /// </summary>
-        /// <param name="game">Game.</param>
-        public virtual void AddTag(Game game)
-        {
-            TItem item = Get(game, true);
-            if (item.HasData)
-            {
-                try
-                {
-                    Guid? tagId = FindGoodPluginTags(string.Empty);
-                    if (tagId != null)
-                    {
-                        if (game.TagIds != null)
-                        {
-                            game.TagIds.Add((Guid)tagId);
-                        }
-                        else
-                        {
-                            game.TagIds = new List<Guid> { (Guid)tagId };
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, $"Tag insert error with {game.Name}", true, PluginName, string.Format(ResourceProvider.GetString("LOCCommonNotificationTagError"), game.Name));
-                    return;
-                }
-            }
-            else if (TagMissing)
-            {
-                if (game.TagIds != null)
-                {
-                    game.TagIds.Add((Guid)AddNoDataTag());
-                }
-                else
-                {
-                    game.TagIds = new List<Guid> { (Guid)AddNoDataTag() };
-                }
-            }
-
-            API.Instance.MainView.UIDispatcher?.Invoke(() =>
-            {
-                API.Instance.Database.Games.Update(game);
-                game.OnPropertyChanged();
-            });
-        }
-
-        /// <summary>
-        /// Adds a tag to a game by ID.
-        /// </summary>
-        /// <param name="id">Game ID.</param>
-        public void AddTag(Guid id)
-        {
-            Game game = API.Instance.Database.Games.Get(id);
-            if (game != null)
-            {
-                AddTag(game);
-            }
-        }
-
-        /// <summary>
-        /// Adds a tag to a list of games by IDs.
-        /// </summary>
-        /// <param name="ids">List of game IDs.</param>
-        /// <param name="message">Custom message.</param>
-        public void AddTag(IEnumerable<Guid> ids, string message)
-        {
-            GlobalProgressOptions options = new GlobalProgressOptions(message)
-            {
-                Cancelable = true,
-                IsIndeterminate = ids.Count() == 1
-            };
-
-            _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
-            {
-                try
-                {
-                    API.Instance.Database.BeginBufferUpdate();
-                    API.Instance.Database.Games.BeginBufferUpdate();
-
-                    Stopwatch stopWatch = new Stopwatch();
-                    stopWatch.Start();
-
-                    a.ProgressMaxValue = ids.Count();
-
-                    foreach (Guid id in ids)
-                    {
-                        Game game = API.Instance.Database.Games.Get(id);
-                        if (game == null)
-                        {
-                            continue;
-                        }
-
-                        a.Text = message
-                            + (ids.Count() == 1 ? string.Empty : "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}")
-                            + "\n" + game?.Name + (game?.Source == null ? string.Empty : $" ({game?.Source.Name})");
-
-                        if (a.CancelToken.IsCancellationRequested)
-                        {
-                            break;
-                        }
-
-                        Thread.Sleep(10);
-
-                        try
-                        {
-                            RemoveTag(game);
-                            AddTag(game);
-                        }
-                        catch (Exception ex)
-                        {
-                            Common.LogError(ex, false, false, PluginName);
-                        }
-
-                        a.CurrentProgressValue++;
-                    }
-
-                    stopWatch.Stop();
-                    TimeSpan ts = stopWatch.Elapsed;
-                    Logger.Info($"AddTag(){(a.CancelToken.IsCancellationRequested ? " canceled" : string.Empty)} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{(double)ids.Count()} items");
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, false, PluginName);
-                }
-                finally
-                {
-                    API.Instance.Database.Games.EndBufferUpdate();
-                    API.Instance.Database.EndBufferUpdate();
-                }
-            }, options);
-        }
-
-        /// <summary>
-        /// Adds a tag to all games.
-        /// </summary>
-        public void AddTagAllGame()
-        {
-            Logger.Info($"AddTagAllGame() started");
-            IEnumerable<Guid> ids = API.Instance.Database.Games.Where(x => x.Hidden == false).Select(x => x.Id);
-            AddTag(ids, $"{PluginName} - {ResourceProvider.GetString("LOCCommonAddingAllTag")}");
-        }
-
-        /// <summary>
-        /// Adds a tag to selected games.
-        /// </summary>
-        public void AddTagSelectData()
-        {
-            Logger.Info($"AddTagSelectData() started");
-
-            OptionsDownloadData View = new OptionsDownloadData(this, true);
-            Window windowExtension = PlayniteUiHelper.CreateExtensionWindow(PluginName + " - " + ResourceProvider.GetString("LOCCommonSelectGames"), View);
-            _ = windowExtension.ShowDialog();
-
-            List<Game> playniteDb = View.GetFilteredGames();
-            TagMissing = View.GetTagMissing();
-
-            if (playniteDb == null)
-            {
-                TagMissing = false;
-                return;
-            }
-
-            IEnumerable<Guid> ids = playniteDb.Select(x => x.Id);
-            AddTag(ids, $"{PluginName} - {ResourceProvider.GetString("LOCCommonAddingAllTag")}");
-            TagMissing = false;
-        }
-
-        /// <summary>
-        /// Removes a tag from a game.
-        /// </summary>
-        /// <param name="game">Game.</param>
-        public void RemoveTag(Game game)
-        {
-            if (game?.TagIds != null)
-            {
-                game.TagIds = game.TagIds.Where(x => !PluginTags.Any(y => x == y.Id)).ToList();
-                API.Instance.MainView.UIDispatcher?.Invoke(() =>
-                {
-                    API.Instance.Database.Games.Update(game);
-                    game.OnPropertyChanged();
-                });
-            }
-        }
-
-        /// <summary>
-        /// Removes a tag from a game by ID.
-        /// </summary>
-        /// <param name="id">Game ID.</param>
-        public void RemoveTag(Guid id)
-        {
-            Game game = API.Instance.Database.Games.Get(id);
-            if (game != null)
-            {
-                RemoveTag(game);
-            }
-        }
-
-        /// <summary>
-        /// Removes a tag from all games.
-        /// </summary>
-        /// <param name="fromClearDatabase">Whether the call is from clearing the database.</param>
-        public void RemoveTagAllGame(bool fromClearDatabase = false)
-        {
-            Common.LogDebug(true, "RemoveTagAllGame()");
-
-            string message = fromClearDatabase
-                ? $"{PluginName} - {ResourceProvider.GetString("LOCCommonClearingAllTag")}"
-                : $"{PluginName} - {ResourceProvider.GetString("LOCCommonRemovingAllTag")}";
-
-            GlobalProgressOptions options = new GlobalProgressOptions(message)
-            {
-                Cancelable = true,
-                IsIndeterminate = false
-            };
-
-            _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
-            {
-                try
-                {
-                    Logger.Info($"RemoveTagAllGame() started");
-                    API.Instance.Database.BeginBufferUpdate();
-                    API.Instance.Database.Games.BeginBufferUpdate();
-
-                    Stopwatch stopWatch = new Stopwatch();
-                    stopWatch.Start();
-
-                    IEnumerable<Game> playniteDb = API.Instance.Database.Games.Where(x => x.Hidden == false);
-                    a.ProgressMaxValue = playniteDb.Count();
-
-                    foreach (Game game in playniteDb)
-                    {
-                        a.Text = message
-                            + "\n\n" + $"{a.CurrentProgressValue}/{a.ProgressMaxValue}"
-                            + "\n" + game?.Name + (game?.Source == null ? string.Empty : $" ({game?.Source.Name})");
-
-                        if (a.CancelToken.IsCancellationRequested)
-                        {
-                            break;
-                        }
-
-                        try
-                        {
-                            RemoveTag(game);
-                        }
-                        catch (Exception ex)
-                        {
-                            Common.LogError(ex, false, false, PluginName);
-                        }
-
-                        a.CurrentProgressValue++;
-                    }
-
-                    stopWatch.Stop();
-                    TimeSpan ts = stopWatch.Elapsed;
-                    Logger.Info($"RemoveTagAllGame(){(a.CancelToken.IsCancellationRequested ? " canceled" : string.Empty)} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {a.CurrentProgressValue}/{(double)playniteDb.Count()} items");
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, false, PluginName);
-                }
-                finally
-                {
-                    API.Instance.Database.Games.EndBufferUpdate();
-                    API.Instance.Database.EndBufferUpdate();
-                }
-            }, options);
-        }
-
-        /// <summary>
-        /// Finds a good plugin tag.
-        /// </summary>
-        /// <param name="tagName">Tag name.</param>
-        /// <returns>Tag ID.</returns>
-        internal virtual Guid? FindGoodPluginTags(string tagName)
-        {
-            return CheckTagExist(tagName);
-        }
-
-        #endregion
-
-        #region Utility Methods
-
-        /// <summary>
-        /// Clears the cache.
-        /// </summary>
-        public void ClearCache()
-        {
-            string PathDirectory = Path.Combine(PlaynitePaths.DataCachePath, PluginName);
-
-            GlobalProgressOptions globalProgressOptions = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonProcessing")}")
-            {
-                Cancelable = false,
-                IsIndeterminate = true
-            };
-
-            _ = API.Instance.Dialogs.ActivateGlobalProgress((activateGlobalProgress) =>
-            {
-                try
-                {
-                    Thread.Sleep(2000);
-                    FileSystem.DeleteDirectory(PathDirectory, true);
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, false, PluginName);
-                    _ = API.Instance.Dialogs.ShowErrorMessage(
-                        string.Format(ResourceProvider.GetString("LOCCommonErrorDeleteCache"), PathDirectory),
-                        PluginName
-                    );
-                }
-            }, globalProgressOptions);
-        }
-
-        /// <summary>
-        /// Handles game item updates.
-        /// </summary>
-        /// <param name="sender">Sender.</param>
-        /// <param name="e">Event arguments.</param>
-        public virtual void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e)
-        {
-            try
-            {
-                if (e?.UpdatedItems?.Count > 0 && Database != null)
-                {
-                    e?.UpdatedItems?.ForEach(x =>
-                    {
-                        if (x.NewData?.Id != null)
-                        {
-                            Database.SetGameInfo<T>(x.NewData.Id);
-                            ActionAfterGames_ItemUpdated(x.OldData, x.NewData);
-                        }
-                    });
-
-                    // If auto update for installed
-                    object settings = PluginSettings.GetType().GetProperty("Settings").GetValue(PluginSettings);
-                    PropertyInfo propertyInfo = settings.GetType().GetProperty("AutoImportOnInstalled");
-                    if (propertyInfo != null && (bool)propertyInfo.GetValue(settings))
-                    {
-                        // Only for a new installation
-                        List<Guid> ids = e.UpdatedItems.Where(x => !x.OldData.IsInstalled & x.NewData.IsInstalled && !PreviousIds.Contains(x.NewData.Id)).Select(x => x.NewData.Id).ToList();
-                        PreviousIds = ids;
-                        if (ids?.Count() > 0)
-                        {
-                            RefreshInstalled(ids);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, false, PluginName);
-            }
-        }
-
-        /// <summary>
-        /// Action to perform after game item updates.
-        /// </summary>
-        /// <param name="gameOld">Old game data.</param>
-        /// <param name="gameNew">New game data.</param>
-        public virtual void ActionAfterGames_ItemUpdated(Game gameOld, Game gameNew)
-        {
-        }
-
-        /// <summary>
-        /// Handles game item collection changes.
-        /// </summary>
-        /// <param name="sender">Sender.</param>
-        /// <param name="e">Event arguments.</param>
-        private void Games_ItemCollectionChanged(object sender, ItemCollectionChangedEventArgs<Game> e)
-        {
-            try
-            {
-                e?.RemovedItems?.ForEach(x =>
-                {
-                    _ = Remove(x);
-                });
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, false, PluginName);
-            }
-        }
-
-        /// <summary>
-        /// Sets theme resources for a game.
-        /// </summary>
-        /// <param name="game">Game.</param>
-        public virtual void SetThemesResources(Game game)
-        {
-        }
-
-        #endregion
-
-        #region Data Extraction
-
-        /// <summary>
-        /// Extracts data to a CSV file.
-        /// </summary>
-        /// <param name="path">Path to save the CSV file.</param>
-        /// <param name="minimum">Whether to extract minimum data.</param>
-        /// <returns>True if the extraction was successful.</returns>
-        public bool ExtractToCsv(string path, bool minimum)
-        {
-            bool isOK = false;
-            try
-            {
-                Logger.Info($"ExtractToCsv({minimum}) started");
-                GlobalProgressOptions options = new GlobalProgressOptions($"{PluginName} - {ResourceProvider.GetString("LOCCommonExtracting")}")
-                {
-                    Cancelable = true,
-                    IsIndeterminate = false
-                };
-
-                _ = API.Instance.Dialogs.ActivateGlobalProgress((a) =>
-                {
-                    Stopwatch stopWatch = new Stopwatch();
-                    stopWatch.Start();
-
-                    try
-                    {
-                        ulong totalItems = 0;
-                        foreach (TItem item in Database.Items?.Values)
-                        {
-                            totalItems += item.Count;
-                        }
-                        a.ProgressMaxValue = totalItems;
-
-                        string filePath = Path.Combine(path, $"{PluginName}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv");
-                        filePath = CommonPlayniteShared.Common.Paths.FixPathLength(filePath);
-                        FileSystem.PrepareSaveFile(filePath);
-                        string csvData = GetCsvData(a, minimum);
-                        if (!csvData.IsNullOrEmpty())
-                        {
-                            if (!a.CancelToken.IsCancellationRequested)
-                            {
-                                File.WriteAllText(filePath, csvData, Encoding.UTF8);
-                                _ = Process.Start("explorer.exe", path);
-                                isOK = true;
-                            }
-                        }
-                        else
-                        {
-                            Logger.Warn($"No csv data for {PluginName}");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, false, true, PluginName);
-                    }
-
-                    stopWatch.Stop();
-                    TimeSpan ts = stopWatch.Elapsed;
-                    Logger.Info($"ExtractToCsv({minimum}){(a.CancelToken.IsCancellationRequested ? " canceled" : string.Empty)} - {string.Format("{0:00}:{1:00}.{2:00}", ts.Minutes, ts.Seconds, ts.Milliseconds / 10)} for {Database.Items?.Count()} items");
-                }, options);
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, true, PluginName);
-            }
-
-            return isOK;
-        }
-
-        /// <summary>
-        /// Gets CSV data.
-        /// </summary>
-        /// <param name="a">Progress action arguments.</param>
-        /// <param name="minimum">Whether to get minimum data.</param>
-        /// <returns>CSV data.</returns>
-        internal virtual string GetCsvData(GlobalProgressActionArgs a, bool minimum)
-        {
-            return null;
-        }
-
-        #endregion
-    }
+	/// <summary>
+	/// Abstract base class for plugin database objects backed by LiteDB.
+	/// Provides CRUD, tag management, refresh orchestration, and CSV extraction.
+	/// </summary>
+	/// <typeparam name="TSettings">Settings view-model type implementing <see cref="ISettings"/>.</typeparam>
+	/// <typeparam name="TItem">Database item type inheriting <see cref="PluginGameEntry"/>.</typeparam>
+	/// <typeparam name="T">Inner data type used to parameterise <see cref="PluginGameCollection{T}"/>.</typeparam>
+	public abstract class PluginDatabaseObject<TSettings, TItem, T> : ObservableObject, IPluginDatabase<TItem>
+		where TSettings : PluginSettings
+		where TItem : PluginGameEntry
+	{
+		protected static readonly ILogger Logger = LogManager.GetLogger();
+
+		/// <inheritdoc cref="IPluginDatabase.PluginName"/>
+		public string PluginName { get; set; }
+
+		/// <summary>Gets or sets the strongly-typed plugin settings view model.</summary>
+		public TSettings PluginSettings { get; set; }
+
+		public PluginExportCsv<TItem> PluginExportCsv { get; set; }
+
+		/// <summary>Gets or sets plugin-specific paths (database, cache, installation directory).</summary>
+		public PluginPaths Paths { get; set; }
+
+		/// <summary>
+		/// Optional callback used to persist plugin settings when they are updated
+		/// from shared UI screens outside the standard Playnite settings lifecycle.
+		/// </summary>
+		public Action PersistSettingsAction { get; set; }
+
+		/// <summary>
+		/// Timeout in milliseconds to wait for the database to finish loading.
+		/// Override to adjust per-plugin (default: 10 000 ms).
+		/// </summary>
+		protected virtual int DatabaseLoadTimeout => 10000;
+		private const int PlayniteDatabaseOpenTimeoutMilliseconds = 30000;
+
+		private const string LegacyLiteDbMigrationMarkerFileName = ".legacy-litedb-migration.done";
+
+		/// <summary>
+		/// Marker file written after a successful one-shot <see cref="MigrateLegacyJsonItem"/> pass on JSON storage.
+		/// </summary>
+		private const string LegacyJsonModelMigrationMarkerFileName = ".legacy-json-model-migration.done";
+
+		/// <summary>Gets or sets the current game displayed in the active UI panel.</summary>
+		public Game GameContext { get; set; }
+
+		/// <inheritdoc cref="IPluginDatabase.PluginWindows"/>
+		public IPluginWindows PluginWindows { get; set; }
+
+		/// <summary>Prefix prepended to every tag created by this plugin (e.g. <c>"[SC]"</c>).</summary>
+		protected string TagBefore { get; set; } = string.Empty;
+
+		/// <summary>Gets or sets a value indicating whether a "No Data" tag should be added to games without data.</summary>
+		public bool TagMissing { get; set; } = false;
+
+		// ── LiteDB backend ────────────────────────────────────────────────────────
+
+		protected PluginItemCollection<TItem> _database;
+
+		// ── IsLoaded ─────────────────────────────────────────────────────────────
+
+		private volatile bool _isLoaded = false;
+
+		/// <inheritdoc cref="IPluginDatabase.IsLoaded"/>
+		public bool IsLoaded
+		{
+			get => _isLoaded;
+			set
+			{
+				if (_isLoaded == value)
+				{
+					return;
+				}
+
+				_isLoaded = value;
+
+				// PropertyChanged must be raised on the UI thread.
+				// SetValue() from ObservableObject would raise it on whichever thread calls it,
+				// causing cross-thread exceptions when called from Task.Run.
+				if (Application.Current?.Dispatcher?.CheckAccess() == true)
+				{
+					OnPropertyChanged(nameof(IsLoaded));
+				}
+				else
+				{
+					Application.Current?.Dispatcher?.BeginInvoke(
+						new Action(() => OnPropertyChanged(nameof(IsLoaded))));
+				}
+			}
+		}
+
+		// ── Database events (replace PluginItemCollection.ItemUpdated / ItemCollectionChanged) ──
+
+		/// <summary>Raised after any item is inserted or updated via <see cref="Add"/> or <see cref="Update"/>.</summary>
+		public event EventHandler<ItemUpdatedEventArgs<TItem>> DatabaseItemUpdated;
+
+		/// <summary>Raised after any item is removed via <see cref="Remove(Guid)"/>.</summary>
+		public event EventHandler<ItemCollectionChangedEventArgs<TItem>> DatabaseItemCollectionChanged;
+
+		// ── Tag cache ─────────────────────────────────────────────────────────────
+
+		private List<Tag> _pluginTagsCache;
+		private bool _pluginTagsCacheInitialized;
+
+		/// <summary>Gets all Playnite tags that start with <see cref="TagBefore"/>.</summary>
+		protected IEnumerable<Tag> PluginTags => GetPluginTags();
+
+		private IEnumerable<Guid> PreviousIds { get; set; } = new List<Guid>();
+
+		/// <summary>
+		/// Initialises paths, cache directories, and subscribes to Playnite game events.
+		/// </summary>
+		protected PluginDatabaseObject(TSettings pluginSettings, string pluginName, string pluginUserDataPath)
+		{
+			PluginSettings = pluginSettings;
+			PluginName = pluginName;
+
+			Paths = new PluginPaths
+			{
+				PluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+				PluginUserDataPath = pluginUserDataPath,
+				PluginDatabasePath = Path.Combine(pluginUserDataPath, pluginName),
+				PluginCachePath = Path.Combine(PlaynitePaths.DataCachePath, pluginName),
+			};
+
+			HttpFileCacheService.CacheDirectory = Paths.PluginCachePath;
+
+			CommonPlayniteShared.Common.FileSystem.CreateDirectory(Paths.PluginDatabasePath);
+			CommonPlayniteShared.Common.FileSystem.CreateDirectory(Paths.PluginCachePath);
+
+			API.Instance.Database.Games.ItemUpdated += Games_ItemUpdated;
+			API.Instance.Database.Games.ItemCollectionChanged += Games_ItemCollectionChanged;
+		}
+
+		#region Database access helpers
+
+		/// <summary>
+		/// Blocks the calling thread until <see cref="IsLoaded"/> is true or
+		/// <see cref="DatabaseLoadTimeout"/> elapses.
+		/// FIX: replaced SpinWait.SpinUntil (busy-wait) with a sleep-based poll
+		/// to avoid burning a CPU core while waiting for background initialisation.
+		/// </summary>
+		private void WaitForDatabaseLoad()
+		{
+			if (IsLoaded)
+			{
+				return;
+			}
+
+			Logger.Info(string.Format("Waiting for database to load (timeout: {0} ms)…", DatabaseLoadTimeout));
+
+			int elapsed = 0;
+			const int pollInterval = 100;
+
+			while (!IsLoaded && elapsed < DatabaseLoadTimeout)
+			{
+				Thread.Sleep(pollInterval);
+				elapsed += pollInterval;
+			}
+
+			if (!IsLoaded)
+			{
+				string message = string.Format("Database load timeout after {0} ms", DatabaseLoadTimeout);
+				Logger.Error(message);
+				throw new TimeoutException(message);
+			}
+
+			Logger.Info("Database loaded successfully.");
+		}
+
+		/// <summary>Returns the database without throwing on timeout; returns <c>null</c> instead.</summary>
+		protected PluginItemCollection<TItem> GetDatabaseSafe()
+		{
+			try
+			{
+				WaitForDatabaseLoad();
+				return _database;
+			}
+			catch (TimeoutException ex)
+			{
+				Logger.Warn(string.Format("Database access timeout: {0}", ex.Message));
+				return null;
+			}
+		}
+
+		/// <summary>Returns <c>true</c> if the database is ready for immediate access.</summary>
+		public bool IsDatabaseReady() => IsLoaded && _database != null;
+
+		/// <summary>Returns metadata for the active database file.</summary>
+		public virtual DatabaseBackupInfo GetCurrentDatabaseInfo()
+		{
+			return null;
+		}
+
+		/// <summary>Returns metadata for backup database files.</summary>
+		public virtual IEnumerable<DatabaseBackupInfo> GetDatabaseBackups()
+		{
+			return Enumerable.Empty<DatabaseBackupInfo>();
+		}
+
+		/// <summary>Creates a backup in the plugin database folder.</summary>
+		public virtual string CreateDatabaseBackup()
+		{
+			return null;
+		}
+
+		/// <summary>Restores current database from the selected backup file.</summary>
+		public virtual bool RestoreDatabaseBackup(string backupFilePath)
+		{
+			return false;
+		}
+
+		/// <summary>Deletes a backup file from disk.</summary>
+		public virtual bool DeleteDatabaseBackup(string backupFilePath)
+		{
+			return false;
+		}
+
+		/// <summary>Returns current backup retention count.</summary>
+		public virtual int GetDatabaseBackupMaxCount()
+		{
+			if (PluginSettings != null && PluginSettings.DatabaseBackupMaxCount >= 3)
+			{
+				return PluginSettings.DatabaseBackupMaxCount;
+			}
+
+			return 5;
+		}
+
+		/// <summary>Updates backup retention count in settings and active database instance.</summary>
+		public virtual void SetDatabaseBackupMaxCount(int value)
+		{
+			int normalized = value < 3 ? 3 : value;
+
+			if (PluginSettings != null)
+			{
+				PluginSettings.DatabaseBackupMaxCount = normalized;
+			}
+
+			try
+			{
+				PersistSettingsAction?.Invoke();
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, "Failed to persist plugin settings after DatabaseBackupMaxCount update.");
+			}
+		}
+
+		#endregion
+
+		#region Shared UI helpers
+
+		/// <summary>Adds <paramref name="tagId"/> to <paramref name="game"/>'s tag list if not already present.</summary>
+		protected static void AppendTagId(Game game, Guid tagId)
+		{
+			if (game.TagIds == null)
+			{
+				game.TagIds = new List<Guid> { tagId };
+			}
+			else if (!game.TagIds.Contains(tagId))
+			{
+				game.TagIds.Add(tagId);
+			}
+		}
+
+		/// <summary>Persists <paramref name="game"/> changes to Playnite on the UI dispatcher thread.</summary>
+		protected static void PersistGameUpdate(Game game)
+		{
+			API.Instance.MainView.UIDispatcher?.Invoke(() =>
+			{
+				API.Instance.Database.Games.Update(game);
+				game.OnPropertyChanged();
+			});
+		}
+
+		#endregion
+
+		#region Database initialisation & lifecycle
+
+		/// <inheritdoc/>
+		public Task<bool> InitializeDatabase()
+		{
+			return Task.Run(() =>
+			{
+				if (IsLoaded)
+				{
+					Logger.Info("Database is already initialised.");
+					return true;
+				}
+
+				bool result = LoadDatabase();
+				IsLoaded = result;
+
+				if (!result)
+				{
+					Logger.Error("LoadDatabase() returned false — plugin database is unavailable.");
+				}
+
+				return result;
+			});
+		}
+
+
+		/// <summary>
+		/// Opens JSON-backed storage, runs <see cref="RunLegacyJsonModelMigrationOnce"/> when needed,
+		/// then calls <see cref="LoadMoreData"/>.
+		/// SetGameInfo and DeleteDataWithDeletedGame are intentionally deferred
+		/// to <see cref="RunPostLoadMaintenance"/> which runs after IsLoaded is set,
+		/// avoiding a deadlock where WaitForDatabaseLoad (10 s) would expire before
+		/// SetGameInfo finishes waiting for Playnite's database (up to 30 s).
+		/// </summary>
+		protected bool LoadDatabase()
+		{
+			try
+			{
+				Stopwatch stopWatch = Stopwatch.StartNew();
+
+				_database = new PluginItemCollection<TItem>(Paths.PluginDatabasePath, API.Instance.Database.Games.CollectionType);
+
+				// One-shot legacy JSON model migration (MigrateLegacyJsonItem), if not already done.
+				RunLegacyJsonModelMigrationOnce();
+
+				LoadMoreData();
+
+				stopWatch.Stop();
+				Logger.Info(string.Format(
+					"LoadDatabase — {0} items in {1:00}:{2:00}.{3:00}",
+					_database.Count,
+					stopWatch.Elapsed.Minutes,
+					stopWatch.Elapsed.Seconds,
+					stopWatch.Elapsed.Milliseconds / 10));
+
+				// Post-load maintenance is deferred to avoid delaying startup.
+				Task.Run(() => RunPostLoadMaintenance());
+
+				return true;
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, true, PluginName);
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Runs game-info synchronisation and orphan cleanup after the database is marked as loaded.
+		/// Waits for Playnite's game database internally via SetGameInfo().
+		/// Errors are caught individually so a failure in one step does not abort the other.
+		/// </summary>
+		private void RunPostLoadMaintenance()
+		{
+			Logger.Info("RunPostLoadMaintenance — started.");
+			Logger.Info(string.Format(
+				"RunPostLoadMaintenance — Playnite DB open: {0}, plugin DB item count: {1}.",
+				API.Instance?.Database?.IsOpen == true,
+				_database?.Count ?? 0));
+
+			if (!WaitForPlayniteDatabaseOpen("RunPostLoadMaintenance"))
+			{
+				Logger.Warn("RunPostLoadMaintenance — skipped because Playnite DB did not open within timeout.");
+				return;
+			}
+
+			try
+			{
+				// Synchronises Name / IsSaved / IsDeleted against Playnite's game list.
+				// Internally waits up to 30 s for Playnite's database to open.
+				_database.SetGameInfo<T>();
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, "RunPostLoadMaintenance — SetGameInfo failed.", false, PluginName);
+			}
+
+			try
+			{
+				if (API.Instance?.Database?.IsOpen != true)
+				{
+					Logger.Warn("RunPostLoadMaintenance — skipping DeleteDataWithDeletedGame because Playnite DB is not open.");
+					return;
+				}
+
+				// An exception here would have silently aborted LoadDatabase() and kept IsLoaded = false.
+				DeleteDataWithDeletedGame();
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, "RunPostLoadMaintenance — DeleteDataWithDeletedGame failed.", false, PluginName);
+			}
+
+			Logger.Info("RunPostLoadMaintenance — completed.");
+		}
+
+		/// <summary>
+		/// Waits until the Playnite database is open before running maintenance operations
+		/// that rely on API.Instance.Database.Games lookups.
+		/// </summary>
+		private bool WaitForPlayniteDatabaseOpen(string operationName)
+		{
+			if (API.Instance?.Database?.IsOpen == true)
+			{
+				return true;
+			}
+
+			Logger.Info(string.Format(
+				"{0} — waiting for Playnite DB to open (timeout: {1} ms).",
+				operationName,
+				PlayniteDatabaseOpenTimeoutMilliseconds));
+
+			int elapsed = 0;
+			const int pollInterval = 100;
+
+			while (API.Instance?.Database?.IsOpen != true && elapsed < PlayniteDatabaseOpenTimeoutMilliseconds)
+			{
+				Thread.Sleep(pollInterval);
+				elapsed += pollInterval;
+			}
+
+			bool isOpen = API.Instance?.Database?.IsOpen == true;
+			if (!isOpen)
+			{
+				Logger.Warn(string.Format(
+					"{0} — Playnite DB did not open within {1} ms.",
+					operationName,
+					PlayniteDatabaseOpenTimeoutMilliseconds));
+			}
+
+			return isOpen;
+		}
+
+		/// <summary>
+		/// Runs a one-shot in-place migration of JSON-backed items via <see cref="MigrateLegacyJsonItem"/>.
+		/// A zip backup of all <c>*.json</c> files in the plugin database folder is created before any rewrite.
+		/// Writes <c>.legacy-json-model-migration.done</c> only when every item migrates without error.
+		/// </summary>
+		private void RunLegacyJsonModelMigrationOnce()
+		{
+			try
+			{
+				if (_database == null || Paths == null || string.IsNullOrEmpty(Paths.PluginDatabasePath))
+				{
+					return;
+				}
+
+				string markerPath = Path.Combine(Paths.PluginDatabasePath, LegacyJsonModelMigrationMarkerFileName);
+				if (File.Exists(markerPath))
+				{
+					return;
+				}
+
+				string[] jsonFiles = Directory.GetFiles(Paths.PluginDatabasePath, "*.json");
+				if (jsonFiles.Length == 0)
+				{
+					File.WriteAllText(markerPath, "No JSON file found for legacy model migration.");
+					return;
+				}
+
+				string archivePath = Path.Combine(
+					Paths.PluginDatabasePath,
+					string.Format(
+						"{0}_legacy-json-model-migration_{1:yyyyMMdd_HHmmss}.zip",
+						PluginName,
+						DateTime.UtcNow));
+
+				int archived = CreateMigrationArchive(jsonFiles, archivePath);
+				if (archived != jsonFiles.Length)
+				{
+					Logger.Error(string.Format(
+						"RunLegacyJsonModelMigrationOnce — backup incomplete ({0}/{1}), migration aborted.",
+						archived, jsonFiles.Length));
+					return;
+				}
+
+				int migrated = 0;
+				int failed = 0;
+
+				using (_database.BufferedUpdate())
+				{
+					foreach (TItem item in _database.ToList())
+					{
+						try
+						{
+							MigrateLegacyJsonItem(item, null);
+							EnsureDateTimesUtc(item);
+							item.IsSaved = true;
+							_database.Update(item);
+							migrated++;
+						}
+						catch (Exception ex)
+						{
+							failed++;
+							Logger.Error(ex, string.Format(
+								"RunLegacyJsonModelMigrationOnce — failed for game '{0}' ({1}).",
+								item?.Name, item?.Id));
+						}
+					}
+				}
+
+				if (failed == 0)
+				{
+					File.WriteAllText(markerPath, string.Format(
+						"Completed at {0:u}. Migrated: {1}. Backup: {2}",
+						DateTime.UtcNow, migrated, archivePath));
+				}
+
+				Logger.Info(string.Format(
+					"RunLegacyJsonModelMigrationOnce — completed: {0} migrated, {1} failed.",
+					migrated, failed));
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, "RunLegacyJsonModelMigrationOnce — unexpected error.");
+			}
+		}
+
+		/*
+		/// <summary>
+		/// One-shot migration from legacy LiteDB files to JSON file-per-item storage.
+		/// A zip backup of legacy .db files is created before conversion.
+		/// The migration is marked complete only when every migrated item succeeds.
+		/// </summary>
+		private void MigrateLiteDbToJson()
+		{
+			try
+			{
+				if (_database == null || Paths == null || string.IsNullOrEmpty(Paths.PluginDatabasePath))
+				{
+					return;
+				}
+
+				string markerPath = Path.Combine(Paths.PluginDatabasePath, LegacyLiteDbMigrationMarkerFileName);
+				if (File.Exists(markerPath))
+				{
+					return;
+				}
+
+				string[] liteDbFiles = Directory.GetFiles(Paths.PluginDatabasePath, "*.db");
+				if (liteDbFiles.Length == 0)
+				{
+					File.WriteAllText(markerPath, "No LiteDB file found for migration.");
+					return;
+				}
+
+				string archivePath = Path.Combine(
+					Paths.PluginDatabasePath,
+					string.Format(
+						"{0}_legacy-litedb-migration_{1:yyyyMMdd_HHmmss}.zip",
+						PluginName,
+						DateTime.UtcNow));
+
+				int archived = CreateMigrationArchive(liteDbFiles, archivePath);
+				if (archived != liteDbFiles.Length)
+				{
+					Logger.Error(string.Format(
+						"MigrateLiteDbToJson — backup incomplete ({0}/{1}), migration aborted.",
+						archived, liteDbFiles.Length));
+					return;
+				}
+
+				int migrated = 0;
+				int failed = 0;
+
+				foreach (string dbFile in liteDbFiles)
+				{
+					try
+					{
+						using (var legacyDb = new LiteDatabase(dbFile))
+						{
+							LiteCollection<TItem> legacyCollection = legacyDb.GetCollection<TItem>("items");
+							List<TItem> legacyItems = legacyCollection.FindAll().ToList();
+
+							using (_database.BufferedUpdate())
+							{
+								foreach (TItem item in legacyItems)
+								{
+									try
+									{
+										if (item == null || item.Id == Guid.Empty)
+										{
+											failed++;
+											continue;
+										}
+
+										MigrateLegacyJsonItem(item, null);
+										EnsureDateTimesUtc(item);
+										item.IsSaved = true;
+
+										if (_database.ContainsItem(item.Id))
+										{
+											_database.Update(item);
+										}
+										else
+										{
+											_database.Add(item);
+										}
+
+										migrated++;
+									}
+									catch (Exception ex)
+									{
+										failed++;
+										Logger.Error(ex, string.Format(
+											"MigrateLiteDbToJson — failed for game '{0}' ({1}) from '{2}'.",
+											item?.Name, item?.Id, dbFile));
+									}
+								}
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						Logger.Error(ex, string.Format(
+							"MigrateLiteDbToJson — failed to read legacy database '{0}'.", dbFile));
+						failed++;
+					}
+				}
+
+				if (failed == 0)
+				{
+					File.WriteAllText(markerPath, string.Format(
+						"Completed at {0:u}. Migrated: {1}. Backup: {2}",
+						DateTime.UtcNow, migrated, archivePath));
+
+					DeleteLegacyLiteDbFiles(liteDbFiles);
+				}
+
+				Logger.Info(string.Format(
+					"MigrateLiteDbToJson — completed: {0} migrated, {1} failed.",
+					migrated, failed));
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, "MigrateLiteDbToJson — unexpected error.");
+			}
+		}
+		*/
+
+		private int CreateMigrationArchive(string[] jsonFiles, string archivePath)
+		{
+			try
+			{
+				int archivedCount = 0;
+				using (FileStream archiveStream = new FileStream(archivePath, System.IO.FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+				using (ZipArchive archive = new ZipArchive(archiveStream, ZipArchiveMode.Create, false))
+				{
+					HashSet<string> usedEntryNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+					foreach (string file in jsonFiles)
+					{
+						string entryName = Path.GetFileName(file);
+						while (!usedEntryNames.Add(entryName))
+						{
+							entryName = string.Format(
+								"{0}_{1}{2}",
+								Path.GetFileNameWithoutExtension(file),
+								Guid.NewGuid().ToString("N"),
+								Path.GetExtension(file));
+						}
+
+						ZipArchiveEntry entry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
+						using (Stream entryStream = entry.Open())
+						using (FileStream fileStream = new FileStream(file, System.IO.FileMode.Open, FileAccess.Read, FileShare.Read))
+						{
+							fileStream.CopyTo(entryStream);
+						}
+						archivedCount++;
+					}
+				}
+
+				Logger.Info(string.Format(
+					"CreateMigrationArchive — archive created: {0} ({1} file(s)).",
+					archivePath, archivedCount));
+				return archivedCount;
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, string.Format(
+					"CreateMigrationArchive — failed to create archive '{0}', migration aborted.",
+					archivePath));
+				return 0;
+			}
+		}
+
+		/// <summary>
+		/// Deletes legacy LiteDB files after a successful migration.
+		/// Errors are logged and do not throw to keep startup resilient.
+		/// </summary>
+		/// <param name="liteDbFiles">Legacy LiteDB file paths to delete.</param>
+		private void DeleteLegacyLiteDbFiles(IEnumerable<string> liteDbFiles)
+		{
+			if (liteDbFiles == null)
+			{
+				return;
+			}
+
+			foreach (string dbFile in liteDbFiles)
+			{
+				try
+				{
+					if (!string.IsNullOrEmpty(dbFile) && File.Exists(dbFile))
+					{
+						File.Delete(dbFile);
+					}
+				}
+				catch (Exception ex)
+				{
+					Logger.Error(ex, string.Format(
+						"MigrateLiteDbToJson — failed to delete legacy database '{0}'.", dbFile));
+				}
+			}
+		}
+
+		/// <summary>
+		/// Override to migrate legacy JSON payloads in memory before they are saved back to disk.
+		/// Called once per item during <see cref="RunLegacyJsonModelMigrationOnce"/> (when the marker file is absent).
+		/// </summary>
+		/// <param name="item">Loaded item to transform in place.</param>
+		/// <param name="progressArgs">Optional progress context; <c>null</c> when migration runs without a progress dialog.</param>
+		protected virtual void MigrateLegacyJsonItem(TItem item, GlobalProgressActionArgs progressArgs) { }
+
+		/// <summary>Override to perform additional plugin-specific initialisation after the base database loads.</summary>
+		protected virtual void LoadMoreData() { }
+
+		/// <inheritdoc/>
+		public bool ClearDatabase()
+		{
+			bool isOk = true;
+			int removedCount = 0;
+
+			GlobalProgressOptions options = new GlobalProgressOptions(
+				string.Format("{0} - {1}", PluginName, ResourceProvider.GetString("LOCCommonProcessing")))
+			{
+				Cancelable = false,
+				IsIndeterminate = false
+			};
+
+			API.Instance.Dialogs.ActivateGlobalProgress((a) =>
+			{
+				List<TItem> allItems = _database.ToList();
+				a.ProgressMaxValue = allItems.Count;
+
+				foreach (TItem item in allItems)
+				{
+					try
+					{
+						RemoveTag(item.Id);
+						_database.Remove(item.Id);
+						Common.LogDebug(true, string.Format("ClearDatabase — removed item {0} ({1})", item.Id, item.Name));
+						removedCount++;
+						a.CurrentProgressValue++;
+					}
+					catch (Exception ex)
+					{
+						isOk = false;
+						Common.LogError(ex, false, string.Format("Error clearing {0} — {1}", item.Id, item.Name), false, PluginName);
+					}
+				}
+
+				Logger.Info(string.Format("ClearDatabase — {0}/{1} items removed successfully.", removedCount, allItems.Count));
+
+			}, options);
+
+			bool cacheOk = ClearCache();
+			if (!cacheOk)
+			{
+				isOk = false;
+			}
+
+			// Notify after all operations (DB removal + cache clear) are complete.
+			DatabaseItemCollectionChanged?.Invoke(this, new ItemCollectionChangedEventArgs<TItem>(
+				new List<TItem>(), new List<TItem>()));
+
+			return isOk;
+		}
+
+		/// <summary>Removes database entries whose corresponding Playnite game no longer exists.</summary>
+		public virtual void DeleteDataWithDeletedGame()
+		{
+			Logger.Info(string.Format(
+				"DeleteDataWithDeletedGame — started. Playnite DB open: {0}, current plugin DB item count: {1}.",
+				API.Instance?.Database?.IsOpen == true,
+				_database?.Count ?? 0));
+
+			List<TItem> orphaned = _database
+				.Where(x => API.Instance.Database.Games.Get(x.Id) == null)
+				.ToList();
+
+			Logger.Info(string.Format(
+				"DeleteDataWithDeletedGame — identified {0} orphaned item(s).",
+				orphaned.Count));
+
+			foreach (TItem item in orphaned)
+			{
+				Logger.Info(string.Format(
+					"Deleting orphaned data: {0} ({1})", item.Name, item.Id));
+				_database.Remove(item.Id);
+			}
+
+			Logger.Info(string.Format(
+				"DeleteDataWithDeletedGame — completed. Removed: {0}. Remaining plugin DB item count: {1}.",
+				orphaned.Count,
+				_database?.Count ?? 0));
+		}
+
+		#endregion
+
+		#region Query helpers
+
+		/// <inheritdoc/>
+		public virtual void GetSelectData()
+		{
+			OptionsDownloadData view = new OptionsDownloadData(this);
+			Window window = PlayniteUiHelper.CreateExtensionWindow(
+				PluginName + " - " + ResourceProvider.GetString("LOCCommonSelectData"), view);
+			window.ShowDialog();
+
+			List<Game> playniteDb = view.GetFilteredGames();
+			bool onlyMissing = view.GetOnlyMissing();
+
+			if (playniteDb == null)
+			{
+				return;
+			}
+
+			if (onlyMissing)
+			{
+				playniteDb = playniteDb.FindAll(x => !Get(x.Id, true).HasData);
+			}
+
+			Refresh(playniteDb.Select(x => x.Id));
+		}
+
+		/// <summary>
+		/// Returns all cached items directly from the in-memory ConcurrentDictionary.
+		/// Faster than GetGamesList() which does an extra Games.Get() per item.
+		/// </summary>
+		public IEnumerable<TItem> GetAllCache()
+		{
+			if (_database == null)
+			{
+				return Enumerable.Empty<TItem>();
+			}
+			return _database;
+		}
+
+		/// <summary>
+		/// Returns all Playnite games that have a corresponding entry in the plugin database.
+		/// Guard added: waits for database load via GetDatabaseSafe().
+		/// </summary>
+		public virtual IEnumerable<Game> GetGamesList()
+		{
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
+			if (db == null)
+			{
+				yield break;
+			}
+
+			foreach (TItem item in db)
+			{
+				Game game = API.Instance.Database.Games.Get(item.Id);
+				if (game != null)
+				{
+					yield return game;
+				}
+			}
+		}
+
+		/// <inheritdoc/>
+		public virtual IEnumerable<Game> GetGamesWithNoData()
+		{
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
+			if (db == null)
+			{
+				return Enumerable.Empty<Game>();
+			}
+
+			IEnumerable<Game> withNoData = db
+				.Where(x => !x.HasData)
+				.Select(x => API.Instance.Database.Games.Get(x.Id))
+				.Where(x => x != null);
+
+			IEnumerable<Game> notInDb = API.Instance.Database.Games
+				.Where(x => !db.ContainsItem(x.Id));
+
+			return withNoData.Union(notInDb).Distinct().Where(x => !x.Hidden);
+		}
+
+		/// <inheritdoc/>
+		public virtual IEnumerable<Game> GetGamesOldData(int months)
+		{
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
+			if (db == null)
+			{
+				return Enumerable.Empty<Game>();
+			}
+
+			return db.Where(x => x.DateLastRefresh <= DateTime.Now.AddMonths(-months))
+				.Select(x => API.Instance.Database.Games.Get(x.Id))
+				.Where(x => x != null);
+		}
+
+		/// <summary>Returns a projection of all database entries as DataGame view models.</summary>
+		public virtual IEnumerable<DataGame> GetDataGames()
+		{
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
+			if (db == null)
+			{
+				return Enumerable.Empty<DataGame>();
+			}
+
+			return db.Select(x => new DataGame
+			{
+				Id = x.Id,
+				Icon = x.Icon.IsNullOrEmpty() ? x.Icon : API.Instance.Database.GetFullFilePath(x.Icon),
+				Name = x.Name,
+				IsDeleted = x.IsDeleted,
+				CountData = x.Count
+			}).Distinct();
+		}
+
+		/// <summary>Returns database entries that are marked as deleted.</summary>
+		public virtual IEnumerable<DataGame> GetIsolatedDataGames()
+		{
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
+			if (db == null)
+			{
+				return Enumerable.Empty<DataGame>();
+			}
+
+			return db.Where(x => x.IsDeleted).Select(x => new DataGame
+			{
+				Id = x.Id,
+				Icon = x.Icon.IsNullOrEmpty() ? x.Icon : API.Instance.Database.GetFullFilePath(x.Icon),
+				Name = x.Name,
+				IsDeleted = x.IsDeleted,
+				CountData = x.Count
+			}).Distinct();
+		}
+
+		#endregion
+
+		#region CRUD
+
+		/// <summary>Creates a minimal default item for <paramref name="id"/>.</summary>
+		public virtual TItem GetDefault(Guid id)
+		{
+			Game game = API.Instance.Database.Games.Get(id);
+			return game == null ? null : GetDefault(game);
+		}
+
+		/// <summary>Creates a minimal default item populated with basic game metadata.</summary>
+		public virtual TItem GetDefault(Game game)
+		{
+			TItem item = typeof(TItem).CrateInstance<TItem>();
+			item.Id = game.Id;
+			item.Name = game.Name;
+			item.IsSaved = false;
+			return item;
+		}
+
+		/// <summary>Adds a new item to the database and raises <see cref="DatabaseItemUpdated"/>.</summary>
+		public virtual void Add(TItem itemToAdd)
+		{
+			try
+			{
+				if (itemToAdd == null)
+				{
+					Logger.Warn("Add() called with null item.");
+					return;
+				}
+
+				itemToAdd.IsSaved = true;
+				if (_database.ContainsItem(itemToAdd.Id))
+				{
+					_database.Update(itemToAdd);
+				}
+				else
+				{
+					_database.Add(itemToAdd);
+				}
+
+				DatabaseItemUpdated?.Invoke(this, new ItemUpdatedEventArgs<TItem>(
+					new List<ItemUpdateEvent<TItem>>
+					{
+						new ItemUpdateEvent<TItem>(itemToAdd, itemToAdd)
+					}));
+
+				if (IsTaggingEnabled())
+				{
+					RemoveTag(itemToAdd.Id);
+					AddTag(itemToAdd.Id);
+				}
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, false, PluginName);
+				NotifyError("Add", ex);
+			}
+		}
+
+		/// <summary>Updates an existing item in the database and raises <see cref="DatabaseItemUpdated"/>.</summary>
+		public virtual void Update(TItem itemToUpdate)
+		{
+			try
+			{
+				if (itemToUpdate == null)
+				{
+					Logger.Warn("Update() called with null item.");
+					return;
+				}
+
+				itemToUpdate.IsSaved = true;
+				itemToUpdate.DateLastRefresh = DateTime.Now.ToUniversalTime();
+				if (_database.ContainsItem(itemToUpdate.Id))
+				{
+					_database.Update(itemToUpdate);
+				}
+				else
+				{
+					_database.Add(itemToUpdate);
+				}
+
+				DatabaseItemUpdated?.Invoke(this, new ItemUpdatedEventArgs<TItem>(
+					new List<ItemUpdateEvent<TItem>>
+					{
+						new ItemUpdateEvent<TItem>(itemToUpdate, itemToUpdate)
+					}));
+
+				if (IsTaggingEnabled())
+				{
+					RemoveTag(itemToUpdate.Id);
+					AddTag(itemToUpdate.Id);
+				}
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, false, PluginName);
+				NotifyError("Update", ex);
+			}
+		}
+
+		/// <summary>Adds the item if no entry exists for its ID; otherwise updates the existing entry.</summary>
+		public virtual void AddOrUpdate(TItem item)
+		{
+			if (item == null)
+			{
+				Logger.Warn("AddOrUpdate() called with null item.");
+				return;
+			}
+
+			if (GetOnlyCache(item.Id) == null)
+			{
+				Add(item);
+			}
+			else
+			{
+				Update(item);
+			}
+		}
+
+		/// <inheritdoc/>
+		public virtual bool Remove(Game game) => Remove(game.Id);
+
+		/// <summary>
+		/// Removes the item identified by <paramref name="id"/> and raises
+		/// <see cref="DatabaseItemCollectionChanged"/>.
+		/// </summary>
+		public virtual bool Remove(Guid id)
+		{
+			RemoveTag(id);
+			bool removed = false;
+			try
+			{
+				removed = _database.Remove(id);
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, false, PluginName);
+			}
+
+			if (removed)
+			{
+				DatabaseItemCollectionChanged?.Invoke(this,
+					new ItemCollectionChangedEventArgs<TItem>(
+						new List<TItem>(), new List<TItem>()));
+			}
+
+			return removed;
+		}
+
+		/// <inheritdoc/>
+		public virtual void Remove(List<Guid> ids) => Remove((IEnumerable<Guid>)ids);
+
+		/// <inheritdoc/>
+		public virtual bool Remove(IEnumerable<Guid> ids)
+		{
+			Logger.Info("Remove(IEnumerable<Guid>) started.");
+			foreach (Guid id in ids)
+			{
+				try
+				{
+					Remove(id);
+				}
+				catch (Exception ex)
+				{
+					Common.LogError(ex, false, true, PluginName);
+				}
+			}
+
+			return true;
+		}
+
+		// ── Cache accessors ───────────────────────────────────────────────────────
+
+		/// <summary>Returns the item from the in-memory collection without any web access.</summary>
+		public virtual TItem GetOnlyCache(Guid id) => _database?.Get(id);
+
+		/// <summary>Returns the item from the in-memory collection without any web access.</summary>
+		public virtual TItem GetOnlyCache(Game game) => _database?.Get(game.Id);
+
+		/// <summary>Returns a deep clone of the item for <paramref name="id"/>.</summary>
+		public virtual TItem GetClone(Guid id) => Serialization.GetClone(Get(id, true, false));
+
+		/// <summary>Returns a deep clone of the item for <paramref name="game"/>.</summary>
+		public virtual TItem GetClone(Game game) => Serialization.GetClone(Get(game, true, false));
+
+		/// <summary>Gets an item by ID, optionally fetching from the web or forcing a refresh.</summary>
+		public abstract TItem Get(Guid id, bool onlyCache = false, bool force = false);
+
+		/// <summary>Gets an item by game, optionally fetching from the web or forcing a refresh.</summary>
+		public virtual TItem Get(Game game, bool onlyCache = false, bool force = false)
+			=> Get(game.Id, onlyCache, force);
+
+		/// <summary>Returns <c>null</c> by default; override to fetch data from an online source.</summary>
+		public virtual TItem GetWeb(Guid id) => null;
+
+		/// <summary>Fetches data from an online source using the game object.</summary>
+		public virtual TItem GetWeb(Game game) => GetWeb(game.Id);
+
+		// ── Explicit IPluginDatabase bridges ─────────────────────────────────────
+		PluginGameEntry IPluginDatabase.Get(Game game, bool onlyCache, bool force)
+			=> Get(game, onlyCache, force);
+		PluginGameEntry IPluginDatabase.Get(Guid id, bool onlyCache, bool force)
+			=> Get(id, onlyCache, force);
+		PluginGameEntry IPluginDatabase.GetOnlyCache(Guid id)
+			=> GetOnlyCache(id);
+		PluginGameEntry IPluginDatabase.GetOnlyCache(Game game)
+			=> GetOnlyCache(game);
+		PluginGameEntry IPluginDatabase.GetClone(Game game)
+			=> GetClone(game);
+		PluginGameEntry IPluginDatabase.GetClone(Guid id)
+			=> GetClone(id);
+		void IPluginDatabase.AddOrUpdate(PluginGameEntry item)
+			=> AddOrUpdate((TItem)item);
+
+		#endregion
+
+		#region Refresh
+
+		/// <summary>Refreshes a single game with a progress dialog.</summary>
+		public void Refresh(Game game) => Refresh(game.Id);
+
+		/// <summary>Refreshes a single game by ID with a progress dialog.</summary>
+		public void Refresh(Guid id)
+		{
+			GlobalProgressOptions options = new GlobalProgressOptions(
+				string.Format("{0} - {1}", PluginName,
+					ResourceProvider.GetString("LOCCommonProcessing")))
+			{
+				Cancelable = false,
+				IsIndeterminate = true
+			};
+
+			API.Instance.Dialogs.ActivateGlobalProgress(a => RefreshNoLoader(id, a.CancelToken), options);
+		}
+
+		/// <inheritdoc/>
+		public void Refresh(IEnumerable<Guid> ids)
+		{
+			Logger.Info("Refresh() started.");
+			Refresh(ids, ResourceProvider.GetString("LOCCommonProcessing"));
+		}
+
+		/// <summary>Refreshes a batch of games with a cancellable progress dialog.</summary>
+		public virtual void Refresh(IEnumerable<Guid> ids, string message)
+		{
+			List<Guid> idList = ids.ToList();
+
+			GlobalProgressOptions options = new GlobalProgressOptions(
+				string.Format("{0} - {1}", PluginName, message))
+			{
+				Cancelable = true,
+				IsIndeterminate = idList.Count == 1
+			};
+
+			API.Instance.Dialogs.ActivateGlobalProgress((a) =>
+			{
+				Stopwatch stopWatch = Stopwatch.StartNew();
+				a.ProgressMaxValue = idList.Count;
+
+				foreach (Guid id in idList)
+				{
+					if (a.CancelToken.IsCancellationRequested)
+					{
+						break;
+					}
+
+					Game game = API.Instance.Database.Games.Get(id);
+					a.Text = BuildProgressText(message, a.CurrentProgressValue, idList.Count, game);
+
+					try
+					{
+						Thread.Sleep(100);
+						RefreshNoLoader(id, a.CancelToken);
+					}
+					catch (Exception ex)
+					{
+						Common.LogError(ex, false, true, PluginName);
+					}
+
+					a.CurrentProgressValue++;
+				}
+
+				stopWatch.Stop();
+				TimeSpan ts = stopWatch.Elapsed;
+				Logger.Info(string.Format(
+					"Refresh(){0} — {1:00}:{2:00}.{3:00} for {4}/{5} items",
+					a.CancelToken.IsCancellationRequested ? " (canceled)" : string.Empty,
+					ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
+					a.CurrentProgressValue, idList.Count));
+			}, options);
+		}
+
+		/// <summary>Refreshes all items that currently have data.</summary>
+		public virtual void RefreshAll()
+		{
+			PluginItemCollection<TItem> db = GetDatabaseSafe();
+			if (db == null)
+			{
+				return;
+			}
+
+			IEnumerable<Guid> ids = db
+				.Where(x => x.HasData)
+				.Select(x => x.Id);
+			Refresh(ids);
+		}
+
+		/// <summary>Core refresh logic without a progress dialog.</summary>
+		public virtual void RefreshNoLoader(Guid id, CancellationToken cancellationToken = default)
+		{
+			Game game = API.Instance.Database.Games.Get(id);
+			Logger.Info(string.Format("RefreshNoLoader — {0} ({1})", game?.Name, id));
+
+			TItem cached = Get(id, true);
+			TItem webItem = GetWeb(id);
+
+			if (webItem != null && !ReferenceEquals(cached, webItem))
+			{
+				Update(webItem);
+			}
+			else
+			{
+				webItem = cached;
+			}
+
+			ActionAfterRefresh(webItem);
+		}
+
+		/// <summary>Called after each item refresh. Override to perform post-processing.</summary>
+		public virtual void ActionAfterRefresh(TItem item) { }
+
+		/// <summary>Refreshes all installed, non-hidden games.</summary>
+		public virtual void RefreshInstalled()
+		{
+			Logger.Info("RefreshInstalled() started.");
+			IEnumerable<Guid> ids = API.Instance.Database.Games
+				.Where(x => x.IsInstalled && !x.Hidden)
+				.Select(x => x.Id);
+			Logger.Info(string.Format(
+				"RefreshInstalled — {0} game(s) queued.", ids.Count()));
+			Refresh(ids, ResourceProvider.GetString("LOCCommonGettingInstalledDatas"));
+		}
+
+		/// <summary>Refreshes a specific set of installed games.</summary>
+		public virtual void RefreshInstalled(IEnumerable<Guid> ids)
+		{
+			Logger.Info("RefreshInstalled(ids) started.");
+			Refresh(ids, ResourceProvider.GetString("LOCCommonGettingInstalledDatas"));
+		}
+
+		/// <summary>Refreshes games added since the last auto-update timestamp stored in settings.</summary>
+		public virtual void RefreshRecent()
+		{
+			Logger.Info("RefreshRecent() started.");
+
+			if (PluginSettings == null)
+			{
+				Logger.Warn("PluginSettings is null in RefreshRecent(); defaulting to -1 month.");
+			}
+
+			DateTime since = PluginSettings != null
+				? PluginSettings.LastAutoLibUpdateAssetsDownload
+				: DateTime.Now.AddMonths(-1);
+
+			IEnumerable<Guid> ids = API.Instance.Database.Games
+				.Where(x => x.Added != null && x.Added > since)
+				.Select(x => x.Id);
+
+			Logger.Info(string.Format("RefreshRecent — {0} game(s) queued.", ids.Count()));
+			Refresh(ids, ResourceProvider.GetString("LOCCommonGettingNewDatas"));
+		}
+
+		/// <inheritdoc/>
+		[Obsolete("Use Refresh(ids)")]
+		public virtual void RefreshWithNoData(IEnumerable<Guid> ids) => Refresh(ids);
+
+		/// <inheritdoc/>
+		public virtual PluginGameEntry MergeData(Guid fromId, Guid toId) => null;
+
+		#endregion
+
+		#region Tag management
+
+		private IEnumerable<Tag> GetPluginTags()
+		{
+			if (_pluginTagsCacheInitialized)
+			{
+				return _pluginTagsCache;
+			}
+
+			_pluginTagsCacheInitialized = true;
+
+			if (TagBefore.IsNullOrEmpty() || API.Instance.Database.Tags == null)
+			{
+				_pluginTagsCache = new List<Tag>();
+				return _pluginTagsCache;
+			}
+
+			_pluginTagsCache = API.Instance.Database.Tags
+				.Where(t => !t.Name.IsNullOrEmpty()
+					&& t.Name.StartsWith(TagBefore, StringComparison.Ordinal))
+				.ToList();
+
+			return _pluginTagsCache;
+		}
+
+		private void ResetPluginTagsCache()
+		{
+			_pluginTagsCacheInitialized = false;
+		}
+
+		/// <summary>Returns the ID of the tag with the full prefixed name, creating it if needed.</summary>
+		internal Guid? CheckTagExist(string tagName)
+		{
+			string fullName = TagBefore.IsNullOrEmpty()
+				? tagName
+				: string.Format("{0} {1}", TagBefore, tagName);
+
+			Tag existing = PluginTags.FirstOrDefault(
+				t => string.Equals(t.Name, fullName, StringComparison.Ordinal));
+
+			if (existing != null)
+			{
+				return existing.Id;
+			}
+
+			API.Instance.Database.Tags.Add(new Tag { Name = fullName });
+			ResetPluginTagsCache();
+
+			Tag created = PluginTags.FirstOrDefault(
+				t => string.Equals(t.Name, fullName, StringComparison.Ordinal));
+
+			return created?.Id;
+		}
+
+		/// <summary>Returns the ID of the localised "No Data" tag, creating it if needed.</summary>
+		public Guid? AddNoDataTag() => CheckTagExist(ResourceProvider.GetString("LOCNoData"));
+
+		/// <summary>
+		/// Resolves and appends the appropriate plugin tag to <paramref name="game"/>.TagIds in memory.
+		/// Does NOT persist the change — caller is responsible for calling PersistGameUpdate.
+		/// </summary>
+		/// <returns>
+		/// <c>true</c> if TagIds was modified and a persist is needed; <c>false</c> otherwise.
+		/// </returns>
+		protected virtual bool AppendPluginTag(Game game)
+		{
+			TItem item = Get(game, true);
+
+			if (item.HasData)
+			{
+				try
+				{
+					Guid? tagId = FindGoodPluginTags(string.Empty);
+					if (tagId != null)
+					{
+						AppendTagId(game, tagId.Value);
+						return true;
+					}
+				}
+				catch (Exception ex)
+				{
+					Common.LogError(ex, false, $"Tag insert error {game.Name}", true, PluginName,
+						string.Format(ResourceProvider.GetString("LOCCommonNotificationTagError"), game.Name));
+				}
+				return false;
+			}
+
+			if (TagMissing)
+			{
+				Guid? noDataTagId = AddNoDataTag();
+				if (noDataTagId != null)
+				{
+					AppendTagId(game, noDataTagId.Value);
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		/// <summary>Adds the appropriate plugin tag to <paramref name="game"/>.</summary>
+		public void AddTag(Game game)
+		{
+			bool modified = AppendPluginTag(game);
+			if (modified)
+			{
+				PersistGameUpdate(game);
+			}
+		}
+
+		/// <summary>Adds the appropriate plugin tag to the game identified by <paramref name="id"/>.</summary>
+		public void AddTag(Guid id)
+		{
+			Game game = API.Instance.Database.Games.Get(id);
+			if (game != null)
+			{
+				AddTag(game);
+			}
+		}
+
+		/// <inheritdoc/>
+		public void AddTagAllGames()
+		{
+			Logger.Info("AddTagAllGame() started.");
+			IEnumerable<Guid> ids = API.Instance.Database.Games
+				.Where(x => !x.Hidden)
+				.Select(x => x.Id);
+			AddTag(ids, string.Format("{0} - {1}", PluginName,
+				ResourceProvider.GetString("LOCCommonAddingAllTag")));
+		}
+
+		/// <inheritdoc/>
+		public void AddTagSelectData()
+		{
+			Logger.Info("AddTagSelectData() started.");
+
+			OptionsDownloadData view = new OptionsDownloadData(this, true);
+			Window window = PlayniteUiHelper.CreateExtensionWindow(
+				PluginName + " - " + ResourceProvider.GetString("LOCCommonSelectGames"), view);
+			window.ShowDialog();
+
+			List<Game> playniteDb = view.GetFilteredGames();
+			TagMissing = view.GetTagMissing();
+
+			if (playniteDb == null)
+			{
+				TagMissing = false;
+				return;
+			}
+
+			AddTag(playniteDb.Select(x => x.Id),
+				string.Format("{0} - {1}", PluginName,
+					ResourceProvider.GetString("LOCCommonAddingAllTag")));
+			TagMissing = false;
+		}
+
+		/// <summary>Adds plugin tags to a batch of games with a cancellable progress dialog.</summary>
+		/// <summary>
+		/// Adds plugin tags to a batch of games with a cancellable progress dialog.
+		/// </summary>
+		/// <summary>
+		/// Adds plugin tags to a batch of games with a cancellable progress dialog.
+		/// Removes existing plugin tags before applying the new ones.
+		/// A single database write is performed per game.
+		/// </summary>
+		/// <param name="ids">The identifiers of the games to tag.</param>
+		/// <param name="message">The message displayed in the progress dialog.</param>
+		public void AddTag(IEnumerable<Guid> ids, string message)
+		{
+			List<Guid> idList = ids.ToList();
+			if (idList.Count == 0) return;
+
+			GlobalProgressOptions options = new GlobalProgressOptions(message)
+			{
+				Cancelable = true,
+				IsIndeterminate = idList.Count == 1
+			};
+
+			API.Instance.Dialogs.ActivateGlobalProgress(a =>
+			{
+				int errorCount = 0;
+
+				try
+				{
+					API.Instance.Database.BeginBufferUpdate();
+					API.Instance.Database.Games.BeginBufferUpdate();
+
+					Stopwatch stopWatch = Stopwatch.StartNew();
+					a.ProgressMaxValue = idList.Count;
+
+					foreach (Guid id in idList)
+					{
+						if (a.CancelToken.IsCancellationRequested) break;
+
+						Game game = API.Instance.Database.Games.Get(id);
+						if (game == null)
+						{
+							a.CurrentProgressValue++;
+							continue;
+						}
+
+						a.Text = BuildProgressText(message, a.CurrentProgressValue, idList.Count, game);
+
+						try
+						{
+							StripPluginTags(game);
+							bool modified = AppendPluginTag(game);
+							if (modified)
+							{
+								PersistGameUpdate(game);
+							}
+						}
+						catch (Exception ex)
+						{
+							errorCount++;
+							Common.LogError(ex, false, false, PluginName);
+						}
+
+						a.CurrentProgressValue++;
+					}
+
+					stopWatch.Stop();
+					TimeSpan ts = stopWatch.Elapsed;
+					Logger.Info(string.Format(
+						"AddTag {0} {1:00}:{2:00}.{3:000} for {4}/{5} items",
+						a.CancelToken.IsCancellationRequested ? "canceled" : string.Empty,
+						ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
+						a.CurrentProgressValue, idList.Count));
+
+					if (errorCount > 0)
+					{
+						API.Instance.Notifications.Add(new NotificationMessage(
+							string.Format("{0}-AddTag-Error", PluginName),
+							string.Format(ResourceProvider.GetString("LOCCommonNotificationTagBatchError"), errorCount),
+							NotificationType.Error,
+							() => PlayniteTools.CreateLogPackage(PluginName)));
+					}
+				}
+				catch (Exception ex)
+				{
+					Common.LogError(ex, false, false, PluginName);
+				}
+				finally
+				{
+					API.Instance.Database.Games.EndBufferUpdate();
+					API.Instance.Database.EndBufferUpdate();
+				}
+			}, options);
+		}
+
+		/// <summary>
+		/// Removes all plugin-owned tags from <paramref name="game"/>.TagIds in memory.
+		/// Does NOT persist the change — caller is responsible for calling PersistGameUpdate.
+		/// </summary>
+		protected void StripPluginTags(Game game)
+		{
+			if (game?.TagIds == null) return;
+
+			game.TagIds = game.TagIds
+				.Where(x => !PluginTags.Any(y => x == y.Id))
+				.ToList();
+		}
+
+		/// <summary>Removes all plugin tags from <paramref name="game"/>.</summary>
+		public void RemoveTag(Game game)
+		{
+			if (game?.TagIds == null)
+			{
+				return;
+			}
+
+			StripPluginTags(game);
+			PersistGameUpdate(game);
+		}
+
+		/// <summary>Removes all plugin tags from the game identified by <paramref name="id"/>.</summary>
+		public void RemoveTag(Guid id)
+		{
+			Game game = API.Instance.Database.Games.Get(id);
+			if (game != null)
+			{
+				RemoveTag(game);
+			}
+		}
+
+		/// <inheritdoc/>
+		public void RemoveTagAllGames(bool fromClearDatabase = false)
+		{
+			Common.LogDebug(true, "RemoveTagAllGame()");
+
+			string message = fromClearDatabase
+				? string.Format("{0} - {1}", PluginName,
+					ResourceProvider.GetString("LOCCommonClearingAllTag"))
+				: string.Format("{0} - {1}", PluginName,
+					ResourceProvider.GetString("LOCCommonRemovingAllTag"));
+
+			GlobalProgressOptions options = new GlobalProgressOptions(message)
+			{
+				Cancelable = true,
+				IsIndeterminate = false
+			};
+
+			API.Instance.Dialogs.ActivateGlobalProgress((a) =>
+			{
+				try
+				{
+					Logger.Info("RemoveTagAllGame() started.");
+					API.Instance.Database.BeginBufferUpdate();
+					API.Instance.Database.Games.BeginBufferUpdate();
+
+					Stopwatch stopWatch = Stopwatch.StartNew();
+					List<Game> playniteDb = API.Instance.Database.Games
+						.Where(x => !x.Hidden)
+						.ToList();
+					a.ProgressMaxValue = playniteDb.Count;
+
+					foreach (Game game in playniteDb)
+					{
+						if (a.CancelToken.IsCancellationRequested)
+						{
+							break;
+						}
+
+						a.Text = BuildProgressText(
+							message, a.CurrentProgressValue, playniteDb.Count, game);
+
+						try
+						{
+							RemoveTag(game);
+						}
+						catch (Exception ex)
+						{
+							Common.LogError(ex, false, false, PluginName);
+						}
+
+						a.CurrentProgressValue++;
+					}
+
+					stopWatch.Stop();
+					TimeSpan ts = stopWatch.Elapsed;
+					Logger.Info(string.Format(
+						"RemoveTagAllGame(){0} — {1:00}:{2:00}.{3:00} for {4}/{5} items",
+						a.CancelToken.IsCancellationRequested ? " (canceled)" : string.Empty,
+						ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
+						a.CurrentProgressValue, playniteDb.Count));
+				}
+				catch (Exception ex)
+				{
+					Common.LogError(ex, false, false, PluginName);
+				}
+				finally
+				{
+					API.Instance.Database.Games.EndBufferUpdate();
+					API.Instance.Database.EndBufferUpdate();
+				}
+			}, options);
+		}
+
+		/// <summary>Resolves the tag ID to apply to a game. Override to implement custom tag selection.</summary>
+		internal virtual Guid? FindGoodPluginTags(string tagName) => CheckTagExist(tagName);
+
+		#endregion
+
+		#region Playnite event handlers
+
+		/// <summary>
+		/// Responds to Playnite game updates.
+		/// Guard added: skips processing if the plugin database is not yet loaded
+		/// to avoid NullReferenceException on _database during startup race condition.
+		/// </summary>
+		public virtual void Games_ItemUpdated(object sender, ItemUpdatedEventArgs<Game> e)
+		{
+			// Guard: _database is null until InitializeDatabase() completes.
+			if (!IsLoaded || _database == null)
+			{
+				Logger.Warn("Games_ItemUpdated fired before database was loaded; skipping.");
+				return;
+			}
+
+			try
+			{
+				if (e?.UpdatedItems?.Count > 0)
+				{
+					e.UpdatedItems.ForEach(x =>
+					{
+						if (x.NewData?.Id != null)
+						{
+							_database.SetGameInfo<T>(x.NewData.Id);
+							ActionAfterGames_ItemUpdated(x.OldData, x.NewData);
+						}
+					});
+
+					if (IsAutoImportOnInstalledEnabled())
+					{
+						List<Guid> newlyInstalled = e.UpdatedItems
+							.Where(x => !x.OldData.IsInstalled
+								&& x.NewData.IsInstalled
+								&& !PreviousIds.Contains(x.NewData.Id))
+							.Select(x => x.NewData.Id)
+							.ToList();
+
+						PreviousIds = newlyInstalled;
+
+						if (newlyInstalled.Count > 0)
+						{
+							RefreshInstalled(newlyInstalled);
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, false, PluginName);
+			}
+		}
+
+		/// <summary>Called after each individual game update event.</summary>
+		public virtual void ActionAfterGames_ItemUpdated(Game gameOld, Game gameNew) { }
+
+		/// <summary>
+		/// Guard added: skips processing if the plugin database is not yet loaded.
+		/// Removes orphaned plugin data when a Playnite game is deleted.
+		/// </summary>
+		private void Games_ItemCollectionChanged(object sender, ItemCollectionChangedEventArgs<Game> e)
+		{
+			// Guard: _database is null until InitializeDatabase() completes.
+			if (!IsLoaded || _database == null)
+			{
+				Logger.Warn("Games_ItemCollectionChanged fired before database was loaded; skipping.");
+				return;
+			}
+
+			try
+			{
+				e?.RemovedItems?.ForEach(x => Remove(x));
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, false, PluginName);
+			}
+		}
+
+
+		/// <summary>Updates theme/UI resources for the given game.</summary>
+		public virtual void SetThemesResources(Game game) { }
+
+		#endregion
+
+		#region CSV extraction
+
+		public bool ExtractToCsv()
+		{
+			return PluginExportCsv.ExportToCsv(PluginName, _database);
+		}
+
+		#endregion
+
+		#region Cache management
+
+		/// <summary>Deletes the plugin's on-disk file cache with a progress dialog.</summary>
+		public bool ClearCache()
+		{
+			bool isOk = true;
+
+			string cacheDir = Path.Combine(PlaynitePaths.DataCachePath, PluginName);
+			GlobalProgressOptions options = new GlobalProgressOptions(
+				string.Format("{0} - {1}", PluginName,
+					ResourceProvider.GetString("LOCCommonProcessing")))
+			{
+				Cancelable = false,
+				IsIndeterminate = true
+			};
+
+			API.Instance.Dialogs.ActivateGlobalProgress((a) =>
+			{
+				Thread.Sleep(2000);
+
+				if (!Directory.Exists(cacheDir))
+				{
+					Logger.Info(string.Format("Cache directory does not exist, nothing to clear: {0}", cacheDir));
+					return;
+				}
+
+				// Delete all files recursively, logging each one individually.
+				foreach (string file in Directory.GetFiles(cacheDir, "*", SearchOption.AllDirectories))
+				{
+					try
+					{
+						File.Delete(file);
+						Logger.Info(string.Format("Cache file deleted: {0}", file));
+					}
+					catch (Exception ex)
+					{
+						isOk = false;
+						Common.LogError(ex, false,
+							string.Format("Failed to delete cache file: {0}", file),
+							false, PluginName);
+						API.Instance.Dialogs.ShowErrorMessage(
+							string.Format(
+								ResourceProvider.GetString("LOCCommonErrorDeleteCache"), file),
+							PluginName);
+					}
+				}
+
+				// Delete all subdirectories once files are gone.
+				foreach (string subDir in Directory.GetDirectories(cacheDir))
+				{
+					try
+					{
+						Directory.Delete(subDir, true);
+						Logger.Info(string.Format("Cache subdirectory deleted: {0}", subDir));
+					}
+					catch (Exception ex)
+					{
+						isOk = false;
+						Common.LogError(ex, false,
+							string.Format("Failed to delete cache subdirectory: {0}", subDir),
+							false, PluginName);
+						API.Instance.Dialogs.ShowErrorMessage(
+							string.Format(
+								ResourceProvider.GetString("LOCCommonErrorDeleteCache"), subDir),
+							PluginName);
+					}
+				}
+
+				// Invalidate the in-memory file cache so subsequent requests
+				// do not return stale paths pointing to deleted files.
+				HttpFileCacheService.ClearAllCache();
+				Logger.Info(string.Format("Cache cleared: {0}", cacheDir));
+
+			}, options);
+
+			return isOk;
+		}
+
+		#endregion
+
+		#region Private utilities
+
+		private static string BuildProgressText(
+			string message, double current, int total, Game game)
+		{
+			string gameLine = game == null
+				? string.Empty
+				: "\n" + game.Name + (game.Source == null
+					? string.Empty
+					: string.Format(" ({0})", game.Source.Name));
+
+			string counterLine = total == 1
+				? string.Empty
+				: string.Format("\n\n{0}/{1}", current, total);
+
+			return message + counterLine + gameLine;
+		}
+
+		private bool IsTaggingEnabled() => PluginSettings != null && PluginSettings.EnableTag;
+
+		private bool IsAutoImportOnInstalledEnabled() => PluginSettings != null && PluginSettings.AutoImportOnInstalled;
+
+		/// <summary>
+		/// Normalizes all DateTime values to UTC in the object graph.
+		/// This prevents legacy JSON data with Local/Unspecified kinds from being persisted
+		/// with inconsistent date formats during migration to LiteDB.
+		/// </summary>
+		private static void EnsureDateTimesUtc(object root)
+		{
+			if (root == null)
+			{
+				return;
+			}
+
+			HashSet<object> visited = new HashSet<object>(ReferenceEqualityComparer.Instance);
+			EnsureDateTimesUtcInternal(root, visited);
+		}
+
+		private static void EnsureDateTimesUtcInternal(object current, HashSet<object> visited)
+		{
+			if (current == null)
+			{
+				return;
+			}
+
+			Type currentType = current.GetType();
+			if (IsTerminalType(currentType))
+			{
+				return;
+			}
+
+			if (!currentType.IsValueType)
+			{
+				if (!visited.Add(current))
+				{
+					return;
+				}
+			}
+
+			IDictionary dictionary = current as IDictionary;
+			if (dictionary != null)
+			{
+				NormalizeDictionaryDateTimesToUtc(dictionary, visited);
+				return;
+			}
+
+			IList list = current as IList;
+			if (list != null)
+			{
+				for (int i = 0; i < list.Count; i++)
+				{
+					object listItem = list[i];
+					if (listItem is DateTime)
+					{
+						list[i] = NormalizeDateTimeToUtc((DateTime)listItem);
+					}
+					else
+					{
+						EnsureDateTimesUtcInternal(listItem, visited);
+					}
+				}
+				return;
+			}
+
+			IEnumerable enumerable = current as IEnumerable;
+			if (enumerable != null && !(current is string))
+			{
+				foreach (object entry in enumerable)
+				{
+					EnsureDateTimesUtcInternal(entry, visited);
+				}
+			}
+
+			PropertyInfo[] properties = currentType
+				.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+				.Where(p => p.CanRead && p.CanWrite && p.GetIndexParameters().Length == 0)
+				.ToArray();
+
+			foreach (PropertyInfo property in properties)
+			{
+				object value;
+				try
+				{
+					value = property.GetValue(current, null);
+				}
+				catch
+				{
+					continue;
+				}
+
+				if (value == null)
+				{
+					continue;
+				}
+
+				Type propertyType = property.PropertyType;
+				if (propertyType == typeof(DateTime))
+				{
+					property.SetValue(current, NormalizeDateTimeToUtc((DateTime)value), null);
+					continue;
+				}
+
+				if (propertyType == typeof(DateTime?))
+				{
+					DateTime? nullableDate = (DateTime?)value;
+					if (nullableDate.HasValue)
+					{
+						property.SetValue(current, (DateTime?)NormalizeDateTimeToUtc(nullableDate.Value), null);
+					}
+					continue;
+				}
+
+				EnsureDateTimesUtcInternal(value, visited);
+			}
+		}
+
+		private static void NormalizeDictionaryDateTimesToUtc(IDictionary dictionary, HashSet<object> visited)
+		{
+			List<DictionaryEntry> entries = new List<DictionaryEntry>();
+			foreach (DictionaryEntry entry in dictionary)
+			{
+				entries.Add(entry);
+			}
+
+			bool keyChanged = false;
+			List<object> keysToRemove = new List<object>();
+			List<KeyValuePair<object, object>> entriesToAdd = new List<KeyValuePair<object, object>>();
+
+			foreach (DictionaryEntry entry in entries)
+			{
+				object key = entry.Key;
+				object value = entry.Value;
+
+				object normalizedKey = key;
+				if (key is DateTime)
+				{
+					normalizedKey = NormalizeDateTimeToUtc((DateTime)key);
+					if (!Equals(normalizedKey, key))
+					{
+						keyChanged = true;
+					}
+				}
+
+				if (value is DateTime)
+				{
+					dictionary[key] = NormalizeDateTimeToUtc((DateTime)value);
+				}
+				else
+				{
+					EnsureDateTimesUtcInternal(value, visited);
+				}
+
+				if (keyChanged)
+				{
+					keysToRemove.Add(key);
+					entriesToAdd.Add(new KeyValuePair<object, object>(normalizedKey, dictionary[key]));
+					keyChanged = false;
+				}
+			}
+
+			for (int i = 0; i < keysToRemove.Count; i++)
+			{
+				dictionary.Remove(keysToRemove[i]);
+			}
+
+			for (int i = 0; i < entriesToAdd.Count; i++)
+			{
+				dictionary[entriesToAdd[i].Key] = entriesToAdd[i].Value;
+			}
+		}
+
+		private static DateTime NormalizeDateTimeToUtc(DateTime dateTime)
+		{
+			if (dateTime.Kind == DateTimeKind.Utc)
+			{
+				return dateTime;
+			}
+
+			if (dateTime.Kind == DateTimeKind.Unspecified)
+			{
+				return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+			}
+
+			return dateTime.ToUniversalTime();
+		}
+
+		private static bool IsTerminalType(Type type)
+		{
+			return type.IsPrimitive
+				|| type.IsEnum
+				|| type == typeof(string)
+				|| type == typeof(decimal)
+				|| type == typeof(Guid)
+				|| type == typeof(DateTime)
+				|| type == typeof(DateTime?);
+		}
+
+		private sealed class ReferenceEqualityComparer : IEqualityComparer<object>
+		{
+			public static readonly ReferenceEqualityComparer Instance = new ReferenceEqualityComparer();
+
+			public bool Equals(object x, object y)
+			{
+				return ReferenceEquals(x, y);
+			}
+
+			public int GetHashCode(object obj)
+			{
+				return RuntimeHelpers.GetHashCode(obj);
+			}
+		}
+
+		private void NotifyError(string operation, Exception ex)
+		{
+			API.Instance.Notifications.Add(new NotificationMessage(
+				string.Format("{0}-Error-{1}", PluginName, operation),
+				string.Format("{0}\n{1}", PluginName, ex.Message),
+				NotificationType.Error,
+				() => PlayniteTools.CreateLogPackage(PluginName)));
+		}
+
+		#endregion
+	}
 }

@@ -20,6 +20,9 @@ namespace CommonPluginsStores.GameJolt.Models
 
         [SerializationPropertyName("c")]
         public C C { get; set; }
+
+        [SerializationPropertyName("t")]
+        public List<object> T { get; set; }
     }
 
     public class AvatarMediaItem

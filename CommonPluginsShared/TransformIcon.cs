@@ -159,7 +159,7 @@
         /// <param name="name"></param>
         /// <param name="returnEmpty"></param>
         /// <returns></returns>
-        public static string Get(string name, bool returnEmpty = false, bool returnDefault = true)
+        public static string Get(string name, bool returnEmpty = false, bool returnDefault = false)
         {
             string stringReturn = string.Empty;
 
@@ -250,6 +250,8 @@
                     stringReturn = uplay;
                     break;
                 case "epic":
+                case "egs":
+                case "epic games store":
                     stringReturn = epic;
                     break;
                 case "bethesda":

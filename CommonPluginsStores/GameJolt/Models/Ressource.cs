@@ -28,7 +28,7 @@ namespace CommonPluginsStores.GameJolt.Models
         public long AddedOn { get; set; }
 
         [SerializationPropertyName("published_on")]
-        public long PublishedOn { get; set; }
+        public long? PublishedOn { get; set; }
 
         [SerializationPropertyName("updated_on")]
         public long UpdatedOn { get; set; }

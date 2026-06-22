@@ -1,13 +1,22 @@
 ﻿using CommonPlayniteShared;
+using CommonPlayniteShared.Common;
+using CommonPluginsShared.Extensions;
+using CommonPluginsShared.Images;
+using CommonPluginsShared.Utilities;
 using Playnite.SDK;
+using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace CommonPluginsShared
 {
@@ -28,9 +37,123 @@ namespace CommonPluginsShared
 
     public class Web
     {
-        private static ILogger Logger => LogManager.GetLogger();
+        private static readonly ILogger Logger = LogManager.GetLogger();
 
-        public static string UserAgent => $"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0 Playnite/{API.Instance.ApplicationInfo.ApplicationVersion.ToString(2)}";
+        public static string UserAgent => $"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+
+        private static readonly Lazy<HttpClient> SharedClientLazy = new Lazy<HttpClient>(() =>
+        {
+            var handler = new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
+
+            var client = new HttpClient(handler, disposeHandler: true)
+            {
+                Timeout = TimeSpan.FromSeconds(60)
+            };
+
+            client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+            return client;
+        }, true);
+
+        private static HttpClient SharedClient => SharedClientLazy.IsValueCreated ? SharedClientLazy.Value : null;
+
+        // Initialization tracking
+        private static readonly object InitLock = new object();
+        private static Task _initializationTask = null;
+        private static volatile Exception _initializationException = null;
+
+        private const int MaxRedirects = 5;
+
+        static Web()
+        {
+        }
+
+        public static bool IsInitialized => SharedClientLazy.IsValueCreated;
+
+        /// <summary>
+        /// Initialize shared HttpClient. When <paramref name="createInBackground"/> is true this will kick off
+        /// background initialization and return a Task that can be awaited to observe completion and exceptions.
+        /// </summary>
+        public static Task InitializeAsync(bool createInBackground = true)
+        {
+            lock (InitLock)
+            {
+                if (SharedClientLazy.IsValueCreated)
+                {
+                    return Task.CompletedTask;
+                }
+
+                if (_initializationTask != null)
+                {
+                    return _initializationTask;
+                }
+
+                if (createInBackground)
+                {
+                    _initializationTask = Task.Run(() =>
+                    {
+                        // Accessing Value will run the factory and may throw; let the task capture the exception
+                        var _ = SharedClientLazy.Value;
+                    });
+
+                    // capture exception for quick synchronous checks if needed
+                    _initializationTask.ContinueWith(t =>
+                    {
+                        if (t.IsFaulted)
+                        {
+                            _initializationException = t.Exception?.GetBaseException();
+                        }
+                    }, TaskContinuationOptions.ExecuteSynchronously);
+
+                    return _initializationTask;
+                }
+                else
+                {
+                    try
+                    {
+                        var _ = SharedClientLazy.Value;
+                        return Task.CompletedTask;
+                    }
+                    catch (Exception)
+                    {
+                        // propagate synchronous exception to caller
+                        throw;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Synchronous convenience method for callers that require blocking initialization.
+        /// This will wait for initialization to complete and will propagate exceptions.
+        /// </summary>
+        public static void InitializeAndWait(bool createInBackground = true)
+        {
+            var t = InitializeAsync(createInBackground);
+            t.GetAwaiter().GetResult();
+
+            if (_initializationException != null)
+            {
+                throw _initializationException;
+            }
+        }
+
+        // Backwards-compatible Initialize wrapper that preserves previous signature.
+        public static void Initialize(bool createInBackground = true)
+        {
+            // Fire-and-forget like before but store the task so callers can observe it via InitializeAsync if needed
+            try
+            {
+                _ = InitializeAsync(createInBackground);
+            }
+            catch (Exception ex)
+            {
+                // Preserve old behavior of logging while still allowing callers to use InitializeAsync/InitializeAndWait
+                Common.LogError(ex, false, "Failed to create shared HttpClient");
+            }
+        }
 
 
         private static string StrWebUserAgentType(WebUserAgentType userAgentType)
@@ -42,6 +165,7 @@ namespace CommonPluginsShared
                 default:
                     break;
             }
+
             return string.Empty;
         }
 
@@ -58,7 +182,7 @@ namespace CommonPluginsShared
         {
             string PathImageFileName = Path.Combine(imagesCachePath, pluginName.ToLower(), imageFileName);
 
-            if (!StringExtensions.IsHttpUrl(url))
+            if (!System.StringExtensions.IsHttpUrl(url))
             {
                 return Task.FromResult(false);
             }
@@ -68,6 +192,8 @@ namespace CommonPluginsShared
                 try
                 {
                     var cachedFile = HttpFileCache.GetWebFile(url);
+
+
                     if (string.IsNullOrEmpty(cachedFile))
                     {
                         //logger.Warn("Web file not found: " + url);
@@ -165,27 +291,7 @@ namespace CommonPluginsShared
             HttpClientHandler handler = new HttpClientHandler();
             if (cookies != null)
             {
-                CookieContainer cookieContainer = new CookieContainer();
-
-                foreach (var cookie in cookies)
-                {
-                    Cookie c = new Cookie();
-                    c.Name = cookie.Name;
-                    c.Value = Tools.FixCookieValue(cookie.Value);
-                    c.Domain = cookie.Domain;
-                    c.Path = cookie.Path;
-
-                    try
-                    {
-                        cookieContainer.Add(c);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, true);
-                    }
-                }
-
-                handler.CookieContainer = cookieContainer;
+                handler.CookieContainer = CreateCookiesContainer(cookies);
             }
 
             using (var client = new HttpClient(handler))
@@ -234,8 +340,8 @@ namespace CommonPluginsShared
                         {
                             uri += "?" + urlParams[1];
                         }
-                        
-                        return await DownloadStringDataKeepParam(uri);
+
+                        return await DownloadStringDataKeepParam(uri).ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
@@ -262,7 +368,7 @@ namespace CommonPluginsShared
 
                     Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
 
-                    return await DownloadStringDataKeepParam(redirectUri.ToString());
+                    return await DownloadStringDataKeepParam(redirectUri.ToString()).ConfigureAwait(false);
                 }
                 else
                 {
@@ -291,58 +397,110 @@ namespace CommonPluginsShared
             }
         }
 
-
-        /// <summary>
-        /// Download string data with manage redirect url.
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public static async Task<string> DownloadStringData(string url)
+		public static async Task<string> DownloadStringData(string url)
         {
-            using (HttpClient client = new HttpClient())
+            return await DownloadStringData(url, 0).ConfigureAwait(false);
+		}
+
+		/// <summary>
+		/// Download string data with manage redirect url.
+		/// </summary>
+		/// <param name="url"></param>
+		/// <returns></returns>
+		public static async Task<string> DownloadStringData(string url, int redirectDepth = 0)
+        {
+            if (redirectDepth >= MaxRedirects)
             {
-                HttpRequestMessage request = new HttpRequestMessage()
+                Logger.Warn($"Maximum redirect depth {MaxRedirects} reached for {url}");
+                return string.Empty;
+            }
+
+            // Prefer using a shared HttpClient for connection reuse and higher parallelism. Fall back to per-call if unavailable.
+            if (SharedClient != null)
+            {
+                using (var request = new HttpRequestMessage()
                 {
                     RequestUri = new Uri(url),
                     Method = HttpMethod.Get
-                };
-
-                HttpResponseMessage response;
-                try
+                })
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
-                    response = await client.SendAsync(request).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    Common.LogError(ex, false, $"Error on download {url}");
-                    return string.Empty;
-                }
-
-                if (response == null)
-                {
-                    return string.Empty;
-                }
-
-                int statusCode = (int)response.StatusCode;
-
-                // We want to handle redirects ourselves so that we can determine the final redirect Location (via header)
-                if (statusCode >= 300 && statusCode <= 399)
-                {
-                    var redirectUri = response.Headers.Location;
-                    if (!redirectUri.IsAbsoluteUri)
+                    HttpResponseMessage response = null;
+                    try
                     {
-                        redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
+                        using (response = await SharedClient.SendAsync(request).ConfigureAwait(false))
+                        {
+                            return await ProcessDownloadStringResponse(response, request, redirectDepth).ConfigureAwait(false);
+                        }
                     }
-
-                    Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
-
-                    return await DownloadStringData(redirectUri.ToString());
+                    catch (Exception ex)
+                    {
+                        Common.LogError(ex, false, $"Error on download {url}");
+                        return string.Empty;
+                    }
                 }
-                else
+            }
+            else
+            {
+                // Fallback behaviour: create a per-call HttpClient as before
+                using (HttpClient client = new HttpClient())
                 {
-                    return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    using (var request = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri(url),
+                        Method = HttpMethod.Get
+                    })
+                    {
+                        HttpResponseMessage response = null;
+                        try
+                        {
+                            client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
+                            using (response = await client.SendAsync(request).ConfigureAwait(false))
+                            {
+                                return await ProcessDownloadStringResponse(response, request, redirectDepth).ConfigureAwait(false);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Common.LogError(ex, false, $"Error on download {url}");
+                            return string.Empty;
+                        }
+                    }
                 }
+            }
+        }
+
+        private static async Task<string> ProcessDownloadStringResponse(HttpResponseMessage response, HttpRequestMessage request, int redirectDepth)
+        {
+            if (response == null)
+            {
+                return string.Empty;
+            }
+
+            int statusCode = (int)response.StatusCode;
+
+            // Handle redirects similarly to previous logic
+            if (statusCode >= 300 && statusCode <= 399)
+            {
+                var redirectUri = response.Headers.Location;
+                if (redirectUri == null)
+                {
+                    Logger.Warn($"DownloadStringData() redirect response missing Location header for {request?.RequestUri}");
+                    return string.Empty;
+                }
+
+                if (!redirectUri.IsAbsoluteUri)
+                {
+                    redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
+                }
+
+                Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
+
+                // perform recursive call afterwards with increased depth
+                return await DownloadStringData(redirectUri.ToString(), redirectDepth + 1).ConfigureAwait(false);
+            }
+            else
+            {
+                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
         }
 
@@ -400,32 +558,17 @@ namespace CommonPluginsShared
         /// <param name="cookies"></param>
         /// <param name="userAgent"></param>
         /// <returns></returns>
-        public static async Task<string> DownloadStringData(string url, List<HttpCookie> cookies = null, string userAgent = "", bool keepParam = false)
+        public static async Task<string> DownloadStringData(string url, List<HttpCookie> cookies = null, string userAgent = "", bool keepParam = false, int redirectDepth = 0)
         {
+            if (redirectDepth >= MaxRedirects)
+            {
+                Logger.Warn($"Maximum redirect depth {MaxRedirects} reached for {url}");
+                return string.Empty;
+            }
             HttpClientHandler handler = new HttpClientHandler();
             if (cookies != null)
             {
-                CookieContainer cookieContainer = new CookieContainer();
-
-                foreach (var cookie in cookies)
-                {
-                    Cookie c = new Cookie();
-                    c.Name = cookie.Name;
-                    c.Value = Tools.FixCookieValue(cookie.Value);
-                    c.Domain = cookie.Domain;
-                    c.Path = cookie.Path;
-
-                    try
-                    {
-                        cookieContainer.Add(c);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, true);
-                    }
-                }
-
-                handler.CookieContainer = cookieContainer;
+                handler.CookieContainer = CreateCookiesContainer(cookies);
             }
 
             var request = new HttpRequestMessage()
@@ -462,7 +605,7 @@ namespace CommonPluginsShared
                             redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
                             urlNew = redirectUri.ToString();
                         }
-                        
+
                         if (keepParam)
                         {
                             var urlParams = url.Split('?').ToList();
@@ -484,7 +627,7 @@ namespace CommonPluginsShared
                         }
 
                         Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", urlNew));
-                        return await DownloadStringData(urlNew, cookies, userAgent);
+                        return await DownloadStringData(urlNew, cookies, userAgent, keepParam, redirectDepth + 1).ConfigureAwait(false);
                     }
                     else
                     {
@@ -508,7 +651,7 @@ namespace CommonPluginsShared
 
             return string.Empty;
         }
-        
+
         public static async Task<string> DownloadStringData(string url, CookieContainer cookies = null, string userAgent = "")
         {
             var response = string.Empty;
@@ -557,29 +700,7 @@ namespace CommonPluginsShared
             HttpClientHandler handler = new HttpClientHandler();
             if (cookies != null)
             {
-                CookieContainer cookieContainer = new CookieContainer();
-
-                foreach (var cookie in cookies)
-                {
-                    Cookie c = new Cookie
-                    {
-                        Name = cookie.Name,
-                        Value = Tools.FixCookieValue(cookie.Value),
-                        Domain = cookie.Domain,
-                        Path = cookie.Path
-                    };
-
-                    try
-                    {
-                        cookieContainer.Add(c);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, true);
-                    }
-                }
-
-                handler.CookieContainer = cookieContainer;
+                handler.CookieContainer = CreateCookiesContainer(cookies);
             }
 
             var request = new HttpRequestMessage()
@@ -595,7 +716,7 @@ namespace CommonPluginsShared
 
                 if (httpHeaders != null)
                 {
-                    httpHeaders.ForEach(x => 
+                    httpHeaders.ForEach(x =>
                     {
                         client.DefaultRequestHeaders.Add(x.Key, x.Value);
                     });
@@ -689,7 +810,7 @@ namespace CommonPluginsShared
                 });
 
                 webView.NavigateAndWait(url);
-                return await webView.GetPageTextAsync();
+                return await webView.GetPageTextAsync().ConfigureAwait(false);
             }
         }
 
@@ -709,7 +830,7 @@ namespace CommonPluginsShared
                 {
                     await client.GetStringAsync(urlBefore).ConfigureAwait(false);
                 }
-                
+
                 string result = await client.GetStringAsync(url).ConfigureAwait(false);
                 return result;
             }
@@ -735,8 +856,8 @@ namespace CommonPluginsShared
             {
                 client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
-                var response = await client.PostAsync(url, content);
-                var str = await response.Content.ReadAsStringAsync();
+                var response = await client.PostAsync(url, content).ConfigureAwait(false);
+                var str = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 return str;
             }
         }
@@ -746,8 +867,8 @@ namespace CommonPluginsShared
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
-                var response = await client.PostAsync(url, content);
-                var str = await response.Content.ReadAsStringAsync();
+                var response = await client.PostAsync(url, content).ConfigureAwait(false);
+                var str = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 return str;
             }
         }
@@ -758,7 +879,7 @@ namespace CommonPluginsShared
         /// <param name="url"></param>
         /// <param name="payload"></param>
         /// <returns></returns>
-        public static async Task<string> PostStringDataPayload(string url, string payload, List<HttpCookie> Cookies = null, List<KeyValuePair<string, string>> moreHeader = null)
+        public static async Task<string> PostStringDataPayload(string url, string payload, List<HttpCookie> cookies = null, List<KeyValuePair<string, string>> moreHeader = null)
         {
             //var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             //var settings = (SettingsSection)config.GetSection("system.net/settings");
@@ -770,38 +891,15 @@ namespace CommonPluginsShared
             var response = string.Empty;
 
             HttpClientHandler handler = new HttpClientHandler();
-            if (Cookies != null)
+            if (cookies != null)
             {
-                CookieContainer cookieContainer = new CookieContainer();
-
-                foreach (HttpCookie cookie in Cookies)
-                {
-                    Cookie c = new Cookie
-                    {
-                        Name = cookie.Name,
-                        Value = Tools.FixCookieValue(cookie.Value),
-                        Domain = cookie.Domain,
-                        Path = cookie.Path
-                    };
-
-                    try
-                    {
-                        cookieContainer.Add(c);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, true);
-                    }
-                }
-
-                handler.CookieContainer = cookieContainer;
+                handler.CookieContainer = CreateCookiesContainer(cookies);
             }
 
             using (var client = new HttpClient(handler))
             {
                 client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
                 client.DefaultRequestHeaders.Add("accept", "application/json, text/javascript, */*; q=0.01");
-                client.DefaultRequestHeaders.Add("Vary", "Accept-Encoding");
 
                 moreHeader?.ForEach(x =>
                 {
@@ -820,7 +918,7 @@ namespace CommonPluginsShared
                     }
                     else
                     {
-                        Logger.Error($"Web error with status code {result.StatusCode.ToString()}");
+                        Logger.Error($"Web error with status code {result.StatusCode}");
                     }
                 }
                 catch (Exception ex)
@@ -843,29 +941,7 @@ namespace CommonPluginsShared
             HttpClientHandler handler = new HttpClientHandler();
             if (cookies != null)
             {
-                CookieContainer cookieContainer = new CookieContainer();
-
-                foreach (HttpCookie cookie in cookies)
-                {
-                    Cookie c = new Cookie
-                    {
-                        Name = cookie.Name,
-                        Value = Tools.FixCookieValue(cookie.Value),
-                        Domain = cookie.Domain,
-                        Path = cookie.Path
-                    };
-
-                    try
-                    {
-                        cookieContainer.Add(c);
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, true);
-                    }
-                }
-
-                handler.CookieContainer = cookieContainer;
+                handler.CookieContainer = CreateCookiesContainer(cookies);
             }
 
             using (var client = new HttpClient(handler))
@@ -897,6 +973,411 @@ namespace CommonPluginsShared
             }
 
             return response;
+        }
+
+
+        private static async Task<Tuple<string, List<HttpCookie>>> DownloadWebView(bool getSource, string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null, CancellationToken cancellationToken = default)
+        {
+            WebViewSettings webViewSettings = new WebViewSettings
+            {
+                UserAgent = UserAgent,
+                JavaScriptEnabled = javaScriptEnabled
+            };
+
+            using (IWebView webViewOffscreen = API.Instance.WebViews.CreateOffscreenView(webViewSettings))
+            {
+                try
+                {
+                    // 1. Set cookies
+                    cookies?.ForEach(cookie => webViewOffscreen.SetCookies(url, cookie));
+
+                    // 2. Prepare asynchronous wait
+                    using (var loadingCompleted = new ManualResetEventSlim(false))
+                    {
+                        // Polling for element support
+                        CancellationTokenSource cts = new CancellationTokenSource();
+                        
+                        try
+                        { 
+                            // 3. Navigate and wait for page to be fully loaded
+                            webViewOffscreen.Navigate(url);
+                            
+                            // Hide bot flags
+                            // Retry mechanism for V8Context
+                            for (int i = 0; i < 10; i++)
+                            {
+                                if (cancellationToken.IsCancellationRequested) return new Tuple<string, List<HttpCookie>>(string.Empty, null);
+
+                                try
+                                {
+                                    await webViewOffscreen.EvaluateScriptAsync("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})").ConfigureAwait(false);
+                                    break;
+                                }
+                                catch (Exception ex)
+                                {
+                                    if (ex.Message.Contains("V8Context"))
+                                    {
+                                        Common.LogDebug(true, $"DownloadWebView: V8Context not ready for 'webdriver' override, retrying... ({i + 1}/10)");
+                                        await Task.Delay(500, cts.Token).ConfigureAwait(false);
+                                    }
+                                    else
+                                    {
+                                        throw;
+                                    }
+                                }
+                            }
+
+                            TimeSpan waitTimeout = TimeSpan.FromSeconds(60);
+
+                            // Always start polling to handle Cloudflare challenges even if elementToWaitFor is null
+                            _ = Task.Run(async () => 
+                            {
+                                 try
+                                 {
+                                     // Initial delay to allow navigation to start
+                                     await Task.Delay(500, cts.Token).ConfigureAwait(false);
+                                     
+                                     int consecutiveErrors = 0;
+
+                                     while (!cts.Token.IsCancellationRequested)
+                                     {
+                                         if (cancellationToken.IsCancellationRequested)
+                                         {
+                                             loadingCompleted.Set();
+                                             break;
+                                         }
+                                         
+                                         try
+                                         {
+                                             // Check if loadingCompleted is already set to avoid unnecessary calls
+                                             if (loadingCompleted.IsSet) break;
+
+                                             // Improved script that checks for Cloudflare AND the target element
+                                             string safeSelector = Serialization.ToJson(elementToWaitFor);
+                                             string script = "(function() { " +
+                                                "function isCf() { " +
+                                                    "var text = (document.body ? document.body.innerText : '') + (document.documentElement ? document.documentElement.innerText : ''); " +
+                                                    "var title = document.title || ''; " +
+                                                    "var hasCfTitle = title.includes('Just a moment...') || title.includes('Cloudflare'); " +
+                                                    "var hasCfText = text.includes('Verifying you are human') || " +
+                                                    "text.includes('needs to review the security of your connection') || " +
+                                                    "text.includes('Performance & security by Cloudflare') || " +
+                                                    "text.includes('Ray ID:'); " +
+                                                    "var hasCfSelectors = !!document.querySelector('#cf-challenge-running, .cf-browser-verification, #challenge-form'); " +
+                                                    "return hasCfTitle || (hasCfText && hasCfSelectors) || (hasCfText && title.length < 10); " +
+                                                "} " +
+                                                "if (isCf()) return { ready: false, cf: true }; " +
+                                                "var isComplete = document.readyState === 'complete' || document.readyState === 'interactive'; " +
+                                                "var text = (document.body ? document.body.innerText : '') + (document.documentElement ? document.documentElement.innerText : ''); " +
+                                                "text = text.trim(); " +
+                                                (string.IsNullOrEmpty(elementToWaitFor) 
+                                                    ? "return { ready: isComplete && text.length > 0, cf: false }; "
+                                                    : $"return {{ ready: isComplete && !!document.querySelector({safeSelector}), cf: false }}; ") +
+                                                "})()";
+
+                                             var jsResult = await webViewOffscreen.EvaluateScriptAsync(script).ConfigureAwait(false);
+                                             
+                                             bool isFound = false;
+                                             bool isCf = false;
+                                             
+                                             if (jsResult?.Success == true && jsResult.Result != null)
+                                             {
+                                                 try 
+                                                 {
+                                                     // jsResult.Result can be a Dictionary<string, object> or ExpandoObject
+                                                     if (jsResult.Result is System.Collections.Generic.IDictionary<string, object> dict)
+                                                     {
+                                                         isFound = dict.ContainsKey("ready") && (bool)dict["ready"];
+                                                         isCf = dict.ContainsKey("cf") && (bool)dict["cf"];
+                                                     }
+                                                     else
+                                                     {
+                                                         string json = Serialization.ToJson(jsResult.Result);
+                                                         var resultObj = Serialization.FromJson<dynamic>(json);
+                                                         isFound = (bool)resultObj["ready"];
+                                                         isCf = (bool)resultObj["cf"];
+                                                     }
+                                                 }
+                                                 catch (Exception exParsed)
+                                                {
+                                                    // Fallback for simple results
+                                                    string resStr = jsResult.Result.ToString();
+                                                    Logger.Warn(exParsed, $"DownloadWebView: Structured parsing failed. Falling back to string check. Result: {resStr.Substring(0, Math.Min(resStr.Length, 150))}...");
+                                                    isFound = resStr.Contains("\"ready\":true") || resStr.Contains("ready=True");
+                                                    isCf = resStr.Contains("\"cf\":true") || resStr.Contains("cf=True");
+                                                }
+                                             }
+
+                                             if (isFound && !isCf)
+                                             {
+                                                 if (!string.IsNullOrEmpty(elementToWaitFor)) Common.LogDebug(true, $"DownloadWebView: Found element '{elementToWaitFor}', stopping wait.");
+                                                 else Common.LogDebug(true, $"DownloadWebView: Page ready (no CF detected), stopping wait.");
+                                                 
+                                                 loadingCompleted.Set();
+                                                 break;
+                                             }
+                                             
+                                             if (isCf)
+                                             {
+                                                 Common.LogDebug(true, $"DownloadWebView: Cloudflare challenge detected for {url}, waiting...");
+                                             }
+                                             else if (!isFound)
+                                             {
+                                                 // Diagnostic logging when target not found and not obviously CF
+                                                 try
+                                                 {
+                                                     var diagResult = await webViewOffscreen.EvaluateScriptAsync("(function() { return { title: document.title, len: document.body ? document.body.innerText.length : 0, state: document.readyState }; })()").ConfigureAwait(false);
+                                                     if (diagResult?.Success == true && diagResult.Result != null)
+                                                     {
+                                                         Common.LogDebug(true, $"DownloadWebView Polling: {Serialization.ToJson(diagResult.Result)} (URL: {url})");
+                                                     }
+                                                 }
+                                                 catch { }
+                                             }
+                                             
+                                             // Script executed successfully, reset error counter
+                                             consecutiveErrors = 0;
+                                         }
+                                         catch (Exception ex)
+                                         {
+                                             // Scripts can only be executed within a V8Context. 
+                                             // This can happen if polling starts before the browser is fully initialized.
+                                             if (ex.Message.Contains("V8Context"))
+                                             {
+                                                 Common.LogDebug(true, $"DownloadWebView: V8Context not ready for selector '{elementToWaitFor}', retrying...");
+                                             }
+                                             else
+                                             {
+                                                 consecutiveErrors++;
+                                                 string msg = $"Polling error for selector '{elementToWaitFor}': {ex.Message}";
+
+                                                 // Escalate to Warn if persistent
+                                                 if (consecutiveErrors >= 5) Logger.Warn(msg);
+                                                 else Logger.Debug(msg);
+                                             }
+                                         }
+                                         
+                                         await Task.Delay(500, cts.Token).ConfigureAwait(false);
+                                     }
+                                 }
+                                 catch (OperationCanceledException)
+                                 {
+                                     // Expected when cancelled
+                                 }
+                            }, cts.Token);
+
+                            if (Application.Current?.Dispatcher?.CheckAccess() == true)
+                            {
+                                // We are on the UI thread, we must not block it with Wait()
+                                var frame = new DispatcherFrame();
+                                bool timedOut = false;
+                                
+                                var timer = new DispatcherTimer { Interval = waitTimeout };
+                                timer.Tick += (t, args) => 
+                                { 
+                                    Logger.Error($"Timeout {waitTimeout.TotalSeconds} seconds for {url} (UI Thread).");
+                                    timedOut = true;
+                                    timer.Stop(); 
+                                    frame.Continue = false; 
+                                };
+                                
+                                // Timer to check if loadingCompleted was set by the polling task or loading handler
+                                var checkTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+                                checkTimer.Tick += (t, args) =>
+                                {
+                                    if (loadingCompleted.IsSet || cancellationToken.IsCancellationRequested)
+                                    {
+                                        timer.Stop();
+                                        checkTimer.Stop();
+                                        frame.Continue = false;
+                                    }
+                                };
+                                
+                                timer.Start();
+                                checkTimer.Start();
+                                
+                                Dispatcher.PushFrame(frame);
+                                
+                                timer.Stop();
+                                checkTimer.Stop();
+                                
+                                if (timedOut || cancellationToken.IsCancellationRequested)
+                                {
+                                    return new Tuple<string, List<HttpCookie>>(string.Empty, null);
+                                }
+                            }
+                            else
+                            {
+                                // Background thread, use Wait()
+                                if (!loadingCompleted.Wait(waitTimeout))
+                                {
+                                    Logger.Error($"Timeout {waitTimeout.TotalSeconds} seconds for {url}.");
+                                    return new Tuple<string, List<HttpCookie>>(string.Empty, null);
+                                }
+                            }
+                        }
+                        finally
+                        {
+                            cts.Cancel();
+                            cts.Dispose();
+                        }
+                    }
+
+                    // 4. Get content
+                    if (cancellationToken.IsCancellationRequested) return new Tuple<string, List<HttpCookie>>(string.Empty, null);
+
+                    string data = getSource ? await webViewOffscreen.GetPageSourceAsync().ConfigureAwait(false) : await webViewOffscreen.GetPageTextAsync().ConfigureAwait(false);
+
+                    // 5. Get cookies
+                    List<HttpCookie> refreshedCookies = null;
+                    if (getCookies)
+                    {
+                        refreshedCookies = webViewOffscreen.GetCookies();
+                        if (domains?.Count > 0)
+                        {
+                            refreshedCookies = refreshedCookies
+                                .Where(c => domains.Any(d => c.Domain.IsEqual(d)))
+                                .ToList();
+                        }
+                    }
+
+                    return new Tuple<string, List<HttpCookie>>(data, refreshedCookies);
+                }
+                finally
+                {
+                    // 6. Delete cookies for domains
+                    if (deleteDomainsCookies && domains?.Count > 0)
+                    {
+                        foreach (var domain in domains)
+                        {
+                            webViewOffscreen.DeleteDomainCookies(domain);
+                        }
+                    }
+                }
+            }
+        }
+
+        public static async Task<Tuple<string, List<HttpCookie>>> DownloadJsonDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null, CancellationToken cancellationToken = default)
+        {
+            return await DownloadWebView(false, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, elementToWaitFor, cancellationToken).ConfigureAwait(false);
+        }
+
+        public static async Task<Tuple<string, List<HttpCookie>>> DownloadSourceDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null, CancellationToken cancellationToken = default)
+        {
+            return await DownloadWebView(true, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, elementToWaitFor, cancellationToken).ConfigureAwait(false);
+        }
+
+
+        private static CookieContainer CreateCookiesContainer(List<HttpCookie> cookies)
+        {
+            CookieContainer cookieContainer = new CookieContainer
+            {
+                PerDomainCapacity = 100,
+                Capacity = 300,
+                MaxCookieSize = 4096 * 10
+            };
+
+            int addedCount = 0;
+            int skippedCount = 0;
+            int errorCount = 0;
+
+            var cookiesByDomain = cookies.GroupBy(c => c.Domain ?? "null");
+            Common.LogDebug(true, $"Cookies distribution: {string.Join(", ", cookiesByDomain.Select(g => $"{g.Key}={g.Count()}"))}");
+
+            foreach (HttpCookie cookie in cookies)
+            {
+                if (string.IsNullOrEmpty(cookie.Domain))
+                {
+                    Logger.Warn($"Cookie '{cookie.Name}' has no domain, skipping");
+                    skippedCount++;
+                    continue;
+                }
+
+                try
+                {
+                    string fixedValue = UtilityTools.FixCookieValue(cookie.Value);
+
+                    Cookie c = new Cookie
+                    {
+                        Name = cookie.Name,
+                        Value = fixedValue,
+                        Domain = cookie.Domain,
+                        Path = cookie.Path ?? "/",
+                        Secure = cookie.Secure,
+                        HttpOnly = cookie.HttpOnly
+                    };
+
+                    if (cookie.Expires.HasValue)
+                    {
+                        c.Expires = cookie.Expires.Value;
+                    }
+
+                    cookieContainer.Add(c);
+                    addedCount++;
+                }
+                catch (CookieException ex)
+                {
+                    errorCount++;
+                    Logger.Error($"CookieException for '{cookie.Name}' on domain '{cookie.Domain}': {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    errorCount++;
+                    Common.LogError(ex, true, $"Failed to add cookie: {cookie.Name} - Domain: {cookie.Domain}");
+                }
+            }
+
+            Common.LogDebug(true, $"CookieContainer: {addedCount} added, {skippedCount} skipped, {errorCount} errors from {cookies.Count} total");
+            Common.LogDebug(true, $"Final container count: {cookieContainer.Count}");
+
+            return cookieContainer;
+        }
+
+        private static async Task<Tuple<string, int, string>> PostJsonWithClient(HttpClient client, string url, string payload, List<HttpHeader> headers)
+        {
+            try
+            {
+                using (var content = new StringContent(payload ?? string.Empty, Encoding.UTF8, "application/json"))
+                using (var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = content })
+                {
+                    if (headers != null)
+                    {
+                        foreach (var header in headers)
+                        {
+                            request.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                        }
+                    }
+
+                    using (var response = await client.SendAsync(request).ConfigureAwait(false))
+                    {
+                        var body = response != null ? await response.Content.ReadAsStringAsync().ConfigureAwait(false) : string.Empty;
+                        var retry = response?.Headers?.RetryAfter?.ToString();
+                        return Tuple.Create(body, response != null ? (int)response.StatusCode : 0, retry);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, $"Error on PostJson {url}");
+                return Tuple.Create(string.Empty, 0, (string)null);
+            }
+        }
+
+        /// <summary>
+        /// Post a JSON payload using the shared HttpClient when available and return body, status code and Retry-After header.
+        /// </summary>
+        public static async Task<Tuple<string, int, string>> PostJsonWithSharedClientWithStatus(string url, string payload, List<HttpHeader> headers = null)
+        {
+            if (SharedClient == null)
+            {
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
+                    return await PostJsonWithClient(client, url, payload, headers).ConfigureAwait(false);
+                }
+            }
+
+            return await PostJsonWithClient(SharedClient, url, payload, headers).ConfigureAwait(false);
         }
     }
 }

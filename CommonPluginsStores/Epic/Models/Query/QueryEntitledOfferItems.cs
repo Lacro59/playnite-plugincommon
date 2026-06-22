@@ -1,18 +1,64 @@
-﻿using System;
+﻿using Playnite.SDK.Data;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace CommonPluginsStores.Epic.Models.Query
 {
-    public class QueryEntitledOfferItems
+    public class QueryGetEntitledOfferItems
     {
-        public class Variables
+        public string OperationName { get; set; } = "getEntitledOfferItems";
+        public string Query { get; set; } = @"
+            query getEntitledOfferItems($Namespace: String!, $OfferId: String!)
+            {
+                Launcher {
+                    entitledOfferItems(namespace: $Namespace, offerId: $OfferId) {
+                        namespace
+                        offerId
+                        entitledToAllItemsInOffer
+                        entitledToAnyItemInOffer
+                    }
+                }
+            }";
+        public EntitledOfferItemsVariables Variables { get; set; } = new EntitledOfferItemsVariables();
+    }
+
+    public class EntitledOfferItemsVariables
+    {
+        public string Namespace { get; set; }
+        public string OfferId { get; set; }
+    }
+
+    public class EntitledOfferItemsResponse
+    {
+        [SerializationPropertyName("data")]
+        public LauncherData Data { get; set; }
+
+        public class LauncherData
         {
-            public string productNameSpace = "";
-            public string offerId = "";
+            [SerializationPropertyName("Launcher")]
+            public Launcher Launcher { get; set; }
         }
 
-        public Variables variables = new Variables();
-        public string query = @"query getEntitledOfferItems($productNameSpace: String!, $offerId: String!) {    Launcher {        entitledOfferItems(namespace: $productNameSpace, offerId: $offerId) {            namespace            offerId            entitledToAllItemsInOffer            entitledToAnyItemInOffer        }    }}";
+        public class Launcher
+        {
+            [SerializationPropertyName("entitledOfferItems")]
+            public EntitledOfferItems EntitledOfferItems { get; set; }
+        }
+
+        public class EntitledOfferItems
+        {
+            [SerializationPropertyName("namespace")]
+            public string Namespace { get; set; }
+
+            [SerializationPropertyName("offerId")]
+            public string OfferId { get; set; }
+
+            [SerializationPropertyName("entitledToAllItemsInOffer")]
+            public bool EntitledToAllItemsInOffer { get; set; }
+
+            [SerializationPropertyName("entitledToAnyItemInOffer")]
+            public bool EntitledToAnyItemInOffer { get; set; }
+        }
     }
 }

@@ -1,13 +1,17 @@
-﻿using System;
+﻿using CommonPlayniteShared;
+using System;
 using System.Globalization;
 using System.Windows.Controls;
 using System.Windows.Data;
 
 namespace CommonPluginsShared.Converters
 {
+    /// <summary>
+    /// Gets the index of a ListBoxItem within its parent ListBox.
+    /// </summary>
     public class IndexConverter : IValueConverter
     {
-        public object Convert(object value, Type TargetType, object parameter, CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             try
             {
@@ -33,7 +37,7 @@ namespace CommonPluginsShared.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
     }
 }
