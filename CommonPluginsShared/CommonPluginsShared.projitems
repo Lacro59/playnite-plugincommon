@@ -11,7 +11,6 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Behaviors\DatePickerCalendar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeLang.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Collections\LiteDbItemCollection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\BatchRefreshCompletedEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginDatabaseObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Collections\PluginGameCollection.cs" />
