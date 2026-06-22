@@ -26,6 +26,15 @@ namespace CommonPluginsStores.Gog
     // https://gogapidocs.readthedocs.io/en/latest/
     public class GogApi : StoreApi
     {
+        /// <summary>Minimum delay between GOG HTTP calls to reduce throttling.</summary>
+        private static readonly TimeSpan ApiRequestMinInterval = TimeSpan.FromMilliseconds(300);
+        private readonly RequestRateLimiter _apiRateLimiter = new RequestRateLimiter(ApiRequestMinInterval);
+
+        private void WaitForApiRateLimit()
+        {
+            _apiRateLimiter.WaitAsync().GetAwaiter().GetResult();
+        }
+
         #region Urls
 
         private static string UrlAccountInfo => @"https://menu.gog.com/v1/account/basic";
@@ -79,6 +88,7 @@ namespace CommonPluginsStores.Gog
 
         private AccountBasicResponse _accountBasic;
         private int _isHandlingLoading = 0;
+        private int _pendingLoginCheck = 0;
         private AccountBasicResponse AccountBasic
         {
             get
@@ -125,42 +135,71 @@ namespace CommonPluginsStores.Gog
         {
             if (CurrentAccountInfos == null)
             {
+                Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn: no CurrentAccountInfos.");
                 return false;
             }
 
             if (!CurrentAccountInfos.IsPrivate && !StoreSettings.UseAuth)
             {
-                return !CurrentAccountInfos.UserId.IsNullOrEmpty();
+                bool hasUserId = !CurrentAccountInfos.UserId.IsNullOrEmpty();
+                Common.LogDebug(true, $"[GogApi] GetIsUserLoggedIn public account: hasUserId={hasUserId}.");
+                return hasUserId;
             }
 
+            if (!ForceFullLoginCheck)
+            {
+                if (TryGetAuthStatusFromStoredCookies())
+                {
+                    Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn fast-path (stored cookies): isLogged=true until background verification.");
+                    return true;
+                }
+
+                bool? cachedToken = TryGetAuthStatusFromStoredToken();
+                if (cachedToken == true)
+                {
+                    Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn fast-path (stored token): isLogged=true until background verification.");
+                    return true;
+                }
+
+                if (cachedToken == false)
+                {
+                    Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn fast-path (stored token): isLogged=false.");
+                    return false;
+                }
+
+                Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn fast-path: no local session hint, returning false until background check.");
+                return false;
+            }
+
+            Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn: full network verification.");
+            bool verified = VerifyGogUserLoggedIn();
+            Common.LogDebug(true, $"[GogApi] GetIsUserLoggedIn full verification result: isLogged={verified}.");
+            return verified;
+        }
+
+        /// <summary>
+        /// Validates GOG session via account API and refreshes stored token and profile fields.
+        /// </summary>
+        private bool VerifyGogUserLoggedIn()
+        {
             bool isLogged = CheckIsUserLoggedIn();
+            Common.LogDebug(true, $"[GogApi] VerifyGogUserLoggedIn CheckIsUserLoggedIn={isLogged}.");
             if (isLogged)
             {
-                _ = SetStoredCookies(GetNewWebCookies(new List<string> { CurrentAccountInfos.Link }));
+                if (GetStoredCookies() == null || GetStoredCookies().Count == 0)
+                {
+                    _ = SetStoredCookies(GetNewWebCookies(new List<string> { CurrentAccountInfos.Link }));
+                }
 
                 string response = Web.DownloadStringData(UrlAccountInfo, GetStoredCookies()).GetAwaiter().GetResult();
-                _ = Serialization.TryFromJson(response, out AccountBasicResponse accountBasicResponse);
-                StoreToken = new StoreToken
+                if (ApplyAccountBasicResponse(response))
                 {
-                    Token = accountBasicResponse.AccessToken
-                };
-
-                if (AccountBasic?.IsLoggedIn ?? false)
-                {
-                    CurrentAccountInfos = new AccountInfos
-                    {
-                        UserId = AccountBasic.UserId,
-                        Pseudo = AccountBasic.Username,
-                        Link = string.Format(UrlUser, AccountBasic.Username),
-                        Avatar = AccountBasic.Avatars.MenuUserAvBig2,
-                        IsPrivate = true,
-                        IsCurrent = true
-                    };
-
-                    SaveCurrentUser();
-                    //_ = GetCurrentAccountInfos();
-
                     LogInfo("logged");
+                }
+                else
+                {
+                    isLogged = false;
+                    StoreToken = null;
                 }
             }
             else
@@ -171,12 +210,55 @@ namespace CommonPluginsStores.Gog
             return isLogged;
         }
 
+        /// <summary>
+        /// Parses a GOG account/basic JSON payload and updates session state when the user is logged in.
+        /// </summary>
+        private bool ApplyAccountBasicResponse(string response)
+        {
+            if (!Serialization.TryFromJson(response, out AccountBasicResponse accountBasicResponse)
+                || !(accountBasicResponse?.IsLoggedIn ?? false))
+            {
+                return false;
+            }
+
+            AccountBasic = accountBasicResponse;
+            StoreToken = new StoreToken
+            {
+                Token = accountBasicResponse.AccessToken
+            };
+            SetStoredToken(StoreToken);
+            CurrentAccountInfos = new AccountInfos
+            {
+                UserId = accountBasicResponse.UserId,
+                Pseudo = accountBasicResponse.Username,
+                Link = string.Format(UrlUser, accountBasicResponse.Username),
+                Avatar = accountBasicResponse.Avatars?.MenuUserAvBig2,
+                IsPrivate = true,
+                IsCurrent = true,
+                AccountStatus = AccountStatus.Private
+            };
+            SaveCurrentUser();
+            return true;
+        }
+
+        /// <summary>
+        /// Returns whether the URL is a GOG login page (modal hash or login host).
+        /// </summary>
+        private static bool IsGogLoginPageUrl(string url)
+        {
+            return !url.IsNullOrWhiteSpace()
+                && (url.IndexOf("#openlogin", StringComparison.OrdinalIgnoreCase) >= 0
+                    || url.IndexOf("login.gog.com", StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+
         public override void Login()
         {
             try
             {
+                long operationGeneration = BeginAuthOperation();
+                _accountBasic = null;
                 ResetIsUserLoggedIn();
-                GogLogin();
+                GogLogin(operationGeneration);
 
                 if (AccountBasic?.IsLoggedIn ?? false)
                 {
@@ -187,10 +269,12 @@ namespace CommonPluginsStores.Gog
                         Link = string.Format(UrlUser, AccountBasic.Username),
                         Avatar = AccountBasic.Avatars.MenuUserAvBig2,
                         IsPrivate = true,
-                        IsCurrent = true
+                        IsCurrent = true,
+                        AccountStatus = AccountStatus.Private
                     };
                     SaveCurrentUser();
                     _ = GetCurrentAccountInfos();
+                    IsUserLoggedIn = true;
 
                     LogInfo("logged");
                 }
@@ -199,6 +283,12 @@ namespace CommonPluginsStores.Gog
             {
                 Common.LogError(ex, false, false, PluginName);
             }
+        }
+
+        public override void ClearSession()
+        {
+            _accountBasic = null;
+            base.ClearSession();
         }
 
         #endregion
@@ -210,27 +300,78 @@ namespace CommonPluginsStores.Gog
             AccountInfos accountInfos = LoadCurrentUser();
             if (!accountInfos?.UserId?.IsNullOrEmpty() ?? false)
             {
+                AccountInfos refreshTarget = accountInfos;
+                string userId = refreshTarget.UserId;
+                Common.LogDebug(true, $"[GogApi] GetCurrentAccountInfos scheduled background refresh UserId={userId}, Pseudo={refreshTarget.Pseudo}.");
                 _ = Task.Run(() =>
                 {
-                    Thread.Sleep(1000);
-                    ProfileUserGalaxy profileUserGalaxy = GetAccountInfoByGalaxyUserId(long.Parse(CurrentAccountInfos.UserId));
-
-                    if (profileUserGalaxy != null)
+                    try
                     {
-                        CurrentAccountInfos.Avatar = $"{UrlImage}/{profileUserGalaxy.Avatar.GogImageId}.jpg";
-                        CurrentAccountInfos.Pseudo = profileUserGalaxy.Username;
+                        WaitForApiRateLimit();
+                        ProfileUserGalaxy profileUserGalaxy = GetAccountInfoByGalaxyUserId(long.Parse(userId));
 
-                        CurrentAccountInfos.IsPrivate = !CheckIsPublic(CurrentAccountInfos).GetAwaiter().GetResult();
-                        CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
+                        if (profileUserGalaxy != null)
+                        {
+                            refreshTarget.Avatar = $"{UrlImage}/{profileUserGalaxy.Avatar.GogImageId}.jpg";
+                            refreshTarget.Pseudo = profileUserGalaxy.Username;
+                            Common.LogDebug(true, $"[GogApi] GetCurrentAccountInfos galaxy profile updated: Pseudo={profileUserGalaxy.Username}.");
+                        }
+                        else
+                        {
+                            Logger.Warn("No GOG profile found for Galaxy user id.");
+                        }
+
+                        bool isPublic = CheckIsPublic(refreshTarget).GetAwaiter().GetResult();
+                        refreshTarget.IsPrivate = !isPublic;
+                        refreshTarget.AccountStatus = refreshTarget.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
+                        ApplyGogAccountBackgroundRefresh(refreshTarget, userId);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        Logger.Warn($"No GOG profil found");
+                        Common.LogError(ex, false, true, PluginName);
+                        refreshTarget.IsPrivate = true;
+                        refreshTarget.AccountStatus = AccountStatus.Private;
+                        ApplyGogAccountBackgroundRefresh(refreshTarget, userId);
                     }
                 });
                 return accountInfos;
             }
+
             return new AccountInfos { IsCurrent = true };
+        }
+
+        /// <summary>
+        /// Publishes a completed background account refresh when the active session still matches.
+        /// </summary>
+        /// <param name="refreshTarget">Account fields gathered on a background thread.</param>
+        /// <param name="userId">Galaxy user id captured when the refresh was scheduled.</param>
+        private void ApplyGogAccountBackgroundRefresh(AccountInfos refreshTarget, string userId)
+        {
+            void apply()
+            {
+                AccountInfos current = CurrentAccountInfos;
+                if (current == null || !userId.IsEqual(current.UserId))
+                {
+                    Common.LogDebug(true, "[GogApi] GetCurrentAccountInfos background refresh discarded (account changed).");
+                    return;
+                }
+
+                current.Avatar = refreshTarget.Avatar;
+                current.Pseudo = refreshTarget.Pseudo;
+                current.IsPrivate = refreshTarget.IsPrivate;
+                current.AccountStatus = refreshTarget.AccountStatus;
+                SaveCurrentUser();
+                Common.LogDebug(true, $"[GogApi] GetCurrentAccountInfos background refresh done IsPrivate={current.IsPrivate}, Pseudo={current.Pseudo}, AccountStatus={current.AccountStatus}.");
+            }
+
+            var dispatcher = API.Instance?.MainView?.UIDispatcher;
+            if (dispatcher != null && !dispatcher.CheckAccess())
+            {
+                dispatcher.BeginInvoke(new Action(apply));
+                return;
+            }
+
+            apply();
         }
 
         protected override ObservableCollection<AccountInfos> GetCurrentFriendsInfos()
@@ -439,6 +580,7 @@ namespace CommonPluginsStores.Gog
                     else
                     {
                         Logger.Warn($"Error 401 - Wait and retry");
+                        Common.LogDebug(true, $"[GogApi] 401/access_denied for game {id}, waiting 5000ms before single retry.");
                         Thread.Sleep(5000);
                         return GetAchievementsPrivate(id, accountInfos, true);
                     }
@@ -800,12 +942,20 @@ namespace CommonPluginsStores.Gog
 
         public async Task<bool> CheckIsPublic(AccountInfos accountInfos)
         {
+            if (accountInfos == null || accountInfos.Pseudo.IsNullOrEmpty())
+            {
+                Common.LogDebug(true, "[GogApi] CheckIsPublic skipped: missing account pseudo.");
+                return false;
+            }
+
             try
             {
-                accountInfos.AccountStatus = AccountStatus.Checking;
                 string url = string.Format(UrlUser, accountInfos.Pseudo);
-                string response = await Web.DownloadStringData(url);
-                return !response.Contains("hook-test=\"isPrivate\"");
+                Common.LogDebug(true, $"[GogApi] CheckIsPublic started: pseudo={accountInfos.Pseudo}.");
+                string response = await Web.DownloadStringData(url, GetStoredCookies());
+                bool isPublic = !response.Contains("hook-test=\"isPrivate\"");
+                Common.LogDebug(true, $"[GogApi] CheckIsPublic completed: isPublic={isPublic}.");
+                return isPublic;
             }
             catch (Exception ex)
             {
@@ -820,7 +970,7 @@ namespace CommonPluginsStores.Gog
             return !AccountBasic?.AccessToken.IsNullOrEmpty() ?? false;
         }
 
-        private void GogLogin()
+        private void GogLogin(long operationGeneration)
         {
             using (IWebView webView = API.Instance.WebViews.CreateView(new WebViewSettings
             {
@@ -832,48 +982,52 @@ namespace CommonPluginsStores.Gog
             {
                 webView.LoadingChanged += async (s, e) =>
                 {
-                    if (Interlocked.Exchange(ref _isHandlingLoading, 1) == 1) return;
+                    string urlAtEvent = webView.GetCurrentAddress();
+                    Common.LogDebug(true, $"[GogApi] Auth webview LoadingChanged: isLoading={e.IsLoading}, url={FormatAuthWebViewUrlForLog(urlAtEvent)}.");
+
+                    if (e.IsLoading)
+                    {
+                        return;
+                    }
+
+                    if (Interlocked.Exchange(ref _isHandlingLoading, 1) == 1)
+                    {
+                        Interlocked.Exchange(ref _pendingLoginCheck, 1);
+                        Common.LogDebug(true, "[GogApi] Auth webview LoadingChanged: deferred (handler already running).");
+                        return;
+                    }
 
                     try
                     {
-                        // Delay to avoid blocking UI and ensure page has time to initialize
-                        await Task.Delay(500);
-
-                        try
+                        do
                         {
-                            string url = webView.GetCurrentAddress();
-                            string obscuredUrl = url;
+                            Interlocked.Exchange(ref _pendingLoginCheck, 0);
+
+                            if (!IsAuthOperationCurrent(operationGeneration))
+                            {
+                                Common.LogDebug(true, "[GogApi] Auth webview login check aborted: superseded auth operation.");
+                                return;
+                            }
+
+                            // Delay to avoid blocking UI and ensure page has time to initialize
+                            await Task.Delay(500);
+
+                            if (!IsAuthOperationCurrent(operationGeneration))
+                            {
+                                Common.LogDebug(true, "[GogApi] Auth webview login check aborted after delay: superseded auth operation.");
+                                return;
+                            }
+
                             try
                             {
-                                if (Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
-                                {
-                                    obscuredUrl = uri.GetLeftPart(UriPartial.Path);
-                                }
+                                await TryCompleteGogLoginFromWebViewAsync(webView);
                             }
-                            catch { }
-                            
-                            Logger.Info($"GogLogin: Checking Url={obscuredUrl}");
-
-                            if (!url.EndsWith("#openlogin"))
+                            catch (Exception ex)
                             {
-                                var cookies = webView.GetCookies();
-                                if (cookies?.Any(x => x.Domain?.Contains("gog.com") == true) ?? false)
-                                {
-                                    string response = await Web.DownloadStringData(UrlAccountInfo, cookies);
-                                    if (Serialization.TryFromJson(response, out AccountBasicResponse accountBasicResponse) && (accountBasicResponse?.IsLoggedIn ?? false))
-                                    {
-                                        Logger.Info("GogLogin: Login successful, saving cookies...");
-                                        AccountBasic = accountBasicResponse;
-                                        _ = SetStoredCookies(cookies);
-                                        webView.Close();
-                                    }
-                                }
+                                Common.LogError(ex, false, true, PluginName);
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            Common.LogError(ex, false, true, PluginName);
-                        }
+                        while (Interlocked.Exchange(ref _pendingLoginCheck, 0) == 1);
                     }
                     finally
                     {
@@ -882,14 +1036,54 @@ namespace CommonPluginsStores.Gog
                 };
 
                 CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
+                Common.LogDebug(true, $"[GogApi] Auth webview opening, initialNavigate={FormatAuthWebViewUrlForLog(UrlLogin)}.");
                 webView.Navigate(UrlLogin);
                 _ = webView.OpenDialog();
+                Common.LogDebug(true, $"[GogApi] Auth webview closed, finalUrl={FormatAuthWebViewUrlForLog(webView.GetCurrentAddress())}, isLoggedIn={AccountBasic?.IsLoggedIn ?? false}.");
             }
+        }
+
+        /// <summary>
+        /// Verifies GOG session from the auth WebView using domain-filtered cookies only.
+        /// Closes the WebView when login is confirmed.
+        /// </summary>
+        private async Task TryCompleteGogLoginFromWebViewAsync(IWebView webView)
+        {
+            string url = webView.GetCurrentAddress();
+            bool isLoginPage = IsGogLoginPageUrl(url);
+            Common.LogDebug(true, $"[GogApi] Auth webview post-delay check, url={FormatAuthWebViewUrlForLog(url)}, isLoginPage={isLoginPage}.");
+
+            if (isLoginPage)
+            {
+                return;
+            }
+
+            List<HttpCookie> gogCookies = GetWebCookies(false, webView);
+            Common.LogDebug(true, $"[GogApi] Auth webview cookie check: gogCookieCount={gogCookies?.Count ?? 0}.");
+
+            if (gogCookies == null || gogCookies.Count == 0)
+            {
+                return;
+            }
+
+            string response = await Web.DownloadStringData(UrlAccountInfo, gogCookies);
+            bool parsed = !string.IsNullOrEmpty(response);
+            bool isLoggedIn = parsed && ApplyAccountBasicResponse(response);
+            Common.LogDebug(true, $"[GogApi] Auth webview account info check: parsed={parsed}, isLoggedIn={isLoggedIn}.");
+
+            if (!isLoggedIn)
+            {
+                return;
+            }
+
+            Common.LogDebug(true, "[GogApi] Auth webview login successful, saving cookies and closing.");
+            _ = SetStoredCookies(gogCookies);
+            webView.Close();
         }
 
         private AccountBasicResponse GetAccountByAuthInfo()
         {
-            string response = Web.DownloadStringData(UrlAccountInfo, GetStoredCookies()).GetAwaiter().GetResult();
+            string response = Web.DownloadStringData(UrlAccountInfo, PeekStoredCookies()).GetAwaiter().GetResult();
             _ = Serialization.TryFromJson(response, out AccountBasicResponse accountBasicResponse);
             return accountBasicResponse;
         }

@@ -15,7 +15,6 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Threading;
 using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.PCGamingWiki
@@ -23,106 +22,74 @@ namespace CommonPluginsStores.PCGamingWiki
 	public class PCGamingWikiApi
 	{
 		internal static readonly ILogger Logger = LogManager.GetLogger();
+		/// <summary>Minimum delay between PCGamingWiki HTTP calls to reduce throttling.</summary>
+		private static readonly TimeSpan ApiRequestMinInterval = TimeSpan.FromMilliseconds(500);
 
 		internal string PluginName { get; }
 		internal string ClientName => "PCGamingWiki";
 		internal ExternalPlugin PluginLibrary { get; }
 
 		private SteamApi SteamApi { get; }
+		private readonly RequestRateLimiter _apiRateLimiter = new RequestRateLimiter(ApiRequestMinInterval);
+
+		private void WaitForApiRateLimit()
+		{
+			_apiRateLimiter.WaitAsync().GetAwaiter().GetResult();
+		}
 
 		#region Urls
 
 		private string UrlBase => @"https://pcgamingwiki.com";
 		private string UrlWithSteamId => UrlBase + @"/api/appid.php?appid={0}";
-		private string UrlPCGamingWikiSearch => UrlBase + @"/w/index.php?search=";
 		private string UrlPCGamingWikiSearchWithApi => UrlBase + @"/w/api.php?action=opensearch&format=json&formatversion=2&search={0}&namespace=0&limit=10";
 		
 		#endregion
 
-		public PCGamingWikiApi(string pluginName, ExternalPlugin pluginLibrary)
+		public PCGamingWikiApi(string pluginName, ExternalPlugin pluginLibrary, SteamApi steamApi = null)
 		{
 			PluginName = pluginName;
 			PluginLibrary = pluginLibrary;
-			SteamApi = new SteamApi(PluginName, ExternalPlugin.CheckLocalizations);
+			SteamApi = steamApi ?? new SteamApi(PluginName, pluginLibrary);
 		}
 
 		/// <summary>
-		/// Get the url for PCGamingWiki from url on Game or with Steam appId or with a search on website.
+		/// Resolves the best PCGamingWiki page URL for <paramref name="game"/>.
+		/// Order: direct wiki link, Steam AppId redirect, then opensearch.
 		/// </summary>
-		public string FindGoodUrl(Game game)
+		/// <param name="game">Target game.</param>
+		/// <param name="steamAppId">
+		/// Optional pre-resolved Steam AppId. When zero and the AppId step runs,
+		/// <see cref="SteamApi.ResolveAppId"/> is called and the result is written back
+		/// so callers can reuse it for a Steam fallback without a second lookup.
+		/// </param>
+		/// <param name="steamAppIdLookupAttempted">
+		/// Set to <see langword="true"/> once <see cref="SteamApi.ResolveAppId"/> has run
+		/// during the AppId lookup step, allowing callers to skip a redundant Steam fallback lookup.
+		/// </param>
+		public string FindGoodUrl(Game game, ref uint steamAppId, ref bool steamAppIdLookupAttempted)
 		{
 			try
 			{
-				string url = string.Empty;
-
-				#region With Steam appId
-
-				uint appId = 0;
-
-				if (game.PluginId == GetPluginId(ExternalPlugin.SteamLibrary))
+				string directUrl = GetDirectPcgwLink(game);
+				if (!directUrl.IsNullOrEmpty())
 				{
-					appId = uint.Parse(game.GameId);
-				}
-				else
-				{
-					appId = SteamApi.GetAppId(game);
+					Logger.Info($"Url for PCGamingWiki find for {game.Name} - {directUrl}");
+					return directUrl;
 				}
 
-				if (appId != 0)
+				string appIdUrl = TryGetUrlFromSteamAppId(game, ref steamAppId, ref steamAppIdLookupAttempted);
+				if (!appIdUrl.IsNullOrEmpty())
 				{
-					url = string.Format(UrlWithSteamId, appId);
-					Thread.Sleep(500);
-					string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
-					if (!response.Contains("search results", StringComparison.OrdinalIgnoreCase))
-					{
-						Logger.Info($"Url for PCGamingWiki find for {game.Name} - {url}");
-						return url;
-					}
+					Logger.Info($"Url for PCGamingWiki find for {game.Name} - {appIdUrl}");
+					return appIdUrl;
 				}
 
-				#endregion
-
-				#region With game links
-
-				url = game.Links?
-					.FirstOrDefault(link =>
-						link.Url.Contains("pcgamingwiki", StringComparison.OrdinalIgnoreCase) &&
-						!link.Url.StartsWith(UrlPCGamingWikiSearch, StringComparison.OrdinalIgnoreCase))
-					?.Url;
-
-				if (!url.IsNullOrEmpty())
+				string searchUrl = TryGetUrlFromPcgwSearch(game);
+				if (!searchUrl.IsNullOrEmpty())
 				{
-					Logger.Info($"Url for PCGamingWiki find for {game.Name} - {url}");
-					return url;
+					Logger.Info($"Url for PCGamingWiki find for {game.Name} - {searchUrl}");
+					return searchUrl;
 				}
-
-				#endregion
-
-				#region With PCGamingWiki search
-
-				string name = PlayniteTools.NormalizeGameName(game.Name);
-
-				if (game.ReleaseDate != null)
-				{
-					url = string.Format(UrlPCGamingWikiSearchWithApi,
-						WebUtility.UrlEncode(name + $" ({((ReleaseDate)game.ReleaseDate).Year})"));
-					url = GetWithSearchApi(url);
-					if (!url.IsNullOrEmpty())
-					{
-						Logger.Info($"Url for PCGamingWiki find for {game.Name} - {url}");
-						return url;
-					}
-				}
-
-				url = string.Format(UrlPCGamingWikiSearchWithApi, WebUtility.UrlEncode(name));
-				url = GetWithSearchApi(url);
-				if (!url.IsNullOrEmpty())
-				{
-					Logger.Info($"Url for PCGamingWiki find for {game.Name} - {url}");
-					return url;
-				}
-
-				#endregion
 			}
 			catch (Exception ex)
 			{
@@ -203,6 +170,76 @@ namespace CommonPluginsStores.PCGamingWiki
 
 		#region Private helpers
 
+		private string GetDirectPcgwLink(Game game)
+		{
+			return game.Links?
+				.Where(link =>
+					link.Url.Contains("pcgamingwiki", StringComparison.OrdinalIgnoreCase) &&
+					!IsPcgwSearchUrl(link.Url))
+				.Select(link => link.Url)
+				.FirstOrDefault();
+		}
+
+		/// <summary>
+		/// Returns <see langword="true"/> for PCGamingWiki search URLs (not article pages),
+		/// regardless of scheme or host casing.
+		/// </summary>
+		private static bool IsPcgwSearchUrl(string url)
+		{
+			return !url.IsNullOrEmpty()
+				&& url.IndexOf("/w/index.php?search=", StringComparison.OrdinalIgnoreCase) >= 0;
+		}
+
+		private string TryGetUrlFromSteamAppId(Game game, ref uint steamAppId, ref bool steamAppIdLookupAttempted)
+		{
+			if (!steamAppIdLookupAttempted)
+			{
+				if (steamAppId == 0)
+				{
+					steamAppId = SteamApi.ResolveAppId(game);
+				}
+
+				steamAppIdLookupAttempted = true;
+			}
+
+			if (steamAppId == 0)
+			{
+				return string.Empty;
+			}
+
+			string url = string.Format(UrlWithSteamId, steamAppId);
+			Common.LogDebug(true, $"[PCGamingWikiApi] Trying appid lookup for {game.Name} ({steamAppId}) with throttled request.");
+			WaitForApiRateLimit();
+			string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
+			if (!response.Contains("search results", StringComparison.OrdinalIgnoreCase))
+			{
+				return url;
+			}
+
+			Logger.Warn($"PCGamingWiki appid lookup returned search page for {game.Name} ({steamAppId}), using fallback strategies.");
+			return string.Empty;
+		}
+
+		private string TryGetUrlFromPcgwSearch(Game game)
+		{
+			string name = PlayniteTools.NormalizeGameName(game.Name);
+
+			if (game.ReleaseDate != null)
+			{
+				string urlWithYear = string.Format(
+					UrlPCGamingWikiSearchWithApi,
+					WebUtility.UrlEncode(name + $" ({((ReleaseDate)game.ReleaseDate).Year})"));
+				string result = GetWithSearchApi(urlWithYear);
+				if (!result.IsNullOrEmpty())
+				{
+					return result;
+				}
+			}
+
+			string url = string.Format(UrlPCGamingWikiSearchWithApi, WebUtility.UrlEncode(name));
+			return GetWithSearchApi(url);
+		}
+
 		private void ParseRow(string dataTitle, string dataMinimum, string dataRecommended, GameRequirements target)
 		{
 			switch (dataTitle)
@@ -218,22 +255,28 @@ namespace CommonPluginsStores.PCGamingWiki
 					break;
 
 				case "system memory (ram)":
-					if (!dataMinimum.IsNullOrEmpty()) target.Minimum.Ram = ParseSize(dataMinimum);
-					// Note: original code used dataMinimum for recommended — bug preserved intentionally; fix if needed.
-					if (!dataRecommended.IsNullOrEmpty()) target.Recommended.Ram = ParseSize(dataRecommended);
+					if (!dataMinimum.IsNullOrEmpty()) target.Minimum.RamSource = StripPlainText(dataMinimum);
+					if (!dataRecommended.IsNullOrEmpty()) target.Recommended.RamSource = StripPlainText(dataRecommended);
 					break;
 
 				case "storage drive (hdd/ssd)":
-					if (!dataMinimum.IsNullOrEmpty()) target.Minimum.Storage = ParseSize(dataMinimum);
-					if (!dataRecommended.IsNullOrEmpty()) target.Recommended.Storage = ParseSize(dataRecommended);
+					if (!dataMinimum.IsNullOrEmpty()) target.Minimum.StorageSource = StripPlainText(dataMinimum);
+					if (!dataRecommended.IsNullOrEmpty()) target.Recommended.StorageSource = StripPlainText(dataRecommended);
 					break;
 
 				case "video card (gpu)":
-					if (!dataMinimum.IsNullOrEmpty()) target.Minimum.Gpu = ParseGpu(dataMinimum);
-					if (!dataRecommended.IsNullOrEmpty()) target.Recommended.Gpu = ParseGpu(dataRecommended);
+					if (!dataMinimum.IsNullOrEmpty()) target.Minimum.Gpu.AddRange(ParseGpu(dataMinimum));
+					if (!dataRecommended.IsNullOrEmpty()) target.Recommended.Gpu.AddRange(ParseGpu(dataRecommended));
 					break;
 
 				default:
+					if (dataTitle.IndexOf("directx", StringComparison.OrdinalIgnoreCase) >= 0
+						|| dataTitle.IndexOf("direct3d", StringComparison.OrdinalIgnoreCase) >= 0)
+					{
+						ParseDirectXRow(dataTitle, dataMinimum, dataRecommended, target);
+						break;
+					}
+
 					Logger.Warn($"PCGamingWikiApi - No handler for sysreq field: {dataTitle}");
 					break;
 			}
@@ -286,18 +329,8 @@ namespace CommonPluginsStores.PCGamingWiki
 			data = data.Replace("<br>", "¤");
 			data = Regex.Replace(data, @"<[^>]*>", string.Empty, RegexOptions.IgnoreCase);
 
-			data = data
-				.Replace("Anything made in the last decade", string.Empty)
-				.Replace("(latest service pack)", string.Empty)
-				.Replace("(1803 or later)", string.Empty)
-				.Replace(" (Only inclusive until patch 1.16.1. Patch 1.17+ Needs XP and greater.)", string.Empty)
-				.Replace("Windows", string.Empty)
-				.Replace("10 October 2018 Update", string.Empty)
-				.Replace("(DXR)", string.Empty)
-				.Replace("or better", string.Empty)
-				.Replace(",", "¤").Replace(" or ", "¤").Replace("/", "¤");
-
-			return data.Split('¤')
+			return data.Replace(",", "¤").Replace(" or ", "¤").Replace("/", "¤")
+				.Split('¤')
 				.Select(x => x.Trim())
 				.Where(x => !x.IsNullOrEmpty())
 				.ToList();
@@ -351,38 +384,35 @@ namespace CommonPluginsStores.PCGamingWiki
 			return result;
 		}
 
-		/// <summary>
-		/// Parses a RAM or storage size string into bytes.
-		/// Handles MB and GB suffixes.
-		/// </summary>
-		private static long ParseSize(string data)
+		private static void ParseDirectXRow(string dataTitle, string dataMinimum, string dataRecommended, GameRequirements target)
 		{
-			data = data.ToLower()
-				.Replace("ram mb ram", string.Empty)
-				.Replace("ram", string.Empty)
+			string titleToken = StripPlainText(dataTitle);
+			if (!titleToken.IsNullOrEmpty())
+			{
+				target.Minimum.Gpu.Add(titleToken);
+				if (!dataRecommended.IsNullOrEmpty())
+				{
+					target.Recommended.Gpu.Add(titleToken);
+				}
+			}
+
+			if (!dataMinimum.IsNullOrEmpty())
+			{
+				target.Minimum.Gpu.AddRange(ParseGpu(dataMinimum));
+			}
+
+			if (!dataRecommended.IsNullOrEmpty())
+			{
+				target.Recommended.Gpu.AddRange(ParseGpu(dataRecommended));
+			}
+		}
+
+		private static string StripPlainText(string data)
+		{
+			data = data.Replace("<br>", " ");
+			return Regex.Replace(data ?? string.Empty, @"<[^>]*>", string.Empty, RegexOptions.IgnoreCase)
+				.Replace("\t", " ")
 				.Trim();
-
-			if (data.Contains("mb"))
-			{
-				data = data.Substring(0, data.IndexOf("mb", StringComparison.Ordinal));
-				double.TryParse(
-					NormalizeDecimalSeparator(data),
-					NumberStyles.Any, CultureInfo.CurrentCulture,
-					out double value);
-				return (long)(1024L * 1024 * value);
-			}
-
-			if (data.Contains("gb"))
-			{
-				data = data.Substring(0, data.IndexOf("gb", StringComparison.Ordinal));
-				double.TryParse(
-					NormalizeDecimalSeparator(data),
-					NumberStyles.Any, CultureInfo.CurrentCulture,
-					out double value);
-				return (long)(1024L * 1024 * 1024 * value);
-			}
-
-			return 0;
 		}
 
 		private static List<string> ParseGpu(string data)
@@ -414,16 +444,12 @@ namespace CommonPluginsStores.PCGamingWiki
 				.Replace("(DXR)", string.Empty)
 				.Replace("TnL support", string.Empty)
 				.Replace("Integrated graphics, monitor with resolution of 1280x720.", "1280x720")
-				.Replace("Integrated graphics", string.Empty)
-				.Replace("Integrated", string.Empty).Replace("Dedicated", string.Empty)
 				.Replace("+ compatible", string.Empty).Replace("compatible", string.Empty)
 				.Replace("that supports DirectDraw at 640x480 resolution, 256 colors", string.Empty)
 				.Replace("or higher", string.Empty)
 				.Replace("capable GPU", string.Empty)
 				.Replace("  ", " ")
 				.Replace(" / ", "¤").Replace(" or ", "¤").Replace(", ", "¤");
-
-			data = Regex.Replace(data, @"DX(\d+)[+]?", "DirectX $1");
 
 			List<string> result = data.Split('¤')
 				.Select(x => x.Trim())
@@ -441,14 +467,6 @@ namespace CommonPluginsStores.PCGamingWiki
 			}).ToList();
 
 			return result;
-		}
-
-		private static string NormalizeDecimalSeparator(string value)
-		{
-			return value
-				.Replace(".", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)
-				.Replace(",", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)
-				.Trim();
 		}
 
 		#endregion

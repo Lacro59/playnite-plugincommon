@@ -66,6 +66,9 @@ namespace CommonPluginsStores.Epic
 		// Semaphore to ensure only one token refresh is performed at a time.
 		private readonly SemaphoreSlim _tokenRefreshSemaphore = new SemaphoreSlim(1, 1);
 
+		private int _isHandlingLoading = 0;
+		private int _pendingLoginCheck = 0;
+
 		/// <summary>Minimum delay between Epic catalog/store HTTP calls (~5 requests per second).</summary>
 		private static readonly TimeSpan ApiRequestMinInterval = TimeSpan.FromMilliseconds(200);
 
@@ -223,30 +226,38 @@ namespace CommonPluginsStores.Epic
 		{
 			if (CurrentAccountInfos == null)
 			{
+				Common.LogDebug(true, "[EpicApi] GetIsUserLoggedIn: no CurrentAccountInfos.");
 				return false;
 			}
 
 			if (!CurrentAccountInfos.IsPrivate && !StoreSettings.UseAuth)
 			{
-				if (StoreToken == null)
-				{
-					StoreToken = GetStoredToken();
-				}
-
-				if (StoreToken != null)
-				{
-					CheckIsUserLoggedIn();
-				}
-
-				return !CurrentAccountInfos.UserId.IsNullOrEmpty();
+				bool hasUserId = !CurrentAccountInfos.UserId.IsNullOrEmpty();
+				Common.LogDebug(true, $"[EpicApi] GetIsUserLoggedIn public account: hasUserId={hasUserId}.");
+				return hasUserId;
 			}
 
+			if (!ForceFullLoginCheck)
+			{
+				bool? cachedAuth = TryGetAuthStatusFromStoredToken();
+				if (cachedAuth.HasValue)
+				{
+					Common.LogDebug(true, $"[EpicApi] GetIsUserLoggedIn fast-path (stored token): isLogged={cachedAuth.Value}.");
+					return cachedAuth.Value;
+				}
+
+				Common.LogDebug(true, "[EpicApi] GetIsUserLoggedIn fast-path: no stored token, returning false until background check.");
+				return false;
+			}
+
+			Common.LogDebug(true, "[EpicApi] GetIsUserLoggedIn: full API verification.");
 			bool isLogged = CheckIsUserLoggedIn();
 			if (!isLogged)
 			{
 				StoreToken = null;
 			}
 
+			Common.LogDebug(true, $"[EpicApi] GetIsUserLoggedIn full verification result: isLogged={isLogged}.");
 			return isLogged;
 		}
 
@@ -259,9 +270,18 @@ namespace CommonPluginsStores.Epic
 		{
 			try
 			{
+				long operationGeneration = BeginAuthOperation();
 				ResetIsUserLoggedIn();
-				EpicLogin();
-				SetUserAfterLogin();
+				bool tokenObtained = EpicLogin(operationGeneration);
+				if (!tokenObtained && IsAuthOperationCurrent(operationGeneration))
+				{
+					tokenObtained = OfferAndRunAlternativeLogin(operationGeneration);
+				}
+
+				if (tokenObtained)
+				{
+					CompleteLoginAfterTokenExchange();
+				}
 			}
 			catch (Exception ex)
 			{
@@ -278,9 +298,12 @@ namespace CommonPluginsStores.Epic
 		{
 			try
 			{
+				long operationGeneration = BeginAuthOperation();
 				ResetIsUserLoggedIn();
-				EpicLoginAlternative();
-				SetUserAfterLogin();
+				if (EpicLoginAlternative(operationGeneration))
+				{
+					CompleteLoginAfterTokenExchange();
+				}
 			}
 			catch (Exception ex)
 			{
@@ -291,24 +314,59 @@ namespace CommonPluginsStores.Epic
 		/// <summary>
 		/// Persists account information and cookies once a valid <see cref="StoreToken"/> has been obtained.
 		/// </summary>
-		private void SetUserAfterLogin()
+		/// <returns><c>true</c> when account data was saved; otherwise <c>false</c>.</returns>
+		private bool SetUserAfterLogin()
 		{
-			if (StoreToken != null)
+			if (StoreToken == null || StoreToken.Token.IsNullOrEmpty() || StoreToken.AccountId.IsNullOrEmpty())
 			{
-				AccountInfos accountInfos = new AccountInfos
-				{
-					UserId = StoreToken.AccountId,
-					Pseudo = StoreToken.AccountId.IsEqual(CurrentAccountInfos.UserId) ? CurrentAccountInfos.Pseudo : string.Empty,
-					Link = string.Format(UrlAccountProfile, StoreToken.AccountId),
-					IsPrivate = true,
-					IsCurrent = true
-				};
-
-				CurrentAccountInfos = accountInfos;
-				SaveCurrentUser();
-				SetStoredCookies(GetWebCookies());
-				LogInfo("logged");
+				Common.LogDebug(true, "[EpicApi] SetUserAfterLogin skipped: no valid store token.");
+				return false;
 			}
+
+			string pseudo = string.Empty;
+			if (CurrentAccountInfos != null
+				&& !CurrentAccountInfos.UserId.IsNullOrEmpty()
+				&& StoreToken.AccountId.IsEqual(CurrentAccountInfos.UserId))
+			{
+				pseudo = CurrentAccountInfos.Pseudo;
+			}
+
+			if (pseudo.IsNullOrEmpty())
+			{
+				EpicAccountResponse epicAccount = GetAccountInfo(StoreToken.AccountId).GetAwaiter().GetResult();
+				pseudo = epicAccount?.DisplayName ?? string.Empty;
+				Common.LogDebug(true, $"[EpicApi] SetUserAfterLogin resolved display name: hasPseudo={!pseudo.IsNullOrEmpty()}.");
+			}
+
+			AccountInfos accountInfos = new AccountInfos
+			{
+				UserId = StoreToken.AccountId,
+				Pseudo = pseudo,
+				Link = string.Format(UrlAccountProfile, StoreToken.AccountId),
+				IsPrivate = true,
+				IsCurrent = true,
+				AccountStatus = AccountStatus.Private
+			};
+
+			CurrentAccountInfos = accountInfos;
+			SaveCurrentUser();
+			SetStoredCookies(GetWebCookies());
+			LogInfo("logged");
+			return true;
+		}
+
+		/// <summary>
+		/// Finalizes Epic login when OAuth token exchange succeeded.
+		/// </summary>
+		private void CompleteLoginAfterTokenExchange()
+		{
+			if (!SetUserAfterLogin())
+			{
+				return;
+			}
+
+			IsUserLoggedIn = true;
+			_ = GetCurrentAccountInfos();
 		}
 
 		#endregion
@@ -327,24 +385,29 @@ namespace CommonPluginsStores.Epic
 			AccountInfos accountInfos = LoadCurrentUser();
 			if (!accountInfos?.UserId?.IsNullOrEmpty() ?? false)
 			{
-				_ = Task.Run(async () =>
+				Common.LogDebug(true, $"[EpicApi] GetCurrentAccountInfos scheduled background refresh UserId={accountInfos.UserId}, Pseudo={accountInfos.Pseudo}.");
+				_ = Task.Run(() =>
 				{
 					try
 					{
-						await Task.Delay(1000).ConfigureAwait(false);
-						CurrentAccountInfos.IsPrivate = !await CheckIsPublic(accountInfos).ConfigureAwait(false);
+						bool isPublic = CheckIsPublic(CurrentAccountInfos).GetAwaiter().GetResult();
+						CurrentAccountInfos.IsPrivate = !isPublic;
 						CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
 
 						if (CurrentAccountInfos.Pseudo.IsNullOrEmpty())
 						{
-							EpicAccountResponse epicAccountResponse = await GetAccountInfo(accountInfos.UserId).ConfigureAwait(false);
+							EpicAccountResponse epicAccountResponse = GetAccountInfo(accountInfos.UserId).GetAwaiter().GetResult();
 							CurrentAccountInfos.Pseudo = epicAccountResponse?.DisplayName;
-							SaveCurrentUser();
 						}
+
+						SaveCurrentUser();
+						Common.LogDebug(true, $"[EpicApi] GetCurrentAccountInfos background refresh done IsPrivate={CurrentAccountInfos.IsPrivate}, Pseudo={CurrentAccountInfos.Pseudo}, AccountStatus={CurrentAccountInfos.AccountStatus}.");
 					}
 					catch (Exception ex)
 					{
 						Common.LogError(ex, false, true, PluginName);
+						CurrentAccountInfos.IsPrivate = true;
+						CurrentAccountInfos.AccountStatus = AccountStatus.Private;
 					}
 				});
 
@@ -1045,9 +1108,16 @@ namespace CommonPluginsStores.Epic
 		/// and stores the result via <see cref="SetToken"/>.
 		/// </summary>
 		/// <param name="authorizationCode">The one-time authorization code returned by Epic's OAuth redirect.</param>
-		private void AuthenticateUsingAuthCode(string authorizationCode)
+		/// <returns><c>true</c> when a valid token was stored; otherwise <c>false</c>.</returns>
+		private bool AuthenticateUsingAuthCode(string authorizationCode)
 		{
-			StoreToken = null;
+			if (authorizationCode.IsNullOrWhiteSpace())
+			{
+				Common.LogDebug(true, "[EpicApi] AuthenticateUsingAuthCode skipped: empty authorization code.");
+				return false;
+			}
+
+			ClearInMemoryStoreToken();
 			using (HttpClient httpClient = new HttpClient())
 			{
 				httpClient.DefaultRequestHeaders.Clear();
@@ -1058,9 +1128,17 @@ namespace CommonPluginsStores.Epic
 					content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
 					HttpResponseMessage response = httpClient.PostAsync(UrlAccountAuth, content).GetAwaiter().GetResult();
 					string respContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-					SetToken(respContent);
+					if (!SetToken(respContent))
+					{
+						Common.LogDebug(true, "[EpicApi] AuthenticateUsingAuthCode failed: invalid OAuth response.");
+						return false;
+					}
 				}
 			}
+
+			bool success = StoreToken != null && !StoreToken.Token.IsNullOrEmpty();
+			Common.LogDebug(true, $"[EpicApi] AuthenticateUsingAuthCode completed: success={success}.");
+			return success;
 		}
 
 		/// <summary>
@@ -1077,17 +1155,18 @@ namespace CommonPluginsStores.Epic
 		{
 			if (accountInfos == null || accountInfos.UserId.IsNullOrEmpty())
 			{
-				Logger.Info("[EpicApi] CheckIsPublic: accountInfos or UserId is null.");
+				Common.LogDebug(true, "[EpicApi] CheckIsPublic skipped: missing account user id.");
 				return false;
 			}
 
 			try
 			{
-				accountInfos.AccountStatus = AccountStatus.Checking;
 				string url = string.Format(UrlAccountProfileUS, accountInfos.UserId);
+				Common.LogDebug(true, $"[EpicApi] CheckIsPublic started: userId={accountInfos.UserId}.");
 				var pageSource = await Web.DownloadSourceDataWebView(url).ConfigureAwait(false);
-				string source = pageSource.Item1;
-				return !source.Contains("This profile is unavailable", StringComparison.OrdinalIgnoreCase);
+				bool isPublic = !pageSource.Item1.Contains("This profile is unavailable", StringComparison.OrdinalIgnoreCase);
+				Common.LogDebug(true, $"[EpicApi] CheckIsPublic completed: isPublic={isPublic}.");
+				return isPublic;
 			}
 			catch (Exception ex)
 			{
@@ -1197,10 +1276,84 @@ namespace CommonPluginsStores.Epic
 		}
 
 		/// <summary>
+		/// Returns true when the URL is the Epic OAuth localhost callback.
+		/// </summary>
+		private static bool IsEpicOAuthCallbackUrl(string url)
+		{
+			return !url.IsNullOrWhiteSpace()
+				&& url.IndexOf("localhost", StringComparison.OrdinalIgnoreCase) >= 0;
+		}
+
+		/// <summary>
+		/// Tries to read the OAuth authorization code from the callback URL query string.
+		/// </summary>
+		private static bool TryExtractAuthorizationCodeFromUrl(string url, out string authorizationCode)
+		{
+			authorizationCode = null;
+			if (url.IsNullOrWhiteSpace())
+			{
+				return false;
+			}
+
+			int codeIndex = url.IndexOf("code=", StringComparison.OrdinalIgnoreCase);
+			if (codeIndex < 0)
+			{
+				return false;
+			}
+
+			int valueStart = codeIndex + 5;
+			int valueEnd = url.IndexOf('&', valueStart);
+			if (valueEnd < 0)
+			{
+				valueEnd = url.Length;
+			}
+
+			string code = url.Substring(valueStart, valueEnd - valueStart).Trim();
+			if (code.IsNullOrEmpty())
+			{
+				return false;
+			}
+
+			authorizationCode = Uri.UnescapeDataString(code);
+			return true;
+		}
+
+		/// <summary>
+		/// Tries to read the OAuth authorization code from the callback page HTML.
+		/// </summary>
+		private static bool TryExtractAuthorizationCodeFromPageSource(string pageSource, out string authorizationCode)
+		{
+			authorizationCode = null;
+			if (pageSource.IsNullOrEmpty())
+			{
+				return false;
+			}
+
+			Match match = Regex.Match(
+				pageSource,
+				@"localhost[/\\]+launcher[/\\]+authorized\?code=([a-zA-Z0-9_-]+)",
+				RegexOptions.IgnoreCase);
+			if (!match.Success)
+			{
+				match = Regex.Match(pageSource, @"[?&]code=([a-zA-Z0-9_-]+)", RegexOptions.IgnoreCase);
+			}
+
+			if (!match.Success)
+			{
+				return false;
+			}
+
+			authorizationCode = match.Groups[1].Value;
+			return !authorizationCode.IsNullOrEmpty();
+		}
+
+		/// <summary>
 		/// Opens a Playnite WebView to the Epic login page, intercepts the OAuth redirect
 		/// and extracts the authorization code from the callback URL.
 		/// </summary>
-		private void EpicLogin()
+		/// <param name="operationGeneration">Auth generation captured when login started.</param>
+		/// <returns><c>true</c> when the OAuth token exchange succeeded; otherwise <c>false</c>.</returns>
+		private bool EpicLogin(long operationGeneration)
 		{
 			var loggedIn = false;
 			var authorizationCode = string.Empty;
@@ -1214,38 +1367,135 @@ namespace CommonPluginsStores.Epic
 			{
 				webView.LoadingChanged += async (s, e) =>
 				{
-					var pageText = await webView.GetPageTextAsync();
-					if (!pageText.IsNullOrEmpty() && pageText.Contains(@"localhost") && !e.IsLoading)
-					{
-						var source = await webView.GetPageSourceAsync();
-						var matches = Regex.Matches(source, @"localhost\/launcher\/authorized\?code=([a-zA-Z0-9]+)", RegexOptions.IgnoreCase);
-						if (matches.Count > 0)
-						{
-							authorizationCode = matches[0].Groups[1].Value;
-							loggedIn = true;
-						}
+					string urlAtEvent = webView.GetCurrentAddress();
+					Common.LogDebug(true, $"[EpicApi] Auth webview LoadingChanged: isLoading={e.IsLoading}, url={FormatAuthWebViewUrlForLog(urlAtEvent)}.");
 
-						webView.Close();
+					if (e.IsLoading)
+					{
+						return;
+					}
+
+					if (Interlocked.Exchange(ref _isHandlingLoading, 1) == 1)
+					{
+						Interlocked.Exchange(ref _pendingLoginCheck, 1);
+						Common.LogDebug(true, "[EpicApi] Auth webview LoadingChanged: deferred (handler already running).");
+						return;
+					}
+
+					try
+					{
+						do
+						{
+							Interlocked.Exchange(ref _pendingLoginCheck, 0);
+
+							if (!IsAuthOperationCurrent(operationGeneration))
+							{
+								Common.LogDebug(true, "[EpicApi] Auth webview login check aborted: superseded auth operation.");
+								return;
+							}
+
+							await Task.Delay(300);
+
+							if (!IsAuthOperationCurrent(operationGeneration))
+							{
+								Common.LogDebug(true, "[EpicApi] Auth webview login check aborted after delay: superseded auth operation.");
+								return;
+							}
+
+							try
+							{
+								string capturedCode = await TryCompleteEpicLoginFromWebViewAsync(webView).ConfigureAwait(false);
+								if (capturedCode == null)
+								{
+									continue;
+								}
+
+								if (!capturedCode.IsNullOrEmpty())
+								{
+									authorizationCode = capturedCode;
+									loggedIn = true;
+									Common.LogDebug(true, "[EpicApi] Auth webview authorization code captured, closing.");
+								}
+								else
+								{
+									Common.LogDebug(true, "[EpicApi] Auth webview localhost page detected but authorization code not found, closing.");
+								}
+
+								webView.Close();
+							}
+							catch (Exception ex)
+							{
+								Common.LogError(ex, false, true, PluginName);
+							}
+						}
+						while (Interlocked.Exchange(ref _pendingLoginCheck, 0) == 1);
+					}
+					finally
+					{
+						_isHandlingLoading = 0;
 					}
 				};
 
 				CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
+				Common.LogDebug(true, $"[EpicApi] Auth webview opening, initialNavigate={FormatAuthWebViewUrlForLog(UrlLogin)}.");
 				webView.Navigate(UrlLogin);
 				_ = webView.OpenDialog();
+				Common.LogDebug(true, $"[EpicApi] Auth webview closed, finalUrl={FormatAuthWebViewUrlForLog(webView.GetCurrentAddress())}, loggedIn={loggedIn}, hasAuthCode={!authorizationCode.IsNullOrEmpty()}.");
 			}
 
-			if (!loggedIn)
+			if (!loggedIn || !IsAuthOperationCurrent(operationGeneration))
 			{
-				return;
+				Common.LogDebug(true, $"[EpicApi] EpicLogin aborted: loggedIn={loggedIn}, operationCurrent={IsAuthOperationCurrent(operationGeneration)}.");
+				return false;
 			}
 
-			if (string.IsNullOrEmpty(authorizationCode))
+			if (authorizationCode.IsNullOrEmpty())
 			{
 				Logger.Error("Failed to get login exchange key for Epic account.");
-				return;
+				return false;
 			}
 
-			AuthenticateUsingAuthCode(authorizationCode);
+			return AuthenticateUsingAuthCode(authorizationCode);
+		}
+
+		/// <summary>
+		/// Attempts to extract the OAuth authorization code from the auth WebView.
+		/// </summary>
+		/// <returns>
+		/// The authorization code when found; an empty string when the callback page
+		/// was reached without a code; null when the page is not a callback yet.
+		/// </returns>
+		private async Task<string> TryCompleteEpicLoginFromWebViewAsync(IWebView webView)
+		{
+			string url = webView.GetCurrentAddress();
+			Common.LogDebug(true, $"[EpicApi] Auth webview post-delay check, url={FormatAuthWebViewUrlForLog(url)}.");
+
+			if (TryExtractAuthorizationCodeFromUrl(url, out string codeFromUrl))
+			{
+				Common.LogDebug(true, "[EpicApi] Auth webview authorization code extracted from URL.");
+				return codeFromUrl;
+			}
+
+			if (!IsEpicOAuthCallbackUrl(url))
+			{
+				string pageText = await webView.GetPageTextAsync().ConfigureAwait(false);
+				bool hasLocalhostCallback = !pageText.IsNullOrEmpty() && pageText.Contains(@"localhost");
+				Common.LogDebug(true, $"[EpicApi] Auth webview callback check: hasLocalhostCallback={hasLocalhostCallback}.");
+
+				if (!hasLocalhostCallback)
+				{
+					return null;
+				}
+			}
+
+			string pageSource = await webView.GetPageSourceAsync().ConfigureAwait(false);
+			if (TryExtractAuthorizationCodeFromPageSource(pageSource, out string codeFromPage))
+			{
+				Common.LogDebug(true, "[EpicApi] Auth webview authorization code extracted from page source.");
+				return codeFromPage;
+			}
+
+			return IsEpicOAuthCallbackUrl(url) ? string.Empty : null;
 		}
 
 		/// <summary>
@@ -1253,8 +1503,11 @@ namespace CommonPluginsStores.Epic
 		/// opens the Epic authorization URL in the default browser and
 		/// prompts the user to paste the resulting code into a dialog.
 		/// </summary>
-		private void EpicLoginAlternative()
+		/// <param name="operationGeneration">Auth generation captured when login started.</param>
+		/// <returns><c>true</c> when the OAuth token exchange succeeded; otherwise <c>false</c>.</returns>
+		private bool EpicLoginAlternative(long operationGeneration)
 		{
+			Common.LogDebug(true, "[EpicApi] Alternative auth flow started.");
 			_ = API.Instance.Dialogs.ShowMessage(
 				ResourceProvider.GetString("LOCEpicAlternativeAuthInstructions"), "",
 				System.Windows.MessageBoxButton.OK,
@@ -1263,12 +1516,74 @@ namespace CommonPluginsStores.Epic
 			_ = ProcessStarter.StartUrl(UrlAuthCode);
 			StringSelectionDialogResult res = API.Instance.Dialogs.SelectString("LOCEpicAuthCodeInputMessage", "", "");
 
-			if (!res.Result || res.SelectedString.IsNullOrWhiteSpace())
+			if (!res.Result || res.SelectedString.IsNullOrWhiteSpace() || !IsAuthOperationCurrent(operationGeneration))
 			{
-				return;
+				Common.LogDebug(true, "[EpicApi] Alternative auth aborted: cancelled, empty input, or superseded auth operation.");
+				return false;
 			}
 
-			AuthenticateUsingAuthCode(res.SelectedString.Trim().Trim('"'));
+			string normalizedCode = NormalizeAuthorizationCodeInput(res.SelectedString);
+			if (normalizedCode.IsNullOrEmpty())
+			{
+				Common.LogDebug(true, "[EpicApi] Alternative auth aborted: could not parse authorization code from input.");
+				return false;
+			}
+
+			return AuthenticateUsingAuthCode(normalizedCode);
+		}
+
+		/// <summary>
+		/// Prompts the user to try manual authorization code entry after a failed WebView login.
+		/// </summary>
+		/// <param name="operationGeneration">Auth generation captured when login started.</param>
+		/// <returns><c>true</c> when alternative auth produced a valid token; otherwise <c>false</c>.</returns>
+		private bool OfferAndRunAlternativeLogin(long operationGeneration)
+		{
+			System.Windows.MessageBoxResult response = API.Instance.Dialogs.ShowMessage(
+				ResourceProvider.GetString("LOCEpicWebViewLoginFailedOfferAlternative"),
+				PluginName,
+				System.Windows.MessageBoxButton.YesNo,
+				System.Windows.MessageBoxImage.Question);
+
+			if (response != System.Windows.MessageBoxResult.Yes)
+			{
+				Common.LogDebug(true, "[EpicApi] Alternative login declined after WebView failure.");
+				return false;
+			}
+
+			Common.LogDebug(true, "[EpicApi] Alternative login offered after WebView failure.");
+			return EpicLoginAlternative(operationGeneration);
+		}
+
+		/// <summary>
+		/// Normalizes user-provided authorization input (raw code, redirect URL, or JSON snippet).
+		/// </summary>
+		private static string NormalizeAuthorizationCodeInput(string rawInput)
+		{
+			if (rawInput.IsNullOrWhiteSpace())
+			{
+				return null;
+			}
+
+			string input = rawInput.Trim().Trim('"').Trim();
+			if (TryExtractAuthorizationCodeFromUrl(input, out string codeFromUrl))
+			{
+				return codeFromUrl;
+			}
+
+			Match jsonMatch = Regex.Match(input, @"""authorizationCode""\s*:\s*""([^""]+)""", RegexOptions.IgnoreCase);
+			if (jsonMatch.Success)
+			{
+				return jsonMatch.Groups[1].Value;
+			}
+
+			Match keyValueMatch = Regex.Match(input, @"authorizationCode\s*[=:]\s*([a-zA-Z0-9_-]+)", RegexOptions.IgnoreCase);
+			if (keyValueMatch.Success)
+			{
+				return keyValueMatch.Groups[1].Value;
+			}
+
+			return input;
 		}
 
 		/// <summary>
@@ -1298,7 +1613,8 @@ namespace CommonPluginsStores.Epic
 		/// <see cref="StoreToken"/>. Persists it via <see cref="SetStoredToken"/>.
 		/// </summary>
 		/// <param name="respContent">Raw JSON body of the OAuth token endpoint response.</param>
-		private void SetToken(string respContent)
+		/// <returns><c>true</c> when the token was deserialized and stored; otherwise <c>false</c>.</returns>
+		private bool SetToken(string respContent)
 		{
 			if (Serialization.TryFromJson(respContent, out OauthResponse oauthResponse, out Exception exception))
 			{
@@ -1312,11 +1628,17 @@ namespace CommonPluginsStores.Epic
 					RefreshExpireAt = oauthResponse.refresh_expires_at
 				};
 				SetStoredToken(StoreToken);
+				Common.LogDebug(true, $"[EpicApi] SetToken succeeded: hasAccountId={!StoreToken.AccountId.IsNullOrEmpty()}, hasToken={!StoreToken.Token.IsNullOrEmpty()}.");
+				return true;
 			}
-			else if (exception != null)
+
+			if (exception != null)
 			{
 				Common.LogError(exception, false, false, PluginName);
 			}
+
+			Common.LogDebug(true, "[EpicApi] SetToken failed: invalid OAuth response.");
+			return false;
 		}
 
 		/// <summary>
@@ -1492,7 +1814,12 @@ namespace CommonPluginsStores.Epic
 			Asset asset = GetAssets()?.FirstOrDefault(a => a.AppName.IsEqual(game.GameId));
 			if (asset == null)
 			{
-				Logger.Warn($"EpicApi.GetAssetFromGame: No asset found for GameId '{game.GameId}'.");
+				Common.LogDebug(true, $"EpicApi.GetAssetFromGame: no library asset for GameId '{game.GameId}'.");
+			}
+			else
+			{
+				Common.LogDebug(true,
+					$"EpicApi.GetAssetFromGame: matched GameId '{game.GameId}' → namespace='{asset.Namespace}', catalogItemId='{asset.CatalogItemId}'.");
 			}
 
 			return asset;
@@ -1507,10 +1834,42 @@ namespace CommonPluginsStores.Epic
 		/// </summary>
 		/// <param name="game">The Playnite game to resolve.</param>
 		/// <returns>The Epic namespace string, or null when no asset is found.</returns>
-		/// <remarks>⚠️ Requires authentication (calls <see cref="GetAssets"/>). For an anonymous alternative use <see cref="GetNamespaceFromGameAnonymous"/>.</remarks>
+		/// <remarks>
+		/// Tries the authenticated library asset list first, then falls back to
+		/// <see cref="GetNamespaceFromGameAnonymous"/> when no asset matches <see cref="Game.GameId"/>.
+		/// </remarks>
 		public string GetNamespaceFromGame(Game game)
 		{
-			return GetAssetFromGame(game)?.Namespace;
+			if (game == null)
+			{
+				Logger.Warn("EpicApi.GetNamespaceFromGame: game is null.");
+				return null;
+			}
+
+			Asset asset = GetAssetFromGame(game);
+			if (asset != null && !asset.Namespace.IsNullOrEmpty())
+			{
+				Common.LogDebug(true,
+					$"EpicApi.GetNamespaceFromGame: resolved via library asset for '{game.Name}' (GameId='{game.GameId}') → '{asset.Namespace}'.");
+				return asset.Namespace;
+			}
+
+			Common.LogDebug(true,
+				$"EpicApi.GetNamespaceFromGame: no library asset for '{game.Name}' (GameId='{game.GameId}'), trying anonymous resolution.");
+
+			string @namespace = GetNamespaceFromGameAnonymous(game);
+			if (@namespace.IsNullOrEmpty())
+			{
+				Common.LogDebug(true,
+					$"EpicApi.GetNamespaceFromGame: all resolution paths failed for '{game.Name}' (GameId='{game.GameId}').");
+			}
+			else
+			{
+				Common.LogDebug(true,
+					$"EpicApi.GetNamespaceFromGame: anonymous fallback succeeded for '{game.Name}' → '{@namespace}'.");
+			}
+
+			return @namespace;
 		}
 
 		/// <summary>
@@ -1684,11 +2043,22 @@ namespace CommonPluginsStores.Epic
 
 			if (result?.Data?.Catalog?.CatalogNs?.Mappings?.FirstOrDefault()?.PageSlug == null)
 			{
+				Common.LogDebug(true, $"EpicApi.GetProductSlug: cache miss for namespace '{@namespace}', querying catalog mappings.");
 				result = QueryCatalogMappings(@namespace).GetAwaiter().GetResult();
 				FileDataService.SaveData(cacheFile, result);
 			}
+			else
+			{
+				Common.LogDebug(true, $"EpicApi.GetProductSlug: cache hit for namespace '{@namespace}'.");
+			}
 
-			return result?.Data?.Catalog?.CatalogNs?.Mappings?.FirstOrDefault()?.PageSlug;
+			string pageSlug = result?.Data?.Catalog?.CatalogNs?.Mappings?.FirstOrDefault()?.PageSlug;
+			if (pageSlug.IsNullOrEmpty())
+			{
+				Common.LogDebug(true, $"EpicApi.GetProductSlug: no pageSlug mapping for namespace '{@namespace}'.");
+			}
+
+			return pageSlug;
 		}
 
 		/// <summary>
@@ -1698,7 +2068,7 @@ namespace CommonPluginsStores.Epic
 		/// Resolution order:
 		/// <list type="number">
 		///   <item>Game Links → store URL → slug → <see cref="GetNamespaceFromSlug"/></item>
-		///   <item>Normalized game name → <see cref="GetProductSlug"/> → <see cref="GetNamespaceFromSlug"/></item>
+		///   <item>Normalized game name → <see cref="QuerySearchStore"/> → namespace (or slug → <see cref="GetNamespaceFromSlug"/>)</item>
 		/// </list>
 		/// Falls back to null when all paths fail.
 		/// </para>
@@ -1716,12 +2086,22 @@ namespace CommonPluginsStores.Epic
 			string slugFromLinks = GetUrlSlugFromGameLinks(game);
 			if (!slugFromLinks.IsNullOrEmpty())
 			{
+				Common.LogDebug(true,
+					$"EpicApi.GetNamespaceFromGameAnonymous: Epic store link slug='{slugFromLinks}' for '{game.Name}' (GameId='{game.GameId}').");
 				string ns = GetNamespaceFromSlug(slugFromLinks);
 				if (!ns.IsNullOrEmpty())
 				{
 					Logger.Info($"EpicApi.GetNamespaceFromGameAnonymous: resolved via Links for '{game.GameId}' → {ns}");
 					return ns;
 				}
+
+				Common.LogDebug(true,
+					$"EpicApi.GetNamespaceFromGameAnonymous: slug '{slugFromLinks}' did not resolve to a namespace.");
+			}
+			else
+			{
+				Common.LogDebug(true,
+					$"EpicApi.GetNamespaceFromGameAnonymous: no Epic store link slug for '{game.Name}' (GameId='{game.GameId}').");
 			}
 
 			string normalizedName = PlayniteTools.NormalizeGameName(
@@ -1730,19 +2110,78 @@ namespace CommonPluginsStores.Epic
 
 			if (!normalizedName.IsNullOrEmpty())
 			{
-				string slugFromName = GetProductSlug(normalizedName);
-				if (!slugFromName.IsNullOrEmpty())
+				string nsFromSearch = ResolveNamespaceFromStoreSearch(normalizedName);
+				if (!nsFromSearch.IsNullOrEmpty())
 				{
-					string ns = GetNamespaceFromSlug(slugFromName);
-					if (!ns.IsNullOrEmpty())
-					{
-						Logger.Info($"EpicApi.GetNamespaceFromGameAnonymous: resolved via Name for '{game.GameId}' → {ns}");
-						return ns;
-					}
+					Logger.Info($"EpicApi.GetNamespaceFromGameAnonymous: resolved via store search for '{game.GameId}' → {nsFromSearch}");
+					return nsFromSearch;
 				}
 			}
 
 			Logger.Warn($"EpicApi.GetNamespaceFromGameAnonymous: could not resolve namespace for '{game.GameId}'.");
+			return null;
+		}
+
+		/// <summary>
+		/// Searches the Epic store catalog by keywords and returns the sandbox namespace
+		/// of the best matching offer.
+		/// </summary>
+		/// <param name="normalizedName">Normalized game name used as search keywords.</param>
+		/// <returns>The namespace string, or null when no suitable match is found.</returns>
+		/// <remarks>Does not require authentication — uses public GraphQL search.</remarks>
+		private string ResolveNamespaceFromStoreSearch(string normalizedName)
+		{
+			if (normalizedName.IsNullOrEmpty())
+			{
+				return null;
+			}
+
+			Common.LogDebug(true, $"EpicApi.ResolveNamespaceFromStoreSearch: keywords='{normalizedName}'.");
+
+			SearchStoreResponse response = QuerySearchStore(normalizedName).GetAwaiter().GetResult();
+			List<SearchStoreResponse.Element> elements = response?.Data?.Catalog?.SearchStore?.Elements;
+			if (elements == null || elements.Count == 0)
+			{
+				Common.LogDebug(true, $"EpicApi.ResolveNamespaceFromStoreSearch: no results for '{normalizedName}'.");
+				return null;
+			}
+
+			Common.LogDebug(true,
+				$"EpicApi.ResolveNamespaceFromStoreSearch: {elements.Count} result(s) for '{normalizedName}'.");
+
+			SearchStoreResponse.Element match = elements.FirstOrDefault(e =>
+				string.Equals(
+					PlayniteTools.NormalizeGameName(e.Title ?? string.Empty),
+					normalizedName,
+					StringComparison.OrdinalIgnoreCase));
+
+			if (match == null)
+			{
+				match = elements[0];
+				Common.LogDebug(true,
+					$"EpicApi.ResolveNamespaceFromStoreSearch: no exact title match, using first result title='{match.Title}'.");
+			}
+			else
+			{
+				Common.LogDebug(true,
+					$"EpicApi.ResolveNamespaceFromStoreSearch: exact title match '{match.Title}'.");
+			}
+
+			if (!match.Namespace.IsNullOrEmpty())
+			{
+				return match.Namespace;
+			}
+
+			string slug = match.ProductSlug ?? match.UrlSlug;
+			if (!slug.IsNullOrEmpty())
+			{
+				Common.LogDebug(true,
+					$"EpicApi.ResolveNamespaceFromStoreSearch: namespace empty, resolving via slug='{slug}'.");
+				return GetNamespaceFromSlug(slug);
+			}
+
+			Common.LogDebug(true,
+				$"EpicApi.ResolveNamespaceFromStoreSearch: result has no namespace or slug, title='{match.Title}'.");
 			return null;
 		}
 
@@ -1771,16 +2210,23 @@ namespace CommonPluginsStores.Epic
 
 			try
 			{
+				Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: resolving slug='{slug}'.");
+
 				string cacheFile = Path.Combine(PathAppsData, Paths.GetSafePathName($"mapping_{slug}.json"));
 				GetMappingByPageSlugResponse result = FileDataService.LoadData<GetMappingByPageSlugResponse>(cacheFile, -1);
 
 				if (result == null)
 				{
+					Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: cache miss for slug='{slug}', querying page mapping.");
 					result = QueryMappingByPageSlug(slug).GetAwaiter().GetResult();
 					if (result != null)
 					{
 						FileDataService.SaveData(cacheFile, result);
 					}
+				}
+				else
+				{
+					Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: cache hit for slug='{slug}'.");
 				}
 
 				var mapping = result?.Data?.StorePageMapping?.Mapping;
@@ -1793,6 +2239,7 @@ namespace CommonPluginsStores.Epic
 				// SandboxId is the canonical namespace identifier.
 				if (!mapping.SandboxId.IsNullOrEmpty())
 				{
+					Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: resolved slug='{slug}' via SandboxId → '{mapping.SandboxId}'.");
 					return mapping.SandboxId;
 				}
 
@@ -1800,6 +2247,7 @@ namespace CommonPluginsStores.Epic
 				string nsFromOffer = mapping.Mappings?.Offer?.Namespace;
 				if (!nsFromOffer.IsNullOrEmpty())
 				{
+					Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: resolved slug='{slug}' via Offer.Namespace → '{nsFromOffer}'.");
 					return nsFromOffer;
 				}
 
@@ -1807,6 +2255,7 @@ namespace CommonPluginsStores.Epic
 				string nsFromPrePurchase = mapping.Mappings?.PrePurchaseOffer?.Namespace;
 				if (!nsFromPrePurchase.IsNullOrEmpty())
 				{
+					Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: resolved slug='{slug}' via PrePurchaseOffer.Namespace → '{nsFromPrePurchase}'.");
 					return nsFromPrePurchase;
 				}
 
@@ -2436,8 +2885,8 @@ namespace CommonPluginsStores.Epic
 		/// Maps a single Epic <see cref="Detail"/> entry into the appropriate field
 		/// of <paramref name="minimum"/> and <paramref name="recommended"/>.
 		/// <para>
-		/// Epic encodes all requirement values as plain strings. RAM and Storage are parsed
-		/// from human-readable size strings (e.g. "8 GB", "50 GB") into bytes.
+		/// Epic encodes all requirement values as plain strings. RAM and storage source
+		/// fields are parsed into bytes during plugin normalisation.
 		/// Unrecognised titles (e.g. "DirectX", "Sound Card") are silently skipped.
 		/// </para>
 		/// </summary>
@@ -2471,15 +2920,15 @@ namespace CommonPluginsStores.Epic
 			else if (string.Equals(title, "Memory", StringComparison.OrdinalIgnoreCase)
 				|| string.Equals(title, "RAM", StringComparison.OrdinalIgnoreCase))
 			{
-				minimum.Ram = ParseSizeToBytes(detail.Minimum);
-				recommended.Ram = ParseSizeToBytes(detail.Recommended);
+				minimum.RamSource = detail.Minimum?.Trim();
+				recommended.RamSource = detail.Recommended?.Trim();
 			}
 			else if (string.Equals(title, "Storage", StringComparison.OrdinalIgnoreCase)
 				|| string.Equals(title, "Hard Drive", StringComparison.OrdinalIgnoreCase)
 				|| string.Equals(title, "Hard disk space", StringComparison.OrdinalIgnoreCase))
 			{
-				minimum.Storage = ParseSizeToBytes(detail.Minimum);
-				recommended.Storage = ParseSizeToBytes(detail.Recommended);
+				minimum.StorageSource = detail.Minimum?.Trim();
+				recommended.StorageSource = detail.Recommended?.Trim();
 			}
 		}
 
@@ -2491,48 +2940,6 @@ namespace CommonPluginsStores.Epic
 			if (!value.IsNullOrEmpty())
 			{
 				list.Add(value.Trim());
-			}
-		}
-
-		/// <summary>
-		/// Parses a human-readable size string into bytes.
-		/// Handles formats such as "8 GB", "8192 MB", "50GB".
-		/// Returns 0 when the input is null, empty, or cannot be parsed.
-		/// </summary>
-		private static double ParseSizeToBytes(string value)
-		{
-			if (value.IsNullOrEmpty())
-			{
-				return 0;
-			}
-
-			string normalised = value.Trim().Replace("\u00A0", " ");
-			int unitStart = normalised.Length;
-
-			while (unitStart > 0 && (char.IsLetter(normalised[unitStart - 1]) || normalised[unitStart - 1] == ' '))
-			{
-				unitStart--;
-			}
-
-			string numericPart = normalised.Substring(0, unitStart).Trim();
-			string unit = normalised.Substring(unitStart).Trim().ToUpperInvariant();
-
-			if (!double.TryParse(
-				numericPart,
-				System.Globalization.NumberStyles.Any,
-				System.Globalization.CultureInfo.InvariantCulture,
-				out double number))
-			{
-				return 0;
-			}
-
-			switch (unit)
-			{
-				case "TB": return number * 1024L * 1024 * 1024 * 1024;
-				case "GB": return number * 1024L * 1024 * 1024;
-				case "MB": return number * 1024L * 1024;
-				case "KB": return number * 1024L;
-				default: return number;
 			}
 		}
 

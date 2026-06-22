@@ -21,6 +21,15 @@ namespace CommonPluginsStores.GameJolt
 {
     public class GameJoltApi : StoreApi
     {
+        /// <summary>Minimum delay between Game Jolt HTTP calls to reduce throttling.</summary>
+        private static readonly TimeSpan ApiRequestMinInterval = TimeSpan.FromMilliseconds(500);
+        private readonly RequestRateLimiter _apiRateLimiter = new RequestRateLimiter(ApiRequestMinInterval);
+
+        private void WaitForApiRateLimit()
+        {
+            _apiRateLimiter.WaitAsync().GetAwaiter().GetResult();
+        }
+
         #region Urls
         private static string UrlBase => @"https://gamejolt.com";
         private static string UrlSiteApi => UrlBase + "/site-api";
@@ -120,7 +129,9 @@ namespace CommonPluginsStores.GameJolt
 
                 if (response.IsNullOrEmpty())
                 {
-                    Thread.Sleep(1000);
+                    Logger.Warn($"Empty trophies payload for game {id}, retrying once.");
+                    Common.LogDebug(true, $"[GameJoltApi] Empty response for {url}, throttled retry with interval {ApiRequestMinInterval.TotalMilliseconds}ms.");
+                    WaitForApiRateLimit();
                     jsonData = Web.DownloadJsonDataWebView(url, GetStoredCookies(), true, CookiesDomains).GetAwaiter().GetResult();
                     response = jsonData.Item1;
                 }
@@ -180,7 +191,9 @@ namespace CommonPluginsStores.GameJolt
 
                 if (response.IsNullOrEmpty())
                 {
-                    Thread.Sleep(1000);
+                    Logger.Warn($"Empty trophies schema payload for game {id}, retrying once.");
+                    Common.LogDebug(true, $"[GameJoltApi] Empty schema response for {url}, throttled retry with interval {ApiRequestMinInterval.TotalMilliseconds}ms.");
+                    WaitForApiRateLimit();
                     jsonData = Web.DownloadJsonDataWebView(url, GetStoredCookies(), true, CookiesDomains).GetAwaiter().GetResult();
                     response = jsonData.Item1;
                 }

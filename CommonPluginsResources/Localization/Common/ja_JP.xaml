@@ -181,6 +181,8 @@
 
 	<sys:String x:Key="LOCCommonAutoImport">ライブラリ更新時にデータを自動インポート（新規項目のみ）</sys:String>
 	<sys:String x:Key="LOCCommonAutoImportOnInstalled">インストール済みゲームのデータを自動インポート</sys:String>
+	<sys:String x:Key="LOCCommonLibraryFiltersSectionTitle">ライブラリフィルター</sys:String>
+	<sys:String x:Key="LOCCommonIncludeEmulatedGames">プラグインの処理にエミュレートされたゲームを含める</sys:String>
 	<sys:String x:Key="LOCCommonImporting">インポート中…</sys:String>
 	<sys:String x:Key="LOCCommonExport">エクスポート</sys:String>
 	<sys:String x:Key="LOCCommonExportData">データをエクスポート</sys:String>
@@ -238,6 +240,8 @@
 	<sys:String x:Key="LOCCommonStoreNoApiKey">{0}：API キーがありません</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0}：設定が見つかりません</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}：ユーザーが認証されていません</sys:String>
+	<sys:String x:Key="LOCCommonStoresInvalidSteamAppId">無効な Steam App ID「{0}」です。Playnite 内のゲームのストア ID は、Steam アプリケーション ID の数値である必要があります（例：Half-Life 2 の場合は 220）。</sys:String>
+	<sys:String x:Key="LOCCommonStoresInvalidSteamAppIdForGame">ゲーム「{0}」の Steam App ID「{1}」が無効です。Playnite 内のゲームのストア ID は、Steam アプリケーション ID の数値である必要があります（例：Half-Life 2 の場合は 220）。</sys:String>
 	<sys:String x:Key="LOCCommonStoresLaunchers">ストアとランチャー</sys:String>
 	<sys:String x:Key="LOCCommonStoresConsolesMobile">コンソールとモバイル</sys:String>
 	<sys:String x:Key="LOCCommonStoreSteam">Steam</sys:String>

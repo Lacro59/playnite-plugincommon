@@ -33,6 +33,9 @@ namespace CommonPluginsShared.Interfaces
 		/// </summary>
 		Action PersistSettingsAction { get; set; }
 
+		/// <summary>Gets plugin settings used for library game filtering.</summary>
+		IPluginSettings FilterSettings { get; }
+
 		/// <summary>Initialize the database.</summary>
 		Task<bool> InitializeDatabase();
 
@@ -80,6 +83,22 @@ namespace CommonPluginsShared.Interfaces
 
 		/// <summary>Refresh data for a list of games.</summary>
 		void Refresh(IEnumerable<Guid> ids);
+
+		/// <summary>
+		/// Raised after a multi-game batch <see cref="Refresh(System.Collections.Generic.IEnumerable{System.Guid})"/>
+		/// completes and Playnite buffered database updates have been flushed.
+		/// </summary>
+		event EventHandler<BatchRefreshCompletedEventArgs> BatchRefreshCompleted;
+
+		/// <summary>Gets a value indicating whether a multi-game batch refresh is currently running.</summary>
+		bool IsBatchRefreshInProgress { get; }
+
+		/// <summary>
+		/// During batch refresh, returns <c>true</c> when auth UI notifications should be skipped
+		/// for the given store/client key (deduplicated per batch).
+		/// </summary>
+		/// <param name="clientKey">Store or client label.</param>
+		bool ShouldSkipAuthNotification(string clientKey);
 
 		/// <summary>Refresh data for a list of games without loading data.</summary>
 		[Obsolete("Use Refresh(ids)")]

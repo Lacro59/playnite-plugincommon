@@ -83,6 +83,46 @@ namespace CommonPluginsShared.Plugins
 
 		#endregion
 
+		#region Library filters
+
+		private bool _includeEmulatedGames = true;
+
+		/// <inheritdoc/>
+		public bool IncludeEmulatedGames
+		{
+			get => _includeEmulatedGames;
+			set => SetValue(ref _includeEmulatedGames, value);
+		}
+
+		private SourceFilterMode _librarySourceFilterMode = SourceFilterMode.All;
+
+		/// <inheritdoc/>
+		public SourceFilterMode LibrarySourceFilterMode
+		{
+			get => _librarySourceFilterMode;
+			set => SetValue(ref _librarySourceFilterMode, value);
+		}
+
+		private List<string> _enabledSources = new List<string>();
+
+		/// <inheritdoc/>
+		public List<string> EnabledSources
+		{
+			get => _enabledSources;
+			set => SetValue(ref _enabledSources, value ?? new List<string>());
+		}
+
+		private List<string> _excludedSources = new List<string>();
+
+		/// <inheritdoc/>
+		public List<string> ExcludedSources
+		{
+			get => _excludedSources;
+			set => SetValue(ref _excludedSources, value ?? new List<string>());
+		}
+
+		#endregion
+
 		#region Runtime state
 
 		/// <inheritdoc/>

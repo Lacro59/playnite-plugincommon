@@ -60,6 +60,25 @@ namespace CommonPluginsShared.Controls
 		}
 
 		/// <summary>
+		/// Attaches shared plugin-database handlers for all <see cref="PluginUserControlExtend"/> derivatives,
+		/// including post-batch UI refresh via <see cref="IPluginDatabase.BatchRefreshCompleted"/>.
+		/// </summary>
+		protected override void AttachStaticEvents()
+		{
+			base.AttachStaticEvents();
+
+			if (DesignerProperties.GetIsInDesignMode(this) || pluginDatabase == null)
+			{
+				return;
+			}
+
+			AttachPluginEvents(pluginDatabase.PluginName + ".BatchRefreshCompleted", () =>
+			{
+				pluginDatabase.BatchRefreshCompleted += CreateBatchRefreshCompletedHandler();
+			});
+		}
+
+		/// <summary>
 		/// Synchronous fallback. Override <see cref="SetDataAsync"/> instead when
 		/// computation is expensive — this overload is only kept for backward compatibility
 		/// with controls that have not yet migrated.
@@ -118,6 +137,17 @@ namespace CommonPluginsShared.Controls
 
 			Game gameSnapshot = GameContext;
 			Guid gameId = gameSnapshot.Id;
+
+			if (pluginDatabase.FilterSettings != null
+				&& !PlayniteTools.ShouldIncludeLibraryGame(gameSnapshot, pluginDatabase.FilterSettings))
+			{
+				PlayniteTools.LogLibraryFilterExclusion(
+					string.Format("{0}.PluginUserControl", pluginDatabase.PluginName),
+					gameSnapshot,
+					PlayniteTools.GetLibraryFilterExclusionReason(gameSnapshot, pluginDatabase.FilterSettings));
+				SetVisibility(Visibility.Collapsed);
+				return;
+			}
 
 #if DEBUG
 			timer.Step(string.Format("cache lookup for game='{0}'", gameSnapshot.Name));

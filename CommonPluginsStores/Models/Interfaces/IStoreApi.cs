@@ -1,4 +1,6 @@
-﻿namespace CommonPluginsStores.Models.Interfaces
+﻿using System;
+
+namespace CommonPluginsStores.Models.Interfaces
 {
     /// <summary>
     /// Represents the API contract for a store plugin.
@@ -16,6 +18,16 @@
         bool IsUserLoggedIn { get; set; }
 
         /// <summary>
+        /// Gets whether a background login refresh is in progress.
+        /// </summary>
+        bool IsLoginRefreshInProgress { get; }
+
+        /// <summary>
+        /// Gets login status for UI bindings without blocking on background refresh or forcing full network verification.
+        /// </summary>
+        bool IsUserLoggedInForDisplay { get; }
+
+        /// <summary>
         /// Gets or sets the current account information.
         /// </summary>
         AccountInfos CurrentAccountInfos { get; set; }
@@ -26,9 +38,25 @@
         void ResetIsUserLoggedIn();
 
         /// <summary>
+        /// Re-evaluates login status on a background thread and invokes <paramref name="onCompleted"/> on the UI thread.
+        /// </summary>
+        /// <param name="onCompleted">Optional callback after the check finishes.</param>
+        void RefreshIsUserLoggedInInBackground(Action onCompleted = null);
+
+        /// <summary>
         /// Clears stored authentication data (cookies, tokens) and session profile fields.
         /// </summary>
         void ClearSession();
+
+        /// <summary>
+        /// Clears the persisted logged-out flag so an explicit login can restore the session.
+        /// </summary>
+        void PrepareExplicitLogin();
+
+        /// <summary>
+        /// Invalidates in-memory account cache and reloads profile data from persistent storage on next access.
+        /// </summary>
+        void ReloadAccountInfos();
 
         /// <summary>
         /// Sets the language or locale used by the store API.

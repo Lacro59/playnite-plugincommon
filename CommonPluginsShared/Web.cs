@@ -59,6 +59,26 @@ namespace CommonPluginsShared
 
         private static HttpClient SharedClient => SharedClientLazy.IsValueCreated ? SharedClientLazy.Value : null;
 
+        /// <summary>
+        /// Creates an <see cref="HttpClientHandler"/> with gzip/deflate decompression enabled.
+        /// Used by per-call clients so compressed store/API responses decode correctly.
+        /// </summary>
+        private static HttpClientHandler CreateHttpClientHandler()
+        {
+            return new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            };
+        }
+
+        /// <summary>
+        /// Returns the shared lazy <see cref="HttpClient"/> (created on first use if not initialized explicitly).
+        /// </summary>
+        private static HttpClient GetHttpClientForStringDownload()
+        {
+            return SharedClientLazy.Value;
+        }
+
         // Initialization tracking
         private static readonly object InitLock = new object();
         private static Task _initializationTask = null;
@@ -415,56 +435,23 @@ namespace CommonPluginsShared
                 return string.Empty;
             }
 
-            // Prefer using a shared HttpClient for connection reuse and higher parallelism. Fall back to per-call if unavailable.
-            if (SharedClient != null)
+            using (var request = new HttpRequestMessage()
             {
-                using (var request = new HttpRequestMessage()
+                RequestUri = new Uri(url),
+                Method = HttpMethod.Get
+            })
+            {
+                try
                 {
-                    RequestUri = new Uri(url),
-                    Method = HttpMethod.Get
-                })
-                {
-                    HttpResponseMessage response = null;
-                    try
+                    using (var response = await GetHttpClientForStringDownload().SendAsync(request).ConfigureAwait(false))
                     {
-                        using (response = await SharedClient.SendAsync(request).ConfigureAwait(false))
-                        {
-                            return await ProcessDownloadStringResponse(response, request, redirectDepth).ConfigureAwait(false);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Common.LogError(ex, false, $"Error on download {url}");
-                        return string.Empty;
+                        return await ProcessDownloadStringResponse(response, request, redirectDepth).ConfigureAwait(false);
                     }
                 }
-            }
-            else
-            {
-                // Fallback behaviour: create a per-call HttpClient as before
-                using (HttpClient client = new HttpClient())
+                catch (Exception ex)
                 {
-                    using (var request = new HttpRequestMessage()
-                    {
-                        RequestUri = new Uri(url),
-                        Method = HttpMethod.Get
-                    })
-                    {
-                        HttpResponseMessage response = null;
-                        try
-                        {
-                            client.DefaultRequestHeaders.Add("User-Agent", Web.UserAgent);
-                            using (response = await client.SendAsync(request).ConfigureAwait(false))
-                            {
-                                return await ProcessDownloadStringResponse(response, request, redirectDepth).ConfigureAwait(false);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Common.LogError(ex, false, $"Error on download {url}");
-                            return string.Empty;
-                        }
-                    }
+                    Common.LogError(ex, false, $"Error on download {url}");
+                    return string.Empty;
                 }
             }
         }
@@ -565,7 +552,7 @@ namespace CommonPluginsShared
                 Logger.Warn($"Maximum redirect depth {MaxRedirects} reached for {url}");
                 return string.Empty;
             }
-            HttpClientHandler handler = new HttpClientHandler();
+            HttpClientHandler handler = CreateHttpClientHandler();
             if (cookies != null)
             {
                 handler.CookieContainer = CreateCookiesContainer(cookies);
@@ -578,7 +565,7 @@ namespace CommonPluginsShared
             };
 
             HttpResponseMessage response;
-            using (var client = new HttpClient(handler))
+            using (var client = new HttpClient(handler, disposeHandler: true))
             {
                 if (userAgent.IsNullOrEmpty())
                 {

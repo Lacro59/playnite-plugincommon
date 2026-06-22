@@ -112,7 +112,6 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0"
@@ -133,10 +132,9 @@
                                Grid.Column="0"
                                Style="{StaticResource ViewColumnLabelText}"
                                Text="{DynamicResource LOCSteamAccountID}"
-                               Margin="0,0,12,12" />
+                               Margin="0,0,12,0" />
                     <StackPanel Grid.Row="1"
-                                Grid.Column="1"
-                                Margin="0,0,0,12">
+                                Grid.Column="1">
                         <TextBox MinWidth="280"
                                  MaxWidth="420"
                                  HorizontalAlignment="Left"
@@ -144,7 +142,8 @@
                                  TextChanged="TextBox_TextChanged" />
                         <TextBlock Margin="0,4,0,0"
                                    FontSize="12"
-                                   Foreground="{DynamicResource TextBrushDarker}">
+                                   Foreground="{DynamicResource TextBrushDarker}"
+                                   Visibility="{Binding ShowGetAccountIdLink, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Hyperlink NavigateUri="https://store.steampowered.com/account"
                                        Command="{x:Static pcmdCommands:CommandsNavigation.NavigateUrl}"
                                        CommandParameter="{Binding NavigateUri, RelativeSource={RelativeSource Self}}">
@@ -152,33 +151,41 @@
                             </Hyperlink>
                         </TextBlock>
                     </StackPanel>
-
-                    <TextBlock Grid.Row="2"
-                               Grid.Column="0"
-                               Style="{StaticResource ViewColumnLabelText}"
-                               Text="{DynamicResource LOCSteamAPIKey}"
-                               Margin="0,0,12,0"
-                               Visibility="{Binding ElementName=PART_HasApiKey, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    <StackPanel Grid.Row="2"
-                                Grid.Column="1"
-                                Visibility="{Binding ElementName=PART_HasApiKey, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <PasswordBox local:PasswordBoxAssistant.BindPassword="True"
-                                     MinWidth="280"
-                                     MaxWidth="420"
-                                     HorizontalAlignment="Left"
-                                     local:PasswordBoxAssistant.BoundPassword="{Binding User.ApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=150}" />
-                        <TextBlock Margin="0,4,0,0"
-                                   FontSize="12"
-                                   Foreground="{DynamicResource TextBrushDarker}">
-                            <Hyperlink NavigateUri="https://steamcommunity.com/dev/apikey"
-                                       Command="{x:Static pcmdCommands:CommandsNavigation.NavigateUrl}"
-                                       CommandParameter="{Binding NavigateUri, RelativeSource={RelativeSource Self}}">
-                                <Run Text="{DynamicResource LOCSettingsApiKeyUrlText}" />
-                            </Hyperlink>
-                        </TextBlock>
-                    </StackPanel>
                 </Grid>
             </StackPanel>
+        </Border>
+
+        <Border Style="{StaticResource SectionBorder}"
+                Margin="0,12,0,0"
+                IsEnabled="{Binding IsApiKeyEntryEnabled}"
+                Visibility="{Binding ShowApiKeyField, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Style="{StaticResource ViewColumnLabelText}"
+                           Text="{DynamicResource LOCSteamAPIKey}"
+                           Margin="0,0,12,0" />
+                <StackPanel Grid.Column="1">
+                    <PasswordBox local:PasswordBoxAssistant.BindPassword="True"
+                                 MinWidth="280"
+                                 MaxWidth="420"
+                                 HorizontalAlignment="Left"
+                                 local:PasswordBoxAssistant.BoundPassword="{Binding User.ApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=150}" />
+                    <TextBlock Margin="0,4,0,0"
+                               FontSize="12"
+                               Foreground="{DynamicResource TextBrushDarker}">
+                        <Hyperlink NavigateUri="https://steamcommunity.com/dev/apikey"
+                                   Command="{x:Static pcmdCommands:CommandsNavigation.NavigateUrl}"
+                                   CommandParameter="{Binding NavigateUri, RelativeSource={RelativeSource Self}}">
+                            <Run Text="{DynamicResource LOCSettingsApiKeyUrlText}" />
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
         </Border>
     </StackPanel>
 </UserControl>

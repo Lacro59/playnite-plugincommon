@@ -43,6 +43,9 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Gets or sets the strongly-typed plugin settings view model.</summary>
 		public TSettings PluginSettings { get; set; }
 
+		/// <inheritdoc/>
+		public IPluginSettings FilterSettings => PluginSettings;
+
 		public PluginExportCsv<TItem> PluginExportCsv { get; set; }
 
 		/// <summary>Gets or sets plugin-specific paths (database, cache, installation directory).</summary>
@@ -123,6 +126,21 @@ namespace CommonPluginsShared.Collections
 
 		/// <summary>Raised after any item is removed via <see cref="Remove(Guid)"/>.</summary>
 		public event EventHandler<ItemCollectionChangedEventArgs<TItem>> DatabaseItemCollectionChanged;
+
+		/// <summary>
+		/// Raised after a multi-game batch <see cref="Refresh(System.Collections.Generic.IEnumerable{System.Guid}, string)"/>
+		/// completes and Playnite buffered database updates have been flushed.
+		/// </summary>
+		public event EventHandler<BatchRefreshCompletedEventArgs> BatchRefreshCompleted;
+
+		// ── Batch refresh auth notification suppression ───────────────────────────
+
+		private readonly object _batchAuthSuppressionLock = new object();
+		private HashSet<string> _batchAuthSuppressedClients;
+		private bool _isBatchRefreshInProgress;
+
+		/// <summary>Gets a value indicating whether a multi-game batch refresh is currently running.</summary>
+		public bool IsBatchRefreshInProgress => _isBatchRefreshInProgress;
 
 		// ── Tag cache ─────────────────────────────────────────────────────────────
 
@@ -767,22 +785,28 @@ namespace CommonPluginsShared.Collections
 				List<TItem> allItems = _database.ToList();
 				a.ProgressMaxValue = allItems.Count;
 
-				foreach (TItem item in allItems)
+				ExecuteWithPlayniteBufferedUpdates(() =>
 				{
-					try
+					using (_database.BufferedUpdate())
 					{
-						RemoveTag(item.Id);
-						_database.Remove(item.Id);
-						Common.LogDebug(true, string.Format("ClearDatabase — removed item {0} ({1})", item.Id, item.Name));
-						removedCount++;
-						a.CurrentProgressValue++;
+						foreach (TItem item in allItems)
+						{
+							try
+							{
+								RemoveTag(item.Id);
+								_database.Remove(item.Id);
+								Common.LogDebug(true, string.Format("ClearDatabase — removed item {0} ({1})", item.Id, item.Name));
+								removedCount++;
+								a.CurrentProgressValue++;
+							}
+							catch (Exception ex)
+							{
+								isOk = false;
+								Common.LogError(ex, false, string.Format("Error clearing {0} — {1}", item.Id, item.Name), false, PluginName);
+							}
+						}
 					}
-					catch (Exception ex)
-					{
-						isOk = false;
-						Common.LogError(ex, false, string.Format("Error clearing {0} — {1}", item.Id, item.Name), false, PluginName);
-					}
-				}
+				});
 
 				Logger.Info(string.Format("ClearDatabase — {0}/{1} items removed successfully.", removedCount, allItems.Count));
 
@@ -817,11 +841,14 @@ namespace CommonPluginsShared.Collections
 				"DeleteDataWithDeletedGame — identified {0} orphaned item(s).",
 				orphaned.Count));
 
-			foreach (TItem item in orphaned)
+			using (_database.BufferedUpdate())
 			{
-				Logger.Info(string.Format(
-					"Deleting orphaned data: {0} ({1})", item.Name, item.Id));
-				_database.Remove(item.Id);
+				foreach (TItem item in orphaned)
+				{
+					Logger.Info(string.Format(
+						"Deleting orphaned data: {0} ({1})", item.Name, item.Id));
+					_database.Remove(item.Id);
+				}
 			}
 
 			Logger.Info(string.Format(
@@ -910,7 +937,7 @@ namespace CommonPluginsShared.Collections
 			IEnumerable<Game> notInDb = API.Instance.Database.Games
 				.Where(x => !db.ContainsItem(x.Id));
 
-			return withNoData.Union(notInDb).Distinct().Where(x => !x.Hidden);
+			return FilterLibraryGames(withNoData.Union(notInDb).Distinct());
 		}
 
 		/// <inheritdoc/>
@@ -922,9 +949,9 @@ namespace CommonPluginsShared.Collections
 				return Enumerable.Empty<Game>();
 			}
 
-			return db.Where(x => x.DateLastRefresh <= DateTime.Now.AddMonths(-months))
+			return FilterLibraryGames(db.Where(x => x.DateLastRefresh <= DateTime.Now.AddMonths(-months))
 				.Select(x => API.Instance.Database.Games.Get(x.Id))
-				.Where(x => x != null);
+				.Where(x => x != null));
 		}
 
 		/// <summary>Returns a projection of all database entries as DataGame view models.</summary>
@@ -1090,11 +1117,135 @@ namespace CommonPluginsShared.Collections
 		public virtual bool Remove(Game game) => Remove(game.Id);
 
 		/// <summary>
-		/// Removes the item identified by <paramref name="id"/> and raises
-		/// <see cref="DatabaseItemCollectionChanged"/>.
+		/// Removes the item identified by <paramref name="id"/> with a progress dialog and raises
+		/// <see cref="DatabaseItemCollectionChanged"/> when removal succeeds.
 		/// </summary>
 		public virtual bool Remove(Guid id)
 		{
+			bool removed = false;
+			string message = ResourceProvider.GetString("LOCCommonDeletePluginData");
+
+			GlobalProgressOptions options = new GlobalProgressOptions(
+				string.Format("{0} - {1}", PluginName, message))
+			{
+				Cancelable = false,
+				IsIndeterminate = true
+			};
+
+			API.Instance.Dialogs.ActivateGlobalProgress(a =>
+			{
+				try
+				{
+					ExecuteWithPlayniteBufferedUpdates(() =>
+					{
+						using (_database.BufferedUpdate())
+						{
+							removed = RemoveNoLoader(id);
+						}
+					});
+				}
+				catch (Exception ex)
+				{
+					Common.LogError(ex, false, false, PluginName);
+				}
+			}, options);
+
+			return removed;
+		}
+
+		/// <inheritdoc/>
+		public virtual void Remove(List<Guid> ids) => Remove((IEnumerable<Guid>)ids);
+
+		/// <inheritdoc/>
+		public virtual bool Remove(IEnumerable<Guid> ids)
+		{
+			Logger.Info("Remove(IEnumerable<Guid>) started.");
+			List<Guid> idList = ids == null ? new List<Guid>() : ids.ToList();
+			if (idList.Count == 0)
+			{
+				return true;
+			}
+
+			if (idList.Count == 1)
+			{
+				return Remove(idList[0]);
+			}
+
+			string message = ResourceProvider.GetString("LOCCommonDeletePluginData");
+			bool anyRemoved = false;
+
+			GlobalProgressOptions options = new GlobalProgressOptions(
+				string.Format("{0} - {1}", PluginName, message))
+			{
+				Cancelable = false,
+				IsIndeterminate = false
+			};
+
+			API.Instance.Dialogs.ActivateGlobalProgress(a =>
+			{
+				try
+				{
+					ExecuteWithPlayniteBufferedUpdates(() =>
+					{
+						using (_database.BufferedUpdate())
+						{
+							a.ProgressMaxValue = idList.Count;
+
+							foreach (Guid id in idList)
+							{
+								Game game = API.Instance.Database.Games.Get(id);
+								a.Text = BuildProgressText(
+									message, a.CurrentProgressValue, idList.Count, game);
+
+								try
+								{
+									if (RemoveNoLoader(id, raiseCollectionChanged: false))
+									{
+										anyRemoved = true;
+									}
+								}
+								catch (Exception ex)
+								{
+									Common.LogError(ex, false, true, PluginName);
+								}
+
+								a.CurrentProgressValue++;
+							}
+						}
+					});
+
+					if (anyRemoved)
+					{
+						DatabaseItemCollectionChanged?.Invoke(this,
+							new ItemCollectionChangedEventArgs<TItem>(
+								new List<TItem>(), new List<TItem>()));
+					}
+				}
+				catch (Exception ex)
+				{
+					Common.LogError(ex, false, false, PluginName);
+				}
+			}, options);
+
+			return true;
+		}
+
+		/// <summary>
+		/// Core removal logic without a progress dialog.
+		/// Used by batch delete, Playnite game-deletion handlers, and <see cref="Remove(Guid)"/>.
+		/// </summary>
+		/// <param name="id">Game identifier whose plugin data should be removed.</param>
+		/// <param name="raiseCollectionChanged">
+		/// When <c>true</c>, raises <see cref="DatabaseItemCollectionChanged"/> after a successful removal.
+		/// </param>
+		/// <returns><c>true</c> if the item was removed from the plugin database.</returns>
+		protected virtual bool RemoveNoLoader(Guid id, bool raiseCollectionChanged = true)
+		{
+			if (_database == null || !_database.ContainsItem(id))
+			{
+				return false;
+			}
+
 			RemoveTag(id);
 			bool removed = false;
 			try
@@ -1108,35 +1259,21 @@ namespace CommonPluginsShared.Collections
 
 			if (removed)
 			{
-				DatabaseItemCollectionChanged?.Invoke(this,
-					new ItemCollectionChangedEventArgs<TItem>(
-						new List<TItem>(), new List<TItem>()));
+				ActionAfterRemove(id);
+
+				if (raiseCollectionChanged)
+				{
+					DatabaseItemCollectionChanged?.Invoke(this,
+						new ItemCollectionChangedEventArgs<TItem>(
+							new List<TItem>(), new List<TItem>()));
+				}
 			}
 
 			return removed;
 		}
 
-		/// <inheritdoc/>
-		public virtual void Remove(List<Guid> ids) => Remove((IEnumerable<Guid>)ids);
-
-		/// <inheritdoc/>
-		public virtual bool Remove(IEnumerable<Guid> ids)
-		{
-			Logger.Info("Remove(IEnumerable<Guid>) started.");
-			foreach (Guid id in ids)
-			{
-				try
-				{
-					Remove(id);
-				}
-				catch (Exception ex)
-				{
-					Common.LogError(ex, false, true, PluginName);
-				}
-			}
-
-			return true;
-		}
+		/// <summary>Called after plugin data for <paramref name="id"/> is removed. Override for plugin-specific cleanup.</summary>
+		protected virtual void ActionAfterRemove(Guid id) { }
 
 		// ── Cache accessors ───────────────────────────────────────────────────────
 
@@ -1212,7 +1349,7 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Refreshes a batch of games with a cancellable progress dialog.</summary>
 		public virtual void Refresh(IEnumerable<Guid> ids, string message)
 		{
-			List<Guid> idList = ids.ToList();
+			List<Guid> idList = FilterLibraryGameIds(ids).ToList();
 
 			GlobalProgressOptions options = new GlobalProgressOptions(
 				string.Format("{0} - {1}", PluginName, message))
@@ -1223,39 +1360,76 @@ namespace CommonPluginsShared.Collections
 
 			API.Instance.Dialogs.ActivateGlobalProgress((a) =>
 			{
-				Stopwatch stopWatch = Stopwatch.StartNew();
-				a.ProgressMaxValue = idList.Count;
+				int processedCount = 0;
+				bool canceled = false;
+				bool isMultiGameBatch = idList.Count > 1;
 
-				foreach (Guid id in idList)
+				if (isMultiGameBatch)
 				{
-					if (a.CancelToken.IsCancellationRequested)
-					{
-						break;
-					}
-
-					Game game = API.Instance.Database.Games.Get(id);
-					a.Text = BuildProgressText(message, a.CurrentProgressValue, idList.Count, game);
-
-					try
-					{
-						Thread.Sleep(100);
-						RefreshNoLoader(id, a.CancelToken);
-					}
-					catch (Exception ex)
-					{
-						Common.LogError(ex, false, true, PluginName);
-					}
-
-					a.CurrentProgressValue++;
+					BeginBatchRefreshAuthSuppression();
 				}
 
-				stopWatch.Stop();
-				TimeSpan ts = stopWatch.Elapsed;
-				Logger.Info(string.Format(
-					"Refresh(){0} — {1:00}:{2:00}.{3:00} for {4}/{5} items",
-					a.CancelToken.IsCancellationRequested ? " (canceled)" : string.Empty,
-					ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
-					a.CurrentProgressValue, idList.Count));
+				try
+				{
+					ExecuteWithPlayniteBufferedUpdates(() =>
+					{
+						using (_database.BufferedUpdate())
+						{
+							Stopwatch stopWatch = Stopwatch.StartNew();
+							a.ProgressMaxValue = idList.Count;
+
+							foreach (Guid id in idList)
+							{
+								if (a.CancelToken.IsCancellationRequested)
+								{
+									break;
+								}
+
+								Game game = API.Instance.Database.Games.Get(id);
+								a.Text = BuildProgressText(message, a.CurrentProgressValue, idList.Count, game);
+
+								try
+								{
+									Thread.Sleep(100);
+									RefreshNoLoader(id, a.CancelToken);
+								}
+								catch (Exception ex)
+								{
+									Common.LogError(ex, false, true, PluginName);
+								}
+
+								a.CurrentProgressValue++;
+							}
+
+							processedCount = (int)a.CurrentProgressValue;
+							canceled = a.CancelToken.IsCancellationRequested;
+
+							stopWatch.Stop();
+							TimeSpan ts = stopWatch.Elapsed;
+							Logger.Info(string.Format(
+								"Refresh(){0} — {1:00}:{2:00}.{3:00} for {4}/{5} items",
+								canceled ? " (canceled)" : string.Empty,
+								ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
+								processedCount, idList.Count));
+						}
+					});
+
+					if (idList.Count > 1 && processedCount > 0)
+					{
+						RaiseBatchRefreshCompleted(processedCount, idList.Count, canceled);
+					}
+				}
+				catch (Exception ex)
+				{
+					Common.LogError(ex, false, false, PluginName);
+				}
+				finally
+				{
+					if (isMultiGameBatch)
+					{
+						EndBatchRefreshAuthSuppression();
+					}
+				}
 			}, options);
 		}
 
@@ -1278,7 +1452,14 @@ namespace CommonPluginsShared.Collections
 		public virtual void RefreshNoLoader(Guid id, CancellationToken cancellationToken = default)
 		{
 			Game game = API.Instance.Database.Games.Get(id);
-			Logger.Info(string.Format("RefreshNoLoader — {0} ({1})", game?.Name, id));
+			string exclusionReason = PlayniteTools.GetLibraryFilterExclusionReason(game, PluginSettings);
+			if (exclusionReason != null)
+			{
+				PlayniteTools.LogLibraryFilterExclusion(string.Format("{0}.RefreshNoLoader", PluginName), game, exclusionReason);
+				return;
+			}
+
+			Logger.Info(string.Format("RefreshNoLoader — {0} ({1} - {2})", game?.Name, id, game?.GameId));
 
 			TItem cached = Get(id, true);
 			TItem webItem = GetWeb(id);
@@ -1302,8 +1483,8 @@ namespace CommonPluginsShared.Collections
 		public virtual void RefreshInstalled()
 		{
 			Logger.Info("RefreshInstalled() started.");
-			IEnumerable<Guid> ids = API.Instance.Database.Games
-				.Where(x => x.IsInstalled && !x.Hidden)
+			IEnumerable<Guid> ids = FilterLibraryGames(
+					API.Instance.Database.Games.Where(x => x.IsInstalled))
 				.Select(x => x.Id);
 			Logger.Info(string.Format(
 				"RefreshInstalled — {0} game(s) queued.", ids.Count()));
@@ -1331,8 +1512,8 @@ namespace CommonPluginsShared.Collections
 				? PluginSettings.LastAutoLibUpdateAssetsDownload
 				: DateTime.Now.AddMonths(-1);
 
-			IEnumerable<Guid> ids = API.Instance.Database.Games
-				.Where(x => x.Added != null && x.Added > since)
+			IEnumerable<Guid> ids = FilterLibraryGames(
+					API.Instance.Database.Games.Where(x => x.Added != null && x.Added > since))
 				.Select(x => x.Id);
 
 			Logger.Info(string.Format("RefreshRecent — {0} game(s) queued.", ids.Count()));
@@ -1472,8 +1653,7 @@ namespace CommonPluginsShared.Collections
 		public void AddTagAllGames()
 		{
 			Logger.Info("AddTagAllGame() started.");
-			IEnumerable<Guid> ids = API.Instance.Database.Games
-				.Where(x => !x.Hidden)
+			IEnumerable<Guid> ids = FilterLibraryGames(API.Instance.Database.Games)
 				.Select(x => x.Id);
 			AddTag(ids, string.Format("{0} - {1}", PluginName,
 				ResourceProvider.GetString("LOCCommonAddingAllTag")));
@@ -1532,68 +1712,63 @@ namespace CommonPluginsShared.Collections
 
 				try
 				{
-					API.Instance.Database.BeginBufferUpdate();
-					API.Instance.Database.Games.BeginBufferUpdate();
-
-					Stopwatch stopWatch = Stopwatch.StartNew();
-					a.ProgressMaxValue = idList.Count;
-
-					foreach (Guid id in idList)
+					ExecuteWithPlayniteBufferedUpdates(() =>
 					{
-						if (a.CancelToken.IsCancellationRequested) break;
+						Stopwatch stopWatch = Stopwatch.StartNew();
+						a.ProgressMaxValue = idList.Count;
 
-						Game game = API.Instance.Database.Games.Get(id);
-						if (game == null)
+						foreach (Guid id in idList)
 						{
-							a.CurrentProgressValue++;
-							continue;
-						}
+							if (a.CancelToken.IsCancellationRequested) break;
 
-						a.Text = BuildProgressText(message, a.CurrentProgressValue, idList.Count, game);
-
-						try
-						{
-							StripPluginTags(game);
-							bool modified = AppendPluginTag(game);
-							if (modified)
+							Game game = API.Instance.Database.Games.Get(id);
+							if (game == null)
 							{
-								PersistGameUpdate(game);
+								a.CurrentProgressValue++;
+								continue;
 							}
+
+							a.Text = BuildProgressText(message, a.CurrentProgressValue, idList.Count, game);
+
+							try
+							{
+								StripPluginTags(game);
+								bool modified = AppendPluginTag(game);
+								if (modified)
+								{
+									PersistGameUpdate(game);
+								}
+							}
+							catch (Exception ex)
+							{
+								errorCount++;
+								Common.LogError(ex, false, false, PluginName);
+							}
+
+							a.CurrentProgressValue++;
 						}
-						catch (Exception ex)
+
+						stopWatch.Stop();
+						TimeSpan ts = stopWatch.Elapsed;
+						Logger.Info(string.Format(
+							"AddTag {0} {1:00}:{2:00}.{3:000} for {4}/{5} items",
+							a.CancelToken.IsCancellationRequested ? "canceled" : string.Empty,
+							ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
+							a.CurrentProgressValue, idList.Count));
+
+						if (errorCount > 0)
 						{
-							errorCount++;
-							Common.LogError(ex, false, false, PluginName);
+							API.Instance.Notifications.Add(new NotificationMessage(
+								string.Format("{0}-AddTag-Error", PluginName),
+								string.Format(ResourceProvider.GetString("LOCCommonNotificationTagBatchError"), errorCount),
+								NotificationType.Error,
+								() => PlayniteTools.CreateLogPackage(PluginName)));
 						}
-
-						a.CurrentProgressValue++;
-					}
-
-					stopWatch.Stop();
-					TimeSpan ts = stopWatch.Elapsed;
-					Logger.Info(string.Format(
-						"AddTag {0} {1:00}:{2:00}.{3:000} for {4}/{5} items",
-						a.CancelToken.IsCancellationRequested ? "canceled" : string.Empty,
-						ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
-						a.CurrentProgressValue, idList.Count));
-
-					if (errorCount > 0)
-					{
-						API.Instance.Notifications.Add(new NotificationMessage(
-							string.Format("{0}-AddTag-Error", PluginName),
-							string.Format(ResourceProvider.GetString("LOCCommonNotificationTagBatchError"), errorCount),
-							NotificationType.Error,
-							() => PlayniteTools.CreateLogPackage(PluginName)));
-					}
+					});
 				}
 				catch (Exception ex)
 				{
 					Common.LogError(ex, false, false, PluginName);
-				}
-				finally
-				{
-					API.Instance.Database.Games.EndBufferUpdate();
-					API.Instance.Database.EndBufferUpdate();
 				}
 			}, options);
 		}
@@ -1655,53 +1830,48 @@ namespace CommonPluginsShared.Collections
 				try
 				{
 					Logger.Info("RemoveTagAllGame() started.");
-					API.Instance.Database.BeginBufferUpdate();
-					API.Instance.Database.Games.BeginBufferUpdate();
-
-					Stopwatch stopWatch = Stopwatch.StartNew();
-					List<Game> playniteDb = API.Instance.Database.Games
-						.Where(x => !x.Hidden)
-						.ToList();
-					a.ProgressMaxValue = playniteDb.Count;
-
-					foreach (Game game in playniteDb)
+					ExecuteWithPlayniteBufferedUpdates(() =>
 					{
-						if (a.CancelToken.IsCancellationRequested)
+						Stopwatch stopWatch = Stopwatch.StartNew();
+						List<Game> playniteDb = API.Instance.Database.Games
+							.Where(x => !x.Hidden)
+							.ToList();
+						a.ProgressMaxValue = playniteDb.Count;
+
+						foreach (Game game in playniteDb)
 						{
-							break;
+							if (a.CancelToken.IsCancellationRequested)
+							{
+								break;
+							}
+
+							a.Text = BuildProgressText(
+								message, a.CurrentProgressValue, playniteDb.Count, game);
+
+							try
+							{
+								RemoveTag(game);
+							}
+							catch (Exception ex)
+							{
+								Common.LogError(ex, false, false, PluginName);
+							}
+
+							a.CurrentProgressValue++;
 						}
 
-						a.Text = BuildProgressText(
-							message, a.CurrentProgressValue, playniteDb.Count, game);
-
-						try
-						{
-							RemoveTag(game);
-						}
-						catch (Exception ex)
-						{
-							Common.LogError(ex, false, false, PluginName);
-						}
-
-						a.CurrentProgressValue++;
-					}
-
-					stopWatch.Stop();
-					TimeSpan ts = stopWatch.Elapsed;
-					Logger.Info(string.Format(
-						"RemoveTagAllGame(){0} — {1:00}:{2:00}.{3:00} for {4}/{5} items",
-						a.CancelToken.IsCancellationRequested ? " (canceled)" : string.Empty,
-						ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
-						a.CurrentProgressValue, playniteDb.Count));
+						stopWatch.Stop();
+						TimeSpan ts = stopWatch.Elapsed;
+						Logger.Info(string.Format(
+							"RemoveTagAllGame(){0} — {1:00}:{2:00}.{3:00} for {4}/{5} items",
+							a.CancelToken.IsCancellationRequested ? " (canceled)" : string.Empty,
+							ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
+							a.CurrentProgressValue, playniteDb.Count));
+					});
 				}
 				catch (Exception ex)
 				{
 					Common.LogError(ex, false, false, PluginName);
-				}
-				finally
-				{
-					API.Instance.Database.Games.EndBufferUpdate();
-					API.Instance.Database.EndBufferUpdate();
 				}
 			}, options);
 		}
@@ -1782,7 +1952,7 @@ namespace CommonPluginsShared.Collections
 
 			try
 			{
-				e?.RemovedItems?.ForEach(x => Remove(x));
+				e?.RemovedItems?.ForEach(x => RemoveNoLoader(x.Id));
 			}
 			catch (Exception ex)
 			{
@@ -1887,6 +2057,94 @@ namespace CommonPluginsShared.Collections
 
 		#region Private utilities
 
+		/// <summary>
+		/// During a multi-game batch refresh, returns <c>true</c> when auth UI notifications
+		/// should be skipped for <paramref name="clientKey"/>. Logs at most once per client per batch.
+		/// </summary>
+		/// <param name="clientKey">Store or client label (e.g. <c>Steam</c>).</param>
+		/// <returns><c>false</c> outside batch refresh; otherwise <c>true</c> to skip the notification.</returns>
+		public bool ShouldSkipAuthNotification(string clientKey)
+		{
+			if (!_isBatchRefreshInProgress || string.IsNullOrEmpty(clientKey))
+			{
+				return false;
+			}
+
+			lock (_batchAuthSuppressionLock)
+			{
+				if (_batchAuthSuppressedClients == null)
+				{
+					return false;
+				}
+
+				if (_batchAuthSuppressedClients.Contains(clientKey))
+				{
+					return true;
+				}
+
+				_batchAuthSuppressedClients.Add(clientKey);
+				Logger.Warn(string.Format(
+					"{0} — {1} user is not authenticated during batch refresh (UI notification suppressed)",
+					PluginName,
+					clientKey));
+				return true;
+			}
+		}
+
+		private void BeginBatchRefreshAuthSuppression()
+		{
+			lock (_batchAuthSuppressionLock)
+			{
+				_isBatchRefreshInProgress = true;
+				_batchAuthSuppressedClients = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+			}
+		}
+
+		private void EndBatchRefreshAuthSuppression()
+		{
+			lock (_batchAuthSuppressionLock)
+			{
+				_isBatchRefreshInProgress = false;
+				_batchAuthSuppressedClients = null;
+			}
+		}
+
+		/// <summary>
+		/// Raises <see cref="BatchRefreshCompleted"/> after a multi-game refresh batch.
+		/// </summary>
+		private void RaiseBatchRefreshCompleted(int processedCount, int totalCount, bool canceled)
+		{
+			try
+			{
+				BatchRefreshCompleted?.Invoke(
+					this,
+					new BatchRefreshCompletedEventArgs(processedCount, totalCount, canceled));
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, false, PluginName);
+			}
+		}
+
+		/// <summary>
+		/// Runs <paramref name="action"/> while Playnite database change notifications are buffered,
+		/// so bulk operations (tags, refresh, and similar) trigger a single UI refresh at the end.
+		/// </summary>
+		private static void ExecuteWithPlayniteBufferedUpdates(Action action)
+		{
+			API.Instance.Database.BeginBufferUpdate();
+			API.Instance.Database.Games.BeginBufferUpdate();
+			try
+			{
+				action();
+			}
+			finally
+			{
+				API.Instance.Database.Games.EndBufferUpdate();
+				API.Instance.Database.EndBufferUpdate();
+			}
+		}
+
 		private static string BuildProgressText(
 			string message, double current, int total, Game game)
 		{
@@ -1906,6 +2164,75 @@ namespace CommonPluginsShared.Collections
 		private bool IsTaggingEnabled() => PluginSettings != null && PluginSettings.EnableTag;
 
 		private bool IsAutoImportOnInstalledEnabled() => PluginSettings != null && PluginSettings.AutoImportOnInstalled;
+
+		/// <summary>
+		/// Returns <c>true</c> when <paramref name="game"/> should be included in library-wide plugin operations.
+		/// </summary>
+		protected bool ShouldIncludeLibraryGame(Game game, bool includeHidden = false)
+			=> PlayniteTools.ShouldIncludeLibraryGame(game, PluginSettings, includeHidden);
+
+		/// <summary>
+		/// Filters games using the active plugin library filter settings.
+		/// </summary>
+		protected IEnumerable<Game> FilterLibraryGames(IEnumerable<Game> games, bool includeHidden = false)
+			=> PlayniteTools.FilterLibraryGames(games, PluginSettings, includeHidden);
+
+		/// <summary>
+		/// Filters game identifiers, resolving each game from the Playnite database.
+		/// </summary>
+		protected IEnumerable<Guid> FilterLibraryGameIds(IEnumerable<Guid> ids)
+		{
+			if (ids == null)
+			{
+				return Enumerable.Empty<Guid>();
+			}
+
+			List<Guid> idList = ids as List<Guid> ?? ids.ToList();
+			List<Guid> included = new List<Guid>(idList.Count);
+			int excludedEmulated = 0;
+			int excludedHidden = 0;
+			int excludedSource = 0;
+
+			foreach (Guid id in idList)
+			{
+				Game game = API.Instance.Database.Games.Get(id);
+				if (game == null)
+				{
+					continue;
+				}
+
+				string reason = PlayniteTools.GetLibraryFilterExclusionReason(game, PluginSettings);
+				if (reason == null)
+				{
+					included.Add(id);
+					continue;
+				}
+
+				if (reason == "hidden")
+				{
+					excludedHidden++;
+				}
+				else if (reason == "emulated")
+				{
+					excludedEmulated++;
+				}
+				else if (reason == "source")
+				{
+					excludedSource++;
+				}
+			}
+
+			PlayniteTools.LogLibraryFilterSummary(
+				string.Format("{0}.FilterLibraryGameIds", PluginName),
+				idList.Count,
+				included.Count,
+				PluginSettings,
+				excludedEmulated,
+				excludedHidden,
+				excludedSource);
+
+			return included;
+		}
 
 		/// <summary>
 		/// Normalizes all DateTime values to UTC in the object graph.

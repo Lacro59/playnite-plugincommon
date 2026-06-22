@@ -19,6 +19,9 @@ namespace CommonPluginsShared
     {
         internal ILogger Logger => LogManager.GetLogger();
 
+        private static readonly object WebCookieLocksSync = new object();
+        private static readonly Dictionary<string, object> WebCookieLocksByClient = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
         #region Properties
 
         /// <summary>
@@ -64,48 +67,56 @@ namespace CommonPluginsShared
         /// Loads encrypted cookies from disk for the configured client.
         /// Expired cookies are removed before returning.
         /// </summary>
+        /// <param name="warnIfMissing">When true, logs a warning if the cookie file is absent.</param>
         /// <returns>The stored cookie list, or an empty list when none are available.</returns>
-        public List<HttpCookie> GetStoredCookies()
+        public List<HttpCookie> GetStoredCookies(bool warnIfMissing = true)
         {
             string message = $"No stored cookies for {ClientName}";
             List<HttpCookie> storedCookies = new List<HttpCookie>();
 
             if (File.Exists(FileCookies))
             {
-                for (int i = 0; i < 5; i++)
+                lock (FileSystem.GetPathSyncRoot(FileCookies))
                 {
-                    try
+                    for (int i = 0; i < 5; i++)
                     {
-                        var decrypted = Encryption.DecryptFromFile(
-                            FileCookies,
-                            Encoding.UTF8,
-                            WindowsIdentity.GetCurrent().User.Value);
-
-                        storedCookies = Serialization.FromJson<List<HttpCookie>>(decrypted);
-
-                        storedCookies.RemoveAll(x => x.Expires != null && (DateTime)x.Expires <= DateTime.Now);
-                        return storedCookies;
-                    }
-                    catch (CryptographicException ex)
-                    {
-                        Common.LogError(ex, false, $"Failed to load saved cookies for {ClientName} (CryptographicException)");
-                        FileSystem.DeleteFile(FileCookies);
-                        return storedCookies;
-                    }
-                    catch (Exception ex)
-                    {
-                        if (i == 4)
+                        try
                         {
-                            Common.LogError(ex, false, $"Failed to load saved cookies for {ClientName}");
+                            var decrypted = Encryption.DecryptFromFile(
+                                FileCookies,
+                                Encoding.UTF8,
+                                WindowsIdentity.GetCurrent().User.Value);
+
+                            storedCookies = Serialization.FromJson<List<HttpCookie>>(decrypted);
+
+                            storedCookies.RemoveAll(x => x.Expires != null && (DateTime)x.Expires <= DateTime.Now);
+                            return storedCookies;
+                        }
+                        catch (CryptographicException ex)
+                        {
+                            Common.LogError(ex, false, $"Failed to load saved cookies for {ClientName} (CryptographicException)");
                             FileSystem.DeleteFile(FileCookies);
                             return storedCookies;
                         }
-                        Thread.Sleep(500);
+                        catch (Exception ex)
+                        {
+                            if (i == 4)
+                            {
+                                Common.LogError(ex, false, $"Failed to load saved cookies for {ClientName}");
+                                FileSystem.DeleteFile(FileCookies);
+                                return storedCookies;
+                            }
+                            Thread.Sleep(500);
+                        }
                     }
                 }
             }
 
-            Logger.Warn(message);
+            if (warnIfMissing)
+            {
+                Logger.Warn(message);
+            }
+
             return storedCookies;
         }
 
@@ -116,29 +127,32 @@ namespace CommonPluginsShared
         /// <returns><c>true</c> when cookies were saved; otherwise <c>false</c>.</returns>
         public bool SetStoredCookies(List<HttpCookie> httpCookies)
         {
-            try
+            lock (FileSystem.GetPathSyncRoot(FileCookies))
             {
-                if (httpCookies != null && httpCookies.Any())
+                try
                 {
-                    FileSystem.CreateDirectory(Path.GetDirectoryName(FileCookies));
-                    Encryption.EncryptToFile(
-                        FileCookies,
-                        Serialization.ToJson(httpCookies),
-                        Encoding.UTF8,
-                        WindowsIdentity.GetCurrent().User.Value);
-                    return true;
+                    httpCookies = FilterCookiesByDomains(httpCookies);
+                    if (httpCookies != null && httpCookies.Any())
+                    {
+                        Encryption.EncryptToFileSafe(
+                            FileCookies,
+                            Serialization.ToJson(httpCookies),
+                            Encoding.UTF8,
+                            WindowsIdentity.GetCurrent().User.Value);
+                        return true;
+                    }
+                    else
+                    {
+                        Logger.Warn($"No cookies saved for {PluginName}");
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    Logger.Warn($"No cookies saved for {PluginName}");
+                    Common.LogError(ex, false, "Failed to save cookies");
                 }
-            }
-            catch (Exception ex)
-            {
-                Common.LogError(ex, false, "Failed to save cookies");
-            }
 
-            return false;
+                return false;
+            }
         }
 
         /// <summary>
@@ -221,6 +235,57 @@ namespace CommonPluginsShared
                 if (createdLocally && webView != null)
                 {
                     webView.Dispose();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Navigates to the specified URLs in a WebView and returns cookies set by those pages.
+        /// Only one refresh per store client runs at a time across the process.
+        /// </summary>
+        /// <param name="urls">Absolute URLs to visit in order.</param>
+        /// <param name="deleteCookies">When <c>true</c>, clears domain cookies from the WebView after extraction.</param>
+        /// <param name="webView">Optional WebView instance. An offscreen view is created when null.</param>
+        /// <returns>Filtered cookies for the configured domains.</returns>
+        public List<HttpCookie> GetNewWebCookiesSerialized(List<string> urls, bool deleteCookies = false, IWebView webView = null)
+        {
+            return GetNewWebCookiesSerialized(urls, deleteCookies, webView, 1000, null);
+        }
+
+        /// <summary>
+        /// Navigates to the specified URLs in a WebView and returns cookies set by those pages.
+        /// Only one refresh per store client runs at a time across the process.
+        /// </summary>
+        /// <param name="urls">Absolute URLs to visit in order.</param>
+        /// <param name="deleteCookies">When <c>true</c>, clears domain cookies from the WebView after extraction.</param>
+        /// <param name="webView">Optional WebView instance. An offscreen view is created when null.</param>
+        /// <param name="waitAfterNavigateMs">Delay in milliseconds after each navigation before reading cookies. Use 0 to skip the wait.</param>
+        /// <param name="cookiesToInject">
+        /// Cookies to inject before navigation. When <c>null</c>, all stored cookies are injected.
+        /// Pass an empty list to skip injection.
+        /// </param>
+        /// <returns>Filtered cookies for the configured domains, or an empty list on failure.</returns>
+        public List<HttpCookie> GetNewWebCookiesSerialized(List<string> urls, bool deleteCookies, IWebView webView, int waitAfterNavigateMs, List<HttpCookie> cookiesToInject)
+        {
+            object sync = GetWebCookieLock(ClientName);
+            bool lockTaken = false;
+
+            try
+            {
+                Monitor.TryEnter(sync, ref lockTaken);
+                if (!lockTaken)
+                {
+                    Common.LogDebug(true, $"{ClientName} GetNewWebCookies: waiting for in-flight WebView cookie refresh.");
+                    Monitor.Enter(sync, ref lockTaken);
+                }
+
+                return GetNewWebCookies(urls, deleteCookies, webView, waitAfterNavigateMs, cookiesToInject);
+            }
+            finally
+            {
+                if (lockTaken)
+                {
+                    Monitor.Exit(sync);
                 }
             }
         }
@@ -329,20 +394,88 @@ namespace CommonPluginsShared
         }
 
         /// <summary>
+        /// Keeps only cookies whose domain matches the configured store domains.
+        /// </summary>
+        /// <param name="httpCookies">Raw cookies from a WebView or HTTP client.</param>
+        /// <returns>Filtered cookie list.</returns>
+        public List<HttpCookie> FilterCookiesByDomains(List<HttpCookie> httpCookies)
+        {
+            if (httpCookies == null || httpCookies.Count == 0)
+            {
+                return new List<HttpCookie>();
+            }
+
+            return httpCookies.Where(cookie => cookie != null && IsCookieDomainAllowed(cookie.Domain)).ToList();
+        }
+
+        /// <summary>
         /// Internal utility method to extract cookies from WebView, filtered and optionally cleared.
         /// </summary>
         private List<HttpCookie> ExtractCookies(IWebView webView, bool deleteCookies)
         {
-            List<HttpCookie> httpCookies = CookiesDomains?.Count > 0
-                ? webView.GetCookies()?.Where(x => CookiesDomains.Any(y => y.Contains(x?.Domain, StringComparison.OrdinalIgnoreCase)))?.ToList() ?? new List<HttpCookie>()
-                : webView.GetCookies()?.Where(x => x?.Domain?.Contains(ClientName, StringComparison.OrdinalIgnoreCase) ?? false)?.ToList() ?? new List<HttpCookie>();
+            List<HttpCookie> httpCookies = FilterCookiesByDomains(webView.GetCookies()?.ToList());
 
-            if (deleteCookies)
+            if (deleteCookies && CookiesDomains != null)
             {
                 CookiesDomains.ForEach(x => webView.DeleteDomainCookies(x));
             }
 
             return httpCookies;
+        }
+
+        private bool IsCookieDomainAllowed(string cookieDomain)
+        {
+            if (string.IsNullOrEmpty(cookieDomain))
+            {
+                return false;
+            }
+
+            if (CookiesDomains == null || CookiesDomains.Count == 0)
+            {
+                return cookieDomain.IndexOf(ClientName, StringComparison.OrdinalIgnoreCase) >= 0;
+            }
+
+            foreach (string allowedDomain in CookiesDomains)
+            {
+                if (CookieDomainMatches(cookieDomain, allowedDomain))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool CookieDomainMatches(string cookieDomain, string allowedDomain)
+        {
+            if (string.IsNullOrEmpty(allowedDomain))
+            {
+                return false;
+            }
+
+            string normalizedCookieDomain = cookieDomain.TrimStart('.');
+            string normalizedAllowedDomain = allowedDomain.TrimStart('.');
+
+            if (normalizedCookieDomain.Equals(normalizedAllowedDomain, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return normalizedCookieDomain.EndsWith("." + normalizedAllowedDomain, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static object GetWebCookieLock(string clientName)
+        {
+            lock (WebCookieLocksSync)
+            {
+                if (!WebCookieLocksByClient.TryGetValue(clientName, out object sync))
+                {
+                    sync = new object();
+                    WebCookieLocksByClient[clientName] = sync;
+                }
+
+                return sync;
+            }
         }
 
         #endregion

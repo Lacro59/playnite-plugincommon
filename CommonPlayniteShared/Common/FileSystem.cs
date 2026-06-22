@@ -22,6 +22,29 @@ namespace CommonPlayniteShared.Common
     public static partial class FileSystem
     {
         private static ILogger logger = LogManager.GetLogger();
+        private static readonly object PathSyncGuard = new object();
+        private static readonly Dictionary<string, object> PathSyncRoots = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Returns a process-wide sync root for the given file path so concurrent plugin instances
+        /// can serialize read/write access to shared credential or cache files.
+        /// </summary>
+        /// <param name="path">Full path to the file being synchronized.</param>
+        /// <returns>Lock object unique to the normalized path.</returns>
+        public static object GetPathSyncRoot(string path)
+        {
+            path = Paths.FixPathLength(path);
+            lock (PathSyncGuard)
+            {
+                if (!PathSyncRoots.TryGetValue(path, out object syncRoot))
+                {
+                    syncRoot = new object();
+                    PathSyncRoots[path] = syncRoot;
+                }
+
+                return syncRoot;
+            }
+        }
 
         public static void CreateDirectory(string path)
         {

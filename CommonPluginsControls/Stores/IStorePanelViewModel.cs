@@ -31,5 +31,10 @@ namespace CommonPluginsControls.Stores
         /// Refreshes auth status and command availability bindings.
         /// </summary>
         void RefreshAuthCommandStates();
+
+        /// <summary>
+        /// Schedules a full auth verification on a background thread.
+        /// </summary>
+        void RequestBackgroundAuthRefresh();
     }
 }

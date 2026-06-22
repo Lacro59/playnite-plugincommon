@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Playnite.SDK;
 
 namespace CommonPlayniteShared.Common
 {
@@ -13,6 +14,8 @@ namespace CommonPlayniteShared.Common
     /// </summary>
     public static class Encryption
     {
+        private static readonly ILogger Logger = LogManager.GetLogger();
+
         public static byte[] GenerateRandomSalt()
         {
             byte[] data = new byte[32];
@@ -56,6 +59,38 @@ namespace CommonPlayniteShared.Common
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Encrypts content to a file with retry logic for transient sharing violations.
+        /// </summary>
+        /// <param name="filePath">Target file path.</param>
+        /// <param name="content">Plain text content to encrypt.</param>
+        /// <param name="encoding">Text encoding for the content.</param>
+        /// <param name="password">Encryption password.</param>
+        /// <param name="retryAttempts">Number of attempts before failing.</param>
+        public static void EncryptToFileSafe(string filePath, string content, Encoding encoding, string password, int retryAttempts = 5)
+        {
+            filePath = Paths.FixPathLength(filePath);
+            FileSystem.CreateDirectory(Path.GetDirectoryName(filePath));
+
+            IOException ioException = null;
+            for (int i = 0; i < retryAttempts; i++)
+            {
+                try
+                {
+                    EncryptToFile(filePath, content, encoding, password);
+                    return;
+                }
+                catch (IOException exc)
+                {
+                    Logger.Debug($"Can't write encrypted file, trying again. {filePath}");
+                    ioException = exc;
+                    Task.Delay(500).Wait();
+                }
+            }
+
+            throw new IOException($"Failed to write encrypted file {filePath}", ioException);
         }
 
         public static string DecryptFromFileOld(string inputFile, Encoding encoding, string password)
@@ -102,8 +137,8 @@ namespace CommonPlayniteShared.Common
         /// <exception cref="CryptographicException">Thrown when decryption fails</exception>
         public static string DecryptFromFile(string inputFile, Encoding encoding, string password)
         {
-            // Read entire file content into memory to avoid file locking
-            byte[] encryptedData = File.ReadAllBytes(inputFile);
+            // Read entire file content into memory with retries and shared read access.
+            byte[] encryptedData = FileSystem.ReadFileAsBytesSafe(inputFile);
 
             var passwordBytes = Encoding.UTF8.GetBytes(password);
             var salt = new byte[32];

@@ -177,11 +177,20 @@ namespace CommonPluginsControls.Stores.Models
 
         /// <summary>
         /// Refreshes auth status properties on the entry (for example after external session changes).
+        /// Does not schedule a network auth check; use <see cref="RequestAuthRefresh"/> when needed.
         /// </summary>
         public void RefreshAuthStatus()
         {
             _authProvider?.RefreshAuthCommandStates();
             NotifyAuthStatusProperties();
+        }
+
+        /// <summary>
+        /// Schedules a background auth verification for this store panel.
+        /// </summary>
+        public void RequestAuthRefresh()
+        {
+            _authProvider?.RequestBackgroundAuthRefresh();
         }
 
         private void Panel_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)

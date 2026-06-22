@@ -1,4 +1,5 @@
 ﻿using CommonPluginsShared.Interfaces;
+using CommonPluginsShared.Collections;
 using Playnite.SDK;
 using Playnite.SDK.Controls;
 using Playnite.SDK.Models;
@@ -355,6 +356,17 @@ namespace CommonPluginsShared.Controls
 		}
 
 		/// <summary>
+		/// Creates a handler for <see cref="PluginDatabaseObject{TSettings, TItem, T}.BatchRefreshCompleted"/>.
+		/// </summary>
+		protected static EventHandler<BatchRefreshCompletedEventArgs> CreateBatchRefreshCompletedHandler()
+		{
+			return (sender, e) =>
+			{
+				NotifyAllInstances(instance => instance.OnBatchRefreshCompleted());
+			};
+		}
+
+		/// <summary>
 		/// Handles a database item update for this instance.
 		/// Called on the UI thread via <see cref="NotifyAllInstances"/>.
 		/// </summary>
@@ -380,6 +392,18 @@ namespace CommonPluginsShared.Controls
 			if (GameContext != null)
 			{
 				ScheduleDataRefresh("database-collection-changed");
+			}
+		}
+
+		/// <summary>
+		/// Handles a multi-game batch refresh completion for this instance.
+		/// Called on the UI thread via <see cref="NotifyAllInstances"/>.
+		/// </summary>
+		protected virtual void OnBatchRefreshCompleted()
+		{
+			if (GameContext != null)
+			{
+				ScheduleDataRefresh("batch-completed");
 			}
 		}
 

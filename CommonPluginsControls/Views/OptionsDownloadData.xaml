@@ -61,16 +61,16 @@
                                 <UniformGrid Columns="3" Rows="1">
                                     <RadioButton Name="PART_AllGames" 
                                                 Style="{StaticResource ModernRadio}"
-                                                GroupName="RadioFilters" 
+                                                GroupName="GameSourceFilters" 
                                                 IsChecked="True"
                                                 Content="{DynamicResource LOCQuickFilterAllGames}" />
                                     <RadioButton Name="PART_Filtred" 
                                                 Style="{StaticResource ModernRadio}"
-                                                GroupName="RadioFilters" 
+                                                GroupName="GameSourceFilters" 
                                                 Content="{DynamicResource LOCMetaGameSourceFiltered}" />
                                     <RadioButton Name="PART_Selected" 
                                                 Style="{StaticResource ModernRadio}"
-                                                GroupName="RadioFilters" 
+                                                GroupName="GameSourceFilters" 
                                                 Content="{DynamicResource LOCMetaGameSourceSelected}" />
                                 </UniformGrid>
                             </StackPanel>
@@ -84,18 +84,21 @@
                                 <UniformGrid Columns="3" Rows="1">
                                     <RadioButton Name="PART_GamesInstalled" 
                                                 Style="{StaticResource ModernRadio}"
-                                                GroupName="RadioFilters" 
-                                                Checked="RadioButton_Checked"
+                                                GroupName="InstallationFilters" 
+                                                Checked="FilterRadio_Checked"
+                                                Unchecked="FilterRadio_Checked"
                                                 Content="{DynamicResource LOCGameIsGameInstalledTitle}" />
                                     <RadioButton Name="PART_GamesNotInstalled" 
                                                 Style="{StaticResource ModernRadio}"
-                                                GroupName="RadioFilters" 
-                                                Checked="RadioButton_Checked"
+                                                GroupName="InstallationFilters" 
+                                                Checked="FilterRadio_Checked"
+                                                Unchecked="FilterRadio_Checked"
                                                 Content="{DynamicResource LOCGameIsUnInstalledTitle}" />
                                     <RadioButton Name="PART_GamesFavorite" 
                                                 Style="{StaticResource ModernRadio}"
-                                                GroupName="RadioFilters" 
-                                                Checked="RadioButton_Checked"
+                                                GroupName="InstallationFilters" 
+                                                Checked="FilterRadio_Checked"
+                                                Unchecked="FilterRadio_Checked"
                                                 Content="{DynamicResource LOCQuickFilterFavorites}" />
                                 </UniformGrid>
                             </StackPanel>
@@ -117,20 +120,23 @@
                                     <RadioButton Name="PART_OldData" 
                                                 Grid.Column="0"
                                                 Style="{StaticResource ModernRadio}"
-                                                GroupName="RadioFilters" 
-                                                Checked="RadioButton_Checked"
+                                                GroupName="TimeFilters" 
+                                                Checked="FilterRadio_Checked"
+                                                Unchecked="FilterRadio_Checked"
                                                 Content="{DynamicResource LOCCommonOldData}" />
                                     <RadioButton Name="PART_GamesRecentlyPlayed" 
                                                 Grid.Column="1"
                                                 Style="{StaticResource ModernRadio}"
-                                                GroupName="RadioFilters" 
-                                                Checked="RadioButton_Checked"
+                                                GroupName="TimeFilters" 
+                                                Checked="FilterRadio_Checked"
+                                                Unchecked="FilterRadio_Checked"
                                                 Content="{DynamicResource LOCQuickFilterRecentlyPlayed}" />
                                     <RadioButton Name="PART_GamesRecentlyAdded" 
                                                 Grid.Column="2"
                                                 Style="{StaticResource ModernRadio}"
-                                                GroupName="RadioFilters" 
-                                                Checked="RadioButton_Checked"
+                                                GroupName="TimeFilters" 
+                                                Checked="FilterRadio_Checked"
+                                                Unchecked="FilterRadio_Checked"
                                                 Content="{DynamicResource LOCCommonRecentlyAdded}" />
 
                                     <Border Grid.Column="3" 
