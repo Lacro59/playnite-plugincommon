@@ -60,6 +60,25 @@ namespace CommonPluginsShared.Controls
 		}
 
 		/// <summary>
+		/// Attaches shared plugin-database handlers for all <see cref="PluginUserControlExtend"/> derivatives,
+		/// including post-batch UI refresh via <see cref="IPluginDatabase.BatchRefreshCompleted"/>.
+		/// </summary>
+		protected override void AttachStaticEvents()
+		{
+			base.AttachStaticEvents();
+
+			if (DesignerProperties.GetIsInDesignMode(this) || pluginDatabase == null)
+			{
+				return;
+			}
+
+			AttachPluginEvents(pluginDatabase.PluginName + ".BatchRefreshCompleted", () =>
+			{
+				pluginDatabase.BatchRefreshCompleted += CreateBatchRefreshCompletedHandler();
+			});
+		}
+
+		/// <summary>
 		/// Synchronous fallback. Override <see cref="SetDataAsync"/> instead when
 		/// computation is expensive — this overload is only kept for backward compatibility
 		/// with controls that have not yet migrated.

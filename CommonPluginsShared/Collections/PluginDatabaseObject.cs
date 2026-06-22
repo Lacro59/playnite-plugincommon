@@ -127,6 +127,21 @@ namespace CommonPluginsShared.Collections
 		/// <summary>Raised after any item is removed via <see cref="Remove(Guid)"/>.</summary>
 		public event EventHandler<ItemCollectionChangedEventArgs<TItem>> DatabaseItemCollectionChanged;
 
+		/// <summary>
+		/// Raised after a multi-game batch <see cref="Refresh(System.Collections.Generic.IEnumerable{System.Guid}, string)"/>
+		/// completes and Playnite buffered database updates have been flushed.
+		/// </summary>
+		public event EventHandler<BatchRefreshCompletedEventArgs> BatchRefreshCompleted;
+
+		// ── Batch refresh auth notification suppression ───────────────────────────
+
+		private readonly object _batchAuthSuppressionLock = new object();
+		private HashSet<string> _batchAuthSuppressedClients;
+		private bool _isBatchRefreshInProgress;
+
+		/// <summary>Gets a value indicating whether a multi-game batch refresh is currently running.</summary>
+		public bool IsBatchRefreshInProgress => _isBatchRefreshInProgress;
+
 		// ── Tag cache ─────────────────────────────────────────────────────────────
 
 		private List<Tag> _pluginTagsCache;
@@ -1235,6 +1250,15 @@ namespace CommonPluginsShared.Collections
 
 			API.Instance.Dialogs.ActivateGlobalProgress((a) =>
 			{
+				int processedCount = 0;
+				bool canceled = false;
+				bool isMultiGameBatch = idList.Count > 1;
+
+				if (isMultiGameBatch)
+				{
+					BeginBatchRefreshAuthSuppression();
+				}
+
 				try
 				{
 					ExecuteWithPlayniteBufferedUpdates(() =>
@@ -1267,19 +1291,34 @@ namespace CommonPluginsShared.Collections
 								a.CurrentProgressValue++;
 							}
 
+							processedCount = (int)a.CurrentProgressValue;
+							canceled = a.CancelToken.IsCancellationRequested;
+
 							stopWatch.Stop();
 							TimeSpan ts = stopWatch.Elapsed;
 							Logger.Info(string.Format(
 								"Refresh(){0} — {1:00}:{2:00}.{3:00} for {4}/{5} items",
-								a.CancelToken.IsCancellationRequested ? " (canceled)" : string.Empty,
+								canceled ? " (canceled)" : string.Empty,
 								ts.Minutes, ts.Seconds, ts.Milliseconds / 10,
-								a.CurrentProgressValue, idList.Count));
+								processedCount, idList.Count));
 						}
 					});
+
+					if (idList.Count > 1 && processedCount > 0)
+					{
+						RaiseBatchRefreshCompleted(processedCount, idList.Count, canceled);
+					}
 				}
 				catch (Exception ex)
 				{
 					Common.LogError(ex, false, false, PluginName);
+				}
+				finally
+				{
+					if (isMultiGameBatch)
+					{
+						EndBatchRefreshAuthSuppression();
+					}
 				}
 			}, options);
 		}
@@ -1907,6 +1946,75 @@ namespace CommonPluginsShared.Collections
 		#endregion
 
 		#region Private utilities
+
+		/// <summary>
+		/// During a multi-game batch refresh, returns <c>true</c> when auth UI notifications
+		/// should be skipped for <paramref name="clientKey"/>. Logs at most once per client per batch.
+		/// </summary>
+		/// <param name="clientKey">Store or client label (e.g. <c>Steam</c>).</param>
+		/// <returns><c>false</c> outside batch refresh; otherwise <c>true</c> to skip the notification.</returns>
+		public bool ShouldSkipAuthNotification(string clientKey)
+		{
+			if (!_isBatchRefreshInProgress || string.IsNullOrEmpty(clientKey))
+			{
+				return false;
+			}
+
+			lock (_batchAuthSuppressionLock)
+			{
+				if (_batchAuthSuppressedClients == null)
+				{
+					return false;
+				}
+
+				if (_batchAuthSuppressedClients.Contains(clientKey))
+				{
+					return true;
+				}
+
+				_batchAuthSuppressedClients.Add(clientKey);
+				Logger.Warn(string.Format(
+					"{0} — {1} user is not authenticated during batch refresh (UI notification suppressed)",
+					PluginName,
+					clientKey));
+				return true;
+			}
+		}
+
+		private void BeginBatchRefreshAuthSuppression()
+		{
+			lock (_batchAuthSuppressionLock)
+			{
+				_isBatchRefreshInProgress = true;
+				_batchAuthSuppressedClients = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+			}
+		}
+
+		private void EndBatchRefreshAuthSuppression()
+		{
+			lock (_batchAuthSuppressionLock)
+			{
+				_isBatchRefreshInProgress = false;
+				_batchAuthSuppressedClients = null;
+			}
+		}
+
+		/// <summary>
+		/// Raises <see cref="BatchRefreshCompleted"/> after a multi-game refresh batch.
+		/// </summary>
+		private void RaiseBatchRefreshCompleted(int processedCount, int totalCount, bool canceled)
+		{
+			try
+			{
+				BatchRefreshCompleted?.Invoke(
+					this,
+					new BatchRefreshCompletedEventArgs(processedCount, totalCount, canceled));
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, false, PluginName);
+			}
+		}
 
 		/// <summary>
 		/// Runs <paramref name="action"/> while Playnite database change notifications are buffered,

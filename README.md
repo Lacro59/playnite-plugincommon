@@ -9,6 +9,10 @@
 
 Common files and functions at plugins for [Playnite](https://playnite.link).
 
+## Documentation
+
+See [docs/](docs/README.md) for technical guides (plugin user controls, batch refresh UI, integration patterns).
+
 ## More
 
 Remember to support [Playnite](https://www.patreon.com/playnite) and [Freepik](https://www.flaticon.com/authors/freepik).
