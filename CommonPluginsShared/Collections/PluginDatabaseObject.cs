@@ -1117,11 +1117,135 @@ namespace CommonPluginsShared.Collections
 		public virtual bool Remove(Game game) => Remove(game.Id);
 
 		/// <summary>
-		/// Removes the item identified by <paramref name="id"/> and raises
-		/// <see cref="DatabaseItemCollectionChanged"/>.
+		/// Removes the item identified by <paramref name="id"/> with a progress dialog and raises
+		/// <see cref="DatabaseItemCollectionChanged"/> when removal succeeds.
 		/// </summary>
 		public virtual bool Remove(Guid id)
 		{
+			bool removed = false;
+			string message = ResourceProvider.GetString("LOCCommonDeletePluginData");
+
+			GlobalProgressOptions options = new GlobalProgressOptions(
+				string.Format("{0} - {1}", PluginName, message))
+			{
+				Cancelable = false,
+				IsIndeterminate = true
+			};
+
+			API.Instance.Dialogs.ActivateGlobalProgress(a =>
+			{
+				try
+				{
+					ExecuteWithPlayniteBufferedUpdates(() =>
+					{
+						using (_database.BufferedUpdate())
+						{
+							removed = RemoveNoLoader(id);
+						}
+					});
+				}
+				catch (Exception ex)
+				{
+					Common.LogError(ex, false, false, PluginName);
+				}
+			}, options);
+
+			return removed;
+		}
+
+		/// <inheritdoc/>
+		public virtual void Remove(List<Guid> ids) => Remove((IEnumerable<Guid>)ids);
+
+		/// <inheritdoc/>
+		public virtual bool Remove(IEnumerable<Guid> ids)
+		{
+			Logger.Info("Remove(IEnumerable<Guid>) started.");
+			List<Guid> idList = ids == null ? new List<Guid>() : ids.ToList();
+			if (idList.Count == 0)
+			{
+				return true;
+			}
+
+			if (idList.Count == 1)
+			{
+				return Remove(idList[0]);
+			}
+
+			string message = ResourceProvider.GetString("LOCCommonDeletePluginData");
+			bool anyRemoved = false;
+
+			GlobalProgressOptions options = new GlobalProgressOptions(
+				string.Format("{0} - {1}", PluginName, message))
+			{
+				Cancelable = false,
+				IsIndeterminate = false
+			};
+
+			API.Instance.Dialogs.ActivateGlobalProgress(a =>
+			{
+				try
+				{
+					ExecuteWithPlayniteBufferedUpdates(() =>
+					{
+						using (_database.BufferedUpdate())
+						{
+							a.ProgressMaxValue = idList.Count;
+
+							foreach (Guid id in idList)
+							{
+								Game game = API.Instance.Database.Games.Get(id);
+								a.Text = BuildProgressText(
+									message, a.CurrentProgressValue, idList.Count, game);
+
+								try
+								{
+									if (RemoveNoLoader(id, raiseCollectionChanged: false))
+									{
+										anyRemoved = true;
+									}
+								}
+								catch (Exception ex)
+								{
+									Common.LogError(ex, false, true, PluginName);
+								}
+
+								a.CurrentProgressValue++;
+							}
+						}
+					});
+
+					if (anyRemoved)
+					{
+						DatabaseItemCollectionChanged?.Invoke(this,
+							new ItemCollectionChangedEventArgs<TItem>(
+								new List<TItem>(), new List<TItem>()));
+					}
+				}
+				catch (Exception ex)
+				{
+					Common.LogError(ex, false, false, PluginName);
+				}
+			}, options);
+
+			return true;
+		}
+
+		/// <summary>
+		/// Core removal logic without a progress dialog.
+		/// Used by batch delete, Playnite game-deletion handlers, and <see cref="Remove(Guid)"/>.
+		/// </summary>
+		/// <param name="id">Game identifier whose plugin data should be removed.</param>
+		/// <param name="raiseCollectionChanged">
+		/// When <c>true</c>, raises <see cref="DatabaseItemCollectionChanged"/> after a successful removal.
+		/// </param>
+		/// <returns><c>true</c> if the item was removed from the plugin database.</returns>
+		protected virtual bool RemoveNoLoader(Guid id, bool raiseCollectionChanged = true)
+		{
+			if (_database == null || !_database.ContainsItem(id))
+			{
+				return false;
+			}
+
 			RemoveTag(id);
 			bool removed = false;
 			try
@@ -1135,35 +1259,21 @@ namespace CommonPluginsShared.Collections
 
 			if (removed)
 			{
-				DatabaseItemCollectionChanged?.Invoke(this,
-					new ItemCollectionChangedEventArgs<TItem>(
-						new List<TItem>(), new List<TItem>()));
+				ActionAfterRemove(id);
+
+				if (raiseCollectionChanged)
+				{
+					DatabaseItemCollectionChanged?.Invoke(this,
+						new ItemCollectionChangedEventArgs<TItem>(
+							new List<TItem>(), new List<TItem>()));
+				}
 			}
 
 			return removed;
 		}
 
-		/// <inheritdoc/>
-		public virtual void Remove(List<Guid> ids) => Remove((IEnumerable<Guid>)ids);
-
-		/// <inheritdoc/>
-		public virtual bool Remove(IEnumerable<Guid> ids)
-		{
-			Logger.Info("Remove(IEnumerable<Guid>) started.");
-			foreach (Guid id in ids)
-			{
-				try
-				{
-					Remove(id);
-				}
-				catch (Exception ex)
-				{
-					Common.LogError(ex, false, true, PluginName);
-				}
-			}
-
-			return true;
-		}
+		/// <summary>Called after plugin data for <paramref name="id"/> is removed. Override for plugin-specific cleanup.</summary>
+		protected virtual void ActionAfterRemove(Guid id) { }
 
 		// ── Cache accessors ───────────────────────────────────────────────────────
 
@@ -1842,7 +1952,7 @@ namespace CommonPluginsShared.Collections
 
 			try
 			{
-				e?.RemovedItems?.ForEach(x => Remove(x));
+				e?.RemovedItems?.ForEach(x => RemoveNoLoader(x.Id));
 			}
 			catch (Exception ex)
 			{
