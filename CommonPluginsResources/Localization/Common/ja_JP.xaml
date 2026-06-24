@@ -71,23 +71,23 @@
 	<sys:String x:Key="LOCCommonNoData">データなし</sys:String>
 	<sys:String x:Key="LOCCommonNoDataAvailable">利用可能なデータがありません</sys:String>
 	<sys:String x:Key="LOCCommonTotal">合計</sys:String>
-	<sys:String x:Key="LOCCommonCut">値下げ</sys:String>
-	<sys:String x:Key="LOCCommonMargin">差額</sys:String>
+	<sys:String x:Key="LOCCommonCut">切り捨て</sys:String>
+	<sys:String x:Key="LOCCommonMargin">余白</sys:String>
 	<sys:String x:Key="LOCCommonMisc">その他</sys:String>
 	<sys:String x:Key="LOCCommonDatabase">データベース</sys:String>
 	<sys:String x:Key="LOCCommonDatabaseMaintenance">データベースメンテナンス</sys:String>
-	<sys:String x:Key="LOCCommonDimensions">サイズ</sys:String>
+	<sys:String x:Key="LOCCommonDimensions">寸法</sys:String>
 	<sys:String x:Key="LOCCommonStyles">スタイル</sys:String>
 	<sys:String x:Key="LOCCommonTypes">種類</sys:String>
-	<sys:String x:Key="LOCCommonProgression">進行状況</sys:String>
-	<sys:String x:Key="LOCCommonCompleted">完了済み</sys:String>
+	<sys:String x:Key="LOCCommonProgression">達成度</sys:String>
+	<sys:String x:Key="LOCCommonCompleted">完了</sys:String>
 	<sys:String x:Key="LOCCommonGameTime">ゲーム時間</sys:String>
 
 	<!-- ==================== SORTING ==================== -->
 
-	<sys:String x:Key="LOCCommonDefaultSorting">既定のゲームリストの並べ替え</sys:String>
-	<sys:String x:Key="LOCCommonSortByDate">日付で並べ替え</sys:String>
-	<sys:String x:Key="LOCCommonSortByScore">スコアで並べ替え</sys:String>
+	<sys:String x:Key="LOCCommonDefaultSorting">デフォルトのゲームリストの並べ替え順</sys:String>
+	<sys:String x:Key="LOCCommonSortByDate">日付順</sys:String>
+	<sys:String x:Key="LOCCommonSortByScore">スコア順</sys:String>
 
 	<!-- ==================== PLAYTIME RANGES ==================== -->
 
@@ -112,25 +112,25 @@
 	<sys:String x:Key="LOCCommonDefaultFilters">既定のフィルターを復元</sys:String>
 	<sys:String x:Key="LOCCommonGameSource">ゲームソース</sys:String>
 	<sys:String x:Key="LOCCommonInstallationStatus">インストール状態</sys:String>
-	<sys:String x:Key="LOCCommonMissingData">データが不足しているゲームにタグを付ける</sys:String>
+	<sys:String x:Key="LOCCommonMissingData">データのないゲームをタグ付けする</sys:String>
 	<sys:String x:Key="LOCCommonOldData">古いデータ</sys:String>
-	<sys:String x:Key="LOCCommonOnlyMissing">不足分のみ</sys:String>
+	<sys:String x:Key="LOCCommonOnlyMissing">不足している場合のみ</sys:String>
 	<sys:String x:Key="LOCCommonRecentlyAdded">最近追加</sys:String>
 	<sys:String x:Key="LOCCommonSaveFilters">現在のフィルターを保存</sys:String>
 	<sys:String x:Key="LOCCommonSearchByName">名前で検索…</sys:String>
 	<sys:String x:Key="LOCCommonSelectFilters">フィルターを選択</sys:String>
 	<sys:String x:Key="LOCCommonTimeFilters">時間ベースのフィルター</sys:String>
-	<sys:String x:Key="LOCCommonUsedFilteredGames">現在フィルターされているゲームを使用</sys:String>
+	<sys:String x:Key="LOCCommonUsedFilteredGames">現在フィルターされているゲーム</sys:String>
 	<sys:String x:Key="LOCCommonAdditionalOptions">追加オプション</sys:String>
 
 	<!-- ==================== LIST ACTIONS ==================== -->
 
 	<sys:String x:Key="LOCCommonClearSelection">選択を解除</sys:String>
-	<sys:String x:Key="LOCCommonRefreshSelected">選択項目を更新</sys:String>
+	<sys:String x:Key="LOCCommonRefreshSelected">⟳ Refresh Selected</sys:String>
 	<sys:String x:Key="LOCCommonSelected">選択済み：</sys:String>
 	<sys:String x:Key="LOCCommonSelectGames">ゲームを選択</sys:String>
 	<sys:String x:Key="LOCCommonSelectVariable">変数を選択</sys:String>
-	<sys:String x:Key="LOCCommonTotalFound">検出数</sys:String>
+	<sys:String x:Key="LOCCommonTotalFound">合計</sys:String>
 
 	<!-- ==================== DATA MANAGEMENT ==================== -->
 
@@ -149,8 +149,8 @@
 	<!-- ==================== TAG MANAGEMENT ==================== -->
 
 	<sys:String x:Key="LOCCommonAddAllTags">すべてのゲームにタグを追加</sys:String>
-	<sys:String x:Key="LOCCommonAddTagAuto">データ追加時にタグを自動追加</sys:String>
-	<sys:String x:Key="LOCCommonAddTPlugin">プラグインタグを追加…</sys:String>
+	<sys:String x:Key="LOCCommonAddTagAuto">データ追加によるタグの自動追加</sys:String>
+	<sys:String x:Key="LOCCommonAddTPlugin">プラグインタグを追加...</sys:String>
 	<sys:String x:Key="LOCCommonRemoveAllTags">プラグインタグを削除</sys:String>
 
 	<!-- Settings section -->
@@ -160,7 +160,7 @@
 	<!-- ==================== DATA SECTION (Settings) ==================== -->
 
 	<sys:String x:Key="LOCCommonDataSectionTitle">データ管理</sys:String>
-	<sys:String x:Key="LOCCommonClearAllDescription">ライブラリ内のすべてのゲームからプラグインデータを完全に削除し、その後すべての一時キャッシュファイルを消去します。Playnite ライブラリ自体には影響しません。この操作は元に戻せません。</sys:String>
+	<sys:String x:Key="LOCCommonClearAllDescription">Permanently deletes all cached system check data for every game. This action cannot be undone.</sys:String>
 	<sys:String x:Key="LOCCommonClearAllConfirm">すべてのプラグインデータを削除してもよろしいですか？この操作は元に戻せません。</sys:String>
 
 	<!-- ==================== CACHE SECTION (Settings) ==================== -->
@@ -185,10 +185,10 @@
 	<sys:String x:Key="LOCCommonIncludeEmulatedGames">プラグインの処理にエミュレートされたゲームを含める</sys:String>
 	<sys:String x:Key="LOCCommonImporting">インポート中…</sys:String>
 	<sys:String x:Key="LOCCommonExport">エクスポート</sys:String>
-	<sys:String x:Key="LOCCommonExportData">データをエクスポート</sys:String>
+	<sys:String x:Key="LOCCommonExportData">データのエクスポート</sys:String>
 	<sys:String x:Key="LOCCommonExportSettings">CSV エクスポート設定</sys:String>
-	<sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} 件のデータをエクスポートしました。
-ディレクトリを開きますか？</sys:String>
+	<sys:String x:Key="LOCCommonExportDataResult" xml:space="preserve">{0} のデータがエクスポートされました。
+ディレクトリを開きますか?</sys:String>
 	<sys:String x:Key="LOCCommonExtractToCsv">プラグインデータを CSV に抽出</sys:String>
 	<sys:String x:Key="LOCCommonExtractAllToCsv">すべてのプラグインデータを CSV に抽出（非常に時間がかかります）</sys:String>
 	<sys:String x:Key="LOCCommonExtracting">抽出中…</sys:String>
@@ -208,9 +208,9 @@
 
 	<!-- ==================== TRANSFER ==================== -->
 
-	<sys:String x:Key="LOCCommonTransfer">転送</sys:String>
-	<sys:String x:Key="LOCCommonTransferPluginData">プラグインデータを転送</sys:String>
-	<sys:String x:Key="LOCCommonSelectTransferData">転送するデータを選択</sys:String>
+	<sys:String x:Key="LOCCommonTransfer">引き継ぎ</sys:String>
+	<sys:String x:Key="LOCCommonTransferPluginData">プラグインデータの引き継ぎ</sys:String>
+	<sys:String x:Key="LOCCommonSelectTransferData">引き継ぐデータを選択</sys:String>
 	<sys:String x:Key="LOCCommonMergedOrErased">消去せずにマージ</sys:String>
 	<sys:String x:Key="LOCCommonErasedWarning">注意してください。対象データが上書きされます！</sys:String>
 
@@ -225,19 +225,19 @@
 	<sys:String x:Key="LOCCommonAuthenticateLabel">認証</sys:String>
 	<sys:String x:Key="LOCCommonControlConfiguration">コントロール設定</sys:String>
 	<sys:String x:Key="LOCCommonGetAccountID">アカウント ID を取得</sys:String>
-	<sys:String x:Key="LOCCommonHasApiKey">API キーあり</sys:String>
+	<sys:String x:Key="LOCCommonHasApiKey">Has api key</sys:String>
 	<sys:String x:Key="LOCCommonIsPrivate">非公開</sys:String>
-	<sys:String x:Key="LOCCommonLoggedIn">ユーザーは認証済みです</sys:String>
-	<sys:String x:Key="LOCCommonLoginChecking">認証状態を確認中…</sys:String>
+	<sys:String x:Key="LOCCommonLoggedIn">ユーザーは認証されています</sys:String>
+	<sys:String x:Key="LOCCommonLoginChecking">認証ステータスを確認中…</sys:String>
 	<sys:String x:Key="LOCCommonNotLoggedIn">認証が必要です</sys:String>
-	<sys:String x:Key="LOCCommonNotLoggedInError">ユーザーの認証に失敗しました</sys:String>
+	<sys:String x:Key="LOCCommonNotLoggedInError">Failed to authenticate user</sys:String>
 	<sys:String x:Key="LOCCommonPrivateChecking">非公開状態を確認中…</sys:String>
 	<sys:String x:Key="LOCCommonUseAuthentication">認証を使用</sys:String>
 	<sys:String x:Key="LOCCommonUseAuthenticationOption">認証を使用（任意、詳細情報の取得のみ）</sys:String>
 
 	<!-- Store error messages -->
-	<sys:String x:Key="LOCCommonStoreBadConfiguration">{0}：設定が正しくありません</sys:String>
-	<sys:String x:Key="LOCCommonStoreNoApiKey">{0}：API キーがありません</sys:String>
+	<sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: 設定が不正です</sys:String>
+	<sys:String x:Key="LOCCommonStoreNoApiKey">{0}: API キーがありません</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0}：設定が見つかりません</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}：ユーザーが認証されていません</sys:String>
 	<sys:String x:Key="LOCCommonStoresInvalidSteamAppId">無効な Steam App ID「{0}」です。Playnite 内のゲームのストア ID は、Steam アプリケーション ID の数値である必要があります（例：Half-Life 2 の場合は 220）。</sys:String>
@@ -250,66 +250,66 @@
 	<sys:String x:Key="LOCCommonStoresNoStoreSelected">認証を設定するストアを選択してください。</sys:String>
 
 	<!-- Ignored items -->
-	<sys:String x:Key="LOCCommonIgnoredItems">無視する項目</sys:String>
+	<sys:String x:Key="LOCCommonIgnoredItems">無視した項目</sys:String>
 	<sys:String x:Key="LOCCommonInputItemIgnore">無視する項目を入力</sys:String>
 	<sys:String x:Key="LOCCommonNotIgnoredItems">無視しない項目</sys:String>
 
 	<!-- ==================== SETTINGS / INTEGRATION ==================== -->
 
-	<sys:String x:Key="LOCCommonChartAllPeriod">既定でチャートにすべてのデータを表示</sys:String>
-	<sys:String x:Key="LOCCommonChartCutPeriod">既定で値のあるデータのみ表示</sys:String>
-	<sys:String x:Key="LOCCommonChartHideOptions">コントロール上のチャートオプションを非表示</sys:String>
+	<sys:String x:Key="LOCCommonChartAllPeriod">すべてのデータをグラフ上にデフォルトで表示</sys:String>
+	<sys:String x:Key="LOCCommonChartCutPeriod">値を持つデータのみをデフォルトで表示</sys:String>
+	<sys:String x:Key="LOCCommonChartHideOptions">コントロール時にグラフのオプションを非表示</sys:String>
 	<sys:String x:Key="LOCCommonControlsAvailable">対応テーマで利用可能な項目</sys:String>
 	<sys:String x:Key="LOCCommonControlsPluginButtonShow">プラグインボタンを表示</sys:String>
 	<sys:String x:Key="LOCCommonControlsPluginButtonShowInContextMenu">コンテキストメニューにデータを表示</sys:String>
 	<sys:String x:Key="LOCCommonControlsPluginViewItemShow">ゲームリストにデータを表示</sys:String>
 	<sys:String x:Key="LOCCommonControlsVisibleNoData">データがない場合に表示</sys:String>
 	<sys:String x:Key="LOCCommonIconStore">ストアアイコンを表示</sys:String>
-	<sys:String x:Key="LOCCommonMenuInExtensions">拡張機能サブメニューにプラグインメニューを表示 *</sys:String>
+	<sys:String x:Key="LOCCommonMenuInExtensions">拡張機能のサブメニューにプラグインメニューを表示</sys:String>
 	<sys:String x:Key="LOCCommonSaveColumOrder">列の順序を保存</sys:String>
 
 	<!-- Integration — appearance -->
 	<sys:String x:Key="LOCCommonIntegration">外観</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButton">ゲーム詳細にプラグインボタンを表示</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonDetails">詳細付きボタン</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonDetails">詳細ボタンを表示</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButtonHeader">ウィンドウのタイトルバーにプラグインボタンを表示</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonIsToggle">切り替えボタン付き</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonIsToggle">トグルボタンあり</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">アイコンのみ表示</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonOptions">ボタンオプション</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonOptions">ボタンのオプション</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButtonSide">サイドバーにプラグインボタンを表示</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationChartOptions">チャートオプション</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationInCustomTheme">カスタムテーマ連携を有効にする（カスタムテーマに組み込まれている場合のみ）</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationChartOptions">グラフのオプション</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationInCustomTheme">カスタムテーマの統合を有効にする (カスタムテーマに統合された場合のみ)</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationInDescription">ゲーム詳細にプラグイン情報を表示</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationListOptions">リストオプション</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationSelectElements">詳細ビューのコンポーネント</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationListOptions">リストのオプション</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationSelectElements">詳細ビューコンポーネント</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationShowTitle">タイトルを表示</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationTopGameDetails">ゲーム説明の上に表示</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationViewItemOptions">表示項目オプション</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationTopGameDetails">ゲームの説明の上に表示</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationViewItemOptions">アイテムのオプションを表示</sys:String>
 
 	<!-- Integration — fullscreen -->
 	<sys:String x:Key="LOCCommonIntegrationFullScreen">フルスクリーン</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationFullScreenEnable">フルスクリーン連携を有効にする</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationFullScreenEnable">フルスクリーン統合を有効にする</sys:String>
 
 	<!-- ==================== PROGRESS / STATUS ==================== -->
 
-	<sys:String x:Key="LOCCommonAddingAllTag">すべてのゲームにタグを追加中…</sys:String>
-	<sys:String x:Key="LOCCommonClearingAllTag">データベースをクリア中…</sys:String>
+	<sys:String x:Key="LOCCommonAddingAllTag">すべてのゲームにタグを追加中...</sys:String>
+	<sys:String x:Key="LOCCommonClearingAllTag">データベースをクリア中...</sys:String>
 	<sys:String x:Key="LOCCommonConverting">変換中です。しばらくお待ちください…</sys:String>
 	<sys:String x:Key="LOCCommonGettingAllDatas">すべてのゲームのデータをダウンロード中…</sys:String>
-	<sys:String x:Key="LOCCommonGettingData">データをダウンロード中…</sys:String>
+	<sys:String x:Key="LOCCommonGettingData">データをダウンロード中...</sys:String>
 	<sys:String x:Key="LOCCommonGettingInstalledDatas">インストール済みゲームのデータをダウンロード中…</sys:String>
 	<sys:String x:Key="LOCCommonGettingNewDatas">新規ゲームのデータをダウンロード中…</sys:String>
 	<sys:String x:Key="LOCCommonProcessing">処理中です。しばらくお待ちください…</sys:String>
-	<sys:String x:Key="LOCCommonRemovingAllTag">すべてのゲームからタグを削除中…</sys:String>
+	<sys:String x:Key="LOCCommonRemovingAllTag">すべてのゲームからタグを削除中...</sys:String>
 
 	<!-- ==================== NOTIFICATIONS & ERRORS ==================== -->
 
 	<sys:String x:Key="LOCCommonCreateLog">ログパッケージを作成しますか？</sys:String>
-	<sys:String x:Key="LOCCommonDataErrorRemove">プラグインデータの削除中にエラーが発生しました。もう一度お試しください。</sys:String>
+	<sys:String x:Key="LOCCommonDataErrorRemove">プラグインデータの削除中にエラーが発生しました。もう一度やり直してください。</sys:String>
 	<sys:String x:Key="LOCCommonDataRemove">プラグインデータが削除されました。</sys:String>
 	<sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}：ユーザーが認証されていません。</sys:String>
 
-	<sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">キャッシュフォルダーを削除できません：
+	<sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">キャッシュフォルダを削除できません:
 {0}</sys:String>
 
 	<sys:String x:Key="LOCCommonErrorGetStoreData" xml:space="preserve">{0} からデータを取得中にエラーが発生しました。
@@ -356,33 +356,32 @@
 
 	<!-- ==================== VARIABLES TOOLTIP ==================== -->
 
-	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">特殊変数を使用して、動的な文字列を追加できます：
-{InstallDir} - ゲームのインストールディレクトリ
-{InstallDirName} - インストールフォルダー名
-{ImagePath} - 設定されている場合、ゲームの ISO/ROM パス
-{ImageName} - ゲームの ISO/ROM ファイル名
-{ImageNameNoExt} - 拡張子を除いたゲームの ISO/ROM ファイル名
-{PlayniteDir} - Playnite のインストールディレクトリ
-{Name} - ゲーム名
+	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
+{InstallDir} - Game installation directory
+{InstallDirName} - Installation folder name
+{ImagePath} - Game ISO/ROM path if set
+{ImageName} - Game ISO/ROM file name
+{ImageNameNoExt} - Game ISO/ROM file name without extension
+{PlayniteDir} - Playnite installation directory
+{Name} - Game name
 
-クラウド変数：
+Cloud variables can be used to add a dynamic string:
 {DropboxFolder}
 {OneDriveFolder}
 
-Steam 変数：
-{SteamId} - Steam ユーザー ID
-{SteamAccountId} - Steam アカウント ID
-{SteamInstallDir} - Steam のインストールディレクトリ
-{SteamScreenshotsDir} - Steam スクリーンショットディレクトリ
+Steam variables can be used to add a dynamic string:
+{SteamId} - Steam user ID
+{SteamAccountId} - Steam account ID
+{SteamInstallDir} - Steam installation directory
+{SteamScreenshotsDir} - Steam screenshots directory
 
-Ubisoft Connect 変数：
-{UbisoftInstallDir} - Ubisoft のインストールディレクトリ
-{UbisoftScreenshotsDir} - Ubisoft スクリーンショットディレクトリ
+Ubisoft Connect variables can be used to add a dynamic string:
+{UbisoftInstallDir} - Ubisoft installation directory
+{UbisoftScreenshotsDir} - Ubisoft screenshots directory
 
-RetroArch 変数：
-{RetroArchScreenshotsDir} - RetroArch スクリーンショットディレクトリ
+{RetroArchScreenshotsDir} - RetroArch screenshots directory
 
-Windows 変数：
+Windows variables can be used to add a dynamic string:
 {WinDir}
 {AllUsersProfile}
 {AppData}
@@ -398,6 +397,6 @@ Windows 変数：
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)} - 32-bit Program Files ディレクトリ</sys:String>
+{ProgramFiles(x86)} - 32-bit Program Files directory</sys:String>
 
 </ResourceDictionary>

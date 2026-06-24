@@ -126,7 +126,7 @@
 	<!-- ==================== LIST ACTIONS ==================== -->
 
 	<sys:String x:Key="LOCCommonClearSelection">Clear Selection</sys:String>
-	<sys:String x:Key="LOCCommonRefreshSelected">Refresh Selected</sys:String>
+	<sys:String x:Key="LOCCommonRefreshSelected">⟳ Refresh Selected</sys:String>
 	<sys:String x:Key="LOCCommonSelected">Selected:</sys:String>
 	<sys:String x:Key="LOCCommonSelectGames">Select games</sys:String>
 	<sys:String x:Key="LOCCommonSelectVariable">Select variable</sys:String>
@@ -134,7 +134,7 @@
 
 	<!-- ==================== DATA MANAGEMENT ==================== -->
 
-	<sys:String x:Key="LOCCommonAddManually">Add manually</sys:String>
+	<sys:String x:Key="LOCCommonAddManually">Lägg till manuellt</sys:String>
 	<sys:String x:Key="LOCCommonRefreshGameData">Refresh data</sys:String>
 	<sys:String x:Key="LOCCommonRefreshAllData">Refresh all data</sys:String>
 	<sys:String x:Key="LOCCommonDeleteGameData">Delete data</sys:String>
@@ -160,7 +160,7 @@
 	<!-- ==================== DATA SECTION (Settings) ==================== -->
 
 	<sys:String x:Key="LOCCommonDataSectionTitle">Data management</sys:String>
-	<sys:String x:Key="LOCCommonClearAllDescription">Permanently deletes all plugin data for every game in your library, then clears all temporary cache files. The Playnite library itself is not affected. This action cannot be undone.</sys:String>
+	<sys:String x:Key="LOCCommonClearAllDescription">Permanently deletes all cached system check data for every game. This action cannot be undone.</sys:String>
 	<sys:String x:Key="LOCCommonClearAllConfirm">Are you sure you want to delete all plugin data? This action cannot be undone.</sys:String>
 
 	<!-- ==================== CACHE SECTION (Settings) ==================== -->
@@ -225,7 +225,7 @@ Do you want to open the directory?</sys:String>
 	<sys:String x:Key="LOCCommonAuthenticateLabel">Authenticate</sys:String>
 	<sys:String x:Key="LOCCommonControlConfiguration">Control configuration</sys:String>
 	<sys:String x:Key="LOCCommonGetAccountID">Get account ID</sys:String>
-	<sys:String x:Key="LOCCommonHasApiKey">Has API key</sys:String>
+	<sys:String x:Key="LOCCommonHasApiKey">Has api key</sys:String>
 	<sys:String x:Key="LOCCommonIsPrivate">Is private</sys:String>
 	<sys:String x:Key="LOCCommonLoggedIn">User is authenticated</sys:String>
 	<sys:String x:Key="LOCCommonLoginChecking">Checking authentication status…</sys:String>
@@ -365,24 +365,23 @@ Please check the plugin settings.</sys:String>
 {PlayniteDir} - Playnite installation directory
 {Name} - Game name
 
-Cloud variables:
+Cloud variables can be used to add a dynamic string:
 {DropboxFolder}
 {OneDriveFolder}
 
-Steam variables:
+Steam variables can be used to add a dynamic string:
 {SteamId} - Steam user ID
 {SteamAccountId} - Steam account ID
 {SteamInstallDir} - Steam installation directory
 {SteamScreenshotsDir} - Steam screenshots directory
 
-Ubisoft Connect variables:
+Ubisoft Connect variables can be used to add a dynamic string:
 {UbisoftInstallDir} - Ubisoft installation directory
 {UbisoftScreenshotsDir} - Ubisoft screenshots directory
 
-RetroArch variables:
 {RetroArchScreenshotsDir} - RetroArch screenshots directory
 
-Windows variables:
+Windows variables can be used to add a dynamic string:
 {WinDir}
 {AllUsersProfile}
 {AppData}
