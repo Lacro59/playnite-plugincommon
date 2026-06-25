@@ -130,6 +130,12 @@
 	<sys:String x:Key="LOCCommonSelected">Selecionado:</sys:String>
 	<sys:String x:Key="LOCCommonSelectGames">Selecionar Jogos</sys:String>
 	<sys:String x:Key="LOCCommonSelectVariable">Selecionar variável</sys:String>
+	<sys:String x:Key="LOCCommonInsertVariable">Insert</sys:String>
+	<sys:String x:Key="LOCCommonVariablePlaceholder">Placeholder</sys:String>
+	<sys:String x:Key="LOCCommonVariableResult">Result</sys:String>
+	<sys:String x:Key="LOCCommonVariableCategoryFolderPath">Folder path</sys:String>
+	<sys:String x:Key="LOCCommonVariableCategoryGameInfo">Game info</sys:String>
+	<sys:String x:Key="LOCCommonVariableCategoryFilePattern">File pattern</sys:String>
 	<sys:String x:Key="LOCCommonTotalFound">Total encontrado</sys:String>
 
 	<!-- ==================== DATA MANAGEMENT ==================== -->
