@@ -130,12 +130,12 @@
 	<sys:String x:Key="LOCCommonSelected">選択済み：</sys:String>
 	<sys:String x:Key="LOCCommonSelectGames">ゲームを選択</sys:String>
 	<sys:String x:Key="LOCCommonSelectVariable">変数を選択</sys:String>
-	<sys:String x:Key="LOCCommonInsertVariable">Insert</sys:String>
-	<sys:String x:Key="LOCCommonVariablePlaceholder">Placeholder</sys:String>
-	<sys:String x:Key="LOCCommonVariableResult">Result</sys:String>
-	<sys:String x:Key="LOCCommonVariableCategoryFolderPath">Folder path</sys:String>
-	<sys:String x:Key="LOCCommonVariableCategoryGameInfo">Game info</sys:String>
-	<sys:String x:Key="LOCCommonVariableCategoryFilePattern">File pattern</sys:String>
+	<sys:String x:Key="LOCCommonInsertVariable">挿入</sys:String>
+	<sys:String x:Key="LOCCommonVariablePlaceholder">プレースホルダー</sys:String>
+	<sys:String x:Key="LOCCommonVariableResult">結果</sys:String>
+	<sys:String x:Key="LOCCommonVariableCategoryFolderPath">フォルダーパス</sys:String>
+	<sys:String x:Key="LOCCommonVariableCategoryGameInfo">ゲーム情報</sys:String>
+	<sys:String x:Key="LOCCommonVariableCategoryFilePattern">ファイルパターン</sys:String>
 	<sys:String x:Key="LOCCommonTotalFound">合計</sys:String>
 
 	<!-- ==================== DATA MANAGEMENT ==================== -->
@@ -166,7 +166,7 @@
 	<!-- ==================== DATA SECTION (Settings) ==================== -->
 
 	<sys:String x:Key="LOCCommonDataSectionTitle">データ管理</sys:String>
-	<sys:String x:Key="LOCCommonClearAllDescription">Permanently deletes all cached system check data for every game. This action cannot be undone.</sys:String>
+	<sys:String x:Key="LOCCommonClearAllDescription">ライブラリ内のすべてのゲームについて、すべてのプラグインデータを完全に削除し、一時キャッシュファイルをすべて消去します。Playniteライブラリ自体には影響しません。この操作は元に戻せません。</sys:String>
 	<sys:String x:Key="LOCCommonClearAllConfirm">すべてのプラグインデータを削除してもよろしいですか？この操作は元に戻せません。</sys:String>
 
 	<!-- ==================== CACHE SECTION (Settings) ==================== -->
@@ -362,32 +362,33 @@
 
 	<!-- ==================== VARIABLES TOOLTIP ==================== -->
 
-	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
-{InstallDir} - Game installation directory
-{InstallDirName} - Installation folder name
-{ImagePath} - Game ISO/ROM path if set
-{ImageName} - Game ISO/ROM file name
-{ImageNameNoExt} - Game ISO/ROM file name without extension
-{PlayniteDir} - Playnite installation directory
-{Name} - Game name
+	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">特殊変数を使用して、動的な文字列を追加できます：
+{InstallDir} - ゲームのインストールディレクトリ
+{InstallDirName} - インストールフォルダー名
+{ImagePath} - 設定されている場合、ゲームの ISO/ROM パス
+{ImageName} - ゲームの ISO/ROM ファイル名
+{ImageNameNoExt} - 拡張子を除いたゲームの ISO/ROM ファイル名
+{PlayniteDir} - Playnite のインストールディレクトリ
+{Name} - ゲーム名
 
-Cloud variables can be used to add a dynamic string:
+クラウド変数：
 {DropboxFolder}
 {OneDriveFolder}
 
-Steam variables can be used to add a dynamic string:
-{SteamId} - Steam user ID
-{SteamAccountId} - Steam account ID
-{SteamInstallDir} - Steam installation directory
-{SteamScreenshotsDir} - Steam screenshots directory
+Steam 変数：
+{SteamId} - Steam ユーザー ID
+{SteamAccountId} - Steam アカウント ID
+{SteamInstallDir} - Steam のインストールディレクトリ
+{SteamScreenshotsDir} - Steam スクリーンショットディレクトリ
 
-Ubisoft Connect variables can be used to add a dynamic string:
-{UbisoftInstallDir} - Ubisoft installation directory
-{UbisoftScreenshotsDir} - Ubisoft screenshots directory
+Ubisoft Connect 変数：
+{UbisoftInstallDir} - Ubisoft のインストールディレクトリ
+{UbisoftScreenshotsDir} - Ubisoft スクリーンショットディレクトリ
 
-{RetroArchScreenshotsDir} - RetroArch screenshots directory
+RetroArch 変数：
+{RetroArchScreenshotsDir} - RetroArch スクリーンショットディレクトリ
 
-Windows variables can be used to add a dynamic string:
+Windows 変数：
 {WinDir}
 {AllUsersProfile}
 {AppData}
@@ -403,6 +404,6 @@ Windows variables can be used to add a dynamic string:
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)} - 32-bit Program Files directory</sys:String>
+{ProgramFiles(x86)} - 32-bit Program Files ディレクトリ</sys:String>
 
 </ResourceDictionary>
