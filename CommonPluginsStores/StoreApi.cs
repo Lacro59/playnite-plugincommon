@@ -748,6 +748,12 @@ namespace CommonPluginsStores
         }
 
         /// <summary>
+        /// When true, <see cref="ClearSession"/> also removes store cookies from the shared Playnite WebView cookie jar.
+        /// Override to false when logout must not affect other plugins that rely on the same SSO session (e.g. SteamLibrary).
+        /// </summary>
+        protected virtual bool ClearGlobalWebViewCookiesOnSessionClear => true;
+
+        /// <summary>
         /// Clears stored authentication data and session profile fields for the current account.
         /// Manual store settings such as the Steam Web API key are preserved.
         /// </summary>
@@ -759,7 +765,16 @@ namespace CommonPluginsStores
             try
             {
                 CookiesTools.ClearStoredCookies();
-                CookiesTools.ClearDomainCookies();
+                if (ClearGlobalWebViewCookiesOnSessionClear)
+                {
+                    Common.LogDebug(true, FormatLogMessage($"ClearSession: purging shared WebView cookie jar ({CookiesDomains?.Count ?? 0} domain(s))."));
+                    CookiesTools.ClearDomainCookies();
+                }
+                else
+                {
+                    Common.LogDebug(true, FormatLogMessage("ClearSession: skipped global WebView cookie purge (ClearGlobalWebViewCookiesOnSessionClear=false); SSO jar preserved for other plugins."));
+                }
+
                 ClearStoredToken();
                 ClearSessionProfileFields();
                 SetSessionLoggedOutByUser();
