@@ -362,32 +362,39 @@ Bitte überprüfe die Plugin Einstellungen.</sys:String>
 
 	<!-- ==================== VARIABLES TOOLTIP ==================== -->
 
-	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Spezielle Variablen können verwendet werden, um eine dynamische Zeichenfolge hinzuzufügen:
-{InstallDir} - Installationsverzeichnis des Spiels
-{InstallDirName} - Name des Installationsordners
-{ImagePath} - ISO/ROM Pfad, falls festgelegt
-{ImageName} - ISO/ROM Datei Name
-{ImageNameNoExt} - ISO/ROM Datei Name ohne Erweiterung
-{PlayniteDir} - Playnite Installationsverzeichnis
-{Name} - Name des Spieles
+	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
+{InstallDir} - Game installation directory
+{InstallDirName} - Installation folder name
+{ImagePath} - Game ISO/ROM path if set
+{ImageName} - Game ISO/ROM file name
+{ImageNameNoExt} - Game ISO/ROM file name without extension
+{PlayniteDir} - Playnite installation directory
+{Name} - Game name
 
-Cloud Variablen können verwendet werden, um eine dynamische Zeichenfolge hinzuzufügen:
+Cloud variables:
 {DropboxFolder}
 {OneDriveFolder}
- 
-Steam Variablen können verwendet werden, um eine dynamische Zeichenfolge hinzuzufügen:
-{SteamId} - Steam User ID
-{SteamAccountId} - Steam Konto ID
-{SteamInstallDir} - Steam Installation Verzeichnis
-{SteamScreenshotsDir} - Steam Screenshots Verzeichnis
 
-Ubisoft Connect Variablen können verwendet werden, um eine dynamische Zeichenfolge hinzuzufügen:
-{UbisoftInstallDir} - Ubisoft Installation Verzeichnis
-{UbisoftScreenshotsDir} - Ubisoft Screenshots Verzeichnis
+Steam variables:
+{SteamId} - Steam user ID
+{SteamAccountId} - Steam account ID
+{SteamInstallDir} - Steam installation directory
+{SteamScreenshotsDir} - Steam screenshots directory
 
-{RetroArchScreenshotsDir}
+Ubisoft Connect variables:
+{UbisoftInstallDir} - Ubisoft installation directory
+{UbisoftScreenshotsDir} - Ubisoft screenshots directory
 
-Windows Variablen können verwendet werden, um eine dynamische Zeichenfolge hinzuzufügen:
+GOG Galaxy variables:
+{GogScreenshotDir} - GOG Galaxy screenshots directory
+
+Xbox Game Bar variables:
+{XboxGamebarScreenshotsDir} - Xbox Game Bar captures directory
+
+RetroArch variables:
+{RetroArchScreenshotsDir} - RetroArch screenshots directory
+
+Windows variables:
 {WinDir}
 {AllUsersProfile}
 {AppData}
@@ -403,6 +410,6 @@ Windows Variablen können verwendet werden, um eine dynamische Zeichenfolge hinz
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)</sys:String>
+{ProgramFiles(x86)} - 32-bit Program Files directory</sys:String>
 
 </ResourceDictionary>
