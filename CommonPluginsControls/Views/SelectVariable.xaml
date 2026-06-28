@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:CommonPluginsControls.Controls"
              mc:Ignorable="d" d:DataContext="{d:DesignInstance local:SelectVariable, IsDesignTimeCreatable=False}"
-             Height="400" Width="800">
+             MinHeight="280" MinWidth="640"
+             HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 
     <DockPanel Margin="10" LastChildFill="True">
         <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
@@ -34,11 +35,14 @@
             </DockPanel>
         </Border>
 
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <ItemsControl Name="PART_Categories">
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalAlignment="Stretch"
+                      HorizontalAlignment="Stretch">
+            <ItemsControl Name="PART_Categories" HorizontalAlignment="Stretch">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Expander IsExpanded="True" Margin="0,0,0,6">
+                        <Expander IsExpanded="True" Margin="0,0,0,6" HorizontalAlignment="Stretch">
                             <Expander.Header>
                                 <TextBlock Style="{DynamicResource SectionHeaderText}" Text="{Binding CategoryName}" />
                             </Expander.Header>
@@ -47,10 +51,20 @@
                                      SelectionChanged="CategoryListBox_SelectionChanged"
                                      MouseDoubleClick="CategoryListBox_MouseDoubleClick"
                                      BorderThickness="0"
-                                     Background="Transparent">
+                                     Background="Transparent"
+                                     HorizontalAlignment="Stretch"
+                                     HorizontalContentAlignment="Stretch"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                     ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        <Setter Property="Padding" Value="0,2" />
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="0,2">
+                                        <Grid Margin="0,2" HorizontalAlignment="Stretch">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="10" />

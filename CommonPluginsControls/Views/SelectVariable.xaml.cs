@@ -35,6 +35,8 @@ namespace CommonPluginsControls.Controls
         public SelectVariable(SelectVariableMode mode, Game previewGame = null)
         {
             InitializeComponent();
+            HorizontalAlignment = HorizontalAlignment.Stretch;
+            VerticalAlignment = VerticalAlignment.Stretch;
 
             Game game = previewGame
                 ?? API.Instance.Database.Games.OrderByDescending(x => x.LastActivity).FirstOrDefault();
@@ -85,6 +87,7 @@ namespace CommonPluginsControls.Controls
                         "{InstallDir}", "{PlayniteDir}",
                         "{SteamInstallDir}", "{SteamScreenshotsDir}",
                         "{UbisoftInstallDir}", "{UbisoftScreenshotsDir}",
+                        "{GogScreenshotDir}", "{XboxGamebarScreenshotsDir}",
                         "{RetroArchScreenshotsDir}",
                         "{WinDir}", "{AllUsersProfile}", "{AppData}", "{HomePath}", "{UserProfile}",
                         "{HomeDrive}", "{SystemDrive}", "{SystemRoot}", "{Public}",

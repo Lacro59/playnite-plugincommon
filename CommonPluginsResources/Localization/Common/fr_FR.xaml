@@ -385,6 +385,12 @@ Variables Ubisoft Connect :
 {UbisoftInstallDir} - Répertoire d'installation Ubisoft
 {UbisoftScreenshotsDir} - Répertoire des captures d'écran Ubisoft
 
+Variables GOG Galaxy :
+{GogScreenshotDir} - Répertoire des captures d'écran GOG Galaxy
+
+Variables Xbox Game Bar :
+{XboxGamebarScreenshotsDir} - Répertoire des captures Xbox Game Bar
+
 Variables RetroArch :
 {RetroArchScreenshotsDir} - Répertoire des captures d'écran RetroArch
 

@@ -388,6 +388,12 @@ Ubisoft Connect variables:
 {UbisoftInstallDir} - Ubisoft installation directory
 {UbisoftScreenshotsDir} - Ubisoft screenshots directory
 
+GOG Galaxy variables:
+{GogScreenshotDir} - GOG Galaxy screenshots directory
+
+Xbox Game Bar variables:
+{XboxGamebarScreenshotsDir} - Xbox Game Bar captures directory
+
 RetroArch variables:
 {RetroArchScreenshotsDir} - RetroArch screenshots directory
 
