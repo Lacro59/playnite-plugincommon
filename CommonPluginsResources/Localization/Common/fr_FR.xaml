@@ -362,32 +362,39 @@ Veuillez vérifier les paramètres du plugin.</sys:String>
 
 	<!-- ==================== VARIABLES TOOLTIP ==================== -->
 
-	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
-{InstallDir} - Game installation directory
-{InstallDirName} - Installation folder name
-{ImagePath} - Game ISO/ROM path if set
-{ImageName} - Game ISO/ROM file name
-{ImageNameNoExt} - Game ISO/ROM file name without extension
-{PlayniteDir} - Playnite installation directory
-{Name} - Game name
+	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Des variables spéciales peuvent être utilisées pour ajouter une chaîne dynamique :
+{InstallDir} - Répertoire d'installation du jeu
+{InstallDirName} - Nom du dossier d'installation
+{ImagePath} - Chemin ISO/ROM du jeu si défini
+{ImageName} - Nom du fichier ISO/ROM du jeu
+{ImageNameNoExt} - Nom du fichier ISO/ROM du jeu sans extension
+{PlayniteDir} - Répertoire d'installation de Playnite
+{Name} - Nom du jeu
 
-Cloud variables can be used to add a dynamic string:
+Variables cloud :
 {DropboxFolder}
 {OneDriveFolder}
 
-Steam variables can be used to add a dynamic string:
-{SteamId} - Steam user ID
-{SteamAccountId} - Steam account ID
-{SteamInstallDir} - Steam installation directory
-{SteamScreenshotsDir} - Steam screenshots directory
+Variables Steam :
+{SteamId} - ID utilisateur Steam
+{SteamAccountId} - ID de compte Steam
+{SteamInstallDir} - Répertoire d'installation Steam
+{SteamScreenshotsDir} - Répertoire des captures d'écran Steam
 
-Ubisoft Connect variables can be used to add a dynamic string:
-{UbisoftInstallDir} - Ubisoft installation directory
-{UbisoftScreenshotsDir} - Ubisoft screenshots directory
+Variables Ubisoft Connect :
+{UbisoftInstallDir} - Répertoire d'installation Ubisoft
+{UbisoftScreenshotsDir} - Répertoire des captures d'écran Ubisoft
 
-{RetroArchScreenshotsDir} - RetroArch screenshots directory
+Variables GOG Galaxy :
+{GogScreenshotDir} - Répertoire des captures d'écran GOG Galaxy
 
-Windows variables can be used to add a dynamic string:
+Variables Xbox Game Bar :
+{XboxGamebarScreenshotsDir} - Répertoire des captures Xbox Game Bar
+
+Variables RetroArch :
+{RetroArchScreenshotsDir} - Répertoire des captures d'écran RetroArch
+
+Variables Windows :
 {WinDir}
 {AllUsersProfile}
 {AppData}
@@ -403,6 +410,6 @@ Windows variables can be used to add a dynamic string:
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)} - 32-bit Program Files directory</sys:String>
+{ProgramFiles(x86)} - Répertoire Program Files 32 bits</sys:String>
 
 </ResourceDictionary>
