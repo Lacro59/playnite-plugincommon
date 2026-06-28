@@ -35,6 +35,12 @@ namespace CommonPluginsShared.Controls
 			var timer = new DebugTimer(GetType().Name + ".OnLoaded");
 #endif
 
+			EnsureRegistered();
+
+#if DEBUG
+			timer.Step("EnsureRegistered done");
+#endif
+
 			InitializeStaticEvents();
 
 #if DEBUG
