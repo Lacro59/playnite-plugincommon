@@ -370,23 +370,30 @@ Por favor, limpe todas as tags no menu de plugins.</sys:String>
 {PlayniteDir} - Playnite installation directory
 {Name} - Game name
 
-Cloud variables can be used to add a dynamic string:
+Cloud variables:
 {DropboxFolder}
 {OneDriveFolder}
 
-Steam variables can be used to add a dynamic string:
+Steam variables:
 {SteamId} - Steam user ID
 {SteamAccountId} - Steam account ID
 {SteamInstallDir} - Steam installation directory
 {SteamScreenshotsDir} - Steam screenshots directory
 
-Ubisoft Connect variables can be used to add a dynamic string:
+Ubisoft Connect variables:
 {UbisoftInstallDir} - Ubisoft installation directory
 {UbisoftScreenshotsDir} - Ubisoft screenshots directory
 
+GOG Galaxy variables:
+{GogScreenshotDir} - GOG Galaxy screenshots directory
+
+Xbox Game Bar variables:
+{XboxGamebarScreenshotsDir} - Xbox Game Bar captures directory
+
+RetroArch variables:
 {RetroArchScreenshotsDir} - RetroArch screenshots directory
 
-Windows variables can be used to add a dynamic string:
+Windows variables:
 {WinDir}
 {AllUsersProfile}
 {AppData}
