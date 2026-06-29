@@ -362,39 +362,39 @@
 
 	<!-- ==================== VARIABLES TOOLTIP ==================== -->
 
-	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
-{InstallDir} - Game installation directory
-{InstallDirName} - Installation folder name
-{ImagePath} - Game ISO/ROM path if set
-{ImageName} - Game ISO/ROM file name
-{ImageNameNoExt} - Game ISO/ROM file name without extension
-{PlayniteDir} - Playnite installation directory
-{Name} - Game name
+	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">特殊変数を使用して、動的な文字列を追加できます：
+{InstallDir} - ゲームのインストールディレクトリ
+{InstallDirName} - インストールフォルダー名
+{ImagePath} - 設定されている場合、ゲームの ISO/ROM パス
+{ImageName} - ゲームの ISO/ROM ファイル名
+{ImageNameNoExt} - 拡張子を除いたゲームの ISO/ROM ファイル名
+{PlayniteDir} - Playnite のインストールディレクトリ
+{Name} - ゲーム名
 
-Cloud variables:
+クラウド変数：
 {DropboxFolder}
 {OneDriveFolder}
 
-Steam variables:
-{SteamId} - Steam user ID
-{SteamAccountId} - Steam account ID
-{SteamInstallDir} - Steam installation directory
-{SteamScreenshotsDir} - Steam screenshots directory
+Steam 変数：
+{SteamId} - Steam ユーザー ID
+{SteamAccountId} - Steam アカウント ID
+{SteamInstallDir} - Steam のインストールディレクトリ
+{SteamScreenshotsDir} - Steam スクリーンショットディレクトリ
 
-Ubisoft Connect variables:
-{UbisoftInstallDir} - Ubisoft installation directory
-{UbisoftScreenshotsDir} - Ubisoft screenshots directory
+Ubisoft Connect 変数：
+{UbisoftInstallDir} - Ubisoft のインストールディレクトリ
+{UbisoftScreenshotsDir} - Ubisoft スクリーンショットディレクトリ
 
-GOG Galaxy variables:
-{GogScreenshotDir} - GOG Galaxy screenshots directory
+GOG Galaxy 変数：
+{GogScreenshotDir} - GOG Galaxy スクリーンショットディレクトリ
 
-Xbox Game Bar variables:
-{XboxGamebarScreenshotsDir} - Xbox Game Bar captures directory
+Xbox Game Bar 変数：
+{XboxGamebarScreenshotsDir} - Xbox Game Bar キャプチャディレクトリ
 
-RetroArch variables:
-{RetroArchScreenshotsDir} - RetroArch screenshots directory
+RetroArch 変数：
+{RetroArchScreenshotsDir} - RetroArch スクリーンショットディレクトリ
 
-Windows variables:
+Windows 変数：
 {WinDir}
 {AllUsersProfile}
 {AppData}
@@ -410,6 +410,6 @@ Windows variables:
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)} - 32-bit Program Files directory</sys:String>
+{ProgramFiles(x86)} - 32-bit Program Files ディレクトリ</sys:String>
 
 </ResourceDictionary>
