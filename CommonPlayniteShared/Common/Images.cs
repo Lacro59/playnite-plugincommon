@@ -95,9 +95,25 @@ namespace CommonPlayniteShared.Common
             }
             catch (Exception e)
             {
-                logger.Error(e, "Failed to load image properties from stream.");
+                logger.Error(e, $"Failed to load image properties from stream. Source: {GetStreamSourceLabel(imageStream)}");
                 return new ImageProperties();
             }
+        }
+
+        private static string GetStreamSourceLabel(Stream stream)
+        {
+            if (stream == null)
+            {
+                return "<null stream>";
+            }
+
+            var fileStream = stream as FileStream;
+            if (fileStream != null && !string.IsNullOrWhiteSpace(fileStream.Name))
+            {
+                return fileStream.Name;
+            }
+
+            return $"<{stream.GetType().Name}>";
         }
 
         /// <summary>
