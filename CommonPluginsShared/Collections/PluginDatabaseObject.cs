@@ -11,6 +11,7 @@ using Playnite.SDK.Data;
 using Playnite.SDK.Models;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -138,6 +139,8 @@ namespace CommonPluginsShared.Collections
 		private readonly object _batchAuthSuppressionLock = new object();
 		private HashSet<string> _batchAuthSuppressedClients;
 		private bool _isBatchRefreshInProgress;
+		private static readonly TimeSpan ErrorNotificationDedupWindow = TimeSpan.FromSeconds(15);
+		private readonly ConcurrentDictionary<string, DateTime> _lastErrorNotifications = new ConcurrentDictionary<string, DateTime>();
 
 		/// <summary>Gets a value indicating whether a multi-game batch refresh is currently running.</summary>
 		public bool IsBatchRefreshInProgress => _isBatchRefreshInProgress;
@@ -1024,14 +1027,20 @@ namespace CommonPluginsShared.Collections
 					return;
 				}
 
-				itemToAdd.IsSaved = true;
-				if (_database.ContainsItem(itemToAdd.Id))
+				PluginItemCollection<TItem> database = GetWritableDatabaseOrNull("Add", itemToAdd.Id);
+				if (database == null)
 				{
-					_database.Update(itemToAdd);
+					return;
+				}
+
+				itemToAdd.IsSaved = true;
+				if (database.ContainsItem(itemToAdd.Id))
+				{
+					database.Update(itemToAdd);
 				}
 				else
 				{
-					_database.Add(itemToAdd);
+					database.Add(itemToAdd);
 				}
 
 				DatabaseItemUpdated?.Invoke(this, new ItemUpdatedEventArgs<TItem>(
@@ -1048,6 +1057,11 @@ namespace CommonPluginsShared.Collections
 			}
 			catch (Exception ex)
 			{
+				Logger.Warn(string.Format(
+					"[{0}] Add failed — {1}, item={2}",
+					PluginName,
+					GetDatabaseReadinessSnapshot(),
+					itemToAdd?.Id));
 				Common.LogError(ex, false, false, PluginName);
 				NotifyError("Add", ex);
 			}
@@ -1064,15 +1078,21 @@ namespace CommonPluginsShared.Collections
 					return;
 				}
 
+				PluginItemCollection<TItem> database = GetWritableDatabaseOrNull("Update", itemToUpdate.Id);
+				if (database == null)
+				{
+					return;
+				}
+
 				itemToUpdate.IsSaved = true;
 				itemToUpdate.DateLastRefresh = DateTime.Now.ToUniversalTime();
-				if (_database.ContainsItem(itemToUpdate.Id))
+				if (database.ContainsItem(itemToUpdate.Id))
 				{
-					_database.Update(itemToUpdate);
+					database.Update(itemToUpdate);
 				}
 				else
 				{
-					_database.Add(itemToUpdate);
+					database.Add(itemToUpdate);
 				}
 
 				DatabaseItemUpdated?.Invoke(this, new ItemUpdatedEventArgs<TItem>(
@@ -1089,6 +1109,11 @@ namespace CommonPluginsShared.Collections
 			}
 			catch (Exception ex)
 			{
+				Logger.Warn(string.Format(
+					"[{0}] Update failed — {1}, item={2}",
+					PluginName,
+					GetDatabaseReadinessSnapshot(),
+					itemToUpdate?.Id));
 				Common.LogError(ex, false, false, PluginName);
 				NotifyError("Update", ex);
 			}
@@ -2444,13 +2469,91 @@ namespace CommonPluginsShared.Collections
 			}
 		}
 
+		/// <summary>
+		/// Posts an error notification for <paramref name="operation"/>.
+		/// The first occurrence is always shown; identical duplicates (same operation and message)
+		/// within <see cref="ErrorNotificationDedupWindow"/> are suppressed to avoid startup spam.
+		/// </summary>
 		private void NotifyError(string operation, Exception ex)
 		{
-			API.Instance.Notifications.Add(new NotificationMessage(
-				string.Format("{0}-Error-{1}", PluginName, operation),
-				string.Format("{0}\n{1}", PluginName, ex.Message),
+			string message = ex?.Message ?? "Unknown error";
+			string notificationKey = string.Format("{0}-Error-{1}", PluginName, operation);
+			string dedupKey = string.Format("{0}|{1}", notificationKey, message);
+			DateTime now = DateTime.UtcNow;
+
+			if (_lastErrorNotifications.TryGetValue(dedupKey, out DateTime lastSent)
+				&& now - lastSent < ErrorNotificationDedupWindow)
+			{
+				Common.LogDebug(true, string.Format(
+					"[{0}] NotifyError({1}) suppressed — dedup window {2}s, lastSent={3:O}, message={4}",
+					PluginName,
+					operation,
+					ErrorNotificationDedupWindow.TotalSeconds,
+					lastSent,
+					message));
+				return;
+			}
+
+			_lastErrorNotifications[dedupKey] = now;
+
+			Common.LogDebug(false, string.Format(
+				"[{0}] NotifyError({1}) posting notification — {2}",
+				PluginName,
+				operation,
+				GetDatabaseReadinessSnapshot()));
+
+			API.Instance?.Notifications?.Add(new NotificationMessage(
+				notificationKey,
+				string.Format("{0}\n{1}", PluginName, message),
 				NotificationType.Error,
 				() => PlayniteTools.CreateLogPackage(PluginName)));
+		}
+
+		/// <summary>Returns a compact snapshot of plugin and Playnite database readiness for diagnostic logs.</summary>
+		private string GetDatabaseReadinessSnapshot()
+		{
+			return string.Format(
+				"IsLoaded={0}, pluginDb={1}, playniteDbOpen={2}",
+				IsLoaded,
+				_database != null ? "ready" : "null",
+				API.Instance?.Database?.IsOpen == true);
+		}
+
+		private PluginItemCollection<TItem> GetWritableDatabaseOrNull(string operation, Guid itemId)
+		{
+			PluginItemCollection<TItem> database = _database;
+			if (database != null)
+			{
+				return database;
+			}
+
+			Common.LogDebug(false, string.Format(
+				"[{0}] {1} — plugin database null, waiting via GetDatabaseSafe ({2}), item={3}",
+				PluginName,
+				operation,
+				GetDatabaseReadinessSnapshot(),
+				itemId));
+
+			database = GetDatabaseSafe();
+			if (database == null)
+			{
+				Logger.Warn(string.Format(
+					"[{0}] {1} skipped — database is not ready ({2}), item={3}",
+					PluginName,
+					operation,
+					GetDatabaseReadinessSnapshot(),
+					itemId));
+			}
+			else
+			{
+				Common.LogDebug(false, string.Format(
+					"[{0}] {1} — database ready after wait, item={2}",
+					PluginName,
+					operation,
+					itemId));
+			}
+
+			return database;
 		}
 
 		#endregion
