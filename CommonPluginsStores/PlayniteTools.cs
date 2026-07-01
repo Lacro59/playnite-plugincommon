@@ -58,17 +58,18 @@ namespace CommonPluginsStores
             // Steam
             if (result.Contains("{Steam"))
             {
+                Common.LogDebug(true, "[PlayniteTools] StringExpandWithStores resolving Steam variables.");
                 SteamApi steamApi = new SteamApi("PlayniteTools", ExternalPlugin.None);
 
                 if (SteamId == "null")
                 {
-                    SteamId = steamApi.CurrentAccountInfos?.UserId.ToString() ?? string.Empty;
+                    SteamId = ResolveSteamUserId(steamApi);
                 }
                 if (SteamAccountId == "null")
                 {
-                    if (steamApi.CurrentAccountInfos != null)
+                    if (!SteamId.IsNullOrEmpty() && ulong.TryParse(SteamId, out ulong steamId))
                     {
-                        SteamAccountId = SteamApi.GetAccountId(ulong.Parse(steamApi.CurrentAccountInfos.UserId)).ToString() ?? string.Empty;
+                        SteamAccountId = SteamApi.GetAccountId(steamId).ToString();
                     }
                 }
                 if (SteamInstallDir == "null")
@@ -77,10 +78,13 @@ namespace CommonPluginsStores
                 }
                 if (SteamScreenshotsDir == "null")
                 {
-                    SteamScreenshotsDir = steamApi.GetScreeshotsPath();
+                    SteamScreenshotsDir = ResolveSteamScreenshotsDir(SteamInstallDir, SteamId, SteamAccountId);
                 }
 
+                Common.LogDebug(true, $"[PlayniteTools] Steam variables resolved: hasSteamId={!SteamId.IsNullOrEmpty()}, hasSteamAccountId={!SteamAccountId.IsNullOrEmpty()}, hasSteamInstallDir={!SteamInstallDir.IsNullOrEmpty()}, hasSteamScreenshotsDir={!SteamScreenshotsDir.IsNullOrEmpty()}.");
+
                 result = SteamId.IsNullOrEmpty() ? result : result.Replace("{SteamId}", SteamId);
+                result = SteamAccountId.IsNullOrEmpty() ? result : result.Replace("{SteamAccountId}", SteamAccountId);
                 result = SteamInstallDir.IsNullOrEmpty() ? result : result.Replace("{SteamInstallDir}", SteamInstallDir);
                 result = SteamScreenshotsDir.IsNullOrEmpty() ? result : result.Replace("{SteamScreenshotsDir}", SteamScreenshotsDir);
             }
@@ -128,6 +132,57 @@ namespace CommonPluginsStores
             }
 
             return fixSeparators ? Paths.FixSeparators(result) : result;
+        }
+
+        private static string ResolveSteamUserId(SteamApi steamApi)
+        {
+            try
+            {
+                var users = steamApi.GetSteamUsers();
+                ulong steamId = users?.Select(user => user.SteamId).FirstOrDefault() ?? 0;
+                string resolvedSteamId = steamId > 0 ? steamId.ToString() : string.Empty;
+                Common.LogDebug(true, $"[PlayniteTools] ResolveSteamUserId: usersCount={users?.Count ?? 0}, hasSteamId={!resolvedSteamId.IsNullOrEmpty()}.");
+                return resolvedSteamId;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, "Error resolving Steam user id for variable expansion.");
+                return string.Empty;
+            }
+        }
+
+        private static string ResolveSteamScreenshotsDir(string steamInstallDir, string steamId, string steamAccountId)
+        {
+            try
+            {
+                if (steamInstallDir.IsNullOrEmpty())
+                {
+                    Common.LogDebug(true, "[PlayniteTools] ResolveSteamScreenshotsDir skipped: empty Steam install directory.");
+                    return string.Empty;
+                }
+
+                if (steamAccountId.IsNullOrEmpty() && !steamId.IsNullOrEmpty() && ulong.TryParse(steamId, out ulong parsedSteamId))
+                {
+                    steamAccountId = SteamApi.GetAccountId(parsedSteamId).ToString();
+                    Common.LogDebug(true, $"[PlayniteTools] ResolveSteamScreenshotsDir computed account id from steam id: hasSteamAccountId={!steamAccountId.IsNullOrEmpty()}.");
+                }
+
+                if (steamAccountId.IsNullOrEmpty())
+                {
+                    Common.LogDebug(true, "[PlayniteTools] ResolveSteamScreenshotsDir skipped: missing Steam account id.");
+                    return string.Empty;
+                }
+
+                string screenshotsDir = Path.Combine(steamInstallDir, "userdata", steamAccountId, "760", "remote");
+                bool exists = Directory.Exists(screenshotsDir);
+                Common.LogDebug(true, $"[PlayniteTools] ResolveSteamScreenshotsDir result: exists={exists}.");
+                return exists ? screenshotsDir : string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, "Error resolving Steam screenshots directory for variable expansion.");
+                return string.Empty;
+            }
         }
 
         public static string PathToRelativeWithStores(Game game, string inputString)
