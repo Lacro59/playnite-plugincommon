@@ -362,39 +362,39 @@
 
 	<!-- ==================== VARIABLES TOOLTIP ==================== -->
 
-	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Special variables can be used to add a dynamic string:
-{InstallDir} - Game installation directory
-{InstallDirName} - Installation folder name
-{ImagePath} - Game ISO/ROM path if set
-{ImageName} - Game ISO/ROM file name
-{ImageNameNoExt} - Game ISO/ROM file name without extension
-{PlayniteDir} - Playnite installation directory
-{Name} - Game name
+	<sys:String x:Key="LOCGameVariablesTooltip" xml:space="preserve">Специальные переменные можно использовать для добавления динамической строки:
+{InstallDir} - Каталог установки игры
+{InstallDirName} - Название каталога установки игры
+{ImagePath} - Путь к ISO/ROM-образу игры, если указан
+{ImageName} - Название ISO/ROM файла игры
+{ImageNameNoExt} - Название ISO/ROM файла игры без расширения
+{PlayniteDir} - Каталог установки Playnite
+{Name} - Название игры
 
-Cloud variables:
+Облачные переменные:
 {DropboxFolder}
 {OneDriveFolder}
 
-Steam variables:
-{SteamId} - Steam user ID
+Переменные Steam:
+{SteamId} - Steam ID пользователя
 {SteamAccountId} - Steam account ID
-{SteamInstallDir} - Steam installation directory
-{SteamScreenshotsDir} - Steam screenshots directory
+{SteamInstallDir} - Каталог установки Steam
+{SteamScreenshotsDir} - Каталог скриншотов Steam
 
-Ubisoft Connect variables:
-{UbisoftInstallDir} - Ubisoft installation directory
-{UbisoftScreenshotsDir} - Ubisoft screenshots directory
+Переменные Ubisoft Connect:
+{UbisoftInstallDir} - Каталог установки Ubisoft
+{UbisoftScreenshotsDir} - Каталог скриншотов Ubisoft
 
-GOG Galaxy variables:
-{GogScreenshotDir} - GOG Galaxy screenshots directory
+Переменные GOG Galaxy:
+{GogScreenshotDir} - Каталог скриншотов GOG Galaxy
 
-Xbox Game Bar variables:
-{XboxGamebarScreenshotsDir} - Xbox Game Bar captures directory
+Переменные Xbox Game Bar:
+{XboxGamebarScreenshotsDir} - Каталог захвата экрана Xbox Game Bar
 
-RetroArch variables:
-{RetroArchScreenshotsDir} - RetroArch screenshots directory
+Переменные RetroArch:
+{RetroArchScreenshotsDir} - Каталог скриншотов RetroArch
 
-Windows variables:
+Переменные Windows:
 {WinDir}
 {AllUsersProfile}
 {AppData}
@@ -410,6 +410,6 @@ Windows variables:
 {CommonProgramFiles}
 {ProgramFiles}
 {CommonProgramFiles(x86)}
-{ProgramFiles(x86)} - 32-bit Program Files directory</sys:String>
+{ProgramFiles(x86)} - 32-битная директория Program Files</sys:String>
 
 </ResourceDictionary>
