@@ -126,7 +126,7 @@
 	<!-- ==================== LIST ACTIONS ==================== -->
 
 	<sys:String x:Key="LOCCommonClearSelection">Effacer la sélection</sys:String>
-	<sys:String x:Key="LOCCommonRefreshSelected">Actualiser la sélection</sys:String>
+	<sys:String x:Key="LOCCommonRefreshSelected">⟳ Refresh Selected</sys:String>
 	<sys:String x:Key="LOCCommonSelected">Sélectionnés :</sys:String>
 	<sys:String x:Key="LOCCommonSelectGames">Sélectionner des jeux</sys:String>
 	<sys:String x:Key="LOCCommonSelectVariable">Sélectionner une variable</sys:String>
@@ -166,7 +166,7 @@
 	<!-- ==================== DATA SECTION (Settings) ==================== -->
 
 	<sys:String x:Key="LOCCommonDataSectionTitle">Gestion des données</sys:String>
-	<sys:String x:Key="LOCCommonClearAllDescription">Supprime définitivement toutes les données de plugin pour chaque jeu de votre bibliothèque, puis efface tous les fichiers de cache temporaires. La bibliothèque Playnite elle-même n'est pas affectée. Cette action ne peut pas être annulée.</sys:String>
+	<sys:String x:Key="LOCCommonClearAllDescription">Permanently deletes all cached system check data for every game. This action cannot be undone.</sys:String>
 	<sys:String x:Key="LOCCommonClearAllConfirm">Êtes-vous sûr de vouloir supprimer toutes les données du plugin ? Cette action ne peut pas être annulée.</sys:String>
 
 	<!-- ==================== CACHE SECTION (Settings) ==================== -->
@@ -231,12 +231,12 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 	<sys:String x:Key="LOCCommonAuthenticateLabel">Connexion</sys:String>
 	<sys:String x:Key="LOCCommonControlConfiguration">Configuration du contrôle</sys:String>
 	<sys:String x:Key="LOCCommonGetAccountID">Obtenir l'ID du compte</sys:String>
-	<sys:String x:Key="LOCCommonHasApiKey">Possède une clé API</sys:String>
+	<sys:String x:Key="LOCCommonHasApiKey">A une clé api</sys:String>
 	<sys:String x:Key="LOCCommonIsPrivate">Est privé</sys:String>
-	<sys:String x:Key="LOCCommonLoggedIn">Connecté</sys:String>
-	<sys:String x:Key="LOCCommonLoginChecking">Vérification en cours…</sys:String>
-	<sys:String x:Key="LOCCommonNotLoggedIn">Connexion requise</sys:String>
-	<sys:String x:Key="LOCCommonNotLoggedInError">Échec de la connexion</sys:String>
+	<sys:String x:Key="LOCCommonLoggedIn">Utilisateur connecté</sys:String>
+	<sys:String x:Key="LOCCommonLoginChecking">Vérification du statut d'authentification…</sys:String>
+	<sys:String x:Key="LOCCommonNotLoggedIn">Authentification requise</sys:String>
+	<sys:String x:Key="LOCCommonNotLoggedInError">Impossible d'authentifier l'utilisateur</sys:String>
 	<sys:String x:Key="LOCCommonPrivateChecking">Vérification du statut privé…</sys:String>
 	<sys:String x:Key="LOCCommonUseAuthentication">Utiliser l'authentification</sys:String>
 	<sys:String x:Key="LOCCommonUseAuthenticationOption">Utiliser l'authentification (optionnelle, pour plus d'informations seulement)</sys:String>
