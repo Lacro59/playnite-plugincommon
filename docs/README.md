@@ -53,6 +53,26 @@ Theme-integrated WPF controls (`PluginUserControlExtendBase` / `PluginUserContro
 
 **Recent change (2026-06)** — After a multi-game `Refresh()`, `BatchRefreshCompleted` notifies all living `PluginUserControlExtend` instances to re-read the session cache (no network). Subscription is **centralized in `PluginUserControlExtend`**; plugin controls do not need extra wiring for this event.
 
+### [Plugin settings live refresh](plugin-settings-live-refresh.md)
+
+Mutable settings instance contract and live theme control refresh after `BeginEdit` / `CancelEdit` / `EndEdit`.
+
+| Section in guide | Summary |
+| ---------------- | ------- |
+| [Contract](plugin-settings-live-refresh.md#contract--single-mutable-instance) | Single runtime settings instance shared by view model and database |
+| [Edit lifecycle](plugin-settings-live-refresh.md#settings-edit-lifecycle) | Snapshot clone, in-place cancel restore, save without instance swap |
+| [Live properties](plugin-settings-live-refresh.md#live-properties) | `SetValue` vs auto-properties for `PropertyChanged` |
+| [Implementation checklist](plugin-settings-live-refresh.md#implementation-checklist-new-plugin) | Steps for new plugins |
+| [Anti-patterns](plugin-settings-live-refresh.md#anti-patterns) | Instance swap pitfalls |
+
+#### Key types
+
+| Type | File |
+| ---- | ---- |
+| `PluginSettingsViewModel` | `CommonPluginsShared/Plugins/PluginSettingsViewModel.cs` |
+| `PluginSettings` | `CommonPluginsShared/Plugins/PluginSettings.cs` |
+| `PluginExtended<…>` | `CommonPluginsShared/PlayniteExtended/PluginExtended.cs` |
+
 ## Quick reference — control update triggers
 
 | Event / signal                  | Wired by                             | Per-instance filter                   |

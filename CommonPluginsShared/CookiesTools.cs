@@ -173,6 +173,37 @@ namespace CommonPluginsShared
         }
 
         /// <summary>
+        /// Injects persisted store cookies into a WebView before navigation.
+        /// </summary>
+        /// <param name="webView">Target WebView instance.</param>
+        public void InjectStoredCookies(IWebView webView)
+        {
+            if (webView == null)
+            {
+                return;
+            }
+
+            List<HttpCookie> injectCookies = GetStoredCookies(warnIfMissing: false);
+            if (injectCookies == null || injectCookies.Count == 0)
+            {
+                Common.LogDebug(true, $"{ClientName} InjectStoredCookies: no persisted cookies; navigation relies on shared WebView SSO jar.");
+                return;
+            }
+
+            Common.LogDebug(true, $"{ClientName} InjectStoredCookies: injecting {injectCookies.Count} cookie(s).");
+            foreach (HttpCookie cookie in injectCookies)
+            {
+                if (cookie == null)
+                {
+                    continue;
+                }
+
+                string domain = cookie.Domain.StartsWith(".") ? cookie.Domain.Substring(1) : cookie.Domain;
+                webView.SetCookies("https://" + domain, cookie);
+            }
+        }
+
+        /// <summary>
         /// Clears cookies for configured domains from an offscreen WebView.
         /// </summary>
         public void ClearDomainCookies()
@@ -189,6 +220,7 @@ namespace CommonPluginsShared
             {
                 webView = API.Instance.WebViews.CreateOffscreenView();
                 Logger.Info($"{ClientName} clearing WebView cookies for {CookiesDomains.Count} domain(s)");
+                Common.LogDebug(true, $"{ClientName} ClearDomainCookies: purging shared Playnite WebView cookie jar ({CookiesDomains.Count} domain(s)); may affect other plugins using the same SSO session.");
 
                 foreach (string domain in CookiesDomains)
                 {
@@ -335,6 +367,7 @@ namespace CommonPluginsShared
 
             try
             {
+                Common.LogDebug(true, $"{ClientName} GetNewWebCookies: deleteCookies={deleteCookies}, urlCount={urls?.Count ?? 0}, sharedJarPurge={(deleteCookies ? "yes" : "no")}.");
                 if (createdLocally)
                 {
                     WebViewSettings webViewSettings = new WebViewSettings
@@ -417,7 +450,12 @@ namespace CommonPluginsShared
 
             if (deleteCookies && CookiesDomains != null)
             {
+                Common.LogDebug(true, $"{ClientName} ExtractCookies: deleteCookies=true — purging {CookiesDomains.Count} domain(s) from shared WebView jar after extracting {httpCookies?.Count ?? 0} cookie(s).");
                 CookiesDomains.ForEach(x => webView.DeleteDomainCookies(x));
+            }
+            else
+            {
+                Common.LogDebug(true, $"{ClientName} ExtractCookies: deleteCookies=false — shared WebView jar left intact ({httpCookies?.Count ?? 0} cookie(s) extracted).");
             }
 
             return httpCookies;
