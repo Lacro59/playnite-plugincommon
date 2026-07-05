@@ -169,7 +169,7 @@ namespace CommonPluginsShared.Controls
 			timer.Step("DispatcherTimer created");
 #endif
 
-			RegisterInstance();
+			EnsureRegistered();
 			Unloaded += PluginUserControlExtendBase_Unloaded;
 
 #if DEBUG
@@ -179,10 +179,23 @@ namespace CommonPluginsShared.Controls
 
 		#region Instance Management
 
-		private void RegisterInstance()
+		/// <summary>
+		/// Ensures this control is tracked for <see cref="NotifyAllInstances"/> broadcasts.
+		/// Playnite may unload and reload theme controls without recreating them; call again on each load.
+		/// </summary>
+		protected void EnsureRegistered()
 		{
 			lock (_initLock)
 			{
+				for (int i = 0; i < _instances.Count; i++)
+				{
+					if (_instances[i].TryGetTarget(out PluginUserControlExtendBase instance)
+						&& ReferenceEquals(instance, this))
+					{
+						return;
+					}
+				}
+
 				_instances.Add(new WeakReference<PluginUserControlExtendBase>(this));
 			}
 		}

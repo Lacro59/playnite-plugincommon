@@ -26,7 +26,7 @@ namespace CommonPluginsShared.Converters
                     return null;
                 }
 
-                string[] validExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".jfif", ".tga", ".webp" };
+                string[] validExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".jfif", ".tga", ".webp", ".avif", ".heic" };
                 if (!validExtensions.Contains(Path.GetExtension(imagePath).ToLowerInvariant()))
                 {
                     return imagePath;

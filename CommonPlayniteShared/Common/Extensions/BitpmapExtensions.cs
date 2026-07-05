@@ -272,9 +272,25 @@ namespace System.Drawing.Imaging
             }
             catch (Exception e)
             {
-                logger.Error(e, "Failed to create bitmap from stream.");
+                logger.Error(e, $"Failed to create bitmap from stream. Source: {GetStreamSourceLabel(stream)}");
                 return null;
             }
+        }
+
+        private static string GetStreamSourceLabel(Stream stream)
+        {
+            if (stream == null)
+            {
+                return "<null stream>";
+            }
+
+            var fileStream = stream as FileStream;
+            if (fileStream != null && !string.IsNullOrWhiteSpace(fileStream.Name))
+            {
+                return fileStream.Name;
+            }
+
+            return $"<{stream.GetType().Name}>";
         }
 
         public static long GetSizeInMemory(this BitmapImage image)

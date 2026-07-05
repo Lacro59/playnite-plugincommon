@@ -422,6 +422,7 @@ namespace CommonPluginsStores.Steam
 				}
 
 				Common.LogDebug(true, "[SteamApi] GetIsUserLoggedIn: full network verification (UseAuth).");
+				Common.LogDebug(true, "[SteamAuthCompat] GetIsUserLoggedIn: full verification — WebView cookie refresh uses deleteCookies=false (shared jar preserved for SteamLibrary).");
 				bool verified = VerifyUserLoggedInWithAuth();
 				Common.LogDebug(true, $"[SteamApi] GetIsUserLoggedIn full verification result: isLogged={verified}.");
 				return verified;
@@ -524,11 +525,12 @@ namespace CommonPluginsStores.Steam
 						return false;
 					}
 
-					Common.LogDebug(true, "[SteamApi] VerifyUserLoggedInWithAuth: refreshing cookies and retrying.");
+					Common.LogDebug(true, "[SteamApi] VerifyUserLoggedInWithAuth: refreshing cookies and retrying (global WebView jar will not be purged).");
 					string url = string.Format(UrlRefreshToken, CurrentAccountInfos.Link);
 
 					Thread.Sleep(250);
-					if (!TryRefreshSteamCookies(url, false, out userData, out isLogged))
+					Common.LogDebug(true, "[SteamAuthCompat] VerifyUserLoggedInWithAuth: cookie refresh attempt 1/3.");
+					if (!TryRefreshSteamCookies(url, out userData, out isLogged))
 					{
 						return false;
 					}
@@ -536,7 +538,8 @@ namespace CommonPluginsStores.Steam
 					if (!isLogged)
 					{
 						Thread.Sleep(250);
-						if (!TryRefreshSteamCookies(url, true, out userData, out isLogged))
+						Common.LogDebug(true, "[SteamAuthCompat] VerifyUserLoggedInWithAuth: cookie refresh attempt 2/3.");
+						if (!TryRefreshSteamCookies(url, out userData, out isLogged))
 						{
 							return false;
 						}
@@ -545,7 +548,8 @@ namespace CommonPluginsStores.Steam
 					if (!isLogged)
 					{
 						Thread.Sleep(250);
-						if (!TryRefreshSteamCookies(url, true, out userData, out isLogged))
+						Common.LogDebug(true, "[SteamAuthCompat] VerifyUserLoggedInWithAuth: cookie refresh attempt 3/3.");
+						if (!TryRefreshSteamCookies(url, out userData, out isLogged))
 						{
 							return false;
 						}
@@ -617,7 +621,10 @@ namespace CommonPluginsStores.Steam
 			}
 		}
 
-		private bool TryRefreshSteamCookies(string refreshUrl, bool deleteCookies, out SteamUserData userData, out bool isLogged)
+		/// <summary>
+		/// Refreshes persisted Steam cookies via WebView navigation without purging the shared Playnite cookie jar.
+		/// </summary>
+		private bool TryRefreshSteamCookies(string refreshUrl, out SteamUserData userData, out bool isLogged)
 		{
 			userData = null;
 			isLogged = false;
@@ -628,7 +635,9 @@ namespace CommonPluginsStores.Steam
 				return false;
 			}
 
-			List<HttpCookie> cookies = GetNewWebCookies(new List<string> { refreshUrl, "https://steamcommunity.com/my", UrlStore }, deleteCookies);
+			Common.LogDebug(true, $"[SteamAuthCompat] TryRefreshSteamCookies: start, deleteCookies=false, refreshUrl={FormatAuthWebViewUrlForLog(refreshUrl)}.");
+
+			List<HttpCookie> cookies = GetNewWebCookies(new List<string> { refreshUrl, "https://steamcommunity.com/my", UrlStore }, deleteCookies: false);
 			if (!IsAuthCheckCurrent())
 			{
 				Common.LogDebug(true, "[SteamApi] VerifyUserLoggedInWithAuth cookie save aborted: superseded auth operation.");
@@ -638,6 +647,7 @@ namespace CommonPluginsStores.Steam
 			_ = SetStoredCookies(cookies);
 			userData = GetUserData();
 			isLogged = HasOwnedApps(userData);
+			Common.LogDebug(true, $"[SteamAuthCompat] TryRefreshSteamCookies: done, persistedCookies={cookies?.Count ?? 0}, ownedApps={userData?.RgOwnedApps?.Count ?? 0}, isLogged={isLogged}.");
 			return true;
 		}
 
@@ -721,10 +731,16 @@ namespace CommonPluginsStores.Steam
 		}
 
 		/// <summary>
+		/// Logout clears CheckDlc persisted session only; the shared Playnite WebView cookie jar is left intact for SteamLibrary SSO.
+		/// </summary>
+		protected override bool ClearGlobalWebViewCookiesOnSessionClear => false;
+
+		/// <summary>
 		/// Clears stored Steam session data including cached owned-apps userdata.
 		/// </summary>
 		public override void ClearSession()
 		{
+			Common.LogDebug(true, "[SteamAuthCompat] ClearSession: clearing CheckDlc persisted Steam session only; shared WebView cookie jar left intact for SteamLibrary.");
 			base.ClearSession();
 			ClearStoredUserData();
 		}
@@ -760,8 +776,9 @@ namespace CommonPluginsStores.Steam
 			try
 			{
 				Common.LogDebug(true, $"[SteamApi] Auth webview opening, initialNavigate={FormatAuthWebViewUrlForLog(RecommendationQueueUrl)}.");
+				Common.LogDebug(true, "[SteamAuthCompat] Login: skipping DeleteDomainCookies; injecting persisted cookies then navigating (global WebView SSO jar preserved).");
 				view.LoadingChanged += CloseWhenLoggedIn;
-				CookiesDomains.ForEach(x => { view.DeleteDomainCookies(x); });
+				CookiesTools.InjectStoredCookies(view);
 				view.Navigate(RecommendationQueueUrl);
 
 				view.OpenDialog();
@@ -778,6 +795,7 @@ namespace CommonPluginsStores.Steam
 				{
 					Common.LogDebug(true, $"[SteamApi] Auth webview closed, finalUrl={FormatAuthWebViewUrlForLog(view.GetCurrentAddress())}, hasAccountInfos={CurrentAccountInfos != null}, hasToken={!(StoreToken?.Token.IsNullOrEmpty() ?? true)}.");
 					view.LoadingChanged -= CloseWhenLoggedIn;
+					Common.LogDebug(true, "[SteamAuthCompat] Login: persisting cookies from auth webview with deleteCookies=false.");
 					_ = SetStoredCookies(GetWebCookies(false, view));
 					view.Dispose();
 				}

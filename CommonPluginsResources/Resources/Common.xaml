@@ -317,6 +317,97 @@
         <Setter Property="IsDefault"  Value="False" />
     </Style>
 
+    <!-- SECTION: HOVER-REVEAL ACTIONS -->
+    <!--
+        Secondary actions stay hidden at rest to reduce visual noise in data lists and section headers.
+        Opacity (not Collapsed) keeps layout stable; IsHitTestVisible blocks interaction while hidden.
+        Reference: ComboBoxRemovable PART_ClearButton (Visibility on ComboBox IsMouseOver).
+    -->
+
+    <Style x:Key="ListRowHoverRevealButton" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+        <Setter Property="Opacity" Value="0" />
+        <Setter Property="IsHitTestVisible" Value="False" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Opacity" Value="1" />
+                <Setter Property="IsHitTestVisible" Value="True" />
+            </Trigger>
+            <Trigger Property="IsFocused" Value="True">
+                <Setter Property="Opacity" Value="1" />
+                <Setter Property="IsHitTestVisible" Value="True" />
+            </Trigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsMouseOver, FallbackValue=False}" Value="True">
+                <Setter Property="Opacity" Value="1" />
+                <Setter Property="IsHitTestVisible" Value="True" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsKeyboardFocusWithin, FallbackValue=False}" Value="True">
+                <Setter Property="Opacity" Value="1" />
+                <Setter Property="IsHitTestVisible" Value="True" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected, FallbackValue=False}" Value="True">
+                <Setter Property="Opacity" Value="1" />
+                <Setter Property="IsHitTestVisible" Value="True" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=IsMouseOver, FallbackValue=False}" Value="True">
+                <Setter Property="Opacity" Value="1" />
+                <Setter Property="IsHitTestVisible" Value="True" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=IsKeyboardFocusWithin, FallbackValue=False}" Value="True">
+                <Setter Property="Opacity" Value="1" />
+                <Setter Property="IsHitTestVisible" Value="True" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=IsSelected, FallbackValue=False}" Value="True">
+                <Setter Property="Opacity" Value="1" />
+                <Setter Property="IsHitTestVisible" Value="True" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ListRowHoverRevealIconButton" TargetType="Button" BasedOn="{StaticResource ListRowHoverRevealButton}">
+        <Setter Property="MinWidth"   Value="0" />
+        <Setter Property="Margin"     Value="0" />
+        <Setter Property="Padding"    Value="6" />
+        <Setter Property="FontFamily" Value="{DynamicResource FontIcoFont}" />
+        <Setter Property="FontSize"   Value="{DynamicResource FontSize}" />
+        <Setter Property="Cursor"     Value="Hand" />
+    </Style>
+
+    <Style x:Key="SectionHeaderActionsGrid" TargetType="Grid">
+        <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+
+    <Style x:Key="SectionHoverRevealButton" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+        <Setter Property="Opacity" Value="0" />
+        <Setter Property="IsHitTestVisible" Value="False" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Opacity" Value="1" />
+                <Setter Property="IsHitTestVisible" Value="True" />
+            </Trigger>
+            <Trigger Property="IsFocused" Value="True">
+                <Setter Property="Opacity" Value="1" />
+                <Setter Property="IsHitTestVisible" Value="True" />
+            </Trigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=IsMouseOver, FallbackValue=False}" Value="True">
+                <Setter Property="Opacity" Value="1" />
+                <Setter Property="IsHitTestVisible" Value="True" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=IsKeyboardFocusWithin, FallbackValue=False}" Value="True">
+                <Setter Property="Opacity" Value="1" />
+                <Setter Property="IsHitTestVisible" Value="True" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="SectionHoverRevealIconButton" TargetType="Button" BasedOn="{StaticResource SectionHoverRevealButton}">
+        <Setter Property="MinWidth"   Value="0" />
+        <Setter Property="Margin"     Value="0" />
+        <Setter Property="Padding"    Value="6" />
+        <Setter Property="FontFamily" Value="{DynamicResource FontIcoFont}" />
+        <Setter Property="FontSize"   Value="{DynamicResource FontSize}" />
+        <Setter Property="Cursor"     Value="Hand" />
+    </Style>
+
     <!-- SECTION: CONTAINERS -->
 
     <Style x:Key="SectionBorder" TargetType="Border">

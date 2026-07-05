@@ -75,9 +75,7 @@ namespace CommonPluginsShared.IO
 				return filename;
 			}
 
-			return keepNameSpace
-				? string.Join(" ", filename.Split(Path.GetInvalidFileNameChars())).Trim()
-				: CommonPlayniteShared.Common.Paths.GetSafePathName(filename);
+			return CommonPlayniteShared.Common.Paths.GetSafePathName(filename);
 		}
 
 		#endregion
