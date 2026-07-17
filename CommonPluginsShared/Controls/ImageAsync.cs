@@ -56,7 +56,7 @@ namespace CommonPluginsShared.Controls
             nameof(Parameter),
             typeof(string),
             typeof(ImageAsync),
-            new FrameworkPropertyMetadata(string.Empty, SourceChanged));
+            new FrameworkPropertyMetadata(string.Empty, ParameterChanged));
 
         /// <summary>
         /// Gets or sets an optional converter parameter forwarded to <see cref="ImageConverter"/> for local file resolution.
@@ -134,6 +134,21 @@ namespace CommonPluginsShared.Controls
 
         private static void DecodePixelHeightChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
         {
+            ReloadCurrentSource(obj);
+        }
+
+        /// <summary>
+        /// Reloads <see cref="Source"/> when <see cref="Parameter"/> changes.
+        /// Must not reuse <see cref="SourceChanged"/>: that callback treats <c>args.NewValue</c> as the image path,
+        /// so setting <c>Parameter="0"</c> would incorrectly load the literal string <c>"0"</c>.
+        /// </summary>
+        private static void ParameterChanged(DependencyObject obj, DependencyPropertyChangedEventArgs args)
+        {
+            ReloadCurrentSource(obj);
+        }
+
+        private static void ReloadCurrentSource(DependencyObject obj)
+        {
             try
             {
                 ImageAsync control = (ImageAsync)obj;
@@ -143,7 +158,7 @@ namespace CommonPluginsShared.Controls
                     return;
                 }
 
-                // Bypass duplicate-source guard so the image is re-decoded at the new height.
+                // Bypass duplicate-source guard so the image is re-decoded with the new decode settings.
                 object previousCurrent = control.CurrentImage;
                 control.CurrentImage = null;
                 control.LoadNewSource(currentSource, previousCurrent);
