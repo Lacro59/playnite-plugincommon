@@ -4,6 +4,7 @@ using CommonPluginsShared.Caching;
 using CommonPluginsShared.Converters;
 using CommonPluginsShared.Images;
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -41,7 +42,7 @@ namespace CommonPluginsShared.Controls
 
         /// <summary>
         /// Gets or sets the image source as a local file path or remote URL.
-        /// Assigning a new value triggers an asynchronous load; the resolved bitmap is applied to the base <see cref="Image.Source"/>.
+        /// Assigning a new value clears the current bitmap then loads asynchronously; the resolved bitmap is applied to the base <see cref="Image.Source"/>.
         /// </summary>
         public new string Source
         {
@@ -178,6 +179,10 @@ namespace CommonPluginsShared.Controls
 
             CurrentImage = newSource;
             SetIsLoading(!string.IsNullOrEmpty(newSource as string));
+
+            // Clear the displayed bitmap immediately so a pending async decode cannot leave a
+            // previous image visible (e.g. Image1/Image2 crossfade FadeIn of a stale layer).
+            base.Source = null;
 
             dynamic image = null;
             string parameter = Parameter;
@@ -326,6 +331,66 @@ namespace CommonPluginsShared.Controls
             }
 
             return text.Substring(0, 117) + "...";
+        }
+
+        /// <summary>
+        /// Waits until <paramref name="imageControl"/> finishes decoding <paramref name="expectedPath"/>.
+        /// Returns <c>false</c> when the path no longer matches (superseded load).
+        /// </summary>
+        /// <param name="imageControl">The control loading the image.</param>
+        /// <param name="expectedPath">The path string assigned to <see cref="Source"/>.</param>
+        /// <returns>A task that completes when loading finishes or is superseded.</returns>
+        public static Task<bool> WaitForDecodeAsync(ImageAsync imageControl, string expectedPath)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            TaskCompletionSource<bool> completion = new TaskCompletionSource<bool>();
+
+            if (imageControl == null || string.IsNullOrEmpty(expectedPath))
+            {
+                LogWaitForDecodeResult(expectedPath, false, stopwatch);
+                completion.SetResult(false);
+                return completion.Task;
+            }
+
+            DependencyPropertyDescriptor descriptor = DependencyPropertyDescriptor.FromProperty(
+                IsLoadingProperty,
+                typeof(ImageAsync));
+
+            EventHandler onIsLoadingChanged = null;
+            onIsLoadingChanged = (sender, e) =>
+            {
+                if (imageControl.IsLoading)
+                {
+                    return;
+                }
+
+                descriptor.RemoveValueChanged(imageControl, onIsLoadingChanged);
+                bool matched = string.Equals(imageControl.Source, expectedPath, StringComparison.Ordinal);
+                LogWaitForDecodeResult(expectedPath, matched, stopwatch);
+                completion.TrySetResult(matched);
+            };
+
+            if (!imageControl.IsLoading)
+            {
+                bool matched = string.Equals(imageControl.Source, expectedPath, StringComparison.Ordinal);
+                LogWaitForDecodeResult(expectedPath, matched, stopwatch);
+                completion.SetResult(matched);
+                return completion.Task;
+            }
+
+            descriptor.AddValueChanged(imageControl, onIsLoadingChanged);
+            return completion.Task;
+        }
+
+        private static void LogWaitForDecodeResult(string expectedPath, bool matched, Stopwatch stopwatch)
+        {
+            stopwatch.Stop();
+            string outcome = matched ? "ready" : "superseded";
+            Common.LogDebug(true, string.Format(
+                "[ImageAsync] WaitForDecode {0} for {1} ({2}ms)",
+                outcome,
+                FormatSourceForLog(expectedPath),
+                stopwatch.ElapsedMilliseconds));
         }
 
         #endregion
