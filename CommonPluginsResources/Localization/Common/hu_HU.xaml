@@ -5,7 +5,7 @@
 	<sys:String x:Key="LOCCommonMigrationPartialFailure">Migration completed with {0} error(s) out of {1} file(s).</sys:String>
 	<sys:String x:Key="LOCCommonMigrationStepBackup">Backup of legacy database…</sys:String>
 	<sys:String x:Key="LOCCommonMigrationStepMigrate">Migration of legacy database…</sys:String>
-	<sys:String x:Key="LOCCommonMigrationStepDeleteLegacy">Régi adatbázis törlése</sys:String>
+	<sys:String x:Key="LOCCommonMigrationStepDeleteLegacy">Régi adatbázis törlése…</sys:String>
 
     <sys:String x:Key="LOCCommonNavShowByWeeks">Adatok mutatása heti szinten</sys:String>
     <sys:String x:Key="LOCCommonNavShowByWeeksDisable">Adatok kikapcsolása heti szinten</sys:String>
@@ -127,8 +127,8 @@
 
 	<sys:String x:Key="LOCCommonClearSelection">Kijelölés törlése</sys:String>
 	<sys:String x:Key="LOCCommonRefreshSelected">Kijelöltek Frissítése</sys:String>
-	<sys:String x:Key="LOCCommonSelected">Kiválsztva:</sys:String>
-	<sys:String x:Key="LOCCommonSelectGames">Játékkok választása</sys:String>
+	<sys:String x:Key="LOCCommonSelected">Kiválasztva:</sys:String>
+	<sys:String x:Key="LOCCommonSelectGames">Játékok választása</sys:String>
 	<sys:String x:Key="LOCCommonSelectVariable">Változó kiválasztása</sys:String>
 	<sys:String x:Key="LOCCommonInsertVariable">Beillesztés</sys:String>
 	<sys:String x:Key="LOCCommonVariablePlaceholder">Helykitöltő</sys:String>
@@ -142,13 +142,13 @@
 
 	<sys:String x:Key="LOCCommonAddManually">Manuális hozzáadás</sys:String>
 	<sys:String x:Key="LOCCommonRefreshGameData">Adatok frissítése</sys:String>
-	<sys:String x:Key="LOCCommonRefreshAllData">Ősszes adat frissítése</sys:String>
+	<sys:String x:Key="LOCCommonRefreshAllData">Összes adat frissítése</sys:String>
 	<sys:String x:Key="LOCCommonDeleteGameData">Adat törlése</sys:String>
 	<sys:String x:Key="LOCCommonDeletePluginData">Bővítmény adat törlése</sys:String>
-	<sys:String x:Key="LOCCommonClearAllDatas">Adat törlése az összes játékből</sys:String>
+	<sys:String x:Key="LOCCommonClearAllDatas">Adat törlése az összes játékból</sys:String>
 	<sys:String x:Key="LOCCommonViewNoData">Bővítmény adat nélküli játékok megtekintése</sys:String>
 	<sys:String x:Key="LOCCommonSelectData">Adat letöltése a kiválasztott játékokhoz</sys:String>
-	<sys:String x:Key="LOCCommonDownloadPluginData">Bővítmény adat letültése...</sys:String>
+	<sys:String x:Key="LOCCommonDownloadPluginData">Bővítmény adat letöltése...</sys:String>
 	<sys:String x:Key="LOCCommonGetAllDatas">Bővítmény adat letöltése az összes játékhoz</sys:String>
 	<sys:String x:Key="LOCCommonIsolatedPluginData">Isolated plugin data</sys:String>
 
@@ -166,7 +166,7 @@
 	<!-- ==================== DATA SECTION (Settings) ==================== -->
 
 	<sys:String x:Key="LOCCommonDataSectionTitle">Adatkezelés</sys:String>
-	<sys:String x:Key="LOCCommonClearAllDescription">Véglegesen törli a könyvtárban található összes játékhoz tartozó összes bővítményadatot, majd törli az összes ideiglenes gyorsítótár-fájlt. Maga a Playnite-könyvtár nem érintett. Ez a művelet visszafordíthatatlan.</sys:String>
+	<sys:String x:Key="LOCCommonClearAllDescription">Véglegesen törli a könyvtárban található összes játékhoz tartozó összes bővítményadatot, majd törli az összes ideiglenes gyorsítótár-fájlt. Maga a Playnite könyvtár nem érintett. Ez a művelet visszafordíthatatlan.</sys:String>
 	<sys:String x:Key="LOCCommonClearAllConfirm">Biztos vagy benne hogy a bővítmény összes adatát törölni szeretnéd? Ez nem vonható vissza.</sys:String>
 
 	<!-- ==================== CACHE SECTION (Settings) ==================== -->
@@ -174,7 +174,7 @@
 	<sys:String x:Key="LOCCommonCacheSectionTitle">Gyorsítótár</sys:String>
 	<sys:String x:Key="LOCCommonClearCacheDescription">Deletes all temporary files stored by this plugin (downloaded images, web responses, etc.). Plugin data and the Playnite library remain intact.</sys:String>
 	<sys:String x:Key="LOCCommonClearCache">Gyorsítótár ürítése</sys:String>
-	<sys:String x:Key="LOCCommonClearCacheError">Hiba történt a bővítmény gyorsítótár ürítése során!</sys:String>
+	<sys:String x:Key="LOCCommonClearCacheError">Hiba történt a bővítmény gyorsítótár ürítése során.</sys:String>
 	<sys:String x:Key="LOCCommonClearCacheConfirm">Biztos vagy benne hogy a gyorsítótár összes adatát törölni szeretnéd? Ez nem vonható vissza.</sys:String>
 
 	<!-- ==================== FOLDER & FILE MANAGEMENT ==================== -->
@@ -210,7 +210,7 @@ Meg akarod nyitni a könyvtárat?</sys:String>
 
 	<sys:String x:Key="LOCCommonUpdate">Frissítés</sys:String>
 	<sys:String x:Key="LOCCommonUpdateEvery">Update on</sys:String>
-	<sys:String x:Key="LOCCommonUpdateOnStart">Frissítés az lakalmazás indulásakor</sys:String>
+	<sys:String x:Key="LOCCommonUpdateOnStart">Frissítés az alkalmazás indulásakor</sys:String>
 
 	<!-- ==================== TRANSFER ==================== -->
 
@@ -244,7 +244,7 @@ Meg akarod nyitni a könyvtárat?</sys:String>
 	<!-- Store error messages -->
 	<sys:String x:Key="LOCCommonStoreBadConfiguration">{0}: Hibás konfiguráció</sys:String>
 	<sys:String x:Key="LOCCommonStoreNoApiKey">{0}: Nincs API kulcs</sys:String>
-	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: Konfiguráció nem taláható</sys:String>
+	<sys:String x:Key="LOCCommonStoreNoConfiguration">{0}: Konfiguráció nem található</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoAuthenticate">{0}: felhasználó nincs hitelesítve</sys:String>
 	<sys:String x:Key="LOCCommonStoresInvalidSteamAppId">Invalid Steam App ID &quot;{0}&quot;. The game's Store ID in Playnite must be a numeric Steam application ID (for example 220 for Half-Life 2).</sys:String>
 	<sys:String x:Key="LOCCommonStoresInvalidSteamAppIdForGame">Invalid Steam App ID &quot;{1}&quot; for game &quot;{0}&quot;. The game's Store ID in Playnite must be a numeric Steam application ID (for example 220 for Half-Life 2).</sys:String>
@@ -253,7 +253,7 @@ Meg akarod nyitni a könyvtárat?</sys:String>
 	<sys:String x:Key="LOCCommonStoreSteam">Steam</sys:String>
 	<sys:String x:Key="LOCCommonStoreEpic">Epic Games</sys:String>
 	<sys:String x:Key="LOCCommonStoreGog">GOG</sys:String>
-	<sys:String x:Key="LOCCommonStoresNoStoreSelected">Válassz egy boltot a hitelesítés beállításához</sys:String>
+	<sys:String x:Key="LOCCommonStoresNoStoreSelected">Válassz egy boltot a hitelesítés beállításához.</sys:String>
 
 	<!-- Ignored items -->
 	<sys:String x:Key="LOCCommonIgnoredItems">Figyelmen kívül hagyott elemek</sys:String>
@@ -313,7 +313,7 @@ Meg akarod nyitni a könyvtárat?</sys:String>
 	<sys:String x:Key="LOCCommonCreateLog">Do you want to create a log package?</sys:String>
 	<sys:String x:Key="LOCCommonDataErrorRemove">Hiba a bővítmény adattörlése közben. Kérlek próbáld újra.</sys:String>
 	<sys:String x:Key="LOCCommonDataRemove">Bővítmény adata törölve.</sys:String>
-	<sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: felhasználó nincs hitelesítve</sys:String>
+	<sys:String x:Key="LOCCommonPluginNoAuthenticate">{0}: felhasználó nincs hitelesítve.</sys:String>
 
 	<sys:String x:Key="LOCCommonErrorDeleteCache" xml:space="preserve">Impossible to delete cache folder:
 {0}</sys:String>
