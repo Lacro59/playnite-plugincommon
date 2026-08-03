@@ -4,6 +4,7 @@ using CommonPluginsShared.Caching;
 using Playnite.SDK;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -560,6 +561,34 @@ namespace CommonPluginsShared.Images
 		/// </summary>
 		public static MemoryCache Cache { get; } = new MemoryCache(Units.MegaBytesToBytes(100));
 
+		/// <summary>
+		/// Tries to return a previously decoded image from the memory cache.
+		/// </summary>
+		public static bool TryGetCachedImage(string source, out BitmapImage image, BitmapLoadProperties loadProperties = null)
+		{
+			image = null;
+
+			if (source.IsNullOrEmpty() || !Cache.TryGet(source, out var cachedItem))
+			{
+				return false;
+			}
+
+			BitmapLoadProperties existingMetadata = null;
+			if (cachedItem.Metadata.TryGetValue(BitmapPropsField, out object metaValue))
+			{
+				existingMetadata = (BitmapLoadProperties)metaValue;
+			}
+
+			if (existingMetadata != loadProperties)
+			{
+				Cache.TryRemove(source);
+				return false;
+			}
+
+			image = cachedItem.CacheObject as BitmapImage;
+			return image != null;
+		}
+
 		#region Path Resolution
 
 		/// <summary>
@@ -601,19 +630,40 @@ namespace CommonPluginsShared.Images
 			{
 				try
 				{
+					Stopwatch stopwatch = Stopwatch.StartNew();
 					string cachedFile = HttpFileCacheService.GetWebFile(source, resize);
+					string cacheProvider = "HttpFileCacheService";
 
 					if (string.IsNullOrEmpty(cachedFile))
 					{
-						// Fallback to CommonPlayniteShared cache
+						cacheProvider = "HttpFileCache";
 						cachedFile = HttpFileCache.GetWebFile(source);
 					}
 
+					stopwatch.Stop();
+					if (string.IsNullOrEmpty(cachedFile))
+					{
+						Common.LogDebug(true, string.Format(
+							"[ImageSourceManagerPlugin] GetImagePath HTTP failed ({0}ms, {1}): {2}",
+							stopwatch.ElapsedMilliseconds,
+							cacheProvider,
+							FormatSourceForLog(source)));
+						return null;
+					}
+
+					Common.LogDebug(true, string.Format(
+						"[ImageSourceManagerPlugin] GetImagePath HTTP resolved ({0}ms, {1}): {2} -> {3}",
+						stopwatch.ElapsedMilliseconds,
+						cacheProvider,
+						FormatSourceForLog(source),
+						cachedFile));
 					return cachedFile;
 				}
 				catch (Exception exc)
 				{
-					Common.LogError(exc, true, $"Failed to load HTTP image: {source}");
+					Common.LogError(exc, true, string.Format(
+						"[ImageSourceManagerPlugin] GetImagePath HTTP error: {0}",
+						FormatSourceForLog(source)));
 					return null;
 				}
 			}
@@ -722,6 +772,9 @@ namespace CommonPluginsShared.Images
 
 				if (existingMetadata == loadProperties)
 				{
+					Common.LogDebug(true, string.Format(
+						"[ImageSourceManagerPlugin] GetImage memory cache hit: {0}",
+						FormatSourceForLog(source)));
 					return cachedItem.CacheObject as BitmapImage;
 				}
 
@@ -767,22 +820,73 @@ namespace CommonPluginsShared.Images
 			{
 				try
 				{
+					Stopwatch stopwatch = Stopwatch.StartNew();
 					string cachedFile = HttpFileCacheService.GetWebFile(source);
+					string cacheProvider = "HttpFileCacheService";
 
 					if (string.IsNullOrEmpty(cachedFile))
 					{
+						cacheProvider = "HttpFileCache";
 						cachedFile = HttpFileCache.GetWebFile(source);
 						if (string.IsNullOrEmpty(cachedFile))
 						{
+							stopwatch.Stop();
+							Common.LogDebug(true, string.Format(
+								"[ImageSourceManagerPlugin] GetImage HTTP failed ({0}ms, {1}): {2}",
+								stopwatch.ElapsedMilliseconds,
+								cacheProvider,
+								FormatSourceForLog(source)));
 							return null;
 						}
 					}
 
-					return BitmapExtensions.BitmapFromFile(cachedFile, loadProperties);
+					BitmapImage bitmap = BitmapExtensions.BitmapFromFile(cachedFile, loadProperties);
+					stopwatch.Stop();
+					if (bitmap == null)
+					{
+						Common.LogDebug(true, string.Format(
+							"[ImageSourceManagerPlugin] GetImage decode failed ({0}ms, {1}): {2} -> {3}",
+							stopwatch.ElapsedMilliseconds,
+							cacheProvider,
+							FormatSourceForLog(source),
+							cachedFile));
+						return null;
+					}
+
+					Common.LogDebug(true, string.Format(
+						"[ImageSourceManagerPlugin] GetImage HTTP resolved ({0}ms, {1}, memoryCached={2}): {3} -> {4}",
+						stopwatch.ElapsedMilliseconds,
+						cacheProvider,
+						cached,
+						FormatSourceForLog(source),
+						cachedFile));
+
+					if (cached)
+					{
+						try
+						{
+							long imageSize = bitmap.GetSizeInMemory();
+							if (imageSize > 0)
+							{
+								Cache.TryAdd(source, bitmap, imageSize, new Dictionary<string, object>
+								{
+									{ BitmapPropsField, loadProperties }
+								});
+							}
+						}
+						catch (Exception e)
+						{
+							Logger.Error(e, $"Failed to cache HTTP image: {source}");
+						}
+					}
+
+					return bitmap;
 				}
 				catch (Exception exc)
 				{
-					Logger.Error(exc, $"Failed to load HTTP image: {source}");
+					Logger.Error(exc, string.Format(
+						"[ImageSourceManagerPlugin] GetImage HTTP error: {0}",
+						FormatSourceForLog(source)));
 					return null;
 				}
 			}
@@ -812,6 +916,21 @@ namespace CommonPluginsShared.Images
 			}
 
 			return null;
+		}
+
+		private static string FormatSourceForLog(string source)
+		{
+			if (source.IsNullOrEmpty())
+			{
+				return "(empty)";
+			}
+
+			if (source.Length <= 120)
+			{
+				return source;
+			}
+
+			return source.Substring(0, 117) + "...";
 		}
 
 		#endregion

@@ -4,6 +4,7 @@ using CommonPlayniteShared.Common.Web;
 using CommonPluginsShared.Images;
 using Playnite.SDK;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -146,6 +147,7 @@ namespace CommonPluginsShared.Caching
 	{
 		private static readonly ILogger Logger = LogManager.GetLogger();
 		private static readonly object CacheLock = new object();
+		private static readonly ConcurrentDictionary<string, object> FileLocks = new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
 		/// <summary>
 		/// Gets or sets the cache directory path.
@@ -214,7 +216,16 @@ namespace CommonPluginsShared.Caching
 
 			string cacheFile = Path.Combine(CacheDirectory, GetFileNameFromUrl(url));
 
-			lock (CacheLock)
+			if (File.Exists(cacheFile) && new FileInfo(cacheFile).Length > 0)
+			{
+#if DEBUG
+				timer.Stop("disk hit");
+#endif
+				return cacheFile;
+			}
+
+			object fileLock = FileLocks.GetOrAdd(cacheFile, _ => new object());
+			lock (fileLock)
 			{
 				if (File.Exists(cacheFile) && new FileInfo(cacheFile).Length > 0)
 				{
