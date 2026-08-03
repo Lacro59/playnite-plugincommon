@@ -1,4 +1,4 @@
-﻿using CommonPluginsShared.Interfaces;
+using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.Collections;
 using Playnite.SDK;
 using Playnite.SDK.Controls;
@@ -933,7 +933,7 @@ namespace CommonPluginsShared.Controls
 		/// </summary>
 		protected void LogControlIssue(string message)
 		{
-			Common.LogDebug(false, string.Format("[{0}] {1}", GetInstanceDiagnosticId(), message));
+			Common.LogDebug(true, string.Format("[{0}] {1}", GetInstanceDiagnosticId(), message));
 		}
 
 		private void LogNotifyAllInstancesFailure(Exception ex)

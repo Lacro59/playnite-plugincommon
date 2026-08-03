@@ -2496,7 +2496,7 @@ namespace CommonPluginsShared.Collections
 
 			_lastErrorNotifications[dedupKey] = now;
 
-			Common.LogDebug(false, string.Format(
+			Common.LogDebug(true, string.Format(
 				"[{0}] NotifyError({1}) posting notification — {2}",
 				PluginName,
 				operation,
@@ -2527,7 +2527,7 @@ namespace CommonPluginsShared.Collections
 				return database;
 			}
 
-			Common.LogDebug(false, string.Format(
+			Common.LogDebug(true, string.Format(
 				"[{0}] {1} — plugin database null, waiting via GetDatabaseSafe ({2}), item={3}",
 				PluginName,
 				operation,
@@ -2546,7 +2546,7 @@ namespace CommonPluginsShared.Collections
 			}
 			else
 			{
-				Common.LogDebug(false, string.Format(
+				Common.LogDebug(true, string.Format(
 					"[{0}] {1} — database ready after wait, item={2}",
 					PluginName,
 					operation,

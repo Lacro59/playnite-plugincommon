@@ -1,4 +1,4 @@
-﻿using CommonPlayniteShared;
+using CommonPlayniteShared;
 using CommonPlayniteShared.Common;
 using CommonPluginsShared.Caching;
 using CommonPluginsShared.Converters;
@@ -230,7 +230,7 @@ namespace CommonPluginsShared.Controls
 
                 if (image == null)
                 {
-                    Common.LogDebug(false, string.Format(
+                    Common.LogDebug(true, string.Format(
                         "[ImageAsync] Load failed for {0} after {1}ms",
                         FormatSourceForLog(requestedSource),
                         stopwatch.ElapsedMilliseconds));
@@ -299,7 +299,7 @@ namespace CommonPluginsShared.Controls
                 return tmpImage;
             }
 
-            Common.LogDebug(false, string.Format(
+            Common.LogDebug(true, string.Format(
                 "[ImageAsync] Unsupported source type: {0}",
                 newSource.GetType().Name));
             return null;

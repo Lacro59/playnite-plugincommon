@@ -643,7 +643,7 @@ namespace CommonPluginsShared.Images
 					stopwatch.Stop();
 					if (string.IsNullOrEmpty(cachedFile))
 					{
-						Common.LogDebug(false, string.Format(
+						Common.LogDebug(true, string.Format(
 							"[ImageSourceManagerPlugin] GetImagePath HTTP failed ({0}ms, {1}): {2}",
 							stopwatch.ElapsedMilliseconds,
 							cacheProvider,
@@ -831,7 +831,7 @@ namespace CommonPluginsShared.Images
 						if (string.IsNullOrEmpty(cachedFile))
 						{
 							stopwatch.Stop();
-							Common.LogDebug(false, string.Format(
+							Common.LogDebug(true, string.Format(
 								"[ImageSourceManagerPlugin] GetImage HTTP failed ({0}ms, {1}): {2}",
 								stopwatch.ElapsedMilliseconds,
 								cacheProvider,
@@ -844,7 +844,7 @@ namespace CommonPluginsShared.Images
 					stopwatch.Stop();
 					if (bitmap == null)
 					{
-						Common.LogDebug(false, string.Format(
+						Common.LogDebug(true, string.Format(
 							"[ImageSourceManagerPlugin] GetImage decode failed ({0}ms, {1}): {2} -> {3}",
 							stopwatch.ElapsedMilliseconds,
 							cacheProvider,
