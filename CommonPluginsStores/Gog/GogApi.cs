@@ -785,7 +785,7 @@ namespace CommonPluginsStores.Gog
                     Name = productApiDetail?.Title,
                     Link = productApiDetail?.ProductLinks?.ProductCard,
                     Image = "https:" + productApiDetail?.ProductImages?.Logo2x,
-                    Description = RemoveDescriptionPromos(productApiDetail.ProductDescription.Full).Trim(),
+                    Description = (RemoveDescriptionPromos(productApiDetail?.ProductDescription?.Full) ?? string.Empty).Trim(),
                     Released = productApiDetail?.ReleaseDate
                 };
 
@@ -852,7 +852,7 @@ namespace CommonPluginsStores.Gog
                         {
                             Id = el.Id.ToString(),
                             Name = productApiDetail?.Title,
-                            Description = RemoveDescriptionPromos(productApiDetail?.ProductDescription?.Full).Trim(),
+                            Description = (RemoveDescriptionPromos(productApiDetail?.ProductDescription?.Full) ?? string.Empty).Trim(),
                             Image = "https:" + productApiDetail?.ProductImages?.Logo2x,
                             Link = string.Format(UrlGogGame, productApiDetail?.Slug),
                             IsOwned = IsOwned
@@ -1251,7 +1251,7 @@ namespace CommonPluginsStores.Gog
         {
             if (originalDescription.IsNullOrEmpty())
             {
-                return originalDescription;
+                return string.Empty;
             }
 
             // Get opening element in description. Promos are always at the start of description.
