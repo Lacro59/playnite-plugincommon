@@ -2821,12 +2821,22 @@ namespace CommonPluginsStores.Steam
             return gameAchievements ?? new ObservableCollection<GameAchievement>();
         }
 
-        public List<GenericItemOption> GetSearchGame(string searchTerm, bool noDlcs = false)
+        /// <summary>
+        /// Searches the Steam store via <c>api/storesearch</c> and returns raw store items (including capsule URLs).
+        /// </summary>
+        /// <param name="searchTerm">Free-text search term (normalized before the request).</param>
+        /// <returns>Matching store items; empty list on failure or empty term.</returns>
+        public List<ItemSearch> SearchStoreItems(string searchTerm)
         {
-            List<GenericItemOption> results = new List<GenericItemOption>();
+            List<ItemSearch> results = new List<ItemSearch>();
 
             try
             {
+                if (searchTerm.IsNullOrEmpty())
+                {
+                    return results;
+                }
+
                 string url = string.Format(UrlSteamGameSearch, searchTerm.NormalizeGameName(), "en");
                 string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
                 _ = Serialization.TryFromJson(response, out SteamSearch steamSearch, out Exception ex);
@@ -2835,8 +2845,34 @@ namespace CommonPluginsStores.Steam
                     throw ex;
                 }
 
-                results = steamSearch?.Items
-                    ?.Select(x => new GenericItemOption { Name = x.Name, Description = x.Id.ToString() + (noDlcs ? string.Empty : $" - {GetGameInfos(x.Id.ToString(), null, true)?.Dlcs?.Count() ?? 0} DLC") })
+                results = steamSearch?.Items ?? new List<ItemSearch>();
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, false, PluginName);
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Searches the Steam store and maps hits to <see cref="GenericItemOption"/> (Name + AppId in Description).
+        /// </summary>
+        /// <param name="searchTerm">Free-text search term.</param>
+        /// <param name="noDlcs">When false, appends a DLC count suffix via <see cref="GetGameInfos"/> (expensive).</param>
+        /// <returns>Options suitable for <see cref="GetAppId"/> when <paramref name="noDlcs"/> is true.</returns>
+        public List<GenericItemOption> GetSearchGame(string searchTerm, bool noDlcs = false)
+        {
+            List<GenericItemOption> results = new List<GenericItemOption>();
+
+            try
+            {
+                results = SearchStoreItems(searchTerm)
+                    ?.Select(x => new GenericItemOption
+                    {
+                        Name = x.Name,
+                        Description = x.Id.ToString() + (noDlcs ? string.Empty : $" - {GetGameInfos(x.Id.ToString(), null, true)?.Dlcs?.Count() ?? 0} DLC")
+                    })
                     ?.ToList() ?? new List<GenericItemOption>();
             }
             catch (Exception ex)
