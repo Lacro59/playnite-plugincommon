@@ -115,6 +115,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Psn\Models\PsnAddOnProducts.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Psn\PsnApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\ExtensionsAchievements.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\GitHubCommitApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\RgProfileData.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamFriendsApps.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Steam\Models\SteamFriendsList.cs" />
