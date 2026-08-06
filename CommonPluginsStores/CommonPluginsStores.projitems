@@ -12,11 +12,17 @@
     <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\QueryRecentGames.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\QueryAchievements.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\QueryOwnedGameProducts.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\QueryGameProducts.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\QueryGameSearch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\QueryGamesBySlugs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\QueryFriends.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\ResponseRecentGames.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\ResponseAchievements.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\ResponseFriends.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\ResponseOwnedGameProducts.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\ResponseGameProducts.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\ResponseGameSearch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ea\Models\Query\ResponseGamesBySlugs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\EpicApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\AgeGatings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Epic\Models\Asset.cs" />
