@@ -2012,9 +2012,47 @@ namespace CommonPluginsStores.Steam
             }
         }
 
+        /// <summary>
+        /// Normalizes Steam store HTML for Playnite: CDN placeholders, video→poster images, and image size attributes.
+        /// Aligned with Universal Steam Metadata <c>MetadataProvider.ParseDescription</c>.
+        /// </summary>
+        /// <param name="description">Raw HTML from <c>about_the_game</c> (or equivalent).</param>
+        /// <returns>HTML suitable for Playnite description rendering; empty when <paramref name="description"/> is null/empty.</returns>
         private string ParseDescription(string description)
         {
-            return description.Replace("%CDN_HOST_MEDIA_SSL%", "steamcdn-a.akamaihd.net");
+            if (description.IsNullOrEmpty())
+            {
+                return string.Empty;
+            }
+
+            description = description.Replace("%CDN_HOST_MEDIA_SSL%", "steamcdn-a.akamaihd.net");
+            HtmlParser parser = new HtmlParser();
+            IHtmlDocument page = parser.Parse(description);
+
+            // Playnite can't render videos — swap for poster thumbnail (Universal Steam Metadata parity).
+            foreach (IElement videoElem in page.QuerySelectorAll("video"))
+            {
+                string poster = videoElem.GetAttribute("poster");
+                if (!poster.IsNullOrWhiteSpace())
+                {
+                    IElement img = page.CreateElement("img");
+                    img.SetAttribute("src", poster);
+                    videoElem.Parent.ReplaceChild(img, videoElem);
+                }
+                else
+                {
+                    videoElem.Parent.RemoveChild(videoElem);
+                }
+            }
+
+            // Playnite HTML renderer does not respect auto height when width/height are set explicitly.
+            foreach (IElement imgElem in page.QuerySelectorAll("img"))
+            {
+                imgElem.RemoveAttribute("height");
+                imgElem.RemoveAttribute("width");
+            }
+
+            return page.Body?.InnerHtml ?? string.Empty;
         }
 
 
