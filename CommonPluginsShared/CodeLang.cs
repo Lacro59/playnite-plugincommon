@@ -101,20 +101,51 @@ namespace CommonPluginsShared
         // -------------------------
 
         /// <summary>
-        /// Converts a Playnite language code to its GOG language identifier.
+        /// Converts a Playnite language code to a GOG products/catalog locale.
         /// </summary>
         /// <param name="playniteLanguage">Playnite language code.</param>
         /// <returns>
-        /// The corresponding GOG language code if supported; otherwise, "en".
+        /// A region-qualified locale (for example <c>fr-FR</c>). Short codes such as <c>fr</c>
+        /// often make the products API return English copy; Chinese uses <c>zh-Hans</c> / <c>zh-Hant</c>.
+        /// Do not lowercase the result before calling <c>api.gog.com/products</c> (<c>fr-fr</c> ≠ <c>fr-FR</c>).
         /// </returns>
         public static string GetGogLang(string playniteLanguage)
         {
-            if (playniteLanguage == "zh_CN") return "zh-Hans";
-            if (playniteLanguage == "zh_TW") return "zh-Hant";
+            playniteLanguage = Normalize(playniteLanguage);
+            if (playniteLanguage == "zh_CN")
+            {
+                return "zh-Hans";
+            }
 
-            string shortLang = GetShortLang(playniteLanguage);
-            string[] arrayLang = { "de", "en", "es", "fr", "ja", "ko", "zh-Hans", "zh-Hant" };
-            return arrayLang.ContainsString(shortLang, StringComparison.OrdinalIgnoreCase) ? shortLang : "en";
+            if (playniteLanguage == "zh_TW")
+            {
+                return "zh-Hant";
+            }
+
+            return playniteLanguage.Replace("_", "-");
+        }
+
+        /// <summary>
+        /// Converts a Playnite language code to a GOG site path / changeLanguage code.
+        /// </summary>
+        /// <param name="playniteLanguage">Playnite language code.</param>
+        /// <returns>
+        /// A short site language (for example <c>fr</c>), or <c>zh-Hans</c> / <c>zh-Hant</c> for Chinese.
+        /// </returns>
+        public static string GetGogSiteLang(string playniteLanguage)
+        {
+            playniteLanguage = Normalize(playniteLanguage);
+            if (playniteLanguage == "zh_CN")
+            {
+                return "zh-Hans";
+            }
+
+            if (playniteLanguage == "zh_TW")
+            {
+                return "zh-Hant";
+            }
+
+            return GetShortLang(playniteLanguage);
         }
 
         // -------------------------

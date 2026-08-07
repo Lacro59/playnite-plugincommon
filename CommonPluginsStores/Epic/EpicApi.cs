@@ -900,6 +900,11 @@ namespace CommonPluginsStores.Epic
 
 			try
 			{
+				string storeLang = CodeLang.GetEpicLang(Locale);
+				string storeCountry = CodeLang.GetCountryFromLast(Locale);
+				Common.LogDebug(true, FormatLogMessage(
+					$"GetGameInfosAnonymous: namespace='{@namespace}', playniteLang='{Locale}', storeLang='{storeLang}', country='{storeCountry}', cache=none (GraphQL live)"));
+
 				AddonsByNamespaceResponse response =
 					QueryAddonsByNamespace(@namespace, "games/edition/base").GetAwaiter().GetResult();
 				CatalogOffer catalogOffer = response?.Data?.Catalog?.CatalogOffers?.Elements?.FirstOrDefault();
@@ -907,18 +912,24 @@ namespace CommonPluginsStores.Epic
 				if (catalogOffer == null)
 				{
 					Logger.Warn($"EpicApi.GetGameInfosAnonymous: No catalog offer found for namespace '{@namespace}'.");
+					Common.LogDebug(true, FormatLogMessage(
+						$"GetGameInfosAnonymous: no offer namespace='{@namespace}', playniteLang='{Locale}', storeLang='{storeLang}'"));
 					return null;
 				}
 
-				string localLang = CodeLang.GetEpicLang(Locale);
+				string description = catalogOffer.Description?.Trim();
+				Common.LogDebug(true, FormatLogMessage(
+					$"GetGameInfosAnonymous: ok namespace='{@namespace}', playniteLang='{Locale}', storeLang='{storeLang}', " +
+					$"title='{catalogOffer.Title}', descriptionLength={description?.Length ?? 0}"));
+
 				return new GameInfos
 				{
 					Id = catalogOffer.Id,
 					Id2 = string.Empty, // AppName unavailable without authentication.
 					Name = catalogOffer.Title,
-					Link = string.Format(UrlStore, localLang, catalogOffer.ProductSlug),
+					Link = string.Format(UrlStore, storeLang, catalogOffer.ProductSlug),
 					Image = catalogOffer.KeyImages?.Find(x => x.Type.IsEqual("OfferImageWide"))?.Url?.Replace("\u002F", "/"),
-					Description = catalogOffer.Description?.Trim(),
+					Description = description,
 					Released = catalogOffer.ReleaseDate
 				};
 			}
@@ -2682,20 +2693,29 @@ namespace CommonPluginsStores.Epic
 		/// <remarks>Does not require authentication — always sent anonymously.</remarks>
 		private async Task<AddonsByNamespaceResponse> QueryAddonsByNamespace(string @namespace, string categories = "addons|digitalextras")
 		{
+			string country = CodeLang.GetCountryFromLast(Locale);
+			string locale = CodeLang.GetEpicLang(Locale);
+			Common.LogDebug(true, FormatLogMessage(
+				$"QueryAddonsByNamespace: namespace='{@namespace}', categories='{categories}', playniteLang='{Locale}', storeLang='{locale}', country='{country}'"));
+
 			var query = new QueryGetAddonsByNamespace
 			{
 				Variables =
 				{
 					Categories = categories,
 					Count = 1000,
-					Country = CodeLang.GetCountryFromLast(Locale),
-					Locale = CodeLang.GetEpicLang(Locale),
+					Country = country,
+					Locale = locale,
 					Namespace = @namespace,
 					SortBy = "effectiveDate",
 					SortDir = "DESC"
 				}
 			};
-			return await QueryGraphQL<AddonsByNamespaceResponse>(query, forceAnonymous: true).ConfigureAwait(false);
+			AddonsByNamespaceResponse response = await QueryGraphQL<AddonsByNamespaceResponse>(query, forceAnonymous: true).ConfigureAwait(false);
+			int elementCount = response?.Data?.Catalog?.CatalogOffers?.Elements?.Count ?? 0;
+			Common.LogDebug(true, FormatLogMessage(
+				$"QueryAddonsByNamespace: result namespace='{@namespace}', elementCount={elementCount}, playniteLang='{Locale}', storeLang='{locale}'"));
+			return response;
 		}
 
 		/// <summary>

@@ -523,43 +523,65 @@ namespace CommonPluginsStores.Ea
 
         private Models.GameStoreDataResponse GetStoreData(string gameSlug)
         {
-            string cachePath = Path.Combine(PathAppsData, $"{gameSlug}.json");
+            string storeLang = CodeLang.GetCountryFromFirst(Locale);
+            string cachePath = GetStoreDataCachePath(gameSlug, storeLang);
             Models.GameStoreDataResponse gameStoreDataResponse = FileDataService.LoadData<Models.GameStoreDataResponse>(cachePath, 1440);
 
-            if (gameStoreDataResponse?.Name.IsNullOrEmpty() ?? true)
+            if (!(gameStoreDataResponse?.Name.IsNullOrEmpty() ?? true))
             {
-                try
-                {
-                    string lang = CodeLang.GetCountryFromFirst(Locale);
-                    string url = string.Format(UrlGameData, gameSlug, lang);
-                    Common.LogDebug(true, FormatLogMessage($"GetStoreData: fetching '{gameSlug}' locale='{lang}'"));
-                    string response = Task.Run(async () => await Web.DownloadStringDataWithGz(url)).GetAwaiter().GetResult();
-                    if (response.IsNullOrEmpty())
-                    {
-                        // drop-api returns HTTP 204 No Content for some delisted / legacy slugs.
-                        LogWarn($"GetStoreData: empty response for slug '{gameSlug}' (locale '{lang}', often HTTP 204); not caching.");
-                        return null;
-                    }
+                Common.LogDebug(true, FormatLogMessage(
+                    $"GetStoreData: cache hit slug='{gameSlug}', playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}'"));
+                return gameStoreDataResponse;
+            }
 
-                    bool parsed = Serialization.TryFromJson(response, out gameStoreDataResponse);
-                    if (!parsed || gameStoreDataResponse?.Name.IsNullOrEmpty() == true)
-                    {
-                        LogWarn($"GetStoreData: deserialize failed or missing name for slug '{gameSlug}' (locale '{lang}', responseLength={response.Length}, tryFromJson={parsed}); not caching.");
-                        return null;
-                    }
-
-                    FileDataService.SaveData(cachePath, gameStoreDataResponse);
-                    Common.LogDebug(true,
-                        FormatLogMessage($"GetStoreData: ok '{gameSlug}' name='{gameStoreDataResponse.Name}', descriptionLength={(gameStoreDataResponse.ShortDescription ?? string.Empty).Length}"));
-                }
-                catch (Exception ex)
+            try
+            {
+                string url = string.Format(UrlGameData, gameSlug, storeLang);
+                Common.LogDebug(true, FormatLogMessage(
+                    $"GetStoreData: cache miss slug='{gameSlug}', playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}'"));
+                string response = Task.Run(async () => await Web.DownloadStringDataWithGz(url)).GetAwaiter().GetResult();
+                if (response.IsNullOrEmpty())
                 {
-                    LogWarn($"GetStoreData: failed for slug '{gameSlug}' ({ex.GetType().Name}: {ex.Message}); returning null.");
+                    // drop-api returns HTTP 204 No Content for some delisted / legacy slugs.
+                    LogWarn($"GetStoreData: empty response for slug '{gameSlug}' (locale '{storeLang}', often HTTP 204); not caching.");
                     return null;
                 }
+
+                bool parsed = Serialization.TryFromJson(response, out gameStoreDataResponse);
+                if (!parsed || gameStoreDataResponse?.Name.IsNullOrEmpty() == true)
+                {
+                    LogWarn($"GetStoreData: deserialize failed or missing name for slug '{gameSlug}' (locale '{storeLang}', responseLength={response.Length}, tryFromJson={parsed}); not caching.");
+                    return null;
+                }
+
+                FileDataService.SaveData(cachePath, gameStoreDataResponse);
+                Common.LogDebug(true, FormatLogMessage(
+                    $"GetStoreData: saved slug='{gameSlug}', playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}', name='{gameStoreDataResponse.Name}', descriptionLength={(gameStoreDataResponse.ShortDescription ?? string.Empty).Length}"));
+            }
+            catch (Exception ex)
+            {
+                LogWarn($"GetStoreData: failed for slug '{gameSlug}' ({ex.GetType().Name}: {ex.Message}); returning null.");
+                return null;
             }
 
             return gameStoreDataResponse;
+        }
+
+        /// <summary>
+        /// Resolves the on-disk Apps cache path for EA store drop-api data.
+        /// Legacy <c>{slug}.json</c> is English-only (<c>en</c>); other locales use <c>{slug}_{storeLang}.json</c>.
+        /// </summary>
+        /// <param name="gameSlug">EA store game slug.</param>
+        /// <param name="storeLang">EA locale from <see cref="CodeLang.GetCountryFromFirst"/>.</param>
+        /// <returns>Absolute path under <see cref="StoreApi.PathAppsData"/>.</returns>
+        private string GetStoreDataCachePath(string gameSlug, string storeLang)
+        {
+            if (storeLang.Equals("en", StringComparison.OrdinalIgnoreCase))
+            {
+                return Path.Combine(PathAppsData, $"{gameSlug}.json");
+            }
+
+            return Path.Combine(PathAppsData, $"{gameSlug}_{storeLang}.json");
         }
 
         #endregion

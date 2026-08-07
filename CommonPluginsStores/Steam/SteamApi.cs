@@ -2107,58 +2107,83 @@ namespace CommonPluginsStores.Steam
 
         private const int MaxAppDetailsRateLimitRetries = 3;
 
+        /// <summary>
+        /// Resolves the on-disk Apps cache path for Steam appdetails.
+        /// Legacy <c>{appId}.json</c> is English-only; other locales use <c>{appId}_{steamLang}.json</c>.
+        /// </summary>
+        /// <param name="appId">Steam App ID.</param>
+        /// <param name="storeLang">Steam language code from <see cref="CodeLang.GetSteamLang"/>.</param>
+        /// <returns>Absolute path under <see cref="StoreApi.PathAppsData"/>.</returns>
+        private string GetAppDetailsCachePath(uint appId, string storeLang)
+        {
+            if (storeLang.Equals("english", StringComparison.OrdinalIgnoreCase))
+            {
+                return Path.Combine(PathAppsData, $"{appId}.json");
+            }
+
+            return Path.Combine(PathAppsData, $"{appId}_{storeLang}.json");
+        }
+
         public StoreAppDetailsResult GetAppDetails(uint appId, int retryCount)
         {
-            string cachePath = Path.Combine(PathAppsData, $"{appId}.json");
+            string storeLang = CodeLang.GetSteamLang(Locale);
+            string cachePath = GetAppDetailsCachePath(appId, storeLang);
             StoreAppDetailsResult storeAppDetailsResult = FileDataService.LoadData<StoreAppDetailsResult>(cachePath, 4320);
 
-            if (storeAppDetailsResult == null)
+            if (storeAppDetailsResult != null)
             {
-                Common.LogDebug(true, $"[SteamApi] Cache miss for app {appId}, request throttled to {ApiRequestMinInterval.TotalMilliseconds}ms.");
-                WaitForStoreAppDetailsAccess();
-                string url = string.Format(UrlApiGameDetails, appId, CodeLang.GetSteamLang(Locale));
-                string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
+                Common.LogDebug(true, FormatLogMessage(
+                    $"GetAppDetails: cache hit appId={appId}, playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}'"));
+                return storeAppDetailsResult;
+            }
 
-                if (IsSteamStoreRateLimitedResponse(response))
+            Common.LogDebug(true, FormatLogMessage(
+                $"GetAppDetails: cache miss appId={appId}, playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}', throttleMs={ApiRequestMinInterval.TotalMilliseconds}"));
+            WaitForStoreAppDetailsAccess();
+            string url = string.Format(UrlApiGameDetails, appId, storeLang);
+            string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
+
+            if (IsSteamStoreRateLimitedResponse(response))
+            {
+                string preview = response == null ? "(null)" : response.Trim();
+                Common.LogDebug(true, $"[SteamApi] Steam store rate limit for app {appId}: response='{preview}'.");
+
+                if (retryCount <= MaxAppDetailsRateLimitRetries)
                 {
-                    string preview = response == null ? "(null)" : response.Trim();
-                    Common.LogDebug(true, $"[SteamApi] Steam store rate limit for app {appId}: response='{preview}'.");
-
-                    if (retryCount <= MaxAppDetailsRateLimitRetries)
-                    {
-                        ApplyStoreRateLimitCooldown(retryCount);
-                        LogWarn($"Steam store rate limit for app {appId}, retry {retryCount}/{MaxAppDetailsRateLimitRetries}.");
-                        return GetAppDetails(appId, retryCount + 1);
-                    }
-
-                    LogWarn($"Steam store rate limit for app {appId}: giving up after {MaxAppDetailsRateLimitRetries} retries.");
-                    return null;
+                    ApplyStoreRateLimitCooldown(retryCount);
+                    LogWarn($"Steam store rate limit for app {appId}, retry {retryCount}/{MaxAppDetailsRateLimitRetries}.");
+                    return GetAppDetails(appId, retryCount + 1);
                 }
 
-                if (!LooksLikeJsonResponse(response))
-                {
-                    string firstByte = response != null && response.Length > 0
-                        ? string.Format("0x{0:X2}", (byte)response[0])
-                        : "empty";
-                    LogWarn($"Unexpected appdetails payload for {appId}: length={response?.Length ?? 0}, firstByte={firstByte}.");
-                    return null;
-                }
+                LogWarn($"Steam store rate limit for app {appId}: giving up after {MaxAppDetailsRateLimitRetries} retries.");
+                return null;
+            }
 
-                if (Serialization.TryFromJson(response, out Dictionary<string, StoreAppDetailsResult> parsedData, out Exception ex) && parsedData != null)
-                {
-                    storeAppDetailsResult = parsedData[appId.ToString()];
-					FileDataService.SaveData(cachePath, storeAppDetailsResult);
-                }
-                else if (ex != null)
-                {
-                    LogWarn($"appdetails JSON parse failed for {appId} (length={response.Length}).");
-                    Common.LogError(ex, false, false, PluginName);
-                }
-                else
-                {
-                    Logger.Warn($"appdetails response for {appId} could not be parsed (no exception, missing key).");
-                    return null;
-                }
+            if (!LooksLikeJsonResponse(response))
+            {
+                string firstByte = response != null && response.Length > 0
+                    ? string.Format("0x{0:X2}", (byte)response[0])
+                    : "empty";
+                LogWarn($"Unexpected appdetails payload for {appId}: length={response?.Length ?? 0}, firstByte={firstByte}.");
+                return null;
+            }
+
+            if (Serialization.TryFromJson(response, out Dictionary<string, StoreAppDetailsResult> parsedData, out Exception ex) && parsedData != null)
+            {
+                storeAppDetailsResult = parsedData[appId.ToString()];
+                FileDataService.SaveData(cachePath, storeAppDetailsResult);
+                Common.LogDebug(true, FormatLogMessage(
+                    $"GetAppDetails: saved appId={appId}, playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}'"));
+            }
+            else if (ex != null)
+            {
+                LogWarn($"appdetails JSON parse failed for {appId} (length={response.Length}).");
+                Common.LogError(ex, false, false, PluginName);
+            }
+            else
+            {
+                Logger.Warn($"appdetails response for {appId} could not be parsed (no exception, missing key).");
+                return null;
             }
 
             return storeAppDetailsResult;
