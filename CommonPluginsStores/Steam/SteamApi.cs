@@ -216,6 +216,20 @@ namespace CommonPluginsStores.Steam
 
 		private static string UrlSteamAppIdListGames => @"https://raw.githubusercontent.com/jsnli/steamappidlist/master/data/games_appid.json";
 		private static string UrlSteamAppIdListDlc => @"https://raw.githubusercontent.com/jsnli/steamappidlist/master/data/dlc_appid.json";
+		private static string UrlSteamAppIdListGamesCommits => @"https://api.github.com/repos/jsnli/steamappidlist/commits?path=data/games_appid.json&per_page=1";
+		private static string UrlSteamAppIdListDlcCommits => @"https://api.github.com/repos/jsnli/steamappidlist/commits?path=data/dlc_appid.json&per_page=1";
+
+		/// <summary>Local AppsList cache TTL (3 days).</summary>
+		private const int SteamAppsCacheMinutes = 4320;
+
+		/// <summary>
+		/// <see cref="FileDataService.LoadData{T}"/> minutes value that loads the file regardless of age without OldData notifications.
+		/// Do not use 0 on the AppsList path (0 triggers a Playnite notification).
+		/// </summary>
+		private const int SteamAppsCacheLoadIgnoreTtlMinutes = -1;
+
+		/// <summary>Maximum age of the public steamappidlist repository before StoreToken fallback is attempted.</summary>
+		private static readonly TimeSpan PublicAppIdListMaxAge = TimeSpan.FromDays(7);
 
 		#endregion
 
@@ -224,68 +238,98 @@ namespace CommonPluginsStores.Steam
 
 		/// <summary>
 		/// Cached list of all Steam applications.
-		/// Automatically loads from cache if available and not expired (3 days),
-		/// otherwise fetches from the Steam API (when authenticated) or from the public
-		/// steamappidlist repository (games + DLC) and caches the result.
+		/// Loads from disk cache when fresh (3 days); otherwise fetches from the public
+		/// steamappidlist repository first, then StoreToken when that fails or the repository
+		/// last commit is older than one week, then a stale local cache.
+		/// Steps and failures are logged only (no Playnite notifications on this path).
 		/// </summary>
 		protected List<SteamApp> SteamApps
 		{
 			get
 			{
-				if (_steamApps == null)
+				if (_steamApps != null)
 				{
-					// 1. Try to load from cache (valid for 3 days)
-					_steamApps = FileDataService.LoadData<List<SteamApp>>(AppsListPath, 4320);
+					return _steamApps;
+				}
 
-					// 2. If cache is expired or missing, fetch from Web
-					if (_steamApps == null)
+				List<SteamApp> cached = FileDataService.LoadData<List<SteamApp>>(AppsListPath, SteamAppsCacheMinutes);
+				if (cached != null && cached.Count > 0)
+				{
+					Common.LogDebug(true, $"[SteamApi] GetSteamAppsList route=Cache, count={cached.Count}.");
+					_steamApps = cached;
+					return _steamApps;
+				}
+
+				Common.LogDebug(true, cached == null
+					? "[SteamApi] GetSteamAppsList cache miss or expired; refreshing online."
+					: "[SteamApi] GetSteamAppsList cache empty; refreshing online.");
+
+				List<SteamApp> steamAppsNew = null;
+				string routeUsed = null;
+
+				// 1. Public GitHub list first (no auth)
+				Common.LogDebug(true, "[SteamApi] GetSteamAppsList route=PublicAppIdList.");
+				steamAppsNew = GetSteamAppsFromPublicAppIdList();
+				bool githubOk = steamAppsNew != null && steamAppsNew.Count > 0;
+				bool repoStale = false;
+				if (githubOk)
+				{
+					routeUsed = "PublicAppIdList";
+					repoStale = IsPublicAppIdListRepositoryStale();
+				}
+				else
+				{
+					Logger.Warn("[SteamApi] GetSteamAppsList PublicAppIdList failed or empty.");
+				}
+
+				// 2. StoreToken when GitHub failed or repository commit is older than one week
+				bool needStoreToken = !githubOk || repoStale;
+				if (needStoreToken)
+				{
+					Common.LogDebug(true, $"[SteamApi] GetSteamAppsList needStoreToken githubOk={githubOk}, repoStale={repoStale}.");
+
+					if (!(StoreToken?.Token.IsNullOrEmpty() ?? true))
 					{
-						Common.LogDebug(true, "GetSteamAppsListFromWeb");
-
-						List<SteamApp> steamAppsNew = null;
-
-						// Determine retrieval method
-						if (!(StoreToken?.Token.IsNullOrEmpty() ?? true))
+						Common.LogDebug(true, "[SteamApi] GetSteamAppsList route=WebToken.");
+						List<SteamApp> fromToken = GetSteamAppsByWebToken();
+						if (fromToken != null && fromToken.Count > 0)
 						{
-							Common.LogDebug(true, "[SteamApi] GetSteamAppsList route=WebToken.");
-							steamAppsNew = GetSteamAppsByWebToken();
-						}
-						else if (StoreSettings.UseApi && CurrentAccountInfos != null && !CurrentAccountInfos.ApiKey.IsNullOrEmpty() && IsUserLoggedIn)
-						{
-							Common.LogDebug(true, $"[SteamApi] GetSteamAppsList route=SteamKit.GetAppList, UseApi={StoreSettings.UseApi}, apiKeyLength={CurrentAccountInfos.ApiKey.Length}.");
-							steamAppsNew = SteamKit.GetAppList(CurrentAccountInfos.ApiKey);
+							steamAppsNew = fromToken;
+							routeUsed = "WebToken";
 						}
 						else
 						{
-							Common.LogDebug(true, $"[SteamApi] GetSteamAppsList route=PublicAppIdList, HasApiKey={!(CurrentAccountInfos?.ApiKey.IsNullOrEmpty() ?? true)}, IsLoggedIn={IsUserLoggedIn}.");
-							steamAppsNew = GetSteamAppsFromPublicAppIdList();
-						}
-
-						// 3. Load existing cache to merge with new data
-						// Use -1 to load silently if we have new data to add, otherwise 0 to flag as expired
-						_steamApps = FileDataService.LoadData<List<SteamApp>>(AppsListPath, steamAppsNew?.Count > 0 ? -1 : 0)
-									 ?? new List<SteamApp>();
-
-						// 4. Merge new apps without duplicates
-						if (steamAppsNew != null && steamAppsNew.Count > 0)
-						{
-							// Use a HashSet for high-performance O(1) lookup
-							var existingIds = new HashSet<uint>(_steamApps.Select(a => a.AppId));
-
-							// Filter apps that aren't already in the list
-							var distinctNewApps = steamAppsNew
-								.Where(a => existingIds.Add(a.AppId))
-								.ToList();
-
-							if (distinctNewApps.Count > 0)
-							{
-								_steamApps.AddRange(distinctNewApps);
-
-								// Persist the updated list to disk
-								FileSystem.WriteStringToFileSafe(AppsListPath, Serialization.ToJson(_steamApps));
-							}
+							Logger.Warn(githubOk && repoStale
+								? "[SteamApi] GetSteamAppsList WebToken failed; keeping PublicAppIdList despite stale repository."
+								: "[SteamApi] GetSteamAppsList WebToken failed or empty.");
 						}
 					}
+					else
+					{
+						Logger.Warn(githubOk && repoStale
+							? "[SteamApi] GetSteamAppsList StoreToken unavailable; keeping PublicAppIdList despite stale repository."
+							: "[SteamApi] GetSteamAppsList WebToken skipped: StoreToken unavailable.");
+					}
+				}
+
+				if (steamAppsNew != null && steamAppsNew.Count > 0)
+				{
+					_steamApps = MergeAndPersistSteamApps(steamAppsNew);
+					Logger.Info($"[SteamApi] GetSteamAppsList route={routeUsed}, count={_steamApps.Count}.");
+					return _steamApps;
+				}
+
+				// 3. Stale disk cache (IgnoreTtl: no OldData notification)
+				_steamApps = FileDataService.LoadData<List<SteamApp>>(AppsListPath, SteamAppsCacheLoadIgnoreTtlMinutes)
+					?? new List<SteamApp>();
+				if (_steamApps.Count > 0)
+				{
+					string cacheAgeHint = TryGetAppsListCacheLastWriteHint();
+					Logger.Warn($"[SteamApi] GetSteamAppsList route=StaleCache, count={_steamApps.Count}{cacheAgeHint}; online sources failed, data may be outdated.");
+				}
+				else
+				{
+					Logger.Error("[SteamApi] GetSteamAppsList unavailable: all online sources failed and no local cache.");
 				}
 
 				return _steamApps;
@@ -294,6 +338,160 @@ namespace CommonPluginsStores.Steam
 			{
 				_steamApps = value;
 				_steamAppsDict = null; // Reset dictionary cache on change
+			}
+		}
+
+		/// <summary>
+		/// Merges newly fetched apps into the on-disk list and always rewrites the cache file
+		/// so the TTL is refreshed after a successful online fetch.
+		/// </summary>
+		private List<SteamApp> MergeAndPersistSteamApps(List<SteamApp> steamAppsNew)
+		{
+			List<SteamApp> baseList = FileDataService.LoadData<List<SteamApp>>(AppsListPath, SteamAppsCacheLoadIgnoreTtlMinutes)
+				?? new List<SteamApp>();
+			var existingIds = new HashSet<uint>(baseList.Select(a => a.AppId));
+			List<SteamApp> distinctNewApps = steamAppsNew
+				.Where(a => a != null && existingIds.Add(a.AppId))
+				.ToList();
+
+			if (distinctNewApps.Count > 0)
+			{
+				baseList.AddRange(distinctNewApps);
+			}
+
+			FileSystem.WriteStringToFileSafe(AppsListPath, Serialization.ToJson(baseList));
+			Common.LogDebug(true, $"[SteamApi] GetSteamAppsList cache persisted, added={distinctNewApps.Count}, total={baseList.Count}.");
+			return baseList;
+		}
+
+		/// <summary>
+		/// Builds a short LastWriteTime suffix for stale-cache warnings, or empty when unavailable.
+		/// </summary>
+		private string TryGetAppsListCacheLastWriteHint()
+		{
+			try
+			{
+				if (!File.Exists(AppsListPath))
+				{
+					return string.Empty;
+				}
+
+				DateTime lastWrite = File.GetLastWriteTime(AppsListPath);
+				return string.Format(CultureInfo.InvariantCulture, ", cacheLastWrite={0:u}", lastWrite);
+			}
+			catch (Exception ex)
+			{
+				Common.LogDebug(true, $"[SteamApi] Could not read AppsList cache LastWriteTime: {ex.Message}");
+				return string.Empty;
+			}
+		}
+
+		/// <summary>
+		/// Returns true when the newest commit touching the public app-list JSON files is older than <see cref="PublicAppIdListMaxAge"/>.
+		/// Returns false when the commit date cannot be resolved so StoreToken is not forced.
+		/// </summary>
+		private bool IsPublicAppIdListRepositoryStale()
+		{
+			DateTime? lastCommitUtc = TryGetPublicAppIdListLastCommitUtc();
+			if (!lastCommitUtc.HasValue)
+			{
+				Logger.Warn("[SteamApi] Could not determine steamappidlist last commit date; skipping stale check.");
+				return false;
+			}
+
+			TimeSpan age = DateTime.UtcNow - lastCommitUtc.Value;
+			bool stale = age > PublicAppIdListMaxAge;
+			if (stale)
+			{
+				Logger.Warn(string.Format(
+					CultureInfo.InvariantCulture,
+					"[SteamApi] steamappidlist last commit is {0:F1} days old (limit {1} days, at {2:u}).",
+					age.TotalDays,
+					PublicAppIdListMaxAge.TotalDays,
+					lastCommitUtc.Value));
+			}
+			else
+			{
+				Common.LogDebug(true, string.Format(
+					CultureInfo.InvariantCulture,
+					"[SteamApi] steamappidlist last commit age={0:F1} days.",
+					age.TotalDays));
+			}
+
+			return stale;
+		}
+
+		/// <summary>
+		/// Returns the most recent commit timestamp across games and DLC JSON paths, or null on failure.
+		/// </summary>
+		private DateTime? TryGetPublicAppIdListLastCommitUtc()
+		{
+			DateTime? gamesCommit = TryGetGitHubPathLastCommitUtc(UrlSteamAppIdListGamesCommits);
+			DateTime? dlcCommit = TryGetGitHubPathLastCommitUtc(UrlSteamAppIdListDlcCommits);
+
+			if (!gamesCommit.HasValue && !dlcCommit.HasValue)
+			{
+				return null;
+			}
+
+			if (!gamesCommit.HasValue)
+			{
+				return dlcCommit;
+			}
+
+			if (!dlcCommit.HasValue)
+			{
+				return gamesCommit;
+			}
+
+			return gamesCommit.Value >= dlcCommit.Value ? gamesCommit : dlcCommit;
+		}
+
+		/// <summary>
+		/// Reads the latest commit date for a GitHub commits API URL filtered by file path.
+		/// </summary>
+		private DateTime? TryGetGitHubPathLastCommitUtc(string commitsUrl)
+		{
+			try
+			{
+				var headers = new List<HttpHeader>
+				{
+					new HttpHeader { Key = "Accept", Value = "application/vnd.github+json" }
+				};
+
+				string json = Web.DownloadStringData(commitsUrl, headers, null).GetAwaiter().GetResult();
+				if (string.IsNullOrWhiteSpace(json))
+				{
+					Common.LogDebug(true, $"[SteamApi] Empty response from GitHub commits API: {commitsUrl}");
+					return null;
+				}
+
+				List<GitHubCommitListItem> commits = Serialization.FromJson<List<GitHubCommitListItem>>(json);
+				GitHubCommitListItem first = commits?.FirstOrDefault();
+				if (first?.Commit == null)
+				{
+					Common.LogDebug(true, $"[SteamApi] No commit payload in GitHub commits API response: {commitsUrl}");
+					return null;
+				}
+
+				DateTime date = first.Commit.Committer != null && first.Commit.Committer.Date != default(DateTime)
+					? first.Commit.Committer.Date
+					: (first.Commit.Author != null ? first.Commit.Author.Date : default(DateTime));
+
+				if (date == default(DateTime))
+				{
+					Common.LogDebug(true, $"[SteamApi] Missing commit date in GitHub commits API response: {commitsUrl}");
+					return null;
+				}
+
+				return date.Kind == DateTimeKind.Unspecified
+					? DateTime.SpecifyKind(date, DateTimeKind.Utc)
+					: date.ToUniversalTime();
+			}
+			catch (Exception ex)
+			{
+				Logger.Warn($"[SteamApi] TryGetGitHubPathLastCommitUtc failed: {ex.GetType().Name} - {ex.Message}");
+				return null;
 			}
 		}
 
@@ -1814,9 +2012,47 @@ namespace CommonPluginsStores.Steam
             }
         }
 
+        /// <summary>
+        /// Normalizes Steam store HTML for Playnite: CDN placeholders, video→poster images, and image size attributes.
+        /// Aligned with Universal Steam Metadata <c>MetadataProvider.ParseDescription</c>.
+        /// </summary>
+        /// <param name="description">Raw HTML from <c>about_the_game</c> (or equivalent).</param>
+        /// <returns>HTML suitable for Playnite description rendering; empty when <paramref name="description"/> is null/empty.</returns>
         private string ParseDescription(string description)
         {
-            return description.Replace("%CDN_HOST_MEDIA_SSL%", "steamcdn-a.akamaihd.net");
+            if (description.IsNullOrEmpty())
+            {
+                return string.Empty;
+            }
+
+            description = description.Replace("%CDN_HOST_MEDIA_SSL%", "steamcdn-a.akamaihd.net");
+            HtmlParser parser = new HtmlParser();
+            IHtmlDocument page = parser.Parse(description);
+
+            // Playnite can't render videos — swap for poster thumbnail (Universal Steam Metadata parity).
+            foreach (IElement videoElem in page.QuerySelectorAll("video"))
+            {
+                string poster = videoElem.GetAttribute("poster");
+                if (!poster.IsNullOrWhiteSpace())
+                {
+                    IElement img = page.CreateElement("img");
+                    img.SetAttribute("src", poster);
+                    videoElem.Parent.ReplaceChild(img, videoElem);
+                }
+                else
+                {
+                    videoElem.Parent.RemoveChild(videoElem);
+                }
+            }
+
+            // Playnite HTML renderer does not respect auto height when width/height are set explicitly.
+            foreach (IElement imgElem in page.QuerySelectorAll("img"))
+            {
+                imgElem.RemoveAttribute("height");
+                imgElem.RemoveAttribute("width");
+            }
+
+            return page.Body?.InnerHtml ?? string.Empty;
         }
 
 
@@ -1871,58 +2107,83 @@ namespace CommonPluginsStores.Steam
 
         private const int MaxAppDetailsRateLimitRetries = 3;
 
+        /// <summary>
+        /// Resolves the on-disk Apps cache path for Steam appdetails.
+        /// Legacy <c>{appId}.json</c> is English-only; other locales use <c>{appId}_{steamLang}.json</c>.
+        /// </summary>
+        /// <param name="appId">Steam App ID.</param>
+        /// <param name="storeLang">Steam language code from <see cref="CodeLang.GetSteamLang"/>.</param>
+        /// <returns>Absolute path under <see cref="StoreApi.PathAppsData"/>.</returns>
+        private string GetAppDetailsCachePath(uint appId, string storeLang)
+        {
+            if (storeLang.Equals("english", StringComparison.OrdinalIgnoreCase))
+            {
+                return Path.Combine(PathAppsData, $"{appId}.json");
+            }
+
+            return Path.Combine(PathAppsData, $"{appId}_{storeLang}.json");
+        }
+
         public StoreAppDetailsResult GetAppDetails(uint appId, int retryCount)
         {
-            string cachePath = Path.Combine(PathAppsData, $"{appId}.json");
+            string storeLang = CodeLang.GetSteamLang(Locale);
+            string cachePath = GetAppDetailsCachePath(appId, storeLang);
             StoreAppDetailsResult storeAppDetailsResult = FileDataService.LoadData<StoreAppDetailsResult>(cachePath, 4320);
 
-            if (storeAppDetailsResult == null)
+            if (storeAppDetailsResult != null)
             {
-                Common.LogDebug(true, $"[SteamApi] Cache miss for app {appId}, request throttled to {ApiRequestMinInterval.TotalMilliseconds}ms.");
-                WaitForStoreAppDetailsAccess();
-                string url = string.Format(UrlApiGameDetails, appId, CodeLang.GetSteamLang(Locale));
-                string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
+                Common.LogDebug(true, FormatLogMessage(
+                    $"GetAppDetails: cache hit appId={appId}, playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}'"));
+                return storeAppDetailsResult;
+            }
 
-                if (IsSteamStoreRateLimitedResponse(response))
+            Common.LogDebug(true, FormatLogMessage(
+                $"GetAppDetails: cache miss appId={appId}, playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}', throttleMs={ApiRequestMinInterval.TotalMilliseconds}"));
+            WaitForStoreAppDetailsAccess();
+            string url = string.Format(UrlApiGameDetails, appId, storeLang);
+            string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
+
+            if (IsSteamStoreRateLimitedResponse(response))
+            {
+                string preview = response == null ? "(null)" : response.Trim();
+                Common.LogDebug(true, $"[SteamApi] Steam store rate limit for app {appId}: response='{preview}'.");
+
+                if (retryCount <= MaxAppDetailsRateLimitRetries)
                 {
-                    string preview = response == null ? "(null)" : response.Trim();
-                    Common.LogDebug(true, $"[SteamApi] Steam store rate limit for app {appId}: response='{preview}'.");
-
-                    if (retryCount <= MaxAppDetailsRateLimitRetries)
-                    {
-                        ApplyStoreRateLimitCooldown(retryCount);
-                        LogWarn($"Steam store rate limit for app {appId}, retry {retryCount}/{MaxAppDetailsRateLimitRetries}.");
-                        return GetAppDetails(appId, retryCount + 1);
-                    }
-
-                    LogWarn($"Steam store rate limit for app {appId}: giving up after {MaxAppDetailsRateLimitRetries} retries.");
-                    return null;
+                    ApplyStoreRateLimitCooldown(retryCount);
+                    LogWarn($"Steam store rate limit for app {appId}, retry {retryCount}/{MaxAppDetailsRateLimitRetries}.");
+                    return GetAppDetails(appId, retryCount + 1);
                 }
 
-                if (!LooksLikeJsonResponse(response))
-                {
-                    string firstByte = response != null && response.Length > 0
-                        ? string.Format("0x{0:X2}", (byte)response[0])
-                        : "empty";
-                    LogWarn($"Unexpected appdetails payload for {appId}: length={response?.Length ?? 0}, firstByte={firstByte}.");
-                    return null;
-                }
+                LogWarn($"Steam store rate limit for app {appId}: giving up after {MaxAppDetailsRateLimitRetries} retries.");
+                return null;
+            }
 
-                if (Serialization.TryFromJson(response, out Dictionary<string, StoreAppDetailsResult> parsedData, out Exception ex) && parsedData != null)
-                {
-                    storeAppDetailsResult = parsedData[appId.ToString()];
-					FileDataService.SaveData(cachePath, storeAppDetailsResult);
-                }
-                else if (ex != null)
-                {
-                    LogWarn($"appdetails JSON parse failed for {appId} (length={response.Length}).");
-                    Common.LogError(ex, false, false, PluginName);
-                }
-                else
-                {
-                    Logger.Warn($"appdetails response for {appId} could not be parsed (no exception, missing key).");
-                    return null;
-                }
+            if (!LooksLikeJsonResponse(response))
+            {
+                string firstByte = response != null && response.Length > 0
+                    ? string.Format("0x{0:X2}", (byte)response[0])
+                    : "empty";
+                LogWarn($"Unexpected appdetails payload for {appId}: length={response?.Length ?? 0}, firstByte={firstByte}.");
+                return null;
+            }
+
+            if (Serialization.TryFromJson(response, out Dictionary<string, StoreAppDetailsResult> parsedData, out Exception ex) && parsedData != null)
+            {
+                storeAppDetailsResult = parsedData[appId.ToString()];
+                FileDataService.SaveData(cachePath, storeAppDetailsResult);
+                Common.LogDebug(true, FormatLogMessage(
+                    $"GetAppDetails: saved appId={appId}, playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}'"));
+            }
+            else if (ex != null)
+            {
+                LogWarn($"appdetails JSON parse failed for {appId} (length={response.Length}).");
+                Common.LogError(ex, false, false, PluginName);
+            }
+            else
+            {
+                Logger.Warn($"appdetails response for {appId} could not be parsed (no exception, missing key).");
+                return null;
             }
 
             return storeAppDetailsResult;
@@ -2623,12 +2884,22 @@ namespace CommonPluginsStores.Steam
             return gameAchievements ?? new ObservableCollection<GameAchievement>();
         }
 
-        public List<GenericItemOption> GetSearchGame(string searchTerm, bool noDlcs = false)
+        /// <summary>
+        /// Searches the Steam store via <c>api/storesearch</c> and returns raw store items (including capsule URLs).
+        /// </summary>
+        /// <param name="searchTerm">Free-text search term (normalized before the request).</param>
+        /// <returns>Matching store items; empty list on failure or empty term.</returns>
+        public List<ItemSearch> SearchStoreItems(string searchTerm)
         {
-            List<GenericItemOption> results = new List<GenericItemOption>();
+            List<ItemSearch> results = new List<ItemSearch>();
 
             try
             {
+                if (searchTerm.IsNullOrEmpty())
+                {
+                    return results;
+                }
+
                 string url = string.Format(UrlSteamGameSearch, searchTerm.NormalizeGameName(), "en");
                 string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
                 _ = Serialization.TryFromJson(response, out SteamSearch steamSearch, out Exception ex);
@@ -2637,8 +2908,34 @@ namespace CommonPluginsStores.Steam
                     throw ex;
                 }
 
-                results = steamSearch?.Items
-                    ?.Select(x => new GenericItemOption { Name = x.Name, Description = x.Id.ToString() + (noDlcs ? string.Empty : $" - {GetGameInfos(x.Id.ToString(), null, true)?.Dlcs?.Count() ?? 0} DLC") })
+                results = steamSearch?.Items ?? new List<ItemSearch>();
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, false, PluginName);
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Searches the Steam store and maps hits to <see cref="GenericItemOption"/> (Name + AppId in Description).
+        /// </summary>
+        /// <param name="searchTerm">Free-text search term.</param>
+        /// <param name="noDlcs">When false, appends a DLC count suffix via <see cref="GetGameInfos"/> (expensive).</param>
+        /// <returns>Options suitable for <see cref="GetAppId"/> when <paramref name="noDlcs"/> is true.</returns>
+        public List<GenericItemOption> GetSearchGame(string searchTerm, bool noDlcs = false)
+        {
+            List<GenericItemOption> results = new List<GenericItemOption>();
+
+            try
+            {
+                results = SearchStoreItems(searchTerm)
+                    ?.Select(x => new GenericItemOption
+                    {
+                        Name = x.Name,
+                        Description = x.Id.ToString() + (noDlcs ? string.Empty : $" - {GetGameInfos(x.Id.ToString(), null, true)?.Dlcs?.Count() ?? 0} DLC")
+                    })
                     ?.ToList() ?? new List<GenericItemOption>();
             }
             catch (Exception ex)
@@ -3069,13 +3366,13 @@ namespace CommonPluginsStores.Steam
 
 		/// <summary>
 		/// Loads the Steam app list from the public steamappidlist repository (games + DLC merged).
-		/// Used when the user is not authenticated via web token or API key session.
+		/// Primary online source for <see cref="SteamApps"/>.
 		/// </summary>
 		private List<SteamApp> GetSteamAppsFromPublicAppIdList()
 		{
 			try
 			{
-				Logger.Info("Loading Steam app list from public steamappidlist repository");
+				Common.LogDebug(true, "[SteamApi] Loading Steam app list from public steamappidlist repository.");
 
 				string gamesJson = Web.DownloadStringData(UrlSteamAppIdListGames).GetAwaiter().GetResult();
 				string dlcJson = Web.DownloadStringData(UrlSteamAppIdListDlc).GetAwaiter().GetResult();
@@ -3106,20 +3403,24 @@ namespace CommonPluginsStores.Steam
 
 				if (merged.Count == 0)
 				{
-					Logger.Warn("Public Steam app list is empty");
+					Logger.Warn("[SteamApi] Public Steam app list is empty.");
 					return null;
 				}
 
-				Logger.Info($"Loaded {merged.Count} Steam apps from public repository");
+				Common.LogDebug(true, $"[SteamApi] Loaded {merged.Count} Steam apps from public repository.");
 				return merged;
 			}
 			catch (Exception ex)
 			{
-				Common.LogError(ex, false, true, PluginName);
+				Logger.Warn($"[SteamApi] GetSteamAppsFromPublicAppIdList failed: {ex.GetType().Name} - {ex.Message}");
 				return null;
 			}
 		}
 
+		/// <summary>
+		/// Loads the Steam app list via store access token (<c>IStoreService/GetAppList</c>).
+		/// Used as fallback when the public repository fetch fails or is stale.
+		/// </summary>
 		private List<SteamApp> GetSteamAppsByWebToken()
 		{
 			try
@@ -3129,8 +3430,8 @@ namespace CommonPluginsStores.Steam
 
 				if (StoreToken?.Token.IsNullOrEmpty() ?? true)
 				{
-					Logger.Warn("StoreToken is not available for GetSteamAppsByWeb");
-					return steamApps;
+					Common.LogDebug(true, "[SteamApi] StoreToken is not available for GetSteamAppsByWebToken.");
+					return null;
 				}
 
 				do
@@ -3163,11 +3464,18 @@ namespace CommonPluginsStores.Steam
 					}
 				} while (lastAppid > 0);
 
+				if (steamApps.Count == 0)
+				{
+					Logger.Warn("[SteamApi] GetSteamAppsByWebToken returned no apps.");
+					return null;
+				}
+
+				Common.LogDebug(true, $"[SteamApi] GetSteamAppsByWebToken loaded {steamApps.Count} apps.");
 				return steamApps;
 			}
 			catch (Exception ex)
 			{
-				Common.LogError(ex, false, true, PluginName);
+				Logger.Warn($"[SteamApi] GetSteamAppsByWebToken failed: {ex.GetType().Name} - {ex.Message}");
 				return null;
 			}
 		}

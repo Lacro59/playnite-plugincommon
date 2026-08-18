@@ -900,6 +900,11 @@ namespace CommonPluginsStores.Epic
 
 			try
 			{
+				string storeLang = CodeLang.GetEpicLang(Locale);
+				string storeCountry = CodeLang.GetCountryFromLast(Locale);
+				Common.LogDebug(true, FormatLogMessage(
+					$"GetGameInfosAnonymous: namespace='{@namespace}', playniteLang='{Locale}', storeLang='{storeLang}', country='{storeCountry}', cache=none (GraphQL live)"));
+
 				AddonsByNamespaceResponse response =
 					QueryAddonsByNamespace(@namespace, "games/edition/base").GetAwaiter().GetResult();
 				CatalogOffer catalogOffer = response?.Data?.Catalog?.CatalogOffers?.Elements?.FirstOrDefault();
@@ -907,18 +912,24 @@ namespace CommonPluginsStores.Epic
 				if (catalogOffer == null)
 				{
 					Logger.Warn($"EpicApi.GetGameInfosAnonymous: No catalog offer found for namespace '{@namespace}'.");
+					Common.LogDebug(true, FormatLogMessage(
+						$"GetGameInfosAnonymous: no offer namespace='{@namespace}', playniteLang='{Locale}', storeLang='{storeLang}'"));
 					return null;
 				}
 
-				string localLang = CodeLang.GetEpicLang(Locale);
+				string description = catalogOffer.Description?.Trim();
+				Common.LogDebug(true, FormatLogMessage(
+					$"GetGameInfosAnonymous: ok namespace='{@namespace}', playniteLang='{Locale}', storeLang='{storeLang}', " +
+					$"title='{catalogOffer.Title}', descriptionLength={description?.Length ?? 0}"));
+
 				return new GameInfos
 				{
 					Id = catalogOffer.Id,
 					Id2 = string.Empty, // AppName unavailable without authentication.
 					Name = catalogOffer.Title,
-					Link = string.Format(UrlStore, localLang, catalogOffer.ProductSlug),
+					Link = string.Format(UrlStore, storeLang, catalogOffer.ProductSlug),
 					Image = catalogOffer.KeyImages?.Find(x => x.Type.IsEqual("OfferImageWide"))?.Url?.Replace("\u002F", "/"),
-					Description = catalogOffer.Description?.Trim(),
+					Description = description,
 					Released = catalogOffer.ReleaseDate
 				};
 			}
@@ -2456,7 +2467,7 @@ namespace CommonPluginsStores.Epic
 		/// <summary>
 		/// Executes a GraphQL query against the Epic launcher store endpoint.
 		/// Adds the EG1 bearer token only when the account is private or
-		/// when <see cref="StoreSettings.UseAuth"/> is set.
+		/// when <see cref="StoreSettings.UseAuth"/> is set, unless <paramref name="forceAnonymous"/> is true.
 		/// When neither condition applies, the query is sent anonymously.
 		/// </summary>
 		/// <typeparam name="T">Expected deserialized response type.</typeparam>
@@ -2464,8 +2475,11 @@ namespace CommonPluginsStores.Epic
 		/// An object exposing OperationName, Query and Variables properties
 		/// (typically a strongly-typed query class from CommonPluginsStores.Epic.Models.Query).
 		/// </param>
+		/// <param name="forceAnonymous">
+		/// When true, never attach Authorization (public store queries such as searchStore).
+		/// </param>
 		/// <returns>The deserialized response, or null on HTTP error or parse failure.</returns>
-		private async Task<T> QueryGraphQL<T>(object queryObject) where T : class
+		private async Task<T> QueryGraphQL<T>(object queryObject, bool forceAnonymous = false) where T : class
 		{
 			try
 			{
@@ -2475,6 +2489,10 @@ namespace CommonPluginsStores.Epic
 				string operationName = queryType.GetProperty("OperationName")?.GetValue(queryObject) as string;
 				string query = queryType.GetProperty("Query")?.GetValue(queryObject) as string;
 				object variables = queryType.GetProperty("Variables")?.GetValue(queryObject);
+
+				string variablesJson = variables != null ? Serialization.ToJson(variables) : "(null)";
+				Common.LogDebug(true,
+					$"[EpicApi.GraphQL] {operationName}: variables={FormatGraphQLResponsePreview(variablesJson, 500)}");
 
 				var payload = new { query, variables };
 				StringContent content = new StringContent(
@@ -2487,11 +2505,19 @@ namespace CommonPluginsStores.Epic
 					httpClient.DefaultRequestHeaders.Clear();
 					httpClient.DefaultRequestHeaders.Add("User-Agent", UserAgent);
 
-					bool needsAuth = (CurrentAccountInfos?.IsPrivate ?? false) || StoreSettings.UseAuth;
-					if (needsAuth && StoreToken != null && !StoreToken.Token.IsNullOrEmpty())
+					bool isPrivate = CurrentAccountInfos?.IsPrivate ?? false;
+					bool useAuth = StoreSettings.UseAuth;
+					bool hasToken = StoreToken != null && !StoreToken.Token.IsNullOrEmpty();
+					bool needsAuth = !forceAnonymous && (isPrivate || useAuth);
+					bool sendingAuth = needsAuth && hasToken;
+					if (sendingAuth)
 					{
 						httpClient.DefaultRequestHeaders.Add("Authorization", StoreToken.Type + " " + StoreToken.Token);
 					}
+
+					Common.LogDebug(true,
+						$"[EpicApi.GraphQL] {operationName}: auth forceAnonymous={forceAnonymous}, isPrivate={isPrivate}, UseAuth={useAuth}, " +
+						$"hasToken={hasToken}, needsAuth={needsAuth}, sendingAuth={sendingAuth}");
 
 					HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content).ConfigureAwait(false);
 					string str = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -2499,7 +2525,7 @@ namespace CommonPluginsStores.Epic
 
 					Common.LogDebug(true,
 						$"[EpicApi.GraphQL] {operationName}: HTTP {(int)response.StatusCode} {response.StatusCode}, " +
-						$"Content-Type={contentType}, length={str?.Length ?? 0}, needsAuth={needsAuth}, url={UrlGraphQL}");
+						$"Content-Type={contentType}, length={str?.Length ?? 0}, sendingAuth={sendingAuth}, url={UrlGraphQL}");
 
 					if (!response.IsSuccessStatusCode)
 					{
@@ -2517,6 +2543,9 @@ namespace CommonPluginsStores.Epic
 							$"[EpicApi.GraphQL] {operationName}: HTTP error body preview='{FormatGraphQLResponsePreview(str)}'");
 						return null;
 					}
+
+					Common.LogDebug(true,
+						$"[EpicApi.GraphQL] {operationName}: body preview='{FormatGraphQLResponsePreview(str)}'");
 
 					if (Serialization.TryFromJson(str, out T data, out Exception ex))
 					{
@@ -2590,7 +2619,7 @@ namespace CommonPluginsStores.Epic
 					Locale = CodeLang.GetEpicLang(Locale)
 				}
 			};
-			return await QueryGraphQL<GetMappingByPageSlugResponse>(query).ConfigureAwait(false);
+			return await QueryGraphQL<GetMappingByPageSlugResponse>(query, forceAnonymous: true).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -2599,7 +2628,8 @@ namespace CommonPluginsStores.Epic
 		/// </summary>
 		/// <param name="keywords">Search terms (e.g. the game name).</param>
 		/// <param name="category">
-		/// Epic category filter (e.g. <c>"games/edition/base"</c>).
+		/// Epic category filter (default aligns with EpicLibrary WebStoreClient:
+		/// <c>"games/edition/base|bundles/games|editors"</c>).
 		/// </param>
 		/// <param name="count">Maximum number of results to return (default: 10).</param>
 		/// <param name="start">Pagination offset (default: 0).</param>
@@ -2608,11 +2638,20 @@ namespace CommonPluginsStores.Epic
 		/// <remarks>Does not require authentication — uses public GraphQL endpoint.</remarks>
 		public async Task<SearchStoreResponse> QuerySearchStore(
 			string keywords,
-			string category = "games|edition|base|bundles|editors",
+			string category = "games/edition/base|bundles/games|editors",
 			int count = 10,
 			int start = 0,
 			bool withPrice = false)
 		{
+			const string epicLibraryCategoryRef = "games/edition/base|bundles/games|editors";
+			string country = CodeLang.GetCountryFromLast(Locale);
+			string locale = CodeLang.GetEpicLang(Locale);
+
+			Common.LogDebug(true,
+				$"[EpicApi.QuerySearchStore] keywords='{keywords}', category='{category}', " +
+				$"categoryEpicLibraryRef='{epicLibraryCategoryRef}', categoryMatchesEpicLibrary={category == epicLibraryCategoryRef}, " +
+				$"country='{country}', locale='{locale}', count={count}, start={start}, withPrice={withPrice}");
+
 			var query = new QuerySearchStore
 			{
 				Variables =
@@ -2621,15 +2660,25 @@ namespace CommonPluginsStores.Epic
 					Count         = count,
 					Start         = start,
 					Category      = category,
-					Country       = CodeLang.GetCountryFromLast(Locale),
-					Locale        = CodeLang.GetEpicLang(Locale),
-					AllowCountries = CodeLang.GetCountryFromLast(Locale),
+					Country       = country,
+					Locale        = locale,
+					AllowCountries = country,
 					SortBy        = "title", //title, relevancy, releaseDate, currentPrice
 					SortDir       = "ASC", // ASC, DESC
 					WithPrice     = withPrice
 				}
 			};
-			return await QueryGraphQL<SearchStoreResponse>(query).ConfigureAwait(false);
+			SearchStoreResponse response = await QueryGraphQL<SearchStoreResponse>(query, forceAnonymous: true).ConfigureAwait(false);
+
+			int elementCount = response?.Data?.Catalog?.SearchStore?.Elements?.Count ?? 0;
+			int? pagingTotal = response?.Data?.Catalog?.SearchStore?.Paging != null
+				? (int?)response.Data.Catalog.SearchStore.Paging.Total
+				: null;
+			Common.LogDebug(true,
+				$"[EpicApi.QuerySearchStore] result keywords='{keywords}', elementCount={elementCount}, " +
+				$"pagingTotal={(pagingTotal.HasValue ? pagingTotal.Value.ToString() : "n/a")}, responseNull={response == null}");
+
+			return response;
 		}
 
 
@@ -2641,23 +2690,32 @@ namespace CommonPluginsStores.Epic
 		/// Pipe-delimited Epic category filter (default: "addons|digitalextras").
 		/// Pass "games/edition/base" to retrieve the base game offer.
 		/// </param>
-		/// <remarks>Does not require authentication.</remarks>
+		/// <remarks>Does not require authentication — always sent anonymously.</remarks>
 		private async Task<AddonsByNamespaceResponse> QueryAddonsByNamespace(string @namespace, string categories = "addons|digitalextras")
 		{
+			string country = CodeLang.GetCountryFromLast(Locale);
+			string locale = CodeLang.GetEpicLang(Locale);
+			Common.LogDebug(true, FormatLogMessage(
+				$"QueryAddonsByNamespace: namespace='{@namespace}', categories='{categories}', playniteLang='{Locale}', storeLang='{locale}', country='{country}'"));
+
 			var query = new QueryGetAddonsByNamespace
 			{
 				Variables =
 				{
 					Categories = categories,
 					Count = 1000,
-					Country = CodeLang.GetCountryFromLast(Locale),
-					Locale = CodeLang.GetEpicLang(Locale),
+					Country = country,
+					Locale = locale,
 					Namespace = @namespace,
 					SortBy = "effectiveDate",
 					SortDir = "DESC"
 				}
 			};
-			return await QueryGraphQL<AddonsByNamespaceResponse>(query).ConfigureAwait(false);
+			AddonsByNamespaceResponse response = await QueryGraphQL<AddonsByNamespaceResponse>(query, forceAnonymous: true).ConfigureAwait(false);
+			int elementCount = response?.Data?.Catalog?.CatalogOffers?.Elements?.Count ?? 0;
+			Common.LogDebug(true, FormatLogMessage(
+				$"QueryAddonsByNamespace: result namespace='{@namespace}', elementCount={elementCount}, playniteLang='{Locale}', storeLang='{locale}'"));
+			return response;
 		}
 
 		/// <summary>

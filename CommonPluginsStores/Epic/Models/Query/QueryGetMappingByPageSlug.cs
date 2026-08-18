@@ -43,9 +43,16 @@ namespace CommonPluginsStores.Epic.Models.Query
 		public GetMappingByPageSlugVariables Variables { get; set; } = new GetMappingByPageSlugVariables();
 	}
 
+	/// <summary>
+	/// GraphQL variables for <c>getMappingByPageSlug</c>.
+	/// JSON keys must match the camelCase <c>$variables</c> declared in the query.
+	/// </summary>
 	public class GetMappingByPageSlugVariables
 	{
+		[SerializationPropertyName("pageSlug")]
 		public string PageSlug { get; set; }
+
+		[SerializationPropertyName("locale")]
 		public string Locale { get; set; }
 	}
 

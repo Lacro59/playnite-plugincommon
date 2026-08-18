@@ -52,9 +52,16 @@ namespace CommonPluginsStores.Epic.Models.Query
 		public PlayerAchievementBySandboxVariables Variables { get; set; } = new PlayerAchievementBySandboxVariables();
 	}
 
+	/// <summary>
+	/// GraphQL variables for <c>PlayerAchievement</c> (by sandbox).
+	/// JSON keys must match the camelCase <c>$variables</c> declared in the query.
+	/// </summary>
 	public class PlayerAchievementBySandboxVariables
 	{
+		[SerializationPropertyName("epicAccountId")]
 		public string EpicAccountId { get; set; }
+
+		[SerializationPropertyName("sandboxId")]
 		public string SandboxId { get; set; }
 	}
 

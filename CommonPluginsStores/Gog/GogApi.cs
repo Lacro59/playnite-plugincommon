@@ -541,7 +541,7 @@ namespace CommonPluginsStores.Gog
 
             try
             {
-                string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Locale).ToLower());
+                string urlLang = string.Format(UrlGogLang, CodeLang.GetGogSiteLang(Locale));
                 string response = Web.DownloadStringData(url, StoreToken?.Token, urlLang).GetAwaiter().GetResult();
 
                 ObservableCollection<GameAchievement> gameAchievements = new ObservableCollection<GameAchievement>();
@@ -599,7 +599,7 @@ namespace CommonPluginsStores.Gog
             try
             {
                 string url = string.Format(UrlUserGameAchievements, accountInfos.Pseudo, id, accountInfos.UserId);
-                string urlLang = string.Format(UrlGogLang, CodeLang.GetGogLang(Locale));
+                string urlLang = string.Format(UrlGogLang, CodeLang.GetGogSiteLang(Locale));
                 Logger.Info($"GetAchievementsPublic: GameId={id}");
                 string response = Web.DownloadStringDataWithUrlBefore(url, urlLang).GetAwaiter().GetResult();
                 string jsonDataString = UtilityTools.GetJsonInString(response, "(?<=window.profilesData.achievements\\s=\\s)");
@@ -785,7 +785,7 @@ namespace CommonPluginsStores.Gog
                     Name = productApiDetail?.Title,
                     Link = productApiDetail?.ProductLinks?.ProductCard,
                     Image = "https:" + productApiDetail?.ProductImages?.Logo2x,
-                    Description = RemoveDescriptionPromos(productApiDetail.ProductDescription.Full).Trim(),
+                    Description = (RemoveDescriptionPromos(productApiDetail?.ProductDescription?.Full) ?? string.Empty).Trim(),
                     Released = productApiDetail?.ReleaseDate
                 };
 
@@ -852,7 +852,7 @@ namespace CommonPluginsStores.Gog
                         {
                             Id = el.Id.ToString(),
                             Name = productApiDetail?.Title,
-                            Description = RemoveDescriptionPromos(productApiDetail?.ProductDescription?.Full).Trim(),
+                            Description = (RemoveDescriptionPromos(productApiDetail?.ProductDescription?.Full) ?? string.Empty).Trim(),
                             Image = "https:" + productApiDetail?.ProductImages?.Logo2x,
                             Link = string.Format(UrlGogGame, productApiDetail?.Slug),
                             IsOwned = IsOwned
@@ -1105,25 +1105,71 @@ namespace CommonPluginsStores.Gog
 
         public ProductApiDetail GetProductDetail(string id)
         {
-            string cachePath = Path.Combine(PathAppsData, $"{id}.json");
+            // Products API is case-sensitive for region tags (fr-FR works; fr / fr-fr often return English).
+            string storeLang = CodeLang.GetGogLang(Locale);
+            string cachePath = GetProductDetailCachePath(id, storeLang);
             ProductApiDetail productApiDetail = FileDataService.LoadData<ProductApiDetail>(cachePath, 1440);
 
-            if (productApiDetail == null)
+            if (productApiDetail != null)
             {
-                string response = Web.DownloadStringData(string.Format(UrlApiGameInfo, id, CodeLang.GetGogLang(Locale).ToLower())).GetAwaiter().GetResult();
-                if (!response.Contains("<!DOCTYPE html>", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    _ = Serialization.TryFromJson(response, out productApiDetail, out Exception ex);
-                    if (ex != null)
-                    {
-                        ManageException($"No data for {id}", ex, response.Contains("404"));
-                    }
+                Common.LogDebug(true, FormatLogMessage(
+                    $"GetProductDetail: cache hit id='{id}', playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}'"));
+                return productApiDetail;
+            }
 
-					FileDataService.SaveData(cachePath, productApiDetail);
+            Common.LogDebug(true, FormatLogMessage(
+                $"GetProductDetail: cache miss id='{id}', playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}'"));
+            string response = Web.DownloadStringData(string.Format(UrlApiGameInfo, id, storeLang)).GetAwaiter().GetResult();
+            if (!response.Contains("<!DOCTYPE html>", StringComparison.InvariantCultureIgnoreCase))
+            {
+                _ = Serialization.TryFromJson(response, out productApiDetail, out Exception ex);
+                if (ex != null)
+                {
+                    ManageException($"No data for {id}", ex, response.Contains("404"));
                 }
+
+                FileDataService.SaveData(cachePath, productApiDetail);
+                Common.LogDebug(true, FormatLogMessage(
+                    $"GetProductDetail: saved id='{id}', playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}', hasData={productApiDetail != null}"));
+            }
+            else
+            {
+                Common.LogDebug(true, FormatLogMessage(
+                    $"GetProductDetail: non-JSON HTML response id='{id}', playniteLang='{Locale}', storeLang='{storeLang}'"));
             }
 
             return productApiDetail;
+        }
+
+        /// <summary>
+        /// Resolves the on-disk Apps cache path for GOG product details.
+        /// Legacy <c>{id}.json</c> is English-only (<c>en</c> / <c>en-*</c>); other locales use <c>{id}_{storeLang}.json</c>.
+        /// </summary>
+        /// <param name="id">GOG product id.</param>
+        /// <param name="storeLang">GOG locale from <see cref="CodeLang.GetGogLang"/> (preserve casing).</param>
+        /// <returns>Absolute path under <see cref="StoreApi.PathAppsData"/>.</returns>
+        private string GetProductDetailCachePath(string id, string storeLang)
+        {
+            if (IsGogEnglishLocale(storeLang))
+            {
+                return Path.Combine(PathAppsData, $"{id}.json");
+            }
+
+            return Path.Combine(PathAppsData, $"{id}_{storeLang}.json");
+        }
+
+        /// <summary>
+        /// Returns true when <paramref name="storeLang"/> is an English products locale (legacy cache key).
+        /// </summary>
+        private static bool IsGogEnglishLocale(string storeLang)
+        {
+            if (storeLang.IsNullOrEmpty())
+            {
+                return true;
+            }
+
+            return storeLang.Equals("en", StringComparison.OrdinalIgnoreCase)
+                || storeLang.StartsWith("en-", StringComparison.OrdinalIgnoreCase);
         }
 
         private UserDataOwned LoadUserDataOwned(bool onlyNow = true)
@@ -1251,7 +1297,7 @@ namespace CommonPluginsStores.Gog
         {
             if (originalDescription.IsNullOrEmpty())
             {
-                return originalDescription;
+                return string.Empty;
             }
 
             // Get opening element in description. Promos are always at the start of description.
