@@ -147,9 +147,9 @@
 	<sys:String x:Key="LOCCommonDeletePluginData">Удалить данные плагина</sys:String>
 	<sys:String x:Key="LOCCommonClearAllDatas">Удалить данные для всех иг</sys:String>
 	<sys:String x:Key="LOCCommonViewNoData">Просмотр игр без данных плагина</sys:String>
-	<sys:String x:Key="LOCCommonSelectData">Скачать данные для выбранных иг</sys:String>
+	<sys:String x:Key="LOCCommonSelectData">Скачать данные для выбранных игр</sys:String>
 	<sys:String x:Key="LOCCommonDownloadPluginData">Загрузка данных плагина...</sys:String>
-	<sys:String x:Key="LOCCommonGetAllDatas">Скачать данные для всех иг</sys:String>
+	<sys:String x:Key="LOCCommonGetAllDatas">Скачать данные для всех игр</sys:String>
 	<sys:String x:Key="LOCCommonIsolatedPluginData">Изолированные данные плагина</sys:String>
 
 	<!-- ==================== TAG MANAGEMENT ==================== -->
