@@ -1799,15 +1799,30 @@ namespace CommonPluginsShared.Collections
 		}
 
 		/// <summary>
+		/// Plugin tag IDs that must remain on the game when stripping playtime / feature tags.
+		/// </summary>
+		/// <returns>Protected tag identifiers; empty by default.</returns>
+		protected virtual IEnumerable<Guid> GetProtectedPluginTagIds()
+		{
+			yield break;
+		}
+
+		/// <summary>
 		/// Removes all plugin-owned tags from <paramref name="game"/>.TagIds in memory.
 		/// Does NOT persist the change — caller is responsible for calling PersistGameUpdate.
+		/// Tags returned by <see cref="GetProtectedPluginTagIds"/> are preserved.
 		/// </summary>
 		protected void StripPluginTags(Game game)
 		{
-			if (game?.TagIds == null) return;
+			if (game?.TagIds == null)
+			{
+				return;
+			}
+
+			HashSet<Guid> protectedIds = new HashSet<Guid>(GetProtectedPluginTagIds() ?? Enumerable.Empty<Guid>());
 
 			game.TagIds = game.TagIds
-				.Where(x => !PluginTags.Any(y => x == y.Id))
+				.Where(x => protectedIds.Contains(x) || !PluginTags.Any(y => x == y.Id))
 				.ToList();
 		}
 
