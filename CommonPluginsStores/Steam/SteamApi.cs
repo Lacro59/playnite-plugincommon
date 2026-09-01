@@ -1,4 +1,4 @@
-﻿using AngleSharp.Dom;
+using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using CommonPlayniteShared.Common;
@@ -66,7 +66,7 @@ namespace CommonPluginsStores.Steam
 
 			if (pauseRemaining > TimeSpan.Zero)
 			{
-				Common.LogDebug(true, $"[SteamApi] Steam store cooldown: waiting {pauseRemaining.TotalSeconds:F0}s before next appdetails call.");
+				Common.LogDebug($"[SteamApi] Steam store cooldown: waiting {pauseRemaining.TotalSeconds:F0}s before next appdetails call.");
 				Thread.Sleep(pauseRemaining);
 			}
 
@@ -255,12 +255,12 @@ namespace CommonPluginsStores.Steam
 				List<SteamApp> cached = FileDataService.LoadData<List<SteamApp>>(AppsListPath, SteamAppsCacheMinutes);
 				if (cached != null && cached.Count > 0)
 				{
-					Common.LogDebug(true, $"[SteamApi] GetSteamAppsList route=Cache, count={cached.Count}.");
+					Common.LogDebug($"[SteamApi] GetSteamAppsList route=Cache, count={cached.Count}.");
 					_steamApps = cached;
 					return _steamApps;
 				}
 
-				Common.LogDebug(true, cached == null
+				Common.LogDebug(cached == null
 					? "[SteamApi] GetSteamAppsList cache miss or expired; refreshing online."
 					: "[SteamApi] GetSteamAppsList cache empty; refreshing online.");
 
@@ -268,7 +268,7 @@ namespace CommonPluginsStores.Steam
 				string routeUsed = null;
 
 				// 1. Public GitHub list first (no auth)
-				Common.LogDebug(true, "[SteamApi] GetSteamAppsList route=PublicAppIdList.");
+				Common.LogDebug("[SteamApi] GetSteamAppsList route=PublicAppIdList.");
 				steamAppsNew = GetSteamAppsFromPublicAppIdList();
 				bool githubOk = steamAppsNew != null && steamAppsNew.Count > 0;
 				bool repoStale = false;
@@ -286,11 +286,11 @@ namespace CommonPluginsStores.Steam
 				bool needStoreToken = !githubOk || repoStale;
 				if (needStoreToken)
 				{
-					Common.LogDebug(true, $"[SteamApi] GetSteamAppsList needStoreToken githubOk={githubOk}, repoStale={repoStale}.");
+					Common.LogDebug($"[SteamApi] GetSteamAppsList needStoreToken githubOk={githubOk}, repoStale={repoStale}.");
 
 					if (!(StoreToken?.Token.IsNullOrEmpty() ?? true))
 					{
-						Common.LogDebug(true, "[SteamApi] GetSteamAppsList route=WebToken.");
+						Common.LogDebug("[SteamApi] GetSteamAppsList route=WebToken.");
 						List<SteamApp> fromToken = GetSteamAppsByWebToken();
 						if (fromToken != null && fromToken.Count > 0)
 						{
@@ -360,7 +360,7 @@ namespace CommonPluginsStores.Steam
 			}
 
 			FileSystem.WriteStringToFileSafe(AppsListPath, Serialization.ToJson(baseList));
-			Common.LogDebug(true, $"[SteamApi] GetSteamAppsList cache persisted, added={distinctNewApps.Count}, total={baseList.Count}.");
+			Common.LogDebug($"[SteamApi] GetSteamAppsList cache persisted, added={distinctNewApps.Count}, total={baseList.Count}.");
 			return baseList;
 		}
 
@@ -381,7 +381,7 @@ namespace CommonPluginsStores.Steam
 			}
 			catch (Exception ex)
 			{
-				Common.LogDebug(true, $"[SteamApi] Could not read AppsList cache LastWriteTime: {ex.Message}");
+				Common.LogDebug($"[SteamApi] Could not read AppsList cache LastWriteTime: {ex.Message}");
 				return string.Empty;
 			}
 		}
@@ -412,7 +412,7 @@ namespace CommonPluginsStores.Steam
 			}
 			else
 			{
-				Common.LogDebug(true, string.Format(
+				Common.LogDebug(string.Format(
 					CultureInfo.InvariantCulture,
 					"[SteamApi] steamappidlist last commit age={0:F1} days.",
 					age.TotalDays));
@@ -462,7 +462,7 @@ namespace CommonPluginsStores.Steam
 				string json = Web.DownloadStringData(commitsUrl, headers, null).GetAwaiter().GetResult();
 				if (string.IsNullOrWhiteSpace(json))
 				{
-					Common.LogDebug(true, $"[SteamApi] Empty response from GitHub commits API: {commitsUrl}");
+					Common.LogDebug($"[SteamApi] Empty response from GitHub commits API: {commitsUrl}");
 					return null;
 				}
 
@@ -470,7 +470,7 @@ namespace CommonPluginsStores.Steam
 				GitHubCommitListItem first = commits?.FirstOrDefault();
 				if (first?.Commit == null)
 				{
-					Common.LogDebug(true, $"[SteamApi] No commit payload in GitHub commits API response: {commitsUrl}");
+					Common.LogDebug($"[SteamApi] No commit payload in GitHub commits API response: {commitsUrl}");
 					return null;
 				}
 
@@ -480,7 +480,7 @@ namespace CommonPluginsStores.Steam
 
 				if (date == default(DateTime))
 				{
-					Common.LogDebug(true, $"[SteamApi] Missing commit date in GitHub commits API response: {commitsUrl}");
+					Common.LogDebug($"[SteamApi] Missing commit date in GitHub commits API response: {commitsUrl}");
 					return null;
 				}
 
@@ -580,7 +580,7 @@ namespace CommonPluginsStores.Steam
         {
             if (CurrentAccountInfos == null)
             {
-                Common.LogDebug(true, "[SteamApi] GetIsUserLoggedIn: no CurrentAccountInfos.");
+                Common.LogDebug("[SteamApi] GetIsUserLoggedIn: no CurrentAccountInfos.");
                 return false;
             }
 
@@ -591,42 +591,42 @@ namespace CommonPluginsStores.Steam
 					bool? cachedAuth = TryGetAuthStatusFromUserDataCache();
 					if (cachedAuth.HasValue)
 					{
-						Common.LogDebug(true, $"[SteamApi] GetIsUserLoggedIn fast-path (user data cache): isLogged={cachedAuth.Value}.");
+						Common.LogDebug($"[SteamApi] GetIsUserLoggedIn fast-path (user data cache): isLogged={cachedAuth.Value}.");
 						return cachedAuth.Value;
 					}
 
 					if (TryGetAuthStatusFromStoredCookies())
 					{
-						Common.LogDebug(true, "[SteamApi] GetIsUserLoggedIn fast-path (stored cookies): isLogged=true until background verification.");
+						Common.LogDebug("[SteamApi] GetIsUserLoggedIn fast-path (stored cookies): isLogged=true until background verification.");
 						return true;
 					}
 
 					bool? cachedToken = TryGetAuthStatusFromStoredToken();
 					if (cachedToken == true)
 					{
-						Common.LogDebug(true, "[SteamApi] GetIsUserLoggedIn fast-path (stored token): isLogged=true until background verification.");
+						Common.LogDebug("[SteamApi] GetIsUserLoggedIn fast-path (stored token): isLogged=true until background verification.");
 						return true;
 					}
 
-					Common.LogDebug(true, "[SteamApi] GetIsUserLoggedIn fast-path: no session hint (cache, cookies, or token), returning false until background check.");
+					Common.LogDebug("[SteamApi] GetIsUserLoggedIn fast-path: no session hint (cache, cookies, or token), returning false until background check.");
 					return false;
 				}
 
 				bool? freshCachedAuth = TryGetAuthStatusFromUserDataCache(freshOnly: true);
 				if (freshCachedAuth.HasValue)
 				{
-					Common.LogDebug(true, $"[SteamApi] GetIsUserLoggedIn: full verification skipped (fresh user data cache, {UserDataAuthCacheMinutes}m).");
+					Common.LogDebug($"[SteamApi] GetIsUserLoggedIn: full verification skipped (fresh user data cache, {UserDataAuthCacheMinutes}m).");
 					return freshCachedAuth.Value;
 				}
 
-				Common.LogDebug(true, "[SteamApi] GetIsUserLoggedIn: full network verification (UseAuth).");
-				Common.LogDebug(true, "[SteamAuthCompat] GetIsUserLoggedIn: full verification — WebView cookie refresh uses deleteCookies=false (shared jar preserved for SteamLibrary).");
+				Common.LogDebug("[SteamApi] GetIsUserLoggedIn: full network verification (UseAuth).");
+				Common.LogDebug("[SteamAuthCompat] GetIsUserLoggedIn: full verification — WebView cookie refresh uses deleteCookies=false (shared jar preserved for SteamLibrary).");
 				bool verified = VerifyUserLoggedInWithAuth();
-				Common.LogDebug(true, $"[SteamApi] GetIsUserLoggedIn full verification result: isLogged={verified}.");
+				Common.LogDebug($"[SteamApi] GetIsUserLoggedIn full verification result: isLogged={verified}.");
 				return verified;
             }
 
-            Common.LogDebug(true, "[SteamApi] GetIsUserLoggedIn: public profile check (no UseAuth).");
+            Common.LogDebug("[SteamApi] GetIsUserLoggedIn: public profile check (no UseAuth).");
             Task<bool> withId = IsProfilePublic(string.Format(UrlProfileById, CurrentAccountInfos.UserId), GetStoredCookies());
             Task<bool> withPersona = IsProfilePublic(string.Format(UrlProfileByName, CurrentAccountInfos.Pseudo), GetStoredCookies());
             Task.WaitAll(withId, withPersona);
@@ -643,7 +643,7 @@ namespace CommonPluginsStores.Steam
 		{
 			if (!HasSessionCredentialsForAuth())
 			{
-				Common.LogDebug(true, "[SteamApi] Auth cache ignored: no stored cookies or token.");
+				Common.LogDebug("[SteamApi] Auth cache ignored: no stored cookies or token.");
 				return null;
 			}
 
@@ -653,13 +653,13 @@ namespace CommonPluginsStores.Steam
 				if (freshCache != null)
 				{
 					bool isLogged = HasOwnedApps(freshCache);
-					Common.LogDebug(true, $"[SteamApi] Auth cache hit (fresh, {UserDataAuthCacheMinutes}m): ownedApps={freshCache.RgOwnedApps?.Count ?? 0}, isLogged={isLogged}.");
+					Common.LogDebug($"[SteamApi] Auth cache hit (fresh, {UserDataAuthCacheMinutes}m): ownedApps={freshCache.RgOwnedApps?.Count ?? 0}, isLogged={isLogged}.");
 					return isLogged;
 				}
 
 				if (freshOnly)
 				{
-					Common.LogDebug(true, "[SteamApi] Auth cache miss: no fresh Steam_UserData.json data.");
+					Common.LogDebug("[SteamApi] Auth cache miss: no fresh Steam_UserData.json data.");
 					return null;
 				}
 
@@ -667,12 +667,12 @@ namespace CommonPluginsStores.Steam
 				if (anyAgeCache != null)
 				{
 					bool isLogged = HasOwnedApps(anyAgeCache);
-					Common.LogDebug(true, $"[SteamApi] Auth cache hit (any age): ownedApps={anyAgeCache.RgOwnedApps?.Count ?? 0}, isLogged={isLogged}.");
+					Common.LogDebug($"[SteamApi] Auth cache hit (any age): ownedApps={anyAgeCache.RgOwnedApps?.Count ?? 0}, isLogged={isLogged}.");
 					return isLogged;
 				}
 			}
 
-			Common.LogDebug(true, "[SteamApi] Auth cache miss: no Steam_UserData.json data.");
+			Common.LogDebug("[SteamApi] Auth cache miss: no Steam_UserData.json data.");
 			return null;
 		}
 
@@ -688,27 +688,27 @@ namespace CommonPluginsStores.Steam
 		{
 			if (!IsAuthCheckCurrent())
 			{
-				Common.LogDebug(true, "[SteamApi] VerifyUserLoggedInWithAuth aborted: superseded auth operation.");
+				Common.LogDebug("[SteamApi] VerifyUserLoggedInWithAuth aborted: superseded auth operation.");
 				return false;
 			}
 
 			SteamUserData userData = GetUserData();
 			bool isLogged = HasOwnedApps(userData);
-			Common.LogDebug(true, $"[SteamApi] VerifyUserLoggedInWithAuth initial attempt: ownedApps={userData?.RgOwnedApps?.Count ?? 0}, isLogged={isLogged}.");
+			Common.LogDebug($"[SteamApi] VerifyUserLoggedInWithAuth initial attempt: ownedApps={userData?.RgOwnedApps?.Count ?? 0}, isLogged={isLogged}.");
 			if (!isLogged)
 			{
 				if (!IsAuthCheckCurrent())
 				{
-					Common.LogDebug(true, "[SteamApi] VerifyUserLoggedInWithAuth aborted before retry: superseded auth operation.");
+					Common.LogDebug("[SteamApi] VerifyUserLoggedInWithAuth aborted before retry: superseded auth operation.");
 					return false;
 				}
 
-				Common.LogDebug(true, "[SteamApi] VerifyUserLoggedInWithAuth: retry after 2s.");
+				Common.LogDebug("[SteamApi] VerifyUserLoggedInWithAuth: retry after 2s.");
 				Thread.Sleep(2000);
 
 				if (!IsAuthCheckCurrent())
 				{
-					Common.LogDebug(true, "[SteamApi] VerifyUserLoggedInWithAuth aborted after delay: superseded auth operation.");
+					Common.LogDebug("[SteamApi] VerifyUserLoggedInWithAuth aborted after delay: superseded auth operation.");
 					return false;
 				}
 
@@ -719,15 +719,15 @@ namespace CommonPluginsStores.Steam
 				{
 					if (CurrentAccountInfos?.SessionLoggedOutByUser == true)
 					{
-						Common.LogDebug(true, "[SteamApi] VerifyUserLoggedInWithAuth: SSO cookie refresh skipped (user logged out explicitly).");
+						Common.LogDebug("[SteamApi] VerifyUserLoggedInWithAuth: SSO cookie refresh skipped (user logged out explicitly).");
 						return false;
 					}
 
-					Common.LogDebug(true, "[SteamApi] VerifyUserLoggedInWithAuth: refreshing cookies and retrying (global WebView jar will not be purged).");
+					Common.LogDebug("[SteamApi] VerifyUserLoggedInWithAuth: refreshing cookies and retrying (global WebView jar will not be purged).");
 					string url = string.Format(UrlRefreshToken, CurrentAccountInfos.Link);
 
 					Thread.Sleep(250);
-					Common.LogDebug(true, "[SteamAuthCompat] VerifyUserLoggedInWithAuth: cookie refresh attempt 1/3.");
+					Common.LogDebug("[SteamAuthCompat] VerifyUserLoggedInWithAuth: cookie refresh attempt 1/3.");
 					if (!TryRefreshSteamCookies(url, out userData, out isLogged))
 					{
 						return false;
@@ -736,7 +736,7 @@ namespace CommonPluginsStores.Steam
 					if (!isLogged)
 					{
 						Thread.Sleep(250);
-						Common.LogDebug(true, "[SteamAuthCompat] VerifyUserLoggedInWithAuth: cookie refresh attempt 2/3.");
+						Common.LogDebug("[SteamAuthCompat] VerifyUserLoggedInWithAuth: cookie refresh attempt 2/3.");
 						if (!TryRefreshSteamCookies(url, out userData, out isLogged))
 						{
 							return false;
@@ -746,7 +746,7 @@ namespace CommonPluginsStores.Steam
 					if (!isLogged)
 					{
 						Thread.Sleep(250);
-						Common.LogDebug(true, "[SteamAuthCompat] VerifyUserLoggedInWithAuth: cookie refresh attempt 3/3.");
+						Common.LogDebug("[SteamAuthCompat] VerifyUserLoggedInWithAuth: cookie refresh attempt 3/3.");
 						if (!TryRefreshSteamCookies(url, out userData, out isLogged))
 						{
 							return false;
@@ -776,18 +776,18 @@ namespace CommonPluginsStores.Steam
 
 			if (!TryGetAuthStatusFromStoredCookies())
 			{
-				Common.LogDebug(true, "[SteamApi] EnsureAccountProfileFromAuthenticatedSession skipped: no stored cookies.");
+				Common.LogDebug("[SteamApi] EnsureAccountProfileFromAuthenticatedSession skipped: no stored cookies.");
 				return;
 			}
 
 			try
 			{
-				Common.LogDebug(true, "[SteamApi] EnsureAccountProfileFromAuthenticatedSession: scraping profile from community /my.");
+				Common.LogDebug("[SteamApi] EnsureAccountProfileFromAuthenticatedSession: scraping profile from community /my.");
 				string response = Web.DownloadStringData(UrlProfileMy, GetStoredCookies()).GetAwaiter().GetResult();
 				AccountInfos scraped = GetAccountInfosFromRgProfileData(response);
 				if (scraped == null || scraped.UserId.IsNullOrEmpty())
 				{
-					Common.LogDebug(true, "[SteamApi] EnsureAccountProfileFromAuthenticatedSession: profile scrape failed.");
+					Common.LogDebug("[SteamApi] EnsureAccountProfileFromAuthenticatedSession: profile scrape failed.");
 					return;
 				}
 
@@ -811,7 +811,7 @@ namespace CommonPluginsStores.Steam
 				}
 
 				SaveCurrentUser();
-				Common.LogDebug(true, $"[SteamApi] EnsureAccountProfileFromAuthenticatedSession: profile restored UserId={user.UserId}, Pseudo={user.Pseudo}.");
+				Common.LogDebug($"[SteamApi] EnsureAccountProfileFromAuthenticatedSession: profile restored UserId={user.UserId}, Pseudo={user.Pseudo}.");
 			}
 			catch (Exception ex)
 			{
@@ -829,23 +829,23 @@ namespace CommonPluginsStores.Steam
 
 			if (!IsAuthCheckCurrent())
 			{
-				Common.LogDebug(true, "[SteamApi] VerifyUserLoggedInWithAuth cookie refresh aborted: superseded auth operation.");
+				Common.LogDebug("[SteamApi] VerifyUserLoggedInWithAuth cookie refresh aborted: superseded auth operation.");
 				return false;
 			}
 
-			Common.LogDebug(true, $"[SteamAuthCompat] TryRefreshSteamCookies: start, deleteCookies=false, refreshUrl={FormatAuthWebViewUrlForLog(refreshUrl)}.");
+			Common.LogDebug($"[SteamAuthCompat] TryRefreshSteamCookies: start, deleteCookies=false, refreshUrl={FormatAuthWebViewUrlForLog(refreshUrl)}.");
 
 			List<HttpCookie> cookies = GetNewWebCookies(new List<string> { refreshUrl, "https://steamcommunity.com/my", UrlStore }, deleteCookies: false);
 			if (!IsAuthCheckCurrent())
 			{
-				Common.LogDebug(true, "[SteamApi] VerifyUserLoggedInWithAuth cookie save aborted: superseded auth operation.");
+				Common.LogDebug("[SteamApi] VerifyUserLoggedInWithAuth cookie save aborted: superseded auth operation.");
 				return false;
 			}
 
 			_ = SetStoredCookies(cookies);
 			userData = GetUserData();
 			isLogged = HasOwnedApps(userData);
-			Common.LogDebug(true, $"[SteamAuthCompat] TryRefreshSteamCookies: done, persistedCookies={cookies?.Count ?? 0}, ownedApps={userData?.RgOwnedApps?.Count ?? 0}, isLogged={isLogged}.");
+			Common.LogDebug($"[SteamAuthCompat] TryRefreshSteamCookies: done, persistedCookies={cookies?.Count ?? 0}, ownedApps={userData?.RgOwnedApps?.Count ?? 0}, isLogged={isLogged}.");
 			return true;
 		}
 
@@ -856,7 +856,7 @@ namespace CommonPluginsStores.Steam
 		{
 			if (!IsAuthOperationCurrent(operationGeneration))
 			{
-				Common.LogDebug(true, "[SteamApi] Post-login verification skipped: superseded by newer auth operation.");
+				Common.LogDebug("[SteamApi] Post-login verification skipped: superseded by newer auth operation.");
 				return;
 			}
 
@@ -869,7 +869,7 @@ namespace CommonPluginsStores.Steam
 
 			bool hasCookies = TryGetAuthStatusFromStoredCookies();
 			bool hasToken = !(StoreToken?.Token.IsNullOrEmpty() ?? true);
-			Common.LogDebug(true, $"[SteamApi] Post-login verification: hasCookies={hasCookies}, hasToken={hasToken}.");
+			Common.LogDebug($"[SteamApi] Post-login verification: hasCookies={hasCookies}, hasToken={hasToken}.");
 
 			if (!hasCookies && !hasToken)
 			{
@@ -883,14 +883,14 @@ namespace CommonPluginsStores.Steam
 			{
 				if (!IsAuthCheckCurrent())
 				{
-					Common.LogDebug(true, "[SteamApi] Post-login verification skipped: superseded before network check.");
+					Common.LogDebug("[SteamApi] Post-login verification skipped: superseded before network check.");
 					return;
 				}
 
 				bool verified = VerifyUserLoggedInWithAuth();
 				if (!IsAuthCheckCurrent())
 				{
-					Common.LogDebug(true, "[SteamApi] Post-login verification result discarded: superseded auth operation.");
+					Common.LogDebug("[SteamApi] Post-login verification result discarded: superseded auth operation.");
 					return;
 				}
 
@@ -920,11 +920,11 @@ namespace CommonPluginsStores.Steam
 
 			if (CurrentAccountInfos == null || CurrentAccountInfos.UserId.IsNullOrEmpty())
 			{
-				Common.LogDebug(true, "[SteamApi] RefreshAccountInfosAfterLogin skipped: no account profile.");
+				Common.LogDebug("[SteamApi] RefreshAccountInfosAfterLogin skipped: no account profile.");
 				return;
 			}
 
-			Common.LogDebug(true, "[SteamApi] RefreshAccountInfosAfterLogin: scheduling profile enrichment.");
+			Common.LogDebug("[SteamApi] RefreshAccountInfosAfterLogin: scheduling profile enrichment.");
 			_ = GetCurrentAccountInfos();
 		}
 
@@ -938,7 +938,7 @@ namespace CommonPluginsStores.Steam
 		/// </summary>
 		public override void ClearSession()
 		{
-			Common.LogDebug(true, "[SteamAuthCompat] ClearSession: clearing CheckDlc persisted Steam session only; shared WebView cookie jar left intact for SteamLibrary.");
+			Common.LogDebug("[SteamAuthCompat] ClearSession: clearing CheckDlc persisted Steam session only; shared WebView cookie jar left intact for SteamLibrary.");
 			base.ClearSession();
 			ClearStoredUserData();
 		}
@@ -953,7 +953,7 @@ namespace CommonPluginsStores.Steam
 				if (File.Exists(FileUserData))
 				{
 					FileSystem.DeleteFileSafe(FileUserData);
-					Common.LogDebug(true, $"[SteamApi] ClearStoredUserData: deleted '{FileUserData}'.");
+					Common.LogDebug($"[SteamApi] ClearStoredUserData: deleted '{FileUserData}'.");
 				}
 			}
 		}
@@ -973,8 +973,8 @@ namespace CommonPluginsStores.Steam
 			var view = API.Instance.WebViews.CreateView(600, 720);
 			try
 			{
-				Common.LogDebug(true, $"[SteamApi] Auth webview opening, initialNavigate={FormatAuthWebViewUrlForLog(RecommendationQueueUrl)}.");
-				Common.LogDebug(true, "[SteamAuthCompat] Login: skipping DeleteDomainCookies; injecting persisted cookies then navigating (global WebView SSO jar preserved).");
+				Common.LogDebug($"[SteamApi] Auth webview opening, initialNavigate={FormatAuthWebViewUrlForLog(RecommendationQueueUrl)}.");
+				Common.LogDebug("[SteamAuthCompat] Login: skipping DeleteDomainCookies; injecting persisted cookies then navigating (global WebView SSO jar preserved).");
 				view.LoadingChanged += CloseWhenLoggedIn;
 				CookiesTools.InjectStoredCookies(view);
 				view.Navigate(RecommendationQueueUrl);
@@ -991,9 +991,9 @@ namespace CommonPluginsStores.Steam
 			{
 				if (view != null)
 				{
-					Common.LogDebug(true, $"[SteamApi] Auth webview closed, finalUrl={FormatAuthWebViewUrlForLog(view.GetCurrentAddress())}, hasAccountInfos={CurrentAccountInfos != null}, hasToken={!(StoreToken?.Token.IsNullOrEmpty() ?? true)}.");
+					Common.LogDebug($"[SteamApi] Auth webview closed, finalUrl={FormatAuthWebViewUrlForLog(view.GetCurrentAddress())}, hasAccountInfos={CurrentAccountInfos != null}, hasToken={!(StoreToken?.Token.IsNullOrEmpty() ?? true)}.");
 					view.LoadingChanged -= CloseWhenLoggedIn;
-					Common.LogDebug(true, "[SteamAuthCompat] Login: persisting cookies from auth webview with deleteCookies=false.");
+					Common.LogDebug("[SteamAuthCompat] Login: persisting cookies from auth webview with deleteCookies=false.");
 					_ = SetStoredCookies(GetWebCookies(false, view));
 					view.Dispose();
 				}
@@ -1054,34 +1054,34 @@ namespace CommonPluginsStores.Steam
 			{
 				var view = (IWebView)sender;
 				string currentUrl = view.GetCurrentAddress();
-				Common.LogDebug(true, $"[SteamApi] Auth webview LoadingChanged: isLoading={e.IsLoading}, url={FormatAuthWebViewUrlForLog(currentUrl)}.");
+				Common.LogDebug($"[SteamApi] Auth webview LoadingChanged: isLoading={e.IsLoading}, url={FormatAuthWebViewUrlForLog(currentUrl)}.");
 
                 if (e.IsLoading) { return; };
 
 				if (IsSteamCommunityProfileUrl(currentUrl))
 				{
-					Common.LogDebug(true, "[SteamApi] Auth webview URL matched community profile, extracting profile and token.");
+					Common.LogDebug("[SteamApi] Auth webview URL matched community profile, extracting profile and token.");
 					bool profileCaptured = await GetSteamProfil(view);
 					await GetSteamUserTokenFromWebViewAsync(view);
 
 					if (!string.IsNullOrEmpty(StoreToken?.Token))
 					{
-						Common.LogDebug(true, "[SteamApi] Auth webview closing: store token captured.");
+						Common.LogDebug("[SteamApi] Auth webview closing: store token captured.");
 						view.Close();
 					}
 					else if (profileCaptured)
 					{
-						Common.LogDebug(true, "[SteamApi] Auth webview closing: profile captured without store token.");
+						Common.LogDebug("[SteamApi] Auth webview closing: profile captured without store token.");
 						view.Close();
 					}
 				}
 				else if (IsSteamLoginUrl(currentUrl))
 				{
-					Common.LogDebug(true, "[SteamApi] Auth webview on login page, waiting for user.");
+					Common.LogDebug("[SteamApi] Auth webview on login page, waiting for user.");
 				}
 				else
 				{
-					Common.LogDebug(true, $"[SteamApi] Auth webview URL not a profile or login page, redirecting to community login: target={FormatAuthWebViewUrlForLog(UrlProfileLogin)}.");
+					Common.LogDebug($"[SteamApi] Auth webview URL not a profile or login page, redirecting to community login: target={FormatAuthWebViewUrlForLog(UrlProfileLogin)}.");
 					view.NavigateAndWait(UrlProfileLogin);
 				}
 			}
@@ -1094,10 +1094,10 @@ namespace CommonPluginsStores.Steam
 		private async Task GetSteamUserTokenFromWebViewAsync(IWebView webView)
 		{
 			var url = webView.GetCurrentAddress();
-			Common.LogDebug(true, $"[SteamApi] Auth webview token extraction started, url={FormatAuthWebViewUrlForLog(url)}.");
+			Common.LogDebug($"[SteamApi] Auth webview token extraction started, url={FormatAuthWebViewUrlForLog(url)}.");
             if (IsSteamLoginUrl(url))
 			{
-				Common.LogDebug(true, "[SteamApi] Auth webview token extraction skipped: still on login page.");
+				Common.LogDebug("[SteamApi] Auth webview token extraction skipped: still on login page.");
 				return;
 			}
 
@@ -1107,12 +1107,12 @@ namespace CommonPluginsStores.Steam
 
 			if (!userIdMatch.Success || !tokenMatch.Success)
 			{
-				Common.LogDebug(true, $"[SteamApi] Auth webview token extraction failed: userIdFound={userIdMatch.Success}, tokenFound={tokenMatch.Success}.");
+				Common.LogDebug($"[SteamApi] Auth webview token extraction failed: userIdFound={userIdMatch.Success}, tokenFound={tokenMatch.Success}.");
 				Logger.Warn("Could not find Steam user ID or token");
 				return;
 			}
 
-			Common.LogDebug(true, $"[SteamApi] Auth webview token extraction succeeded: userIdFound={userIdMatch.Success}, tokenFound={tokenMatch.Success}.");
+			Common.LogDebug($"[SteamApi] Auth webview token extraction succeeded: userIdFound={userIdMatch.Success}, tokenFound={tokenMatch.Success}.");
 
 			StoreToken = new StoreToken
             {
@@ -1124,7 +1124,7 @@ namespace CommonPluginsStores.Steam
 
         private async Task<bool> GetSteamProfil(IWebView webView)
         {
-			Common.LogDebug(true, $"[SteamApi] Auth webview profile extraction started, url={FormatAuthWebViewUrlForLog(webView.GetCurrentAddress())}.");
+			Common.LogDebug($"[SteamApi] Auth webview profile extraction started, url={FormatAuthWebViewUrlForLog(webView.GetCurrentAddress())}.");
             string source = await webView.GetPageSourceAsync();
 			AccountInfos accountInfos = GetAccountInfosFromRgProfileData(source);
 
@@ -1133,12 +1133,12 @@ namespace CommonPluginsStores.Steam
                 CurrentAccountInfos = accountInfos;
                 SaveCurrentUser();
 
-				Common.LogDebug(true, $"[SteamApi] Auth webview profile extraction succeeded: userId={accountInfos.UserId}, pseudo={accountInfos.Pseudo}.");
+				Common.LogDebug($"[SteamApi] Auth webview profile extraction succeeded: userId={accountInfos.UserId}, pseudo={accountInfos.Pseudo}.");
                 LogInfo("logged");
 				return true;
             }
 
-			Common.LogDebug(true, "[SteamApi] Auth webview profile extraction failed: g_rgProfileData not found in page source.");
+			Common.LogDebug("[SteamApi] Auth webview profile extraction failed: g_rgProfileData not found in page source.");
 			return false;
 		}
 
@@ -1229,14 +1229,14 @@ namespace CommonPluginsStores.Steam
             if (!accountInfos?.UserId?.IsNullOrEmpty() ?? false)
             {
                 bool useWebProfile = ShouldUseWebForAccountProfile(accountInfos);
-                Common.LogDebug(true, $"[SteamApi] GetCurrentAccountInfos scheduled background refresh UserId={accountInfos.UserId}, UseApi={StoreSettings.UseApi}, UseAuth={StoreSettings.UseAuth}, ForceAuth={StoreSettings.ForceAuth}, route={(useWebProfile ? "Web" : "Api")}.");
+                Common.LogDebug($"[SteamApi] GetCurrentAccountInfos scheduled background refresh UserId={accountInfos.UserId}, UseApi={StoreSettings.UseApi}, UseAuth={StoreSettings.UseAuth}, ForceAuth={StoreSettings.ForceAuth}, route={(useWebProfile ? "Web" : "Api")}.");
                 _ = Task.Run(() =>
                 {
                     Thread.Sleep(1000);
 
                     if (ShouldUseWebForAccountProfile(accountInfos))
                     {
-                        Common.LogDebug(true, "[SteamApi] GetCurrentAccountInfos route=Web profile scrape.");
+                        Common.LogDebug("[SteamApi] GetCurrentAccountInfos route=Web profile scrape.");
                         string response = Web.DownloadStringData(string.Format(UrlProfileById, accountInfos.UserId), GetStoredCookies()).GetAwaiter().GetResult();
                         AccountInfos newAccountInfos = GetAccountInfosFromRgProfileData(response);
 
@@ -1251,38 +1251,38 @@ namespace CommonPluginsStores.Steam
 							CurrentAccountInfos.Avatar = newAccountInfos.Avatar;
                             CurrentAccountInfos.Pseudo = newAccountInfos.Pseudo;
                             CurrentAccountInfos.Link = newAccountInfos.Link;
-                            Common.LogDebug(true, "[SteamApi] GetCurrentAccountInfos web scrape updated profile fields.");
+                            Common.LogDebug("[SteamApi] GetCurrentAccountInfos web scrape updated profile fields.");
 						}
                     }
                     else if (ulong.TryParse(accountInfos.UserId, out ulong steamId))
                     {
-                        Common.LogDebug(true, $"[SteamApi] GetCurrentAccountInfos route=GetPlayerSummaries, steamId={steamId}.");
+                        Common.LogDebug($"[SteamApi] GetCurrentAccountInfos route=GetPlayerSummaries, steamId={steamId}.");
                         ObservableCollection<AccountInfos> playerSummaries = GetPlayerSummaries(new List<ulong> { steamId });
                         CurrentAccountInfos.Avatar = playerSummaries?.FirstOrDefault().Avatar ?? CurrentAccountInfos.Avatar;
                         CurrentAccountInfos.Pseudo = playerSummaries?.FirstOrDefault().Pseudo ?? CurrentAccountInfos.Pseudo;
                         CurrentAccountInfos.Link = playerSummaries?.FirstOrDefault().Link ?? CurrentAccountInfos.Link;
-                        Common.LogDebug(true, $"[SteamApi] GetCurrentAccountInfos GetPlayerSummaries resultCount={playerSummaries?.Count ?? 0}.");
+                        Common.LogDebug($"[SteamApi] GetCurrentAccountInfos GetPlayerSummaries resultCount={playerSummaries?.Count ?? 0}.");
                     }
                     else
                     {
-                        Common.LogDebug(true, $"[SteamApi] GetCurrentAccountInfos skipped API path: UserId not a valid steamId64 ({accountInfos.UserId}).");
+                        Common.LogDebug($"[SteamApi] GetCurrentAccountInfos skipped API path: UserId not a valid steamId64 ({accountInfos.UserId}).");
                     }
 
                     CurrentAccountInfos.IsPrivate = !CheckIsPublic(accountInfos).GetAwaiter().GetResult();
                     CurrentAccountInfos.AccountStatus = CurrentAccountInfos.IsPrivate ? AccountStatus.Private : AccountStatus.Public;
                     SaveCurrentUser();
-                    Common.LogDebug(true, $"[SteamApi] GetCurrentAccountInfos background refresh done IsPrivate={CurrentAccountInfos.IsPrivate}, Pseudo={CurrentAccountInfos.Pseudo}.");
+                    Common.LogDebug($"[SteamApi] GetCurrentAccountInfos background refresh done IsPrivate={CurrentAccountInfos.IsPrivate}, Pseudo={CurrentAccountInfos.Pseudo}.");
                 });
                 return accountInfos;
             }
             if (HasPersistedManualAccountData(accountInfos))
             {
                 accountInfos.IsCurrent = true;
-                Common.LogDebug(true, "[SteamApi] GetCurrentAccountInfos no UserId, returning persisted manual account data (ApiKey kept).");
+                Common.LogDebug("[SteamApi] GetCurrentAccountInfos no UserId, returning persisted manual account data (ApiKey kept).");
                 return accountInfos;
             }
 
-            Common.LogDebug(true, "[SteamApi] GetCurrentAccountInfos no UserId, returning empty current account.");
+            Common.LogDebug("[SteamApi] GetCurrentAccountInfos no UserId, returning empty current account.");
             return new AccountInfos { IsCurrent = true };
         }
 
@@ -1299,11 +1299,11 @@ namespace CommonPluginsStores.Steam
                 if (CurrentAccountInfos != null && CurrentAccountInfos.IsCurrent)
                 {
                     bool useWeb = StoreSettings.UseAuth || CurrentAccountInfos.IsPrivate || !StoreSettings.UseApi || CurrentAccountInfos.ApiKey.IsNullOrEmpty();
-                    Common.LogDebug(true, $"[SteamApi] GetCurrentFriendsInfos route={(useWeb ? "Web" : "Api")}, UseAuth={StoreSettings.UseAuth}, UseApi={StoreSettings.UseApi}, IsPrivate={CurrentAccountInfos.IsPrivate}, HasApiKey={!CurrentAccountInfos.ApiKey.IsNullOrEmpty()}.");
+                    Common.LogDebug($"[SteamApi] GetCurrentFriendsInfos route={(useWeb ? "Web" : "Api")}, UseAuth={StoreSettings.UseAuth}, UseApi={StoreSettings.UseApi}, IsPrivate={CurrentAccountInfos.IsPrivate}, HasApiKey={!CurrentAccountInfos.ApiKey.IsNullOrEmpty()}.");
                     accountInfos = useWeb
                         ? GetCurrentFriendsInfosByWeb()
                         : GetCurrentFriendsInfosByApi();
-                    Common.LogDebug(true, $"[SteamApi] GetCurrentFriendsInfos resultCount={accountInfos?.Count ?? 0}.");
+                    Common.LogDebug($"[SteamApi] GetCurrentFriendsInfos resultCount={accountInfos?.Count ?? 0}.");
                 }
                 return accountInfos;
             }
@@ -1332,7 +1332,7 @@ namespace CommonPluginsStores.Steam
                 if (CurrentAccountInfos != null && CurrentAccountInfos.IsCurrent)
                 {
                     bool useWeb = StoreSettings.UseAuth || CurrentAccountInfos.IsPrivate || !StoreSettings.UseApi || CurrentAccountInfos.ApiKey.IsNullOrEmpty();
-                    Common.LogDebug(true, $"[SteamApi] GetAccountGamesInfos route={(useWeb ? "WebToken" : "Api")}, UserId={accountInfos?.UserId}, UseAuth={StoreSettings.UseAuth}, UseApi={StoreSettings.UseApi}, IsPrivate={CurrentAccountInfos.IsPrivate}, HasApiKey={!CurrentAccountInfos.ApiKey.IsNullOrEmpty()}.");
+                    Common.LogDebug($"[SteamApi] GetAccountGamesInfos route={(useWeb ? "WebToken" : "Api")}, UserId={accountInfos?.UserId}, UseAuth={StoreSettings.UseAuth}, UseApi={StoreSettings.UseApi}, IsPrivate={CurrentAccountInfos.IsPrivate}, HasApiKey={!CurrentAccountInfos.ApiKey.IsNullOrEmpty()}.");
                     ObservableCollection<AccountGameInfos> accountGameInfos = useWeb
                         ? GetAccountGamesInfosByWebToken(accountInfos)
                         : GetAccountGamesInfosByApi(accountInfos);
@@ -1961,11 +1961,11 @@ namespace CommonPluginsStores.Steam
                     if (ownedCount > 0)
                     {
                         SaveUserData(userData);
-                        Common.LogDebug(true, $"[SteamApi] GetUserData: ownedApps={ownedCount}.");
+                        Common.LogDebug($"[SteamApi] GetUserData: ownedApps={ownedCount}.");
                     }
                     else
                     {
-                        Common.LogDebug(true, $"[SteamApi] GetUserData: response parsed but ownedApps=0 (payloadLength={result?.Length ?? 0}).");
+                        Common.LogDebug($"[SteamApi] GetUserData: response parsed but ownedApps=0 (payloadLength={result?.Length ?? 0}).");
                     }
 
                     if (ex != null)
@@ -2003,7 +2003,7 @@ namespace CommonPluginsStores.Steam
             {
                 if (FileDataService.SaveData(FileUserData, userData))
                 {
-                    Common.LogDebug(true, $"[SteamApi] SaveUserData: persisted {userData.RgOwnedApps?.Count ?? 0} owned app(s) to '{FileUserData}'.");
+                    Common.LogDebug($"[SteamApi] SaveUserData: persisted {userData.RgOwnedApps?.Count ?? 0} owned app(s) to '{FileUserData}'.");
                 }
                 else
                 {
@@ -2132,12 +2132,12 @@ namespace CommonPluginsStores.Steam
 
             if (storeAppDetailsResult != null)
             {
-                Common.LogDebug(true, FormatLogMessage(
+                Common.LogDebug(FormatLogMessage(
                     $"GetAppDetails: cache hit appId={appId}, playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}'"));
                 return storeAppDetailsResult;
             }
 
-            Common.LogDebug(true, FormatLogMessage(
+            Common.LogDebug(FormatLogMessage(
                 $"GetAppDetails: cache miss appId={appId}, playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}', throttleMs={ApiRequestMinInterval.TotalMilliseconds}"));
             WaitForStoreAppDetailsAccess();
             string url = string.Format(UrlApiGameDetails, appId, storeLang);
@@ -2146,7 +2146,7 @@ namespace CommonPluginsStores.Steam
             if (IsSteamStoreRateLimitedResponse(response))
             {
                 string preview = response == null ? "(null)" : response.Trim();
-                Common.LogDebug(true, $"[SteamApi] Steam store rate limit for app {appId}: response='{preview}'.");
+                Common.LogDebug($"[SteamApi] Steam store rate limit for app {appId}: response='{preview}'.");
 
                 if (retryCount <= MaxAppDetailsRateLimitRetries)
                 {
@@ -2172,7 +2172,7 @@ namespace CommonPluginsStores.Steam
             {
                 storeAppDetailsResult = parsedData[appId.ToString()];
                 FileDataService.SaveData(cachePath, storeAppDetailsResult);
-                Common.LogDebug(true, FormatLogMessage(
+                Common.LogDebug(FormatLogMessage(
                     $"GetAppDetails: saved appId={appId}, playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}'"));
             }
             else if (ex != null)
@@ -2277,7 +2277,7 @@ namespace CommonPluginsStores.Steam
 			{
 				foreach (IElement element in listItems)
 				{
-					Common.LogDebug(true, $"SteamApi.ParseSteamRequirementHtml - {element.InnerHtml}");
+					Common.LogDebug($"SteamApi.ParseSteamRequirementHtml - {element.InnerHtml}");
 					ParseRequirementListItem(element.InnerHtml, entry);
 				}
 			}
@@ -2954,7 +2954,7 @@ namespace CommonPluginsStores.Steam
         {
             int steamIdsCount = steamIds?.Count ?? 0;
             bool useSteamWebApi = IsSteamWebApiKeyActive(CurrentAccountInfos);
-            Common.LogDebug(true, $"[SteamApi] GetPlayerSummaries entry steamIdsCount={steamIdsCount}, UseSteamWebApi={useSteamWebApi}.");
+            Common.LogDebug($"[SteamApi] GetPlayerSummaries entry steamIdsCount={steamIdsCount}, UseSteamWebApi={useSteamWebApi}.");
             ObservableCollection<AccountInfos> playerSummaries = null;
             if (steamIdsCount > 0 && useSteamWebApi)
             {
@@ -2966,18 +2966,18 @@ namespace CommonPluginsStores.Steam
                     Pseudo = x.PersonaName,
                     Link = x.ProfileUrl
                 }).ToObservable();
-                Common.LogDebug(true, $"[SteamApi] GetPlayerSummaries mapped resultCount={playerSummaries?.Count ?? 0}.");
+                Common.LogDebug($"[SteamApi] GetPlayerSummaries mapped resultCount={playerSummaries?.Count ?? 0}.");
             }
             else
             {
-                Common.LogDebug(true, "[SteamApi] GetPlayerSummaries skipped (empty steamIds or missing API key).");
+                Common.LogDebug("[SteamApi] GetPlayerSummaries skipped (empty steamIds or missing API key).");
             }
             return playerSummaries;
         }
 
         private ObservableCollection<AccountGameInfos> GetAccountGamesInfosByApi(AccountInfos accountInfos)
         {
-            Common.LogDebug(true, $"[SteamApi] GetAccountGamesInfosByApi entry UserId={accountInfos?.UserId}.");
+            Common.LogDebug($"[SteamApi] GetAccountGamesInfosByApi entry UserId={accountInfos?.UserId}.");
             ObservableCollection<AccountGameInfos> accountGameInfos = null;
             if (!CurrentAccountInfos.ApiKey.IsNullOrEmpty() && ulong.TryParse(accountInfos.UserId, out ulong steamId))
             {
@@ -3004,24 +3004,24 @@ namespace CommonPluginsStores.Steam
 
                     accountGameInfos.Add(gameInfos);
                 });
-                Common.LogDebug(true, $"[SteamApi] GetAccountGamesInfosByApi success gameCount={accountGameInfos.Count}.");
+                Common.LogDebug($"[SteamApi] GetAccountGamesInfosByApi success gameCount={accountGameInfos.Count}.");
             }
             else
             {
-                Common.LogDebug(true, "[SteamApi] GetAccountGamesInfosByApi skipped (missing API key or invalid UserId).");
+                Common.LogDebug("[SteamApi] GetAccountGamesInfosByApi skipped (missing API key or invalid UserId).");
             }
             return accountGameInfos;
         }
 
         private ObservableCollection<AccountInfos> GetCurrentFriendsInfosByApi()
         {
-            Common.LogDebug(true, $"[SteamApi] GetCurrentFriendsInfosByApi entry UserId={CurrentAccountInfos?.UserId}.");
+            Common.LogDebug($"[SteamApi] GetCurrentFriendsInfosByApi entry UserId={CurrentAccountInfos?.UserId}.");
             ObservableCollection<AccountInfos> currentFriendsInfos = null;
             if (!CurrentAccountInfos.ApiKey.IsNullOrEmpty() && ulong.TryParse(CurrentAccountInfos.UserId, out ulong steamId))
             {
                 List<SteamFriend> friendList = SteamKit.GetFriendList(CurrentAccountInfos.ApiKey, steamId);
                 List<ulong> steamIds = friendList?.Select(x => x.SteamId)?.ToList() ?? new List<ulong>();
-                Common.LogDebug(true, $"[SteamApi] GetCurrentFriendsInfosByApi GetFriendList count={friendList?.Count ?? 0}, requesting summaries for {steamIds.Count} steamIds.");
+                Common.LogDebug($"[SteamApi] GetCurrentFriendsInfosByApi GetFriendList count={friendList?.Count ?? 0}, requesting summaries for {steamIds.Count} steamIds.");
                 currentFriendsInfos = GetPlayerSummaries(steamIds);
 
                 friendList?.ForEach(x =>
@@ -3032,11 +3032,11 @@ namespace CommonPluginsStores.Steam
                         userInfos.DateAdded = x.FriendSince;
                     }
                 });
-                Common.LogDebug(true, $"[SteamApi] GetCurrentFriendsInfosByApi success friendCount={currentFriendsInfos?.Count ?? 0}.");
+                Common.LogDebug($"[SteamApi] GetCurrentFriendsInfosByApi success friendCount={currentFriendsInfos?.Count ?? 0}.");
             }
             else
             {
-                Common.LogDebug(true, "[SteamApi] GetCurrentFriendsInfosByApi skipped (missing API key or invalid UserId).");
+                Common.LogDebug("[SteamApi] GetCurrentFriendsInfosByApi skipped (missing API key or invalid UserId).");
             }
             return currentFriendsInfos;
         }
@@ -3372,7 +3372,7 @@ namespace CommonPluginsStores.Steam
 		{
 			try
 			{
-				Common.LogDebug(true, "[SteamApi] Loading Steam app list from public steamappidlist repository.");
+				Common.LogDebug("[SteamApi] Loading Steam app list from public steamappidlist repository.");
 
 				string gamesJson = Web.DownloadStringData(UrlSteamAppIdListGames).GetAwaiter().GetResult();
 				string dlcJson = Web.DownloadStringData(UrlSteamAppIdListDlc).GetAwaiter().GetResult();
@@ -3407,7 +3407,7 @@ namespace CommonPluginsStores.Steam
 					return null;
 				}
 
-				Common.LogDebug(true, $"[SteamApi] Loaded {merged.Count} Steam apps from public repository.");
+				Common.LogDebug($"[SteamApi] Loaded {merged.Count} Steam apps from public repository.");
 				return merged;
 			}
 			catch (Exception ex)
@@ -3430,7 +3430,7 @@ namespace CommonPluginsStores.Steam
 
 				if (StoreToken?.Token.IsNullOrEmpty() ?? true)
 				{
-					Common.LogDebug(true, "[SteamApi] StoreToken is not available for GetSteamAppsByWebToken.");
+					Common.LogDebug("[SteamApi] StoreToken is not available for GetSteamAppsByWebToken.");
 					return null;
 				}
 
@@ -3470,7 +3470,7 @@ namespace CommonPluginsStores.Steam
 					return null;
 				}
 
-				Common.LogDebug(true, $"[SteamApi] GetSteamAppsByWebToken loaded {steamApps.Count} apps.");
+				Common.LogDebug($"[SteamApi] GetSteamAppsByWebToken loaded {steamApps.Count} apps.");
 				return steamApps;
 			}
 			catch (Exception ex)

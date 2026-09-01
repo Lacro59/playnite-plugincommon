@@ -1,4 +1,4 @@
-﻿using CommonPlayniteShared.Common;
+using CommonPlayniteShared.Common;
 using CommonPlayniteShared.PluginLibrary.OriginLibrary.Models;
 using CommonPlayniteShared.PluginLibrary.OriginLibrary.Services;
 using CommonPluginsShared;
@@ -321,8 +321,7 @@ namespace CommonPluginsStores.Ea
                 });
                 gameInfos.Dlcs = Dlcs;
 
-                Common.LogDebug(true,
-                    FormatLogMessage($"GetGameInfos: ok offerId='{id}', slug='{gameSlug}', descriptionLength={(gameInfos.Description ?? string.Empty).Length}"));
+                Common.LogDebug(FormatLogMessage($"GetGameInfos: ok offerId='{id}', slug='{gameSlug}', descriptionLength={(gameInfos.Description ?? string.Empty).Length}"));
                 return gameInfos;
             }
             catch (Exception ex)
@@ -529,7 +528,7 @@ namespace CommonPluginsStores.Ea
 
             if (!(gameStoreDataResponse?.Name.IsNullOrEmpty() ?? true))
             {
-                Common.LogDebug(true, FormatLogMessage(
+                Common.LogDebug(FormatLogMessage(
                     $"GetStoreData: cache hit slug='{gameSlug}', playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}'"));
                 return gameStoreDataResponse;
             }
@@ -537,7 +536,7 @@ namespace CommonPluginsStores.Ea
             try
             {
                 string url = string.Format(UrlGameData, gameSlug, storeLang);
-                Common.LogDebug(true, FormatLogMessage(
+                Common.LogDebug(FormatLogMessage(
                     $"GetStoreData: cache miss slug='{gameSlug}', playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}'"));
                 string response = Task.Run(async () => await Web.DownloadStringDataWithGz(url)).GetAwaiter().GetResult();
                 if (response.IsNullOrEmpty())
@@ -555,7 +554,7 @@ namespace CommonPluginsStores.Ea
                 }
 
                 FileDataService.SaveData(cachePath, gameStoreDataResponse);
-                Common.LogDebug(true, FormatLogMessage(
+                Common.LogDebug(FormatLogMessage(
                     $"GetStoreData: saved slug='{gameSlug}', playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}', name='{gameStoreDataResponse.Name}', descriptionLength={(gameStoreDataResponse.ShortDescription ?? string.Empty).Length}"));
             }
             catch (Exception ex)
@@ -696,13 +695,13 @@ namespace CommonPluginsStores.Ea
             List<GameInfos> results = new List<GameInfos>();
             if (searchTerm.IsNullOrEmpty() || maxResults <= 0)
             {
-                Common.LogDebug(true, FormatLogMessage($"SearchGames: skipped (term empty or maxResults={maxResults})."));
+                Common.LogDebug(FormatLogMessage($"SearchGames: skipped (term empty or maxResults={maxResults})."));
                 return results;
             }
 
             try
             {
-                Common.LogDebug(true, FormatLogMessage($"SearchGames: term='{searchTerm}', maxResults={maxResults}"));
+                Common.LogDebug(FormatLogMessage($"SearchGames: term='{searchTerm}', maxResults={maxResults}"));
 
                 List<string> catalogSlugs = GetCatalogSlugs();
                 if (catalogSlugs == null || catalogSlugs.Count == 0)
@@ -711,12 +710,12 @@ namespace CommonPluginsStores.Ea
                     return results;
                 }
 
-                Common.LogDebug(true, FormatLogMessage($"SearchGames: catalogSlugCount={catalogSlugs.Count}"));
+                Common.LogDebug(FormatLogMessage($"SearchGames: catalogSlugCount={catalogSlugs.Count}"));
 
                 string normalizedTerm = NormalizeSearchText(searchTerm);
                 if (normalizedTerm.IsNullOrEmpty())
                 {
-                    Common.LogDebug(true, FormatLogMessage("SearchGames: normalized term is empty."));
+                    Common.LogDebug(FormatLogMessage("SearchGames: normalized term is empty."));
                     return results;
                 }
 
@@ -730,18 +729,16 @@ namespace CommonPluginsStores.Ea
 
                 List<string> matchedSlugs = scored.Select(x => x.Slug).ToList();
                 string topPreview = string.Join(", ", scored.Take(5).Select(x => $"{x.Slug}:{x.Score}"));
-                Common.LogDebug(true,
-                    FormatLogMessage($"SearchGames: normalizedTerm='{normalizedTerm}', matchedSlugCount={matchedSlugs.Count}, top=[{topPreview}]"));
+                Common.LogDebug(FormatLogMessage($"SearchGames: normalizedTerm='{normalizedTerm}', matchedSlugCount={matchedSlugs.Count}, top=[{topPreview}]"));
 
                 if (matchedSlugs.Count == 0)
                 {
-                    Common.LogDebug(true, FormatLogMessage("SearchGames: no slug matches."));
+                    Common.LogDebug(FormatLogMessage("SearchGames: no slug matches."));
                     return results;
                 }
 
                 Dictionary<string, GameProductItem> productsBySlug = EnrichCatalogProducts(matchedSlugs);
-                Common.LogDebug(true,
-                    FormatLogMessage($"SearchGames: enrichRequested={matchedSlugs.Count}, enrichResolved={productsBySlug.Count}"));
+                Common.LogDebug(FormatLogMessage($"SearchGames: enrichRequested={matchedSlugs.Count}, enrichResolved={productsBySlug.Count}"));
 
                 int skippedNoOfferId = 0;
                 foreach (string slug in matchedSlugs)
@@ -789,8 +786,7 @@ namespace CommonPluginsStores.Ea
                     });
                 }
 
-                Common.LogDebug(true,
-                    FormatLogMessage($"SearchGames: resultCount={results.Count}, skippedNoOfferId={skippedNoOfferId}"));
+                Common.LogDebug(FormatLogMessage($"SearchGames: resultCount={results.Count}, skippedNoOfferId={skippedNoOfferId}"));
             }
             catch (Exception ex)
             {
@@ -809,11 +805,11 @@ namespace CommonPluginsStores.Ea
             List<string> cached = FileDataService.LoadData<List<string>>(PathCatalogSlugsCache, CatalogSlugsCacheMinutes);
             if (cached != null && cached.Count > 0)
             {
-                Common.LogDebug(true, FormatLogMessage($"SearchGames: catalog cache hit ({cached.Count} slugs, ttlMinutes={CatalogSlugsCacheMinutes})."));
+                Common.LogDebug(FormatLogMessage($"SearchGames: catalog cache hit ({cached.Count} slugs, ttlMinutes={CatalogSlugsCacheMinutes})."));
                 return cached;
             }
 
-            Common.LogDebug(true, FormatLogMessage("SearchGames: catalog cache miss; fetching gameSearch."));
+            Common.LogDebug(FormatLogMessage("SearchGames: catalog cache miss; fetching gameSearch."));
             ResponseGameSearch response = GetGameSearchCatalog().GetAwaiter().GetResult();
             List<string> slugs = response?.Data?.GameSearch?.Items?
                 .Select(x => x.Slug)
@@ -829,7 +825,7 @@ namespace CommonPluginsStores.Ea
             }
             else
             {
-                Common.LogDebug(true, FormatLogMessage("SearchGames: gameSearch returned no slugs."));
+                Common.LogDebug(FormatLogMessage("SearchGames: gameSearch returned no slugs."));
             }
 
             return slugs;

@@ -220,7 +220,7 @@ namespace CommonPluginsShared.Controls
 
                 if (!requestedSource.Equals(CurrentImage))
                 {
-                    Common.LogDebug(true, string.Format(
+                    Common.LogDebug(string.Format(
                         "[ImageAsync] Discarded stale load for {0} ({1}ms)",
                         FormatSourceForLog(requestedSource),
                         stopwatch.ElapsedMilliseconds));
@@ -230,14 +230,14 @@ namespace CommonPluginsShared.Controls
 
                 if (image == null)
                 {
-                    Common.LogDebug(true, string.Format(
+                    Common.LogDebug(string.Format(
                         "[ImageAsync] Load failed for {0} after {1}ms",
                         FormatSourceForLog(requestedSource),
                         stopwatch.ElapsedMilliseconds));
                 }
                 else
                 {
-                    Common.LogDebug(true, string.Format(
+                    Common.LogDebug(string.Format(
                         "[ImageAsync] Load succeeded for {0} in {1}ms",
                         FormatSourceForLog(requestedSource),
                         stopwatch.ElapsedMilliseconds));
@@ -280,14 +280,14 @@ namespace CommonPluginsShared.Controls
                 object tmpImage = new ImageConverter().Convert(values, null, parameter, null);
                 if (tmpImage is BitmapImage)
                 {
-                    Common.LogDebug(true, string.Format(
+                    Common.LogDebug(string.Format(
                         "[ImageAsync] ImageConverter (local file) for {0}",
                         FormatSourceForLog(str)));
                     ((BitmapImage)tmpImage).Freeze();
                     return tmpImage;
                 }
 
-                Common.LogDebug(true, string.Format(
+                Common.LogDebug(string.Format(
                     "[ImageAsync] ImageSourceManagerPlugin.GetImage for {0}",
                     FormatSourceForLog(str)));
                 tmpImage = ImageSourceManagerPlugin.GetImage(str, true);
@@ -299,7 +299,7 @@ namespace CommonPluginsShared.Controls
                 return tmpImage;
             }
 
-            Common.LogDebug(true, string.Format(
+            Common.LogDebug(string.Format(
                 "[ImageAsync] Unsupported source type: {0}",
                 newSource.GetType().Name));
             return null;
@@ -386,7 +386,7 @@ namespace CommonPluginsShared.Controls
         {
             stopwatch.Stop();
             string outcome = matched ? "ready" : "superseded";
-            Common.LogDebug(true, string.Format(
+            Common.LogDebug(string.Format(
                 "[ImageAsync] WaitForDecode {0} for {1} ({2}ms)",
                 outcome,
                 FormatSourceForLog(expectedPath),

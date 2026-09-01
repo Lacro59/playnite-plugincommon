@@ -1,13 +1,17 @@
 using CommonPluginsShared.Commands;
 using CommonPluginsShared.Interfaces;
 using Playnite.SDK;
+using Playnite.SDK.Plugins;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 
 namespace CommonPluginsShared.Plugins
 {
-	public class PluginSettingsViewModel: ObservableObject
+	/// <summary>
+	/// Shared helpers for plugin settings view-models (commands, clone helpers, persist + verbose sync).
+	/// </summary>
+	public class PluginSettingsViewModel : ObservableObject
 	{
 		protected static readonly ILogger Logger = LogManager.GetLogger();
 
@@ -37,6 +41,32 @@ namespace CommonPluginsShared.Plugins
 				object value = property.GetValue(source, null);
 				property.SetValue(target, value, null);
 			}
+		}
+
+		/// <summary>
+		/// Persists settings through Playnite and synchronizes verbose logging (Info state log included).
+		/// Prefer this over a bare <c>SavePluginSettings</c> in <c>EndEdit</c> so every plugin gets the same sync.
+		/// </summary>
+		/// <param name="plugin">Plugin instance used by Playnite to locate the settings file.</param>
+		/// <param name="settings">Settings model to persist.</param>
+		protected void PersistSettings(Plugin plugin, IPluginSettings settings)
+		{
+			if (plugin == null || settings == null)
+			{
+				return;
+			}
+
+			plugin.SavePluginSettings(settings);
+			Common.SyncVerboseLoggingFromSettings(settings, "settings-saved");
+		}
+
+		/// <summary>
+		/// Synchronizes verbose logging after settings were already persisted (for example by <c>PersistSettingsAction</c>).
+		/// </summary>
+		/// <param name="settings">Settings model currently in memory.</param>
+		protected void SyncVerboseLoggingAfterSave(IPluginSettings settings)
+		{
+			Common.SyncVerboseLoggingFromSettings(settings, "settings-saved");
 		}
 
 		#region Commands

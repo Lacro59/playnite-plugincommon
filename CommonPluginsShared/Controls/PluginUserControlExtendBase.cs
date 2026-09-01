@@ -919,21 +919,21 @@ namespace CommonPluginsShared.Controls
 			return string.Format("{0}#{1:X8}", GetType().Name, GetHashCode());
 		}
 
-		/// <summary>Verbose trace — DEBUG builds only, marked as ignored in the log file.</summary>
+		/// <summary>Verbose trace — gated by <see cref="Common.IsVerboseLoggingEffective"/>.</summary>
 		protected void LogControlTrace(string phase, string detail = null)
 		{
 			string message = detail == null
 				? string.Format("[{0}] {1}", GetInstanceDiagnosticId(), phase)
 				: string.Format("[{0}] {1} — {2}", GetInstanceDiagnosticId(), phase, detail);
-			Common.LogDebug(true, message);
+			Common.LogDebug(message);
 		}
 
 		/// <summary>
-		/// Important diagnostic — logged in DEBUG and Release at debug level without the [Ignored] prefix.
+		/// Important control diagnostic — same verbose gate as <see cref="LogControlTrace"/>.
 		/// </summary>
 		protected void LogControlIssue(string message)
 		{
-			Common.LogDebug(true, string.Format("[{0}] {1}", GetInstanceDiagnosticId(), message));
+			Common.LogDebug(string.Format("[{0}] {1}", GetInstanceDiagnosticId(), message));
 		}
 
 		private void LogNotifyAllInstancesFailure(Exception ex)

@@ -1,4 +1,5 @@
 using CommonPluginsShared.Interfaces;
+using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
@@ -119,6 +120,43 @@ namespace CommonPluginsShared.Plugins
 		{
 			get => _excludedSources;
 			set => SetValue(ref _excludedSources, value ?? new List<string>());
+		}
+
+		#endregion
+
+		#region Logging
+
+		private static readonly ILogger Logger = LogManager.GetLogger();
+
+		private bool _enableVerboseLogging = false;
+
+		/// <inheritdoc/>
+		public bool EnableVerboseLogging
+		{
+			get => _enableVerboseLogging;
+			set => SetValue(ref _enableVerboseLogging, value);
+		}
+
+		/// <summary>
+		/// Writes an Info log describing the build configuration and the persisted verbose logging preference.
+		/// Distinguishes the stored setting from the effective verbose state (Debug builds always enable verbose output).
+		/// </summary>
+		/// <param name="context">Caller context (for example <c>startup</c> or <c>settings-saved</c>).</param>
+		public void LogVerboseLoggingState(string context)
+		{
+#if DEBUG
+			const string buildConfiguration = "Debug";
+#else
+			const string buildConfiguration = "Release";
+#endif
+
+			string reason = string.IsNullOrEmpty(context) ? "sync" : context;
+			Logger.Info(string.Format(
+				"[PluginSettings] Verbose logging ({0}): build={1}, EnableVerboseLogging={2}, effective={3}",
+				reason,
+				buildConfiguration,
+				EnableVerboseLogging,
+				Common.IsVerboseLoggingEffective));
 		}
 
 		#endregion

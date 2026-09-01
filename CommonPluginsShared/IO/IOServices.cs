@@ -555,7 +555,7 @@ namespace CommonPluginsShared.IO
 				{
 					if (attempt < MaxRetryAttempts - 1)
 					{
-						_logger.Debug($"File locked, retry {attempt + 1}/{MaxRetryAttempts}: {filePath}");
+						Common.LogDebug($"File locked, retry {attempt + 1}/{MaxRetryAttempts}: {filePath}");
 						await Task.Delay(RetryDelayMs).ConfigureAwait(false);
 						continue;
 					}

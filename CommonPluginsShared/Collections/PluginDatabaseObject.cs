@@ -798,7 +798,7 @@ namespace CommonPluginsShared.Collections
 							{
 								RemoveTag(item.Id);
 								_database.Remove(item.Id);
-								Common.LogDebug(true, string.Format("ClearDatabase — removed item {0} ({1})", item.Id, item.Name));
+								Common.LogDebug(string.Format("ClearDatabase — removed item {0} ({1})", item.Id, item.Name));
 								removedCount++;
 								a.CurrentProgressValue++;
 							}
@@ -1851,7 +1851,7 @@ namespace CommonPluginsShared.Collections
 		/// <inheritdoc/>
 		public void RemoveTagAllGames(bool fromClearDatabase = false)
 		{
-			Common.LogDebug(true, "RemoveTagAllGame()");
+			Common.LogDebug("RemoveTagAllGame()");
 
 			string message = fromClearDatabase
 				? string.Format("{0} - {1}", PluginName,
@@ -2499,7 +2499,7 @@ namespace CommonPluginsShared.Collections
 			if (_lastErrorNotifications.TryGetValue(dedupKey, out DateTime lastSent)
 				&& now - lastSent < ErrorNotificationDedupWindow)
 			{
-				Common.LogDebug(true, string.Format(
+				Common.LogDebug(string.Format(
 					"[{0}] NotifyError({1}) suppressed — dedup window {2}s, lastSent={3:O}, message={4}",
 					PluginName,
 					operation,
@@ -2511,7 +2511,7 @@ namespace CommonPluginsShared.Collections
 
 			_lastErrorNotifications[dedupKey] = now;
 
-			Common.LogDebug(true, string.Format(
+			Common.LogDebug(string.Format(
 				"[{0}] NotifyError({1}) posting notification — {2}",
 				PluginName,
 				operation,
@@ -2542,7 +2542,7 @@ namespace CommonPluginsShared.Collections
 				return database;
 			}
 
-			Common.LogDebug(true, string.Format(
+			Common.LogDebug(string.Format(
 				"[{0}] {1} — plugin database null, waiting via GetDatabaseSafe ({2}), item={3}",
 				PluginName,
 				operation,
@@ -2561,7 +2561,7 @@ namespace CommonPluginsShared.Collections
 			}
 			else
 			{
-				Common.LogDebug(true, string.Format(
+				Common.LogDebug(string.Format(
 					"[{0}] {1} — database ready after wait, item={2}",
 					PluginName,
 					operation,

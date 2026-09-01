@@ -1,4 +1,4 @@
-﻿using CommonPluginsShared;
+using CommonPluginsShared;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
@@ -28,7 +28,7 @@ namespace CommonPluginsShared.UI
         /// <returns>True if all operations succeeded without fatal errors.</returns>
         public static bool AddResources(List<ResourcesList> resourcesList)
         {
-            Common.LogDebug(true, $"AddResources() - {Serialization.ToJson(resourcesList)}");
+            Common.LogDebug($"AddResources() - {Serialization.ToJson(resourcesList)}");
 
             foreach (ResourcesList item in resourcesList)
             {
@@ -333,7 +333,7 @@ namespace CommonPluginsShared.UI
                 UserControl controlParent = FindParent<UserControl>(controlElement);
                 FrameworkElement controlContainer = (FrameworkElement)controlParent.Parent;
 
-                Common.LogDebug(true, $"SetControlSize({controlElement.Name}) - parent: {controlContainer.Name}, H: {controlContainer.Height}, W: {controlContainer.Width}");
+                Common.LogDebug($"SetControlSize({controlElement.Name}) - parent: {controlContainer.Name}, H: {controlContainer.Height}, W: {controlContainer.Width}");
 
                 // Height
                 if (!double.IsNaN(controlContainer.Height))

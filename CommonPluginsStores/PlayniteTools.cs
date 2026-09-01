@@ -1,4 +1,4 @@
-﻿using Playnite.SDK.Models;
+using Playnite.SDK.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -58,7 +58,7 @@ namespace CommonPluginsStores
             // Steam
             if (result.Contains("{Steam"))
             {
-                Common.LogDebug(true, "[PlayniteTools] StringExpandWithStores resolving Steam variables.");
+                Common.LogDebug("[PlayniteTools] StringExpandWithStores resolving Steam variables.");
                 SteamApi steamApi = new SteamApi("PlayniteTools", ExternalPlugin.None);
 
                 if (SteamId == "null")
@@ -81,7 +81,7 @@ namespace CommonPluginsStores
                     SteamScreenshotsDir = ResolveSteamScreenshotsDir(SteamInstallDir, SteamId, SteamAccountId);
                 }
 
-                Common.LogDebug(true, $"[PlayniteTools] Steam variables resolved: hasSteamId={!SteamId.IsNullOrEmpty()}, hasSteamAccountId={!SteamAccountId.IsNullOrEmpty()}, hasSteamInstallDir={!SteamInstallDir.IsNullOrEmpty()}, hasSteamScreenshotsDir={!SteamScreenshotsDir.IsNullOrEmpty()}.");
+                Common.LogDebug($"[PlayniteTools] Steam variables resolved: hasSteamId={!SteamId.IsNullOrEmpty()}, hasSteamAccountId={!SteamAccountId.IsNullOrEmpty()}, hasSteamInstallDir={!SteamInstallDir.IsNullOrEmpty()}, hasSteamScreenshotsDir={!SteamScreenshotsDir.IsNullOrEmpty()}.");
 
                 result = SteamId.IsNullOrEmpty() ? result : result.Replace("{SteamId}", SteamId);
                 result = SteamAccountId.IsNullOrEmpty() ? result : result.Replace("{SteamAccountId}", SteamAccountId);
@@ -141,7 +141,7 @@ namespace CommonPluginsStores
                 var users = steamApi.GetSteamUsers();
                 ulong steamId = users?.Select(user => user.SteamId).FirstOrDefault() ?? 0;
                 string resolvedSteamId = steamId > 0 ? steamId.ToString() : string.Empty;
-                Common.LogDebug(true, $"[PlayniteTools] ResolveSteamUserId: usersCount={users?.Count ?? 0}, hasSteamId={!resolvedSteamId.IsNullOrEmpty()}.");
+                Common.LogDebug($"[PlayniteTools] ResolveSteamUserId: usersCount={users?.Count ?? 0}, hasSteamId={!resolvedSteamId.IsNullOrEmpty()}.");
                 return resolvedSteamId;
             }
             catch (Exception ex)
@@ -157,25 +157,25 @@ namespace CommonPluginsStores
             {
                 if (steamInstallDir.IsNullOrEmpty())
                 {
-                    Common.LogDebug(true, "[PlayniteTools] ResolveSteamScreenshotsDir skipped: empty Steam install directory.");
+                    Common.LogDebug("[PlayniteTools] ResolveSteamScreenshotsDir skipped: empty Steam install directory.");
                     return string.Empty;
                 }
 
                 if (steamAccountId.IsNullOrEmpty() && !steamId.IsNullOrEmpty() && ulong.TryParse(steamId, out ulong parsedSteamId))
                 {
                     steamAccountId = SteamApi.GetAccountId(parsedSteamId).ToString();
-                    Common.LogDebug(true, $"[PlayniteTools] ResolveSteamScreenshotsDir computed account id from steam id: hasSteamAccountId={!steamAccountId.IsNullOrEmpty()}.");
+                    Common.LogDebug($"[PlayniteTools] ResolveSteamScreenshotsDir computed account id from steam id: hasSteamAccountId={!steamAccountId.IsNullOrEmpty()}.");
                 }
 
                 if (steamAccountId.IsNullOrEmpty())
                 {
-                    Common.LogDebug(true, "[PlayniteTools] ResolveSteamScreenshotsDir skipped: missing Steam account id.");
+                    Common.LogDebug("[PlayniteTools] ResolveSteamScreenshotsDir skipped: missing Steam account id.");
                     return string.Empty;
                 }
 
                 string screenshotsDir = Path.Combine(steamInstallDir, "userdata", steamAccountId, "760", "remote");
                 bool exists = Directory.Exists(screenshotsDir);
-                Common.LogDebug(true, $"[PlayniteTools] ResolveSteamScreenshotsDir result: exists={exists}.");
+                Common.LogDebug($"[PlayniteTools] ResolveSteamScreenshotsDir result: exists={exists}.");
                 return exists ? screenshotsDir : string.Empty;
             }
             catch (Exception ex)

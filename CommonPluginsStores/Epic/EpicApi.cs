@@ -1,4 +1,4 @@
-﻿using CommonPlayniteShared.Common;
+using CommonPlayniteShared.Common;
 using CommonPlayniteShared.PluginLibrary.EpicLibrary.Models;
 using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
@@ -226,14 +226,14 @@ namespace CommonPluginsStores.Epic
 		{
 			if (CurrentAccountInfos == null)
 			{
-				Common.LogDebug(true, "[EpicApi] GetIsUserLoggedIn: no CurrentAccountInfos.");
+				Common.LogDebug("[EpicApi] GetIsUserLoggedIn: no CurrentAccountInfos.");
 				return false;
 			}
 
 			if (!CurrentAccountInfos.IsPrivate && !StoreSettings.UseAuth)
 			{
 				bool hasUserId = !CurrentAccountInfos.UserId.IsNullOrEmpty();
-				Common.LogDebug(true, $"[EpicApi] GetIsUserLoggedIn public account: hasUserId={hasUserId}.");
+				Common.LogDebug($"[EpicApi] GetIsUserLoggedIn public account: hasUserId={hasUserId}.");
 				return hasUserId;
 			}
 
@@ -242,22 +242,22 @@ namespace CommonPluginsStores.Epic
 				bool? cachedAuth = TryGetAuthStatusFromStoredToken();
 				if (cachedAuth.HasValue)
 				{
-					Common.LogDebug(true, $"[EpicApi] GetIsUserLoggedIn fast-path (stored token): isLogged={cachedAuth.Value}.");
+					Common.LogDebug($"[EpicApi] GetIsUserLoggedIn fast-path (stored token): isLogged={cachedAuth.Value}.");
 					return cachedAuth.Value;
 				}
 
-				Common.LogDebug(true, "[EpicApi] GetIsUserLoggedIn fast-path: no stored token, returning false until background check.");
+				Common.LogDebug("[EpicApi] GetIsUserLoggedIn fast-path: no stored token, returning false until background check.");
 				return false;
 			}
 
-			Common.LogDebug(true, "[EpicApi] GetIsUserLoggedIn: full API verification.");
+			Common.LogDebug("[EpicApi] GetIsUserLoggedIn: full API verification.");
 			bool isLogged = CheckIsUserLoggedIn();
 			if (!isLogged)
 			{
 				StoreToken = null;
 			}
 
-			Common.LogDebug(true, $"[EpicApi] GetIsUserLoggedIn full verification result: isLogged={isLogged}.");
+			Common.LogDebug($"[EpicApi] GetIsUserLoggedIn full verification result: isLogged={isLogged}.");
 			return isLogged;
 		}
 
@@ -319,7 +319,7 @@ namespace CommonPluginsStores.Epic
 		{
 			if (StoreToken == null || StoreToken.Token.IsNullOrEmpty() || StoreToken.AccountId.IsNullOrEmpty())
 			{
-				Common.LogDebug(true, "[EpicApi] SetUserAfterLogin skipped: no valid store token.");
+				Common.LogDebug("[EpicApi] SetUserAfterLogin skipped: no valid store token.");
 				return false;
 			}
 
@@ -335,7 +335,7 @@ namespace CommonPluginsStores.Epic
 			{
 				EpicAccountResponse epicAccount = GetAccountInfo(StoreToken.AccountId).GetAwaiter().GetResult();
 				pseudo = epicAccount?.DisplayName ?? string.Empty;
-				Common.LogDebug(true, $"[EpicApi] SetUserAfterLogin resolved display name: hasPseudo={!pseudo.IsNullOrEmpty()}.");
+				Common.LogDebug($"[EpicApi] SetUserAfterLogin resolved display name: hasPseudo={!pseudo.IsNullOrEmpty()}.");
 			}
 
 			AccountInfos accountInfos = new AccountInfos
@@ -385,7 +385,7 @@ namespace CommonPluginsStores.Epic
 			AccountInfos accountInfos = LoadCurrentUser();
 			if (!accountInfos?.UserId?.IsNullOrEmpty() ?? false)
 			{
-				Common.LogDebug(true, $"[EpicApi] GetCurrentAccountInfos scheduled background refresh UserId={accountInfos.UserId}, Pseudo={accountInfos.Pseudo}.");
+				Common.LogDebug($"[EpicApi] GetCurrentAccountInfos scheduled background refresh UserId={accountInfos.UserId}, Pseudo={accountInfos.Pseudo}.");
 				_ = Task.Run(() =>
 				{
 					try
@@ -401,7 +401,7 @@ namespace CommonPluginsStores.Epic
 						}
 
 						SaveCurrentUser();
-						Common.LogDebug(true, $"[EpicApi] GetCurrentAccountInfos background refresh done IsPrivate={CurrentAccountInfos.IsPrivate}, Pseudo={CurrentAccountInfos.Pseudo}, AccountStatus={CurrentAccountInfos.AccountStatus}.");
+						Common.LogDebug($"[EpicApi] GetCurrentAccountInfos background refresh done IsPrivate={CurrentAccountInfos.IsPrivate}, Pseudo={CurrentAccountInfos.Pseudo}, AccountStatus={CurrentAccountInfos.AccountStatus}.");
 					}
 					catch (Exception ex)
 					{
@@ -827,14 +827,14 @@ namespace CommonPluginsStores.Epic
 
 			try
 			{
-				Common.LogDebug(true, $"EpicApi.GetDlcInfos: querying addons for namespace '{id}'");
+				Common.LogDebug($"EpicApi.GetDlcInfos: querying addons for namespace '{id}'");
 				string localLang = CodeLang.GetEpicLang(Locale);
 				ObservableCollection<DlcInfos> dlcs = new ObservableCollection<DlcInfos>();
 				AddonsByNamespaceResponse addonsByNamespaceResponse = QueryAddonsByNamespace(id).GetAwaiter().GetResult();
 
 				if (addonsByNamespaceResponse == null)
 				{
-					Common.LogDebug(true, $"EpicApi.GetDlcInfos: QueryAddonsByNamespace returned null for namespace '{id}' (see GraphQL logs above).");
+					Common.LogDebug($"EpicApi.GetDlcInfos: QueryAddonsByNamespace returned null for namespace '{id}' (see GraphQL logs above).");
 				}
 
 				if (addonsByNamespaceResponse?.Data?.Catalog?.CatalogOffers?.Elements == null)
@@ -902,7 +902,7 @@ namespace CommonPluginsStores.Epic
 			{
 				string storeLang = CodeLang.GetEpicLang(Locale);
 				string storeCountry = CodeLang.GetCountryFromLast(Locale);
-				Common.LogDebug(true, FormatLogMessage(
+				Common.LogDebug(FormatLogMessage(
 					$"GetGameInfosAnonymous: namespace='{@namespace}', playniteLang='{Locale}', storeLang='{storeLang}', country='{storeCountry}', cache=none (GraphQL live)"));
 
 				AddonsByNamespaceResponse response =
@@ -912,13 +912,13 @@ namespace CommonPluginsStores.Epic
 				if (catalogOffer == null)
 				{
 					Logger.Warn($"EpicApi.GetGameInfosAnonymous: No catalog offer found for namespace '{@namespace}'.");
-					Common.LogDebug(true, FormatLogMessage(
+					Common.LogDebug(FormatLogMessage(
 						$"GetGameInfosAnonymous: no offer namespace='{@namespace}', playniteLang='{Locale}', storeLang='{storeLang}'"));
 					return null;
 				}
 
 				string description = catalogOffer.Description?.Trim();
-				Common.LogDebug(true, FormatLogMessage(
+				Common.LogDebug(FormatLogMessage(
 					$"GetGameInfosAnonymous: ok namespace='{@namespace}', playniteLang='{Locale}', storeLang='{storeLang}', " +
 					$"title='{catalogOffer.Title}', descriptionLength={description?.Length ?? 0}"));
 
@@ -1124,7 +1124,7 @@ namespace CommonPluginsStores.Epic
 		{
 			if (authorizationCode.IsNullOrWhiteSpace())
 			{
-				Common.LogDebug(true, "[EpicApi] AuthenticateUsingAuthCode skipped: empty authorization code.");
+				Common.LogDebug("[EpicApi] AuthenticateUsingAuthCode skipped: empty authorization code.");
 				return false;
 			}
 
@@ -1141,14 +1141,14 @@ namespace CommonPluginsStores.Epic
 					string respContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 					if (!SetToken(respContent))
 					{
-						Common.LogDebug(true, "[EpicApi] AuthenticateUsingAuthCode failed: invalid OAuth response.");
+						Common.LogDebug("[EpicApi] AuthenticateUsingAuthCode failed: invalid OAuth response.");
 						return false;
 					}
 				}
 			}
 
 			bool success = StoreToken != null && !StoreToken.Token.IsNullOrEmpty();
-			Common.LogDebug(true, $"[EpicApi] AuthenticateUsingAuthCode completed: success={success}.");
+			Common.LogDebug($"[EpicApi] AuthenticateUsingAuthCode completed: success={success}.");
 			return success;
 		}
 
@@ -1166,17 +1166,17 @@ namespace CommonPluginsStores.Epic
 		{
 			if (accountInfos == null || accountInfos.UserId.IsNullOrEmpty())
 			{
-				Common.LogDebug(true, "[EpicApi] CheckIsPublic skipped: missing account user id.");
+				Common.LogDebug("[EpicApi] CheckIsPublic skipped: missing account user id.");
 				return false;
 			}
 
 			try
 			{
 				string url = string.Format(UrlAccountProfileUS, accountInfos.UserId);
-				Common.LogDebug(true, $"[EpicApi] CheckIsPublic started: userId={accountInfos.UserId}.");
+				Common.LogDebug($"[EpicApi] CheckIsPublic started: userId={accountInfos.UserId}.");
 				var pageSource = await Web.DownloadSourceDataWebView(url).ConfigureAwait(false);
 				bool isPublic = !pageSource.Item1.Contains("This profile is unavailable", StringComparison.OrdinalIgnoreCase);
-				Common.LogDebug(true, $"[EpicApi] CheckIsPublic completed: isPublic={isPublic}.");
+				Common.LogDebug($"[EpicApi] CheckIsPublic completed: isPublic={isPublic}.");
 				return isPublic;
 			}
 			catch (Exception ex)
@@ -1379,7 +1379,7 @@ namespace CommonPluginsStores.Epic
 				webView.LoadingChanged += async (s, e) =>
 				{
 					string urlAtEvent = webView.GetCurrentAddress();
-					Common.LogDebug(true, $"[EpicApi] Auth webview LoadingChanged: isLoading={e.IsLoading}, url={FormatAuthWebViewUrlForLog(urlAtEvent)}.");
+					Common.LogDebug($"[EpicApi] Auth webview LoadingChanged: isLoading={e.IsLoading}, url={FormatAuthWebViewUrlForLog(urlAtEvent)}.");
 
 					if (e.IsLoading)
 					{
@@ -1389,7 +1389,7 @@ namespace CommonPluginsStores.Epic
 					if (Interlocked.Exchange(ref _isHandlingLoading, 1) == 1)
 					{
 						Interlocked.Exchange(ref _pendingLoginCheck, 1);
-						Common.LogDebug(true, "[EpicApi] Auth webview LoadingChanged: deferred (handler already running).");
+						Common.LogDebug("[EpicApi] Auth webview LoadingChanged: deferred (handler already running).");
 						return;
 					}
 
@@ -1401,7 +1401,7 @@ namespace CommonPluginsStores.Epic
 
 							if (!IsAuthOperationCurrent(operationGeneration))
 							{
-								Common.LogDebug(true, "[EpicApi] Auth webview login check aborted: superseded auth operation.");
+								Common.LogDebug("[EpicApi] Auth webview login check aborted: superseded auth operation.");
 								return;
 							}
 
@@ -1409,7 +1409,7 @@ namespace CommonPluginsStores.Epic
 
 							if (!IsAuthOperationCurrent(operationGeneration))
 							{
-								Common.LogDebug(true, "[EpicApi] Auth webview login check aborted after delay: superseded auth operation.");
+								Common.LogDebug("[EpicApi] Auth webview login check aborted after delay: superseded auth operation.");
 								return;
 							}
 
@@ -1425,11 +1425,11 @@ namespace CommonPluginsStores.Epic
 								{
 									authorizationCode = capturedCode;
 									loggedIn = true;
-									Common.LogDebug(true, "[EpicApi] Auth webview authorization code captured, closing.");
+									Common.LogDebug("[EpicApi] Auth webview authorization code captured, closing.");
 								}
 								else
 								{
-									Common.LogDebug(true, "[EpicApi] Auth webview localhost page detected but authorization code not found, closing.");
+									Common.LogDebug("[EpicApi] Auth webview localhost page detected but authorization code not found, closing.");
 								}
 
 								webView.Close();
@@ -1448,15 +1448,15 @@ namespace CommonPluginsStores.Epic
 				};
 
 				CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
-				Common.LogDebug(true, $"[EpicApi] Auth webview opening, initialNavigate={FormatAuthWebViewUrlForLog(UrlLogin)}.");
+				Common.LogDebug($"[EpicApi] Auth webview opening, initialNavigate={FormatAuthWebViewUrlForLog(UrlLogin)}.");
 				webView.Navigate(UrlLogin);
 				_ = webView.OpenDialog();
-				Common.LogDebug(true, $"[EpicApi] Auth webview closed, finalUrl={FormatAuthWebViewUrlForLog(webView.GetCurrentAddress())}, loggedIn={loggedIn}, hasAuthCode={!authorizationCode.IsNullOrEmpty()}.");
+				Common.LogDebug($"[EpicApi] Auth webview closed, finalUrl={FormatAuthWebViewUrlForLog(webView.GetCurrentAddress())}, loggedIn={loggedIn}, hasAuthCode={!authorizationCode.IsNullOrEmpty()}.");
 			}
 
 			if (!loggedIn || !IsAuthOperationCurrent(operationGeneration))
 			{
-				Common.LogDebug(true, $"[EpicApi] EpicLogin aborted: loggedIn={loggedIn}, operationCurrent={IsAuthOperationCurrent(operationGeneration)}.");
+				Common.LogDebug($"[EpicApi] EpicLogin aborted: loggedIn={loggedIn}, operationCurrent={IsAuthOperationCurrent(operationGeneration)}.");
 				return false;
 			}
 
@@ -1479,11 +1479,11 @@ namespace CommonPluginsStores.Epic
 		private async Task<string> TryCompleteEpicLoginFromWebViewAsync(IWebView webView)
 		{
 			string url = webView.GetCurrentAddress();
-			Common.LogDebug(true, $"[EpicApi] Auth webview post-delay check, url={FormatAuthWebViewUrlForLog(url)}.");
+			Common.LogDebug($"[EpicApi] Auth webview post-delay check, url={FormatAuthWebViewUrlForLog(url)}.");
 
 			if (TryExtractAuthorizationCodeFromUrl(url, out string codeFromUrl))
 			{
-				Common.LogDebug(true, "[EpicApi] Auth webview authorization code extracted from URL.");
+				Common.LogDebug("[EpicApi] Auth webview authorization code extracted from URL.");
 				return codeFromUrl;
 			}
 
@@ -1491,7 +1491,7 @@ namespace CommonPluginsStores.Epic
 			{
 				string pageText = await webView.GetPageTextAsync().ConfigureAwait(false);
 				bool hasLocalhostCallback = !pageText.IsNullOrEmpty() && pageText.Contains(@"localhost");
-				Common.LogDebug(true, $"[EpicApi] Auth webview callback check: hasLocalhostCallback={hasLocalhostCallback}.");
+				Common.LogDebug($"[EpicApi] Auth webview callback check: hasLocalhostCallback={hasLocalhostCallback}.");
 
 				if (!hasLocalhostCallback)
 				{
@@ -1502,7 +1502,7 @@ namespace CommonPluginsStores.Epic
 			string pageSource = await webView.GetPageSourceAsync().ConfigureAwait(false);
 			if (TryExtractAuthorizationCodeFromPageSource(pageSource, out string codeFromPage))
 			{
-				Common.LogDebug(true, "[EpicApi] Auth webview authorization code extracted from page source.");
+				Common.LogDebug("[EpicApi] Auth webview authorization code extracted from page source.");
 				return codeFromPage;
 			}
 
@@ -1518,7 +1518,7 @@ namespace CommonPluginsStores.Epic
 		/// <returns><c>true</c> when the OAuth token exchange succeeded; otherwise <c>false</c>.</returns>
 		private bool EpicLoginAlternative(long operationGeneration)
 		{
-			Common.LogDebug(true, "[EpicApi] Alternative auth flow started.");
+			Common.LogDebug("[EpicApi] Alternative auth flow started.");
 			_ = API.Instance.Dialogs.ShowMessage(
 				ResourceProvider.GetString("LOCEpicAlternativeAuthInstructions"), "",
 				System.Windows.MessageBoxButton.OK,
@@ -1529,14 +1529,14 @@ namespace CommonPluginsStores.Epic
 
 			if (!res.Result || res.SelectedString.IsNullOrWhiteSpace() || !IsAuthOperationCurrent(operationGeneration))
 			{
-				Common.LogDebug(true, "[EpicApi] Alternative auth aborted: cancelled, empty input, or superseded auth operation.");
+				Common.LogDebug("[EpicApi] Alternative auth aborted: cancelled, empty input, or superseded auth operation.");
 				return false;
 			}
 
 			string normalizedCode = NormalizeAuthorizationCodeInput(res.SelectedString);
 			if (normalizedCode.IsNullOrEmpty())
 			{
-				Common.LogDebug(true, "[EpicApi] Alternative auth aborted: could not parse authorization code from input.");
+				Common.LogDebug("[EpicApi] Alternative auth aborted: could not parse authorization code from input.");
 				return false;
 			}
 
@@ -1558,11 +1558,11 @@ namespace CommonPluginsStores.Epic
 
 			if (response != System.Windows.MessageBoxResult.Yes)
 			{
-				Common.LogDebug(true, "[EpicApi] Alternative login declined after WebView failure.");
+				Common.LogDebug("[EpicApi] Alternative login declined after WebView failure.");
 				return false;
 			}
 
-			Common.LogDebug(true, "[EpicApi] Alternative login offered after WebView failure.");
+			Common.LogDebug("[EpicApi] Alternative login offered after WebView failure.");
 			return EpicLoginAlternative(operationGeneration);
 		}
 
@@ -1639,7 +1639,7 @@ namespace CommonPluginsStores.Epic
 					RefreshExpireAt = oauthResponse.refresh_expires_at
 				};
 				SetStoredToken(StoreToken);
-				Common.LogDebug(true, $"[EpicApi] SetToken succeeded: hasAccountId={!StoreToken.AccountId.IsNullOrEmpty()}, hasToken={!StoreToken.Token.IsNullOrEmpty()}.");
+				Common.LogDebug($"[EpicApi] SetToken succeeded: hasAccountId={!StoreToken.AccountId.IsNullOrEmpty()}, hasToken={!StoreToken.Token.IsNullOrEmpty()}.");
 				return true;
 			}
 
@@ -1648,7 +1648,7 @@ namespace CommonPluginsStores.Epic
 				Common.LogError(exception, false, false, PluginName);
 			}
 
-			Common.LogDebug(true, "[EpicApi] SetToken failed: invalid OAuth response.");
+			Common.LogDebug("[EpicApi] SetToken failed: invalid OAuth response.");
 			return false;
 		}
 
@@ -1825,12 +1825,11 @@ namespace CommonPluginsStores.Epic
 			Asset asset = GetAssets()?.FirstOrDefault(a => a.AppName.IsEqual(game.GameId));
 			if (asset == null)
 			{
-				Common.LogDebug(true, $"EpicApi.GetAssetFromGame: no library asset for GameId '{game.GameId}'.");
+				Common.LogDebug($"EpicApi.GetAssetFromGame: no library asset for GameId '{game.GameId}'.");
 			}
 			else
 			{
-				Common.LogDebug(true,
-					$"EpicApi.GetAssetFromGame: matched GameId '{game.GameId}' → namespace='{asset.Namespace}', catalogItemId='{asset.CatalogItemId}'.");
+				Common.LogDebug($"EpicApi.GetAssetFromGame: matched GameId '{game.GameId}' → namespace='{asset.Namespace}', catalogItemId='{asset.CatalogItemId}'.");
 			}
 
 			return asset;
@@ -1860,24 +1859,20 @@ namespace CommonPluginsStores.Epic
 			Asset asset = GetAssetFromGame(game);
 			if (asset != null && !asset.Namespace.IsNullOrEmpty())
 			{
-				Common.LogDebug(true,
-					$"EpicApi.GetNamespaceFromGame: resolved via library asset for '{game.Name}' (GameId='{game.GameId}') → '{asset.Namespace}'.");
+				Common.LogDebug($"EpicApi.GetNamespaceFromGame: resolved via library asset for '{game.Name}' (GameId='{game.GameId}') → '{asset.Namespace}'.");
 				return asset.Namespace;
 			}
 
-			Common.LogDebug(true,
-				$"EpicApi.GetNamespaceFromGame: no library asset for '{game.Name}' (GameId='{game.GameId}'), trying anonymous resolution.");
+			Common.LogDebug($"EpicApi.GetNamespaceFromGame: no library asset for '{game.Name}' (GameId='{game.GameId}'), trying anonymous resolution.");
 
 			string @namespace = GetNamespaceFromGameAnonymous(game);
 			if (@namespace.IsNullOrEmpty())
 			{
-				Common.LogDebug(true,
-					$"EpicApi.GetNamespaceFromGame: all resolution paths failed for '{game.Name}' (GameId='{game.GameId}').");
+				Common.LogDebug($"EpicApi.GetNamespaceFromGame: all resolution paths failed for '{game.Name}' (GameId='{game.GameId}').");
 			}
 			else
 			{
-				Common.LogDebug(true,
-					$"EpicApi.GetNamespaceFromGame: anonymous fallback succeeded for '{game.Name}' → '{@namespace}'.");
+				Common.LogDebug($"EpicApi.GetNamespaceFromGame: anonymous fallback succeeded for '{game.Name}' → '{@namespace}'.");
 			}
 
 			return @namespace;
@@ -2054,19 +2049,19 @@ namespace CommonPluginsStores.Epic
 
 			if (result?.Data?.Catalog?.CatalogNs?.Mappings?.FirstOrDefault()?.PageSlug == null)
 			{
-				Common.LogDebug(true, $"EpicApi.GetProductSlug: cache miss for namespace '{@namespace}', querying catalog mappings.");
+				Common.LogDebug($"EpicApi.GetProductSlug: cache miss for namespace '{@namespace}', querying catalog mappings.");
 				result = QueryCatalogMappings(@namespace).GetAwaiter().GetResult();
 				FileDataService.SaveData(cacheFile, result);
 			}
 			else
 			{
-				Common.LogDebug(true, $"EpicApi.GetProductSlug: cache hit for namespace '{@namespace}'.");
+				Common.LogDebug($"EpicApi.GetProductSlug: cache hit for namespace '{@namespace}'.");
 			}
 
 			string pageSlug = result?.Data?.Catalog?.CatalogNs?.Mappings?.FirstOrDefault()?.PageSlug;
 			if (pageSlug.IsNullOrEmpty())
 			{
-				Common.LogDebug(true, $"EpicApi.GetProductSlug: no pageSlug mapping for namespace '{@namespace}'.");
+				Common.LogDebug($"EpicApi.GetProductSlug: no pageSlug mapping for namespace '{@namespace}'.");
 			}
 
 			return pageSlug;
@@ -2097,8 +2092,7 @@ namespace CommonPluginsStores.Epic
 			string slugFromLinks = GetUrlSlugFromGameLinks(game);
 			if (!slugFromLinks.IsNullOrEmpty())
 			{
-				Common.LogDebug(true,
-					$"EpicApi.GetNamespaceFromGameAnonymous: Epic store link slug='{slugFromLinks}' for '{game.Name}' (GameId='{game.GameId}').");
+				Common.LogDebug($"EpicApi.GetNamespaceFromGameAnonymous: Epic store link slug='{slugFromLinks}' for '{game.Name}' (GameId='{game.GameId}').");
 				string ns = GetNamespaceFromSlug(slugFromLinks);
 				if (!ns.IsNullOrEmpty())
 				{
@@ -2106,13 +2100,11 @@ namespace CommonPluginsStores.Epic
 					return ns;
 				}
 
-				Common.LogDebug(true,
-					$"EpicApi.GetNamespaceFromGameAnonymous: slug '{slugFromLinks}' did not resolve to a namespace.");
+				Common.LogDebug($"EpicApi.GetNamespaceFromGameAnonymous: slug '{slugFromLinks}' did not resolve to a namespace.");
 			}
 			else
 			{
-				Common.LogDebug(true,
-					$"EpicApi.GetNamespaceFromGameAnonymous: no Epic store link slug for '{game.Name}' (GameId='{game.GameId}').");
+				Common.LogDebug($"EpicApi.GetNamespaceFromGameAnonymous: no Epic store link slug for '{game.Name}' (GameId='{game.GameId}').");
 			}
 
 			string normalizedName = PlayniteTools.NormalizeGameName(
@@ -2147,18 +2139,17 @@ namespace CommonPluginsStores.Epic
 				return null;
 			}
 
-			Common.LogDebug(true, $"EpicApi.ResolveNamespaceFromStoreSearch: keywords='{normalizedName}'.");
+			Common.LogDebug($"EpicApi.ResolveNamespaceFromStoreSearch: keywords='{normalizedName}'.");
 
 			SearchStoreResponse response = QuerySearchStore(normalizedName).GetAwaiter().GetResult();
 			List<SearchStoreResponse.Element> elements = response?.Data?.Catalog?.SearchStore?.Elements;
 			if (elements == null || elements.Count == 0)
 			{
-				Common.LogDebug(true, $"EpicApi.ResolveNamespaceFromStoreSearch: no results for '{normalizedName}'.");
+				Common.LogDebug($"EpicApi.ResolveNamespaceFromStoreSearch: no results for '{normalizedName}'.");
 				return null;
 			}
 
-			Common.LogDebug(true,
-				$"EpicApi.ResolveNamespaceFromStoreSearch: {elements.Count} result(s) for '{normalizedName}'.");
+			Common.LogDebug($"EpicApi.ResolveNamespaceFromStoreSearch: {elements.Count} result(s) for '{normalizedName}'.");
 
 			SearchStoreResponse.Element match = elements.FirstOrDefault(e =>
 				string.Equals(
@@ -2169,13 +2160,11 @@ namespace CommonPluginsStores.Epic
 			if (match == null)
 			{
 				match = elements[0];
-				Common.LogDebug(true,
-					$"EpicApi.ResolveNamespaceFromStoreSearch: no exact title match, using first result title='{match.Title}'.");
+				Common.LogDebug($"EpicApi.ResolveNamespaceFromStoreSearch: no exact title match, using first result title='{match.Title}'.");
 			}
 			else
 			{
-				Common.LogDebug(true,
-					$"EpicApi.ResolveNamespaceFromStoreSearch: exact title match '{match.Title}'.");
+				Common.LogDebug($"EpicApi.ResolveNamespaceFromStoreSearch: exact title match '{match.Title}'.");
 			}
 
 			if (!match.Namespace.IsNullOrEmpty())
@@ -2186,13 +2175,11 @@ namespace CommonPluginsStores.Epic
 			string slug = match.ProductSlug ?? match.UrlSlug;
 			if (!slug.IsNullOrEmpty())
 			{
-				Common.LogDebug(true,
-					$"EpicApi.ResolveNamespaceFromStoreSearch: namespace empty, resolving via slug='{slug}'.");
+				Common.LogDebug($"EpicApi.ResolveNamespaceFromStoreSearch: namespace empty, resolving via slug='{slug}'.");
 				return GetNamespaceFromSlug(slug);
 			}
 
-			Common.LogDebug(true,
-				$"EpicApi.ResolveNamespaceFromStoreSearch: result has no namespace or slug, title='{match.Title}'.");
+			Common.LogDebug($"EpicApi.ResolveNamespaceFromStoreSearch: result has no namespace or slug, title='{match.Title}'.");
 			return null;
 		}
 
@@ -2221,14 +2208,14 @@ namespace CommonPluginsStores.Epic
 
 			try
 			{
-				Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: resolving slug='{slug}'.");
+				Common.LogDebug($"EpicApi.GetNamespaceFromSlug: resolving slug='{slug}'.");
 
 				string cacheFile = Path.Combine(PathAppsData, Paths.GetSafePathName($"mapping_{slug}.json"));
 				GetMappingByPageSlugResponse result = FileDataService.LoadData<GetMappingByPageSlugResponse>(cacheFile, -1);
 
 				if (result == null)
 				{
-					Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: cache miss for slug='{slug}', querying page mapping.");
+					Common.LogDebug($"EpicApi.GetNamespaceFromSlug: cache miss for slug='{slug}', querying page mapping.");
 					result = QueryMappingByPageSlug(slug).GetAwaiter().GetResult();
 					if (result != null)
 					{
@@ -2237,7 +2224,7 @@ namespace CommonPluginsStores.Epic
 				}
 				else
 				{
-					Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: cache hit for slug='{slug}'.");
+					Common.LogDebug($"EpicApi.GetNamespaceFromSlug: cache hit for slug='{slug}'.");
 				}
 
 				var mapping = result?.Data?.StorePageMapping?.Mapping;
@@ -2250,7 +2237,7 @@ namespace CommonPluginsStores.Epic
 				// SandboxId is the canonical namespace identifier.
 				if (!mapping.SandboxId.IsNullOrEmpty())
 				{
-					Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: resolved slug='{slug}' via SandboxId → '{mapping.SandboxId}'.");
+					Common.LogDebug($"EpicApi.GetNamespaceFromSlug: resolved slug='{slug}' via SandboxId → '{mapping.SandboxId}'.");
 					return mapping.SandboxId;
 				}
 
@@ -2258,7 +2245,7 @@ namespace CommonPluginsStores.Epic
 				string nsFromOffer = mapping.Mappings?.Offer?.Namespace;
 				if (!nsFromOffer.IsNullOrEmpty())
 				{
-					Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: resolved slug='{slug}' via Offer.Namespace → '{nsFromOffer}'.");
+					Common.LogDebug($"EpicApi.GetNamespaceFromSlug: resolved slug='{slug}' via Offer.Namespace → '{nsFromOffer}'.");
 					return nsFromOffer;
 				}
 
@@ -2266,7 +2253,7 @@ namespace CommonPluginsStores.Epic
 				string nsFromPrePurchase = mapping.Mappings?.PrePurchaseOffer?.Namespace;
 				if (!nsFromPrePurchase.IsNullOrEmpty())
 				{
-					Common.LogDebug(true, $"EpicApi.GetNamespaceFromSlug: resolved slug='{slug}' via PrePurchaseOffer.Namespace → '{nsFromPrePurchase}'.");
+					Common.LogDebug($"EpicApi.GetNamespaceFromSlug: resolved slug='{slug}' via PrePurchaseOffer.Namespace → '{nsFromPrePurchase}'.");
 					return nsFromPrePurchase;
 				}
 
@@ -2456,7 +2443,7 @@ namespace CommonPluginsStores.Epic
 					}
 					catch (Exception ex)
 					{
-						Common.LogDebug(true, $"[EpicApi] GET {url}: HTTP {(int)response.StatusCode}, preview='{FormatGraphQLResponsePreview(str)}'");
+						Common.LogDebug($"[EpicApi] GET {url}: HTTP {(int)response.StatusCode}, preview='{FormatGraphQLResponsePreview(str)}'");
 						Common.LogError(ex, false, true, PluginName, $"Failed to deserialize GET response - {FormatGraphQLResponsePreview(str)}");
 						return null;
 					}
@@ -2491,8 +2478,7 @@ namespace CommonPluginsStores.Epic
 				object variables = queryType.GetProperty("Variables")?.GetValue(queryObject);
 
 				string variablesJson = variables != null ? Serialization.ToJson(variables) : "(null)";
-				Common.LogDebug(true,
-					$"[EpicApi.GraphQL] {operationName}: variables={FormatGraphQLResponsePreview(variablesJson, 500)}");
+				Common.LogDebug($"[EpicApi.GraphQL] {operationName}: variables={FormatGraphQLResponsePreview(variablesJson, 500)}");
 
 				var payload = new { query, variables };
 				StringContent content = new StringContent(
@@ -2515,16 +2501,14 @@ namespace CommonPluginsStores.Epic
 						httpClient.DefaultRequestHeaders.Add("Authorization", StoreToken.Type + " " + StoreToken.Token);
 					}
 
-					Common.LogDebug(true,
-						$"[EpicApi.GraphQL] {operationName}: auth forceAnonymous={forceAnonymous}, isPrivate={isPrivate}, UseAuth={useAuth}, " +
+					Common.LogDebug($"[EpicApi.GraphQL] {operationName}: auth forceAnonymous={forceAnonymous}, isPrivate={isPrivate}, UseAuth={useAuth}, " +
 						$"hasToken={hasToken}, needsAuth={needsAuth}, sendingAuth={sendingAuth}");
 
 					HttpResponseMessage response = await httpClient.PostAsync(UrlGraphQL, content).ConfigureAwait(false);
 					string str = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 					string contentType = response.Content.Headers.ContentType?.ToString() ?? "(none)";
 
-					Common.LogDebug(true,
-						$"[EpicApi.GraphQL] {operationName}: HTTP {(int)response.StatusCode} {response.StatusCode}, " +
+					Common.LogDebug($"[EpicApi.GraphQL] {operationName}: HTTP {(int)response.StatusCode} {response.StatusCode}, " +
 						$"Content-Type={contentType}, length={str?.Length ?? 0}, sendingAuth={sendingAuth}, url={UrlGraphQL}");
 
 					if (!response.IsSuccessStatusCode)
@@ -2539,13 +2523,11 @@ namespace CommonPluginsStores.Epic
 							Logger.Error($"[GraphQL] HTTP Error {response.StatusCode}: {operationName} - {FormatGraphQLResponsePreview(str)}");
 						}
 
-						Common.LogDebug(true,
-							$"[EpicApi.GraphQL] {operationName}: HTTP error body preview='{FormatGraphQLResponsePreview(str)}'");
+						Common.LogDebug($"[EpicApi.GraphQL] {operationName}: HTTP error body preview='{FormatGraphQLResponsePreview(str)}'");
 						return null;
 					}
 
-					Common.LogDebug(true,
-						$"[EpicApi.GraphQL] {operationName}: body preview='{FormatGraphQLResponsePreview(str)}'");
+					Common.LogDebug($"[EpicApi.GraphQL] {operationName}: body preview='{FormatGraphQLResponsePreview(str)}'");
 
 					if (Serialization.TryFromJson(str, out T data, out Exception ex))
 					{
@@ -2553,16 +2535,14 @@ namespace CommonPluginsStores.Epic
 					}
 					else if (ex != null)
 					{
-						Common.LogDebug(true,
-							$"[EpicApi.GraphQL] {operationName}: JSON parse failed, firstChar='{(str != null && str.Length > 0 ? str[0].ToString() : "?")}', " +
+						Common.LogDebug($"[EpicApi.GraphQL] {operationName}: JSON parse failed, firstChar='{(str != null && str.Length > 0 ? str[0].ToString() : "?")}', " +
 							$"preview='{FormatGraphQLResponsePreview(str)}'");
 						Common.LogError(ex, false, false, PluginName,
 							$"Failed to deserialize GraphQL response - {operationName}: {FormatGraphQLResponsePreview(str)}");
 					}
 					else
 					{
-						Common.LogDebug(true,
-							$"[EpicApi.GraphQL] {operationName}: TryFromJson returned false without exception, preview='{FormatGraphQLResponsePreview(str)}'");
+						Common.LogDebug($"[EpicApi.GraphQL] {operationName}: TryFromJson returned false without exception, preview='{FormatGraphQLResponsePreview(str)}'");
 					}
 
 					return null;
@@ -2647,8 +2627,7 @@ namespace CommonPluginsStores.Epic
 			string country = CodeLang.GetCountryFromLast(Locale);
 			string locale = CodeLang.GetEpicLang(Locale);
 
-			Common.LogDebug(true,
-				$"[EpicApi.QuerySearchStore] keywords='{keywords}', category='{category}', " +
+			Common.LogDebug($"[EpicApi.QuerySearchStore] keywords='{keywords}', category='{category}', " +
 				$"categoryEpicLibraryRef='{epicLibraryCategoryRef}', categoryMatchesEpicLibrary={category == epicLibraryCategoryRef}, " +
 				$"country='{country}', locale='{locale}', count={count}, start={start}, withPrice={withPrice}");
 
@@ -2674,8 +2653,7 @@ namespace CommonPluginsStores.Epic
 			int? pagingTotal = response?.Data?.Catalog?.SearchStore?.Paging != null
 				? (int?)response.Data.Catalog.SearchStore.Paging.Total
 				: null;
-			Common.LogDebug(true,
-				$"[EpicApi.QuerySearchStore] result keywords='{keywords}', elementCount={elementCount}, " +
+			Common.LogDebug($"[EpicApi.QuerySearchStore] result keywords='{keywords}', elementCount={elementCount}, " +
 				$"pagingTotal={(pagingTotal.HasValue ? pagingTotal.Value.ToString() : "n/a")}, responseNull={response == null}");
 
 			return response;
@@ -2695,7 +2673,7 @@ namespace CommonPluginsStores.Epic
 		{
 			string country = CodeLang.GetCountryFromLast(Locale);
 			string locale = CodeLang.GetEpicLang(Locale);
-			Common.LogDebug(true, FormatLogMessage(
+			Common.LogDebug(FormatLogMessage(
 				$"QueryAddonsByNamespace: namespace='{@namespace}', categories='{categories}', playniteLang='{Locale}', storeLang='{locale}', country='{country}'"));
 
 			var query = new QueryGetAddonsByNamespace
@@ -2713,7 +2691,7 @@ namespace CommonPluginsStores.Epic
 			};
 			AddonsByNamespaceResponse response = await QueryGraphQL<AddonsByNamespaceResponse>(query, forceAnonymous: true).ConfigureAwait(false);
 			int elementCount = response?.Data?.Catalog?.CatalogOffers?.Elements?.Count ?? 0;
-			Common.LogDebug(true, FormatLogMessage(
+			Common.LogDebug(FormatLogMessage(
 				$"QueryAddonsByNamespace: result namespace='{@namespace}', elementCount={elementCount}, playniteLang='{Locale}', storeLang='{locale}'"));
 			return response;
 		}
