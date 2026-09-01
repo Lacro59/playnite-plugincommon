@@ -272,6 +272,11 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 	<sys:String x:Key="LOCCommonControlsVisibleNoData">Afficher lorsqu'il n'y a pas de données</sys:String>
 	<sys:String x:Key="LOCCommonIconStore">Afficher l'icône du magasin</sys:String>
 	<sys:String x:Key="LOCCommonMenuInExtensions">Afficher le menu du plugin dans le sous-menu des extensions *</sys:String>
+	<sys:String x:Key="LOCCommonEnableVerboseLogging">Activer les logs de débogage détaillés du plugin (messages supplémentaires dans extensions.log)</sys:String>
+	<sys:String x:Key="LOCCommonDebugTab">Débogage</sys:String>
+	<sys:String x:Key="LOCCommonVerboseLoggingHelp" xml:space="preserve">Pour signaler un bug, activez les logs détaillés ci-dessous, reproduisez le problème une fois, puis créez un paquet de logs et joignez le fichier ZIP à votre issue GitHub. Les logs détaillés écrivent des messages de diagnostic supplémentaires dans extensions.log (dossier de configuration Playnite).</sys:String>
+	<sys:String x:Key="LOCCommonCreateLogPackageButton">Créer un paquet de logs</sys:String>
+	<sys:String x:Key="LOCCommonLogPackageHelp">Crée une archive ZIP des fichiers journaux Playnite dans le dossier cache et ouvre ce dossier. Joignez l'archive lors de l'ouverture d'un rapport de bug.</sys:String>
 	<sys:String x:Key="LOCCommonSaveColumOrder">Enregistrer l'ordre des colonnes</sys:String>
 
 	<!-- Integration — appearance -->
