@@ -125,6 +125,8 @@
 
 	<!-- ==================== LIST ACTIONS ==================== -->
 
+	<sys:String x:Key="LOCCommonListViewResetColumns">Réinitialiser les colonnes</sys:String>
+	<sys:String x:Key="LOCCommonListViewShowAllColumns">Afficher toutes les colonnes</sys:String>
 	<sys:String x:Key="LOCCommonClearSelection">Effacer la sélection</sys:String>
 	<sys:String x:Key="LOCCommonRefreshSelected">⟳ Refresh Selected</sys:String>
 	<sys:String x:Key="LOCCommonSelected">Sélectionnés :</sys:String>

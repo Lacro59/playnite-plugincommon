@@ -1,5 +1,6 @@
 using CommonPluginsShared.Extensions;
 using CommonPluginsShared.UI;
+using Playnite.SDK;
 using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
@@ -604,14 +605,20 @@ namespace CommonPluginsShared.Controls
 
             if (EnableColumnResetAction)
             {
-                MenuItem resetItem = new MenuItem { Header = "Reset columns" };
+                MenuItem resetItem = new MenuItem
+                {
+                    Header = GetColumnMenuHeader("LOCCommonListViewResetColumns", "Reset columns")
+                };
                 resetItem.Click += (sender, args) => ResetColumnConfiguration();
                 contextMenu.Items.Add(resetItem);
             }
 
             if (EnableColumnVisibilityToggle)
             {
-                MenuItem showAllItem = new MenuItem { Header = "Show all columns" };
+                MenuItem showAllItem = new MenuItem
+                {
+                    Header = GetColumnMenuHeader("LOCCommonListViewShowAllColumns", "Show all columns")
+                };
                 showAllItem.Click += (sender, args) => ShowAllColumns(gridView);
                 contextMenu.Items.Add(showAllItem);
 
@@ -655,6 +662,26 @@ namespace CommonPluginsShared.Controls
             }
 
             return contextMenu;
+        }
+
+        /// <summary>
+        /// Resolves a localized menu header, falling back to English when the key is missing.
+        /// </summary>
+        private static string GetColumnMenuHeader(string resourceKey, string fallback)
+        {
+            try
+            {
+                string value = ResourceProvider.GetString(resourceKey);
+                if (!value.IsNullOrEmpty() && !value.IsEqual(resourceKey))
+                {
+                    return value;
+                }
+            }
+            catch
+            {
+            }
+
+            return fallback;
         }
 
         /// <summary>
@@ -1784,6 +1811,8 @@ namespace CommonPluginsShared.Controls
 
         /// <summary>
         /// Gets display name for a column.
+        /// Prefer the first <see cref="Label"/> inside a header <see cref="StackPanel"/>
+        /// (icon may precede the label), then fall back to header content.
         /// </summary>
         private string GetColumnDisplayName(GridViewColumn column)
         {
@@ -1794,12 +1823,15 @@ namespace CommonPluginsShared.Controls
 
             if (column.Header is GridViewColumnHeader header)
             {
-                if (header.Content is StackPanel stackPanel && stackPanel.Children.Count > 0)
+                if (header.Content is StackPanel stackPanel)
                 {
-                    Label firstLabel = stackPanel.Children[0] as Label;
-                    if (firstLabel?.Content != null && !firstLabel.Content.ToString().IsNullOrEmpty())
+                    foreach (UIElement child in stackPanel.Children)
                     {
-                        return firstLabel.Content.ToString();
+                        Label label = child as Label;
+                        if (label?.Content != null && !label.Content.ToString().IsNullOrEmpty())
+                        {
+                            return label.Content.ToString();
+                        }
                     }
                 }
 

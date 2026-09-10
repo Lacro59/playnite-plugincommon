@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -128,6 +128,8 @@
 
 	<!-- ==================== LIST ACTIONS ==================== -->
 
+	<sys:String x:Key="LOCCommonListViewResetColumns">Reset columns</sys:String>
+	<sys:String x:Key="LOCCommonListViewShowAllColumns">Show all columns</sys:String>
 	<sys:String x:Key="LOCCommonClearSelection">Clear Selection</sys:String>
 	<sys:String x:Key="LOCCommonRefreshSelected">Refresh Selected</sys:String>
 	<sys:String x:Key="LOCCommonSelected">Selected:</sys:String>
