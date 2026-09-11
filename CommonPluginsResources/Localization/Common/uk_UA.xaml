@@ -125,6 +125,8 @@
 
 	<!-- ==================== LIST ACTIONS ==================== -->
 
+	<sys:String x:Key="LOCCommonListViewResetColumns">Reset columns</sys:String>
+	<sys:String x:Key="LOCCommonListViewShowAllColumns">Show all columns</sys:String>
 	<sys:String x:Key="LOCCommonClearSelection">Clear Selection</sys:String>
 	<sys:String x:Key="LOCCommonRefreshSelected">⟳ Refresh Selected</sys:String>
 	<sys:String x:Key="LOCCommonSelected">Selected:</sys:String>
@@ -272,6 +274,11 @@
 	<sys:String x:Key="LOCCommonControlsVisibleNoData">Відображати якщо немає даних</sys:String>
 	<sys:String x:Key="LOCCommonIconStore">Показувати іконку магазину</sys:String>
 	<sys:String x:Key="LOCCommonMenuInExtensions">Показувати меню плагіну у підменю розширень *</sys:String>
+	<sys:String x:Key="LOCCommonEnableVerboseLogging">Enable verbose plugin debug logging (extra logs in extensions.log)</sys:String>
+	<sys:String x:Key="LOCCommonDebugTab">Debug</sys:String>
+	<sys:String x:Key="LOCCommonVerboseLoggingHelp" xml:space="preserve">When reporting a bug, enable verbose logging below, reproduce the issue once, then create a log package and attach the ZIP file to your GitHub issue. Verbose logging writes additional diagnostic messages to extensions.log in the Playnite configuration folder.</sys:String>
+	<sys:String x:Key="LOCCommonCreateLogPackageButton">Create log package</sys:String>
+	<sys:String x:Key="LOCCommonLogPackageHelp">Creates a ZIP archive of Playnite log files in the cache folder and opens that folder. Attach the archive when opening a bug report.</sys:String>
 	<sys:String x:Key="LOCCommonSaveColumOrder">Зберегти порядок стовпців</sys:String>
 
 	<!-- Integration — appearance -->
