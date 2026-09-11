@@ -22,7 +22,7 @@ namespace CommonPluginsShared
 		{
 			_context = context;
 			_sw = Stopwatch.StartNew();
-			Common.LogDebug(true, string.Format("[{0}] start", _context));
+			Common.LogDebug(string.Format("[{0}] start", _context));
 		}
 
 		/// <summary>
@@ -31,7 +31,7 @@ namespace CommonPluginsShared
 		/// <param name="label">Step description.</param>
 		public void Step(string label)
 		{
-			Common.LogDebug(true, string.Format("[{0}] {1} [{2}ms]", _context, label, _sw.ElapsedMilliseconds));
+			Common.LogDebug(string.Format("[{0}] {1} [{2}ms]", _context, label, _sw.ElapsedMilliseconds));
 		}
 
 		/// <summary>
@@ -48,7 +48,7 @@ namespace CommonPluginsShared
 
 			_sw.Stop();
 			_stopped = true;
-			Common.LogDebug(true, string.Format("[{0}] {1} [{2}ms total]", _context, label, _sw.ElapsedMilliseconds));
+			Common.LogDebug(string.Format("[{0}] {1} [{2}ms total]", _context, label, _sw.ElapsedMilliseconds));
 		}
 
 		/// <inheritdoc />

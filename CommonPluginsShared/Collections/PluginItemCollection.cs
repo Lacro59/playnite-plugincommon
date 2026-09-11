@@ -62,7 +62,7 @@ namespace CommonPluginsShared.Collections
 					else
 					{
 						item.IsDeleted = true;
-						Common.LogDebug(true, $"Marking item {id} as deleted because game is missing or type does not match {expectedType.Name}.");
+						Common.LogDebug($"Marking item {id} as deleted because game is missing or type does not match {expectedType.Name}.");
 					}
 				}
 			}
@@ -101,7 +101,7 @@ namespace CommonPluginsShared.Collections
 				return;
 			}
 
-			Common.LogDebug(true, $"Starting bulk game info update for {Items.Count} items using PluginGameCollection<{typeof(T).Name}>.");
+			Common.LogDebug($"Starting bulk game info update for {Items.Count} items using PluginGameCollection<{typeof(T).Name}>.");
 
 			using (BufferedUpdate())
 			{
@@ -111,7 +111,7 @@ namespace CommonPluginsShared.Collections
 				}
 			}
 
-			Common.LogDebug(true, $"Completed bulk game info update for {Items.Count} items using PluginGameCollection<{typeof(T).Name}>.");
+			Common.LogDebug($"Completed bulk game info update for {Items.Count} items using PluginGameCollection<{typeof(T).Name}>.");
 		}
 
 		/// <summary>
@@ -145,7 +145,7 @@ namespace CommonPluginsShared.Collections
 				return;
 			}
 
-			Common.LogDebug(true, $"Starting bulk game info details update for {Items.Count} items using PluginGameCollectionWithDetails<{typeof(T).Name}, {typeof(Y).Name}>.");
+			Common.LogDebug($"Starting bulk game info details update for {Items.Count} items using PluginGameCollectionWithDetails<{typeof(T).Name}, {typeof(Y).Name}>.");
 
 			using (BufferedUpdate())
 			{
@@ -155,7 +155,7 @@ namespace CommonPluginsShared.Collections
 				}
 			}
 
-			Common.LogDebug(true, $"Completed bulk game info details update for {Items.Count} items using PluginGameCollectionWithDetails<{typeof(T).Name}, {typeof(Y).Name}>.");
+			Common.LogDebug($"Completed bulk game info details update for {Items.Count} items using PluginGameCollectionWithDetails<{typeof(T).Name}, {typeof(Y).Name}>.");
 		}
 
 		/// <summary>
@@ -172,7 +172,7 @@ namespace CommonPluginsShared.Collections
 				return true;
 			}
 
-			Common.LogDebug(true, $"Waiting for Playnite database to open before '{operationName}'.");
+			Common.LogDebug($"Waiting for Playnite database to open before '{operationName}'.");
 
 			bool isOpen = SpinWait.SpinUntil(() => IsDatabaseOpen, DatabaseOpenTimeoutMilliseconds);
 			if (!isOpen)

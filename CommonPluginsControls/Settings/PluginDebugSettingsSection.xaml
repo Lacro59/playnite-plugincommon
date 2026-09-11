@@ -1,0 +1,37 @@
+<UserControl x:Class="CommonPluginsControls.Settings.PluginDebugSettingsSection"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignWidth="640">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  PanningMode="VerticalOnly">
+        <StackPanel>
+            <TextBlock Style="{DynamicResource BaseTextBlockStyle}"
+                       Text="{DynamicResource LOCCommonVerboseLoggingHelp}"
+                       TextWrapping="Wrap"
+                       Opacity="0.9"/>
+
+            <CheckBox Margin="0,16,0,0"
+                      IsChecked="{Binding Settings.EnableVerboseLogging}"
+                      Content="{DynamicResource LOCCommonEnableVerboseLogging}"
+                      Checked="VerboseLogging_Changed"
+                      Unchecked="VerboseLogging_Changed"/>
+
+            <Button Margin="0,20,0,0"
+                    MinHeight="26"
+                    HorizontalAlignment="Left"
+                    Content="{DynamicResource LOCCommonCreateLogPackageButton}"
+                    Click="CreateLogPackage_Click"/>
+
+            <TextBlock Margin="0,12,0,0"
+                       Style="{DynamicResource BaseTextBlockStyle}"
+                       Text="{DynamicResource LOCCommonLogPackageHelp}"
+                       TextWrapping="Wrap"
+                       FontSize="{DynamicResource FontSizeSmall}"
+                       Opacity="0.75"/>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

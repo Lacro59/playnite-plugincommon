@@ -1,4 +1,4 @@
-﻿using AngleSharp.Dom;
+using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using CommonPlayniteShared.Common;
@@ -135,14 +135,14 @@ namespace CommonPluginsStores.Gog
         {
             if (CurrentAccountInfos == null)
             {
-                Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn: no CurrentAccountInfos.");
+                Common.LogDebug("[GogApi] GetIsUserLoggedIn: no CurrentAccountInfos.");
                 return false;
             }
 
             if (!CurrentAccountInfos.IsPrivate && !StoreSettings.UseAuth)
             {
                 bool hasUserId = !CurrentAccountInfos.UserId.IsNullOrEmpty();
-                Common.LogDebug(true, $"[GogApi] GetIsUserLoggedIn public account: hasUserId={hasUserId}.");
+                Common.LogDebug($"[GogApi] GetIsUserLoggedIn public account: hasUserId={hasUserId}.");
                 return hasUserId;
             }
 
@@ -150,30 +150,30 @@ namespace CommonPluginsStores.Gog
             {
                 if (TryGetAuthStatusFromStoredCookies())
                 {
-                    Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn fast-path (stored cookies): isLogged=true until background verification.");
+                    Common.LogDebug("[GogApi] GetIsUserLoggedIn fast-path (stored cookies): isLogged=true until background verification.");
                     return true;
                 }
 
                 bool? cachedToken = TryGetAuthStatusFromStoredToken();
                 if (cachedToken == true)
                 {
-                    Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn fast-path (stored token): isLogged=true until background verification.");
+                    Common.LogDebug("[GogApi] GetIsUserLoggedIn fast-path (stored token): isLogged=true until background verification.");
                     return true;
                 }
 
                 if (cachedToken == false)
                 {
-                    Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn fast-path (stored token): isLogged=false.");
+                    Common.LogDebug("[GogApi] GetIsUserLoggedIn fast-path (stored token): isLogged=false.");
                     return false;
                 }
 
-                Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn fast-path: no local session hint, returning false until background check.");
+                Common.LogDebug("[GogApi] GetIsUserLoggedIn fast-path: no local session hint, returning false until background check.");
                 return false;
             }
 
-            Common.LogDebug(true, "[GogApi] GetIsUserLoggedIn: full network verification.");
+            Common.LogDebug("[GogApi] GetIsUserLoggedIn: full network verification.");
             bool verified = VerifyGogUserLoggedIn();
-            Common.LogDebug(true, $"[GogApi] GetIsUserLoggedIn full verification result: isLogged={verified}.");
+            Common.LogDebug($"[GogApi] GetIsUserLoggedIn full verification result: isLogged={verified}.");
             return verified;
         }
 
@@ -183,7 +183,7 @@ namespace CommonPluginsStores.Gog
         private bool VerifyGogUserLoggedIn()
         {
             bool isLogged = CheckIsUserLoggedIn();
-            Common.LogDebug(true, $"[GogApi] VerifyGogUserLoggedIn CheckIsUserLoggedIn={isLogged}.");
+            Common.LogDebug($"[GogApi] VerifyGogUserLoggedIn CheckIsUserLoggedIn={isLogged}.");
             if (isLogged)
             {
                 if (GetStoredCookies() == null || GetStoredCookies().Count == 0)
@@ -302,7 +302,7 @@ namespace CommonPluginsStores.Gog
             {
                 AccountInfos refreshTarget = accountInfos;
                 string userId = refreshTarget.UserId;
-                Common.LogDebug(true, $"[GogApi] GetCurrentAccountInfos scheduled background refresh UserId={userId}, Pseudo={refreshTarget.Pseudo}.");
+                Common.LogDebug($"[GogApi] GetCurrentAccountInfos scheduled background refresh UserId={userId}, Pseudo={refreshTarget.Pseudo}.");
                 _ = Task.Run(() =>
                 {
                     try
@@ -314,7 +314,7 @@ namespace CommonPluginsStores.Gog
                         {
                             refreshTarget.Avatar = $"{UrlImage}/{profileUserGalaxy.Avatar.GogImageId}.jpg";
                             refreshTarget.Pseudo = profileUserGalaxy.Username;
-                            Common.LogDebug(true, $"[GogApi] GetCurrentAccountInfos galaxy profile updated: Pseudo={profileUserGalaxy.Username}.");
+                            Common.LogDebug($"[GogApi] GetCurrentAccountInfos galaxy profile updated: Pseudo={profileUserGalaxy.Username}.");
                         }
                         else
                         {
@@ -352,7 +352,7 @@ namespace CommonPluginsStores.Gog
                 AccountInfos current = CurrentAccountInfos;
                 if (current == null || !userId.IsEqual(current.UserId))
                 {
-                    Common.LogDebug(true, "[GogApi] GetCurrentAccountInfos background refresh discarded (account changed).");
+                    Common.LogDebug("[GogApi] GetCurrentAccountInfos background refresh discarded (account changed).");
                     return;
                 }
 
@@ -361,7 +361,7 @@ namespace CommonPluginsStores.Gog
                 current.IsPrivate = refreshTarget.IsPrivate;
                 current.AccountStatus = refreshTarget.AccountStatus;
                 SaveCurrentUser();
-                Common.LogDebug(true, $"[GogApi] GetCurrentAccountInfos background refresh done IsPrivate={current.IsPrivate}, Pseudo={current.Pseudo}, AccountStatus={current.AccountStatus}.");
+                Common.LogDebug($"[GogApi] GetCurrentAccountInfos background refresh done IsPrivate={current.IsPrivate}, Pseudo={current.Pseudo}, AccountStatus={current.AccountStatus}.");
             }
 
             var dispatcher = API.Instance?.MainView?.UIDispatcher;
@@ -580,7 +580,7 @@ namespace CommonPluginsStores.Gog
                     else
                     {
                         Logger.Warn($"Error 401 - Wait and retry");
-                        Common.LogDebug(true, $"[GogApi] 401/access_denied for game {id}, waiting 5000ms before single retry.");
+                        Common.LogDebug($"[GogApi] 401/access_denied for game {id}, waiting 5000ms before single retry.");
                         Thread.Sleep(5000);
                         return GetAchievementsPrivate(id, accountInfos, true);
                     }
@@ -944,17 +944,17 @@ namespace CommonPluginsStores.Gog
         {
             if (accountInfos == null || accountInfos.Pseudo.IsNullOrEmpty())
             {
-                Common.LogDebug(true, "[GogApi] CheckIsPublic skipped: missing account pseudo.");
+                Common.LogDebug("[GogApi] CheckIsPublic skipped: missing account pseudo.");
                 return false;
             }
 
             try
             {
                 string url = string.Format(UrlUser, accountInfos.Pseudo);
-                Common.LogDebug(true, $"[GogApi] CheckIsPublic started: pseudo={accountInfos.Pseudo}.");
+                Common.LogDebug($"[GogApi] CheckIsPublic started: pseudo={accountInfos.Pseudo}.");
                 string response = await Web.DownloadStringData(url, GetStoredCookies());
                 bool isPublic = !response.Contains("hook-test=\"isPrivate\"");
-                Common.LogDebug(true, $"[GogApi] CheckIsPublic completed: isPublic={isPublic}.");
+                Common.LogDebug($"[GogApi] CheckIsPublic completed: isPublic={isPublic}.");
                 return isPublic;
             }
             catch (Exception ex)
@@ -983,7 +983,7 @@ namespace CommonPluginsStores.Gog
                 webView.LoadingChanged += async (s, e) =>
                 {
                     string urlAtEvent = webView.GetCurrentAddress();
-                    Common.LogDebug(true, $"[GogApi] Auth webview LoadingChanged: isLoading={e.IsLoading}, url={FormatAuthWebViewUrlForLog(urlAtEvent)}.");
+                    Common.LogDebug($"[GogApi] Auth webview LoadingChanged: isLoading={e.IsLoading}, url={FormatAuthWebViewUrlForLog(urlAtEvent)}.");
 
                     if (e.IsLoading)
                     {
@@ -993,7 +993,7 @@ namespace CommonPluginsStores.Gog
                     if (Interlocked.Exchange(ref _isHandlingLoading, 1) == 1)
                     {
                         Interlocked.Exchange(ref _pendingLoginCheck, 1);
-                        Common.LogDebug(true, "[GogApi] Auth webview LoadingChanged: deferred (handler already running).");
+                        Common.LogDebug("[GogApi] Auth webview LoadingChanged: deferred (handler already running).");
                         return;
                     }
 
@@ -1005,7 +1005,7 @@ namespace CommonPluginsStores.Gog
 
                             if (!IsAuthOperationCurrent(operationGeneration))
                             {
-                                Common.LogDebug(true, "[GogApi] Auth webview login check aborted: superseded auth operation.");
+                                Common.LogDebug("[GogApi] Auth webview login check aborted: superseded auth operation.");
                                 return;
                             }
 
@@ -1014,7 +1014,7 @@ namespace CommonPluginsStores.Gog
 
                             if (!IsAuthOperationCurrent(operationGeneration))
                             {
-                                Common.LogDebug(true, "[GogApi] Auth webview login check aborted after delay: superseded auth operation.");
+                                Common.LogDebug("[GogApi] Auth webview login check aborted after delay: superseded auth operation.");
                                 return;
                             }
 
@@ -1036,10 +1036,10 @@ namespace CommonPluginsStores.Gog
                 };
 
                 CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
-                Common.LogDebug(true, $"[GogApi] Auth webview opening, initialNavigate={FormatAuthWebViewUrlForLog(UrlLogin)}.");
+                Common.LogDebug($"[GogApi] Auth webview opening, initialNavigate={FormatAuthWebViewUrlForLog(UrlLogin)}.");
                 webView.Navigate(UrlLogin);
                 _ = webView.OpenDialog();
-                Common.LogDebug(true, $"[GogApi] Auth webview closed, finalUrl={FormatAuthWebViewUrlForLog(webView.GetCurrentAddress())}, isLoggedIn={AccountBasic?.IsLoggedIn ?? false}.");
+                Common.LogDebug($"[GogApi] Auth webview closed, finalUrl={FormatAuthWebViewUrlForLog(webView.GetCurrentAddress())}, isLoggedIn={AccountBasic?.IsLoggedIn ?? false}.");
             }
         }
 
@@ -1051,7 +1051,7 @@ namespace CommonPluginsStores.Gog
         {
             string url = webView.GetCurrentAddress();
             bool isLoginPage = IsGogLoginPageUrl(url);
-            Common.LogDebug(true, $"[GogApi] Auth webview post-delay check, url={FormatAuthWebViewUrlForLog(url)}, isLoginPage={isLoginPage}.");
+            Common.LogDebug($"[GogApi] Auth webview post-delay check, url={FormatAuthWebViewUrlForLog(url)}, isLoginPage={isLoginPage}.");
 
             if (isLoginPage)
             {
@@ -1059,7 +1059,7 @@ namespace CommonPluginsStores.Gog
             }
 
             List<HttpCookie> gogCookies = GetWebCookies(false, webView);
-            Common.LogDebug(true, $"[GogApi] Auth webview cookie check: gogCookieCount={gogCookies?.Count ?? 0}.");
+            Common.LogDebug($"[GogApi] Auth webview cookie check: gogCookieCount={gogCookies?.Count ?? 0}.");
 
             if (gogCookies == null || gogCookies.Count == 0)
             {
@@ -1069,14 +1069,14 @@ namespace CommonPluginsStores.Gog
             string response = await Web.DownloadStringData(UrlAccountInfo, gogCookies);
             bool parsed = !string.IsNullOrEmpty(response);
             bool isLoggedIn = parsed && ApplyAccountBasicResponse(response);
-            Common.LogDebug(true, $"[GogApi] Auth webview account info check: parsed={parsed}, isLoggedIn={isLoggedIn}.");
+            Common.LogDebug($"[GogApi] Auth webview account info check: parsed={parsed}, isLoggedIn={isLoggedIn}.");
 
             if (!isLoggedIn)
             {
                 return;
             }
 
-            Common.LogDebug(true, "[GogApi] Auth webview login successful, saving cookies and closing.");
+            Common.LogDebug("[GogApi] Auth webview login successful, saving cookies and closing.");
             _ = SetStoredCookies(gogCookies);
             webView.Close();
         }
@@ -1112,12 +1112,12 @@ namespace CommonPluginsStores.Gog
 
             if (productApiDetail != null)
             {
-                Common.LogDebug(true, FormatLogMessage(
+                Common.LogDebug(FormatLogMessage(
                     $"GetProductDetail: cache hit id='{id}', playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}'"));
                 return productApiDetail;
             }
 
-            Common.LogDebug(true, FormatLogMessage(
+            Common.LogDebug(FormatLogMessage(
                 $"GetProductDetail: cache miss id='{id}', playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}'"));
             string response = Web.DownloadStringData(string.Format(UrlApiGameInfo, id, storeLang)).GetAwaiter().GetResult();
             if (!response.Contains("<!DOCTYPE html>", StringComparison.InvariantCultureIgnoreCase))
@@ -1129,12 +1129,12 @@ namespace CommonPluginsStores.Gog
                 }
 
                 FileDataService.SaveData(cachePath, productApiDetail);
-                Common.LogDebug(true, FormatLogMessage(
+                Common.LogDebug(FormatLogMessage(
                     $"GetProductDetail: saved id='{id}', playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}', hasData={productApiDetail != null}"));
             }
             else
             {
-                Common.LogDebug(true, FormatLogMessage(
+                Common.LogDebug(FormatLogMessage(
                     $"GetProductDetail: non-JSON HTML response id='{id}', playniteLang='{Locale}', storeLang='{storeLang}'"));
             }
 

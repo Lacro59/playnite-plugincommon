@@ -643,7 +643,7 @@ namespace CommonPluginsShared.Images
 					stopwatch.Stop();
 					if (string.IsNullOrEmpty(cachedFile))
 					{
-						Common.LogDebug(true, string.Format(
+						Common.LogDebug(string.Format(
 							"[ImageSourceManagerPlugin] GetImagePath HTTP failed ({0}ms, {1}): {2}",
 							stopwatch.ElapsedMilliseconds,
 							cacheProvider,
@@ -651,7 +651,7 @@ namespace CommonPluginsShared.Images
 						return null;
 					}
 
-					Common.LogDebug(true, string.Format(
+					Common.LogDebug(string.Format(
 						"[ImageSourceManagerPlugin] GetImagePath HTTP resolved ({0}ms, {1}): {2} -> {3}",
 						stopwatch.ElapsedMilliseconds,
 						cacheProvider,
@@ -772,7 +772,7 @@ namespace CommonPluginsShared.Images
 
 				if (existingMetadata == loadProperties)
 				{
-					Common.LogDebug(true, string.Format(
+					Common.LogDebug(string.Format(
 						"[ImageSourceManagerPlugin] GetImage memory cache hit: {0}",
 						FormatSourceForLog(source)));
 					return cachedItem.CacheObject as BitmapImage;
@@ -831,7 +831,7 @@ namespace CommonPluginsShared.Images
 						if (string.IsNullOrEmpty(cachedFile))
 						{
 							stopwatch.Stop();
-							Common.LogDebug(true, string.Format(
+							Common.LogDebug(string.Format(
 								"[ImageSourceManagerPlugin] GetImage HTTP failed ({0}ms, {1}): {2}",
 								stopwatch.ElapsedMilliseconds,
 								cacheProvider,
@@ -844,7 +844,7 @@ namespace CommonPluginsShared.Images
 					stopwatch.Stop();
 					if (bitmap == null)
 					{
-						Common.LogDebug(true, string.Format(
+						Common.LogDebug(string.Format(
 							"[ImageSourceManagerPlugin] GetImage decode failed ({0}ms, {1}): {2} -> {3}",
 							stopwatch.ElapsedMilliseconds,
 							cacheProvider,
@@ -853,7 +853,7 @@ namespace CommonPluginsShared.Images
 						return null;
 					}
 
-					Common.LogDebug(true, string.Format(
+					Common.LogDebug(string.Format(
 						"[ImageSourceManagerPlugin] GetImage HTTP resolved ({0}ms, {1}, memoryCached={2}): {3} -> {4}",
 						stopwatch.ElapsedMilliseconds,
 						cacheProvider,

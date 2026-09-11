@@ -303,7 +303,7 @@ namespace CommonPluginsShared.Utilities
 				return match.Groups[1].Value;
 			}
 
-			Common.LogDebug(true, $"JSON not found with pattern: {pattern}");
+			Common.LogDebug($"JSON not found with pattern: {pattern}");
 			return string.Empty;
 		}
 

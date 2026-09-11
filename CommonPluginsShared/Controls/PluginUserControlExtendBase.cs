@@ -99,6 +99,9 @@ namespace CommonPluginsShared.Controls
 				Visibility newVisibility = mustDisplay ? Visibility.Visible : Visibility.Collapsed;
 				if (obj.Parent is ContentControl contentControl)
 				{
+					// Local value helps themes that do not bind the host ContentControl.
+					// Prefer MustDisplay=false until HasData is known (see GameContextChanged) so
+					// this does not flash Visible on ProgressBar/ViewItem hosts without data.
 					contentControl.Visibility = newVisibility;
 				}
 
@@ -683,9 +686,21 @@ namespace CommonPluginsShared.Controls
 			}
 #endif
 
-			MustDisplay = AlwaysShow || controlDataContext.IsActivated;
+			bool isActivated = controlDataContext?.IsActivated ?? false;
 
-			if (!(controlDataContext?.IsActivated ?? false) || newContext == null || !MustDisplay)
+			// Pending HasData: only AlwaysShow claims MustDisplay before UpdateDataAsync.
+			// Setting MustDisplay = IsActivated here forced theme ContentControl hosts Visible
+			// for ProgressBar/ViewItem even with no cache entry (parent callback).
+			if (isContextSwitch)
+			{
+				MustDisplay = AlwaysShow;
+			}
+			else if (!isActivated && !AlwaysShow)
+			{
+				MustDisplay = false;
+			}
+
+			if (!isActivated || newContext == null)
 			{
 #if DEBUG
 				timer.Stop("early exit (not activated or no context)");
@@ -846,13 +861,28 @@ namespace CommonPluginsShared.Controls
 		/// <see cref="GameContextChanged"/> collapse/reset path.
 		/// </summary>
 		/// <param name="reason">Caller label for diagnostics.</param>
+		/// <remarks>
+		/// Does not set <see cref="MustDisplay"/> from <c>IsActivated</c> alone — post-data visibility
+		/// is owned by <c>RefreshMustDisplayFromData</c> in <see cref="PluginUserControlExtend"/>.
+		/// <see cref="AlwaysShow"/> controls keep <see cref="MustDisplay"/> true while debouncing.
+		/// </remarks>
 		protected void ScheduleDataRefresh(string reason)
 		{
-			MustDisplay = AlwaysShow || (controlDataContext?.IsActivated ?? false);
+			bool isActivated = controlDataContext?.IsActivated ?? false;
 
-			if (!(controlDataContext?.IsActivated ?? false) || GameContext == null || !MustDisplay)
+			if (!isActivated || GameContext == null)
 			{
+				if (!AlwaysShow)
+				{
+					MustDisplay = false;
+				}
+
 				return;
+			}
+
+			if (AlwaysShow)
+			{
+				MustDisplay = true;
 			}
 
 			RestartTimer(reason);
@@ -919,21 +949,21 @@ namespace CommonPluginsShared.Controls
 			return string.Format("{0}#{1:X8}", GetType().Name, GetHashCode());
 		}
 
-		/// <summary>Verbose trace — DEBUG builds only, marked as ignored in the log file.</summary>
+		/// <summary>Verbose trace — gated by <see cref="Common.IsVerboseLoggingEffective"/>.</summary>
 		protected void LogControlTrace(string phase, string detail = null)
 		{
 			string message = detail == null
 				? string.Format("[{0}] {1}", GetInstanceDiagnosticId(), phase)
 				: string.Format("[{0}] {1} — {2}", GetInstanceDiagnosticId(), phase, detail);
-			Common.LogDebug(true, message);
+			Common.LogDebug(message);
 		}
 
 		/// <summary>
-		/// Important diagnostic — logged in DEBUG and Release at debug level without the [Ignored] prefix.
+		/// Important control diagnostic — same verbose gate as <see cref="LogControlTrace"/>.
 		/// </summary>
 		protected void LogControlIssue(string message)
 		{
-			Common.LogDebug(true, string.Format("[{0}] {1}", GetInstanceDiagnosticId(), message));
+			Common.LogDebug(string.Format("[{0}] {1}", GetInstanceDiagnosticId(), message));
 		}
 
 		private void LogNotifyAllInstancesFailure(Exception ex)

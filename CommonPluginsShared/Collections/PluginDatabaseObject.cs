@@ -798,7 +798,7 @@ namespace CommonPluginsShared.Collections
 							{
 								RemoveTag(item.Id);
 								_database.Remove(item.Id);
-								Common.LogDebug(true, string.Format("ClearDatabase — removed item {0} ({1})", item.Id, item.Name));
+								Common.LogDebug(string.Format("ClearDatabase — removed item {0} ({1})", item.Id, item.Name));
 								removedCount++;
 								a.CurrentProgressValue++;
 							}
@@ -1799,15 +1799,30 @@ namespace CommonPluginsShared.Collections
 		}
 
 		/// <summary>
+		/// Plugin tag IDs that must remain on the game when stripping playtime / feature tags.
+		/// </summary>
+		/// <returns>Protected tag identifiers; empty by default.</returns>
+		protected virtual IEnumerable<Guid> GetProtectedPluginTagIds()
+		{
+			yield break;
+		}
+
+		/// <summary>
 		/// Removes all plugin-owned tags from <paramref name="game"/>.TagIds in memory.
 		/// Does NOT persist the change — caller is responsible for calling PersistGameUpdate.
+		/// Tags returned by <see cref="GetProtectedPluginTagIds"/> are preserved.
 		/// </summary>
 		protected void StripPluginTags(Game game)
 		{
-			if (game?.TagIds == null) return;
+			if (game?.TagIds == null)
+			{
+				return;
+			}
+
+			HashSet<Guid> protectedIds = new HashSet<Guid>(GetProtectedPluginTagIds() ?? Enumerable.Empty<Guid>());
 
 			game.TagIds = game.TagIds
-				.Where(x => !PluginTags.Any(y => x == y.Id))
+				.Where(x => protectedIds.Contains(x) || !PluginTags.Any(y => x == y.Id))
 				.ToList();
 		}
 
@@ -1836,7 +1851,7 @@ namespace CommonPluginsShared.Collections
 		/// <inheritdoc/>
 		public void RemoveTagAllGames(bool fromClearDatabase = false)
 		{
-			Common.LogDebug(true, "RemoveTagAllGame()");
+			Common.LogDebug("RemoveTagAllGame()");
 
 			string message = fromClearDatabase
 				? string.Format("{0} - {1}", PluginName,
@@ -2484,7 +2499,7 @@ namespace CommonPluginsShared.Collections
 			if (_lastErrorNotifications.TryGetValue(dedupKey, out DateTime lastSent)
 				&& now - lastSent < ErrorNotificationDedupWindow)
 			{
-				Common.LogDebug(true, string.Format(
+				Common.LogDebug(string.Format(
 					"[{0}] NotifyError({1}) suppressed — dedup window {2}s, lastSent={3:O}, message={4}",
 					PluginName,
 					operation,
@@ -2496,7 +2511,7 @@ namespace CommonPluginsShared.Collections
 
 			_lastErrorNotifications[dedupKey] = now;
 
-			Common.LogDebug(true, string.Format(
+			Common.LogDebug(string.Format(
 				"[{0}] NotifyError({1}) posting notification — {2}",
 				PluginName,
 				operation,
@@ -2527,7 +2542,7 @@ namespace CommonPluginsShared.Collections
 				return database;
 			}
 
-			Common.LogDebug(true, string.Format(
+			Common.LogDebug(string.Format(
 				"[{0}] {1} — plugin database null, waiting via GetDatabaseSafe ({2}), item={3}",
 				PluginName,
 				operation,
@@ -2546,7 +2561,7 @@ namespace CommonPluginsShared.Collections
 			}
 			else
 			{
-				Common.LogDebug(true, string.Format(
+				Common.LogDebug(string.Format(
 					"[{0}] {1} — database ready after wait, item={2}",
 					PluginName,
 					operation,

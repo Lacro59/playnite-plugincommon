@@ -1,4 +1,4 @@
-﻿using CommonPlayniteShared.Common;
+using CommonPlayniteShared.Common;
 using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Models;
@@ -130,7 +130,7 @@ namespace CommonPluginsStores.GameJolt
                 if (response.IsNullOrEmpty())
                 {
                     Logger.Warn($"Empty trophies payload for game {id}, retrying once.");
-                    Common.LogDebug(true, $"[GameJoltApi] Empty response for {url}, throttled retry with interval {ApiRequestMinInterval.TotalMilliseconds}ms.");
+                    Common.LogDebug($"[GameJoltApi] Empty response for {url}, throttled retry with interval {ApiRequestMinInterval.TotalMilliseconds}ms.");
                     WaitForApiRateLimit();
                     jsonData = Web.DownloadJsonDataWebView(url, GetStoredCookies(), true, CookiesDomains).GetAwaiter().GetResult();
                     response = jsonData.Item1;
@@ -192,7 +192,7 @@ namespace CommonPluginsStores.GameJolt
                 if (response.IsNullOrEmpty())
                 {
                     Logger.Warn($"Empty trophies schema payload for game {id}, retrying once.");
-                    Common.LogDebug(true, $"[GameJoltApi] Empty schema response for {url}, throttled retry with interval {ApiRequestMinInterval.TotalMilliseconds}ms.");
+                    Common.LogDebug($"[GameJoltApi] Empty schema response for {url}, throttled retry with interval {ApiRequestMinInterval.TotalMilliseconds}ms.");
                     WaitForApiRateLimit();
                     jsonData = Web.DownloadJsonDataWebView(url, GetStoredCookies(), true, CookiesDomains).GetAwaiter().GetResult();
                     response = jsonData.Item1;

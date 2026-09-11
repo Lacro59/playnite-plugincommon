@@ -1,4 +1,4 @@
-﻿using Ardalis.GuardClauses;
+using Ardalis.GuardClauses;
 using CommonPlayniteShared;
 using CommonPlayniteShared.Common;
 using CommonPluginsShared;
@@ -446,7 +446,7 @@ namespace CommonPluginsStores
 						return true;
 					}
 
-					Common.LogDebug(true, FormatLogMessage("Session token cleared (nothing to save)."));
+					Common.LogDebug(FormatLogMessage("Session token cleared (nothing to save)."));
 				}
 				catch (Exception ex)
 				{
@@ -488,7 +488,7 @@ namespace CommonPluginsStores
 
 			if (pendingTask != null && !pendingTask.IsCompleted)
 			{
-				Common.LogDebug(true, FormatLogMessage("IsUserLoggedIn: waiting for pending background login refresh."));
+				Common.LogDebug(FormatLogMessage("IsUserLoggedIn: waiting for pending background login refresh."));
 				pendingTask.GetAwaiter().GetResult();
 			}
 		}
@@ -536,7 +536,7 @@ namespace CommonPluginsStores
 						_loginRefreshCallbacks.Add(onCompleted);
 					}
 
-					Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: coalesced with in-flight refresh."));
+					Common.LogDebug(FormatLogMessage("RefreshIsUserLoggedInInBackground: coalesced with in-flight refresh."));
 					return;
 				}
 
@@ -545,7 +545,7 @@ namespace CommonPluginsStores
 					_loginRefreshCallbacks.Add(onCompleted);
 				}
 
-				Common.LogDebug(true, FormatLogMessage($"RefreshIsUserLoggedInInBackground: scheduling full login check, generation={operationGeneration}."));
+				Common.LogDebug(FormatLogMessage($"RefreshIsUserLoggedInInBackground: scheduling full login check, generation={operationGeneration}."));
 
 				refreshCompleted = new TaskCompletionSource<object>();
 				previousGate = _pendingLoginRefreshTask;
@@ -558,7 +558,7 @@ namespace CommonPluginsStores
 				{
 					if (!IsAuthOperationCurrent(operationGeneration))
 					{
-						Common.LogDebug(true, FormatLogMessage($"RefreshIsUserLoggedInInBackground: aborted before start (generation={operationGeneration}, current={Interlocked.Read(ref _authOperationGeneration)})."));
+						Common.LogDebug(FormatLogMessage($"RefreshIsUserLoggedInInBackground: aborted before start (generation={operationGeneration}, current={Interlocked.Read(ref _authOperationGeneration)})."));
 						return;
 					}
 
@@ -567,7 +567,7 @@ namespace CommonPluginsStores
 						BeginFullLoginCheck(operationGeneration);
 						if (!IsAuthOperationCurrent(operationGeneration))
 						{
-							Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: aborted after BeginFullLoginCheck (superseded auth operation)."));
+							Common.LogDebug(FormatLogMessage("RefreshIsUserLoggedInInBackground: aborted after BeginFullLoginCheck (superseded auth operation)."));
 							return;
 						}
 
@@ -584,12 +584,12 @@ namespace CommonPluginsStores
 
 						if (!IsAuthCheckCurrent())
 						{
-							Common.LogDebug(true, FormatLogMessage("RefreshIsUserLoggedInInBackground: result discarded (superseded auth operation)."));
+							Common.LogDebug(FormatLogMessage("RefreshIsUserLoggedInInBackground: result discarded (superseded auth operation)."));
 							return;
 						}
 
 						SetValue(ref isUserLoggedIn, isLoggedIn);
-						Common.LogDebug(true, FormatLogMessage($"RefreshIsUserLoggedInInBackground: full check completed, IsUserLoggedIn={isLoggedIn}."));
+						Common.LogDebug(FormatLogMessage($"RefreshIsUserLoggedInInBackground: full check completed, IsUserLoggedIn={isLoggedIn}."));
 					}
 					catch (Exception ex)
 					{
@@ -625,7 +625,7 @@ namespace CommonPluginsStores
 				_loginRefreshCallbacks.Clear();
 			}
 
-			Common.LogDebug(true, FormatLogMessage($"RefreshIsUserLoggedInInBackground: notifying UI ({callbacks.Count} callback(s))."));
+			Common.LogDebug(FormatLogMessage($"RefreshIsUserLoggedInInBackground: notifying UI ({callbacks.Count} callback(s))."));
 			foreach (Action callback in callbacks)
 			{
 				if (callback != null)
@@ -641,7 +641,7 @@ namespace CommonPluginsStores
 		protected long BeginAuthOperation()
 		{
 			long generation = Interlocked.Increment(ref _authOperationGeneration);
-			Common.LogDebug(true, FormatLogMessage($"BeginAuthOperation: generation={generation}."));
+			Common.LogDebug(FormatLogMessage($"BeginAuthOperation: generation={generation}."));
 			return generation;
 		}
 
@@ -739,7 +739,7 @@ namespace CommonPluginsStores
             _accountCache.Clear();
             SetValue(ref _lazyAccount, CreateAccountInfosLazy(), nameof(CurrentAccountInfos));
             isUserLoggedIn = null;
-            Common.LogDebug(true, FormatLogMessage("ReloadAccountInfos: account cache invalidated."));
+            Common.LogDebug(FormatLogMessage("ReloadAccountInfos: account cache invalidated."));
         }
 
         private Lazy<AccountInfos> CreateAccountInfosLazy()
@@ -767,12 +767,12 @@ namespace CommonPluginsStores
                 CookiesTools.ClearStoredCookies();
                 if (ClearGlobalWebViewCookiesOnSessionClear)
                 {
-                    Common.LogDebug(true, FormatLogMessage($"ClearSession: purging shared WebView cookie jar ({CookiesDomains?.Count ?? 0} domain(s))."));
+                    Common.LogDebug(FormatLogMessage($"ClearSession: purging shared WebView cookie jar ({CookiesDomains?.Count ?? 0} domain(s))."));
                     CookiesTools.ClearDomainCookies();
                 }
                 else
                 {
-                    Common.LogDebug(true, FormatLogMessage("ClearSession: skipped global WebView cookie purge (ClearGlobalWebViewCookiesOnSessionClear=false); SSO jar preserved for other plugins."));
+                    Common.LogDebug(FormatLogMessage("ClearSession: skipped global WebView cookie purge (ClearGlobalWebViewCookiesOnSessionClear=false); SSO jar preserved for other plugins."));
                 }
 
                 ClearStoredToken();
@@ -802,11 +802,11 @@ namespace CommonPluginsStores
                 {
                     FileSystem.DeleteFileSafe(FileToken);
                     LogInfo("Stored token file deleted");
-                    Common.LogDebug(true, FormatLogMessage($"ClearStoredToken: {FileToken}"));
+                    Common.LogDebug(FormatLogMessage($"ClearStoredToken: {FileToken}"));
                 }
                 else
                 {
-                    Common.LogDebug(true, FormatLogMessage("ClearStoredToken: no token file found"));
+                    Common.LogDebug(FormatLogMessage("ClearStoredToken: no token file found"));
                 }
             }
         }
@@ -829,7 +829,7 @@ namespace CommonPluginsStores
             user.Link = null;
             user.Pseudo = null;
             user.AccountStatus = AccountStatus.Unknown;
-            Common.LogDebug(true, FormatLogMessage("ClearSession: session profile fields cleared (UserId, Pseudo, avatar, link)"));
+            Common.LogDebug(FormatLogMessage("ClearSession: session profile fields cleared (UserId, Pseudo, avatar, link)"));
         }
 
         /// <summary>
@@ -845,7 +845,7 @@ namespace CommonPluginsStores
             }
 
             user.SessionLoggedOutByUser = true;
-            Common.LogDebug(true, FormatLogMessage("ClearSession: session logged-out flag set (SSO refresh suppressed)."));
+            Common.LogDebug(FormatLogMessage("ClearSession: session logged-out flag set (SSO refresh suppressed)."));
         }
 
         /// <inheritdoc />
@@ -859,7 +859,7 @@ namespace CommonPluginsStores
 
             user.SessionLoggedOutByUser = false;
             SaveCurrentUser();
-            Common.LogDebug(true, FormatLogMessage("PrepareExplicitLogin: session logged-out flag cleared."));
+            Common.LogDebug(FormatLogMessage("PrepareExplicitLogin: session logged-out flag cleared."));
         }
 
         /// <summary>
