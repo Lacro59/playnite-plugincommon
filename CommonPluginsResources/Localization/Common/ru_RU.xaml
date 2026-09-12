@@ -125,8 +125,8 @@
 
 	<!-- ==================== LIST ACTIONS ==================== -->
 
-	<sys:String x:Key="LOCCommonListViewResetColumns">Reset columns</sys:String>
-	<sys:String x:Key="LOCCommonListViewShowAllColumns">Show all columns</sys:String>
+	<sys:String x:Key="LOCCommonListViewResetColumns">Сбросить столбцы</sys:String>
+	<sys:String x:Key="LOCCommonListViewShowAllColumns">Показать все столбцы</sys:String>
 	<sys:String x:Key="LOCCommonClearSelection">Очистить выбранное</sys:String>
 	<sys:String x:Key="LOCCommonRefreshSelected">⟳ Refresh Selected</sys:String>
 	<sys:String x:Key="LOCCommonSelected">Выбрано:</sys:String>
@@ -274,11 +274,11 @@
 	<sys:String x:Key="LOCCommonControlsVisibleNoData">Отображать текст, когда нет данны</sys:String>
 	<sys:String x:Key="LOCCommonIconStore">Показать иконку магазина</sys:String>
 	<sys:String x:Key="LOCCommonMenuInExtensions">Показывать меню плагинов в подменю расширений *</sys:String>
-	<sys:String x:Key="LOCCommonEnableVerboseLogging">Enable verbose plugin debug logging (extra logs in extensions.log)</sys:String>
-	<sys:String x:Key="LOCCommonDebugTab">Debug</sys:String>
-	<sys:String x:Key="LOCCommonVerboseLoggingHelp" xml:space="preserve">When reporting a bug, enable verbose logging below, reproduce the issue once, then create a log package and attach the ZIP file to your GitHub issue. Verbose logging writes additional diagnostic messages to extensions.log in the Playnite configuration folder.</sys:String>
-	<sys:String x:Key="LOCCommonCreateLogPackageButton">Create log package</sys:String>
-	<sys:String x:Key="LOCCommonLogPackageHelp">Creates a ZIP archive of Playnite log files in the cache folder and opens that folder. Attach the archive when opening a bug report.</sys:String>
+	<sys:String x:Key="LOCCommonEnableVerboseLogging">Включить подробное ведение логов плагина (дополнительные логи в extensions.log)</sys:String>
+	<sys:String x:Key="LOCCommonDebugTab">Отладка</sys:String>
+	<sys:String x:Key="LOCCommonVerboseLoggingHelp" xml:space="preserve">При сообщении об ошибке включите подробное логирование ниже, воспроизведите проблему один раз, затем создайте пакет логов и прикрепите ZIP-файл к вашему обращению (issue) на GitHub. Подробное логирование записывает дополнительные диагностические сообщения в файл extensions.log в папке конфигурации Playnite.</sys:String>
+	<sys:String x:Key="LOCCommonCreateLogPackageButton">Создать пакет логов</sys:String>
+	<sys:String x:Key="LOCCommonLogPackageHelp">Создает ZIP-архив с файлами логов Playnite в папке кэша и открывает эту папку. Прикрепите архив при создании отчета об ошибке.</sys:String>
 	<sys:String x:Key="LOCCommonSaveColumOrder">Сохранить порядок сортировки</sys:String>
 
 	<!-- Integration — appearance -->
