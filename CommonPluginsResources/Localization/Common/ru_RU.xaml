@@ -285,7 +285,7 @@
 	<sys:String x:Key="LOCCommonIntegration">Внешний вид</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButton">Показать кнопку плагина в подробностях игры</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButtonDetails">Кнопка с деталями</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonHeader">Отображать кнопку плагина в Windiws баре</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonHeader">Отображать кнопку плагина в заголовке окна</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButtonIsToggle">С кнопкой переключения</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">Показывать только иконк</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButtonOptions">Параметры кнопки</sys:String>
