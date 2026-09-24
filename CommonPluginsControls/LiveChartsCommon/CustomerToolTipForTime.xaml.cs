@@ -100,7 +100,22 @@ namespace CommonPluginsControls.LiveChartsCommon
             new FrameworkPropertyMetadata(true, OnShowContentFlagsChanged));
 
         /// <summary>
-        /// True when the left column (icon and/or name) should be visible.
+        /// When true, shows a color swatch from <c>Series.Fill</c> (pie charts).
+        /// </summary>
+        public bool ShowSeriesColor
+        {
+            get { return (bool)GetValue(ShowSeriesColorProperty); }
+            set { SetValue(ShowSeriesColorProperty, value); }
+        }
+
+        public static readonly DependencyProperty ShowSeriesColorProperty = DependencyProperty.Register(
+            nameof(ShowSeriesColor),
+            typeof(bool),
+            typeof(CustomerToolTipForTime),
+            new FrameworkPropertyMetadata(false, OnShowContentFlagsChanged));
+
+        /// <summary>
+        /// True when the left column (color swatch, icon and/or name) should be visible.
         /// Dependency property so DataTemplate bindings refresh when flags change.
         /// </summary>
         public bool ShowLeftContent
@@ -170,7 +185,7 @@ namespace CommonPluginsControls.LiveChartsCommon
 
         private void UpdateShowLeftContent()
         {
-            ShowLeftContent = ShowIcon || ShowLabel;
+            ShowLeftContent = ShowIcon || ShowLabel || ShowSeriesColor;
             OnPropertyChanged(nameof(ShowLeftContent));
         }
 

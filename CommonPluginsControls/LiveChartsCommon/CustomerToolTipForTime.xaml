@@ -44,6 +44,21 @@
                                         <!-- Plain TextBlock/Image: TextBlockWithIcon custom DPs do not receive LiveCharts ChartPoint bindings. -->
                                         <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,16,0" VerticalAlignment="Center"
                                                     Visibility="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.ShowLeftContent, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <Border Width="12" Height="12" CornerRadius="2" Margin="0,0,8,0" VerticalAlignment="Center"
+                                                    Background="{Binding Series.Fill}"
+                                                    BorderBrush="{DynamicResource CommonToolTipBorderBrush}"
+                                                    BorderThickness="1">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.ShowSeriesColor}" Value="False">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                            </Border>
                                             <Image Height="28" Margin="0,0,8,0" VerticalAlignment="Center"
                                                    Source="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Icon), Converter={StaticResource ObjectToImageSourceConverter}}">
                                                 <Image.Style>
