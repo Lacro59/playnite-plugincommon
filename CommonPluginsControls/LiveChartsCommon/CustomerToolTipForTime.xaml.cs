@@ -1,15 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Data;
 using CommonPluginsControls.Controls;
 using CommonPlayniteShared.Common;
-using CommonPluginsShared;
 using LiveCharts;
 using LiveCharts.Wpf;
-using System.Collections.Generic;
 
 namespace CommonPluginsControls.LiveChartsCommon
 {
@@ -82,7 +80,40 @@ namespace CommonPluginsControls.LiveChartsCommon
             nameof(ShowIcon),
             typeof(bool),
             typeof(CustomerToolTipForTime),
-            new FrameworkPropertyMetadata(false));
+            new FrameworkPropertyMetadata(false, OnShowContentFlagsChanged));
+
+        /// <summary>
+        /// When true, the series name is shown in the left tooltip column (Genres/Tags).
+        /// When false with <see cref="ShowIcon"/> true, only the icon is shown (Games).
+        /// When both false, only the playtime remains (Sources).
+        /// </summary>
+        public bool ShowLabel
+        {
+            get { return (bool)GetValue(ShowLabelProperty); }
+            set { SetValue(ShowLabelProperty, value); }
+        }
+
+        public static readonly DependencyProperty ShowLabelProperty = DependencyProperty.Register(
+            nameof(ShowLabel),
+            typeof(bool),
+            typeof(CustomerToolTipForTime),
+            new FrameworkPropertyMetadata(true, OnShowContentFlagsChanged));
+
+        /// <summary>
+        /// True when the left column (icon and/or name) should be visible.
+        /// Dependency property so DataTemplate bindings refresh when flags change.
+        /// </summary>
+        public bool ShowLeftContent
+        {
+            get { return (bool)GetValue(ShowLeftContentProperty); }
+            private set { SetValue(ShowLeftContentProperty, value); }
+        }
+
+        public static readonly DependencyProperty ShowLeftContentProperty = DependencyProperty.Register(
+            nameof(ShowLeftContent),
+            typeof(bool),
+            typeof(CustomerToolTipForTime),
+            new FrameworkPropertyMetadata(true));
 
         public bool ShowTitle
         {
@@ -125,6 +156,63 @@ namespace CommonPluginsControls.LiveChartsCommon
         #endregion
 
 
+        private static void OnShowContentFlagsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            CustomerToolTipForTime tooltip = d as CustomerToolTipForTime;
+            if (tooltip == null)
+            {
+                return;
+            }
+
+            tooltip.UpdateShowLeftContent();
+            tooltip.ApplyModeFromFlags();
+        }
+
+        private void UpdateShowLeftContent()
+        {
+            ShowLeftContent = ShowIcon || ShowLabel;
+            OnPropertyChanged(nameof(ShowLeftContent));
+        }
+
+        /// <summary>
+        /// Maps ShowIcon/ShowLabel to a TextBlockWithIconMode for API compatibility (tooltip XAML uses ShowIcon/ShowLabel directly).
+        /// </summary>
+        private void ApplyModeFromFlags()
+        {
+            if (ShowIcon && !ShowLabel)
+            {
+                if (Mode == TextBlockWithIconMode.IconTextFirstWithText
+                    || Mode == TextBlockWithIconMode.IconTextFirstOnly
+                    || Mode == TextBlockWithIconMode.IconTextOnly
+                    || Mode == TextBlockWithIconMode.IconTextWithText)
+                {
+                    Mode = TextBlockWithIconMode.IconTextFirstOnly;
+                }
+                else
+                {
+                    Mode = TextBlockWithIconMode.IconFirstOnly;
+                }
+            }
+            else if (!ShowIcon && ShowLabel)
+            {
+                Mode = TextBlockWithIconMode.TextOnly;
+            }
+            else if (ShowIcon && ShowLabel)
+            {
+                if (Mode == TextBlockWithIconMode.IconTextFirstOnly
+                    || Mode == TextBlockWithIconMode.IconTextOnly
+                    || Mode == TextBlockWithIconMode.IconTextFirstWithText
+                    || Mode == TextBlockWithIconMode.IconTextWithText)
+                {
+                    Mode = TextBlockWithIconMode.IconTextFirstWithText;
+                }
+                else if (Mode == TextBlockWithIconMode.IconFirstOnly || Mode == TextBlockWithIconMode.IconOnly)
+                {
+                    Mode = TextBlockWithIconMode.IconFirstWithText;
+                }
+            }
+        }
+
         protected virtual void OnPropertyChanged(string propertyName = null)
         {
             if (PropertyChanged != null)
@@ -139,25 +227,19 @@ namespace CommonPluginsControls.LiveChartsCommon
             InitializeComponent();
 
             DataContext = this;
+            UpdateShowLeftContent();
         }
 
         private void Grid_Loaded(object sender, RoutedEventArgs e)
         {
-            if (ShowIcon)
+            // LiveCharts may replace DataContext when hosting the tooltip; restore self for flag bindings.
+            if (!ReferenceEquals(DataContext, this))
             {
-                if (Mode == TextBlockWithIconMode.IconTextFirstOnly || Mode == TextBlockWithIconMode.IconTextFirstWithText || Mode == TextBlockWithIconMode.IconTextOnly)
-                {
-                    Mode = TextBlockWithIconMode.IconTextFirstWithText;
-                }
-                else if (Mode == TextBlockWithIconMode.IconFirstOnly || Mode == TextBlockWithIconMode.IconFirstWithText || Mode == TextBlockWithIconMode.IconOnly)
-                {
-                    Mode = TextBlockWithIconMode.IconFirstWithText;
-                }
+                DataContext = this;
             }
-            else
-            {
-                Mode = TextBlockWithIconMode.TextOnly;
-            }
+
+            UpdateShowLeftContent();
+            ApplyModeFromFlags();
         }
     }
 }
