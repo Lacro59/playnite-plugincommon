@@ -193,6 +193,13 @@ namespace CommonPluginsShared.Controls
 		/// (ProgressBar / ViewItem); AlwaysShow controls (e.g. PluginButton) stay visible.
 		/// </description>
 		/// </item>
+		/// <item>
+		/// <description>
+		/// Library filter (<see cref="PlayniteTools.ShouldIncludeLibraryGame"/>) collapses non-AlwaysShow
+		/// controls for excluded games (Hidden, source, emulated). <see cref="PluginUserControlExtendBase.AlwaysShow"/>
+		/// bypasses that guard so theme buttons remain usable on Hidden / filtered games (e.g. DuplicateHider).
+		/// </description>
+		/// </item>
 		/// </list>
 		/// Smoke other plugins after publishing this submodule: game without plugin data → game with data.
 		/// </remarks>
@@ -225,12 +232,29 @@ namespace CommonPluginsShared.Controls
 			if (pluginDatabase.FilterSettings != null
 				&& !PlayniteTools.ShouldIncludeLibraryGame(gameSnapshot, pluginDatabase.FilterSettings))
 			{
-				PlayniteTools.LogLibraryFilterExclusion(
-					string.Format("{0}.PluginUserControl", pluginDatabase.PluginName),
+				string exclusionReason = PlayniteTools.GetLibraryFilterExclusionReason(
 					gameSnapshot,
-					PlayniteTools.GetLibraryFilterExclusionReason(gameSnapshot, pluginDatabase.FilterSettings));
-				SetVisibility(Visibility.Collapsed);
-				return;
+					pluginDatabase.FilterSettings);
+
+				// AlwaysShow (e.g. PluginButton) must stay available on Hidden / filtered games.
+				if (AlwaysShow)
+				{
+					Common.LogDebug(string.Format(
+						"[LibraryFilter] {0}.PluginUserControl: AlwaysShow bypass — would exclude '{1}' ({2}) — reason={3}",
+						pluginDatabase.PluginName,
+						gameSnapshot.Name ?? "?",
+						gameSnapshot.Id,
+						PlayniteTools.GetLibraryFilterExclusionDetail(gameSnapshot, exclusionReason) ?? "unknown"));
+				}
+				else
+				{
+					PlayniteTools.LogLibraryFilterExclusion(
+						string.Format("{0}.PluginUserControl", pluginDatabase.PluginName),
+						gameSnapshot,
+						exclusionReason);
+					SetVisibility(Visibility.Collapsed);
+					return;
+				}
 			}
 
 #if DEBUG
