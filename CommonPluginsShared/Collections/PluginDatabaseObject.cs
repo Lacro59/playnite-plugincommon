@@ -868,8 +868,12 @@ namespace CommonPluginsShared.Collections
 		public virtual void GetSelectData()
 		{
 			OptionsDownloadData view = new OptionsDownloadData(this);
+			WindowOptions windowOptions = new WindowOptions
+			{
+				EnableWindowPersistence = false
+			};
 			Window window = PlayniteUiHelper.CreateExtensionWindow(
-				PluginName + " - " + ResourceProvider.GetString("LOCCommonSelectData"), view);
+				PluginName + " - " + ResourceProvider.GetString("LOCCommonSelectData"), view, windowOptions);
 			window.ShowDialog();
 
 			List<Game> playniteDb = view.GetFilteredGames();
@@ -1690,8 +1694,12 @@ namespace CommonPluginsShared.Collections
 			Logger.Info("AddTagSelectData() started.");
 
 			OptionsDownloadData view = new OptionsDownloadData(this, true);
+			WindowOptions windowOptions = new WindowOptions
+			{
+				EnableWindowPersistence = false
+			};
 			Window window = PlayniteUiHelper.CreateExtensionWindow(
-				PluginName + " - " + ResourceProvider.GetString("LOCCommonSelectGames"), view);
+				PluginName + " - " + ResourceProvider.GetString("LOCCommonSelectGames"), view, windowOptions);
 			window.ShowDialog();
 
 			List<Game> playniteDb = view.GetFilteredGames();
