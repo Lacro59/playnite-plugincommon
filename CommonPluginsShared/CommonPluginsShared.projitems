@@ -77,6 +77,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Localization.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\PluginPaths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\TraceInfos.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\WindowPositionModels.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteExtended\PluginExtended.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PlayniteTools.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RequestRateLimiter.cs" />
@@ -89,6 +90,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Commands\CommandsWindows.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI\ResourcesList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UI\UIHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UI\WindowPositionPersistence.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)utilities\UtilityServices.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Web.cs" />
   </ItemGroup>

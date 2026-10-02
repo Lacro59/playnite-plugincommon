@@ -59,7 +59,8 @@ namespace CommonPluginsShared.Plugins
 				ShowCloseButton = true,
 				CanBeResizable = false,
 				Height = 700,
-				Width = 1000
+				Width = 1000,
+				WindowPersistenceKey = "Common.DataWithoutGame"
 			};
 
 			var viewExtension = new ListWithNoData(PluginDatabase);
@@ -78,7 +79,8 @@ namespace CommonPluginsShared.Plugins
 				ShowMaximizeButton = false,
 				ShowCloseButton = true,
 				Height = 200,
-				Width = 1000
+				Width = 1000,
+				EnableWindowPersistence = false
 			};
 
 			TransfertData ViewExtension = new TransfertData(dataGames.ToList(), PluginDatabase);
@@ -103,7 +105,8 @@ namespace CommonPluginsShared.Plugins
 				ShowCloseButton = true,
 				CanBeResizable = true,
 				MinHeight = 500,
-				Width = 980
+				Width = 980,
+				WindowPersistenceKey = "Common.DatabaseMaintenance"
 			};
 
 			var viewExtension = new DatabaseMaintenanceView(PluginDatabase);

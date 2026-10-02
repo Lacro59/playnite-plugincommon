@@ -132,11 +132,16 @@ namespace CommonPluginsShared.Controls
 			}
 		}
 
+		/// <summary>
+		/// DP callback for chart/control options (axis, filters, selected date, etc.).
+		/// Must schedule a data refresh — not <see cref="GameContextChanged"/> — because the
+		/// same-game early exit would skip SetData while the game id is unchanged.
+		/// </summary>
 		protected static void ControlsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
 		{
 			if (sender is PluginUserControlExtendBase obj && e.NewValue != e.OldValue)
 			{
-				obj.GameContextChanged(null, obj.GameContext);
+				obj.ScheduleDataRefresh("control-property-changed");
 			}
 		}
 

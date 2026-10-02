@@ -334,6 +334,21 @@ namespace CommonPluginsShared.Controls
         private ListSortDirection? _lastDirection;
 
         /// <summary>
+        /// Property path of the last applied sort (stable key for persistence).
+        /// </summary>
+        private string _activeSortMemberPath;
+
+        /// <summary>
+        /// Sort member path restored from <see cref="ListViewColumnState"/> (disk).
+        /// </summary>
+        private string _persistedSortMemberPath;
+
+        /// <summary>
+        /// Sort direction restored from <see cref="ListViewColumnState"/> (disk).
+        /// </summary>
+        private ListSortDirection? _persistedSortDirection;
+
+        /// <summary>
         /// Flag to track if initial sort has been applied.
         /// </summary>
         private bool _isInitialSortApplied = false;
@@ -543,6 +558,8 @@ namespace CommonPluginsShared.Controls
             CaptureInitialColumns(gridView);
             LoadColumnState();
             ApplyForcedHiddenColumns(gridView);
+            _isInitialSortApplied = false;
+            TryApplyInitialSort();
         }
 
         /// <summary>
@@ -573,11 +590,17 @@ namespace CommonPluginsShared.Controls
         /// <param name="e">Event arguments.</param>
         private void OnItemsSourceChanged(object sender, EventArgs e)
         {
-            // Reset to allow new sort
+            // Reset to allow re-applying session / persisted / default sort on the new view.
             _isInitialSortApplied = false;
 
             if (this.ItemsSource != null)
             {
+                Common.LogDebug(string.Format(
+                    "[ListViewExtend] OnItemsSourceChanged — key={0}, activeSort={1}, direction={2}",
+                    GetColumnConfigurationKey(),
+                    _activeSortMemberPath,
+                    _lastDirection));
+
                 // Check if containers are generated
                 if (this.ItemContainerGenerator.Status == System.Windows.Controls.Primitives.GeneratorStatus.ContainersGenerated)
                 {
@@ -606,10 +629,19 @@ namespace CommonPluginsShared.Controls
 
         /// <summary>
         /// Attempts to apply the initial sort when the control is ready with data.
+        /// Priority: session user sort → persisted disk → XAML <see cref="SortingDefaultDataName"/>.
         /// </summary>
         private void TryApplyInitialSort()
         {
-            if (_isInitialSortApplied || !SortingEnable || SortingDefaultDataName.IsNullOrEmpty())
+            if (_isInitialSortApplied || !SortingEnable)
+            {
+                return;
+            }
+
+            bool hasSessionSort = !_activeSortMemberPath.IsNullOrEmpty() && _lastDirection != null;
+            bool hasPersistedSort = !_persistedSortMemberPath.IsNullOrEmpty();
+            bool hasDefaultSort = !SortingDefaultDataName.IsNullOrEmpty();
+            if (!hasSessionSort && !hasPersistedSort && !hasDefaultSort)
             {
                 return;
             }
@@ -624,14 +656,45 @@ namespace CommonPluginsShared.Controls
             {
                 try
                 {
-					if (ApplyConfiguredSort())
+                    if (_isInitialSortApplied)
+                    {
+                        return;
+                    }
+
+                    if (ApplySessionSort())
                     {
                         _isInitialSortApplied = true;
+                        return;
+                    }
+
+                    if (ApplyPersistedSort())
+                    {
+                        _isInitialSortApplied = true;
+                        return;
+                    }
+
+                    if (ApplyConfiguredSort())
+                    {
+                        _isInitialSortApplied = true;
+                        Common.LogDebug(string.Format(
+                            "[ListViewExtend] TryApplyInitialSort — key={0}, branch=default, sort={1}, direction={2}",
+                            GetColumnConfigurationKey(),
+                            SortingDefaultDataName,
+                            SortingSortDirection));
+                    }
+                    else
+                    {
+                        Common.LogDebug(string.Format(
+                            "[ListViewExtend] TryApplyInitialSort failed — key={0}, session={1}, persisted={2}, default={3}",
+                            GetColumnConfigurationKey(),
+                            _activeSortMemberPath,
+                            _persistedSortMemberPath,
+                            SortingDefaultDataName));
                     }
                 }
                 catch (Exception ex)
                 {
-                    Common.LogError(ex, false);
+                    Common.LogError(ex, false, "[ListViewExtend] TryApplyInitialSort");
                 }
             }), System.Windows.Threading.DispatcherPriority.DataBind);
         }
@@ -905,6 +968,9 @@ namespace CommonPluginsShared.Controls
             {
                 RemovePersistedState();
             }
+
+            ClearPersistedSort();
+            _activeSortMemberPath = null;
         }
 
         /// <summary>
@@ -1288,6 +1354,9 @@ namespace CommonPluginsShared.Controls
                                 }
 
                                 ApplySortToHeader(headerClicked, sortBy, direction);
+                                _persistedSortMemberPath = _activeSortMemberPath;
+                                _persistedSortDirection = direction;
+                                SaveColumnState();
                             }
                         }
                     }
@@ -1451,27 +1520,93 @@ namespace CommonPluginsShared.Controls
 
             _lastHeaderClicked = displayHeader;
             _lastDirection = direction;
+            _activeSortMemberPath = sortBy;
         }
 
         /// <summary>
-        /// Re-applies the current sort.
+        /// Applies sort restored from <see cref="ListViewColumnState"/> when persistence is enabled.
+        /// </summary>
+        /// <returns>True when sort was applied.</returns>
+        private bool ApplyPersistedSort()
+        {
+            if (!SortingEnable || _persistedSortMemberPath.IsNullOrEmpty() || !(this.View is GridView))
+            {
+                return false;
+            }
+
+            try
+            {
+                ListSortDirection direction = _persistedSortDirection ?? ListSortDirection.Ascending;
+                GridViewColumnHeader header = FindSortColumnHeader(_persistedSortMemberPath);
+                if (header == null)
+                {
+                    Common.LogDebug(string.Format(
+                        "[ListViewExtend] ApplyPersistedSort failed — key={0}, sort={1}, header not found",
+                        GetColumnConfigurationKey(),
+                        _persistedSortMemberPath));
+                    return false;
+                }
+
+                ApplySortToHeader(header, _persistedSortMemberPath, direction);
+                Common.LogDebug(string.Format(
+                    "[ListViewExtend] ApplyPersistedSort — key={0}, sort={1}, direction={2}",
+                    GetColumnConfigurationKey(),
+                    _persistedSortMemberPath,
+                    direction));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, "[ListViewExtend] ApplyPersistedSort");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Re-applies the current in-memory user sort (header + direction) after an ItemsSource refresh.
+        /// </summary>
+        /// <returns>True when sort was applied.</returns>
+        private bool ApplySessionSort()
+        {
+            if (!SortingEnable || _activeSortMemberPath.IsNullOrEmpty() || _lastDirection == null || !(this.View is GridView))
+            {
+                return false;
+            }
+
+            try
+            {
+                ListSortDirection direction = _lastDirection.Value;
+                GridViewColumnHeader header = FindSortColumnHeader(_activeSortMemberPath);
+                if (header == null)
+                {
+                    Common.LogDebug(string.Format(
+                        "[ListViewExtend] ApplySessionSort failed — key={0}, sort={1}, header not found",
+                        GetColumnConfigurationKey(),
+                        _activeSortMemberPath));
+                    return false;
+                }
+
+                ApplySortToHeader(header, _activeSortMemberPath, direction);
+                Common.LogDebug(string.Format(
+                    "[ListViewExtend] ApplySessionSort — key={0}, sort={1}, direction={2}",
+                    GetColumnConfigurationKey(),
+                    _activeSortMemberPath,
+                    direction));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Common.LogError(ex, false, "[ListViewExtend] ApplySessionSort");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Re-applies the current sort (session) including header caret.
         /// </summary>
         public void Sorting()
         {
-            if (_lastHeaderClicked != null)
-            {
-                GridViewColumnHeader headerClicked = _lastHeaderClicked;
-                if (headerClicked.Column != null)
-                {
-                    string sortBy = ResolveSortBy(headerClicked);
-                    if (sortBy.IsNullOrEmpty())
-                    {
-                        return;
-                    }
-
-                    Sort(sortBy, (ListSortDirection)_lastDirection);
-                }
-            }
+            ApplySessionSort();
         }
 
         /// <summary>
@@ -1575,6 +1710,7 @@ namespace CommonPluginsShared.Controls
         {
             if (!EnableColumnPersistence || ColumnConfigurationFilePath.IsNullOrEmpty() || !File.Exists(ColumnConfigurationFilePath))
             {
+                ClearPersistedSort();
                 Common.LogDebug(string.Format(
                     "[ListViewExtend] LoadColumnState skipped — key={0}, persistence={1}, fileExists={2}, path={3}",
                     GetColumnConfigurationKey(),
@@ -1594,6 +1730,7 @@ namespace CommonPluginsShared.Controls
                 Dictionary<string, ListViewColumnState> statesByKey = LoadAllPersistedStates();
                 if (statesByKey == null)
                 {
+                    ClearPersistedSort();
                     Common.LogDebug(string.Format(
                         "[ListViewExtend] LoadColumnState — key={0}, no states map",
                         GetColumnConfigurationKey()));
@@ -1603,6 +1740,7 @@ namespace CommonPluginsShared.Controls
                 ListViewColumnState state;
                 if (!statesByKey.TryGetValue(GetColumnConfigurationKey(), out state) || state == null)
                 {
+                    ClearPersistedSort();
                     Common.LogDebug(string.Format(
                         "[ListViewExtend] LoadColumnState — key={0}, no entry for this scope (mapKeys={1})",
                         GetColumnConfigurationKey(),
@@ -1610,11 +1748,15 @@ namespace CommonPluginsShared.Controls
                     return;
                 }
 
+                RememberPersistedSort(state);
+
                 Common.LogDebug(string.Format(
-                    "[ListViewExtend] LoadColumnState — key={0}, ordered=[{1}], visible=[{2}]",
+                    "[ListViewExtend] LoadColumnState — key={0}, ordered=[{1}], visible=[{2}], sort={3}, direction={4}",
                     GetColumnConfigurationKey(),
                     FormatKeyList(state.OrderedColumnKeys),
-                    FormatKeyList(state.VisibleColumnKeys)));
+                    FormatKeyList(state.VisibleColumnKeys),
+                    state.SortMemberPath,
+                    state.SortDirection));
 
                 bool needsRewrite = ApplyColumnState(gridView, state);
                 Common.LogDebug(string.Format(
@@ -1655,10 +1797,12 @@ namespace CommonPluginsShared.Controls
                 statesByKey[GetColumnConfigurationKey()] = builtState;
 
                 Common.LogDebug(string.Format(
-                    "[ListViewExtend] SaveColumnState — key={0}, ordered=[{1}], visible=[{2}], path={3}",
+                    "[ListViewExtend] SaveColumnState — key={0}, ordered=[{1}], visible=[{2}], sort={3}, direction={4}, path={5}",
                     GetColumnConfigurationKey(),
                     FormatKeyList(builtState.OrderedColumnKeys),
                     FormatKeyList(builtState.VisibleColumnKeys),
+                    builtState.SortMemberPath,
+                    builtState.SortDirection,
                     ColumnConfigurationFilePath));
 
                 string serializedData = Serialization.ToJson(statesByKey);
@@ -1756,11 +1900,58 @@ namespace CommonPluginsShared.Controls
                 }
             }
 
+            string sortMemberPath = _activeSortMemberPath;
+            if (sortMemberPath.IsNullOrEmpty() && _lastHeaderClicked != null)
+            {
+                sortMemberPath = ResolveSortBy(_lastHeaderClicked);
+            }
+
+            string sortDirection = null;
+            if (_lastDirection != null)
+            {
+                sortDirection = _lastDirection.Value.ToString();
+            }
+
             return new ListViewColumnState
             {
                 VisibleColumnKeys = visibleColumns,
-                OrderedColumnKeys = orderColumns
+                OrderedColumnKeys = orderColumns,
+                SortMemberPath = sortMemberPath,
+                SortDirection = sortDirection
             };
+        }
+
+        /// <summary>
+        /// Caches sort fields from a persisted column state for later application.
+        /// </summary>
+        /// <param name="state">Loaded column state (may be null).</param>
+        private void RememberPersistedSort(ListViewColumnState state)
+        {
+            ClearPersistedSort();
+            if (state == null || state.SortMemberPath.IsNullOrEmpty())
+            {
+                return;
+            }
+
+            _persistedSortMemberPath = state.SortMemberPath;
+            if (!state.SortDirection.IsNullOrEmpty()
+                && Enum.TryParse(state.SortDirection, true, out ListSortDirection parsedDirection))
+            {
+                _persistedSortDirection = parsedDirection;
+            }
+            else
+            {
+                _persistedSortDirection = ListSortDirection.Ascending;
+            }
+        }
+
+        /// <summary>
+        /// Clears sort fields restored from disk.
+        /// </summary>
+        private void ClearPersistedSort()
+        {
+            _persistedSortMemberPath = null;
+            _persistedSortDirection = null;
         }
 
         /// <summary>
@@ -2194,6 +2385,16 @@ namespace CommonPluginsShared.Controls
         /// Gets or sets visible column keys.
         /// </summary>
         public List<string> VisibleColumnKeys { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Gets or sets the property path used for sorting (same key as <see cref="ListViewColumnOptions.SortMemberPathProperty"/>).
+        /// </summary>
+        public string SortMemberPath { get; set; }
+
+        /// <summary>
+        /// Gets or sets the sort direction name (<c>Ascending</c> / <c>Descending</c>).
+        /// </summary>
+        public string SortDirection { get; set; }
     }
 
 

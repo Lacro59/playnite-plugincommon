@@ -1,18 +1,18 @@
 <UserControl x:Class="CommonPluginsControls.LiveChartsCommon.CustomerToolTipForTime"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
              xmlns:livechartscommon="clr-namespace:CommonPluginsControls.LiveChartsCommon"
-             xmlns:commonpluginscontrols="clr-namespace:CommonPluginsControls.Controls"
              xmlns:converters="clr-namespace:CommonPluginsShared.Converters"
-             mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300" 
+             mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300"
              d:DataContext="{d:DesignInstance Type=livechartscommon:CustomerToolTipForTime}">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <converters:PlayTimeToStringConverterWithZero x:Key="PlayTimeToStringConverterWithZero" />
+        <livechartscommon:ObjectToImageSourceConverter x:Key="ObjectToImageSourceConverter" />
         <wpf:SharedConverter x:Key="SharedConverter" />
         <wpf:SharedVisibilityConverter x:Key="SharedVisibilityConverter" />
     </UserControl.Resources>
@@ -28,7 +28,7 @@
                         <StackPanel Margin="0,0,0,10" Visibility="{Binding ShowTitle, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <TextBlock Text="{Binding DataTitle, FallbackValue='line1'}" HorizontalAlignment="Center" FontWeight="Bold"
                                        FontSize="16" Style="{DynamicResource BaseTextBlockStyle}" />
-                                <TextBlock Text="{Binding DataTitleInfo, FallbackValue='line1'}" HorizontalAlignment="Center" FontWeight="Normal"
+                            <TextBlock Text="{Binding DataTitleInfo, FallbackValue='line1'}" HorizontalAlignment="Center" FontWeight="Normal"
                                        Opacity="0.8" FontSize="14" Style="{DynamicResource BaseTextBlockStyle}" />
                         </StackPanel>
 
@@ -38,26 +38,71 @@
                                     <Grid Margin="2">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" SharedSizeGroup="Title" />
-                                            <ColumnDefinition Width="40" />
                                             <ColumnDefinition Width="*" SharedSizeGroup="Time" />
                                         </Grid.ColumnDefinitions>
 
-                                        <commonpluginscontrols:TextBlockWithIcon Grid.Column="0" Style="{DynamicResource BaseTextBlockStyle}"
-                                                                                 Mode="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.Mode}"
-                                                                                 Icon="{Binding ElementName=PART_Icon, Path=Text}"
-                                                                                 IconText="{Binding ElementName=PART_IconText, Path=Text}"
-                                                                                 Text="{Binding ElementName=PART_Text, Path=Text}"
-                                                                                 FontSize="16" VerticalAlignment="Center" />
+                                        <!-- Plain TextBlock/Image: TextBlockWithIcon custom DPs do not receive LiveCharts ChartPoint bindings. -->
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,16,0" VerticalAlignment="Center"
+                                                    Visibility="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.ShowLeftContent, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <Border Width="12" Height="12" CornerRadius="2" Margin="0,0,8,0" VerticalAlignment="Center"
+                                                    Background="{Binding Series.Fill}"
+                                                    BorderBrush="{DynamicResource CommonToolTipBorderBrush}"
+                                                    BorderThickness="1">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.ShowSeriesColor}" Value="False">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                            </Border>
+                                            <Image Height="28" Margin="0,0,8,0" VerticalAlignment="Center"
+                                                   Source="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Icon), Converter={StaticResource ObjectToImageSourceConverter}}">
+                                                <Image.Style>
+                                                    <Style TargetType="Image">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.ShowIcon}" Value="False">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Icon), Converter={StaticResource ObjectToImageSourceConverter}}" Value="{x:Null}">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Image.Style>
+                                            </Image>
+                                            <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" FontSize="24"
+                                                       FontFamily="{DynamicResource CommonFont}"
+                                                       Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.IconText)}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.ShowIcon}" Value="False">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.IconText)}" Value="">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.IconText)}" Value="{x:Null}">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <TextBlock VerticalAlignment="Center" FontSize="16"
+                                                       Style="{DynamicResource BaseTextBlockStyle}"
+                                                       Visibility="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.ShowLabel, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                       Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Name)}" />
+                                        </StackPanel>
 
-                                        <TextBlock Grid.Column="0"  Visibility="Collapsed" Name="PART_Text" Style="{DynamicResource BaseTextBlockStyle}"
-                                                   Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Name)}" />
-                                        <TextBlock Grid.Column="0"  Visibility="Collapsed" Name="PART_IconText" Style="{DynamicResource BaseTextBlockStyle}"
-                                                   Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.IconText)}" />
-                                        <TextBlock Grid.Column="0"  Visibility="Collapsed" Name="PART_Icon" Style="{DynamicResource BaseTextBlockStyle}"
-                                                   Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Icon)}" />
-
-                                        <TextBlock Grid.Column="2" FontSize="16" HorizontalAlignment="Right" Style="{DynamicResource BaseTextBlockStyle}"
-                                                   Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Values), Mode=OneWay, Converter={StaticResource PlayTimeToStringConverterWithZero}}" 
+                                        <TextBlock Grid.Column="1" FontSize="16" HorizontalAlignment="Right" Style="{DynamicResource BaseTextBlockStyle}"
+                                                   Text="{Binding ChartPoint.Instance.(livechartscommon:CustomerForTime.Values), Mode=OneWay, Converter={StaticResource PlayTimeToStringConverterWithZero}}"
                                                    VerticalAlignment="Center" Foreground="{DynamicResource CommonToolTipForeground}" />
                                     </Grid>
                                 </DataTemplate>
@@ -69,4 +114,3 @@
         </ControlTemplate>
     </UserControl.Template>
 </UserControl>
-    

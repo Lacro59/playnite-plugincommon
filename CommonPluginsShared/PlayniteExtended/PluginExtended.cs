@@ -1,5 +1,6 @@
 using CommonPluginsShared.Collections;
 using CommonPluginsShared.Interfaces;
+using CommonPluginsShared.UI;
 using Playnite.SDK;
 using Playnite.SDK.Plugins;
 using System;
@@ -63,6 +64,7 @@ namespace CommonPluginsShared.PlayniteExtended
 
 			// Get plugin's data location 
 			PluginUserDataPath = this.GetPluginUserDataPath();
+			WindowPositionPersistence.PluginUserDataPath = PluginUserDataPath;
 
             LoadCommon();
             SyncVerboseLoggingFromSettings("startup");
