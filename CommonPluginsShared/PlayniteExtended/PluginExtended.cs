@@ -1,3 +1,4 @@
+using CommonPlayniteShared;
 using CommonPluginsShared.Collections;
 using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.UI;
@@ -74,6 +75,9 @@ namespace CommonPluginsShared.PlayniteExtended
         {
             // Set the common resourses & event
             Common.Load(PluginFolder, PlayniteApi.ApplicationSettings.Language);
+
+            // Playnite date formats from config.json — shared by all plugins using CommonPlayniteShared converters.
+            PlayniteDateFormats.Load();
         }
 
         /// <summary>
