@@ -6,6 +6,7 @@ using CommonPluginsShared.Images;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -287,10 +288,12 @@ namespace CommonPluginsShared.Controls
                     return tmpImage;
                 }
 
+                BitmapLoadProperties loadProperties = CreateDecodeProperties(values);
                 Common.LogDebug(string.Format(
-                    "[ImageAsync] ImageSourceManagerPlugin.GetImage for {0}",
-                    FormatSourceForLog(str)));
-                tmpImage = ImageSourceManagerPlugin.GetImage(str, true);
+                    "[ImageAsync] ImageSourceManagerPlugin.GetImage for {0} decodeH={1}",
+                    FormatSourceForLog(str),
+                    loadProperties != null ? loadProperties.MaxDecodePixelHeight.ToString() : "0"));
+                tmpImage = ImageSourceManagerPlugin.GetImage(str, true, loadProperties);
                 if (tmpImage is BitmapImage)
                 {
                     ((BitmapImage)tmpImage).Freeze();
@@ -303,6 +306,35 @@ namespace CommonPluginsShared.Controls
                 "[ImageAsync] Unsupported source type: {0}",
                 newSource.GetType().Name));
             return null;
+        }
+
+        /// <summary>
+        /// Builds decode constraints from the ImageAsync values bag (source, DecodePixelHeight).
+        /// </summary>
+        private static BitmapLoadProperties CreateDecodeProperties(object[] values)
+        {
+            if (values == null || values.Length < 2 || values[1] == null)
+            {
+                return null;
+            }
+
+            double decodeHeight;
+            try
+            {
+                decodeHeight = Convert.ToDouble(values[1]);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+            int height = (int)Math.Round(decodeHeight);
+            if (height <= 0)
+            {
+                return null;
+            }
+
+            return new BitmapLoadProperties(0, height);
         }
 
         private void SetIsLoading(bool value)
