@@ -919,7 +919,7 @@ namespace CommonPluginsStores.Gog
             {
                 return null;
             }
-            
+
             try
             {
                 ObservableCollection<GameDlcOwned> GamesDlcsOwned = new ObservableCollection<GameDlcOwned>();
