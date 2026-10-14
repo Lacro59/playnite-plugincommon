@@ -176,7 +176,15 @@
                                  HorizontalAlignment="Left"
                                  local:PasswordBoxAssistant.BoundPassword="{Binding User.ApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=150}" />
                     <TextBlock Margin="0,4,0,0"
-                               FontSize="12"
+                               Style="{DynamicResource BaseTextBlockStyle}"
+                               FontSize="{DynamicResource FontSizeSmall}"
+                               Foreground="{DynamicResource TextBrushDarker}"
+                               Text="{DynamicResource LOCSteamApiKeyOptionalHint}"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding ForceAuth, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock Margin="0,4,0,0"
+                               Style="{DynamicResource BaseTextBlockStyle}"
+                               FontSize="{DynamicResource FontSizeSmall}"
                                Foreground="{DynamicResource TextBrushDarker}">
                         <Hyperlink NavigateUri="https://steamcommunity.com/dev/apikey"
                                    Command="{x:Static pcmdCommands:CommandsNavigation.NavigateUrl}"

@@ -233,7 +233,12 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamGame> GetOwnedGames(string apiKey, ulong steamId)
         {
-            Common.LogDebug($"[SteamKit] GetOwnedGames entry steamId={steamId}, apiKeyLength={apiKey?.Length ?? 0}, interface=IPlayerService/GetOwnedGames/v1.");
+            int apiKeyLength = apiKey?.Length ?? 0;
+            Common.LogDebug($"[SteamKit] GetOwnedGames entry steamId={steamId}, apiKeyLength={apiKeyLength}, interface=IPlayerService/GetOwnedGames/v1.");
+            if (apiKeyLength == 17 && ulong.TryParse(apiKey, out _))
+            {
+                Common.LogDebug($"[SteamKit] GetOwnedGames: apiKeyLength=17 looks like SteamID64, not a Web API key — call will likely 401.");
+            }
             WaitForApiRateLimit();
             try
             {
@@ -242,7 +247,7 @@ namespace CommonPluginsStores.Steam
                     ["steamId"] = steamId.ToString(),
                     ["include_appinfo"] = "1",
                     ["include_played_free_games"] = "1",
-                    ["include_extended_appinfo"] = "1" 
+                    ["include_extended_appinfo"] = "1"
                 };
 
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("IPlayerService", apiKey))
@@ -307,9 +312,9 @@ namespace CommonPluginsStores.Steam
 								Hidden = data["hidden"].AsBoolean(),
 								Icon = string.IsNullOrEmpty(data["icon"].AsString()) ? string.Empty : string.Format(UrlAchievementImg, appId, data["icon"].AsString()),
 								IconGray = string.IsNullOrEmpty(data["icon_gray"].AsString()) ? string.Empty : string.Format(UrlAchievementImg, appId, data["icon_gray"].AsString()),
-								InternalName = data["internal_name"].AsString(),
-								LocalizedDesc = data["localized_desc"].AsString(),
-								LocalizedName = data["localized_name"].AsString(),
+								InternalName = data["internal_name"].AsString() ?? string.Empty,
+								LocalizedDesc = data["localized_desc"].AsString() ?? string.Empty,
+								LocalizedName = data["localized_name"].AsString() ?? string.Empty,
 								PlayerPercentUnlocked = string.IsNullOrEmpty(data["player_percent_unlocked"].AsString()) ? "100" : data["player_percent_unlocked"].AsString(),
 							});
 						}
@@ -416,11 +421,21 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamPlayerAchievement> GetPlayerAchievements(string apiKey, uint appId, ulong steamId)
         {
-            return GetPlayerAchievements(apiKey, appId, steamId, "english");
+            return GetPlayerAchievements(apiKey, appId, steamId, "english", out _);
         }
 
         public static List<SteamPlayerAchievement> GetPlayerAchievements(string apiKey, uint appId, ulong steamId, string language)
         {
+            return GetPlayerAchievements(apiKey, appId, steamId, language, out _);
+        }
+
+        /// <summary>
+        /// Fetches player achievements via ISteamUserStats. On HTTP 403 (profile/stats private),
+        /// <paramref name="isForbidden"/> is set so callers can skip further API attempts for that user.
+        /// </summary>
+        public static List<SteamPlayerAchievement> GetPlayerAchievements(string apiKey, uint appId, ulong steamId, string language, out bool isForbidden)
+        {
+            isForbidden = false;
             WaitForApiRateLimit();
             try
             {
@@ -438,21 +453,7 @@ namespace CommonPluginsStores.Steam
 
                     if (results["achievements"].Children.Count == 0)
                     {
-                        //if (Serialization.TryFromJson(data, out dynamic steamAchievements))
-                        //string data = Web.DownloadStringData(string.Format(UrlGetPlayerAchievements, appId, language, apiKey, steamId)).GetAwaiter().GetResult();
-                        //{
-                        //    foreach (dynamic dataApi in steamAchievements["playerstats"]["achievements"])
-                        //    {
-                        //        steamPlayerAchievements.Add(new SteamPlayerAchievement
-                        //        {
-                        //            Achieved = (int)dataApi["achieved"],
-                        //            ApiName = dataApi["apiname"],
-                        //            Description = dataApi["description"],
-                        //            Name = dataApi["name"],
-                        //            UnlockTime = (int)dataApi["unlocktime"] == 0 ? default : new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds((int)dataApi["unlocktime"])
-                        //        });
-                        //    }
-                        //}
+                        // Empty achievements node — valid response (no unlocks / no items).
                     }
                     else
                     {
@@ -473,6 +474,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
+                isForbidden = ex.Message != null && ex.Message.IndexOf("403", StringComparison.Ordinal) >= 0;
                 Common.LogError(ex, false, $"With {appId}");
                 return null;
             }

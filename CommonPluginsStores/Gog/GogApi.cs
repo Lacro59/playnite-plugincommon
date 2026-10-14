@@ -495,15 +495,14 @@ namespace CommonPluginsStores.Gog
                             }
 
                             string link = UrlBase + x.Game.Url?.Replace("\\", string.Empty);
-                            ObservableCollection<GameAchievement> Achievements = GetAchievements(id, accountInfos);
 
+                            // Achievements left null — callers enrich via GetAchievements (avoids N+1 on bulk friends refresh).
                             AccountGameInfos accountGameInfos = new AccountGameInfos
                             {
                                 Id = id,
                                 Name = name,
                                 Link = link,
                                 IsCommun = isCommun,
-                                Achievements = Achievements,
                                 Playtime = playtime
                             };
                             accountGamesInfos.Add(accountGameInfos);
@@ -515,6 +514,7 @@ namespace CommonPluginsStores.Gog
                     }
                 }
 
+                Common.LogDebug($"[GogApi] GetAccountGamesInfos success gameCount={accountGamesInfos.Count} achievementsDeferred=true UserId={accountInfos?.UserId}");
                 return accountGamesInfos;
             }
             catch (Exception ex)

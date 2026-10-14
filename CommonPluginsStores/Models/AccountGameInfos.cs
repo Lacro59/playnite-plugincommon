@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -9,6 +9,10 @@ namespace CommonPluginsStores.Models
     public class AccountGameInfos : BasicAccountGameInfos
     {
         public bool IsCommun { get; set; }
+
+        /// <summary>
+        /// Total playtime for the game, in seconds (Playnite convention).
+        /// </summary>
         public int Playtime { get; set; }
 
         public int AchievementsUnlocked => Achievements?.Where(y => y.DateUnlocked != default)?.Count() ?? 0;

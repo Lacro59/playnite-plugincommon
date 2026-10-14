@@ -158,7 +158,14 @@ namespace CommonPluginsStores.Ea
 
         #region User details
 
-        // Account games list is partial (current user / BASE_GAME only); see .tasks/TODO-FIXME.md.
+        /// <summary>
+        /// Owned games for the current EA account only.
+        /// </summary>
+        /// <remarks>
+        /// Friend accounts (<c>IsCurrent == false</c>) return an empty list — EA friends remain
+        /// identity-only in consumers (no library / playtime / achievements). Partial catalog
+        /// (current user / BASE_GAME only); see .tasks/TODO-FIXME.md.
+        /// </remarks>
         public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
         {
             if (!IsUserLoggedIn)

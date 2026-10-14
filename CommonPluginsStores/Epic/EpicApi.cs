@@ -499,7 +499,10 @@ namespace CommonPluginsStores.Epic
 		/// </summary>
 		/// <param name="accountInfos">Must be the current user's account info.</param>
 		/// <returns>An <see cref="ObservableCollection{AccountGameInfos}"/> or null on failure.</returns>
-		/// <remarks>⚠️ Requires authentication.</remarks>
+		/// <remarks>
+		/// Requires authentication. Friend accounts (<c>IsCurrent == false</c>) are not supported —
+		/// Epic friends remain identity-only in consumers (no library / playtime / achievements).
+		/// </remarks>
 		public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
 		{
 			if (!IsUserLoggedIn || !accountInfos.IsCurrent)

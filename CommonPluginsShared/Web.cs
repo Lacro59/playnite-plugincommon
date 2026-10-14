@@ -983,12 +983,12 @@ namespace CommonPluginsShared
                     {
                         // Polling for element support
                         CancellationTokenSource cts = new CancellationTokenSource();
-                        
+
                         try
-                        { 
+                        {
                             // 3. Navigate and wait for page to be fully loaded
                             webViewOffscreen.Navigate(url);
-                            
+
                             // Hide bot flags
                             // Retry mechanism for V8Context
                             for (int i = 0; i < 10; i++)
@@ -1017,13 +1017,13 @@ namespace CommonPluginsShared
                             TimeSpan waitTimeout = TimeSpan.FromSeconds(60);
 
                             // Always start polling to handle Cloudflare challenges even if elementToWaitFor is null
-                            _ = Task.Run(async () => 
+                            _ = Task.Run(async () =>
                             {
                                  try
                                  {
                                      // Initial delay to allow navigation to start
                                      await Task.Delay(500, cts.Token).ConfigureAwait(false);
-                                     
+
                                      int consecutiveErrors = 0;
 
                                      while (!cts.Token.IsCancellationRequested)
@@ -1033,7 +1033,7 @@ namespace CommonPluginsShared
                                              loadingCompleted.Set();
                                              break;
                                          }
-                                         
+
                                          try
                                          {
                                              // Check if loadingCompleted is already set to avoid unnecessary calls
@@ -1057,19 +1057,19 @@ namespace CommonPluginsShared
                                                 "var isComplete = document.readyState === 'complete' || document.readyState === 'interactive'; " +
                                                 "var text = (document.body ? document.body.innerText : '') + (document.documentElement ? document.documentElement.innerText : ''); " +
                                                 "text = text.trim(); " +
-                                                (string.IsNullOrEmpty(elementToWaitFor) 
+                                                (string.IsNullOrEmpty(elementToWaitFor)
                                                     ? "return { ready: isComplete && text.length > 0, cf: false }; "
                                                     : $"return {{ ready: isComplete && !!document.querySelector({safeSelector}), cf: false }}; ") +
                                                 "})()";
 
                                              var jsResult = await webViewOffscreen.EvaluateScriptAsync(script).ConfigureAwait(false);
-                                             
+
                                              bool isFound = false;
                                              bool isCf = false;
-                                             
+
                                              if (jsResult?.Success == true && jsResult.Result != null)
                                              {
-                                                 try 
+                                                 try
                                                  {
                                                      // jsResult.Result can be a Dictionary<string, object> or ExpandoObject
                                                      if (jsResult.Result is System.Collections.Generic.IDictionary<string, object> dict)
@@ -1099,11 +1099,11 @@ namespace CommonPluginsShared
                                              {
                                                  if (!string.IsNullOrEmpty(elementToWaitFor)) Common.LogDebug($"DownloadWebView: Found element '{elementToWaitFor}', stopping wait.");
                                                  else Common.LogDebug($"DownloadWebView: Page ready (no CF detected), stopping wait.");
-                                                 
+
                                                  loadingCompleted.Set();
                                                  break;
                                              }
-                                             
+
                                              if (isCf)
                                              {
                                                  Common.LogDebug($"DownloadWebView: Cloudflare challenge detected for {url}, waiting...");
@@ -1121,13 +1121,13 @@ namespace CommonPluginsShared
                                                  }
                                                  catch { }
                                              }
-                                             
+
                                              // Script executed successfully, reset error counter
                                              consecutiveErrors = 0;
                                          }
                                          catch (Exception ex)
                                          {
-                                             // Scripts can only be executed within a V8Context. 
+                                             // Scripts can only be executed within a V8Context.
                                              // This can happen if polling starts before the browser is fully initialized.
                                              if (ex.Message.Contains("V8Context"))
                                              {
@@ -1143,7 +1143,7 @@ namespace CommonPluginsShared
                                                  else Common.LogDebug(msg);
                                              }
                                          }
-                                         
+
                                          await Task.Delay(500, cts.Token).ConfigureAwait(false);
                                      }
                                  }
@@ -1158,16 +1158,16 @@ namespace CommonPluginsShared
                                 // We are on the UI thread, we must not block it with Wait()
                                 var frame = new DispatcherFrame();
                                 bool timedOut = false;
-                                
+
                                 var timer = new DispatcherTimer { Interval = waitTimeout };
-                                timer.Tick += (t, args) => 
-                                { 
+                                timer.Tick += (t, args) =>
+                                {
                                     Logger.Error($"Timeout {waitTimeout.TotalSeconds} seconds for {url} (UI Thread).");
                                     timedOut = true;
-                                    timer.Stop(); 
-                                    frame.Continue = false; 
+                                    timer.Stop();
+                                    frame.Continue = false;
                                 };
-                                
+
                                 // Timer to check if loadingCompleted was set by the polling task or loading handler
                                 var checkTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
                                 checkTimer.Tick += (t, args) =>
@@ -1179,15 +1179,15 @@ namespace CommonPluginsShared
                                         frame.Continue = false;
                                     }
                                 };
-                                
+
                                 timer.Start();
                                 checkTimer.Start();
-                                
+
                                 Dispatcher.PushFrame(frame);
-                                
+
                                 timer.Stop();
                                 checkTimer.Stop();
-                                
+
                                 if (timedOut || cancellationToken.IsCancellationRequested)
                                 {
                                     return new Tuple<string, List<HttpCookie>>(string.Empty, null);
@@ -1283,13 +1283,18 @@ namespace CommonPluginsShared
                 try
                 {
                     string fixedValue = UtilityTools.FixCookieValue(cookie.Value);
-
-                    Cookie c = new Cookie
+                    string domainHost = cookie.Domain.Trim().TrimStart('.');
+                    if (domainHost.IsNullOrEmpty())
                     {
-                        Name = cookie.Name,
-                        Value = fixedValue,
-                        Domain = cookie.Domain,
-                        Path = cookie.Path ?? "/",
+                        skippedCount++;
+                        continue;
+                    }
+
+                    // URI-based Add is more reliable than Cookie.Domain alone (Steam community SSO).
+                    Uri cookieUri = new Uri("https://" + domainHost + "/");
+                    Cookie c = new Cookie(cookie.Name, fixedValue)
+                    {
+                        Path = cookie.Path.IsNullOrEmpty() ? "/" : cookie.Path,
                         Secure = cookie.Secure,
                         HttpOnly = cookie.HttpOnly
                     };
@@ -1299,7 +1304,7 @@ namespace CommonPluginsShared
                         c.Expires = cookie.Expires.Value;
                     }
 
-                    cookieContainer.Add(c);
+                    cookieContainer.Add(cookieUri, c);
                     addedCount++;
                 }
                 catch (CookieException ex)
