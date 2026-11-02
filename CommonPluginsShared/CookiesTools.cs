@@ -205,6 +205,7 @@ namespace CommonPluginsShared
 
         /// <summary>
         /// Clears cookies for configured domains from an offscreen WebView.
+        /// Marshalled on the Playnite UI dispatcher (CEF requires UI thread). Prefer not calling this for shared SSO domains — see <c>ClearGlobalWebViewCookiesOnSessionClear</c>.
         /// </summary>
         public void ClearDomainCookies()
         {
@@ -214,27 +215,39 @@ namespace CommonPluginsShared
                 return;
             }
 
-            IWebView webView = null;
-
-            try
+            Action clearAction = () =>
             {
-                webView = API.Instance.WebViews.CreateOffscreenView();
-                Logger.Info($"{ClientName} clearing WebView cookies for {CookiesDomains.Count} domain(s)");
-                Common.LogDebug($"{ClientName} ClearDomainCookies: purging shared Playnite WebView cookie jar ({CookiesDomains.Count} domain(s)); may affect other plugins using the same SSO session.");
-
-                foreach (string domain in CookiesDomains)
+                IWebView webView = null;
+                try
                 {
-                    webView.DeleteDomainCookies(domain);
-                    Common.LogDebug($"{ClientName} ClearDomainCookies: {domain}");
+                    webView = API.Instance.WebViews.CreateOffscreenView();
+                    Logger.Info($"{ClientName} clearing WebView cookies for {CookiesDomains.Count} domain(s)");
+                    Common.LogDebug($"{ClientName} ClearDomainCookies: purging shared Playnite WebView cookie jar ({CookiesDomains.Count} domain(s)); may affect other plugins using the same SSO session.");
+
+                    foreach (string domain in CookiesDomains)
+                    {
+                        webView.DeleteDomainCookies(domain);
+                        Common.LogDebug($"{ClientName} ClearDomainCookies: {domain}");
+                    }
                 }
-            }
-            catch (Exception ex)
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, $"{ClientName} ClearDomainCookies failed");
+                }
+                finally
+                {
+                    webView?.Dispose();
+                }
+            };
+
+            System.Windows.Threading.Dispatcher dispatcher = API.Instance?.MainView?.UIDispatcher;
+            if (dispatcher != null && !dispatcher.CheckAccess())
             {
-                Logger.Error(ex, $"{ClientName} ClearDomainCookies failed");
+                dispatcher.Invoke(clearAction);
             }
-            finally
+            else
             {
-                webView?.Dispose();
+                clearAction();
             }
         }
 

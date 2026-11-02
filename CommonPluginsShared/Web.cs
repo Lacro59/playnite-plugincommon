@@ -963,7 +963,7 @@ namespace CommonPluginsShared
         }
 
 
-        private static async Task<Tuple<string, List<HttpCookie>>> DownloadWebView(bool getSource, string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null, CancellationToken cancellationToken = default)
+        private static async Task<Tuple<string, List<HttpCookie>>> DownloadWebView(bool getSource, string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = false, bool javaScriptEnabled = true, string elementToWaitFor = null, CancellationToken cancellationToken = default)
         {
             WebViewSettings webViewSettings = new WebViewSettings
             {
@@ -1244,12 +1244,14 @@ namespace CommonPluginsShared
             }
         }
 
-        public static async Task<Tuple<string, List<HttpCookie>>> DownloadJsonDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null, CancellationToken cancellationToken = default)
+        /// <param name="deleteDomainsCookies">When true, purges <paramref name="domains"/> from the shared CEF jar after the request. Default false (zero impact on library plugins).</param>
+        public static async Task<Tuple<string, List<HttpCookie>>> DownloadJsonDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = false, bool javaScriptEnabled = true, string elementToWaitFor = null, CancellationToken cancellationToken = default)
         {
             return await DownloadWebView(false, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, elementToWaitFor, cancellationToken).ConfigureAwait(false);
         }
 
-        public static async Task<Tuple<string, List<HttpCookie>>> DownloadSourceDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = true, bool javaScriptEnabled = true, string elementToWaitFor = null, CancellationToken cancellationToken = default)
+        /// <param name="deleteDomainsCookies">When true, purges <paramref name="domains"/> from the shared CEF jar after the request. Default false (zero impact on library plugins).</param>
+        public static async Task<Tuple<string, List<HttpCookie>>> DownloadSourceDataWebView(string url, List<HttpCookie> cookies = null, bool getCookies = false, List<string> domains = null, bool deleteDomainsCookies = false, bool javaScriptEnabled = true, string elementToWaitFor = null, CancellationToken cancellationToken = default)
         {
             return await DownloadWebView(true, url, cookies, getCookies, domains, deleteDomainsCookies, javaScriptEnabled, elementToWaitFor, cancellationToken).ConfigureAwait(false);
         }

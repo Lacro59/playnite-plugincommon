@@ -1035,8 +1035,8 @@ namespace CommonPluginsStores.Gog
                     }
                 };
 
-                CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
                 Common.LogDebug($"[GogApi] Auth webview opening, initialNavigate={FormatAuthWebViewUrlForLog(UrlLogin)}.");
+                Common.LogDebug("[GogApi] Login: skipping DeleteDomainCookies; shared WebView SSO jar preserved for other plugins.");
                 webView.Navigate(UrlLogin);
                 _ = webView.OpenDialog();
                 Common.LogDebug($"[GogApi] Auth webview closed, finalUrl={FormatAuthWebViewUrlForLog(webView.GetCurrentAddress())}, isLoggedIn={AccountBasic?.IsLoggedIn ?? false}.");

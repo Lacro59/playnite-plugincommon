@@ -155,22 +155,45 @@ namespace CommonPluginsControls.Stores
         {
             try
             {
+                IStoreApi storeApi = StoreApi;
+                if (storeApi == null)
+                {
+                    Common.LogDebug("[StorePanel] ExecuteLogin skipped: StoreApi is null.");
+                    return;
+                }
+
+                IStoreSessionManager sessionManager = storeApi as IStoreSessionManager;
+                if (!useAlternative && sessionManager != null)
+                {
+                    StoreSettingsLog.LoginRequested(storeApi);
+                    AuthProbeResult probe = sessionManager.AuthenticateInteractive(forceInteractive: true);
+                    Common.LogDebug($"[StorePanel] AuthenticateInteractive Outcome={probe.Outcome}, IsSuccess={probe.IsSuccess}.");
+                    NotifyAuthStatusChanged();
+                    if (!probe.IsSuccess)
+                    {
+                        ScheduleBackgroundAuthRefresh();
+                    }
+
+                    StoreSettingsLog.LoginCompleted(storeApi, AuthStatus);
+                    return;
+                }
+
                 if (useAlternative)
                 {
-                    StoreSettingsLog.LoginAlternativeRequested(StoreApi);
-                    StoreApi?.PrepareExplicitLogin();
-                    StoreApi.LoginAlternative();
+                    StoreSettingsLog.LoginAlternativeRequested(storeApi);
+                    storeApi.PrepareExplicitLogin();
+                    storeApi.LoginAlternative();
                 }
                 else
                 {
-                    StoreSettingsLog.LoginRequested(StoreApi);
-                    StoreApi?.PrepareExplicitLogin();
-                    StoreApi.Login();
+                    StoreSettingsLog.LoginRequested(storeApi);
+                    storeApi.PrepareExplicitLogin();
+                    storeApi.Login();
                 }
 
                 NotifyAuthStatusChanged();
                 ScheduleBackgroundAuthRefresh();
-                StoreSettingsLog.LoginCompleted(StoreApi, AuthStatus);
+                StoreSettingsLog.LoginCompleted(storeApi, AuthStatus);
             }
             catch (Exception ex)
             {

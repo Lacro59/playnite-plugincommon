@@ -1450,8 +1450,8 @@ namespace CommonPluginsStores.Epic
 					}
 				};
 
-				CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
 				Common.LogDebug($"[EpicApi] Auth webview opening, initialNavigate={FormatAuthWebViewUrlForLog(UrlLogin)}.");
+				Common.LogDebug("[EpicApi] Login: skipping DeleteDomainCookies; shared WebView SSO jar preserved for other plugins.");
 				webView.Navigate(UrlLogin);
 				_ = webView.OpenDialog();
 				Common.LogDebug($"[EpicApi] Auth webview closed, finalUrl={FormatAuthWebViewUrlForLog(webView.GetCurrentAddress())}, loggedIn={loggedIn}, hasAuthCode={!authorizationCode.IsNullOrEmpty()}.");
