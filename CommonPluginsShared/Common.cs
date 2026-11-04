@@ -232,12 +232,12 @@ namespace CommonPluginsShared
 		/// Main error logging handler.
 		/// Builds a contextual message from the stack trace and can emit a Playnite notification.
 		/// </summary>
-		/// <param name="ex">Exception to log.</param>
+		/// <param name="ex">Exception to log; may be null (stack is taken from the current call site).</param>
 		/// <param name="isIgnored">If true, logs are marked as ignored and notifications are suppressed.</param>
 		/// <param name="message">Optional additional message.</param>
 		/// <param name="showNotification">If true, a Playnite notification is created.</param>
 		/// <param name="pluginName">Plugin name used in the notification.</param>
-		/// <param name="notificationMessage">Custom notification message; if empty, exception message is used.</param>
+		/// <param name="notificationMessage">Custom notification message; if empty, exception message (or <paramref name="message"/>) is used.</param>
 		public static void LogError(
 			Exception ex,
 			bool isIgnored,
@@ -303,11 +303,12 @@ namespace CommonPluginsShared
 
 			// Use a deterministic id so the same logical error reuses the same notification.
 			var notificationId = BuildNotificationId(ex, pluginName);
+			string fallbackNotification = ex != null ? ex.Message : message;
 			var notificationText = string.Format(
 				"{0}{1}{2}",
 				pluginName,
 				Environment.NewLine,
-				notificationMessage.IsNullOrEmpty() ? ex.Message : notificationMessage);
+				notificationMessage.IsNullOrEmpty() ? fallbackNotification : notificationMessage);
 
 			API.Instance.Notifications.Add(
 				new NotificationMessage(
