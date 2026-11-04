@@ -219,6 +219,7 @@
                     stringReturn = indiegala;
                     break;
                 case "steam":
+                case "steam family sharing":
                     stringReturn = steam;
                     break;
                 case "gog":

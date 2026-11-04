@@ -1,5 +1,7 @@
+using CommonPlayniteShared;
 using CommonPluginsShared.Collections;
 using CommonPluginsShared.Interfaces;
+using CommonPluginsShared.UI;
 using Playnite.SDK;
 using Playnite.SDK.Plugins;
 using System;
@@ -28,7 +30,11 @@ namespace CommonPluginsShared.PlayniteExtended
         {
             // Get plugin's database if used
             PluginDatabase = typeof(TPluginDatabase).CrateInstance<TPluginDatabase>(PluginSettingsViewModel.Settings, this.GetPluginUserDataPath());
-			PluginDatabase.PersistSettingsAction = () => SavePluginSettings(PluginSettingsViewModel.Settings);
+			PluginDatabase.PersistSettingsAction = () =>
+			{
+				SavePluginSettings(PluginSettingsViewModel.Settings);
+				SyncVerboseLoggingFromSettings("settings-saved");
+			};
             PluginDatabase.InitializeDatabase();
 		}
 	}
@@ -59,14 +65,36 @@ namespace CommonPluginsShared.PlayniteExtended
 
 			// Get plugin's data location 
 			PluginUserDataPath = this.GetPluginUserDataPath();
+			WindowPositionPersistence.PluginUserDataPath = PluginUserDataPath;
 
             LoadCommon();
+            SyncVerboseLoggingFromSettings("startup");
         }
 
         protected void LoadCommon()
         {
             // Set the common resourses & event
             Common.Load(PluginFolder, PlayniteApi.ApplicationSettings.Language);
+
+            // Playnite date formats from config.json — shared by all plugins using CommonPlayniteShared converters.
+            PlayniteDateFormats.Load();
+        }
+
+        /// <summary>
+        /// Applies the persisted verbose logging preference to <see cref="Common"/> and logs the state.
+        /// </summary>
+        /// <param name="context">Caller context for the Info log (for example <c>startup</c> or <c>settings-saved</c>).</param>
+        protected void SyncVerboseLoggingFromSettings(string context = "startup")
+        {
+            try
+            {
+                var settingsViewModel = PluginSettingsViewModel as IPluginSettingsViewModel;
+                Common.SyncVerboseLoggingFromSettings(settingsViewModel?.Settings, context);
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn(ex, "Failed to sync verbose logging from plugin settings.");
+            }
         }
     }
 }

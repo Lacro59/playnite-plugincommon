@@ -1,4 +1,4 @@
-﻿using CommonPluginsShared.Interfaces;
+using CommonPluginsShared.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Data;
 using Playnite.SDK.Models;
@@ -476,7 +476,7 @@ namespace CommonPluginsShared
 		/// </summary>
 		public static void LogLibraryFilterExclusion(string context, Game game, string reason)
 		{
-			Common.LogDebug(true, string.Format(
+			Common.LogDebug(string.Format(
 				"[LibraryFilter] {0}: excluded '{1}' ({2}) — reason={3}",
 				context,
 				game?.Name ?? "?",
@@ -494,7 +494,7 @@ namespace CommonPluginsShared
 				return;
 			}
 
-			Common.LogDebug(true, string.Format(
+			Common.LogDebug(string.Format(
 				"[LibraryFilter] {0}: {1} -> {2} games (IncludeEmulatedGames={3}, SourceFilter={4}, excluded emulated={5}, excluded hidden={6}, excluded source={7})",
 				context,
 				beforeCount,
@@ -648,7 +648,7 @@ namespace CommonPluginsShared
                     {
                         _ = Task.Run(() =>
                         {
-                            Common.LogDebug(true, $"DownloadFileImage is missing - {fileName}");
+                            Common.LogDebug($"DownloadFileImage is missing - {fileName}");
                             Web.DownloadFileImage(fileName, options.Url, PlaynitePaths.DataCachePath, pluginName).GetAwaiter().GetResult();
                         });
                     }

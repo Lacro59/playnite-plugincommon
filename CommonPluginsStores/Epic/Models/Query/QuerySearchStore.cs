@@ -125,26 +125,67 @@ namespace CommonPluginsStores.Epic.Models.Query
 		public SearchStoreVariables Variables { get; set; } = new SearchStoreVariables();
 	}
 
+	/// <summary>
+	/// GraphQL variables for <c>searchStoreQuery</c>.
+	/// Property names use PascalCase in C#; JSON keys must match the camelCase <c>$variables</c> declared in the query.
+	/// </summary>
 	public class SearchStoreVariables
 	{
+		[SerializationPropertyName("allowCountries")]
 		public string AllowCountries { get; set; }
+
+		[SerializationPropertyName("category")]
 		public string Category { get; set; }
+
+		[SerializationPropertyName("count")]
 		public int? Count { get; set; }
+
+		[SerializationPropertyName("country")]
 		public string Country { get; set; }
+
+		[SerializationPropertyName("keywords")]
 		public string Keywords { get; set; }
+
+		[SerializationPropertyName("locale")]
 		public string Locale { get; set; }
+
+		[SerializationPropertyName("namespace")]
 		public string Namespace { get; set; }
+
+		[SerializationPropertyName("itemNs")]
 		public string ItemNs { get; set; }
+
+		[SerializationPropertyName("sortBy")]
 		public string SortBy { get; set; }
+
+		[SerializationPropertyName("sortDir")]
 		public string SortDir { get; set; }
+
+		[SerializationPropertyName("start")]
 		public int? Start { get; set; }
+
+		[SerializationPropertyName("tag")]
 		public string Tag { get; set; }
+
+		[SerializationPropertyName("releaseDate")]
 		public string ReleaseDate { get; set; }
+
+		[SerializationPropertyName("withPrice")]
 		public bool WithPrice { get; set; }
+
+		[SerializationPropertyName("withPromotions")]
 		public bool WithPromotions { get; set; }
+
+		[SerializationPropertyName("priceRange")]
 		public string PriceRange { get; set; }
+
+		[SerializationPropertyName("freeGame")]
 		public bool? FreeGame { get; set; }
+
+		[SerializationPropertyName("onSale")]
 		public bool? OnSale { get; set; }
+
+		[SerializationPropertyName("effectiveDate")]
 		public string EffectiveDate { get; set; }
 	}
 

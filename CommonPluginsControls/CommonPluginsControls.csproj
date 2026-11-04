@@ -102,6 +102,7 @@
     </Compile>
     <Compile Include="LiveChartsCommon\CustomerForSingle.cs" />
     <Compile Include="LiveChartsCommon\CustomerForTime.cs" />
+    <Compile Include="LiveChartsCommon\ObjectToImageSourceConverter.cs" />
     <Compile Include="LiveChartsCommon\CustomerToolTipForLog.xaml.cs">
       <DependentUpon>CustomerToolTipForLog.xaml</DependentUpon>
     </Compile>

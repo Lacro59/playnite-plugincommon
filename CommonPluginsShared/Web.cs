@@ -1,4 +1,4 @@
-﻿using CommonPlayniteShared;
+using CommonPlayniteShared;
 using CommonPlayniteShared.Common;
 using CommonPluginsShared.Extensions;
 using CommonPluginsShared.Images;
@@ -386,7 +386,7 @@ namespace CommonPluginsShared
                         redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
                     }
 
-                    Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
+                    Common.LogDebug(string.Format("DownloadStringData() redirecting to {0}", redirectUri));
 
                     return await DownloadStringDataKeepParam(redirectUri.ToString()).ConfigureAwait(false);
                 }
@@ -480,7 +480,7 @@ namespace CommonPluginsShared
                     redirectUri = new Uri(request.RequestUri.GetLeftPart(UriPartial.Authority) + redirectUri);
                 }
 
-                Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", redirectUri));
+                Common.LogDebug(string.Format("DownloadStringData() redirecting to {0}", redirectUri));
 
                 // perform recursive call afterwards with increased depth
                 return await DownloadStringData(redirectUri.ToString(), redirectDepth + 1).ConfigureAwait(false);
@@ -613,7 +613,7 @@ namespace CommonPluginsShared
                             }
                         }
 
-                        Common.LogDebug(true, string.Format("DownloadStringData() redirecting to {0}", urlNew));
+                        Common.LogDebug(string.Format("DownloadStringData() redirecting to {0}", urlNew));
                         return await DownloadStringData(urlNew, cookies, userAgent, keepParam, redirectDepth + 1).ConfigureAwait(false);
                     }
                     else
@@ -1004,7 +1004,7 @@ namespace CommonPluginsShared
                                 {
                                     if (ex.Message.Contains("V8Context"))
                                     {
-                                        Common.LogDebug(true, $"DownloadWebView: V8Context not ready for 'webdriver' override, retrying... ({i + 1}/10)");
+                                        Common.LogDebug($"DownloadWebView: V8Context not ready for 'webdriver' override, retrying... ({i + 1}/10)");
                                         await Task.Delay(500, cts.Token).ConfigureAwait(false);
                                     }
                                     else
@@ -1097,8 +1097,8 @@ namespace CommonPluginsShared
 
                                              if (isFound && !isCf)
                                              {
-                                                 if (!string.IsNullOrEmpty(elementToWaitFor)) Common.LogDebug(true, $"DownloadWebView: Found element '{elementToWaitFor}', stopping wait.");
-                                                 else Common.LogDebug(true, $"DownloadWebView: Page ready (no CF detected), stopping wait.");
+                                                 if (!string.IsNullOrEmpty(elementToWaitFor)) Common.LogDebug($"DownloadWebView: Found element '{elementToWaitFor}', stopping wait.");
+                                                 else Common.LogDebug($"DownloadWebView: Page ready (no CF detected), stopping wait.");
                                                  
                                                  loadingCompleted.Set();
                                                  break;
@@ -1106,7 +1106,7 @@ namespace CommonPluginsShared
                                              
                                              if (isCf)
                                              {
-                                                 Common.LogDebug(true, $"DownloadWebView: Cloudflare challenge detected for {url}, waiting...");
+                                                 Common.LogDebug($"DownloadWebView: Cloudflare challenge detected for {url}, waiting...");
                                              }
                                              else if (!isFound)
                                              {
@@ -1116,7 +1116,7 @@ namespace CommonPluginsShared
                                                      var diagResult = await webViewOffscreen.EvaluateScriptAsync("(function() { return { title: document.title, len: document.body ? document.body.innerText.length : 0, state: document.readyState }; })()").ConfigureAwait(false);
                                                      if (diagResult?.Success == true && diagResult.Result != null)
                                                      {
-                                                         Common.LogDebug(true, $"DownloadWebView Polling: {Serialization.ToJson(diagResult.Result)} (URL: {url})");
+                                                         Common.LogDebug($"DownloadWebView Polling: {Serialization.ToJson(diagResult.Result)} (URL: {url})");
                                                      }
                                                  }
                                                  catch { }
@@ -1131,7 +1131,7 @@ namespace CommonPluginsShared
                                              // This can happen if polling starts before the browser is fully initialized.
                                              if (ex.Message.Contains("V8Context"))
                                              {
-                                                 Common.LogDebug(true, $"DownloadWebView: V8Context not ready for selector '{elementToWaitFor}', retrying...");
+                                                 Common.LogDebug($"DownloadWebView: V8Context not ready for selector '{elementToWaitFor}', retrying...");
                                              }
                                              else
                                              {
@@ -1140,7 +1140,7 @@ namespace CommonPluginsShared
 
                                                  // Escalate to Warn if persistent
                                                  if (consecutiveErrors >= 5) Logger.Warn(msg);
-                                                 else Logger.Debug(msg);
+                                                 else Common.LogDebug(msg);
                                              }
                                          }
                                          
@@ -1269,7 +1269,7 @@ namespace CommonPluginsShared
             int errorCount = 0;
 
             var cookiesByDomain = cookies.GroupBy(c => c.Domain ?? "null");
-            Common.LogDebug(true, $"Cookies distribution: {string.Join(", ", cookiesByDomain.Select(g => $"{g.Key}={g.Count()}"))}");
+            Common.LogDebug($"Cookies distribution: {string.Join(", ", cookiesByDomain.Select(g => $"{g.Key}={g.Count()}"))}");
 
             foreach (HttpCookie cookie in cookies)
             {
@@ -1314,8 +1314,8 @@ namespace CommonPluginsShared
                 }
             }
 
-            Common.LogDebug(true, $"CookieContainer: {addedCount} added, {skippedCount} skipped, {errorCount} errors from {cookies.Count} total");
-            Common.LogDebug(true, $"Final container count: {cookieContainer.Count}");
+            Common.LogDebug($"CookieContainer: {addedCount} added, {skippedCount} skipped, {errorCount} errors from {cookies.Count} total");
+            Common.LogDebug($"Final container count: {cookieContainer.Count}");
 
             return cookieContainer;
         }

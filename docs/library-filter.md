@@ -60,7 +60,7 @@ When `PluginDatabase.PluginSettings` (also exposed as `FilterSettings`) holds ac
 | Refresh recent | `RefreshRecent` | `FilterLibraryGames` |
 | Games with no data / old data | `GetGamesWithNoData`, `GetGamesOldData` | `FilterLibraryGames` |
 | Single-game refresh (base) | `PluginDatabaseObject.RefreshNoLoader` | `GetLibraryFilterExclusionReason` at entry |
-| Theme controls | `PluginUserControlExtend.UpdateDataAsync` | `ShouldIncludeLibraryGame` → control collapsed |
+| Theme controls | `PluginUserControlExtend.UpdateDataAsync` | `ShouldIncludeLibraryGame` → collapsed; skipped when `AlwaysShow` (e.g. PluginButton on Hidden) |
 
 No extra code is required for these paths **after** settings are configured.
 

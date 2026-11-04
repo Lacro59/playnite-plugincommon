@@ -70,5 +70,11 @@ namespace CommonPluginsShared.Interfaces
 		/// Values are compared against <c>PlayniteTools.GetSourceName</c>.
 		/// </summary>
 		List<string> ExcludedSources { get; set; }
+
+		/// <summary>
+		/// Gets or sets a value indicating whether verbose debug logging is enabled.
+		/// When enabled, diagnostic messages marked as verbose are written to extensions.log in release builds.
+		/// </summary>
+		bool EnableVerboseLogging { get; set; }
 	}
 }

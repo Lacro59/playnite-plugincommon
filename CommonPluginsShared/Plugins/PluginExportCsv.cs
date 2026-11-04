@@ -52,7 +52,8 @@ namespace CommonPluginsShared.Plugins
 				ShowMaximizeButton = false,
 				CanBeResizable = false,
 				Width = 500,
-				MinHeight = 500
+				MinHeight = 500,
+				EnableWindowPersistence = false
 			};
 			var window = PlayniteUiHelper.CreateExtensionWindow(GetExportWindowTitle(pluginName), view, windowOptions);
 			window.ShowDialog();

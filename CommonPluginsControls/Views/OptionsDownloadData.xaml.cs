@@ -1,4 +1,4 @@
-﻿using CommonPluginsShared;
+using CommonPluginsShared;
 using CommonPluginsShared.Interfaces;
 using Playnite.SDK;
 using Playnite.SDK.Models;
@@ -100,7 +100,7 @@ namespace CommonPluginsControls.Controls
             {
                 int beforeLibraryFilter = FilteredGames?.Count ?? 0;
                 FilteredGames = PlayniteTools.FilterLibraryGames(FilteredGames, PluginDatabase.FilterSettings).ToList();
-                Common.LogDebug(true, string.Format(
+                Common.LogDebug(string.Format(
                     "[LibraryFilter] OptionsDownloadData: {0} -> {1} games after library filter (IncludeEmulatedGames={2}, SourceFilter={3})",
                     beforeLibraryFilter,
                     FilteredGames.Count,
@@ -165,7 +165,7 @@ namespace CommonPluginsControls.Controls
                 : "(none)";
             int gameCount = FilteredGames?.Count ?? 0;
 
-            Common.LogDebug(true, string.Format(
+            Common.LogDebug(string.Format(
                 "[OptionsDownloadData] GameSource={0}, Installation={1}, Time={2}, Months={3}, TagMissing={4}, OnlyMissing={5}, Games={6}",
                 gameSource,
                 installation,

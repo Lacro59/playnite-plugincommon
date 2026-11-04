@@ -4,10 +4,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
+using CommonPluginsShared.UI;
 using Playnite.SDK;
 
 namespace CommonPluginsShared
 {
+    /// <summary>
+    /// Helpers for creating and configuring Playnite extension windows.
+    /// </summary>
     public class PlayniteUiHelper
     {
         /// <summary>
@@ -26,6 +30,9 @@ namespace CommonPluginsShared
 
         /// <summary>
         /// Creates a Playnite extension window with the specified settings.
+        /// When <see cref="WindowOptions.EnableWindowPersistence"/> is true and a
+        /// <see cref="WindowOptions.WindowPersistenceKey"/> is set, size/position/state
+        /// are restored from and saved to the plugin ExtensionData <c>windowPositions.json</c>.
         /// </summary>
         /// <param name="title">Window title</param>
         /// <param name="viewExtension">User control to display</param>
@@ -55,6 +62,7 @@ namespace CommonPluginsShared
 
             ApplyWindowDimensions(windowExtension, viewExtension, windowOptions, windowExtension.Owner);
             ApplyWindowConstraints(windowExtension, windowOptions);
+            AttachWindowPersistence(windowExtension, windowOptions);
 
             windowExtension.PreviewKeyDown += HandleEsc;
 
@@ -176,11 +184,10 @@ namespace CommonPluginsShared
             }
 
             System.Windows.Point topLeftDip = ownerSource.CompositionTarget.TransformFromDevice.Transform(new System.Windows.Point(workingAreaPixels.Left, workingAreaPixels.Top));
-			System.Windows.Point bottomRightDip = ownerSource.CompositionTarget.TransformFromDevice.Transform(new System.Windows.Point(workingAreaPixels.Right, workingAreaPixels.Bottom));
+            System.Windows.Point bottomRightDip = ownerSource.CompositionTarget.TransformFromDevice.Transform(new System.Windows.Point(workingAreaPixels.Right, workingAreaPixels.Bottom));
 
             return new Rect(topLeftDip, bottomRightDip);
         }
-
 
         /// <summary>
         /// Applies window size constraints independently (min/max dimensions).
@@ -207,18 +214,101 @@ namespace CommonPluginsShared
                 window.MaxHeight = windowOptions.MaxHeight;
             }
         }
+
+        /// <summary>
+        /// Restores persisted geometry when enabled and attaches save-on-close.
+        /// </summary>
+        private static void AttachWindowPersistence(Window window, WindowOptions windowOptions)
+        {
+            bool missingKey;
+            if (!WindowPositionPersistence.CanPersist(windowOptions, out missingKey))
+            {
+                if (missingKey)
+                {
+                    Common.LogDebug(string.Format(
+                        "[PlayniteUiHelper] Window persistence enabled but WindowPersistenceKey is empty (title=\"{0}\"); skipping.",
+                        window.Title));
+                }
+
+                return;
+            }
+
+            string key = windowOptions.WindowPersistenceKey.Trim();
+            Rect workArea = GetOwnerWorkArea(window.Owner);
+            WindowPositionPersistence.TryRestore(window, key, workArea);
+
+            window.Closed += (sender, args) =>
+            {
+                Window closedWindow = sender as Window;
+                if (closedWindow != null)
+                {
+                    WindowPositionPersistence.Save(closedWindow, key);
+                }
+            };
+        }
     }
 
+    /// <summary>
+    /// Extended window creation options for plugin dialogs.
+    /// </summary>
     public class WindowOptions : WindowCreationOptions
     {
+        /// <summary>
+        /// Gets or sets the fixed window width in DIPs when greater than zero.
+        /// </summary>
         public double Width { get; set; }
+
+        /// <summary>
+        /// Gets or sets the window width as a percentage of the owner work area.
+        /// </summary>
         public double WidthPercent { get; set; }
+
+        /// <summary>
+        /// Gets or sets the fixed window height in DIPs when greater than zero.
+        /// </summary>
         public double Height { get; set; }
+
+        /// <summary>
+        /// Gets or sets the window height as a percentage of the owner work area.
+        /// </summary>
         public double HeightPercent { get; set; }
+
+        /// <summary>
+        /// Gets or sets the minimum window width.
+        /// </summary>
         public double MinWidth { get; set; }
+
+        /// <summary>
+        /// Gets or sets the minimum window height.
+        /// </summary>
         public double MinHeight { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum window width.
+        /// </summary>
         public double MaxWidth { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum window height.
+        /// </summary>
         public double MaxHeight { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the window can be resized by the user.
+        /// </summary>
         public bool CanBeResizable { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets whether size, position and state are persisted under the plugin ExtensionData folder.
+        /// Defaults to <c>true</c>; set to <c>false</c> for one-shot dialogs.
+        /// Persistence still requires a non-empty <see cref="WindowPersistenceKey"/>.
+        /// </summary>
+        public bool EnableWindowPersistence { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets a stable, non-localized key used as the JSON entry id (for example <c>GameActivity.GameView</c>).
+        /// Required when <see cref="EnableWindowPersistence"/> is <c>true</c>.
+        /// </summary>
+        public string WindowPersistenceKey { get; set; }
     }
 }

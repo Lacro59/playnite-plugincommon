@@ -125,6 +125,8 @@
 
 	<!-- ==================== LIST ACTIONS ==================== -->
 
+	<sys:String x:Key="LOCCommonListViewResetColumns">Сбросить столбцы</sys:String>
+	<sys:String x:Key="LOCCommonListViewShowAllColumns">Показать все столбцы</sys:String>
 	<sys:String x:Key="LOCCommonClearSelection">Очистить выбранное</sys:String>
 	<sys:String x:Key="LOCCommonRefreshSelected">⟳ Refresh Selected</sys:String>
 	<sys:String x:Key="LOCCommonSelected">Выбрано:</sys:String>
@@ -147,9 +149,9 @@
 	<sys:String x:Key="LOCCommonDeletePluginData">Удалить данные плагина</sys:String>
 	<sys:String x:Key="LOCCommonClearAllDatas">Удалить данные для всех иг</sys:String>
 	<sys:String x:Key="LOCCommonViewNoData">Просмотр игр без данных плагина</sys:String>
-	<sys:String x:Key="LOCCommonSelectData">Скачать данные для выбранных иг</sys:String>
+	<sys:String x:Key="LOCCommonSelectData">Скачать данные для выбранных игр</sys:String>
 	<sys:String x:Key="LOCCommonDownloadPluginData">Загрузка данных плагина...</sys:String>
-	<sys:String x:Key="LOCCommonGetAllDatas">Скачать данные для всех иг</sys:String>
+	<sys:String x:Key="LOCCommonGetAllDatas">Скачать данные для всех игр</sys:String>
 	<sys:String x:Key="LOCCommonIsolatedPluginData">Изолированные данные плагина</sys:String>
 
 	<!-- ==================== TAG MANAGEMENT ==================== -->
@@ -272,13 +274,18 @@
 	<sys:String x:Key="LOCCommonControlsVisibleNoData">Отображать текст, когда нет данны</sys:String>
 	<sys:String x:Key="LOCCommonIconStore">Показать иконку магазина</sys:String>
 	<sys:String x:Key="LOCCommonMenuInExtensions">Показывать меню плагинов в подменю расширений *</sys:String>
+	<sys:String x:Key="LOCCommonEnableVerboseLogging">Включить подробное ведение логов плагина (дополнительные логи в extensions.log)</sys:String>
+	<sys:String x:Key="LOCCommonDebugTab">Отладка</sys:String>
+	<sys:String x:Key="LOCCommonVerboseLoggingHelp" xml:space="preserve">При сообщении об ошибке включите подробное логирование ниже, воспроизведите проблему один раз, затем создайте пакет логов и прикрепите ZIP-файл к вашему обращению (issue) на GitHub. Подробное логирование записывает дополнительные диагностические сообщения в файл extensions.log в папке конфигурации Playnite.</sys:String>
+	<sys:String x:Key="LOCCommonCreateLogPackageButton">Создать пакет логов</sys:String>
+	<sys:String x:Key="LOCCommonLogPackageHelp">Создает ZIP-архив с файлами логов Playnite в папке кэша и открывает эту папку. Прикрепите архив при создании отчета об ошибке.</sys:String>
 	<sys:String x:Key="LOCCommonSaveColumOrder">Сохранить порядок сортировки</sys:String>
 
 	<!-- Integration — appearance -->
 	<sys:String x:Key="LOCCommonIntegration">Внешний вид</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButton">Показать кнопку плагина в подробностях игры</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButtonDetails">Кнопка с деталями</sys:String>
-	<sys:String x:Key="LOCCommonIntegrationButtonHeader">Отображать кнопку плагина в Windiws баре</sys:String>
+	<sys:String x:Key="LOCCommonIntegrationButtonHeader">Отображать кнопку плагина в заголовке окна</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButtonIsToggle">С кнопкой переключения</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButtonOnlyIcon">Показывать только иконк</sys:String>
 	<sys:String x:Key="LOCCommonIntegrationButtonOptions">Параметры кнопки</sys:String>

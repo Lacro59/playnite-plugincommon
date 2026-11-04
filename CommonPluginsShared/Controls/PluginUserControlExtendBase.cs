@@ -1,4 +1,4 @@
-﻿using CommonPluginsShared.Interfaces;
+using CommonPluginsShared.Interfaces;
 using CommonPluginsShared.Collections;
 using Playnite.SDK;
 using Playnite.SDK.Controls;
@@ -50,6 +50,7 @@ namespace CommonPluginsShared.Controls
 
 		private static readonly object _settingsCoalesceLock = new object();
 		private static DispatcherTimer _settingsCoalesceTimer;
+		private static HashSet<string> _pendingSettingsProperties;
 
 		#region Dependency Properties
 
@@ -98,6 +99,9 @@ namespace CommonPluginsShared.Controls
 				Visibility newVisibility = mustDisplay ? Visibility.Visible : Visibility.Collapsed;
 				if (obj.Parent is ContentControl contentControl)
 				{
+					// Local value helps themes that do not bind the host ContentControl.
+					// Prefer MustDisplay=false until HasData is known (see GameContextChanged) so
+					// this does not flash Visible on ProgressBar/ViewItem hosts without data.
 					contentControl.Visibility = newVisibility;
 				}
 
@@ -128,11 +132,16 @@ namespace CommonPluginsShared.Controls
 			}
 		}
 
+		/// <summary>
+		/// DP callback for chart/control options (axis, filters, selected date, etc.).
+		/// Must schedule a data refresh — not <see cref="GameContextChanged"/> — because the
+		/// same-game early exit would skip SetData while the game id is unchanged.
+		/// </summary>
 		protected static void ControlsPropertyChangedCallback(DependencyObject sender, DependencyPropertyChangedEventArgs e)
 		{
 			if (sender is PluginUserControlExtendBase obj && e.NewValue != e.OldValue)
 			{
-				obj.GameContextChanged(null, obj.GameContext);
+				obj.ScheduleDataRefresh("control-property-changed");
 			}
 		}
 
@@ -290,18 +299,34 @@ namespace CommonPluginsShared.Controls
 			NotifyAllInstances(instance => instance.Games_ItemUpdated(sender, e));
 		}
 
+		/// <summary>
+		/// Builds the shared plugin-settings <see cref="INotifyPropertyChanged"/> handler.
+		/// </summary>
+		/// <remarks>
+		/// Property names are forwarded into the coalesce queue so controls can ignore mirror flags
+		/// (see <see cref="ShouldApplySettingsProperty"/>). Default behavior still refreshes on every change.
+		/// Attention: only filter theme/session mirrors — never filter real user options, or settings UI
+		/// changes will not reach derived controls in every plugin that shares this base.
+		/// </remarks>
 		protected static PropertyChangedEventHandler CreatePluginSettingsHandler()
 		{
 			return (sender, e) =>
 			{
-				ScheduleCoalescedSettingsRefresh();
+				ScheduleCoalescedSettingsRefresh(e != null ? e.PropertyName : null);
 			};
 		}
 
 		/// <summary>
-		/// Coalesces plugin settings <see cref="PropertyChanged"/> notifications before refreshing controls.
+		/// Coalesces plugin settings <see cref="INotifyPropertyChanged"/> notifications before refreshing controls.
 		/// </summary>
-		private static void ScheduleCoalescedSettingsRefresh()
+		/// <param name="propertyName">
+		/// Changed property name, or null/empty to force a full settings refresh.
+		/// </param>
+		/// <remarks>
+		/// Null/empty names force a full refresh for all instances. Named properties are batched; a tick
+		/// applies only when at least one pending name passes <see cref="ShouldApplySettingsProperty"/>.
+		/// </remarks>
+		private static void ScheduleCoalescedSettingsRefresh(string propertyName)
 		{
 			Dispatcher dispatcher = Application.Current?.Dispatcher;
 			if (dispatcher == null)
@@ -311,6 +336,14 @@ namespace CommonPluginsShared.Controls
 
 			lock (_settingsCoalesceLock)
 			{
+				if (_pendingSettingsProperties == null)
+				{
+					_pendingSettingsProperties = new HashSet<string>();
+				}
+
+				// Empty string marks a forced full refresh (IgnoreSettings / unknown property).
+				_pendingSettingsProperties.Add(propertyName ?? string.Empty);
+
 				if (_settingsCoalesceTimer == null)
 				{
 					_settingsCoalesceTimer = new DispatcherTimer
@@ -327,12 +360,15 @@ namespace CommonPluginsShared.Controls
 
 		private static void OnSettingsCoalesceTick(object sender, EventArgs e)
 		{
+			HashSet<string> pendingProperties;
 			lock (_settingsCoalesceLock)
 			{
 				_settingsCoalesceTimer?.Stop();
+				pendingProperties = _pendingSettingsProperties;
+				_pendingSettingsProperties = null;
 			}
 
-			NotifyAllInstances(instance => instance.ApplyCoalescedSettingsRefresh());
+			NotifyAllInstances(instance => instance.ApplyCoalescedSettingsRefresh(pendingProperties));
 		}
 
 		/// <summary>
@@ -530,16 +566,74 @@ namespace CommonPluginsShared.Controls
 
 		protected virtual void PluginSettings_PropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
-			ApplyCoalescedSettingsRefresh();
+			// Force full refresh (IgnoreSettings DP path and legacy callers).
+			ApplyCoalescedSettingsRefresh(null);
 		}
 
 		/// <summary>
 		/// Applies plugin settings to the control and schedules a debounced data refresh.
+		/// Skips when every pending property is filtered by <see cref="ShouldApplySettingsProperty"/>.
 		/// </summary>
-		private void ApplyCoalescedSettingsRefresh()
+		/// <param name="propertyNames">
+		/// Coalesced property names. Null/empty forces a full refresh. An empty string entry also forces refresh.
+		/// </param>
+		/// <remarks>
+		/// Calls <see cref="SetDefaultDataContext"/> then <see cref="ScheduleDataRefresh"/>. Overriding
+		/// <see cref="ShouldApplySettingsProperty"/> incorrectly can starve other plugins of settings updates
+		/// only for that derived control type — keep filters narrow and opt-in.
+		/// </remarks>
+		private void ApplyCoalescedSettingsRefresh(ICollection<string> propertyNames)
 		{
+			if (!ShouldApplySettingsRefresh(propertyNames))
+			{
+				return;
+			}
+
 			SetDefaultDataContext();
 			ScheduleDataRefresh("settings-changed");
+		}
+
+		/// <summary>
+		/// Whether a plugin-settings property change should reset/refresh this control.
+		/// </summary>
+		/// <param name="propertyName">Settings property name.</param>
+		/// <returns>
+		/// <c>true</c> to apply <see cref="SetDefaultDataContext"/> + data refresh; <c>false</c> to ignore.
+		/// </returns>
+		/// <remarks>
+		/// Default is <c>true</c> (full compatibility with existing plugins).
+		/// Attention for shared-base consumers:
+		/// return <c>false</c> only for theme/session mirror flags updated on every game switch
+		/// (e.g. HasDataBackground / HasDataCover / HasDataIcon). Filtering a real user option
+		/// silently breaks settings propagation for that control. Prefer overriding in a plugin-specific
+		/// intermediate base, not in this shared class.
+		/// </remarks>
+		protected virtual bool ShouldApplySettingsProperty(string propertyName)
+		{
+			return true;
+		}
+
+		/// <summary>
+		/// Returns whether the coalesced property set should trigger a settings refresh.
+		/// </summary>
+		/// <param name="propertyNames">Pending property names from the coalesce timer.</param>
+		/// <returns><c>true</c> when at least one name must refresh; otherwise <c>false</c>.</returns>
+		private bool ShouldApplySettingsRefresh(ICollection<string> propertyNames)
+		{
+			if (propertyNames == null || propertyNames.Count == 0)
+			{
+				return true;
+			}
+
+			foreach (string propertyName in propertyNames)
+			{
+				if (string.IsNullOrEmpty(propertyName) || ShouldApplySettingsProperty(propertyName))
+				{
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		public override void GameContextChanged(Game oldContext, Game newContext)
@@ -566,7 +660,12 @@ namespace CommonPluginsShared.Controls
 			// UI flicker and unnecessary work while the timer debounces the burst.
 			if (isContextSwitch)
 			{
-				SetVisibility(Visibility.Collapsed);
+				// Default collapses to hide stale content; override only when a theme-native
+				// fallback would flash if this control goes Collapsed (see ShouldCollapseOnContextSwitch).
+				if (ShouldCollapseOnContextSwitch())
+				{
+					SetVisibility(Visibility.Collapsed);
+				}
 				SetDefaultDataContext();
 #if DEBUG
 				timer.Step("SetDefaultDataContext done (context switch)");
@@ -592,9 +691,21 @@ namespace CommonPluginsShared.Controls
 			}
 #endif
 
-			MustDisplay = AlwaysShow || controlDataContext.IsActivated;
+			bool isActivated = controlDataContext?.IsActivated ?? false;
 
-			if (!(controlDataContext?.IsActivated ?? false) || newContext == null || !MustDisplay)
+			// Pending HasData: only AlwaysShow claims MustDisplay before UpdateDataAsync.
+			// Setting MustDisplay = IsActivated here forced theme ContentControl hosts Visible
+			// for ProgressBar/ViewItem even with no cache entry (parent callback).
+			if (isContextSwitch)
+			{
+				MustDisplay = AlwaysShow;
+			}
+			else if (!isActivated && !AlwaysShow)
+			{
+				MustDisplay = false;
+			}
+
+			if (!isActivated || newContext == null)
 			{
 #if DEBUG
 				timer.Stop("early exit (not activated or no context)");
@@ -640,6 +751,21 @@ namespace CommonPluginsShared.Controls
 		#endregion
 
 		public virtual void SetDefaultDataContext() { }
+
+		/// <summary>
+		/// Whether <see cref="GameContextChanged"/> should collapse the control on a game switch.
+		/// </summary>
+		/// <returns><c>true</c> to collapse (default); <c>false</c> to keep current visibility.</returns>
+		/// <remarks>
+		/// Default is <c>true</c> so other plugins keep the previous hide-stale-content behavior.
+		/// Attention: return <c>false</c> only when collapsing would briefly reveal a theme-native
+		/// surface that must stay hidden while the feature is enabled. Leaving the control Visible
+		/// without clearing layers can show the previous game's media until the next SetData.
+		/// </remarks>
+		protected virtual bool ShouldCollapseOnContextSwitch()
+		{
+			return true;
+		}
 
 		/// <summary>
 		/// Cancels any in-flight <see cref="UpdateDataAsync"/> for the current instance.
@@ -740,13 +866,28 @@ namespace CommonPluginsShared.Controls
 		/// <see cref="GameContextChanged"/> collapse/reset path.
 		/// </summary>
 		/// <param name="reason">Caller label for diagnostics.</param>
+		/// <remarks>
+		/// Does not set <see cref="MustDisplay"/> from <c>IsActivated</c> alone — post-data visibility
+		/// is owned by <c>RefreshMustDisplayFromData</c> in <see cref="PluginUserControlExtend"/>.
+		/// <see cref="AlwaysShow"/> controls keep <see cref="MustDisplay"/> true while debouncing.
+		/// </remarks>
 		protected void ScheduleDataRefresh(string reason)
 		{
-			MustDisplay = AlwaysShow || (controlDataContext?.IsActivated ?? false);
+			bool isActivated = controlDataContext?.IsActivated ?? false;
 
-			if (!(controlDataContext?.IsActivated ?? false) || GameContext == null || !MustDisplay)
+			if (!isActivated || GameContext == null)
 			{
+				if (!AlwaysShow)
+				{
+					MustDisplay = false;
+				}
+
 				return;
+			}
+
+			if (AlwaysShow)
+			{
+				MustDisplay = true;
 			}
 
 			RestartTimer(reason);
@@ -813,21 +954,21 @@ namespace CommonPluginsShared.Controls
 			return string.Format("{0}#{1:X8}", GetType().Name, GetHashCode());
 		}
 
-		/// <summary>Verbose trace — DEBUG builds only, marked as ignored in the log file.</summary>
+		/// <summary>Verbose trace — gated by <see cref="Common.IsVerboseLoggingEffective"/>.</summary>
 		protected void LogControlTrace(string phase, string detail = null)
 		{
 			string message = detail == null
 				? string.Format("[{0}] {1}", GetInstanceDiagnosticId(), phase)
 				: string.Format("[{0}] {1} — {2}", GetInstanceDiagnosticId(), phase, detail);
-			Common.LogDebug(true, message);
+			Common.LogDebug(message);
 		}
 
 		/// <summary>
-		/// Important diagnostic — logged in DEBUG and Release at debug level without the [Ignored] prefix.
+		/// Important control diagnostic — same verbose gate as <see cref="LogControlTrace"/>.
 		/// </summary>
 		protected void LogControlIssue(string message)
 		{
-			Common.LogDebug(false, string.Format("[{0}] {1}", GetInstanceDiagnosticId(), message));
+			Common.LogDebug(string.Format("[{0}] {1}", GetInstanceDiagnosticId(), message));
 		}
 
 		private void LogNotifyAllInstancesFailure(Exception ex)

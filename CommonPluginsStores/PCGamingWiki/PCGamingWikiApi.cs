@@ -1,4 +1,4 @@
-﻿using AngleSharp.Dom;
+using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 using CommonPluginsShared;
@@ -113,7 +113,7 @@ namespace CommonPluginsStores.PCGamingWiki
 
 			try
 			{
-				Common.LogDebug(true, $"PCGamingWikiApi.GetSystemRequirements - url: {url}");
+				Common.LogDebug($"PCGamingWikiApi.GetSystemRequirements - url: {url}");
 
 				string html = string.Empty;
 				try
@@ -147,7 +147,7 @@ namespace CommonPluginsStores.PCGamingWiki
 					string dataMinimum = row.QuerySelector(".table-sysreqs-body-minimum")?.InnerHtml.Trim() ?? string.Empty;
 					string dataRecommended = row.QuerySelector(".table-sysreqs-body-recommended")?.InnerHtml.Trim() ?? string.Empty;
 
-					Common.LogDebug(true, $"PCGamingWikiApi - [{dataTitle}] min: {dataMinimum} | rec: {dataRecommended}");
+					Common.LogDebug($"PCGamingWikiApi - [{dataTitle}] min: {dataMinimum} | rec: {dataRecommended}");
 
 					ParseRow(dataTitle, dataMinimum, dataRecommended, result);
 				}
@@ -208,7 +208,7 @@ namespace CommonPluginsStores.PCGamingWiki
 			}
 
 			string url = string.Format(UrlWithSteamId, steamAppId);
-			Common.LogDebug(true, $"[PCGamingWikiApi] Trying appid lookup for {game.Name} ({steamAppId}) with throttled request.");
+			Common.LogDebug($"[PCGamingWikiApi] Trying appid lookup for {game.Name} ({steamAppId}) with throttled request.");
 			WaitForApiRateLimit();
 			string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
 			if (!response.Contains("search results", StringComparison.OrdinalIgnoreCase))

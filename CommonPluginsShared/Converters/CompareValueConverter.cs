@@ -19,10 +19,24 @@ namespace CommonPluginsShared.Converters
                 }
 
                 // Handle string cleaning and parsing
-                string val0 = values[0]?.ToString()?.Replace("%", string.Empty)?.Replace("°", string.Empty);
-                string val1 = values[1]?.ToString();
+                string val0 = values[0]?.ToString()
+                    ?.Replace("%", string.Empty)
+                    ?.Replace("°", string.Empty)
+                    ?.Replace("W", string.Empty)
+                    ?.Replace("w", string.Empty);
+                string val1 = values[1]?.ToString()
+                    ?.Replace("%", string.Empty)
+                    ?.Replace("°", string.Empty)
+                    ?.Replace("W", string.Empty)
+                    ?.Replace("w", string.Empty);
 
                 if (!int.TryParse(val0, out int valueData) || !int.TryParse(val1, out int valueControl))
+                {
+                    return ResourceProvider.GetResource("TextBrush");
+                }
+
+                // Threshold 0 = indicator off for this sensor (independent of EnableWarm).
+                if (valueControl <= 0)
                 {
                     return ResourceProvider.GetResource("TextBrush");
                 }

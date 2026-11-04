@@ -69,6 +69,7 @@ namespace CommonPluginsControls.Views
                 ShowMinimizeButton = false,
                 ShowMaximizeButton = false,
                 ShowCloseButton = true,
+                EnableWindowPersistence = false
             };
 
             var data = (DataGame)PART_Lb.SelectedItem;

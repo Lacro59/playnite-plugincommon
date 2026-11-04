@@ -106,7 +106,7 @@ namespace CommonPluginsShared
 					Application.Current.Resources.Add(resourceKey, lastModified);
 					Application.Current.Resources.MergedDictionaries.Add(dictionary);
 
-					LogDebug(true, string.Format("Loaded resource {0} - {1:yyyy-MM-dd HH:mm:ss}", file, lastModified));
+					LogDebug(string.Format("Loaded resource {0} - {1:yyyy-MM-dd HH:mm:ss}", file, lastModified));
 				}
 				catch (Exception ex)
 				{
@@ -165,27 +165,67 @@ namespace CommonPluginsShared
 
 		#region Logging
 
+		private static bool _verboseLoggingStored;
+
 		/// <summary>
-		/// Write a debug message.
-		/// In release builds, messages marked as ignored will not be logged.
+		/// Updates the stored verbose logging preference from plugin settings.
+		/// Does not change the serialized settings file; DEBUG builds always log verbose messages regardless.
 		/// </summary>
-		/// <param name="isIgnored">If true, the message is prefixed and only logged in debug builds.</param>
-		/// <param name="message">Message to log.</param>
-		public static void LogDebug(bool isIgnored, string message)
+		/// <param name="enableVerboseLogging">Persisted user preference.</param>
+		public static void SetVerboseLogging(bool enableVerboseLogging)
 		{
-			if (isIgnored)
+			_verboseLoggingStored = enableVerboseLogging;
+		}
+
+		/// <summary>
+		/// Synchronizes verbose logging from a plugin settings model and logs the resulting state at Info level.
+		/// </summary>
+		/// <param name="settings">Plugin settings instance, or null to leave the stored value unchanged.</param>
+		/// <param name="context">Caller context for the Info log (for example <c>startup</c> or <c>settings-saved</c>).</param>
+		public static void SyncVerboseLoggingFromSettings(Interfaces.IPluginSettings settings, string context = "sync")
+		{
+			if (settings == null)
 			{
-				message = string.Format("[Ignored] {0}", message);
+				return;
 			}
 
+			SetVerboseLogging(settings.EnableVerboseLogging);
+
+			var pluginSettings = settings as Plugins.PluginSettings;
+			if (pluginSettings != null)
+			{
+				pluginSettings.LogVerboseLoggingState(context);
+			}
+		}
+
+		/// <summary>
+		/// Gets whether verbose debug messages should be written.
+		/// DEBUG builds always return <c>true</c>; release builds follow <see cref="SetVerboseLogging"/>.
+		/// </summary>
+		public static bool IsVerboseLoggingEffective
+		{
+			get
+			{
 #if DEBUG
-			Logger.Debug(message);
+				return true;
 #else
-            if (!isIgnored)
-            {
-                Logger.Debug(message);
-            }
+				return _verboseLoggingStored;
 #endif
+			}
+		}
+
+		/// <summary>
+		/// Writes a verbose debug message when <see cref="IsVerboseLoggingEffective"/> is true.
+		/// </summary>
+		/// <param name="message">Message to log.</param>
+		public static void LogDebug(string message)
+		{
+			if (!IsVerboseLoggingEffective)
+			{
+				return;
+			}
+
+			Logger.Debug(message);
 		}
 
 		/// <summary>

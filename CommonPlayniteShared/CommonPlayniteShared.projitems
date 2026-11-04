@@ -57,6 +57,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\InvertableBooleanToVisibilityConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\InvertedBoolenConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\PlayTimeToStringConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\DateTimeToLastPlayedConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DateTimes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\NegateConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\StringNullOrEmptyToBoolConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\StringNullOrEmptyToVisibilityConverter.cs" />
@@ -94,6 +96,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\XboxLibrary\Services\XboxAccountClient.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Settings\PlaynitePaths.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Settings\PlayniteSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Settings\DateFormattingOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Settings\PlayniteDateFormats.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Gog.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Models\AccountBasicResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PluginLibrary\GogLibrary\Models\GetOwnedGamesResult.cs" />

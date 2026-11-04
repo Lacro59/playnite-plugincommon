@@ -127,21 +127,21 @@ namespace CommonPluginsControls.Stores
             IStoreApi storeApi = StoreApi;
             if (storeApi == null)
             {
-                Common.LogDebug(true, "[StorePanel] ScheduleBackgroundAuthRefresh skipped: StoreApi is null.");
+                Common.LogDebug("[StorePanel] ScheduleBackgroundAuthRefresh skipped: StoreApi is null.");
                 return;
             }
 
             int generation = Interlocked.Increment(ref _authRefreshGeneration);
-            Common.LogDebug(true, $"[StorePanel] ScheduleBackgroundAuthRefresh generation={generation}, store={storeApi.GetType().Name}.");
+            Common.LogDebug($"[StorePanel] ScheduleBackgroundAuthRefresh generation={generation}, store={storeApi.GetType().Name}.");
             storeApi.RefreshIsUserLoggedInInBackground(() =>
             {
                 if (generation != _authRefreshGeneration || !ReferenceEquals(StoreApi, storeApi))
                 {
-                    Common.LogDebug(true, $"[StorePanel] Background auth refresh discarded (generation={generation}, current={_authRefreshGeneration}).");
+                    Common.LogDebug($"[StorePanel] Background auth refresh discarded (generation={generation}, current={_authRefreshGeneration}).");
                     return;
                 }
 
-                Common.LogDebug(true, $"[StorePanel] Background auth refresh applied for {storeApi.GetType().Name}, AuthStatus={AuthStatus}.");
+                Common.LogDebug($"[StorePanel] Background auth refresh applied for {storeApi.GetType().Name}, AuthStatus={AuthStatus}.");
                 NotifyAuthStatusChanged();
             });
             NotifyAuthStatusChanged();

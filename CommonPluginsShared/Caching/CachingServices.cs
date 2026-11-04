@@ -4,6 +4,7 @@ using CommonPlayniteShared.Common.Web;
 using CommonPluginsShared.Images;
 using Playnite.SDK;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -99,7 +100,7 @@ namespace CommonPluginsShared.Caching
 		public void Set(string key, T value, TimeSpan ttl)
 		{
 #if DEBUG
-			Logger.Debug(string.Format("[SmartCache<{0}>.Set] key='{1}'", typeof(T).Name, key));
+			Common.LogDebug(string.Format("[SmartCache<{0}>.Set] key='{1}'", typeof(T).Name, key));
 #endif
 			lock (_lockObject)
 			{
@@ -113,7 +114,7 @@ namespace CommonPluginsShared.Caching
 		public void Clear()
 		{
 #if DEBUG
-			Logger.Debug(string.Format("[SmartCache<{0}>.Clear] all entries removed", typeof(T).Name));
+			Common.LogDebug(string.Format("[SmartCache<{0}>.Clear] all entries removed", typeof(T).Name));
 #endif
 			lock (_lockObject)
 			{
@@ -129,7 +130,7 @@ namespace CommonPluginsShared.Caching
 		public bool Remove(string key)
 		{
 #if DEBUG
-			Logger.Debug(string.Format("[SmartCache<{0}>.Remove] key='{1}'", typeof(T).Name, key));
+			Common.LogDebug(string.Format("[SmartCache<{0}>.Remove] key='{1}'", typeof(T).Name, key));
 #endif
 			lock (_lockObject)
 			{
@@ -146,6 +147,7 @@ namespace CommonPluginsShared.Caching
 	{
 		private static readonly ILogger Logger = LogManager.GetLogger();
 		private static readonly object CacheLock = new object();
+		private static readonly ConcurrentDictionary<string, object> FileLocks = new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
 		/// <summary>
 		/// Gets or sets the cache directory path.
@@ -187,7 +189,7 @@ namespace CommonPluginsShared.Caching
 			bool exists = File.Exists(cacheFile) && new FileInfo(cacheFile).Length > 0;
 
 #if DEBUG
-			Logger.Debug(string.Format("[HttpFileCacheService.IsFileCached] url='{0}' cached={1}", url, exists));
+			Common.LogDebug(string.Format("[HttpFileCacheService.IsFileCached] url='{0}' cached={1}", url, exists));
 #endif
 			return exists;
 		}
@@ -214,7 +216,16 @@ namespace CommonPluginsShared.Caching
 
 			string cacheFile = Path.Combine(CacheDirectory, GetFileNameFromUrl(url));
 
-			lock (CacheLock)
+			if (File.Exists(cacheFile) && new FileInfo(cacheFile).Length > 0)
+			{
+#if DEBUG
+				timer.Stop("disk hit");
+#endif
+				return cacheFile;
+			}
+
+			object fileLock = FileLocks.GetOrAdd(cacheFile, _ => new object());
+			lock (fileLock)
 			{
 				if (File.Exists(cacheFile) && new FileInfo(cacheFile).Length > 0)
 				{
@@ -259,7 +270,7 @@ namespace CommonPluginsShared.Caching
 					if (e.Response == null)
 					{
 #if DEBUG
-						Logger.Debug(string.Format("[HttpFileCacheService.GetWebFile] network error (no response) for url='{0}': {1}", url, e.Message));
+						Common.LogDebug(string.Format("[HttpFileCacheService.GetWebFile] network error (no response) for url='{0}': {1}", url, e.Message));
 #endif
 						throw;
 					}
@@ -268,7 +279,7 @@ namespace CommonPluginsShared.Caching
 					if (response.StatusCode != HttpStatusCode.NotFound)
 					{
 #if DEBUG
-						Logger.Debug(string.Format("[HttpFileCacheService.GetWebFile] HTTP {0} for url='{1}'", (int)response.StatusCode, url));
+						Common.LogDebug(string.Format("[HttpFileCacheService.GetWebFile] HTTP {0} for url='{1}'", (int)response.StatusCode, url));
 #endif
 						throw;
 					}
@@ -300,7 +311,7 @@ namespace CommonPluginsShared.Caching
 					try
 					{
 #if DEBUG
-						Logger.Debug(string.Format("[HttpFileCacheService.ClearCache] removing url='{0}'", url));
+						Common.LogDebug(string.Format("[HttpFileCacheService.ClearCache] removing url='{0}'", url));
 #endif
 						FileSystem.DeleteFileSafe(cacheFile);
 					}
@@ -318,7 +329,7 @@ namespace CommonPluginsShared.Caching
 		public static void ClearAllCache()
 		{
 #if DEBUG
-			Logger.Debug("[HttpFileCacheService.ClearAllCache] start");
+			Common.LogDebug("[HttpFileCacheService.ClearAllCache] start");
 #endif
 			lock (CacheLock)
 			{
@@ -332,7 +343,7 @@ namespace CommonPluginsShared.Caching
 						}
 					}
 #if DEBUG
-					Logger.Debug("[HttpFileCacheService.ClearAllCache] done");
+					Common.LogDebug("[HttpFileCacheService.ClearAllCache] done");
 #endif
 				}
 				catch (Exception e)

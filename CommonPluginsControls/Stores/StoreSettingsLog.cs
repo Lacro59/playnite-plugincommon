@@ -31,7 +31,7 @@ namespace CommonPluginsControls.Stores
 
         public static void Debug(string message)
         {
-            Common.LogDebug(true, $"{Prefix} {message}");
+            Common.LogDebug($"{Prefix} {message}");
         }
 
         public static void StoreRegistered(string storeId, bool isVisible, int sortOrder)

@@ -110,6 +110,57 @@ namespace CommonPluginsShared.Controls
 		}
 
 		/// <summary>
+		/// Clears visible media when the session cache has no entry for the current game.
+		/// Override in controls that keep bitmap/video layers between updates.
+		/// </summary>
+		/// <param name="gameContext">The current selected game.</param>
+		/// <param name="cancellationToken">Token to observe for cancellation.</param>
+		/// <remarks>
+		/// Default is a no-op. Called from <see cref="UpdateDataAsync"/> before visibility is applied.
+		/// Attention: plugins that retain Image/Video layers across games should override and clear them;
+		/// otherwise the previous game's media can remain visible when the new game has no cache entry.
+		/// </remarks>
+		protected virtual Task OnNoPluginCacheEntryAsync(Game gameContext, CancellationToken cancellationToken)
+		{
+			return Task.CompletedTask;
+		}
+
+		/// <summary>
+		/// Recalculates <see cref="PluginUserControlExtendBase.MustDisplay"/> from activation and
+		/// whether the current game has displayable plugin data, then applies visibility.
+		/// </summary>
+		/// <param name="hasDisplayableData">
+		/// <c>true</c> when the session cache has usable data for the current game
+		/// (typically <see cref="PluginGameEntry.HasData"/>); <c>false</c> on cache miss or empty entry.
+		/// </param>
+		/// <remarks>
+		/// Contract: <c>MustDisplay = AlwaysShow || (IsActivated &amp;&amp; hasDisplayableData)</c>.
+		/// Controls with <see cref="PluginUserControlExtendBase.AlwaysShow"/> (e.g. theme buttons that
+		/// open a search when empty) stay visible without data; ProgressBar / ViewItem collapse.
+		/// Call after cache lookup / <see cref="SetDataAsync"/> so visibility matches real data.
+		/// </remarks>
+		protected void RefreshMustDisplayFromData(bool hasDisplayableData)
+		{
+			bool isActivated = controlDataContext?.IsActivated ?? false;
+			MustDisplay = AlwaysShow || (isActivated && hasDisplayableData);
+			ApplyVisibilityFromMustDisplay();
+		}
+
+		/// <summary>
+		/// Applies <see cref="UIElement.Visibility"/> from <see cref="PluginUserControlExtendBase.MustDisplay"/>
+		/// and <see cref="PluginUserControlExtendBase.AlwaysShow"/> after <see cref="SetDataAsync"/> may have
+		/// refreshed in-memory plugin data (e.g. Playnite default media mirrors).
+		/// </summary>
+		/// <remarks>
+		/// Uses <c>AlwaysShow || MustDisplay</c>. Prefer <see cref="RefreshMustDisplayFromData"/> after
+		/// cache lookup so <see cref="PluginUserControlExtendBase.MustDisplay"/> reflects HasData.
+		/// </remarks>
+		protected void ApplyVisibilityFromMustDisplay()
+		{
+			SetVisibility(AlwaysShow || MustDisplay ? Visibility.Visible : Visibility.Collapsed);
+		}
+
+		/// <summary>
 		/// Updates the control. The session cache lookup is synchronous and sub-millisecond
 		/// after pre-warm — no <see cref="Task.Run"/> overhead.
 		/// For games absent from the session cache a background fetch is queued without
@@ -118,6 +169,40 @@ namespace CommonPluginsShared.Controls
 		/// derived classes can override to run off the UI thread.
 		/// In-flight updates are cancelled via <see cref="CancellationToken"/> when the game context changes.
 		/// </summary>
+		/// <remarks>
+		/// Behavioral contract shared by all plugins using this control (breaking vs older early-return):
+		/// <list type="bullet">
+		/// <item>
+		/// <description>
+		/// Cache miss (<c>pluginGameData == null</c>): calls <see cref="OnNoPluginCacheEntryAsync"/> then
+		/// <see cref="RefreshMustDisplayFromData"/> with <c>hasDisplayableData=false</c> — does not call
+		/// <see cref="SetDataAsync"/>.
+		/// </description>
+		/// </item>
+		/// <item>
+		/// <description>
+		/// Cache hit with <c>!HasData</c>: still calls <see cref="SetDataAsync"/> so derived controls can
+		/// clear/reset UI. Older code returned early without SetData — overrides must tolerate empty entries
+		/// (guard on HasData / null collections) and must not assume data is always present.
+		/// </description>
+		/// </item>
+		/// <item>
+		/// <description>
+		/// Visibility after SetData is driven by <see cref="RefreshMustDisplayFromData"/>:
+		/// <c>AlwaysShow || (IsActivated &amp;&amp; HasData)</c>. Without data, non-AlwaysShow controls collapse
+		/// (ProgressBar / ViewItem); AlwaysShow controls (e.g. PluginButton) stay visible.
+		/// </description>
+		/// </item>
+		/// <item>
+		/// <description>
+		/// Library filter (<see cref="PlayniteTools.ShouldIncludeLibraryGame"/>) collapses non-AlwaysShow
+		/// controls for excluded games (Hidden, source, emulated). <see cref="PluginUserControlExtendBase.AlwaysShow"/>
+		/// bypasses that guard so theme buttons remain usable on Hidden / filtered games (e.g. DuplicateHider).
+		/// </description>
+		/// </item>
+		/// </list>
+		/// Smoke other plugins after publishing this submodule: game without plugin data → game with data.
+		/// </remarks>
 		public override async Task UpdateDataAsync()
 		{
 #if DEBUG
@@ -147,12 +232,29 @@ namespace CommonPluginsShared.Controls
 			if (pluginDatabase.FilterSettings != null
 				&& !PlayniteTools.ShouldIncludeLibraryGame(gameSnapshot, pluginDatabase.FilterSettings))
 			{
-				PlayniteTools.LogLibraryFilterExclusion(
-					string.Format("{0}.PluginUserControl", pluginDatabase.PluginName),
+				string exclusionReason = PlayniteTools.GetLibraryFilterExclusionReason(
 					gameSnapshot,
-					PlayniteTools.GetLibraryFilterExclusionReason(gameSnapshot, pluginDatabase.FilterSettings));
-				SetVisibility(Visibility.Collapsed);
-				return;
+					pluginDatabase.FilterSettings);
+
+				// AlwaysShow (e.g. PluginButton) must stay available on Hidden / filtered games.
+				if (AlwaysShow)
+				{
+					Common.LogDebug(string.Format(
+						"[LibraryFilter] {0}.PluginUserControl: AlwaysShow bypass — would exclude '{1}' ({2}) — reason={3}",
+						pluginDatabase.PluginName,
+						gameSnapshot.Name ?? "?",
+						gameSnapshot.Id,
+						PlayniteTools.GetLibraryFilterExclusionDetail(gameSnapshot, exclusionReason) ?? "unknown"));
+				}
+				else
+				{
+					PlayniteTools.LogLibraryFilterExclusion(
+						string.Format("{0}.PluginUserControl", pluginDatabase.PluginName),
+						gameSnapshot,
+						exclusionReason);
+					SetVisibility(Visibility.Collapsed);
+					return;
+				}
 			}
 
 #if DEBUG
@@ -176,35 +278,52 @@ namespace CommonPluginsShared.Controls
 
 			if (pluginGameData == null)
 			{
-				SetVisibility(AlwaysShow ? Visibility.Visible : Visibility.Collapsed);
-				LogControlIssue(string.Format("UpdateDataAsync: no cache entry for '{0}', visibility={1}",
-					gameSnapshot.Name,
-					Visibility));
+				LogControlIssue(string.Format("UpdateDataAsync: no cache entry for '{0}'",
+					gameSnapshot.Name));
+
+				if (cancellationToken.IsCancellationRequested || GameContext == null || GameContext.Id != gameId)
+				{
+					LogControlIssue(string.Format("UpdateDataAsync aborted: cancelled or context changed before no-entry reset (gameId={0})", gameId));
+#if DEBUG
+					timer.Stop("cancelled or context changed before no-entry reset, abort");
+#endif
+					return;
+				}
+
+				// Hook for media controls; default no-op — other plugins can ignore.
+				await OnNoPluginCacheEntryAsync(gameSnapshot, cancellationToken);
+				RefreshMustDisplayFromData(hasDisplayableData: false);
 #if DEBUG
 				timer.Stop(string.Format("no entry, visibility={0}", Visibility));
 #endif
 				return;
 			}
 
-			if (!pluginGameData.HasData)
+			// Do not early-return: SetDataAsync must still run so derived controls can clear UI.
+			// Overrides that assumed HasData == true must be hardened (shared across plugins).
+			bool hasDisplayableData = pluginGameData.HasData;
+			if (!hasDisplayableData)
 			{
-				SetVisibility(AlwaysShow ? Visibility.Visible : Visibility.Collapsed);
-				LogControlIssue(string.Format("UpdateDataAsync: cache entry without data for '{0}', visibility={1}",
-					gameSnapshot.Name,
-					Visibility));
+				LogControlIssue(string.Format("UpdateDataAsync: cache entry without data for '{0}' (stale HasData cache possible)",
+					gameSnapshot.Name));
+			}
+
+			if (cancellationToken.IsCancellationRequested || GameContext == null || GameContext.Id != gameId)
+			{
+				LogControlIssue(string.Format("UpdateDataAsync aborted: cancelled or context changed before SetData (gameId={0})", gameId));
 #if DEBUG
-				timer.Stop(string.Format("no data, visibility={0}", Visibility));
+				timer.Stop("cancelled or context changed before SetData, abort");
 #endif
 				return;
 			}
-
-			SetVisibility(MustDisplay ? Visibility.Visible : Visibility.Collapsed);
 
 #if DEBUG
 			timer.Step("calling SetDataAsync");
 #endif
 
 			await SetDataAsync(gameSnapshot, pluginGameData, cancellationToken);
+
+			RefreshMustDisplayFromData(hasDisplayableData);
 
 			LogControlTrace("UpdateDataAsync completed", string.Format("game='{0}', visibility={1}", gameSnapshot.Name, Visibility));
 
