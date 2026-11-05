@@ -7,6 +7,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.IO;
+using ImageMagick;
 using Playnite.SDK;
 using CommonPlayniteShared.Common.Media.Icons;//using Playnite.Common.Media.Icons;
 using System.Drawing.Imaging;
@@ -78,6 +79,19 @@ namespace CommonPlayniteShared.Common
         {
             try
             {
+                imageStream.Seek(0, SeekOrigin.Begin);
+                if (BitmapExtensions.IsFormatForImageMagickDecode(imageStream))
+                {
+                    imageStream.Seek(0, SeekOrigin.Begin);
+                    var info = new MagickImageInfo(imageStream);
+                    return new ImageProperties
+                    {
+                        Height = (int)info.Height,
+                        Width = (int)info.Width,
+                    };
+                }
+
+                imageStream.Seek(0, SeekOrigin.Begin);
                 var decoder = BitmapDecoder.Create(imageStream, BitmapCreateOptions.IgnoreColorProfile, BitmapCacheOption.Default);
                 if (decoder.Frames.HasItems())
                 {
