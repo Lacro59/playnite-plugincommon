@@ -26,7 +26,7 @@ namespace CommonPluginsShared.Converters
                     return null;
                 }
 
-                string[] validExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".jfif", ".tga", ".webp", ".avif", ".heic", ".ico" };
+                string[] validExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".jfif", ".tga", ".webp", ".avif", ".jxl", ".heic", ".ico" };
                 if (!validExtensions.Contains(Path.GetExtension(imagePath).ToLowerInvariant()))
                 {
                     return imagePath;
@@ -53,7 +53,7 @@ namespace CommonPluginsShared.Converters
                 // Specific handling for TGA
                 if (imagePath.EndsWith(".tga", StringComparison.OrdinalIgnoreCase))
                 {
-                    // TgaToBitmap might not support resize properties directly/easily in this context without more code, 
+                    // TgaToBitmap might not support resize properties directly/easily in this context without more code,
                     // so we return the bitmap as is, or implementing resize is out of scope for this refactor without breaking changes.
                     // The original code was: return bitmapImage == null ? null : bitmapLoadProperties == null ? bitmapImage : bitmapImage.GetClone(bitmapLoadProperties);
                     // Assuming GetClone extension method handles resizing via BitmapLoadProperties logic or similar.

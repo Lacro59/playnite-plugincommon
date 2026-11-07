@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Data;
@@ -25,16 +25,12 @@ namespace CommonPluginsShared.Converters
                     string ext = System.IO.Path.GetExtension(strValue);
                     if (string.IsNullOrEmpty(ext))
                     {
-                        return "\ueb16"; // Image icon?
+                        return "\ueb16";
                     }
 
                     if (VideoExtensions.Contains(ext))
                     {
-                        return "\ueb13"; // Video icon?
-                    }
-                    if (ext.Equals(".webp", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return "\ueb16 \ueb13"; // Both?
+                        return "\ueb13";
                     }
 
                     return "\ueb16";

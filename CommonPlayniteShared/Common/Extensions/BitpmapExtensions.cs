@@ -1,6 +1,7 @@
 ﻿//using PhotoSauce.MagicScaler;
 using CommonPlayniteShared;//using Playnite;
 using CommonPlayniteShared.Common;//using Playnite.Common;
+using ImageMagick;
 using Playnite.SDK;
 using System;
 using System.Collections.Generic;
@@ -115,6 +116,13 @@ namespace System.Drawing.Imaging
     public static partial class BitmapExtensions
     {
         private static ILogger logger = LogManager.GetLogger();
+        private static readonly byte[] webpSig = new byte[] { 0x57, 0x45, 0x42, 0x50 };
+        // Apparently both ftypavif and ftypmif1 can appear in avif encoded images
+        private static readonly byte[] avif1 = new byte[] { 0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66 };
+        private static readonly byte[] avif2 = new byte[] { 0x66, 0x74, 0x79, 0x70, 0x6d, 0x69, 0x66, 0x31 };
+        // https://github.com/ImageMagick/jpeg-xl/blob/main/doc/format_overview.md#file-format
+        private static readonly byte[] jpegxl1 = new byte[] { 0x00, 0x00, 0x00, 0x0C, 0x4A, 0x58, 0x4C, 0x20, 0x0D, 0x0A, 0x87, 0x0A };
+        private static readonly byte[] jpegxl2 = new byte[] { 0xFF, 0x0A };
 
         public static BitmapSource CreateSourceFromURI(Uri imageUri)
         {
@@ -180,12 +188,88 @@ namespace System.Drawing.Imaging
             }
         }
 
+        /// <summary>
+        /// Returns whether the stream starts with a WebP, AVIF or JPEG XL signature decoded via Magick.NET.
+        /// </summary>
+        /// <param name="stream">Readable seekable image stream.</param>
+        public static bool IsFormatForImageMagickDecode(Stream stream)
+        {
+            if (stream == null || stream.Length < 12)
+            {
+                return false;
+            }
+
+            // WEBP
+            stream.Seek(8, SeekOrigin.Begin);
+            var buffer = new byte[webpSig.Length];
+            stream.Read(buffer, 0, webpSig.Length);
+            if (buffer.SequenceEqual(webpSig))
+            {
+                return true;
+            }
+
+            // AVIF
+            stream.Seek(4, SeekOrigin.Begin);
+            buffer = new byte[avif1.Length];
+            stream.Read(buffer, 0, avif1.Length);
+            if (buffer.SequenceEqual(avif1))
+            {
+                return true;
+            }
+
+            if (buffer.SequenceEqual(avif2))
+            {
+                return true;
+            }
+
+            // JPEG XL
+            stream.Seek(0, SeekOrigin.Begin);
+            buffer = new byte[jpegxl1.Length];
+            stream.Read(buffer, 0, jpegxl1.Length);
+            if (buffer.SequenceEqual(jpegxl1))
+            {
+                return true;
+            }
+
+            if (new ArraySegment<byte>(buffer, 0, jpegxl2.Length).SequenceEqual(jpegxl2))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Decodes WebP / AVIF / JPEG XL through Magick.NET and returns a frozen <see cref="BitmapImage"/>.
+        /// </summary>
+        /// <param name="stream">Readable seekable image stream.</param>
+        /// <param name="loadProperties">Ignored for Magick decode (host limitation).</param>
+        public static BitmapImage BitmapFromStreamImageMagick(Stream stream, BitmapLoadProperties loadProperties = null)
+        {
+            // Magick.NET does not expose a reliable decode-at-size path for these formats.
+            // https://github.com/dlemstra/Magick.NET/discussions/1824#discussioncomment-12810888
+            stream.Seek(0, SeekOrigin.Begin);
+            using (var mImage = new MagickImage(stream))
+            {
+                BitmapSource source = mImage.ToBitmapSource();
+                source.Freeze();
+                return BitmapSourceToBitmapImage(source);
+            }
+        }
+
         // TODO: Modify scaling to scale by both axies.
         // This will currently work properly only if load properties force only width or height, not both.
         public static BitmapImage BitmapFromStream(Stream stream, BitmapLoadProperties loadProperties = null)
         {
             try
             {
+                // For webp, avif and jpeg xl primarily, since Windows' decoder doesn't work properly with some files.
+                if (IsFormatForImageMagickDecode(stream))
+                {
+                    logger.Debug($"[Bitmap][Magick] decode source={GetStreamSourceLabel(stream)}");
+                    return BitmapFromStreamImageMagick(stream, loadProperties);
+                }
+
                 stream.Seek(0, SeekOrigin.Begin);
                 var properties = Images.GetImageProperties(stream);
                 var aspect = new AspectRatio(properties.Width, properties.Height);
@@ -274,6 +358,25 @@ namespace System.Drawing.Imaging
             {
                 logger.Error(e, $"Failed to create bitmap from stream. Source: {GetStreamSourceLabel(stream)}");
                 return null;
+            }
+        }
+
+        private static BitmapImage BitmapSourceToBitmapImage(BitmapSource source)
+        {
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(source));
+            using (var stream = new MemoryStream())
+            {
+                encoder.Save(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.CreateOptions = BitmapCreateOptions.IgnoreColorProfile;
+                bitmap.StreamSource = stream;
+                bitmap.EndInit();
+                bitmap.Freeze();
+                return bitmap;
             }
         }
 
