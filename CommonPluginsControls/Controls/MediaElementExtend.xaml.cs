@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using CommonPluginsShared;
+using Playnite.SDK;
+using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace CommonPluginsControls.Controls
@@ -22,6 +16,8 @@ namespace CommonPluginsControls.Controls
     /// </summary>
     public partial class MediaElementExtend : UserControl
     {
+        private static ILogger Logger => LogManager.GetLogger();
+
         private DispatcherTimer timer;
         private bool isSeekingMedia = false;
         private bool isLeave = false;
@@ -169,6 +165,14 @@ namespace CommonPluginsControls.Controls
         // to the total number of miliseconds in the length of the media clip.
         private void PART_Video_MediaOpened(object sender, EventArgs e)
         {
+            string duration = PART_Video.NaturalDuration.HasTimeSpan
+                ? PART_Video.NaturalDuration.TimeSpan.ToString(@"hh\:mm\:ss")
+                : "n/a";
+            Common.LogDebug(string.Format(
+                "[MediaElementExtend][preview] opened file={0} duration={1}",
+                GetSourceFileName(PART_Video.Source),
+                duration));
+
             if (PART_Video.Source != null && PART_Video.NaturalDuration.HasTimeSpan && PART_Video.LoadedBehavior == MediaState.Play)
             {
                 timelineSlider.Maximum = PART_Video.NaturalDuration.TimeSpan.TotalSeconds;
@@ -178,6 +182,33 @@ namespace CommonPluginsControls.Controls
             {
                 volumeSlider.Value = 0;
                 PART_Video.Volume = 0;
+            }
+        }
+
+        private void PART_Video_MediaFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+            Uri failedSource = PART_Video.Source ?? Source;
+            string error = e?.ErrorException != null ? e.ErrorException.Message : "unknown";
+            Logger.Warn(string.Format(
+                "[MediaElementExtend][preview] failed file={0} error={1}",
+                GetSourceFileName(failedSource),
+                error));
+        }
+
+        private static string GetSourceFileName(Uri source)
+        {
+            if (source == null)
+            {
+                return string.Empty;
+            }
+
+            try
+            {
+                return Path.GetFileName(source.LocalPath);
+            }
+            catch (Exception)
+            {
+                return source.ToString();
             }
         }
 
@@ -229,7 +260,7 @@ namespace CommonPluginsControls.Controls
         private void Grid_MouseLeave(object sender, MouseEventArgs e)
         {
             isLeave = true;
-            Task.Run(() => 
+            Task.Run(() =>
             {
                 Thread.Sleep(1000);
                 Application.Current.Dispatcher.Invoke(() =>
