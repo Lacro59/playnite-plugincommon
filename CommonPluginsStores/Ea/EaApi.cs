@@ -5,7 +5,9 @@ using CommonPluginsShared;
 using CommonPluginsShared.Extensions;
 using CommonPluginsStores.Ea.Models.Query;
 using CommonPluginsStores.Models;
+using CommonPluginsStores.Models.Enumerations;
 using Playnite.SDK;
+using Playnite.SDK.Events;
 using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
@@ -16,13 +18,15 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using static CommonPluginsShared.PlayniteTools;
 
 namespace CommonPluginsStores.Ea
 {
     /// <summary>
-    /// Based on https://github.com/BellezaEmporium/galaxy-integration-ead
+    /// EA store API (friends, catalog, achievements). Auth aligned with PlayniteAchievements <c>EASessionManager</c>
+    /// (token probe + interactive login on ea.com); legacy Origin entitlements kept for catalog fallback.
     /// </summary>
     public class EaApi : StoreApi
     {
@@ -30,6 +34,7 @@ namespace CommonPluginsStores.Ea
 
         private static string UrlDropApi => @"https://drop-api.ea.com";
         private static string UrlGameData => UrlDropApi + @"/game/{0}?locale={1}";
+        private static string UrlLogin => @"https://www.ea.com/login";
 
         #endregion
 
@@ -37,6 +42,9 @@ namespace CommonPluginsStores.Ea
 
         private static readonly Lazy<OriginAccountClient> _originAPI = new Lazy<OriginAccountClient>(() => new OriginAccountClient(API.Instance.WebViews.CreateOffscreenView()));
         private static OriginAccountClient OriginAPI => _originAPI.Value;
+
+        private int _authCheckInProgress;
+        private bool _loginSucceeded;
 
         #region Paths
 
@@ -57,8 +65,22 @@ namespace CommonPluginsStores.Ea
         /// </summary>
         private const int GamesBySlugsBatchSize = 50;
 
-        public EaApi(string pluginName) : base(pluginName, ExternalPlugin.OriginLibrary, "EA")
+        /// <summary>
+        /// Initializes EA store API with the consuming plugin identity (cookies / userdata ownership).
+        /// </summary>
+        /// <param name="pluginName">Display name of the consuming plugin.</param>
+        /// <param name="pluginLibrary">Consuming plugin id (e.g. <see cref="ExternalPlugin.PlayerActivities"/>), not OriginLibrary.</param>
+        public EaApi(string pluginName, ExternalPlugin pluginLibrary) : base(pluginName, pluginLibrary, "EA")
         {
+            CookiesDomains = new List<string>
+            {
+                "ea.com",
+                ".ea.com",
+                "accounts.ea.com",
+                "www.ea.com",
+                "myaccount.ea.com"
+            };
+
             // Legacy apps-list cache (obsolete); catalog search uses EA_CatalogSlugs.json instead.
             AppsListPath = Path.Combine(PathStoresData, "EA_AppsList.json");
             FileSystem.DeleteFile(AppsListPath);
@@ -70,33 +92,44 @@ namespace CommonPluginsStores.Ea
 
         #region Configuration
 
+        /// <inheritdoc />
+        /// <remarks>
+        /// Probe uses the same implicit-grant token URL as PlayniteAchievements <c>EASessionManager</c>,
+        /// then GraphQL identity for account fields.
+        /// </remarks>
         protected override bool GetIsUserLoggedIn()
         {
-            bool isLogged = OriginAPI.GetIsUserLoggedIn();
+            AuthTokenResponse accessToken = TryGetAccessToken();
+            bool isLogged = accessToken != null && accessToken.error.IsNullOrEmpty() && !accessToken.access_token.IsNullOrEmpty();
             if (isLogged)
             {
-                AuthTokenResponse accessToken = OriginAPI.GetAccessToken();
                 StoreToken = new StoreToken
-                { 
+                {
                     Token = accessToken.access_token,
-                    Type = accessToken.token_type
+                    Type = accessToken.token_type.IsNullOrEmpty() ? "Bearer" : accessToken.token_type
                 };
 
                 ResponseIdentity responseIdentity = GetIdentity().GetAwaiter().GetResult();
+                if (responseIdentity?.Data?.Me?.Player == null || responseIdentity.Data.Me.Player.Psd.IsNullOrEmpty())
+                {
+                    Common.LogDebug(FormatLogMessage("GetIsUserLoggedIn: token ok but identity missing."));
+                    StoreToken = null;
+                    return false;
+                }
+
                 CurrentAccountInfos = new AccountInfos
                 {
-                    UserId    = responseIdentity.Data.Me.Player.Pd,
-                    ClientId  = responseIdentity.Data.Me.Player.Psd,
-                    Pseudo    = responseIdentity.Data.Me.Player.DisplayName,
-                    Link      = string.Empty,
-                    Avatar    = responseIdentity?.Data?.Me?.Player?.Avatar?.Medium?.Path ?? string.Empty,
+                    UserId = responseIdentity.Data.Me.Player.Pd,
+                    ClientId = responseIdentity.Data.Me.Player.Psd,
+                    Pseudo = responseIdentity.Data.Me.Player.DisplayName,
+                    Link = string.Empty,
+                    Avatar = responseIdentity?.Data?.Me?.Player?.Avatar?.Medium?.Path ?? string.Empty,
                     IsPrivate = true,
-                    IsCurrent = true
+                    IsCurrent = true,
+                    AccountStatus = AccountStatus.Private
                 };
 
                 SaveCurrentUser();
-                //_ = GetCurrentAccountInfos();
-
                 LogInfo("logged");
             }
             else
@@ -105,6 +138,160 @@ namespace CommonPluginsStores.Ea
             }
 
             return isLogged;
+        }
+
+        /// <inheritdoc />
+        /// <remarks>
+        /// Interactive login mirrors PlayniteAchievements <c>EASessionManager</c> (ea.com/login + token probe).
+        /// </remarks>
+        public override void Login()
+        {
+            long operationGeneration = BeginAuthOperation();
+            ResetIsUserLoggedIn();
+            StoreToken = null;
+            _loginSucceeded = false;
+
+            IWebView view = API.Instance.WebViews.CreateView(1000, 800);
+            try
+            {
+                Common.LogDebug(FormatLogMessage($"Auth webview opening, initialNavigate={FormatAuthWebViewUrlForLog(UrlLogin)}."));
+                Common.LogDebug(FormatLogMessage("Login: skipping DeleteDomainCookies; shared WebView SSO jar preserved for other plugins."));
+                view.LoadingChanged += CloseWhenLoggedIn;
+                view.Navigate(UrlLogin);
+                view.OpenDialog();
+            }
+            catch (Exception ex)
+            {
+                LogError(ex, "interactive login webview failed");
+            }
+            finally
+            {
+                if (view != null)
+                {
+                    Common.LogDebug(FormatLogMessage(
+                        $"Auth webview closed, finalUrl={FormatAuthWebViewUrlForLog(view.GetCurrentAddress())}, loginSucceeded={_loginSucceeded}."));
+                    view.LoadingChanged -= CloseWhenLoggedIn;
+                    _ = SetStoredCookies(GetWebCookies(false, view) ?? new List<HttpCookie>());
+                    view.Dispose();
+                }
+
+                if (_loginSucceeded && IsAuthOperationCurrent(operationGeneration))
+                {
+                    IsUserLoggedIn = true;
+                }
+                else if (!_loginSucceeded)
+                {
+                    LogWarn("interactive login cancelled or failed");
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public override void ClearSession()
+        {
+            StoreToken = null;
+            _loginSucceeded = false;
+            base.ClearSession();
+        }
+
+        private async void CloseWhenLoggedIn(object sender, WebViewLoadingChangedEventArgs e)
+        {
+            if (e.IsLoading)
+            {
+                return;
+            }
+
+            IWebView view = sender as IWebView;
+            if (view == null)
+            {
+                return;
+            }
+
+            string address = view.GetCurrentAddress();
+            if (address.IsNullOrEmpty())
+            {
+                return;
+            }
+
+            bool isLoginPage = address.IndexOf("ea.com/login", StringComparison.OrdinalIgnoreCase) >= 0;
+            if (isLoginPage)
+            {
+                return;
+            }
+
+            if (Interlocked.CompareExchange(ref _authCheckInProgress, 1, 0) != 0)
+            {
+                return;
+            }
+
+            try
+            {
+                Common.LogDebug(FormatLogMessage($"Auth navigation: {FormatAuthWebViewUrlForLog(address)}."));
+                if (await TryCompleteLoginFromSessionAsync().ConfigureAwait(false))
+                {
+                    _loginSucceeded = true;
+                    LogInfo("interactive login succeeded");
+                    _ = API.Instance.MainView.UIDispatcher.BeginInvoke(new Action(() =>
+                    {
+                        try
+                        {
+                            view.Close();
+                        }
+                        catch (Exception closeEx)
+                        {
+                            Common.LogError(closeEx, true, false, PluginName);
+                        }
+                    }));
+                }
+                else
+                {
+                    Common.LogDebug(FormatLogMessage("Auth navigation: session probe not ready yet."));
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(ex, "interactive login navigation check failed");
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _authCheckInProgress, 0);
+            }
+        }
+
+        private async Task<bool> TryCompleteLoginFromSessionAsync()
+        {
+            const int attempts = 8;
+            const int delayMs = 500;
+
+            for (int attempt = 1; attempt <= attempts; attempt++)
+            {
+                bool loggedIn = await Task.Run(() => GetIsUserLoggedIn()).ConfigureAwait(false);
+                if (loggedIn)
+                {
+                    return true;
+                }
+
+                if (attempt < attempts)
+                {
+                    await Task.Delay(delayMs).ConfigureAwait(false);
+                }
+            }
+
+            return false;
+        }
+
+        private AuthTokenResponse TryGetAccessToken()
+        {
+            try
+            {
+                return OriginAPI.GetAccessToken();
+            }
+            catch (Exception ex)
+            {
+                // Expected during probe / pre-login; keep verbose-only to avoid Error spam.
+                Common.LogDebug(FormatLogMessage($"TryGetAccessToken: {ex.GetType().Name}: {ex.Message}"));
+                return null;
+            }
         }
 
         #endregion
@@ -146,7 +333,7 @@ namespace CommonPluginsStores.Ea
 
                 return accountsInfos;
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 Common.LogError(ex, false, true, PluginName);
             }
@@ -158,7 +345,14 @@ namespace CommonPluginsStores.Ea
 
         #region User details
 
-        // Account games list is partial (current user / BASE_GAME only); see .tasks/TODO-FIXME.md.
+        /// <summary>
+        /// Owned games for the current EA account only.
+        /// </summary>
+        /// <remarks>
+        /// Friend accounts (<c>IsCurrent == false</c>) return an empty list — EA friends remain
+        /// identity-only in consumers (no library / playtime / achievements). Partial catalog
+        /// (current user / BASE_GAME only); see .tasks/TODO-FIXME.md.
+        /// </remarks>
         public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
         {
             if (!IsUserLoggedIn)

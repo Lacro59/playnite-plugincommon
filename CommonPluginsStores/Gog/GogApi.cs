@@ -495,15 +495,14 @@ namespace CommonPluginsStores.Gog
                             }
 
                             string link = UrlBase + x.Game.Url?.Replace("\\", string.Empty);
-                            ObservableCollection<GameAchievement> Achievements = GetAchievements(id, accountInfos);
 
+                            // Achievements left null — callers enrich via GetAchievements (avoids N+1 on bulk friends refresh).
                             AccountGameInfos accountGameInfos = new AccountGameInfos
                             {
                                 Id = id,
                                 Name = name,
                                 Link = link,
                                 IsCommun = isCommun,
-                                Achievements = Achievements,
                                 Playtime = playtime
                             };
                             accountGamesInfos.Add(accountGameInfos);
@@ -515,6 +514,7 @@ namespace CommonPluginsStores.Gog
                     }
                 }
 
+                Common.LogDebug($"[GogApi] GetAccountGamesInfos success gameCount={accountGamesInfos.Count} achievementsDeferred=true UserId={accountInfos?.UserId}");
                 return accountGamesInfos;
             }
             catch (Exception ex)
@@ -919,7 +919,7 @@ namespace CommonPluginsStores.Gog
             {
                 return null;
             }
-            
+
             try
             {
                 ObservableCollection<GameDlcOwned> GamesDlcsOwned = new ObservableCollection<GameDlcOwned>();
@@ -1035,8 +1035,8 @@ namespace CommonPluginsStores.Gog
                     }
                 };
 
-                CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
                 Common.LogDebug($"[GogApi] Auth webview opening, initialNavigate={FormatAuthWebViewUrlForLog(UrlLogin)}.");
+                Common.LogDebug("[GogApi] Login: skipping DeleteDomainCookies; shared WebView SSO jar preserved for other plugins.");
                 webView.Navigate(UrlLogin);
                 _ = webView.OpenDialog();
                 Common.LogDebug($"[GogApi] Auth webview closed, finalUrl={FormatAuthWebViewUrlForLog(webView.GetCurrentAddress())}, isLoggedIn={AccountBasic?.IsLoggedIn ?? false}.");

@@ -273,7 +273,7 @@ namespace CommonPluginsStores.GameJolt
                             Match match = Regex.Match(src, @"<div[^>]*class=""-username"">(.*?)<\/div>");
                             if (match.Success && match.Groups.Count > 1)
                             {
-                                _ = SetStoredCookies(GetWebCookies(true));
+                                _ = SetStoredCookies(GetWebCookies(false));
 
                                 string user = match.Groups[1].Value.Replace("Hey @", string.Empty, StringComparison.InvariantCultureIgnoreCase);
                                 Profile profile = GetUser(user);
@@ -303,7 +303,7 @@ namespace CommonPluginsStores.GameJolt
                     }
                 };
 
-                CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
+                Common.LogDebug("[GameJoltApi] Login: skipping DeleteDomainCookies; shared WebView SSO jar preserved for other plugins.");
                 webView.Navigate(UrlLogin);
                 _ = webView.OpenDialog();
             }

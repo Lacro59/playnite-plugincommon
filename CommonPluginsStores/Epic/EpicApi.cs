@@ -499,7 +499,10 @@ namespace CommonPluginsStores.Epic
 		/// </summary>
 		/// <param name="accountInfos">Must be the current user's account info.</param>
 		/// <returns>An <see cref="ObservableCollection{AccountGameInfos}"/> or null on failure.</returns>
-		/// <remarks>⚠️ Requires authentication.</remarks>
+		/// <remarks>
+		/// Requires authentication. Friend accounts (<c>IsCurrent == false</c>) are not supported —
+		/// Epic friends remain identity-only in consumers (no library / playtime / achievements).
+		/// </remarks>
 		public override ObservableCollection<AccountGameInfos> GetAccountGamesInfos(AccountInfos accountInfos)
 		{
 			if (!IsUserLoggedIn || !accountInfos.IsCurrent)
@@ -1447,8 +1450,8 @@ namespace CommonPluginsStores.Epic
 					}
 				};
 
-				CookiesDomains.ForEach(x => { webView.DeleteDomainCookies(x); });
 				Common.LogDebug($"[EpicApi] Auth webview opening, initialNavigate={FormatAuthWebViewUrlForLog(UrlLogin)}.");
+				Common.LogDebug("[EpicApi] Login: skipping DeleteDomainCookies; shared WebView SSO jar preserved for other plugins.");
 				webView.Navigate(UrlLogin);
 				_ = webView.OpenDialog();
 				Common.LogDebug($"[EpicApi] Auth webview closed, finalUrl={FormatAuthWebViewUrlForLog(webView.GetCurrentAddress())}, loggedIn={loggedIn}, hasAuthCode={!authorizationCode.IsNullOrEmpty()}.");

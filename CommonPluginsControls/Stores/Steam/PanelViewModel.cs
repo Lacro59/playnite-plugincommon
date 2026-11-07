@@ -1,4 +1,4 @@
-﻿using CommonPluginsStores.Models.Enumerations;
+using CommonPluginsStores.Models.Enumerations;
 
 namespace CommonPluginsControls.Stores.Steam
 {
@@ -18,14 +18,14 @@ namespace CommonPluginsControls.Stores.Steam
         }
 
         /// <summary>
-        /// API key field is only shown when authentication is optional and API mode is enabled.
+        /// API key field: optional under forced login (<see cref="ForceAuth"/>), or when API mode is enabled without ForceAuth.
         /// </summary>
-        public bool ShowApiKeyField => !ForceAuth && UseApi;
+        public bool ShowApiKeyField => ForceAuth || UseApi;
 
         /// <summary>
-        /// API key can be edited when optional API mode is active (private profiles with API key).
+        /// API key can be edited whenever the field is shown (forced-auth plugins keep login mandatory and key optional).
         /// </summary>
-        public bool IsApiKeyEntryEnabled => !ForceAuth && UseApi;
+        public bool IsApiKeyEntryEnabled => ForceAuth || UseApi;
 
         protected override string LoginErrorContext => "Steam login failed";
 

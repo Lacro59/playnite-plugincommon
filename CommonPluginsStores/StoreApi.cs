@@ -30,7 +30,7 @@ namespace CommonPluginsStores
     /// Abstract base class for store API implementations.
     /// Provides common functionality for managing user accounts, games, achievements, and DLC data.
     /// </summary>
-    public abstract class StoreApi : ObservableObject, IStoreApi, IStoreApiInternal
+    public abstract class StoreApi : ObservableObject, IStoreApi, IStoreApiInternal, IStoreSessionManager
     {
         protected static readonly ILogger Logger = LogManager.GetLogger();
 
@@ -59,7 +59,7 @@ namespace CommonPluginsStores
         /// Gets or sets the current friends list.
         /// Data is refreshed every 30 minutes.
         /// </summary>
-        /// 
+        ///
         public ObservableCollection<AccountInfos> CurrentFriendsInfos => _lazyFriends.Value;
 
         /// <summary>
@@ -264,7 +264,7 @@ namespace CommonPluginsStores
 		/// <summary>
 		/// Gets or sets the authentication token for API requests.
 		/// </summary>
-		protected StoreToken StoreToken 
+		protected StoreToken StoreToken
         {
             get
             {
@@ -749,9 +749,10 @@ namespace CommonPluginsStores
 
         /// <summary>
         /// When true, <see cref="ClearSession"/> also removes store cookies from the shared Playnite WebView cookie jar.
-        /// Override to false when logout must not affect other plugins that rely on the same SSO session (e.g. SteamLibrary).
+        /// Default is false: Lacro59 store logout must not wipe the shared CEF jar used by library plugins (SteamLibrary, GogLibrary, EpicLibrary, …).
+        /// Override to true only when a deliberate global purge is required and documented.
         /// </summary>
-        protected virtual bool ClearGlobalWebViewCookiesOnSessionClear => true;
+        protected virtual bool ClearGlobalWebViewCookiesOnSessionClear => false;
 
         /// <summary>
         /// Clears stored authentication data and session profile fields for the current account.
@@ -919,6 +920,98 @@ namespace CommonPluginsStores
             }
 
             return url;
+        }
+
+        /// <inheritdoc />
+        public string ProviderKey => ClientName;
+
+        /// <inheritdoc />
+        public virtual AuthProbeResult ProbeAuthState()
+        {
+            long generation = BeginAuthOperation();
+            BeginFullLoginCheck(generation);
+            try
+            {
+                bool isLoggedIn;
+                _loginRefreshResolutionDepth++;
+                try
+                {
+                    isLoggedIn = GetIsUserLoggedIn();
+                }
+                finally
+                {
+                    _loginRefreshResolutionDepth--;
+                }
+
+                if (!IsAuthCheckCurrent())
+                {
+                    Common.LogDebug(FormatLogMessage("ProbeAuthState: discarded (superseded auth operation)."));
+                    return AuthProbeResult.ProbeFailed();
+                }
+
+                SetValue(ref isUserLoggedIn, isLoggedIn);
+                if (isLoggedIn)
+                {
+                    string userId = CurrentAccountInfos?.UserId;
+                    Common.LogDebug(FormatLogMessage($"ProbeAuthState: AlreadyAuthenticated UserId={userId}."));
+                    return AuthProbeResult.AlreadyAuthenticated(userId);
+                }
+
+                Common.LogDebug(FormatLogMessage("ProbeAuthState: NotAuthenticated."));
+                return AuthProbeResult.NotAuthenticated();
+            }
+            catch (Exception ex)
+            {
+                LogError(ex, "ProbeAuthState failed");
+                return AuthProbeResult.ProbeFailed();
+            }
+            finally
+            {
+                EndFullLoginCheck();
+            }
+        }
+
+        /// <inheritdoc />
+        public virtual AuthProbeResult AuthenticateInteractive(bool forceInteractive)
+        {
+            try
+            {
+                if (!forceInteractive)
+                {
+                    AuthProbeResult existing = ProbeAuthState();
+                    if (existing.IsSuccess)
+                    {
+                        Common.LogDebug(FormatLogMessage("AuthenticateInteractive: already authenticated."));
+                        return existing;
+                    }
+                }
+                else
+                {
+                    ClearSession();
+                    PrepareExplicitLogin();
+                }
+
+                Login();
+
+                AuthProbeResult probed = ProbeAuthState();
+                if (probed.IsSuccess)
+                {
+                    Common.LogDebug(FormatLogMessage($"AuthenticateInteractive: Authenticated UserId={probed.UserId}."));
+                    return AuthProbeResult.Authenticated(probed.UserId, probed.ExpiresUtc, windowOpened: true);
+                }
+
+                LogWarn($"AuthenticateInteractive: not authenticated after login (Outcome={probed.Outcome}).");
+                return AuthProbeResult.NotAuthenticated();
+            }
+            catch (NotImplementedException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                LogError(ex, "AuthenticateInteractive failed");
+                return AuthProbeResult.Failed(windowOpened: true);
+            }
         }
 
         /// <summary>
