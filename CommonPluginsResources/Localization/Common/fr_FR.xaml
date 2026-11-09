@@ -255,6 +255,7 @@ Voulez-vous ouvrir le répertoire ?</sys:String>
 	<sys:String x:Key="LOCCommonStoreSteam">Steam</sys:String>
 	<sys:String x:Key="LOCCommonStoreEpic">Epic Games</sys:String>
 	<sys:String x:Key="LOCCommonStoreGog">GOG</sys:String>
+	<sys:String x:Key="LOCCommonStoreEa">EA</sys:String>
 	<sys:String x:Key="LOCCommonStoresNoStoreSelected">Sélectionnez une boutique pour configurer l'authentification.</sys:String>
 
 	<!-- Ignored items -->
