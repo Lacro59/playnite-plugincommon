@@ -15,6 +15,7 @@ using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -145,10 +146,15 @@ namespace CommonPluginsStores
                     return isUserLoggedIn.Value;
                 }
 
+                Stopwatch sw = Stopwatch.StartNew();
                 _displayOnlyResolutionDepth++;
                 try
                 {
-                    return GetIsUserLoggedIn();
+                    bool isLogged = GetIsUserLoggedIn();
+                    bool? uiThread = API.Instance?.MainView?.UIDispatcher?.CheckAccess();
+                    Common.LogDebug(FormatLogMessage(
+                        $"IsUserLoggedInForDisplay resolve elapsedMs={sw.ElapsedMilliseconds} isLogged={isLogged} uiThread={uiThread}"));
+                    return isLogged;
                 }
                 finally
                 {
