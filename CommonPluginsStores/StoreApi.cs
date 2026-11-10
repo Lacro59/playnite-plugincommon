@@ -137,6 +137,15 @@ namespace CommonPluginsStores
         }
 
         /// <inheritdoc />
+        public bool HasCachedLoginStatus => isUserLoggedIn.HasValue;
+
+        /// <inheritdoc />
+        /// <remarks>
+        /// Prefer cached value for WPF bindings. When the cache is empty, returns a local
+        /// display-only probe (<see cref="ForceFullLoginCheck"/> suppressed) — never a full network check.
+        /// Panel VMs should prefer <see cref="HasCachedLoginStatus"/> / <see cref="IsLoginRefreshInProgress"/>
+        /// and show <c>Checking</c> instead of calling this on a cold cache.
+        /// </remarks>
         public bool IsUserLoggedInForDisplay
         {
             get

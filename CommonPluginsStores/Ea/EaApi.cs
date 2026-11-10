@@ -94,11 +94,32 @@ namespace CommonPluginsStores.Ea
 
         /// <inheritdoc />
         /// <remarks>
-        /// Probe uses the same implicit-grant token URL as PlayniteAchievements <c>EASessionManager</c>,
-        /// then GraphQL identity for account fields.
+        /// Display path (<see cref="StoreApi.ForceFullLoginCheck"/> false): local token/saved-user
+        /// hints only — no token probe or GraphQL identity. Full path uses the same implicit-grant
+        /// token URL as PlayniteAchievements <c>EASessionManager</c>, then GraphQL identity.
         /// </remarks>
         protected override bool GetIsUserLoggedIn()
         {
+            if (!ForceFullLoginCheck)
+            {
+                bool? cachedAuth = TryGetAuthStatusFromStoredToken();
+                if (cachedAuth.HasValue)
+                {
+                    Common.LogDebug(FormatLogMessage($"GetIsUserLoggedIn fast-path (stored token): isLogged={cachedAuth.Value}."));
+                    return cachedAuth.Value;
+                }
+
+                if (TryGetAuthStatusFromSavedUser())
+                {
+                    Common.LogDebug(FormatLogMessage("GetIsUserLoggedIn fast-path (saved user): isLogged=true until background verification."));
+                    return true;
+                }
+
+                Common.LogDebug(FormatLogMessage("GetIsUserLoggedIn fast-path: no local session hint, returning false until background check."));
+                return false;
+            }
+
+            Common.LogDebug(FormatLogMessage("GetIsUserLoggedIn: full network verification."));
             AuthTokenResponse accessToken = TryGetAccessToken();
             bool isLogged = accessToken != null && accessToken.error.IsNullOrEmpty() && !accessToken.access_token.IsNullOrEmpty();
             if (isLogged)
@@ -137,6 +158,7 @@ namespace CommonPluginsStores.Ea
                 StoreToken = null;
             }
 
+            Common.LogDebug(FormatLogMessage($"GetIsUserLoggedIn full verification result: isLogged={isLogged}."));
             return isLogged;
         }
 
