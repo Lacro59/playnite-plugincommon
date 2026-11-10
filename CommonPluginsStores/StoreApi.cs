@@ -15,6 +15,7 @@ using Playnite.SDK.Data;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -136,6 +137,15 @@ namespace CommonPluginsStores
         }
 
         /// <inheritdoc />
+        public bool HasCachedLoginStatus => isUserLoggedIn.HasValue;
+
+        /// <inheritdoc />
+        /// <remarks>
+        /// Prefer cached value for WPF bindings. When the cache is empty, returns a local
+        /// display-only probe (<see cref="ForceFullLoginCheck"/> suppressed) — never a full network check.
+        /// Panel VMs should prefer <see cref="HasCachedLoginStatus"/> / <see cref="IsLoginRefreshInProgress"/>
+        /// and show <c>Checking</c> instead of calling this on a cold cache.
+        /// </remarks>
         public bool IsUserLoggedInForDisplay
         {
             get
@@ -145,10 +155,15 @@ namespace CommonPluginsStores
                     return isUserLoggedIn.Value;
                 }
 
+                Stopwatch sw = Stopwatch.StartNew();
                 _displayOnlyResolutionDepth++;
                 try
                 {
-                    return GetIsUserLoggedIn();
+                    bool isLogged = GetIsUserLoggedIn();
+                    bool? uiThread = API.Instance?.MainView?.UIDispatcher?.CheckAccess();
+                    Common.LogDebug(FormatLogMessage(
+                        $"IsUserLoggedInForDisplay resolve elapsedMs={sw.ElapsedMilliseconds} isLogged={isLogged} uiThread={uiThread}"));
+                    return isLogged;
                 }
                 finally
                 {

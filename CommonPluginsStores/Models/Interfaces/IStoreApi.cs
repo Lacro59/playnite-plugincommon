@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace CommonPluginsStores.Models.Interfaces
 {
@@ -21,6 +21,11 @@ namespace CommonPluginsStores.Models.Interfaces
         /// Gets whether a background login refresh is in progress.
         /// </summary>
         bool IsLoginRefreshInProgress { get; }
+
+        /// <summary>
+        /// Gets whether a login status value is already cached (no resolve required).
+        /// </summary>
+        bool HasCachedLoginStatus { get; }
 
         /// <summary>
         /// Gets login status for UI bindings without blocking on background refresh or forcing full network verification.
