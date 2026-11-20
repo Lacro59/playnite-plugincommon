@@ -13,6 +13,7 @@ namespace CommonPluginsShared.Controls
     {
         private TextBlock PART_TextBlockTitle { get; set; }
         private Grid PART_GridContener { get; set; }
+        private ScrollViewer PART_ContentScrollViewer { get; set; }
 
 
         public SidebarItemControl()
@@ -58,20 +59,22 @@ namespace CommonPluginsShared.Controls
             // Content Grid
             PART_GridContener = new Grid();
 
-            // Content ScrollViewer
-            ScrollViewer scrollViewer = new ScrollViewer
+            // Content ScrollViewer — Auto by default; views with their own list scroll
+            // should call SetContentVerticalScrollBarVisibility(Disabled) so the host
+            // passes a finite height and the list shrinks instead of growing the page.
+            PART_ContentScrollViewer = new ScrollViewer
             {
                 HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
                 VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             };
 
-            scrollViewer.Content = PART_GridContener;
+            PART_ContentScrollViewer.Content = PART_GridContener;
 
 
             // Control
             DockPanel dockPanel = new DockPanel();
             _ = dockPanel.Children.Add(stackPanel);
-            _ = dockPanel.Children.Add(scrollViewer);
+            _ = dockPanel.Children.Add(PART_ContentScrollViewer);
 
             this.Content = dockPanel;
         }
@@ -85,6 +88,20 @@ namespace CommonPluginsShared.Controls
         public void AddContent(FrameworkElement content)
         {
             _ = PART_GridContener.Children.Add(content);
+        }
+
+        /// <summary>
+        /// Controls the host content ScrollViewer. Use <see cref="ScrollBarVisibility.Disabled"/>
+        /// when the embedded view already scrolls (ListBox / DataGrid) so expanders shrink the list instead of the page.
+        /// </summary>
+        public void SetContentVerticalScrollBarVisibility(ScrollBarVisibility visibility)
+        {
+            if (PART_ContentScrollViewer == null)
+            {
+                return;
+            }
+
+            PART_ContentScrollViewer.VerticalScrollBarVisibility = visibility;
         }
     }
 }
