@@ -35,8 +35,9 @@ namespace CommonPluginsControls.Stores
 
                 _storeApi = value;
                 OnPropertyChanged(nameof(StoreApi));
-                NotifyAuthStatusChanged();
+                // Schedule first so IsLoginRefreshInProgress is true before WPF re-reads AuthStatus.
                 ScheduleBackgroundAuthRefresh();
+                NotifyAuthStatusChanged();
             }
         }
 
@@ -84,7 +85,8 @@ namespace CommonPluginsControls.Stores
                     return AuthStatus.Failed;
                 }
 
-                if (StoreApi.IsLoginRefreshInProgress)
+                // Never resolve login on the UI binding path: wait for cache or background refresh.
+                if (StoreApi.IsLoginRefreshInProgress || !StoreApi.HasCachedLoginStatus)
                 {
                     return AuthStatus.Checking;
                 }
@@ -104,8 +106,8 @@ namespace CommonPluginsControls.Stores
         public void ResetIsUserLoggedIn()
         {
             StoreApi?.ResetIsUserLoggedIn();
-            NotifyAuthStatusChanged();
             ScheduleBackgroundAuthRefresh();
+            NotifyAuthStatusChanged();
         }
 
         public void RefreshAuthCommandStates()
