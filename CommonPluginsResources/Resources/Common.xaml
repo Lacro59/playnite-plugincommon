@@ -1,4 +1,4 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- SECTION: TEXT STYLES -->
@@ -602,7 +602,9 @@
           </Expander>
         Implementation note:
           The header is a borderless ToggleButton whose IsChecked is TwoWay-bound to
-          IsExpanded. This is the standard WPF Expander pattern; no code-behind needed.
+          IsExpanded. Content / ContentTemplate are TemplateBound to Expander.Header /
+          HeaderTemplate so the header ContentPresenter actually shows the Header
+          (string or rich content). No code-behind needed.
     -->
     <Style x:Key="ModernExpanderStyle" TargetType="Expander">
         <Setter Property="Foreground"                 Value="{DynamicResource TextBrush}" />
@@ -628,6 +630,9 @@
                                           IsChecked="{Binding IsExpanded,
                                               RelativeSource={RelativeSource TemplatedParent},
                                               Mode=TwoWay}"
+                                          Content="{TemplateBinding Header}"
+                                          ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                          ContentStringFormat="{TemplateBinding HeaderStringFormat}"
                                           Focusable="False"
                                           Cursor="Hand"
                                           BorderThickness="0"
@@ -668,9 +673,10 @@
                                                     </TextBlock>
                                                 </Border>
 
-                                                <!-- Title (Header property) -->
+                                                <!-- Title / rich header (ToggleButton.Content ← Expander.Header) -->
                                                 <ContentPresenter Grid.Column="2"
                                                                   VerticalAlignment="Center"
+                                                                  HorizontalAlignment="Stretch"
                                                                   RecognizesAccessKey="True"
                                                                   TextBlock.FontSize="{DynamicResource FontSize}"
                                                                   TextBlock.FontWeight="SemiBold"
