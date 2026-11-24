@@ -8,7 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Threading;
 
 namespace CommonPluginsStores.Steam
 {
@@ -17,10 +19,198 @@ namespace CommonPluginsStores.Steam
         internal static readonly ILogger Logger = LogManager.GetLogger();
         private static readonly TimeSpan ApiRequestMinInterval = TimeSpan.FromMilliseconds(100);
         private static readonly RequestRateLimiter ApiRateLimiter = new RequestRateLimiter(ApiRequestMinInterval);
+        private const int MaxWebApiRateLimitRetries = 3;
+        /// <summary>HTTP 429 — not defined on <see cref="HttpStatusCode"/> in .NET Framework 4.6.2.</summary>
+        private const HttpStatusCode HttpStatusTooManyRequests = (HttpStatusCode)429;
+        private static readonly TimeSpan MaxRetryAfterDelay = TimeSpan.FromSeconds(120);
 
         private static void WaitForApiRateLimit()
         {
             ApiRateLimiter.WaitAsync().GetAwaiter().GetResult();
+        }
+
+        /// <summary>
+        /// Calls a Steam WebAPI method with proactive throttling and quiet retries on HTTP 429.
+        /// Honours <c>Retry-After</c> when present; otherwise applies a bounded backoff.
+        /// </summary>
+        /// <param name="steamInterface">Open SteamKit2 WebAPI interface.</param>
+        /// <param name="apiMethod">WebAPI method name (e.g. GetPlayerSummaries).</param>
+        /// <param name="version">Interface method version.</param>
+        /// <param name="args">Method arguments, or <c>null</c>.</param>
+        /// <param name="operationLabel">Short label for Warn logs (no secrets).</param>
+        /// <returns>KeyValue payload from SteamKit2.</returns>
+        private static KeyValue CallWithRateLimitRetry(
+            WebAPI.Interface steamInterface,
+            string apiMethod,
+            int version,
+            Dictionary<string, string> args,
+            string operationLabel)
+        {
+            int attempt = 0;
+            while (true)
+            {
+                WaitForApiRateLimit();
+                try
+                {
+                    return steamInterface.Call(apiMethod, version, args);
+                }
+                catch (Exception ex) when (IsHttpTooManyRequests(ex))
+                {
+                    attempt++;
+                    if (attempt > MaxWebApiRateLimitRetries)
+                    {
+                        Logger.Warn($"[SteamKit] {operationLabel}: HTTP 429 after retries={MaxWebApiRateLimitRetries}, giving up.");
+                        throw;
+                    }
+
+                    string delaySource;
+                    TimeSpan delay = GetRetryAfterDelay(ex, attempt, out delaySource);
+                    Common.LogDebug($"[SteamKit] {operationLabel}: rateLimit delaySeconds={delay.TotalSeconds:F0} source={delaySource}");
+                    Logger.Warn($"[SteamKit] {operationLabel}: HTTP 429, retry={attempt}/{MaxWebApiRateLimitRetries} delaySeconds={delay.TotalSeconds:F0}.");
+                    Thread.Sleep(delay);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns true when the exception chain represents an HTTP 429 Too Many Requests response.
+        /// </summary>
+        private static bool IsHttpTooManyRequests(Exception ex)
+        {
+            if (TryGetHttpWebResponse(ex, out HttpWebResponse response))
+            {
+                return response.StatusCode == HttpStatusTooManyRequests;
+            }
+
+            return ExceptionMessageSuggestsTooManyRequests(ex);
+        }
+
+        private static bool TryGetHttpWebResponse(Exception ex, out HttpWebResponse response)
+        {
+            response = null;
+            Exception current = ex;
+            while (current != null)
+            {
+                WebException webException = current as WebException;
+                if (webException?.Response is HttpWebResponse httpResponse)
+                {
+                    response = httpResponse;
+                    return true;
+                }
+
+                AggregateException aggregate = current as AggregateException;
+                if (aggregate != null)
+                {
+                    foreach (Exception inner in aggregate.InnerExceptions)
+                    {
+                        if (TryGetHttpWebResponse(inner, out response))
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                current = current.InnerException;
+            }
+
+            return false;
+        }
+
+        private static bool ExceptionMessageSuggestsTooManyRequests(Exception ex)
+        {
+            Exception current = ex;
+            while (current != null)
+            {
+                if (!string.IsNullOrEmpty(current.Message)
+                    && (current.Message.IndexOf("429", StringComparison.OrdinalIgnoreCase) >= 0
+                        || current.Message.IndexOf("Too Many Requests", StringComparison.OrdinalIgnoreCase) >= 0))
+                {
+                    return true;
+                }
+
+                current = current.InnerException;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Resolves wait duration from <c>Retry-After</c> (seconds or HTTP-date), else bounded backoff.
+        /// </summary>
+        /// <param name="ex">Exception that carried the 429 response.</param>
+        /// <param name="attempt">1-based retry index.</param>
+        /// <param name="delaySource"><c>Retry-After</c> or <c>fallback</c> for Debug diagnostics.</param>
+        private static TimeSpan GetRetryAfterDelay(Exception ex, int attempt, out string delaySource)
+        {
+            delaySource = "fallback";
+            if (TryGetHttpWebResponse(ex, out HttpWebResponse response))
+            {
+                string retryAfter = response.Headers?[HttpResponseHeader.RetryAfter];
+                if (!string.IsNullOrWhiteSpace(retryAfter))
+                {
+                    int seconds;
+                    if (int.TryParse(retryAfter.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out seconds)
+                        && seconds >= 0)
+                    {
+                        delaySource = "Retry-After";
+                        return CapRetryDelay(TimeSpan.FromSeconds(seconds));
+                    }
+
+                    DateTimeOffset retryAt;
+                    if (DateTimeOffset.TryParse(retryAfter, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out retryAt))
+                    {
+                        TimeSpan until = retryAt.UtcDateTime - DateTime.UtcNow;
+                        if (until > TimeSpan.Zero)
+                        {
+                            delaySource = "Retry-After";
+                            return CapRetryDelay(until);
+                        }
+                    }
+                }
+            }
+
+            int fallbackSeconds = Math.Min(120, Math.Max(5, 15 * attempt));
+            return TimeSpan.FromSeconds(fallbackSeconds);
+        }
+
+        private static TimeSpan CapRetryDelay(TimeSpan delay)
+        {
+            if (delay > MaxRetryAfterDelay)
+            {
+                return MaxRetryAfterDelay;
+            }
+
+            if (delay < TimeSpan.FromSeconds(1))
+            {
+                return TimeSpan.FromSeconds(1);
+            }
+
+            return delay;
+        }
+
+        /// <summary>
+        /// Logs a failed SteamKit call: Warn already emitted for exhausted 429; other failures use Error.
+        /// </summary>
+        private static void LogNonRateLimitFailure(Exception ex, string debugMessage, string errorMessage = null)
+        {
+            if (!string.IsNullOrEmpty(debugMessage))
+            {
+                Common.LogDebug(debugMessage);
+            }
+
+            if (IsHttpTooManyRequests(ex))
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(errorMessage))
+            {
+                Common.LogError(ex, false);
+            }
+            else
+            {
+                Common.LogError(ex, false, errorMessage);
+            }
         }
 
         #region Urls
@@ -35,12 +225,11 @@ namespace CommonPluginsStores.Steam
 		[Obsolete("Used GetAppList(apiKey)")]
 		public static List<SteamApp> GetAppList()
         {
-            WaitForApiRateLimit();
             try
             {
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("ISteamApps"))
                 {
-                    KeyValue results = steamInterface.Call("GetAppList", 2, null);
+                    KeyValue results = CallWithRateLimitRetry(steamInterface, "GetAppList", 2, null, "GetAppList");
 
                     KeyValue applistNode = null;
                     if (results != null)
@@ -82,7 +271,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false);
+                LogNonRateLimitFailure(ex, $"[SteamKit] GetAppList failed: {ex.GetType().Name} - {ex.Message}");
                 return null;
             }
         }
@@ -95,7 +284,6 @@ namespace CommonPluginsStores.Steam
 
         {
             Common.LogDebug($"[SteamKit] GetAppList entry last_appid={last_appid}, apiKeyLength={apiKey?.Length ?? 0}.");
-            WaitForApiRateLimit();
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -108,7 +296,7 @@ namespace CommonPluginsStores.Steam
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("IStoreService", apiKey))
                 {
                     List<SteamApp> appList = new List<SteamApp>();
-                    KeyValue results = steamInterface.Call("GetAppList", 1, args);
+                    KeyValue results = CallWithRateLimitRetry(steamInterface, "GetAppList", 1, args, "GetAppList");
                     foreach (KeyValue data in results?.Children?.FirstOrDefault()?.Children)
                     {
                         appList.Add(new SteamApp
@@ -131,8 +319,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogDebug($"[SteamKit] GetAppList failed: {ex.GetType().Name} - {ex.Message}");
-                Common.LogError(ex, false);
+                LogNonRateLimitFailure(ex, $"[SteamKit] GetAppList failed: {ex.GetType().Name} - {ex.Message}");
                 return null;
             }
         }
@@ -144,7 +331,6 @@ namespace CommonPluginsStores.Steam
         public static List<SteamFriend> GetFriendList(string apiKey, ulong steamId)
         {
             Common.LogDebug($"[SteamKit] GetFriendList entry steamId={steamId}, apiKeyLength={apiKey?.Length ?? 0}, interface=ISteamUser/GetFriendList/v1.");
-            WaitForApiRateLimit();
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -155,7 +341,7 @@ namespace CommonPluginsStores.Steam
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("ISteamUser", apiKey))
                 {
                     List<SteamFriend> friendList = new List<SteamFriend>();
-                    KeyValue results = steamInterface.Call("GetFriendList", 1, args);
+                    KeyValue results = CallWithRateLimitRetry(steamInterface, "GetFriendList", 1, args, "GetFriendList");
                     foreach (KeyValue data in results["friends"].Children)
                     {
                         friendList.Add(new SteamFriend
@@ -171,8 +357,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogDebug($"[SteamKit] GetFriendList failed: {ex.GetType().Name} - {ex.Message}");
-                Common.LogError(ex, false);
+                LogNonRateLimitFailure(ex, $"[SteamKit] GetFriendList failed: {ex.GetType().Name} - {ex.Message}");
                 return null;
             }
         }
@@ -182,7 +367,6 @@ namespace CommonPluginsStores.Steam
         {
             int steamIdsCount = steamIds?.Count ?? 0;
             Common.LogDebug($"[SteamKit] GetPlayerSummaries entry steamIdsCount={steamIdsCount}, apiKeyLength={apiKey?.Length ?? 0}, interface=ISteamUser/GetPlayerSummaries/v2, argKey=steamIds.");
-            WaitForApiRateLimit();
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -193,7 +377,7 @@ namespace CommonPluginsStores.Steam
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("ISteamUser", apiKey))
                 {
                     List<SteamPlayer> friendList = new List<SteamPlayer>();
-                    KeyValue results = steamInterface.Call("GetPlayerSummaries", 2, args);
+                    KeyValue results = CallWithRateLimitRetry(steamInterface, "GetPlayerSummaries", 2, args, "GetPlayerSummaries");
                     foreach (KeyValue data in results["players"].Children)
                     {
                         friendList.Add(new SteamPlayer
@@ -221,8 +405,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogDebug($"[SteamKit] GetPlayerSummaries failed: {ex.GetType().Name} - {ex.Message}");
-                Common.LogError(ex, false);
+                LogNonRateLimitFailure(ex, $"[SteamKit] GetPlayerSummaries failed: {ex.GetType().Name} - {ex.Message}");
                 return null;
             }
         }
@@ -239,7 +422,6 @@ namespace CommonPluginsStores.Steam
             {
                 Common.LogDebug($"[SteamKit] GetOwnedGames: apiKeyLength=17 looks like SteamID64, not a Web API key — call will likely 401.");
             }
-            WaitForApiRateLimit();
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -253,7 +435,7 @@ namespace CommonPluginsStores.Steam
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("IPlayerService", apiKey))
                 {
                     List<SteamGame> ownedGames = new List<SteamGame>();
-                    KeyValue results = steamInterface.Call("GetOwnedGames", 1, args);
+                    KeyValue results = CallWithRateLimitRetry(steamInterface, "GetOwnedGames", 1, args, "GetOwnedGames");
                     foreach (KeyValue data in results["games"].Children)
                     {
                         ownedGames.Add(new SteamGame
@@ -275,8 +457,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogDebug($"[SteamKit] GetOwnedGames failed: {ex.GetType().Name} - {ex.Message}");
-                Common.LogError(ex, false);
+                LogNonRateLimitFailure(ex, $"[SteamKit] GetOwnedGames failed: {ex.GetType().Name} - {ex.Message}");
                 return null;
             }
         }
@@ -289,7 +470,6 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamAchievement> GetGameAchievements(uint appId, string language)
         {
-            WaitForApiRateLimit();
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -301,7 +481,7 @@ namespace CommonPluginsStores.Steam
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("IPlayerService"))
                 {
                     List<SteamAchievement> achievementLists = new List<SteamAchievement>();
-                    KeyValue results = steamInterface.Call("GetGameAchievements", 1, args);
+                    KeyValue results = CallWithRateLimitRetry(steamInterface, "GetGameAchievements", 1, args, $"GetGameAchievements appId={appId}");
 
                     if (results["achievements"].Children.Count != 0)
                     {
@@ -324,7 +504,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, $"With {appId}");
+                LogNonRateLimitFailure(ex, null, $"With {appId}");
                 return null;
             }
         }
@@ -340,7 +520,6 @@ namespace CommonPluginsStores.Steam
 
         public static SteamSchema GetSchemaForGame(string apiKey, uint appId, string language)
         {
-            WaitForApiRateLimit();
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -352,7 +531,7 @@ namespace CommonPluginsStores.Steam
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("ISteamUserStats", apiKey))
                 {
                     SteamSchema schemaForGame = new SteamSchema();
-                    KeyValue results = steamInterface.Call("GetSchemaForGame", 2, args);
+                    KeyValue results = CallWithRateLimitRetry(steamInterface, "GetSchemaForGame", 2, args, $"GetSchemaForGame appId={appId}");
                     foreach (KeyValue data in results["availableGameStats"]["stats"].Children)
                     {
                         schemaForGame.Stats.Add(new SteamSchemaStats
@@ -379,7 +558,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, $"With {appId}");
+                LogNonRateLimitFailure(ex, null, $"With {appId}");
                 return null;
             }
         }
@@ -387,7 +566,6 @@ namespace CommonPluginsStores.Steam
 
         public static List<SteamStats> GetUserStatsForGame(string apiKey, uint appId, ulong steamId)
         {
-            WaitForApiRateLimit();
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -399,7 +577,7 @@ namespace CommonPluginsStores.Steam
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("ISteamUserStats", apiKey))
                 {
                     List<SteamStats> userStatsForGames = new List<SteamStats>();
-                    KeyValue results = steamInterface.Call("GetUserStatsForGame", 1, args);
+                    KeyValue results = CallWithRateLimitRetry(steamInterface, "GetUserStatsForGame", 1, args, $"GetUserStatsForGame appId={appId}");
                     foreach (KeyValue data in results["stats"].Children)
                     {
                         userStatsForGames.Add(new SteamStats
@@ -413,7 +591,7 @@ namespace CommonPluginsStores.Steam
             }
             catch (Exception ex)
             {
-                Common.LogError(ex, false, $"With {appId}");
+                LogNonRateLimitFailure(ex, null, $"With {appId}");
                 return null;
             }
         }
@@ -436,7 +614,6 @@ namespace CommonPluginsStores.Steam
         public static List<SteamPlayerAchievement> GetPlayerAchievements(string apiKey, uint appId, ulong steamId, string language, out bool isForbidden)
         {
             isForbidden = false;
-            WaitForApiRateLimit();
             try
             {
                 Dictionary<string, string> args = new Dictionary<string, string>
@@ -449,7 +626,7 @@ namespace CommonPluginsStores.Steam
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("ISteamUserStats", apiKey))
                 {
                     List<SteamPlayerAchievement> steamPlayerAchievements = new List<SteamPlayerAchievement>();
-                    KeyValue results = steamInterface.Call("GetPlayerAchievements", 1, args);
+                    KeyValue results = CallWithRateLimitRetry(steamInterface, "GetPlayerAchievements", 1, args, $"GetPlayerAchievements appId={appId}");
 
                     if (results["achievements"].Children.Count == 0)
                     {
@@ -475,14 +652,13 @@ namespace CommonPluginsStores.Steam
             catch (Exception ex)
             {
                 isForbidden = ex.Message != null && ex.Message.IndexOf("403", StringComparison.Ordinal) >= 0;
-                Common.LogError(ex, false, $"With {appId}");
+                LogNonRateLimitFailure(ex, null, $"With {appId}");
                 return null;
             }
         }
 
         public static bool CheckGameIsPrivate(string apiKey, uint appId, ulong steamId)
         {
-            WaitForApiRateLimit();
             try
             {
                 Logger.Info($"CheckGameIsPrivate({appId})");
@@ -495,14 +671,13 @@ namespace CommonPluginsStores.Steam
 
                 using (WebAPI.Interface steamInterface = WebAPI.GetInterface("ISteamUserStats", apiKey))
                 {
-                    List<SteamPlayerAchievement> steamPlayerAchievements = new List<SteamPlayerAchievement>();
-                    KeyValue results = steamInterface.Call("GetPlayerAchievements", 1, args);
+                    CallWithRateLimitRetry(steamInterface, "GetPlayerAchievements", 1, args, $"CheckGameIsPrivate appId={appId}");
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                return ex.Message.Contains("403");
+                return ex.Message != null && ex.Message.IndexOf("403", StringComparison.Ordinal) >= 0;
             }
         }
 
