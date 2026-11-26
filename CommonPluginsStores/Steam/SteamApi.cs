@@ -2249,6 +2249,13 @@ namespace CommonPluginsStores.Steam
             return Path.Combine(PathAppsData, $"{appId}_{storeLang}.json");
         }
 
+        /// <summary>
+        /// Fetches Steam store appdetails for <paramref name="appId"/> (cache then HTTP).
+        /// Returns <c>null</c> on rate limit exhaustion, non-JSON payload, parse failure, or missing dictionary key (no throw).
+        /// </summary>
+        /// <param name="appId">Steam App ID.</param>
+        /// <param name="retryCount">1-based rate-limit retry counter.</param>
+        /// <returns>Parsed store result, or <c>null</c> when details are unavailable.</returns>
         public StoreAppDetailsResult GetAppDetails(uint appId, int retryCount)
         {
             string storeLang = CodeLang.GetSteamLang(Locale);
@@ -2295,7 +2302,14 @@ namespace CommonPluginsStores.Steam
 
             if (Serialization.TryFromJson(response, out Dictionary<string, StoreAppDetailsResult> parsedData, out Exception ex) && parsedData != null)
             {
-                storeAppDetailsResult = parsedData[appId.ToString()];
+                string appIdKey = appId.ToString();
+                if (!parsedData.TryGetValue(appIdKey, out storeAppDetailsResult) || storeAppDetailsResult == null)
+                {
+                    string keysPreview = string.Join(",", parsedData.Keys.Take(5));
+                    LogWarn($"GetAppDetails: missing key appId={appId} keyCount={parsedData.Count} keys=[{keysPreview}]");
+                    return null;
+                }
+
                 FileDataService.SaveData(cachePath, storeAppDetailsResult);
                 Common.LogDebug(FormatLogMessage(
                     $"GetAppDetails: saved appId={appId}, playniteLang='{Locale}', storeLang='{storeLang}', path='{cachePath}'"));
