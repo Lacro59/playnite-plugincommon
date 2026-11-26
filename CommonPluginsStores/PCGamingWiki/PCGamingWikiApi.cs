@@ -42,7 +42,9 @@ namespace CommonPluginsStores.PCGamingWiki
 		private string UrlBase => @"https://pcgamingwiki.com";
 		private string UrlWithSteamId => UrlBase + @"/api/appid.php?appid={0}";
 		private string UrlPCGamingWikiSearchWithApi => UrlBase + @"/w/api.php?action=opensearch&format=json&formatversion=2&search={0}&namespace=0&limit=10";
-		
+		private string UrlWikiPage => UrlBase + @"/wiki/{0}";
+		private string UrlParseApi => UrlBase + @"/w/api.php?action=parse&page={0}&prop=text&format=json";
+
 		#endregion
 
 		public PCGamingWikiApi(string pluginName, ExternalPlugin pluginLibrary, SteamApi steamApi = null)
@@ -98,6 +100,123 @@ namespace CommonPluginsStores.PCGamingWiki
 
 			Logger.Warn($"Url for PCGamingWiki not find for {game.Name}");
 			return string.Empty;
+		}
+
+		/// <summary>
+		/// Builds the canonical <c>/wiki/Title</c> URL for a MediaWiki page title.
+		/// </summary>
+		/// <param name="pageTitle">Wiki page title (spaces or underscores).</param>
+		/// <returns>Article URL, or empty when <paramref name="pageTitle"/> is empty.</returns>
+		public string BuildWikiPageUrl(string pageTitle)
+		{
+			if (pageTitle.IsNullOrEmpty())
+			{
+				return string.Empty;
+			}
+
+			string normalized = pageTitle.Trim().Replace(' ', '_');
+			return string.Format(UrlWikiPage, normalized);
+		}
+
+		/// <summary>
+		/// Downloads the rendered HTML of a PCGamingWiki article via MediaWiki
+		/// <c>action=parse</c>, which bypasses Cloudflare challenges on <c>/wiki/</c> and
+		/// <c>api/appid.php</c> pages when using <see cref="Web.DownloadStringData(string)"/>.
+		/// </summary>
+		/// <param name="wikiUrlOrPageTitle">
+		/// Article URL containing <c>/wiki/</c>, or a bare page title. AppId redirect URLs
+		/// are not supported here (return empty).
+		/// </param>
+		/// <param name="displayTitle">Parsed article title when the request succeeds.</param>
+		/// <returns>HTML fragment of the page, or empty on failure.</returns>
+		public string DownloadWikiHtmlViaParseApi(string wikiUrlOrPageTitle, out string displayTitle)
+		{
+			displayTitle = string.Empty;
+			string pageTitle = TryGetWikiPageTitle(wikiUrlOrPageTitle);
+			if (pageTitle.IsNullOrEmpty())
+			{
+				Logger.Warn($"[PCGamingWikiApi] No wiki page title for parse API from '{wikiUrlOrPageTitle}'.");
+				return string.Empty;
+			}
+
+			try
+			{
+				string apiUrl = string.Format(UrlParseApi, Uri.EscapeDataString(pageTitle.Replace(' ', '_')));
+				Common.LogDebug($"[PCGamingWikiApi] parse API page='{pageTitle}'.");
+				WaitForApiRateLimit();
+				string json = Web.DownloadStringData(apiUrl).GetAwaiter().GetResult();
+				if (json.IsNullOrEmpty())
+				{
+					Logger.Warn($"[PCGamingWikiApi] Empty parse API response for '{pageTitle}'.");
+					return string.Empty;
+				}
+
+				if (!Serialization.TryFromJson(json, out dynamic data) || data?.parse == null)
+				{
+					Logger.Warn($"[PCGamingWikiApi] Invalid parse API JSON for '{pageTitle}'.");
+					return string.Empty;
+				}
+
+				displayTitle = data.parse.title != null
+					? data.parse.title.ToString()
+					: pageTitle;
+				string html = data.parse.text != null && data.parse.text["*"] != null
+					? data.parse.text["*"].ToString()
+					: string.Empty;
+
+				if (html.IsNullOrEmpty())
+				{
+					Logger.Warn($"[PCGamingWikiApi] parse API returned no HTML for '{pageTitle}'.");
+				}
+
+				return html ?? string.Empty;
+			}
+			catch (Exception ex)
+			{
+				Common.LogError(ex, false, $"[PCGamingWikiApi] parse API failed for '{pageTitle}'", true, PluginName);
+				return string.Empty;
+			}
+		}
+
+		/// <summary>
+		/// Extracts a MediaWiki page title from a PCGamingWiki article URL, or returns the
+		/// input when it is already a bare title.
+		/// </summary>
+		/// <param name="wikiUrlOrPageTitle">Article URL or title.</param>
+		/// <returns>Page title, or empty when the value is an AppId URL or cannot be parsed.</returns>
+		public static string TryGetWikiPageTitle(string wikiUrlOrPageTitle)
+		{
+			if (wikiUrlOrPageTitle.IsNullOrEmpty())
+			{
+				return string.Empty;
+			}
+
+			string value = wikiUrlOrPageTitle.Trim();
+			if (value.IndexOf("appid.php", StringComparison.OrdinalIgnoreCase) >= 0)
+			{
+				return string.Empty;
+			}
+
+			int wikiIndex = value.IndexOf("/wiki/", StringComparison.OrdinalIgnoreCase);
+			if (wikiIndex >= 0)
+			{
+				string title = value.Substring(wikiIndex + "/wiki/".Length);
+				int query = title.IndexOfAny(new[] { '?', '#' });
+				if (query >= 0)
+				{
+					title = title.Substring(0, query);
+				}
+
+				return WebUtility.UrlDecode(title.Replace('_', ' ')).Trim();
+			}
+
+			if (value.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+				|| value.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+			{
+				return string.Empty;
+			}
+
+			return value.Replace('_', ' ').Trim();
 		}
 
 		/// <summary>
@@ -211,12 +330,116 @@ namespace CommonPluginsStores.PCGamingWiki
 			Common.LogDebug($"[PCGamingWikiApi] Trying appid lookup for {game.Name} ({steamAppId}) with throttled request.");
 			WaitForApiRateLimit();
 			string response = Web.DownloadStringData(url).GetAwaiter().GetResult();
-			if (!response.Contains("search results", StringComparison.OrdinalIgnoreCase))
+
+			if (response.IsNullOrEmpty())
 			{
-				return url;
+				Logger.Warn($"PCGamingWiki appid lookup empty for {game.Name} ({steamAppId}), using fallback strategies.");
+				return string.Empty;
 			}
 
-			Logger.Warn($"PCGamingWiki appid lookup returned search page for {game.Name} ({steamAppId}), using fallback strategies.");
+			// Web.DownloadStringData returns the body for HTTP 403 without status; Cloudflare
+			// challenge pages were previously treated as success (no "search results" text).
+			if (IsCloudflareChallengeHtml(response))
+			{
+				Logger.Warn($"PCGamingWiki appid lookup blocked (Cloudflare) for {game.Name} ({steamAppId}), using fallback strategies.");
+				return string.Empty;
+			}
+
+			if (response.IndexOf("search results", StringComparison.OrdinalIgnoreCase) >= 0)
+			{
+				Logger.Warn($"PCGamingWiki appid lookup returned search page for {game.Name} ({steamAppId}), using fallback strategies.");
+				return string.Empty;
+			}
+
+			if (!LooksLikePcgwArticleHtml(response))
+			{
+				Logger.Warn($"PCGamingWiki appid lookup returned non-article HTML for {game.Name} ({steamAppId}), using fallback strategies.");
+				return string.Empty;
+			}
+
+			// Prefer a canonical /wiki/ URL so callers can use MediaWiki action=parse.
+			string wikiTitle = TryExtractWikiTitleFromArticleHtml(response);
+			string wikiUrl = BuildWikiPageUrl(wikiTitle);
+			if (!wikiUrl.IsNullOrEmpty())
+			{
+				Common.LogDebug($"[PCGamingWikiApi] appid {steamAppId} resolved to wiki page '{wikiTitle}'.");
+				return wikiUrl;
+			}
+
+			Logger.Warn($"PCGamingWiki appid lookup could not extract wiki title for {game.Name} ({steamAppId}), using fallback strategies.");
+			return string.Empty;
+		}
+
+		/// <summary>
+		/// Detects Cloudflare browser-challenge / attention pages returned as HTTP bodies.
+		/// </summary>
+		private static bool IsCloudflareChallengeHtml(string html)
+		{
+			if (html.IsNullOrEmpty())
+			{
+				return false;
+			}
+
+			return html.IndexOf("Just a moment", StringComparison.OrdinalIgnoreCase) >= 0
+				|| html.IndexOf("cf-browser-verification", StringComparison.OrdinalIgnoreCase) >= 0
+				|| html.IndexOf("cf-challenge", StringComparison.OrdinalIgnoreCase) >= 0
+				|| html.IndexOf("Attention Required", StringComparison.OrdinalIgnoreCase) >= 0
+				|| html.IndexOf("cdn-cgi/challenge", StringComparison.OrdinalIgnoreCase) >= 0;
+		}
+
+		/// <summary>
+		/// Returns true when the HTML looks like a rendered PCGamingWiki article (not a challenge or empty shell).
+		/// </summary>
+		private static bool LooksLikePcgwArticleHtml(string html)
+		{
+			if (html.IsNullOrEmpty())
+			{
+				return false;
+			}
+
+			return html.IndexOf("mw-parser-output", StringComparison.OrdinalIgnoreCase) >= 0
+				|| html.IndexOf("article-title", StringComparison.OrdinalIgnoreCase) >= 0
+				|| html.IndexOf("table-l10n-body-row", StringComparison.OrdinalIgnoreCase) >= 0
+				|| html.IndexOf("/wiki/", StringComparison.OrdinalIgnoreCase) >= 0;
+		}
+
+		/// <summary>
+		/// Tries to read the wiki page title from article HTML (canonical link, then h1).
+		/// </summary>
+		private static string TryExtractWikiTitleFromArticleHtml(string html)
+		{
+			if (html.IsNullOrEmpty())
+			{
+				return string.Empty;
+			}
+
+			Match canonical = Regex.Match(
+				html,
+				@"rel\s*=\s*[""']canonical[""'][^>]*href\s*=\s*[""'](?<href>[^""']+)[""']|href\s*=\s*[""'](?<href>[^""']+)[""'][^>]*rel\s*=\s*[""']canonical[""']",
+				RegexOptions.IgnoreCase);
+			if (canonical.Success)
+			{
+				string fromCanonical = TryGetWikiPageTitle(canonical.Groups["href"].Value);
+				if (!fromCanonical.IsNullOrEmpty())
+				{
+					return fromCanonical;
+				}
+			}
+
+			Match h1 = Regex.Match(
+				html,
+				@"<h1[^>]*class\s*=\s*[""'][^""']*article-title[^""']*[""'][^>]*>(?<title>.*?)</h1>",
+				RegexOptions.IgnoreCase | RegexOptions.Singleline);
+			if (h1.Success)
+			{
+				string title = Regex.Replace(h1.Groups["title"].Value, @"<[^>]+>", string.Empty);
+				title = WebUtility.HtmlDecode(title).Trim();
+				if (!title.IsNullOrEmpty())
+				{
+					return title;
+				}
+			}
+
 			return string.Empty;
 		}
 
