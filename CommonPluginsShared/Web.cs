@@ -487,7 +487,20 @@ namespace CommonPluginsShared
             }
             else
             {
+                // Keep returning the body for non-2xx (callers may still parse); log so 4xx/5xx are visible.
+                WarnIfNonSuccessStatusCode(statusCode, request?.RequestUri?.ToString());
                 return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Logs a Warn when <paramref name="statusCode"/> is outside the 2xx range; does not alter the download result.
+        /// </summary>
+        private static void WarnIfNonSuccessStatusCode(int statusCode, string url)
+        {
+            if (statusCode < 200 || statusCode >= 400)
+            {
+                Logger.Warn($"DownloadStringData() with statuscode {statusCode} for {url}");
             }
         }
 
@@ -618,6 +631,8 @@ namespace CommonPluginsShared
                     }
                     else
                     {
+                        // Same contract as ProcessDownloadStringResponse: log non-2xx, still return body.
+                        WarnIfNonSuccessStatusCode(statusCode, url);
                         return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     }
 
